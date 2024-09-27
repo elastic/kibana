@@ -176,20 +176,15 @@ const applicationsLinks: AppDeepLink[] = [
   },
 ];
 
-const getAppSearchLinks = (core: CoreStart): AppDeepLink[] => {
-  return [
-    {
-      id: 'engines',
-      path: `/${ENGINES_PATH}`,
-      title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
-        defaultMessage: 'Engines',
-      }),
-      visibleIn: Boolean(core.application.capabilities.navLinks.enterpriseSearch)
-        ? ['globalSearch']
-        : [],
-    },
-  ];
-};
+const appSearchLinks = [
+  {
+    id: 'engines',
+    path: `/${ENGINES_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
+      defaultMessage: 'Engines',
+    }),
+  },
+];
 
 export class EnterpriseSearchPlugin implements Plugin {
   private appUpdaters$: Record<string, Subject<AppUpdater>> = {};
@@ -530,9 +525,9 @@ export class EnterpriseSearchPlugin implements Plugin {
       core.application.register({
         appRoute: APP_SEARCH_PLUGIN.URL,
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        deepLinks: appSearchLinks,
         euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
         id: APP_SEARCH_PLUGIN.ID,
-        updater$: this.appUpdaters$[APP_SEARCH_PLUGIN.ID],
         mount: async (params: AppMountParameters) => {
           const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
           const { chrome, http } = kibanaDeps.core;
@@ -662,11 +657,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
-
-    this.appUpdaters$[APP_SEARCH_PLUGIN.ID].next(() => ({
-      deepLinks: getAppSearchLinks(core), // update the deepLinks based on the current user's capabilities
-      visibleIn: [],
-    }));
 
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
