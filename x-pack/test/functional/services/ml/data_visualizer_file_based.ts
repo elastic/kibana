@@ -199,7 +199,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
           },
         },
       });
-      // @ts-expect-error
+      // @ts-expect-error incorrect type definition
       return resp.hits.total?.value;
     },
 

@@ -405,7 +405,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('closes filebeat config');
           await ml.dataVisualizerFileBased.closeCreateFilebeatConfig();
 
-          // await new Promise((r) => setTimeout(r, 400000));
           await ml.dataVisualizerFileBased.assertDocCountInIndex(
             testData.indexName,
             testData.expected.ingestedDocCount
