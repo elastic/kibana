@@ -173,7 +173,7 @@ const preferNewestValueProcessor = ({ field }: PreferNewestValue): IngestProcess
 };
 
 const preferOldestValueProcessor = ({ field }: PreferOldestValue): IngestProcessorContainer => {
-  const historicalField = `${ENRICH_FIELD}.${field}`;
+  const historicalField = `ctx.${ENRICH_FIELD}.${field}`;
   return {
     set: {
       if: `!(${isFieldMissingOrEmpty(historicalField)})`,
