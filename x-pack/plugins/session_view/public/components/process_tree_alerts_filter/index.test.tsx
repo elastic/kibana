@@ -10,6 +10,7 @@ import { mockAlertTypeCounts } from '../../../common/mocks/constants/session_vie
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeAlertsFilter, ProcessTreeAlertsFilterDeps } from '.';
 import userEvent from '@testing-library/user-event';
+import { fireEvent } from '@testing-library/react';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 
 describe('ProcessTreeAlertsFiltersFilter component', () => {
@@ -112,13 +113,15 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should open filter menu popover', async () => {
+        const user = userEvent.setup();
+
         renderResult = mockedContext.render(<ProcessTreeAlertsFilter {...props} />);
 
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenu = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterSelectorContainerMenu'
@@ -130,13 +133,15 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
 
     describe('EuiContextMenuItem filter when two alert categories exists', () => {
       it('should display network option in filter menu', async () => {
+        const user = userEvent.setup();
+
         renderResult = mockedContext.render(<ProcessTreeAlertsFilter {...props} />);
 
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -147,13 +152,15 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should display process option in filter menu', async () => {
+        const user = userEvent.setup();
+
         renderResult = mockedContext.render(<ProcessTreeAlertsFilter {...props} />);
 
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -164,13 +171,15 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should not display file option in filter menu', async () => {
+        const user = userEvent.setup();
+
         renderResult = mockedContext.render(<ProcessTreeAlertsFilter {...props} />);
 
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -192,11 +201,12 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should display network option in filter menu', async () => {
+        const user = userEvent.setup();
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -207,11 +217,12 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should display process option in filter menu', async () => {
+        const user = userEvent.setup();
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -222,11 +233,12 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should display file option in filter menu', async () => {
+        const user = userEvent.setup();
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -248,6 +260,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           <ProcessTreeAlertsFilter {...props} alertTypeCounts={alertTypeCountsUpdated} />
         );
       });
+
       it('should set the EmptyFilterButton text content to  display "View: all alerts"  by default ', () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
@@ -256,45 +269,61 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       });
 
       it('should set the EmptyFilterButton text content to  display "View: file alerts"  when file alert option is clicked', async () => {
+        const user = userEvent.setup();
+
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file').click();
+        fireEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file')
+        );
 
         expect(filterButton).toHaveTextContent('View: file alerts');
       });
 
       it('should set the EmptyFilterButton text content to  display "View: all alerts"  when default filter option is clicked', async () => {
+        const user = userEvent.setup();
+
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default').click();
+        fireEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default')
+        );
 
         expect(filterButton).toHaveTextContent(`View: ${DEFAULT_ALERT_FILTER_VALUE} alerts`);
       });
 
       it('should set the EmptyFilterButton text content to  display "View: process alerts"  when process alert option is clicked', async () => {
+        const user = userEvent.setup();
+
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process').click();
+        fireEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process')
+        );
 
         expect(filterButton).toHaveTextContent('View: process alerts');
       });
 
       it('should set the EmptyFilterButton text content to  display "View: network alerts"  when network alert option is clicked', async () => {
+        const user = userEvent.setup();
+
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        await userEvent.click(filterButton);
+        await user.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
+        fireEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network')
+        );
 
         expect(filterButton).toHaveTextContent('View: network alerts');
       });

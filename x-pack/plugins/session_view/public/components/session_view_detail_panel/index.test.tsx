@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import {
   mockAlerts,
   sessionViewBasicProcessMock,
@@ -57,22 +58,25 @@ describe('SessionView component', () => {
     });
 
     it('can switch tabs to show host details', async () => {
+      const user = userEvent.setup();
       renderResult = mockedContext.render(<SessionViewDetailPanel {...props} />);
-      renderResult.queryByText('Metadata')?.click();
+      await user.click(renderResult.getByText('Metadata'));
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryAllByText('james-fleet-714-2')).toHaveLength(2);
     });
 
     it('can switch tabs to show alert details', async () => {
+      const user = userEvent.setup();
       renderResult = mockedContext.render(
         <SessionViewDetailPanel {...props} alerts={mockAlerts} alertsCount={mockAlerts.length} />
       );
-      renderResult.queryByText('Alerts')?.click();
+      await user.click(renderResult.getByText('Alerts'));
       expect(renderResult.queryByText('List view')).toBeVisible();
     });
     it('alert tab disabled when no alerts', async () => {
+      const user = userEvent.setup();
       renderResult = mockedContext.render(<SessionViewDetailPanel {...props} />);
-      renderResult.queryByText('Alerts')?.click();
+      await user.click(renderResult.getByText('Alerts'));
       expect(renderResult.queryByText('List view')).toBeFalsy();
     });
   });

@@ -732,18 +732,16 @@ function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void
   });
 }
 
-function selectEuiComboBoxOption({
+async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
 }: {
   comboBoxToggleButton: HTMLElement;
   optionIndex: number;
-}): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+}) {
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
-    fireEvent.click(screen.getAllByRole('option')[optionIndex]);
-  });
+  fireEvent.click(screen.getAllByRole('option')[optionIndex]);
 }
 
 function clearEuiComboBoxSelection({ clearButton }: { clearButton: HTMLElement }): Promise<void> {

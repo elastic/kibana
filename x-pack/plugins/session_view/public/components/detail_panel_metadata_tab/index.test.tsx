@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import type {
   ProcessEventHost,
@@ -122,6 +123,7 @@ describe('DetailPanelMetadataTab component', () => {
 
   describe('When DetailPanelMetadataTab is mounted', () => {
     it('renders DetailPanelMetadataTab correctly (non cloud environment)', async () => {
+      const user = userEvent.setup();
       renderResult = mockedContext.render(<DetailPanelMetadataTab processHost={TEST_HOST} />);
 
       expect(renderResult.queryByText('hostname')).toBeVisible();
@@ -136,7 +138,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult.queryByText('OS')?.click();
+      await user.click(renderResult.getByText('OS'));
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
@@ -159,6 +161,8 @@ describe('DetailPanelMetadataTab component', () => {
     });
 
     it('renders DetailPanelMetadataTab correctly (cloud environment)', async () => {
+      const user = userEvent.setup();
+
       renderResult = mockedContext.render(
         <DetailPanelMetadataTab
           processHost={TEST_HOST}
@@ -182,7 +186,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryAllByText('name').length).toBe(2);
 
       // expand host os accordion
-      renderResult.queryByText('OS')?.click();
+      await user.click(renderResult.getByText('OS'));
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
@@ -199,7 +203,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
 
       // expand Container Accordion
-      renderResult.queryByText('Container')?.click();
+      await user.click(renderResult.getByText('Container'));
       expect(renderResult.queryByText('image.name')).toBeVisible();
       expect(renderResult.queryByText('image.tag')).toBeVisible();
       expect(renderResult.queryByText('image.hash.all')).toBeVisible();
@@ -210,7 +214,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_HASH_ALL)).toBeVisible();
 
       // expand Orchestrator Accordion
-      renderResult.queryByText('Orchestrator')?.click();
+      await user.click(renderResult.getByText('Orchestrator'));
       expect(renderResult.queryByText('resource.name')).toBeVisible();
       expect(renderResult.queryByText('resource.type')).toBeVisible();
       expect(renderResult.queryByText('resource.ip')).toBeVisible();
@@ -227,7 +231,7 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
 
       // expand Cloud Accordion
-      renderResult.queryByText('Cloud')?.click();
+      await user.click(renderResult.getByText('Cloud'));
       expect(renderResult.queryByText('instance.name')).toBeVisible();
       expect(renderResult.queryByText('provider')).toBeVisible();
       expect(renderResult.queryByText('region')).toBeVisible();

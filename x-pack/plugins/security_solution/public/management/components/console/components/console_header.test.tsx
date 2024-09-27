@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
@@ -41,9 +42,10 @@ describe('Console header area', () => {
     );
   });
 
-  it('should open the side panel when help button is clicked', () => {
+  it('should open the side panel when help button is clicked', async () => {
+    const user = userEvent.setup();
     render();
-    renderResult.getByTestId('test-header-helpButton').click();
+    await user.click(renderResult.getByTestId('test-header-helpButton'));
 
     expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
   });

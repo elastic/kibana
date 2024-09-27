@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
+import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { Form, useForm } from '../../../../shared_imports';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
@@ -586,8 +586,7 @@ function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');
     const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
-
-    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
+    return expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
   });
 }
 
@@ -639,19 +638,17 @@ function selectFirstEuiComboBoxOption({
   return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }
 
-function typeInCustomComboBoxOption({
+async function typeInCustomComboBoxOption({
   comboBoxToggleButton,
   optionText,
 }: {
   comboBoxToggleButton: HTMLElement;
   optionText: string;
 }) {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
-    fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
-    fireEvent.keyDown(document.activeElement as HTMLInputElement, { key: 'Enter' });
-  });
+  fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
+  fireEvent.keyDown(document.activeElement as HTMLInputElement, { key: 'Enter' });
 }
 
 function getLastSelectToggleButtonForName(): HTMLElement {

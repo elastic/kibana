@@ -688,34 +688,32 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-function selectEuiComboBoxOption({
+async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
-    const options = Array.from(
-      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
-    );
+  const options = Array.from(
+    document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
+  );
 
-    if (typeof optionText === 'string') {
-      const optionToSelect = options.find((option) => option.textContent === optionText);
+  if (typeof optionText === 'string') {
+    const optionToSelect = options.find((option) => option.textContent === optionText);
 
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
-      }
+    if (optionToSelect) {
+      fireEvent.click(optionToSelect);
     } else {
-      fireEvent.click(options[optionIndex]);
+      throw new Error(
+        `Could not find option with text "${optionText}". Available options: ${options
+          .map((option) => option.textContent)
+          .join(', ')}`
+      );
     }
-  });
+  } else {
+    fireEvent.click(options[optionIndex]);
+  }
 }
 
 function selectFirstEuiComboBoxOption({
