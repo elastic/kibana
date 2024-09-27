@@ -150,7 +150,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async getBarChartData(selector: string, dataLabel = 'Count') {
     const bars = (await this.getEsChartDebugState(selector))?.bars ?? [];
     const values = bars.find(({ name }) => name === dataLabel)?.bars ?? [];
-    return valuessort((a, b) => a.x - b.x).map(({ y }) => y);
+    return values.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
   private async toggleLegend(force = false) {
