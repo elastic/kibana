@@ -1056,7 +1056,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             // For rare chart values we are only interested wether a value is either `0` or not,
             // `0` acts like a flag in the chart whether to display the dot/marker.
             // For single metric chart, we need to pass null values to display data gaps.
-            // All other charts are metric based and with
+            // All other charts are distribution based and with
             // those a value of `null` acts as the flag to hide a data point.
             if (
               chartType === CHART_TYPE.SINGLE_METRIC ||
@@ -1142,14 +1142,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
             chartPoint.scheduledEvents = events;
-            // We do not want to create additional points for single metric charts
-            // as it could break the chart.
-          } else if (chartType !== CHART_TYPE.SINGLE_METRIC) {
+          } else {
             // If there's no underlying metric data point for the scheduled event,
             // create a new chart point with a value of 0.
+            // Except for Single Metric Charts, where we want to create a point at the bottom of the chart.
+            // Which is not always `0`.
             const eventChartPoint: ChartPoint = {
               date: Number(time),
-              value: 0,
+              value: chartType === CHART_TYPE.SINGLE_METRIC ? null : 0,
               entity: SCHEDULE_EVENT_MARKER_ENTITY,
               scheduledEvents: events,
             };
