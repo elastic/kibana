@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -19,6 +19,7 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
   AppDeepLink,
+  AppUpdater,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -175,17 +176,23 @@ const applicationsLinks: AppDeepLink[] = [
   },
 ];
 
-const appSearchLinks: AppDeepLink[] = [
-  {
-    id: 'engines',
-    path: `/${ENGINES_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
-      defaultMessage: 'Engines',
-    }),
-  },
-];
+const getAppSearchLinks = (core: CoreStart): AppDeepLink[] => {
+  return [
+    {
+      id: 'engines',
+      path: `/${ENGINES_PATH}`,
+      title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
+        defaultMessage: 'Engines',
+      }),
+      visibleIn: Boolean(core.application.capabilities.navLinks.enterpriseSearch)
+        ? ['globalSearch']
+        : [],
+    },
+  ];
+};
 
 export class EnterpriseSearchPlugin implements Plugin {
+  private appUpdaters$: Record<string, Subject<AppUpdater>> = {};
   private config: ClientConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -518,12 +525,14 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerLocators(share!);
 
     if (config.canDeployEntSearch) {
+      this.appUpdaters$[APP_SEARCH_PLUGIN.ID] = new Subject<AppUpdater>();
+
       core.application.register({
         appRoute: APP_SEARCH_PLUGIN.URL,
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        deepLinks: appSearchLinks,
         euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
         id: APP_SEARCH_PLUGIN.ID,
+        updater$: this.appUpdaters$[APP_SEARCH_PLUGIN.ID],
         mount: async (params: AppMountParameters) => {
           const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
           const { chrome, http } = kibanaDeps.core;
@@ -653,6 +662,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    this.appUpdaters$[APP_SEARCH_PLUGIN.ID].next(() => ({
+      deepLinks: getAppSearchLinks(core), // update the deepLinks based on the current user's capabilities
+      visibleIn: [],
+    }));
 
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
