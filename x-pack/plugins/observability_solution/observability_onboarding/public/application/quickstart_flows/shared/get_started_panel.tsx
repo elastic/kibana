@@ -15,32 +15,60 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OnboardingFlowEventContext,
+} from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
+  onboardingFlowType,
+  dataset,
   integration,
-  dashboardLinks,
+  actionLinks,
+  previewImage = 'charts_screen.svg',
   newTab,
   isLoading,
+  onboardingId,
+  telemetryEventContext,
 }: {
+  onboardingFlowType: string;
+  dataset: string;
   integration: string;
   newTab: boolean;
-  dashboardLinks: Array<{
+  actionLinks: Array<{
     id: string;
-    label: string;
     title: string;
+    label: string;
+    href: string;
   }>;
+  previewImage?: string;
   isLoading: boolean;
+  onboardingId?: string;
+  telemetryEventContext?: OnboardingFlowEventContext;
 }) {
   const {
-    services: { http, share },
+    services: { http, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
-  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  useEffect(() => {
+    analytics?.reportEvent(
+      OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT.eventType,
+      {
+        onboardingFlowType,
+        onboardingId,
+        dataset,
+        context: telemetryEventContext,
+      }
+    );
+    /**
+     * Firing the event only once when the component mounts
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -50,7 +78,7 @@ export function GetStartedPanel({
             <EuiSkeletonRectangle width={162} height={117} />
           ) : (
             <EuiImage
-              src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
+              src={http.staticAssets.getPluginAssetHref(previewImage)}
               width={162}
               height={117}
               alt=""
@@ -61,17 +89,16 @@ export function GetStartedPanel({
 
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {dashboardLinks.map(({ id, label, title }) => (
+            {actionLinks.map(({ id, title, label, href }) => (
               <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
                   <EuiText key={id} size="s">
                     <p>{title}</p>
                   </EuiText>
                   <EuiLink
-                    data-test-subj={`observabilityOnboardingDataIngestStatusViewDashboardLink-${id}`}
-                    href={dashboardLocator?.getRedirectUrl({
-                      dashboardId: id,
-                    })}
+                    data-test-subj={`observabilityOnboardingDataIngestStatusActionLink-${id}`}
+                    data-onboarding-id={onboardingId}
+                    href={href}
                     target={newTab ? '_blank' : '_self'}
                   >
                     {label}

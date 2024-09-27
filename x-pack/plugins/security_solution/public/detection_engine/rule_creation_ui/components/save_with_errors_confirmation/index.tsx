@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -32,7 +32,19 @@ const SaveWithErrorsModalComponent = ({
       confirmButtonText={i18n.SAVE_WITH_ERRORS_CONFIRM_BUTTON}
       defaultFocusedButton="confirm"
     >
-      <>{i18n.SAVE_WITH_ERRORS_MODAL_MESSAGE(errors.length)}</>
+      <>
+        {i18n.SAVE_WITH_ERRORS_MODAL_MESSAGE(errors.length)}
+        <EuiSpacer size="s" />
+        <ul>
+          {errors.map((validationError, idx) => {
+            return (
+              <li key={idx}>
+                <EuiText>{validationError}</EuiText>
+              </li>
+            );
+          })}
+        </ul>
+      </>
     </EuiConfirmModal>
   );
 };

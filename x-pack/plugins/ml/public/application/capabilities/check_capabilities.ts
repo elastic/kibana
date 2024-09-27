@@ -27,7 +27,7 @@ import {
   type MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
+import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
@@ -54,7 +54,7 @@ export class MlCapabilitiesService {
 
   private _subscription: Subscription | undefined;
 
-  constructor(private readonly mlApiServices: MlApiServices) {
+  constructor(private readonly mlApi: MlApi) {
     this.init();
   }
 
@@ -67,7 +67,7 @@ export class MlCapabilitiesService {
         tap(() => {
           this._isLoading$.next(true);
         }),
-        switchMap(() => from(this.mlApiServices.checkMlCapabilities())),
+        switchMap(() => from(this.mlApi.checkMlCapabilities())),
         retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
       )
       .subscribe((results) => {
@@ -197,11 +197,11 @@ export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalSer
 }
 
 export function checkCreateJobsCapabilitiesResolver(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   redirectToJobsManagementPage: () => Promise<void>
 ): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities(mlApiServices)
+    getCapabilities(mlApi)
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,

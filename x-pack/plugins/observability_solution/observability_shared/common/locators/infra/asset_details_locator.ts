@@ -9,6 +9,11 @@ import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { type AlertStatus } from '@kbn/rule-data-utils';
 
+export enum SupportedAssetTypes {
+  container = 'container',
+  host = 'host',
+}
+
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
@@ -47,8 +52,26 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
   public readonly getLocation = async (
     params: AssetDetailsLocatorParams & { state?: SerializableRecord }
   ) => {
-    const legacyNodeDetailsQueryParams = rison.encodeUnknown(params._a);
-    const assetDetailsQueryParams = rison.encodeUnknown(params.assetDetails);
+    // Check which asset types are currently supported
+    const isSupportedByAssetDetails = Object.values(SupportedAssetTypes).includes(
+      params.assetType as SupportedAssetTypes
+    );
+
+    // Map the compatible parameters to _a compatible shape
+    const mappedAssetParams =
+      params.assetDetails && !isSupportedByAssetDetails
+        ? {
+            time: params.assetDetails.dateRange,
+          }
+        : undefined;
+
+    const legacyNodeDetailsQueryParams = !isSupportedByAssetDetails
+      ? rison.encodeUnknown({ ...mappedAssetParams, ...params._a })
+      : undefined;
+
+    const assetDetailsQueryParams = isSupportedByAssetDetails
+      ? rison.encodeUnknown(params.assetDetails)
+      : undefined;
 
     const queryParams = [];
     if (assetDetailsQueryParams !== undefined) {

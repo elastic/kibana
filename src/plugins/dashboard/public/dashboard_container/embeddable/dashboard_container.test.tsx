@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import type { TimeRange } from '@kbn/es-query';
@@ -24,13 +25,11 @@ import {
   getSampleDashboardPanel,
   mockControlGroupApi,
 } from '../../mocks';
-import { pluginServices } from '../../services/plugin_services';
+import { embeddableService } from '../../services/kibana_services';
 import { DashboardContainer } from './dashboard_container';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(embeddableFactory);
+embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(embeddableFactory);
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({

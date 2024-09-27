@@ -24,9 +24,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 
-import { mlJobServiceFactory } from '../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
-
 import { isManagedJob } from '../../../jobs_utils';
 
 import { forceStartDatafeeds } from '../utils';
@@ -57,10 +54,7 @@ export class StartDatafeedModal extends Component {
     this.refreshJobs = this.props.refreshJobs;
     this.getShowCreateAlertFlyoutFunction = this.props.getShowCreateAlertFlyoutFunction;
     this.toastNotifications = constructorContext.services.notifications.toasts;
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(this.toastNotifications),
-      constructorContext.services.mlServices.mlApiServices
-    );
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   componentDidMount() {
@@ -125,7 +119,7 @@ export class StartDatafeedModal extends Component {
       ? this.state.endTime.valueOf()
       : this.state.endTime;
 
-    forceStartDatafeeds(this.toastNotifications, this.mlJobService, jobs, start, end, () => {
+    forceStartDatafeeds(this.toastNotifications, this.mlApi, jobs, start, end, () => {
       if (this.state.createAlert && jobs.length > 0) {
         this.getShowCreateAlertFlyoutFunction()(jobs.map((job) => job.id));
       }

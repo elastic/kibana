@@ -110,7 +110,7 @@ export const AssistantHeader: React.FC<Props> = ({
   const showDestroyModal = useCallback(() => setIsResetConversationModalVisible(true), []);
 
   const onConversationChange = useCallback(
-    (updatedConversation) => {
+    (updatedConversation: Conversation) => {
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,

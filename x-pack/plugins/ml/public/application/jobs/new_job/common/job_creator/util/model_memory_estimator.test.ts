@@ -10,7 +10,7 @@ import { useFakeTimers } from 'sinon';
 import type { CalculatePayload } from './model_memory_estimator';
 import { modelMemoryEstimatorProvider } from './model_memory_estimator';
 import type { JobValidator } from '../../job_validator';
-import type { MlApiServices } from '../../../../../services/ml_api_service';
+import type { MlApi } from '../../../../../services/ml_api_service';
 import type { JobCreator } from '../job_creator';
 import { BehaviorSubject } from 'rxjs';
 
@@ -20,7 +20,7 @@ describe('delay', () => {
   let mockJobCreator: JobCreator;
   let wizardInitialized$: BehaviorSubject<boolean>;
   let mockJobValidator: JobValidator;
-  let mockMlApiServices: MlApiServices;
+  let mockMlApiServices: MlApi;
 
   beforeEach(() => {
     clock = useFakeTimers();
@@ -37,7 +37,7 @@ describe('delay', () => {
         const { of } = require('rxjs');
         return of({ modelMemoryLimit: '15MB' });
       }),
-    } as unknown as MlApiServices;
+    } as unknown as MlApi;
 
     modelMemoryEstimator = modelMemoryEstimatorProvider(
       mockJobCreator,

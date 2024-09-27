@@ -25,6 +25,7 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import type { IRuleDataClient } from '..';
@@ -50,28 +51,38 @@ export type BackendAlertWithSuppressionFields870<T> = Omit<
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
-const augmentAlerts = <T>({
+const augmentAlerts = async <T>({
   alerts,
   options,
   kibanaVersion,
   currentTimeOverride,
+  intendedTimestamp,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  const maintenanceWindowIds: string[] =
+    alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
+
+  const currentDate = new Date();
+  const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
   return alerts.map((alert) => {
     return {
       ...alert,
       _source: {
-        [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
-        [ALERT_START]: currentTimeOverride ?? new Date(),
-        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
+        [ALERT_START]: timestampOverrideOrCurrent,
+        [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
+        [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
+          ? intendedTimestamp
+          : timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(options?.maintenanceWindowIds?.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+        ...(maintenanceWindowIds.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
           : {}),
         ...commonRuleFields,
         ...alert._source,
@@ -251,6 +262,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
             ...options.services,
             alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
+
               logger.debug(`Found ${numAlerts} alerts.`);
 
               const ruleDataClientWriter = await ruleDataClient.getWriter({
@@ -297,11 +309,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                let intendedTimestamp;
+                if (options.startedAtOverridden) {
+                  intendedTimestamp = options.startedAt;
+                }
+
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
+                  intendedTimestamp,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -380,6 +398,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               let alertsWereTruncated = false;
+
+              let intendedTimestamp;
+              if (options.startedAtOverridden) {
+                intendedTimestamp = options.startedAt;
+              }
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -555,11 +578,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  intendedTimestamp,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

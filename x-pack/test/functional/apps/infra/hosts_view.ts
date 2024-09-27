@@ -298,15 +298,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  // Failing: See https://github.com/elastic/kibana/issues/191806
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
+    let synthtraceApmClient: ApmSynthtraceEsClient;
+
+    before(async () => {
+      synthEsInfraClient = await getInfraSynthtraceEsClient(esClient);
+      syntEsLogsClient = await getLogsSynthtraceEsClient(esClient);
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
+        client: esClient,
+        packageVersion: version,
+      });
+
+      return Promise.all([
+        synthtraceApmClient.clean(),
+        synthEsInfraClient.clean(),
+        syntEsLogsClient.clean(),
+      ]);
+    });
+
+    after(async () => {
+      return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
+        synthtraceApmClient.clean(),
+        synthEsInfraClient.clean(),
+        syntEsLogsClient.clean(),
+      ]);
+    });
 
     describe('#Onboarding', function () {
       before(async () => {
-        synthEsInfraClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsInfraClient.clean();
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
       });
 
@@ -325,14 +348,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('#With data', function () {
-      let synthtraceApmClient: ApmSynthtraceEsClient;
       before(async () => {
-        synthEsInfraClient = await getInfraSynthtraceEsClient(esClient);
-        syntEsLogsClient = await getLogsSynthtraceEsClient(esClient);
-        const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-        synthtraceApmClient = await getApmSynthtraceEsClient({
-          client: esClient,
-          packageVersion: version,
+        const hosts = generateHostData({
+          from: DATE_WITH_HOSTS_DATA_FROM,
+          to: DATE_WITH_HOSTS_DATA_TO,
+          hosts: SYNTH_HOSTS,
         });
 
         const services = generateAddServicesToExistingHost({
@@ -350,26 +370,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await browser.setWindowSize(1600, 1200);
 
-        return Promise.all([
+        await Promise.all([
+          synthEsInfraClient.index(hosts),
           synthtraceApmClient.index(services),
-          synthEsInfraClient.index(
-            generateHostData({
-              from: DATE_WITH_HOSTS_DATA_FROM,
-              to: DATE_WITH_HOSTS_DATA_TO,
-              hosts: SYNTH_HOSTS,
-            })
-          ),
           syntEsLogsClient.index(logs),
         ]);
       });
 
       after(async () => {
-        return Promise.all([
-          apmSynthtraceKibanaClient.uninstallApmPackage(),
-          synthtraceApmClient.clean(),
-          synthEsInfraClient.clean(),
-          browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY),
-        ]);
+        return browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
       });
 
       describe('#Single Host Flyout', () => {

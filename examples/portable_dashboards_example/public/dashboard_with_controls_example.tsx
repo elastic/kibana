@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -13,41 +14,29 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardRenderer,
   DashboardCreationOptions,
 } from '@kbn/dashboard-plugin/public';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
     if (!dashboard) return;
-    (async () => {
-      const api = await dashboard.addNewPanel(
+    dashboard
+      .addNewPanel(
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
           initialState: {},
         },
         true
-      );
-      if (!apiHasUniqueId(api)) {
-        return;
-      }
-      const prevPanelState = dashboard.getExplicitInput().panels[api.uuid];
-      // resize the new panel so that it fills up the entire width of the dashboard
-      dashboard.updateInput({
-        panels: {
-          [api.uuid]: {
-            ...prevPanelState,
-            gridData: { i: api.uuid, x: 0, y: 0, w: 48, h: 12 },
-          },
-        },
+      )
+      .catch(() => {
+        // ignore error - its an example
       });
-    })();
   }, [dashboard]);
 
   return (
@@ -87,7 +76,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               }),
             };
           }}
-          ref={setDashboard}
+          onApiAvailable={setDashboard}
         />
       </EuiPanel>
     </>

@@ -88,12 +88,14 @@ describe('TemplateTags', () => {
     expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
 
     const comboBoxEle = await screen.findByRole('combobox');
-    userEvent.paste(comboBoxEle, 'test');
-    userEvent.keyboard('{enter}');
-    userEvent.paste(comboBoxEle, 'template');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(comboBoxEle);
+    await userEvent.paste('test');
+    await userEvent.keyboard('{enter}');
+    await userEvent.click(comboBoxEle);
+    await userEvent.paste('template');
+    await userEvent.keyboard('{enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -115,10 +117,11 @@ describe('TemplateTags', () => {
     expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
 
     const comboBoxEle = await screen.findByRole('combobox');
-    userEvent.paste(comboBoxEle, 'test');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(comboBoxEle);
+    await userEvent.paste('test');
+    await userEvent.keyboard('{enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

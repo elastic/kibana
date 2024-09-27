@@ -7,16 +7,17 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
+import { SamplesFormat } from '../../../common';
 import type { CategorizationState } from '../../types';
-import type { CategorizationGraphParams, CategorizationBaseNodeParams } from './types';
-import { prefixSamples, formatSamples } from '../../util/samples';
-import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';
-import { handleCategorizationValidation } from './validate';
-import { handleInvalidCategorization } from './invalid';
-import { handleErrors } from './errors';
-import { handleReview } from './review';
+import { formatSamples, prefixSamples } from '../../util/samples';
+import { handleCategorization } from './categorization';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
+import { handleErrors } from './errors';
+import { handleInvalidCategorization } from './invalid';
+import { handleReview } from './review';
+import type { CategorizationBaseNodeParams, CategorizationGraphParams } from './types';
+import { handleCategorizationValidation } from './validate';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -63,6 +64,10 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: boolean, y?: boolean) => y ?? x,
     default: () => false,
   },
+  hasTriedOnce: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
   errors: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
@@ -99,9 +104,13 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  samplesFormat: {
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'unsupported' }),
+  },
 };
 
-function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+function modelJSONInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
   const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
@@ -111,6 +120,20 @@ function modelInput({ state }: CategorizationBaseNodeParams): Partial<Categoriza
     ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
     samples,
     formattedSamples,
+    initialPipeline,
+    finalized: false,
+    reviewed: false,
+    lastExecutedChain: 'modelJSONInput',
+  };
+}
+
+function modelInput({ state }: CategorizationBaseNodeParams): Partial<CategorizationState> {
+  const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
+  return {
+    exAnswer: JSON.stringify(CATEGORIZATION_EXAMPLE_ANSWER, null, 2),
+    ecsCategories: JSON.stringify(ECS_CATEGORIES, null, 2),
+    ecsTypes: JSON.stringify(ECS_TYPES, null, 2),
+    samples: state.rawSamples,
     initialPipeline,
     finalized: false,
     reviewed: false,
@@ -129,14 +152,29 @@ function modelOutput({ state }: CategorizationBaseNodeParams): Partial<Categoriz
   };
 }
 
+function modelRouter({ state }: CategorizationBaseNodeParams): string {
+  if (state.samplesFormat.name === 'json' || state.samplesFormat.name === 'ndjson') {
+    return 'modelJSONInput';
+  }
+  return 'modelInput';
+}
+
 function validationRouter({ state }: CategorizationBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
     return 'categorization';
   }
   return 'validateCategorization';
 }
 
 function chainRouter({ state }: CategorizationBaseNodeParams): string {
+  if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
+  }
   if (Object.keys(state.errors).length > 0) {
     return 'errors';
   }
@@ -158,6 +196,7 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     channels: graphState,
   })
     .addNode('modelInput', (state: CategorizationState) => modelInput({ state }))
+    .addNode('modelJSONInput', (state: CategorizationState) => modelJSONInput({ state }))
     .addNode('modelOutput', (state: CategorizationState) => modelOutput({ state }))
     .addNode('handleCategorization', (state: CategorizationState) =>
       handleCategorization({ state, model })
@@ -173,8 +212,12 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     )
     .addNode('handleErrors', (state: CategorizationState) => handleErrors({ state, model }))
     .addNode('handleReview', (state: CategorizationState) => handleReview({ state, model }))
-    .addEdge(START, 'modelInput')
+    .addConditionalEdges(START, (state: CategorizationState) => modelRouter({ state }), {
+      modelJSONInput: 'modelJSONInput',
+      modelInput: 'modelInput', // For Non JSON input samples
+    })
     .addEdge('modelOutput', END)
+    .addEdge('modelJSONInput', 'handleValidatePipeline')
     .addEdge('modelInput', 'handleValidatePipeline')
     .addEdge('handleCategorization', 'handleValidatePipeline')
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
@@ -184,6 +227,7 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
       'handleValidatePipeline',
       (state: CategorizationState) => validationRouter({ state }),
       {
+        modelOutput: 'modelOutput',
         categorization: 'handleCategorization',
         validateCategorization: 'handleCategorizationValidation',
       }

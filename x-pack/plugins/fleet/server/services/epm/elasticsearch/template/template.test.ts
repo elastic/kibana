@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
@@ -265,7 +265,7 @@ describe('EPM template', () => {
   it('tests loading base.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = safeLoad(fieldsYML);
+    const fields: Field[] = load(fieldsYML);
 
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
@@ -276,7 +276,7 @@ describe('EPM template', () => {
   it('tests loading coredns.logs.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/coredns.logs.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = safeLoad(fieldsYML);
+    const fields: Field[] = load(fieldsYML);
 
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
@@ -287,7 +287,7 @@ describe('EPM template', () => {
   it('tests loading system.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = safeLoad(fieldsYML);
+    const fields: Field[] = load(fieldsYML);
     const processedFields = processFields(fields);
 
     const mappings = generateMappings(processedFields);
@@ -298,7 +298,7 @@ describe('EPM template', () => {
   it('tests loading cockroachdb_dynamic_templates.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/cockroachdb_dynamic_templates.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
-    const fields: Field[] = safeLoad(fieldsYML);
+    const fields: Field[] = load(fieldsYML);
     const processedFields = processFields(fields);
 
     const mappings = generateMappings(processedFields);
@@ -320,7 +320,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(longWithIndexFalseYml);
+    const fields: Field[] = load(longWithIndexFalseYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(longWithIndexFalseMapping);
@@ -340,7 +340,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithIndexFalseYml);
+    const fields: Field[] = load(keywordWithIndexFalseYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithIndexFalseMapping);
@@ -360,7 +360,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(textWithStoreTrueYml);
+    const fields: Field[] = load(textWithStoreTrueYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(textWithStoreTrueMapping);
@@ -392,7 +392,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(textWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(textWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(textWithMultiFieldsMapping);
@@ -426,7 +426,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
@@ -458,7 +458,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithAnalyzedMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithAnalyzedMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
@@ -489,7 +489,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithNormalizedMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithNormalizedMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithNormalizedMultiFieldsMapping);
@@ -518,7 +518,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
@@ -547,7 +547,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
@@ -568,7 +568,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(dateWithFormatYml);
+    const fields: Field[] = load(dateWithFormatYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(dateWithMapping);
@@ -602,7 +602,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(keywordWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
@@ -630,7 +630,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(wildcardWithMultiFieldsLiteralYml);
+    const fields: Field[] = load(wildcardWithMultiFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(wildcardWithMultiFieldsMapping);
@@ -648,7 +648,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldLiteralYml);
+    const fields: Field[] = load(objectFieldLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldMapping);
@@ -668,7 +668,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldEnabledFalseLiteralYml);
+    const fields: Field[] = load(objectFieldEnabledFalseLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldEnabledFalseMapping);
@@ -688,7 +688,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldDynamicFalseLiteralYml);
+    const fields: Field[] = load(objectFieldDynamicFalseLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldDynamicFalseMapping);
@@ -708,7 +708,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldDynamicTrueLiteralYml);
+    const fields: Field[] = load(objectFieldDynamicTrueLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldDynamicTrueMapping);
@@ -728,7 +728,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldDynamicStrictLiteralYml);
+    const fields: Field[] = load(objectFieldDynamicStrictLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldDynamicStrictMapping);
@@ -753,7 +753,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldWithPropertyLiteralYml);
+    const fields: Field[] = load(objectFieldWithPropertyLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyMapping);
@@ -780,7 +780,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
@@ -819,7 +819,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
@@ -858,7 +858,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const fields: Field[] = load(objectFieldWithPropertyReversedLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
@@ -886,7 +886,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -914,7 +914,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -949,7 +949,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -978,7 +978,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -1014,7 +1014,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -1042,7 +1042,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -1060,7 +1060,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const fields: Field[] = load(constantKeywordLiteralYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
@@ -1080,7 +1080,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const fields: Field[] = load(constantKeywordLiteralYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
@@ -1104,7 +1104,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
@@ -1127,7 +1127,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
@@ -1151,7 +1151,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
@@ -1185,7 +1185,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
@@ -1218,7 +1218,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, false);
     expect(mappings).toEqual(expectedMapping);
@@ -1245,7 +1245,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(literalYml);
+    const fields: Field[] = load(literalYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(expectedMapping);
@@ -1267,7 +1267,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const fields: Field[] = load(metaFieldLiteralYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
@@ -1306,7 +1306,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(metaFieldLiteralYaml);
+    const fields: Field[] = load(metaFieldLiteralYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(metaFieldMapping));
@@ -1328,7 +1328,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(fieldLiteralYaml);
+    const fields: Field[] = load(fieldLiteralYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
@@ -1348,7 +1348,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1373,7 +1373,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1403,7 +1403,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1434,7 +1434,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1466,7 +1466,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1499,7 +1499,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1531,7 +1531,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1563,7 +1563,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1597,7 +1597,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1652,7 +1652,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1709,7 +1709,7 @@ describe('EPM template', () => {
         },
       ],
     };
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
@@ -1721,7 +1721,7 @@ describe('EPM template', () => {
   type: object
   object_type: constant_keyword
 `;
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
     expect(() => {
       const processedFields = processFields(fields);
       generateMappings(processedFields);
@@ -1867,6 +1867,110 @@ describe('EPM template', () => {
         },
       });
     });
+
+    it('should fill constant keywords from previous mappings', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+                value: 'some_value',
+              },
+            },
+          },
+        },
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {
+          properties: {
+            some_keyword_field: {
+              type: 'constant_keyword',
+              value: 'some_value',
+            },
+          },
+        },
+        write_index_only: true,
+      });
+    });
+
+    it('should not error when previous mappings are not found', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-constant.keyword-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test-constant.keyword-default': {
+          mappings: {
+            properties: {
+              some_keyword_field: {
+                type: 'constant_keyword',
+              },
+            },
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {},
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-constant.keyword-*'],
+            template: {
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            },
+          } as any,
+        },
+      ]);
+      const putMappingsCalls = esClient.indices.putMapping.mock.calls;
+      expect(putMappingsCalls).toHaveLength(1);
+      expect(putMappingsCalls[0][0]).toEqual({
+        index: 'test-constant.keyword-default',
+        body: {},
+        write_index_only: true,
+      });
+    });
+
     it('should rollover on expected error', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -2055,6 +2159,102 @@ describe('EPM template', () => {
       );
 
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
+    });
+
+    it('should rollover on dynamic dimension mappings changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should not rollover on dynamic dimension mappings not changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
   });
 });

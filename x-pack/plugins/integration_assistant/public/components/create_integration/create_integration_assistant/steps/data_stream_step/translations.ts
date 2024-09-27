@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ErrorCode } from '../../../../../../common/constants';
 
 export const INTEGRATION_NAME_TITLE = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.integrationNameTitle',
@@ -126,10 +127,24 @@ export const LOGS_SAMPLE_ERROR = {
       defaultMessage: 'Failed to read the logs sample file',
     }
   ),
+  CAN_NOT_READ_WITH_REASON: (reason: string) =>
+    i18n.translate(
+      'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotReadWithReason',
+      {
+        values: { reason },
+        defaultMessage: 'An error occurred when reading logs sample: {reason}',
+      }
+    ),
   CAN_NOT_PARSE: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotParse',
     {
       defaultMessage: 'Cannot parse the logs sample file as either a JSON or NDJSON file',
+    }
+  ),
+  TOO_LARGE_TO_PARSE: i18n.translate(
+    'xpack.integrationAssistant.step.dataStream.logsSample.errorTooLargeToParse',
+    {
+      defaultMessage: 'This logs sample file is too large to parse',
     }
   ),
   NOT_ARRAY: i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray', {
@@ -182,3 +197,25 @@ export const GENERATION_ERROR = (progressStep: string) =>
 export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.retryButtonLabel', {
   defaultMessage: 'Retry',
 });
+
+export const ERROR_TRANSLATION: Record<ErrorCode, string> = {
+  [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
+    'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
+    {
+      defaultMessage:
+        'Please verify the format of log samples is correct and try again. Try with a fewer samples if error persists.',
+    }
+  ),
+  [ErrorCode.RECURSION_LIMIT]: i18n.translate(
+    'xpack.integrationAssistant.errors.recursionLimitReached',
+    {
+      defaultMessage: 'Max attempts exceeded. Please try again.',
+    }
+  ),
+  [ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
+    'xpack.integrationAssistant.errors.unsupportedLogSamples',
+    {
+      defaultMessage: 'Unsupported log format in the samples.',
+    }
+  ),
+};

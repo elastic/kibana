@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
@@ -12,11 +13,13 @@ import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rx
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
-import { pluginServices } from '../../../services/plugin_services';
+import {
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../../../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
-import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -187,10 +190,9 @@ function backupUnsavedChanges(
   dashboardChanges: Partial<DashboardContainerInput>,
   reactEmbeddableChanges: UnsavedPanelState
 ) {
-  const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
-  dashboardBackup.setState(
+  getDashboardBackupService().setState(
     this.getDashboardSavedObjectId(),
     {
       ...dashboardStateToBackup,

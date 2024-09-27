@@ -19,7 +19,7 @@ jest.mock('../contexts/kibana', () => ({
   useNotifications: () => ({
     toasts: { addDanger: jest.fn(), addError: jest.fn() },
   }),
-  useMlApiContext: jest.fn(),
+  useMlApi: jest.fn(),
   useMlKibana: () => ({
     services: {
       docLinks: {

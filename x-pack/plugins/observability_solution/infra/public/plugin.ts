@@ -38,11 +38,6 @@ import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
 import { ADD_LOG_STREAM_ACTION_ID, LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
-import {
-  type InfraLocators,
-  InfraLogsLocatorDefinition,
-  InfraNodeLogsLocatorDefinition,
-} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -58,13 +53,13 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
+import { hostsTitle, inventoryTitle, metricsExplorerTitle, metricsTitle } from './translations';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
-  private locators?: InfraLocators;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -108,7 +103,7 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     if (this.config.featureFlags.logsUIEnabled) {
-      // fetchData `appLink` redirects to logs/stream
+      // fetchData `appLink` redirects to logs explorer
       pluginsSetup.observability.dashboard.register({
         appName: 'infra_logs',
         hasData: getLogsHasDataFetcher(core.getStartServices),
@@ -169,17 +164,27 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.infrastructure.show
                 ? [
                     {
-                      label: 'Infrastructure',
+                      label: metricsTitle,
                       sortKey: 300,
                       entries: [
-                        { label: 'Inventory', app: 'metrics', path: '/inventory' },
+                        {
+                          label: inventoryTitle,
+                          app: 'metrics',
+                          path: '/inventory',
+                        },
                         ...(this.config.featureFlags.metricsExplorerEnabled
-                          ? [{ label: 'Metrics Explorer', app: 'metrics', path: '/explorer' }]
+                          ? [
+                              {
+                                label: metricsExplorerTitle,
+                                app: 'metrics',
+                                path: '/explorer',
+                              },
+                            ]
                           : []),
                         ...(isInfrastructureHostsViewEnabled
                           ? [
                               {
-                                label: 'Hosts',
+                                label: hostsTitle,
                                 app: 'metrics',
                                 path: '/hosts',
                               },
@@ -206,14 +211,6 @@ export class Plugin implements InfraClientPluginClass {
         pluginStart,
       });
     });
-
-    // Register Locators
-    const logsLocator = this.config.featureFlags.logsUIEnabled
-      ? pluginsSetup.share.url.locators.create(new InfraLogsLocatorDefinition({ core }))
-      : undefined;
-    const nodeLogsLocator = this.config.featureFlags.logsUIEnabled
-      ? pluginsSetup.share.url.locators.create(new InfraNodeLogsLocatorDefinition({ core }))
-      : undefined;
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
@@ -283,9 +280,7 @@ export class Plugin implements InfraClientPluginClass {
       return [
         {
           id: 'inventory',
-          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-            defaultMessage: 'Inventory',
-          }),
+          title: inventoryTitle,
           path: '/inventory',
           visibleIn,
         },
@@ -364,21 +359,6 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
-    to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
-    core.application.register({
-      id: 'infra',
-      appRoute: '/app/infra',
-      title: 'infra',
-      visibleIn: [],
-      mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./apps/legacy_app');
-
-        return renderApp(coreStart, params);
-      },
-    });
-
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices, isInfrastructureHostsViewEnabled]: [
         [CoreStart, InfraClientStartDeps, InfraClientStartExports],
@@ -395,26 +375,13 @@ export class Plugin implements InfraClientPluginClass {
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
-
-    this.locators = {
-      logsLocator,
-      nodeLogsLocator,
-    };
-
-    return {
-      locators: this.locators,
-    };
+    return {};
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const inventoryViews = this.inventoryViews.start({
-      http: core.http,
-    });
-
-    const metricsExplorerViews = this.metricsExplorerViews?.start({
-      http: core.http,
-    });
-
+    const { http } = core;
+    const inventoryViews = this.inventoryViews.start({ http });
+    const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
@@ -455,7 +422,6 @@ export class Plugin implements InfraClientPluginClass {
       inventoryViews,
       metricsExplorerViews,
       telemetry,
-      locators: this.locators!,
     };
 
     return startContract;

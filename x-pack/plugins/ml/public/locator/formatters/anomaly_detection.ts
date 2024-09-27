@@ -93,6 +93,13 @@ export function formatAnomalyDetectionCreateJobSelectIndex(
   );
 }
 
+export function formatSuppliedConfigurationsManagementUrl(
+  appBasePath: string,
+  pageState: MlGenericUrlState['pageState']
+): string {
+  return formatGenericMlUrl(appBasePath, ML_PAGES.SUPPLIED_CONFIGURATIONS, pageState);
+}
+
 /**
  * Creates URL to the Anomaly Explorer page
  */

@@ -1,30 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
+export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
  */
+export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+
 export type ESQLSingleAstItem =
-  | ESQLFunction // "function call expression"
+  | ESQLFunction
   | ESQLCommandOption
-  | ESQLSource // "source identifier expression"
-  | ESQLColumn // "field identifier expression"
+  | ESQLSource
+  | ESQLColumn
   | ESQLTimeInterval
-  | ESQLList // "list expression"
-  | ESQLLiteral // "literal expression"
+  | ESQLList
+  | ESQLLiteral
   | ESQLCommandMode
-  | ESQLInlineCast // "inline cast expression"
+  | ESQLInlineCast
+  | ESQLOrderExpression
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
@@ -42,7 +46,7 @@ export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLSingleAstItem | ESQLAstCommand;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -54,6 +58,18 @@ export interface ESQLAstBaseItem<Name = string> {
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
+  formatting?: ESQLAstNodeFormatting;
+}
+
+/**
+ * Contains optional formatting information used by the pretty printer.
+ */
+export interface ESQLAstNodeFormatting {
+  top?: ESQLAstComment[];
+  left?: ESQLAstCommentMultiLine[];
+  right?: ESQLAstCommentMultiLine[];
+  rightSingleLine?: ESQLAstCommentSingleLine;
+  bottom?: ESQLAstComment[];
 }
 
 export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
@@ -82,6 +98,11 @@ export interface ESQLAstRenameExpression extends ESQLCommandOption {
 
 export interface ESQLCommandMode extends ESQLAstBaseItem {
   type: 'mode';
+}
+
+export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
+  type: 'query';
+  commands: ESQLAstCommand[];
 }
 
 /**
@@ -113,6 +134,17 @@ export interface ESQLFunction<
   args: ESQLAstItem[];
 }
 
+const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
+  typeof node === 'object' &&
+  node !== null &&
+  Object.hasOwn(node, 'name') &&
+  Object.hasOwn(node, 'text');
+
+export const isESQLFunction = (node: unknown): node is ESQLFunction =>
+  isESQLAstBaseItem(node) &&
+  Object.hasOwn(node, 'type') &&
+  (node as ESQLFunction).type === 'function';
+
 export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'> {
   subtype: 'variadic-call';
   args: ESQLAstItem[];
@@ -123,9 +155,24 @@ export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   args: [ESQLAstItem];
 }
 
-export interface ESQLPostfixUnaryExpression extends ESQLFunction<'postfix-unary-expression'> {
+export interface ESQLPostfixUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'postfix-unary-expression', Name> {
   subtype: 'postfix-unary-expression';
   args: [ESQLAstItem];
+}
+
+/**
+ * Represents an order expression used in SORT commands.
+ *
+ * ```
+ * ... | SORT field ASC NULLS FIRST
+ * ```
+ */
+export interface ESQLOrderExpression extends ESQLAstBaseItem {
+  type: 'order';
+  order: '' | 'ASC' | 'DESC';
+  nulls: '' | 'NULLS FIRST' | 'NULLS LAST';
+  args: [field: ESQLAstItem];
 }
 
 export interface ESQLBinaryExpression
@@ -292,6 +339,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
+  isESQLAstBaseItem(node) &&
+  (node as ESQLNamedParamLiteral).literalType === 'param' &&
+  (node as ESQLNamedParamLiteral).paramType === 'named';
 /**
  * *Positional* parameter is a question mark followed by a number "?1".
  *
@@ -324,3 +375,14 @@ export interface EditorError {
   code?: string;
   severity: 'error' | 'warning' | number;
 }
+
+export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-line'> {
+  type: 'comment';
+  subtype: SubType;
+  text: string;
+  location: ESQLLocation;
+}
+
+export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;
+export type ESQLAstCommentMultiLine = ESQLAstGenericComment<'multi-line'>;
+export type ESQLAstComment = ESQLAstCommentSingleLine | ESQLAstCommentMultiLine;

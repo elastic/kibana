@@ -17,7 +17,7 @@ export function isValidFilterListId(id) {
 // original filter list to which edits are being applied, is defined with a filter_id property.
 export function saveFilterList(
   toastNotifications,
-  mlApiServices,
+  mlApi,
   filterId,
   description,
   items,
@@ -26,7 +26,7 @@ export function saveFilterList(
   return new Promise((resolve, reject) => {
     if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
       // Create a new filter.
-      addFilterList(toastNotifications, mlApiServices, filterId, description, items)
+      addFilterList(toastNotifications, mlApi, filterId, description, items)
         .then((newFilter) => {
           resolve(newFilter);
         })
@@ -35,7 +35,7 @@ export function saveFilterList(
         });
     } else {
       // Edit to existing filter.
-      updateFilterList(mlApiServices, loadedFilterList, description, items)
+      updateFilterList(mlApi, loadedFilterList, description, items)
         .then((updatedFilter) => {
           resolve(updatedFilter);
         })
@@ -46,7 +46,7 @@ export function saveFilterList(
   });
 }
 
-export function addFilterList(toastNotifications, mlApiServices, filterId, description, items) {
+export function addFilterList(toastNotifications, mlApi, filterId, description, items) {
   const filterWithIdExistsErrorMessage = i18n.translate(
     'xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage',
     {
@@ -59,13 +59,13 @@ export function addFilterList(toastNotifications, mlApiServices, filterId, descr
 
   return new Promise((resolve, reject) => {
     // First check the filterId isn't already in use by loading the current list of filters.
-    mlApiServices.filters
+    mlApi.filters
       .filtersStats()
       .then((filterLists) => {
         const savedFilterIds = filterLists.map((filterList) => filterList.filter_id);
         if (savedFilterIds.indexOf(filterId) === -1) {
           // Save the new filter.
-          mlApiServices.filters
+          mlApi.filters
             .addFilter(filterId, description, items)
             .then((newFilter) => {
               resolve(newFilter);
@@ -84,14 +84,14 @@ export function addFilterList(toastNotifications, mlApiServices, filterId, descr
   });
 }
 
-export function updateFilterList(mlApiServices, loadedFilterList, description, items) {
+export function updateFilterList(mlApi, loadedFilterList, description, items) {
   return new Promise((resolve, reject) => {
     // Get items added and removed from loaded filter.
     const loadedItems = loadedFilterList.items;
     const addItems = items.filter((item) => loadedItems.includes(item) === false);
     const removeItems = loadedItems.filter((item) => items.includes(item) === false);
 
-    mlApiServices.filters
+    mlApi.filters
       .updateFilter(loadedFilterList.filter_id, description, addItems, removeItems)
       .then((updatedFilter) => {
         resolve(updatedFilter);

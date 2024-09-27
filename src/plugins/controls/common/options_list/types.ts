@@ -1,35 +1,51 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
-import type { DataControlInput } from '../types';
 import { OptionsListSelection } from './options_list_selections';
+import { OptionsListSortingType } from './suggestions_sorting';
+import { DefaultDataControlState } from '../types';
 import { OptionsListSearchTechnique } from './suggestions_searching';
-import type { OptionsListSortingType } from './suggestions_sorting';
 
-export const OPTIONS_LIST_CONTROL = 'optionsListControl'; // TODO: Replace with OPTIONS_LIST_CONTROL_TYPE
+/**
+ * ----------------------------------------------------------------
+ * Options list state types
+ * ----------------------------------------------------------------
+ */
 
-export interface OptionsListEmbeddableInput extends DataControlInput {
+export interface OptionsListDisplaySettings {
+  placeholder?: string;
+  hideActionBar?: boolean;
+  hideExclude?: boolean;
+  hideExists?: boolean;
+  hideSort?: boolean;
+}
+
+export interface OptionsListControlState
+  extends DefaultDataControlState,
+    OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: OptionsListSelection[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
-  hideActionBar?: boolean;
-  hideExclude?: boolean;
-  hideExists?: boolean;
-  placeholder?: string;
-  hideSort?: boolean;
   exclude?: boolean;
 }
+
+/**
+ * ----------------------------------------------------------------
+ * Options list server request + response types
+ * ----------------------------------------------------------------
+ */
 
 export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
 
@@ -76,7 +92,7 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody
   extends Pick<
-    OptionsListEmbeddableInput,
+    OptionsListControlState,
     'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;

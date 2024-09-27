@@ -72,6 +72,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         type="visualOptions"
         groupPosition="none"
         buttonDataTestSubj="lnsVisualOptionsButton"
+        data-test-subj="lnsVisualOptionsPopover"
       >
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}

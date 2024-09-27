@@ -143,7 +143,7 @@ describe.skip('When on the policy list page', () => {
       expect(endpointCount[0].textContent).toBe('4');
     });
 
-    it('endpoint count link should navigate to the endpoint list filtered by policy', () => {
+    it('endpoint count link should navigate to the endpoint list filtered by policy', async () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
       const backLink = {
@@ -159,7 +159,7 @@ describe.skip('When on the policy list page', () => {
         },
       };
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink')[0];
-      userEvent.click(endpointCount);
+      await userEvent.click(endpointCount);
 
       expect(history.location.pathname).toEqual(getEndpointListPath({ name: 'endpointList' }));
       expect(history.location.search).toEqual(filterByPolicyQuery);
@@ -194,7 +194,7 @@ describe.skip('When on the policy list page', () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('pagination-button-next')).toBeTruthy();
       });
-      userEvent.click(renderResult.getByTestId('pagination-button-next'));
+      await userEvent.click(renderResult.getByTestId('pagination-button-next'));
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
       });
@@ -209,9 +209,9 @@ describe.skip('When on the policy list page', () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
       });
-      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
-      userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
+      await userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
 
       await waitFor(() => {
         expect(getPackagePolicies).toHaveBeenCalledTimes(2);
@@ -246,9 +246,9 @@ describe.skip('When on the policy list page', () => {
       });
 
       // change pageSize
-      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
-      userEvent.click(renderResult.getByTestId('tablePagination-10-rows'));
+      await userEvent.click(renderResult.getByTestId('tablePagination-10-rows'));
 
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(

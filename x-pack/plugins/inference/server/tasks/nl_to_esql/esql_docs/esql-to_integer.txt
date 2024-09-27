@@ -1,0 +1,28 @@
+# TO_INTEGER
+
+The TO_INTEGER function converts an input value into an integer.
+
+## Syntax
+
+`TO_INTEGER(field)`
+
+### Parameters
+
+#### field
+
+The input value. This can be a single or multi-valued column or an expression.
+
+## Description
+
+The TO_INTEGER function converts an input value into an integer.
+
+## Examples
+
+```esql
+ROW long = [5013792, 2147483647, 501379200000]
+| EVAL int = TO_INTEGER(long)
+```
+
+## Notes
+
+-  If the input parameter is of a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an integer. A boolean value of true is converted to integer 1, and false is converted to 0.
