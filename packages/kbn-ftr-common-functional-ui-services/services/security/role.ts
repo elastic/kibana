@@ -10,27 +10,25 @@
 import util from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-
-const headers = Object.freeze({
-  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-});
 
 export class Role {
   constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { data, status, statusText } = await this.kibanaServer.request({
-      path: `/api/security/role/${name}`,
-      method: 'PUT',
-      body: {
-        kibana: role.kibana,
-        elasticsearch: role.elasticsearch,
-      },
-      headers,
-      retries: 0,
-    });
+    const { data, status, statusText } = await this.kibanaServer
+      .request({
+        path: `/api/security/role/${name}`,
+        method: 'PUT',
+        body: {
+          kibana: role.kibana,
+          elasticsearch: role.elasticsearch,
+        },
+        retries: 0,
+      })
+      .catch((e) => {
+        throw new Error(util.inspect(e.axiosError.response, true));
+      });
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`

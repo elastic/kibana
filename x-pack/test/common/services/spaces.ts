@@ -12,7 +12,7 @@ import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
 import Url from 'url';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+// import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
@@ -47,7 +47,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const axios = Axios.create({
     headers: {
       'kbn-xsrf': 'x-pack/ftr/services/spaces/space',
-      [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+      // [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
     },
     baseURL: url,
     maxRedirects: 0,
