@@ -92,7 +92,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                     defaultMessage: 'Browse content syncs',
                   }
                 ),
-                error: errorOnContentSync ? true : false,
+                error: errorOnContentSync,
                 title: i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
                   {
@@ -108,7 +108,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                     defaultMessage: 'Browse document level security syncs',
                   }
                 ),
-                error: errorOnAccessSync ? true : false,
+                error: errorOnAccessSync,
                 title: i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
                   {
