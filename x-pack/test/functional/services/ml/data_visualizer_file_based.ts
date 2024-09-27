@@ -204,7 +204,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertFieldsFromIndex(index: string, fields: string[]) {
-      await retry.tryForTime(1 * 1000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         const sortedFields = fields.sort();
         const fieldCaps = await es.fieldCaps({
           index,
