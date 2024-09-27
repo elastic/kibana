@@ -56,7 +56,7 @@ export const buildUserEntityDefinition = (namespace: string): EntityDefinition =
     metadata: [
       {
         source: '_index',
-        destination: 'entityFields.source',
+        destination: 'entity.source',
       },
       'asset.criticality',
       'user.domain',

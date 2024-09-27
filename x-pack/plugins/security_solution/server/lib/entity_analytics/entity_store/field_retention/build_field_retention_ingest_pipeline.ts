@@ -28,7 +28,7 @@ export const buildFieldRetentionIngestPipeline = ({
   enrichPolicyName: string;
   allEntityFields: string[];
 }): IngestProcessorContainer[] => [
-  ...(DEBUG_MODE ? [debugAddContextStep()] : []),
+  ...(DEBUG_MODE ? [debugDeepCopyContextStep()] : []),
   {
     enrich: {
       policy_name: enrichPolicyName,
@@ -43,45 +43,21 @@ export const buildFieldRetentionIngestPipeline = ({
     },
   },
   {
-    remove: {
-      ignore_failure: true,
-      field: 'entity',
-    },
-  },
-  ...getDotExpanderProcessors(allEntityFields),
-  ...getFieldProcessors(fieldRetentionDefinition),
-  ...getRemoveEmptyFieldProcessors(allEntityFields),
-  {
     set: {
       field: 'entity.name',
       value: `{{${getIdentityFieldForEntityType(fieldRetentionDefinition.entityType)}}}`,
     },
   },
-  {
-    set: {
-      field: 'entity.source',
-      copy_from: 'entityFields.source',
-      ignore_failure: true,
-    },
-  },
-  {
-    remove: {
-      ignore_failure: true,
-      field: 'entityFields',
-    },
-  },
   arrayToSingleValueProcessor({
     field: `${fieldRetentionDefinition.entityType}.risk.calculated_level`,
   }),
-  // arrayToSingleValueProcessor({
-  //   field: 'asset.criticality',
-  // }),
-  {
-    remove: {
-      ignore_failure: true,
-      field: 'event',
-    },
-  },
+  arrayToSingleValueProcessor({
+    field: 'asset.criticality',
+  }),
+  ...getDotExpanderProcessors(allEntityFields),
+  ...getFieldProcessors(fieldRetentionDefinition),
+  ...getRemoveEmptyFieldProcessors(allEntityFields),
+  removeEntityDefinitionFields(fieldRetentionDefinition.entityType),
   {
     remove: {
       ignore_failure: true,
@@ -108,6 +84,22 @@ export const buildFieldRetentionIngestPipeline = ({
     : []),
 ];
 
+const removeEntityDefinitionFields = (entityType: string): IngestProcessorContainer => ({
+  remove: {
+    ignore_failure: true,
+    field: [
+      'event',
+      'entity.lastSeenTimestamp',
+      'entity.schemaVersion',
+      'entity.definitionVersion',
+      'entity.identityFields',
+      'entity.definitionId',
+      'entity.displayName',
+      'entity.firstSeenTimestamp',
+    ],
+  },
+});
+
 const arrayToSingleValueProcessor = ({ field }: { field: string }): IngestProcessorContainer => {
   const ctxField = `ctx.${field}`;
   return {
@@ -126,17 +118,42 @@ const arrayToSingleValueProcessor = ({ field }: { field: string }): IngestProces
   };
 };
 
-const debugAddContextStep = (): IngestProcessorContainer => ({
+/**
+ * Deeply copies the context so we can debug the pipeline
+ * Deep copy is necessary because the context is a mutable object and painless copies by ref
+ *
+ * @return {*}  {IngestProcessorContainer}
+ */
+const debugDeepCopyContextStep = (): IngestProcessorContainer => ({
   script: {
     lang: 'painless',
     source: `
-    Map ctxCopy = new HashMap(ctx);
-    ctxCopy.remove('_index');
-    ctxCopy.remove('_id');
-    ctxCopy.remove('_version');
-    ctxCopy.remove('_seq_no');
-    ctxCopy.remove('_primary_term');
-    ctx.full_ctx = ctxCopy;
+Map deepCopy(Map original) {
+    Map copy = new HashMap();
+    for (entry in original.entrySet()) {
+        if (entry.getValue() instanceof Map) {
+            // Recursively deep copy nested maps
+            copy.put(entry.getKey(), deepCopy((Map)entry.getValue()));
+        } else if (entry.getValue() instanceof List) {
+            // Deep copy lists
+            List newList = new ArrayList();
+            for (item in (List)entry.getValue()) {
+                if (item instanceof Map) {
+                    newList.add(deepCopy((Map)item));
+                } else {
+                    newList.add(item);
+                }
+            }
+            copy.put(entry.getKey(), newList);
+        } else {
+            // Copy by value for other types
+            copy.put(entry.getKey(), entry.getValue());
+        }
+    }
+    return copy;
+}
+
+ctx.debug_ctx = deepCopy(ctx);
   `,
   },
 });
