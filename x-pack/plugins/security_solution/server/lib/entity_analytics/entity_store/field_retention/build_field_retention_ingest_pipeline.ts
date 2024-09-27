@@ -161,10 +161,11 @@ const isFieldMissingOrEmpty = (field: string): string => {
 
 const preferNewestValueProcessor = ({ field }: PreferNewestValue): IngestProcessorContainer => {
   const historicalField = `${ENRICH_FIELD}.${field}`;
-  const ctxField = `ctx.${field}`;
   return {
     set: {
-      if: isFieldMissingOrEmpty(ctxField),
+      if: `${isFieldMissingOrEmpty(`ctx.${field}`)} && !(${isFieldMissingOrEmpty(
+        `ctx.${historicalField}`
+      )})`,
       field,
       value: `{{${historicalField}}}`,
     },
