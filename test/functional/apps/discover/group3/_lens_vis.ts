@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  describe('discover lens vis-meow', function () {
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
