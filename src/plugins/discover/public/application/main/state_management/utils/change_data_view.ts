@@ -44,6 +44,8 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   internalState.transitions.setIsDataViewLoading(true);
+  console.error('Reset profile state from changeDataView');
+  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
@@ -71,6 +73,4 @@ export async function changeDataView(
   }
 
   internalState.transitions.setIsDataViewLoading(false);
-  console.error('Reset profile state from changeDataView');
-  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 }
