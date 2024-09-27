@@ -358,6 +358,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         );
       }
 
+      console.log(`alertDocsBackfill3 ${JSON.stringify(alertDocsBackfill3)}`);
+      console.log(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
+
       expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[5]);
       expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[6]);
       expect(alertDocsBackfill3[2]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[7]);
