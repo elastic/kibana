@@ -176,6 +176,56 @@ describe('clearExpiredSnoozes()', () => {
     );
   });
 
+  test('passes namespace if provided', async () => {
+    const { attributes, id } = getRule([
+      {
+        duration: 1000,
+        rRule: {
+          tzid: 'UTC',
+          dtstart: moment().subtract(1, 'd').toISOString(),
+          count: 1,
+        },
+      },
+      {
+        id: '1',
+        duration: 1000,
+        rRule: {
+          tzid: 'UTC',
+          dtstart: moment().add(1, 'd').toISOString(),
+          count: 1,
+        },
+      },
+    ]);
+    await clearExpiredSnoozes({
+      logger: mockLogger,
+      rule: { ...attributes, id },
+      savedObjectsClient: internalSavedObjectsRepository,
+      namespace: 'foo-namespace',
+    });
+    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        snoozeSchedule: [
+          {
+            id: '1',
+            duration: 1000,
+            rRule: {
+              tzid: 'UTC',
+              dtstart: moment().add(1, 'd').toISOString(),
+              count: 1,
+            },
+          },
+        ],
+      },
+      {
+        refresh: false,
+        namespace: 'foo-namespace',
+      }
+    );
+  });
+
   test('does nothing when no snoozes are expired', async () => {
     const { attributes, id } = getRule([
       {

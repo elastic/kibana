@@ -14,10 +14,11 @@ interface ClearExpiredSnoozesOpts {
   logger: Logger;
   rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
   savedObjectsClient: ISavedObjectsRepository;
+  namespace?: string;
   version?: string;
 }
 export async function clearExpiredSnoozes(opts: ClearExpiredSnoozesOpts): Promise<void> {
-  const { logger, rule, savedObjectsClient, version } = opts;
+  const { logger, namespace, rule, savedObjectsClient, version } = opts;
 
   if (!rule.snoozeSchedule || !rule.snoozeSchedule.length) return;
 
@@ -39,7 +40,7 @@ export async function clearExpiredSnoozes(opts: ClearExpiredSnoozesOpts): Promis
     updatedAt: new Date().toISOString(),
   };
 
-  const updateOptions = { version, refresh: false };
+  const updateOptions = { namespace, version, refresh: false };
 
   await partiallyUpdateRule(savedObjectsClient, rule.id, updateAttributes, updateOptions);
 }

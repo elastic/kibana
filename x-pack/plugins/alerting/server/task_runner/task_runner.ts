@@ -532,6 +532,7 @@ export class TaskRunner<
         try {
           await clearExpiredSnoozes({
             logger: this.logger,
+            namespace,
             rule: runRuleParams.rule,
             savedObjectsClient: this.internalSavedObjectsRepository,
             version: runRuleParams.version,
