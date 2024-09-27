@@ -30,7 +30,7 @@ export function EntitiesInventoryCallout({ onDissmiss }: EntitiesInventoryCallou
       <EuiFlexItem grow={false}>
         <EuiLink
           data-test-subj="apmEntitiesInventoryCalloutLink"
-          href={entitiesInventoryLocator?.useUrl({})}
+          href={entitiesInventoryLocator.useUrl({})}
         >
           <FormattedMessage
             id="xpack.apm.entitiesInventoryCallout.linklabel"
