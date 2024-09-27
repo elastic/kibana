@@ -35,7 +35,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
         setIsDeleting(false);
         onDelete();
       }}
-      style={{ marginRight: theme.eui.euiSize }}
+      style={{ marginRight: theme.size.base }}
     >
       {i18n.translate('xpack.apm.settings.customLink.delete', {
         defaultMessage: 'Delete',

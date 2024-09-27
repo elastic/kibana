@@ -97,7 +97,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
-            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={theme.isDarkColorMode ? DARK_THEME : LIGHT_THEME}
             locale={i18n.getLocale()}
           />
           <Axis

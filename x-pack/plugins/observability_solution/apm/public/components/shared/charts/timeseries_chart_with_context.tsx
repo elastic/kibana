@@ -70,7 +70,7 @@ export function TimeseriesChartWithContext({
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);
   const theme = useTheme();
-  const annotationColor = theme.eui.euiColorSuccess;
+  const annotationColor = theme.colors.success;
   const { annotations } = useAnnotationsContext();
 
   const timeseriesAnnotations = [

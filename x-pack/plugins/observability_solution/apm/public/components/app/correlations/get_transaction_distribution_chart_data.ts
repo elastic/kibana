@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+
+import type { UseEuiThemeWithColorsVis } from '../../../hooks/use_theme';
 import type { HistogramItem } from '../../../../common/correlations/types';
 import { DurationDistributionChartData } from '../../shared/charts/duration_distribution_chart';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -18,7 +19,7 @@ export function getTransactionDistributionChartData({
   failedTransactionsHistogram,
   selectedTerm,
 }: {
-  euiTheme: EuiTheme;
+  euiTheme: UseEuiThemeWithColorsVis;
   allTransactionsHistogram?: HistogramItem[];
   failedTransactionsHistogram?: HistogramItem[];
   selectedTerm?: LatencyCorrelation | FailedTransactionsCorrelation | undefined;
@@ -31,7 +32,7 @@ export function getTransactionDistributionChartData({
         defaultMessage: 'All transactions',
       }),
       histogram: allTransactionsHistogram,
-      areaSeriesColor: euiTheme.eui.euiColorVis1,
+      areaSeriesColor: euiTheme.euiPaletteColorBlind.euiColorVis1,
     });
   }
 
@@ -41,7 +42,7 @@ export function getTransactionDistributionChartData({
         defaultMessage: 'Failed transactions',
       }),
       histogram: failedTransactionsHistogram,
-      areaSeriesColor: euiTheme.eui.euiColorVis7,
+      areaSeriesColor: euiTheme.euiPaletteColorBlind.euiColorVis7,
     });
   }
 
@@ -49,7 +50,7 @@ export function getTransactionDistributionChartData({
     transactionDistributionChartData.push({
       id: `${selectedTerm.fieldName}:${selectedTerm.fieldValue}`,
       histogram: selectedTerm.histogram,
-      areaSeriesColor: euiTheme.eui.euiColorVis2,
+      areaSeriesColor: euiTheme.euiPaletteColorBlind.euiColorVis2,
     });
   }
 

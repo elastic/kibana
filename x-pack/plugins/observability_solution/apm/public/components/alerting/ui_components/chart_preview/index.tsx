@@ -19,6 +19,8 @@ import {
   TickFormatter,
   Tooltip,
   niceTimeFormatter,
+  DARK_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -57,10 +59,10 @@ export function ChartPreview({
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const style = {
-    fill: theme.eui.euiColorVis2,
+    fill: theme.euiPaletteColorBlind.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: theme.eui.euiColorVis2,
+      stroke: theme.euiPaletteColorBlind.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,
@@ -121,6 +123,7 @@ export function ChartPreview({
           legendPosition={'bottom'}
           legendSize={legendSize}
           locale={i18n.getLocale()}
+          theme={theme.isDarkColorMode ? DARK_THEME : LIGHT_THEME}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}

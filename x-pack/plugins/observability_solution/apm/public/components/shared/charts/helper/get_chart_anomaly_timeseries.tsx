@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { UseEuiThemeWithColorsVis } from '../../../../hooks/use_theme';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
@@ -24,7 +24,7 @@ export function getChartAnomalyTimeseries({
   anomalyTimeseriesColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
-  theme: EuiTheme;
+  theme: UseEuiThemeWithColorsVis;
   anomalyTimeseriesColor?: string;
 }):
   | {
@@ -47,7 +47,7 @@ export function getChartAnomalyTimeseries({
           opacity: 0,
         },
       },
-      color: anomalyTimeseriesColor ?? rgba(theme.eui.euiColorVis1, 0.5),
+      color: anomalyTimeseriesColor ?? rgba(theme.euiPaletteColorBlind.euiColorVis1, 0.5),
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,

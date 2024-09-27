@@ -15,10 +15,10 @@ interface Props {
 }
 
 export function ErrorCountSummaryItemBadge({ count }: Props) {
-  const theme = useTheme();
+  const euiTheme = useTheme();
 
   return (
-    <EuiBadge color={theme.eui.euiColorDanger} style={{ maxWidth: '200px' }}>
+    <EuiBadge color={euiTheme.colors.danger} style={{ maxWidth: '200px' }}>
       {i18n.translate('xpack.apm.transactionDetails.errorCount', {
         defaultMessage: '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
         values: { errorCount: count },
