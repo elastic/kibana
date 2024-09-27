@@ -49,6 +49,10 @@ export enum TELEMETRY_EVENT {
 
   // AI assistant on rule creation form
   OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',
+
+  // Rule preview
+  PREVIEW_RULE_ALL = 'preview_rule_all',
+  PREVIEW_RULE_WITH_LOGGED_REQUESTS = 'preview_rule_with_logged_requests',
 }
 
 export enum TelemetryEventTypes {

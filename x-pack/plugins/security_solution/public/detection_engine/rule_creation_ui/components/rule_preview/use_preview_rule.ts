@@ -12,12 +12,20 @@ import type {
   RuleCreateProps,
   RulePreviewResponse,
 } from '../../../../../common/api/detection_engine';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 
 import { previewRule } from '../../../rule_management/api/api';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
+
+const trackPreview = (enableLoggedRequests: boolean) => {
+  track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.PREVIEW_RULE_ALL);
+  if (enableLoggedRequests) {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.PREVIEW_RULE_WITH_LOGGED_REQUESTS);
+  }
+};
 
 const emptyPreviewRule: RulePreviewResponse = {
   previewId: undefined,
@@ -57,6 +65,7 @@ export const usePreviewRule = ({
     const createPreviewId = async () => {
       if (rule != null) {
         try {
+          trackPreview(enableLoggedRequests);
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
             rule: {
