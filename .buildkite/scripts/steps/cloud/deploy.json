@@ -161,7 +161,6 @@
         "ref_id": "main-elasticsearch"
       }
     ],
-    "enterprise_search": [],
     "kibana": [
       {
         "elasticsearch_cluster_ref_id": "main-elasticsearch",
