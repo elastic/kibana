@@ -32,8 +32,8 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             {accessControlSwitch && (
               <EuiFlexItem
-                css={css`ç
-                  min-width: ${Number(euiTheme.size.xs) * 65}px;
+                css={css`
+                  min-width: ${euiTheme.base * 18}px;
                 `}
                 grow={false}
               >
