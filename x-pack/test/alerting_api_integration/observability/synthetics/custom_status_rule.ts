@@ -508,7 +508,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert).to.have.property('kibana.alert.status', 'active');
 
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down 1 time from Dev Service | 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
         const downResponse = await waitForDocumentInIndex<{
           ruleType: string;
@@ -527,17 +527,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(downResponse.hits.hits[0]._source).property(
           'reason',
-          `Monitor "${monitor.name}" is down 1 time from Dev Service | 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
         expect(downResponse.hits.hits[0]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev | dev2');
+        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger recovered alert', async () => {
@@ -583,17 +583,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(recoveryResponse.hits.hits[1]._source).property(
           'reason',
-          `Monitor "${monitor.name}" from Dev Service | Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
+          `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
         );
         expect(recoveryResponse.hits.hits[1]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(recoveryResponse.hits.hits[1]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev | dev2');
+        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
       });
 
       let downDocs: any[] = [];
@@ -616,7 +616,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down 1 time from Dev Service | 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
         const downResponse = await waitForDocumentInIndex<{
           ruleType: string;
@@ -632,17 +632,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(downResponse.hits.hits[2]._source).property(
           'reason',
-          `Monitor "${monitor.name}" is down 1 time from Dev Service | 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
         expect(downResponse.hits.hits[2]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(downResponse.hits.hits[2]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[2]._source).property('locationId', 'dev | dev2');
+        expect(downResponse.hits.hits[2]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger recovered alert when the location threshold is no longer met', async () => {
@@ -676,17 +676,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(recoveryResponse.hits.hits[3]._source).property(
           'reason',
-          `Monitor "${monitor.name}" from Dev Service | Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
+          `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
         );
         expect(recoveryResponse.hits.hits[3]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(recoveryResponse.hits.hits[3]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[3]._source).property('locationId', 'dev | dev2');
+        expect(recoveryResponse.hits.hits[3]._source).property('locationId', 'dev and dev2');
         expect(recoveryResponse.hits.hits[3]._source).property(
           'recoveryReason',
           'the alert condition is no longer met'
@@ -875,7 +875,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 5 times from Dev Service and 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
         );
         const downResponse = await waitForDocumentInIndex<{
           ruleType: string;
@@ -895,17 +895,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(downResponse.hits.hits[0]._source).property(
           'reason',
-          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 5 times from Dev Service and 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
         );
         expect(downResponse.hits.hits[0]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev | dev2');
+        expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger alert action', async function () {
@@ -928,17 +928,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(alertAction.hits.hits[0]._source).property(
           'reason',
-          `Monitor "${monitor.name}" is down 5 times from Dev Service | 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
+          `Monitor "${monitor.name}" is down 5 times from Dev Service and 5 times from Dev Service 2. Alert when down 5 times within the last 5 minutes from at least 2 locations.`
         );
         expect(alertAction.hits.hits[0]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(alertAction.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(alertAction.hits.hits[0]._source).property('locationId', 'dev | dev2');
+        expect(alertAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger recovered alert', async function () {
@@ -974,7 +974,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(recoveryAction.hits.hits[1]._source).property(
           'reason',
-          `Monitor "${monitor.name}" from Dev Service | Dev Service 2 is recovered. Alert when 5 checks are down within the last 5 minutes from at least 2 locations.`
+          `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 5 checks are down within the last 5 minutes from at least 2 locations.`
         );
         expect(recoveryAction.hits.hits[1]._source).property(
           'recoveryReason',
@@ -983,13 +983,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(recoveryAction.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
         expect(recoveryAction.hits.hits[1]._source).property(
           'locationNames',
-          'Dev Service | Dev Service 2'
+          'Dev Service and Dev Service 2'
         );
         expect(recoveryAction.hits.hits[1]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryAction.hits.hits[1]._source).property('locationId', 'dev | dev2');
+        expect(recoveryAction.hits.hits[1]._source).property('locationId', 'dev and dev2');
       });
     });
 

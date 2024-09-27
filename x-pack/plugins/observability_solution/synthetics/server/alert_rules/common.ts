@@ -262,7 +262,7 @@ export const setRecoveredAlertsContext = ({
     const context = {
       ...alertState,
       ...(monitorSummary ? monitorSummary : {}),
-      locationId: locationIds.join(' | '),
+      locationId: locationIds.join(` ${AND_LABEL} `),
       idWithLocation: recoveredAlertId,
       lastErrorMessage,
       recoveryStatus,
@@ -580,6 +580,6 @@ export function getTimeUnitLabel(timeWindow: TimeWindow) {
   }
 }
 
-const AND_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.andLabel', {
+export const AND_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.andLabel', {
   defaultMessage: 'and',
 });

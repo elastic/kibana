@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
 import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
-import { getTimeUnitLabel } from '../common';
+import { AND_LABEL, getTimeUnitLabel } from '../common';
 import { ALERT_REASON_MSG } from '../action_variables';
 import { MonitorSummaryStatusRule } from './types';
 import {
@@ -80,7 +80,7 @@ export const getMonitorSummary = ({
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
   const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
   const formattedLocationName = Array.isArray(locationName)
-    ? locationName.join(' | ')
+    ? locationName.join(` ${AND_LABEL} `)
     : locationName;
   const checkedAt = moment(monitorInfo?.['@timestamp'])
     .tz(tz || 'UTC')
@@ -104,7 +104,7 @@ export const getMonitorSummary = ({
 
   return {
     checkedAt,
-    locationId: locationId?.join?.(' | ') ?? '',
+    locationId: locationId?.join?.(` ${AND_LABEL} `) ?? '',
     configId,
     monitorUrl: monitorInfo.url?.full || UNAVAILABLE_LABEL,
     monitorUrlLabel: typeToUrlLabelMap[monitorType] || 'URL',
@@ -190,7 +190,7 @@ export const getUngroupedReasonMessage = ({
               }
             );
           })
-          .join(' | '),
+          .join(` ${AND_LABEL} `),
       },
     }
   );
