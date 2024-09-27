@@ -10,7 +10,7 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewLazy } from '@kbn/data-views-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createKibanaReactContext, DataPublicPluginStart } from './shared_imports';
@@ -57,7 +57,7 @@ export const getEditorOpener =
         }
       };
 
-      const onSaveIndexPattern = (indexPattern: DataView) => {
+      const onSaveIndexPattern = (indexPattern: DataViewLazy) => {
         closeEditor();
 
         if (onSave) {

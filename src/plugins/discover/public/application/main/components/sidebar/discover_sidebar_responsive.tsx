@@ -297,7 +297,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         ? () => {
             const ref = dataViewEditor.openEditor({
               onSave: async (dataView) => {
-                onDataViewCreated(dataView);
+                const dv = await services.dataViews.toDataView(dataView);
+                onDataViewCreated(dv);
               },
             });
             if (setDataViewEditorRef) {
@@ -306,7 +307,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [
+      canEditDataView,
+      dataViewEditor,
+      setDataViewEditorRef,
+      onDataViewCreated,
+      closeFieldListFlyout,
+      services.dataViews,
+    ]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');

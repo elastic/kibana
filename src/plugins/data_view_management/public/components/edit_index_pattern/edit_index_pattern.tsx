@@ -69,6 +69,7 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 
 import {
   dataViewSelector,
+  dataViewLazySelector,
   allowedTypesSelector,
   relationshipsSelector,
   tagsSelector,
@@ -91,6 +92,7 @@ export const EditIndexPattern = withRouter(
       ...startServices
     } = useKibana<IndexPatternManagmentContext>().services;
     const dataView = useStateSelector(dataViewMgmtService.state$, dataViewSelector);
+    const dataViewLazy = useStateSelector(dataViewMgmtService.state$, dataViewLazySelector);
     const allowedTypes = useStateSelector(dataViewMgmtService.state$, allowedTypesSelector);
     const relationships = useStateSelector(dataViewMgmtService.state$, relationshipsSelector);
     const tags = useStateSelector(dataViewMgmtService.state$, tagsSelector);
@@ -146,7 +148,7 @@ export const EditIndexPattern = withRouter(
         }}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
-        editData={dataView}
+        editData={dataViewLazy}
       />
     ) : (
       <></>

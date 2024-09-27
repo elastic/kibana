@@ -59,15 +59,18 @@ const DataViewFlyoutContentContainer = ({
         if (editData.isPersisted()) {
           await dataViews.updateSavedObject(editData);
         }
+        if (editData?.id) {
+          dataViews.clearDataViewInstanceCache(editData.id);
+        }
         saveResponse = editData;
       } else {
         saveResponse = persist
-          ? await dataViews.createAndSave(dataViewSpec)
-          : await dataViews.create(dataViewSpec);
+          ? await dataViews.createAndSaveDataViewLazy(dataViewSpec)
+          : await dataViews.createDataViewLazy(dataViewSpec);
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
-        await dataViews.refreshFields(saveResponse);
+        // await dataViews.refreshFields(saveResponse);
 
         if (persist) {
           const title = i18n.translate('indexPatternEditor.saved', {

@@ -24,6 +24,7 @@ import {
   INDEX_PATTERN_TYPE,
   DataViewField,
   DataView,
+  DataViewLazy,
 } from '@kbn/data-views-plugin/public';
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -76,6 +77,7 @@ export interface DataViewMgmtServiceConstructorArgs {
 
 export interface DataViewMgmtState {
   dataView?: DataView;
+  dataViewLazy?: DataViewLazy;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
@@ -207,6 +209,8 @@ export class DataViewMgmtService {
   async setDataView(dataView: DataView) {
     this.updateState({ isRefreshing: true });
 
+    const dataViewLazy = await this.services.dataViews.toDataViewLazy(dataView);
+
     const fieldRecords = dataView.fields
       .filter((field) => !field.scripted)
       .reduce((acc, field) => {
@@ -239,6 +243,7 @@ export class DataViewMgmtService {
 
     this.updateState({
       dataView,
+      dataViewLazy,
       fields,
       indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,

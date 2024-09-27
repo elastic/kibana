@@ -10,6 +10,7 @@
 import { DataViewMgmtState } from './data_view_management_service';
 
 export const dataViewSelector = (state: DataViewMgmtState) => state.dataView;
+export const dataViewLazySelector = (state: DataViewMgmtState) => state.dataViewLazy;
 export const allowedTypesSelector = (state: DataViewMgmtState) => state.allowedTypes;
 export const relationshipsSelector = (state: DataViewMgmtState) => state.relationships;
 export const tagsSelector = (state: DataViewMgmtState) => state.tags;
