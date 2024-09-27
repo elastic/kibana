@@ -34,18 +34,18 @@ export const getSuppressionAlertFields = ({
   fallbackTimestamp,
   instanceId,
 }: {
-  fields: Record<string, unknown> | undefined;
+  fields: Record<string, string | number | null> | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   suppressionTerms: SuppressionTerm[];
   fallbackTimestamp: string;
   instanceId: string;
 }) => {
-  const primeTimestamp = get(fields, primaryTimestamp) as string;
-  const secondTimestamp =
-    secondaryTimestamp != null ? (get(fields, secondaryTimestamp) as string) : fallbackTimestamp;
-
-  const suppressionTime = new Date(primeTimestamp ?? secondTimestamp);
+  const suppressionTime = new Date(
+    get(fields, primaryTimestamp) ??
+      (secondaryTimestamp && get(fields, secondaryTimestamp)) ??
+      fallbackTimestamp
+  );
 
   // console.error('SUPPRESSION TIME');
 

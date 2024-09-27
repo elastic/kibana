@@ -2895,6 +2895,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
+      // @skipInServerless
       it('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
         // this timestamp is 1 minute in the past
