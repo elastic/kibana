@@ -2,63 +2,40 @@ Settings YAML file schema
 
 
 ```
-
-# [Required] An Elastic product name: 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'
-product: Kibana
-
-# [Required] This will be the settings page title
-collection: Alerting and action settings in Kibana
+product: <Required (string) - the Elastic product name, e.g. 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'>
+collection: <Required (string) - the settings page title, e.g. Alerting and action settings in Kibana>
+page_description:
+  - <"Optional (asciidoc) - A summary description that appears at the top of the settings page">
 
 groups:
-    # [Optional] The title of the sections that divide up a single settings page. Examples: 'General settings', 'Action settings', 'Preconfigured connector settings'
-  - group: General settings
-
-    # [Optional] Links from other places in the documentation can use this ID. For example, "For more information, see [General settings](./general-alert-action-settings)"
-    group_id: general-alert-action-settings
-
-    # [Optional] Markdown format wrapped in single or double quotation marks. This becomes the description content below the group title. Each bullet renders as a separate paragraph.
+  - group: <Optional (string) - The title of a section within the settings page, e.g. 'General settings', 'Action settings', 'Preconfigured connector settings'>
+    group_id: <Optional (string) - An ID used for links from other sections of the docs, e.g., general-alert-action-settings. The link itself would have a format like "For more information, see <<general-alert-action-settings,eneral settings>>".>
     description:
-     - "Something"
-     - "Something else."
+     - <Optional (asciidoc enclosed in single or double quotation marks) - The description content that appears below the group title.>
+     - <Each bullet renders as a separate paragraph.>
 
     settings:
-
-        # [Required] The setting name.
-      - setting: xpack.encryptedSavedObjects.encryptionKey 
-
-        # [Required] Markdown format wrapped in single or double quotation marks. This becomes the description content below the setting. Each bullet renders as a separate paragraph.
+      - setting: <Required (string) - The setting name, e.g. xpack.encryptedSavedObjects.encryptionKey>
         description:
-          - "A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties."
-          - "{kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key."
-          - "If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}."
-          - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
-        
-        # [Optional] Markdown format wrapped in single or double quotation marks.
-        # For a beta release, set 'state' to "technical-preview" and the standard disclaimer will be added.
-        # For non-public settings, set state to 'hidden' and the setting won't be displayed in the docs.
-        # For a deprecated setting, use 'Deprecated' and add a 'state_guidance' field with the details, as shown below.
-        state: Deprecated
-        state_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
-
-        [Optional] Markdown format wrapped in single or double quotation marks. Can be one of 'note:', 'warning:', 'tip:', 'important:'. The warning, note, or whichever will appear below the last paragraph of the setting description.
-        warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2."
-
-        # [Optional] The default value for the setting.
-        default: true
-
-        # [Required only for Elasticsearch settings] One of 'dynamic', 'static'.
-        type: static
-
-        # [Optional] Markdown format wrapped in single or double quotation marks. Format is "`option` - description of the option"
+          - <Required (Asciidoc enclosed in single or double quotation marks) - A description of the setting>
+          - <Each bullet renders as a separate paragraph.>
+        state: <Optional (one of 'deprecated', 'technical-preview', or 'hidden') - For 'deprecated', use the 'state_guidance' field below if you want to provide additional detail such as the version in which the setting was deprecated and what other setting to use instead. For 'technical-preview', a standard disclaimer is added. For 'hidden', the setting won't be rendered in the docs.>
+        state_guidance: <Optional (asciidoc enclosed in single or double quotation marks) - Additional detail to provide for a deprecated setting, e.g., "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
+        note: <Optional (asciidoc enclosed in single or double quotation marks) - Text to display in a special "Note:" call-out box. e.g., "Feature Name is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.">
+        tip: <Optional (asciidoc enclosed in single or double quotation marks) - Text to display in a special "Tip:" call-out box.
+        warning: <Optional (asciidoc enclosed in single or double quotation marks) - Text to display in a special "Warning:" call-out box,
+        important: <Optional (asciidoc enclosed in single or double quotation marks) - Text to display in a special "Important:" call-out box.
+        default: <Optional (string) - The default value for the setting.>
+        type: <Optional (one of 'static' or 'dynamic') - Used for Elasticsearch settings only>
         options:
-          - "`yes` - a description"
-          - "`no` - a different description"
-          - "`maybe`- yet another description"
+          - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
+          - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
+          - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
 
         # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
-          - self-managed
+          - <Optional (one of 'self-managed', 'cloud', or 'serverless') - List each environment where the setting is available. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option-name details, above.
+          - <Optional (one of 'self-managed', 'cloud', or 'serverless')
+          - <Optional (one of 'self-managed', 'cloud', or 'serverless')
 ```
-
-
 

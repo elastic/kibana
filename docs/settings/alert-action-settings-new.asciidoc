@@ -18,17 +18,20 @@ Alerting and actions are enabled by default in {kib}, but require you to configu
 You can configure the following settings in the `kibana.yml` file.
 
 
-include::../settings-gen/source/kibana-config-settings.asciidoc[]
-
-
-
-
 
 
 
 **====================================**
 
-**--End of generated example content--**
+**--Start of generated content--**
+
+**====================================**
+
+include::../settings-gen/source/kibana-alert-action-settings.asciidoc[]
+
+**====================================**
+
+**--End of generated content--**
 
 **====================================**
 

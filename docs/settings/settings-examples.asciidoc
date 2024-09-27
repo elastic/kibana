@@ -1,0 +1,8 @@
+[[kibana-settings-examples]]
+== {kib} settings examples
+++++
+<titleabbrev>{kib} settings examples</titleabbrev>
+++++
+
+include::../settings-gen/source/kibana-settings-examples.asciidoc[]
+
