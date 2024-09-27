@@ -368,8 +368,8 @@ describe('SLO Edit Page', () => {
         expect(queryByTestId('apmLatencyServiceSelector')).toHaveTextContent('cartService');
         expect(queryByTestId('apmLatencyEnvironmentSelector')).toHaveTextContent('prod');
 
-        expect(queryByTestId('sloEditFormObjectiveSection')).toBeFalsy();
-        expect(queryByTestId('sloEditFormDescriptionSection')).toBeFalsy();
+        expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+        expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
       });
     });
 

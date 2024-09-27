@@ -1,6 +1,6 @@
 [role="xpack"]
 [[playground-context]]
-== Optimize model context
+=== Optimize model context
 
 preview::[]
 
@@ -22,7 +22,7 @@ Currently you can only select *one field* to be provided as context to the LLM.
 
 [float]
 [[playground-context-ui]]
-== Edit context in UI
+=== Edit context in UI
 
 Use the *Edit context* button in the {x} UI to adjust the number of documents and fields sent to the LLM.
 
@@ -33,13 +33,13 @@ If you're hitting context length limits, try the following:
 
 [float]
 [[playground-context-index]]
-== Other context optimizations
+=== Other context optimizations
 
 This section covers additional context optimizations that you won't be able to make directly in the UI.
 
 [float]
 [[playground-context-index-chunking]]
-=== Chunking large documents
+==== Chunking large documents
 
 If you're working with large fields, you may need to adjust your indexing strategy.
 Consider breaking your documents into smaller chunks, such as sentences or paragraphs.
@@ -56,7 +56,7 @@ Refer to the following Python notebooks for examples of how to chunk your docume
 
 [float]
 [[playground-context-balance]]
-=== Balancing cost/latency and result quality
+==== Balancing cost/latency and result quality
 
 Here are some general recommendations for balancing cost/latency and result quality with different context sizes:
 
