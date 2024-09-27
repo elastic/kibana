@@ -28,7 +28,6 @@ export const PresentationPanelInternal = <
   hideHeader,
   showShadow,
   showBorder,
-  showBevel,
 
   showBadges,
   showNotifications,

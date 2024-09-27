@@ -123,7 +123,6 @@ const HelloWorldEmbeddablePanel = forwardRef<
         hideHeader={hideHeader}
         showShadow={showShadow}
         showBorder={showBorder}
-        showBevel={showBevel}
       />
     );
   }
