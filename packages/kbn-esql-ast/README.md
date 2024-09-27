@@ -14,6 +14,24 @@ Contents of this package:
 - [`pretty_print` &mdash; Contains code for formatting AST to text](./src/pretty_print/README.md).
 
 
+## Demo
+
+Much of the functionality of this package is demonstrated in the demo UI. You
+can run it in Storybook, using the following command:
+
+```bash
+yarn storybook esql_ast_inspector
+```
+
+Alternatively, you can start Kibana with *Example Plugins* enabled, using:
+
+```bash
+yarn start --run-examples
+```
+
+Then navigate to the *ES|QL AST Inspector* plugin in the Kibana UI.
+
+
 ## Keeping ES|QL AST library up to date
 
 In general when operating on changes here use the `yarn kbn watch` in a terminal
