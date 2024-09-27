@@ -146,23 +146,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render incompatible cell action for message column', async () => {
-        while (true) {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await dataViews.switchTo('my-example-logs');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
-          expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
-            true
-          );
-          expect(
-            await dataGrid.cellExpandPopoverActionExists('another-example-data-source-action')
-          ).to.be(false);
-        }
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataViews.switchTo('my-example-logs');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
+        expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
+          true
+        );
+        expect(
+          await dataGrid.cellExpandPopoverActionExists('another-example-data-source-action')
+        ).to.be(false);
       });
 
       it('should not render cell actions for incompatible data source', async () => {
