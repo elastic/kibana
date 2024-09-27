@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { SetFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { SetRuleFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
 import type {
   DiffableRule,
@@ -20,7 +20,7 @@ interface FinalEditProps {
   fieldName: string;
   finalDiffableRule: DiffableRule;
   setReadOnlyMode: () => void;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function FinalEdit({

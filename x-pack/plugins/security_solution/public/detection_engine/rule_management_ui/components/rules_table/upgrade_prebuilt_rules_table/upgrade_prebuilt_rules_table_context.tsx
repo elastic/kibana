@@ -9,7 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { ThreeWayDiffTab } from '../../../../rule_management/components/rule_details/three_way_diff/three_way_diff_tab';
+import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -140,7 +140,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filterOptions,
     rules: ruleUpgradeInfos,
   });
-  const { rulesUpgradeState, setFieldResolvedValue } =
+  const { rulesUpgradeState, setRuleFieldResolvedValue } =
     usePrebuiltRulesUpgradeState(filteredRuleUpgradeInfos);
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
@@ -253,10 +253,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             ),
             content: (
               <TabContentPadding>
-                <ThreeWayDiffTab
+                <RuleUpgradeConflictsResolverTab
                   ruleId={rule.rule_id}
                   ruleUpgradeState={ruleUpgradeState}
-                  setFieldResolvedValue={setFieldResolvedValue}
+                  setRuleFieldResolvedValue={setRuleFieldResolvedValue}
                 />
               </TabContentPadding>
             ),
@@ -282,7 +282,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         jsonViewUpdates,
       ];
     },
-    [rulesUpgradeState, setFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
+    [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
   );
   const filteredRules = useMemo(
     () => filteredRuleUpgradeInfos.map((rule) => rule.target_rule),

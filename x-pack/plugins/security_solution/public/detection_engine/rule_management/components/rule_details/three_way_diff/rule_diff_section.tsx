@@ -12,13 +12,13 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type {
   RuleUpgradeState,
-  SetFieldResolvedValueFn,
+  SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { RuleDiffField } from './rule_diff_field';
 
 interface RuleDiffSectionProps {
   ruleUpgradeState: RuleUpgradeState;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleDiffSection({

@@ -7,14 +7,14 @@
 
 import React, { createContext, useContext } from 'react';
 import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
-import type { SetFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { SetRuleFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 interface FinalEditContextType {
   fieldName: string;
   finalDiffableRule: DiffableRule;
   setReadOnlyMode: () => void;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 const FinalEditContext = createContext<FinalEditContextType | null>(null);

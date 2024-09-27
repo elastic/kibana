@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type {
   RuleUpgradeState,
-  SetFieldResolvedValueFn,
+  SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { UpgradeInfoBar } from './upgrade_info_bar';
 import { RuleDiffSection } from './rule_diff_section';
@@ -18,7 +18,7 @@ import type { RuleSignatureId } from '../../../../../../common/api/detection_eng
 interface ThreeWayDiffTabProps {
   ruleId: RuleSignatureId;
   ruleUpgradeState: RuleUpgradeState;
-  setFieldResolvedValue: (ruleId: RuleSignatureId) => SetFieldResolvedValueFn;
+  setFieldResolvedValue: (ruleId: RuleSignatureId) => SetRuleFieldResolvedValueFn;
 }
 
 export function ThreeWayDiffTab({

@@ -21,13 +21,13 @@ import { SideHeader } from '../components/side_header';
 interface ComparisonSideProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
-  finalFieldValue: DiffableAllFields[FieldName];
+  resolvedValue: DiffableAllFields[FieldName];
 }
 
 export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
   fieldName,
   fieldThreeWayDiff,
-  finalFieldValue,
+  resolvedValue,
 }: ComparisonSideProps<FieldName>) {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
     SelectedVersions.CurrentFinal
@@ -35,17 +35,9 @@ export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
 
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
 
-  const oldFieldValue = pickFieldValueForVersion(
-    oldVersionType,
-    fieldThreeWayDiff,
-    finalFieldValue
-  );
+  const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldThreeWayDiff, resolvedValue);
 
-  const newFieldValue = pickFieldValueForVersion(
-    newVersionType,
-    fieldThreeWayDiff,
-    finalFieldValue
-  );
+  const newFieldValue = pickFieldValueForVersion(newVersionType, fieldThreeWayDiff, resolvedValue);
 
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);
 

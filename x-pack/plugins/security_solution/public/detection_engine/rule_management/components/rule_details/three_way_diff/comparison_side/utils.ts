@@ -23,10 +23,10 @@ import type {
 export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFields>(
   version: Version,
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>,
-  finalFieldValue: DiffableAllFields[FieldName]
+  resolvedValue: DiffableAllFields[FieldName]
 ): DiffableAllFields[FieldName] | undefined {
   if (version === Version.Final) {
-    return finalFieldValue;
+    return resolvedValue;
   }
 
   const versionFieldToPick = `${version}_version` as const;

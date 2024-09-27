@@ -27,7 +27,7 @@ export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
   hasUnresolvedConflicts: boolean;
 }
 export type RulesUpgradeState = Record<RuleSignatureId, RuleUpgradeState>;
-export type SetFieldResolvedValueFn<
+export type SetRuleFieldResolvedValueFn<
   FieldName extends keyof DiffableAllFields = keyof DiffableAllFields
 > = (params: { fieldName: FieldName; resolvedValue: DiffableAllFields[FieldName] }) => void;
 
@@ -36,7 +36,7 @@ type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
 
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;
-  setFieldResolvedValue: (ruleId: RuleSignatureId) => SetFieldResolvedValueFn;
+  setRuleFieldResolvedValue: (ruleId: RuleSignatureId) => SetRuleFieldResolvedValueFn;
 }
 
 export function usePrebuiltRulesUpgradeState(
@@ -44,9 +44,9 @@ export function usePrebuiltRulesUpgradeState(
 ): UseRulesUpgradeStateResult {
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
 
-  const setFieldResolvedValue = useCallback(
+  const setRuleFieldResolvedValue = useCallback(
     (ruleId: RuleSignatureId) =>
-      (...[params]: Parameters<SetFieldResolvedValueFn>) => {
+      (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
         setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
           ...prevRulesResolvedConflicts,
           [ruleId]: {
@@ -81,7 +81,7 @@ export function usePrebuiltRulesUpgradeState(
 
   return {
     rulesUpgradeState,
-    setFieldResolvedValue,
+    setRuleFieldResolvedValue,
   };
 }
 

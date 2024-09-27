@@ -24,13 +24,13 @@ import type {
 import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
 import { ComparisonSide } from './comparison_side/comparison_side';
 import { FinalSide } from './final_side/final_side';
-import type { SetFieldResolvedValueFn } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { SetRuleFieldResolvedValueFn } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 
 interface RuleDiffFieldProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
   fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
   finalDiffableRule: DiffableRule;
-  setFieldResolvedValue: SetFieldResolvedValueFn;
+  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleDiffField<FieldName extends keyof DiffableAllFields>({
@@ -57,7 +57,7 @@ export function RuleDiffField<FieldName extends keyof DiffableAllFields>({
               <ComparisonSide
                 fieldName={fieldName}
                 fieldThreeWayDiff={fieldThreeWayDiff}
-                finalFieldValue={finalDiffableRule[fieldName]}
+                resolvedValue={finalDiffableRule[fieldName]}
               />
             </EuiFlexItem>
             <EuiFlexItem
