@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { constUndefined } from 'fp-ts/lib/function';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { assetCriticalityFieldMap } from '../constants';
-import { AssetCriticalityDataClient } from '../asset_criticality_data_client';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality_migration_client';
 
 const TASK_TYPE = 'security-solution-ea-asset-criticality-ecs-migration';
@@ -20,11 +14,9 @@ const TASK_TIMEOUT = '15m';
 const TASK_SCOPE = ['securitySolution'];
 
 export const scheduleAssetCriticalityEcsCompliancyMigration = async ({
-  // coreStartPromise,
-  // pluginStartPromise,
   auditLogger,
   taskManager,
-  logger, // should make all logger calls debug?
+  logger,
   getStartServices,
 }: EntityAnalyticsMigrationsParams) => {
   if (!taskManager) {
@@ -41,44 +33,41 @@ export const scheduleAssetCriticalityEcsCompliancyMigration = async ({
     },
   });
 
-  getStartServices().then(async ([coreStart, depsStart]) => {
-    const taskManagerStart = depsStart.taskManager;
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
+  const [coreStart, depsStart] = await getStartServices();
+  const taskManagerStart = depsStart.taskManager;
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const migrationClient = new AssetCriticalityEcsMigrationClient({
-      esClient,
-      logger,
-      auditLogger,
-    });
-
-    const shouldMigrateMappings = await migrationClient.isEcsMappingsMigrationRequired();
-    console.log('----------------- shouldMigrateMappings', shouldMigrateMappings);
-    if (shouldMigrateMappings) {
-      logger.debug('Migrating Asset Criticality mappings');
-      await migrationClient.migrateEcsMappings();
-    }
-
-    const shouldMigrateData = await migrationClient.isEcsDataMigrationRequired();
-    console.log('----------------- shouldMigrateData', shouldMigrateData);
-    if (shouldMigrateData && taskManagerStart) {
-      logger.debug(`Task scheduled: "${TASK_TYPE}"`);
-
-      const now = new Date();
-      try {
-        await taskManagerStart.ensureScheduled({
-          id: TASK_ID,
-          taskType: TASK_TYPE,
-          scheduledAt: now,
-          runAt: now,
-          scope: TASK_SCOPE,
-          params: {},
-          state: {},
-        });
-      } catch (e) {
-        logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
-      }
-    }
+  const migrationClient = new AssetCriticalityEcsMigrationClient({
+    esClient,
+    logger,
+    auditLogger,
   });
+
+  const shouldMigrateMappings = await migrationClient.isEcsMappingsMigrationRequired();
+  if (shouldMigrateMappings) {
+    logger.debug('Migrating Asset Criticality mappings');
+    await migrationClient.migrateEcsMappings();
+  }
+
+  const shouldMigrateData = await migrationClient.isEcsDataMigrationRequired();
+  if (shouldMigrateData && taskManagerStart) {
+    logger.debug(`Task scheduled: "${TASK_TYPE}"`);
+
+    const now = new Date();
+    try {
+      await taskManagerStart.ensureScheduled({
+        id: TASK_ID,
+        taskType: TASK_TYPE,
+        scheduledAt: now,
+        runAt: now,
+        scope: TASK_SCOPE,
+        params: {},
+        state: {},
+      });
+    } catch (e) {
+      logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
+    }
+  }
 };
 
 const createMigrationTask =
@@ -90,24 +79,23 @@ const createMigrationTask =
   () => {
     return {
       run: async () => {
-        await getStartServices().then(async ([coreStart, deps]) => {
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const migrationClient = new AssetCriticalityEcsMigrationClient({
-            esClient,
-            logger,
-            auditLogger,
-          });
-
-          const response = await migrationClient.migrateEcsData();
-          const failures = response.failures?.map((failure) => failure.cause).join('\n');
-
-          console.log('----------------- migrateEcsData', response);
-          logger.info(
-            `Task "${TASK_TYPE}" finished. Updated documents: ${response.updated}, failures: ${
-              failures ?? 'none'
-            }`
-          );
+        const [coreStart] = await getStartServices();
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        const migrationClient = new AssetCriticalityEcsMigrationClient({
+          esClient,
+          logger,
+          auditLogger,
         });
+
+        const response = await migrationClient.migrateEcsData();
+        const failures = response.failures?.map((failure) => failure.cause);
+        const hasFailures = failures && failures?.length > 0;
+
+        logger.info(
+          `Task "${TASK_TYPE}" finished. Updated documents: ${response.updated}, failures: ${
+            hasFailures ? failures.join('\n') : 0
+          }`
+        );
       },
 
       cancel: async () => {
@@ -124,3 +112,4 @@ const createMigrationTask =
 // [ ] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasnt finished)
 // [ ] test with lots of data
 // [ ] make looger append asset-criticality-ecs-migration to the logger context
+// [ ] bundle size might get very big because of the client import
