@@ -110,16 +110,15 @@ export const buildFieldRetentionIngestPipeline = ({
 
 const arrayToSingleValueProcessor = ({ field }: { field: string }): IngestProcessorContainer => {
   const ctxField = `ctx.${field}`;
-  const fieldBrackets = convertPathToBracketNotation(ctxField);
   return {
     script: {
       lang: 'painless',
       source: `
       if (!(${isFieldMissingOrEmpty(ctxField)})){
-        if (${fieldBrackets} instanceof List) {
-          ctx.${field} = ${fieldBrackets}[0];
-        } else if (${fieldBrackets} instanceof Set) {
-          ctx.${field} = ${fieldBrackets}.toArray()[0];
+        if (${ctxField} instanceof List) {
+          ${ctxField} = ${ctxField}[0];
+        } else if (${ctxField} instanceof Set) {
+          ${ctxField} = ${ctxField}.toArray()[0];
         }
       }
     `,
@@ -229,25 +228,25 @@ export const getProgressivePathsNoCtx = (path: string): string[] => {
 };
 
 const collectValuesProcessor = ({ field, maxLength }: CollectValues) => {
-  const fieldBrackets = convertPathToBracketNotation(`ctx.${field}`);
-  const enrichFieldBrackets = convertPathToBracketNotation(`ctx.${ENRICH_FIELD}.${field}`);
+  const ctxField = `ctx.${field}`;
+  const enrichField = `ctx.${ENRICH_FIELD}.${field}`;
   return {
     script: {
       lang: 'painless',
       source: `
-if (${fieldBrackets} == null) {
-  ${fieldBrackets} = new ArrayList();
+Set uniqueVals = new HashSet();
+
+if (!(${isFieldMissingOrEmpty(ctxField)})) {
+  uniqueVals.addAll(${ctxField});
 }
 
-Set uniqueRoles = new HashSet(${fieldBrackets});
-
-if (uniqueRoles.size() < params.max_length && ctx.historical != null && ${enrichFieldBrackets} != null) {
-  int remaining = params.max_length - uniqueRoles.size();
-  List historicalRoles = ${enrichFieldBrackets}.subList(0, (int) Math.min(remaining, ${enrichFieldBrackets}.size()));
-  uniqueRoles.addAll(historicalRoles);
+if (uniqueVals.size() < params.max_length && !(${isFieldMissingOrEmpty(enrichField)})) {
+  int remaining = params.max_length - uniqueVals.size();
+  List historicalVals = ${enrichField}.subList(0, (int) Math.min(remaining, ${enrichField}.size()));
+  uniqueVals.addAll(historicalVals);
 }
 
-${fieldBrackets} = new ArrayList(uniqueRoles).subList(0, (int) Math.min(params.max_length, uniqueRoles.size()));
+${ctxField} = new ArrayList(uniqueVals).subList(0, (int) Math.min(params.max_length, uniqueVals.size()));
 `,
       params: {
         max_length: maxLength,
