@@ -295,7 +295,7 @@ apply_elastic_agent_config() {
     # Extract new config files from downloaded archive
     tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")" &&
     # Replace placeholder with the Ingest API key
-    sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    sed -i='' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
     tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$' | while read -r file; do
@@ -576,9 +576,9 @@ backup_elastic_agent_config
 
 printf "\n\e[1m%s\e[0m\n" "Installing Elastic Agent..."
 install_integrations
-download_elastic_agent
-extract_elastic_agent
-install_elastic_agent
+# download_elastic_agent
+# extract_elastic_agent
+# install_elastic_agent
 apply_elastic_agent_config
 
 printf "\n\e[1m%s\e[0m\n" "Waiting for healthy status..."
