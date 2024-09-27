@@ -152,6 +152,7 @@ describe('useGetEndpointsList hook', () => {
 
     // verify useGetEndpointsList hook returns the same inactive agents
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: 'inactive' }));
+
     expect(
       res.data?.map((host) => host.name.split('-')[2]).filter((name) => name === 'inactive').length
     ).toEqual(3);

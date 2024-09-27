@@ -68,8 +68,10 @@ describe('useCreateSecurityDashboardLink', () => {
     it('should return a memoized value when rerendered', async () => {
       const { result, rerender } = await asyncRenderUseCreateSecurityDashboard();
 
+      await waitFor(() => expect(result.current.isLoading).toEqual(false));
       const result1 = result.current;
       act(() => rerender());
+      await waitFor(() => expect(result.current.isLoading).toEqual(false));
       const result2 = result.current;
       expect(result1).toEqual(result2);
     });

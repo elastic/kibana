@@ -10,7 +10,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { ActionsMenu } from './actions_menu';
 import React from 'react';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { endpointPageHttpMock } from '../../../mocks';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -43,8 +43,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let httpMocks: ReturnType<typeof endpointPageHttpMock>;
-  // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
-  // let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let endpointHost: HostInfo;
 
   const setEndpointMetadataResponse = (isolation: boolean = false) => {
@@ -73,8 +72,8 @@ describe('When using the Endpoint Details Actions Menu', () => {
 
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
     coreStart = mockedContext.coreStart;
-    // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
-    // middlewareSpy = mockedContext.middlewareSpy;
+
+    middlewareSpy = mockedContext.middlewareSpy;
 
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
 
@@ -129,16 +128,14 @@ describe('When using the Endpoint Details Actions Menu', () => {
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
         await render();
-        // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
-        // await act(async () => {
-        //   await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        // });
+
+        middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
         const takeActionMenuItem = renderResult.getByTestId(dataTestSubj);
         takeActionMenuItem.style.pointerEvents = 'all';
         await user.click(takeActionMenuItem);
 
-        expect(coreStart.application.navigateToApp).toHaveBeenCalled();
+        await waitFor(() => expect(coreStart.application.navigateToApp).toHaveBeenCalled());
       }
     );
   });

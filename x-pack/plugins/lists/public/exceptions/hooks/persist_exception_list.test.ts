@@ -37,7 +37,7 @@ describe('usePersistExceptionList', () => {
   });
 
   test('initializes hook', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
+    const { result } = renderHook<ReturnPersistExceptionList, PersistHookProps>(() =>
       usePersistExceptionList({ http: mockKibanaHttpService, onError })
     );
 
@@ -45,63 +45,66 @@ describe('usePersistExceptionList', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
-    await act(async () => {
-      const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
-        usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
-      await waitFor(() => null);
-      result.current[1](getCreateExceptionListSchemaMock());
-      rerender();
+    const { result, rerender } = renderHook<ReturnPersistExceptionList, PersistHookProps>(() =>
+      usePersistExceptionList({ http: mockKibanaHttpService, onError })
+    );
 
-      expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
+    await waitFor(() => expect(result.current[1]).toEqual(expect.any(Function)));
+
+    act(() => {
+      result.current[1](getCreateExceptionListSchemaMock());
     });
+
+    rerender();
+
+    expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
-    await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
-        usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
-      await waitFor(() => null);
+    const { result } = renderHook<ReturnPersistExceptionList, PersistHookProps>(() =>
+      usePersistExceptionList({ http: mockKibanaHttpService, onError })
+    );
+    await waitFor(() => expect(result.current[1]).toEqual(expect.any(Function)));
+    act(() => {
       result.current[1](getCreateExceptionListSchemaMock());
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
   });
 
   test('it invokes "updateExceptionList" when payload has "id"', async () => {
     const addException = jest.spyOn(api, 'addExceptionList');
     const updateException = jest.spyOn(api, 'updateExceptionList');
-    await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
-        usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
+    const { result } = renderHook<ReturnPersistExceptionList, PersistHookProps>(() =>
+      usePersistExceptionList({ http: mockKibanaHttpService, onError })
+    );
 
-      await waitFor(() => null);
+    await waitFor(() => expect(result.current[1]).toEqual(expect.any(Function)));
+    act(() => {
       result.current[1](getUpdateExceptionListSchemaMock());
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
-      expect(addException).not.toHaveBeenCalled();
-      expect(updateException).toHaveBeenCalled();
     });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+    expect(addException).not.toHaveBeenCalled();
+    expect(updateException).toHaveBeenCalled();
   });
 
   test('"onError" callback is invoked and "isSaved" is "false" when api call fails', async () => {
     const error = new Error('persist rule failed');
     jest.spyOn(api, 'addExceptionList').mockRejectedValue(error);
 
-    await act(async () => {
-      const { result } = renderHook<PersistHookProps, ReturnPersistExceptionList>(() =>
-        usePersistExceptionList({ http: mockKibanaHttpService, onError })
-      );
-      await waitFor(() => null);
+    const { result } = renderHook<ReturnPersistExceptionList, PersistHookProps>(() =>
+      usePersistExceptionList({ http: mockKibanaHttpService, onError })
+    );
+    await waitFor(() => expect(result.current[1]).toEqual(expect.any(Function)));
+    act(() => {
       result.current[1](getCreateExceptionListSchemaMock());
-      await waitFor(() => null);
-
-      expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
-      expect(onError).toHaveBeenCalledWith(error);
     });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
+    expect(onError).toHaveBeenCalledWith(error);
   });
 });

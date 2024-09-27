@@ -65,7 +65,7 @@ describe('useGetAgentStatus hook', () => {
 
   it('should return expected data', async () => {
     const { result } = renderHook();
-    await waitFor(() => result.current);
+    await waitFor(() => expect(result.current.data).toBeDefined());
 
     expect(result.current.data).toEqual({
       '1-2-3': {

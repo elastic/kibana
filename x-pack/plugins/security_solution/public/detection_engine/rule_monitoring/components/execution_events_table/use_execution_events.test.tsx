@@ -95,10 +95,9 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     // It switches to an error state
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(false);
     expect(result.current.isError).toEqual(true);
     expect(result.current.error).toEqual(exception);

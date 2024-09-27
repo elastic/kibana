@@ -71,8 +71,8 @@ describe('SearchBar', () => {
   };
 
   const focusAndUpdate = async () => {
+    fireEvent.focus(await screen.findByTestId('nav-search-input'));
     await act(async () => {
-      (await screen.findByTestId('nav-search-input')).focus();
       jest.runAllTimers();
     });
   };

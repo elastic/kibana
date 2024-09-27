@@ -77,7 +77,7 @@ describe('DataQualityContext', () => {
 
   test('it throws an error when useDataQualityContext hook is used without a DataQualityContext', () => {
     expect(() => renderHook(useDataQualityContext)).toThrowError(
-      expect.stringMatching(/useDataQualityContext must be used within a DataQualityProvider/)
+      'useDataQualityContext must be used within a DataQualityProvider'
     );
   });
 

@@ -67,9 +67,11 @@ beforeAll(() => {
   //       at appendChild (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7183:39)
   // ```
   // @see https://github.com/facebook/react/issues/11565
-  // @ts-expect-error react18 upgrade, please verify implementation works as it should
+  // @ts-expect-error added during react18 upgrade, please verify implementation works as it should
   jest.spyOn(ReactDOM, 'createPortal').mockImplementation((...args) => {
-    jest.requireActual('react-dom').createPortal(...args);
+    // eslint-disable-next-line prefer-spread
+    REAL_REACT_DOM_CREATE_PORTAL.apply(null, args);
+
     // Needed for react-Test-library. See:
     // https://github.com/facebook/react/issues/11565
     return args[0] as ReactPortal;

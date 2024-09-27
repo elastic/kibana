@@ -54,22 +54,26 @@ describe('CoverageOverviewFiltersPanel', () => {
   test('it correctly populates rule activity filter state', () => {
     const wrapper = renderFiltersPanel();
 
-    wrapper.getByTestId('coverageOverviewRuleActivityFilterButton').click();
+    fireEvent.click(wrapper.getByTestId('coverageOverviewRuleActivityFilterButton'));
 
-    within(wrapper.getByTestId('coverageOverviewFilterList'))
-      .getByText(ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label])
-      .click();
+    fireEvent.click(
+      within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
+        ruleActivityFilterLabelMap[ruleActivityFilterDefaultOptions[0].label]
+      )
+    );
     expect(setRuleActivityFilter).toHaveBeenCalledWith([ruleActivityFilterDefaultOptions[0].label]);
   });
 
   test('it correctly populates rule source filter state', () => {
     const wrapper = renderFiltersPanel();
 
-    wrapper.getByTestId('coverageOverviewRuleSourceFilterButton').click();
+    fireEvent.click(wrapper.getByTestId('coverageOverviewRuleSourceFilterButton'));
 
-    within(wrapper.getByTestId('coverageOverviewFilterList'))
-      .getByText(ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label])
-      .click();
+    fireEvent.click(
+      within(wrapper.getByTestId('coverageOverviewFilterList')).getByText(
+        ruleSourceFilterLabelMap[ruleSourceFilterDefaultOptions[0].label]
+      )
+    );
     expect(setRuleSourceFilter).toHaveBeenCalledWith([ruleSourceFilterDefaultOptions[0].label]);
   });
 

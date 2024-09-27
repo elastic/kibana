@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { TRUSTED_APPS_PATH } from '../../../../../common/constants';
@@ -61,9 +61,10 @@ describe('When on the trusted applications page', () => {
 
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
-    const { findAllByTestId } = render();
-    await waitFor(async () => {
-      await expect(findAllByTestId('trustedAppsListPage-card')).resolves.toHaveLength(10);
+    render();
+
+    await waitFor(() => {
+      return expect(screen.queryAllByTestId('trustedAppsListPage-card')).toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();

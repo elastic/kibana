@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import moment from 'moment';
 import { useKibana } from '../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -40,7 +40,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
   });
 
   it('should send schedule rule run request', async () => {
-    const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
+    const { result } = renderHook(() => useScheduleRuleRun(), {
       wrapper: TestProviders,
     });
 
@@ -62,7 +62,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
   });
 
   it('should call reportManualRuleRunExecute with success status on success', async () => {
-    const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
+    const { result } = renderHook(() => useScheduleRuleRun(), {
       wrapper: TestProviders,
     });
 
@@ -85,7 +85,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
   });
 
   it('should call reportManualRuleRunExecute with error status on failure', async () => {
-    const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
+    const { result } = renderHook(() => useScheduleRuleRun(), {
       wrapper: TestProviders,
     });
 

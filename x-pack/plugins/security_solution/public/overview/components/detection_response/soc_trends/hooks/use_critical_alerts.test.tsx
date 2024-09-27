@@ -70,6 +70,8 @@ describe('useCriticalAlerts', () => {
       wrapper: wrapperContainer,
     });
 
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+
     expect(result.current).toEqual({
       stat: '-',
       isLoading: true,

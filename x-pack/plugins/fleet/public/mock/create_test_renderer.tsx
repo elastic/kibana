@@ -64,7 +64,14 @@ export interface TestRenderer {
   waitFor: typeof waitFor;
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: Infinity,
+    },
+  },
+});
 
 export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor, fireEvent } from '@testing-library/react';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { useOnExpandableFlyoutClose } from './use_on_expandable_flyout_close';
 import { Flyouts } from '../../document_details/shared/constants/flyouts';
@@ -16,30 +16,44 @@ jest.mock('../../document_details/shared/hooks/use_which_flyout');
 describe('useOnExpandableFlyoutClose', () => {
   const callbackFct = jest.fn().mockImplementation((id: string) => {});
 
-  it('should run the callback function and remove the event listener from the window', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should run the callback function and remove the event listener from the window', async () => {
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
 
-    window.removeEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
+    const removeListenerSpy = jest.spyOn(window, 'removeEventListener');
 
-    renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
+    removeListenerSpy.mockImplementationOnce((event, callback) => {});
 
-    window.dispatchEvent(
+    const { unmount } = renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
+
+    fireEvent(
+      window,
       new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
         detail: Flyouts.timeline,
       })
     );
 
+    await waitFor(() => expect(callbackFct).toHaveBeenCalled());
+
     expect(callbackFct).toHaveBeenCalledWith(Flyouts.timeline);
-    expect(window.removeEventListener).toBeCalled();
+
+    unmount();
+
+    expect(removeListenerSpy).toHaveBeenCalled();
   });
 
   it('should add event listener to window', async () => {
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.securitySolution);
 
-    window.addEventListener = jest.fn().mockImplementationOnce((event, callback) => {});
+    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+
+    addEventListenerSpy.mockImplementationOnce((event, callback) => {});
 
     renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 
-    expect(window.addEventListener).toBeCalled();
+    await waitFor(() => expect(addEventListenerSpy).toHaveBeenCalled());
   });
 });

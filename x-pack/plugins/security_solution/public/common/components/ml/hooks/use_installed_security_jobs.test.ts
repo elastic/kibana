@@ -86,7 +86,7 @@ describe('useInstalledSecurityJobs', () => {
         wrapper: TestProviders,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(appToastsMock.addError).toHaveBeenCalled());
 
       expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
         title: 'Security job fetch failure',

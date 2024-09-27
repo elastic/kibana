@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { render } from '@testing-library/react';
 
 import { SettingsMenu } from './settings_menu';
@@ -21,7 +22,8 @@ import {
 } from './test_ids';
 
 describe('SettingsMenu', () => {
-  it('should render the flyout type button group', () => {
+  it('should render the flyout type button group', async () => {
+    const user = userEvent.setup();
     const flyoutTypeProps = {
       type: 'overlay' as EuiFlyoutProps['type'],
       onChange: jest.fn(),
@@ -33,7 +35,7 @@ describe('SettingsMenu', () => {
       <SettingsMenu flyoutTypeProps={flyoutTypeProps} />
     );
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+    await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
 
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID)).toBeInTheDocument();
     expect(
@@ -42,7 +44,9 @@ describe('SettingsMenu', () => {
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should select correct the flyout type', () => {
+  it('should select correct the flyout type', async () => {
+    const user = userEvent.setup();
+
     const onChange = jest.fn();
     const flyoutTypeProps = {
       type: 'overlay' as EuiFlyoutProps['type'],
@@ -53,13 +57,14 @@ describe('SettingsMenu', () => {
 
     const { getByTestId } = render(<SettingsMenu flyoutTypeProps={flyoutTypeProps} />);
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
-    getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID).click();
+    await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
+    await user.click(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID));
 
     expect(onChange).toHaveBeenCalledWith('push');
   });
 
-  it('should render the the flyout type button group disabled', () => {
+  it('should render the the flyout type button group disabled', async () => {
+    const user = userEvent.setup();
     const flyoutTypeProps = {
       type: 'overlay' as EuiFlyoutProps['type'],
       onChange: jest.fn(),
@@ -69,12 +74,13 @@ describe('SettingsMenu', () => {
 
     const { getByTestId } = render(<SettingsMenu flyoutTypeProps={flyoutTypeProps} />);
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+    await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID)).toHaveAttribute('disabled');
     expect(getByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should not render the information icon if the tooltip is empty', () => {
+  it('should not render the information icon if the tooltip is empty', async () => {
+    const user = userEvent.setup();
     const flyoutTypeProps = {
       type: 'overlay' as EuiFlyoutProps['type'],
       onChange: jest.fn(),
@@ -86,7 +92,7 @@ describe('SettingsMenu', () => {
       <SettingsMenu flyoutTypeProps={flyoutTypeProps} />
     );
 
-    getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
+    await user.click(getByTestId(SETTINGS_MENU_BUTTON_TEST_ID));
     expect(
       queryByTestId(SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID)
     ).not.toBeInTheDocument();

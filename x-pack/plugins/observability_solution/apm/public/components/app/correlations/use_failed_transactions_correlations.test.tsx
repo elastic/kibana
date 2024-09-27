@@ -255,10 +255,10 @@ describe('useFailedTransactionsCorrelations', () => {
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
       const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: () =>
+          React.createElement(wrapper, {
+            error: true,
+          }),
       });
 
       try {
@@ -273,15 +273,14 @@ describe('useFailedTransactionsCorrelations', () => {
 
     it('should still be running after 50ms', async () => {
       const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: () =>
+          React.createElement(wrapper, {
+            error: true,
+          }),
       });
 
       try {
         jest.advanceTimersByTime(50);
-
         expect(result.current.progress).toEqual({
           isRunning: true,
           loaded: 0,
@@ -294,10 +293,10 @@ describe('useFailedTransactionsCorrelations', () => {
 
     it('should stop and return an error after more than 100ms', async () => {
       const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: () =>
+          React.createElement(wrapper, {
+            error: true,
+          }),
       });
 
       try {

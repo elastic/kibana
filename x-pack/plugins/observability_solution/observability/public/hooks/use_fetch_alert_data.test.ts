@@ -40,7 +40,7 @@ describe('useFetchAlertData', () => {
   });
 
   it('initially is not loading and does not have data', async () => {
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+    const { result } = renderHook<[boolean, Record<string, unknown>], string>(() =>
       useFetchAlertData(testIds)
     );
 
@@ -52,7 +52,7 @@ describe('useFetchAlertData', () => {
       throw new Error('an http error');
     });
 
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+    const { result } = renderHook<[boolean, Record<string, unknown>], string>(() =>
       useFetchAlertData(testIds)
     );
 
@@ -62,7 +62,7 @@ describe('useFetchAlertData', () => {
   });
 
   it('retrieves the alert data', async () => {
-    const { result } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+    const { result } = renderHook<[boolean, Record<string, unknown>], string>(() =>
       useFetchAlertData(testIds)
     );
 
@@ -76,7 +76,7 @@ describe('useFetchAlertData', () => {
 
   it('does not populate the results when the request is canceled', async () => {
     // FIXME: This test case doesn't do what it's titled as
-    const { result, unmount } = renderHook<string, [boolean, Record<string, unknown>]>(() =>
+    const { result, unmount } = renderHook<[boolean, Record<string, unknown>], string>(() =>
       useFetchAlertData(testIds)
     );
 

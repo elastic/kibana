@@ -90,11 +90,13 @@ describe('useHostIsolationAction', () => {
 
       const { result } = render();
 
-      expect(result.current).toEqual([
-        buildExpectedMenuItemResult({
-          ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
-        }),
-      ]);
+      await waitFor(() =>
+        expect(result.current).toEqual([
+          buildExpectedMenuItemResult({
+            ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
+          }),
+        ])
+      );
     }
   );
 
@@ -159,7 +161,8 @@ describe('useHostIsolationAction', () => {
         hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
       }
       const { result } = render();
-      await waitFor(() => result.current);
+
+      await waitFor(() => expect(result.current[0].toolTipContent).not.toEqual('Loading'));
 
       expect(result.current).toEqual([
         buildExpectedMenuItemResult({
@@ -174,7 +177,10 @@ describe('useHostIsolationAction', () => {
   it('should call isolate API when agent is currently NOT isolated', async () => {
     const { result } = render();
     await waitFor(() => result.current);
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+
+    act(() => {
+      result.current[0].onClick!({} as unknown as React.MouseEvent);
+    });
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
   });
@@ -186,7 +192,9 @@ describe('useHostIsolationAction', () => {
       })
     );
     const { result } = render();
-    await waitFor(() => result.current);
+
+    await waitFor(() => expect(result.current[0].toolTipContent).not.toEqual('Loading'));
+
     act(() => {
       result.current[0].onClick!({} as unknown as React.MouseEvent);
     });

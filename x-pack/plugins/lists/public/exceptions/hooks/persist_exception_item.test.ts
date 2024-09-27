@@ -37,7 +37,7 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('initializes hook', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -45,20 +45,21 @@ describe('usePersistExceptionItem', () => {
   });
 
   test('"isLoading" is "true" when exception item is being saved', async () => {
-    const { result, rerender } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result, rerender } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
-    await act(async () => {
+    act(() => {
       result.current[1](getCreateExceptionListItemSchemaMock());
-      rerender();
     });
+
+    rerender();
 
     expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
   });
 
   test('"isSaved" is "true" when exception item saved successfully', async () => {
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -72,7 +73,7 @@ describe('usePersistExceptionItem', () => {
   test('it invokes "updateExceptionListItem" when payload has "id"', async () => {
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -99,7 +100,7 @@ describe('usePersistExceptionItem', () => {
   test('it invokes "addExceptionListItem" when payload does not have "id"', async () => {
     const updateExceptionListItem = jest.spyOn(api, 'updateExceptionListItem');
     const addExceptionListItem = jest.spyOn(api, 'addExceptionListItem');
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 
@@ -124,7 +125,7 @@ describe('usePersistExceptionItem', () => {
   test('"onError" callback is invoked and "isSaved" is "false" when api call fails', async () => {
     const error = new Error('persist rule failed');
     jest.spyOn(api, 'addExceptionListItem').mockRejectedValue(error);
-    const { result } = renderHook<PersistHookProps, ReturnPersistExceptionItem>(() =>
+    const { result } = renderHook<ReturnPersistExceptionItem, PersistHookProps>(() =>
       usePersistExceptionItem({ http: mockKibanaHttpService, onError })
     );
 

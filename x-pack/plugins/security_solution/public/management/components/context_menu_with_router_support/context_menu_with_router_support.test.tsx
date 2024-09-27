@@ -23,9 +23,7 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   let items: ContextMenuWithRouterSupportProps['items'];
 
   const clickMenuTriggerButton = () => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('testMenu-triggerButton'));
-    });
+    fireEvent.click(renderResult.getByTestId('testMenu-triggerButton'));
   };
 
   const getContextMenuPanel = () => renderResult.queryByTestId('testMenu-popoverPanel');
@@ -99,11 +97,9 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   it('should close menu when a menu item is clicked and call menu item onclick callback', async () => {
     render();
     clickMenuTriggerButton();
-    await act(async () => {
-      const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
-      fireEvent.click(renderResult.getByTestId('menu-item-one'));
-      await menuPanelRemoval;
-    });
+    const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
+    fireEvent.click(renderResult.getByTestId('menu-item-one'));
+    await menuPanelRemoval;
 
     expect(getContextMenuPanel()).toBeNull();
   });

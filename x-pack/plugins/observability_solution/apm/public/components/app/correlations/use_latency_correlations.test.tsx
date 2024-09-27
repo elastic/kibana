@@ -234,10 +234,10 @@ describe('useLatencyCorrelations', () => {
 
     it('should still be running after 50ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: () =>
+          React.createElement(wrapper, {
+            error: true,
+          }),
       });
 
       try {
@@ -255,10 +255,10 @@ describe('useLatencyCorrelations', () => {
 
     it('should stop and return an error after more than 100ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: () =>
+          React.createElement(wrapper, {
+            error: true,
+          }),
       });
 
       try {

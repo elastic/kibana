@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, act } from '@testing-library/react';
 
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
@@ -140,9 +140,11 @@ describe('EqlQueryBar', () => {
       // open options popover
       fireEvent.click(getByTestId('eql-settings-trigger'));
       // display combobox options
-      within(getByTestId(`eql-timestamp-field`)).getByRole('combobox').focus();
+      act(() => {
+        within(getByTestId(`eql-timestamp-field`)).getByRole('combobox').focus();
+      });
       // select timestamp
-      getByText('timestamp').click();
+      fireEvent.click(getByText('timestamp'));
 
       expect(onOptionsChangeMock).toHaveBeenCalledWith('timestampField', 'timestamp');
     });

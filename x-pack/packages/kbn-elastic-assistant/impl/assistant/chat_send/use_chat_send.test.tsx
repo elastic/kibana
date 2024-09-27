@@ -60,10 +60,16 @@ describe('use chat send', () => {
   });
   it('handleOnChatCleared clears the conversation', async () => {
     (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
-    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
+    const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          handleOnChatCleared: expect.any(Function),
+        })
+      )
+    );
     act(() => {
       result.current.handleOnChatCleared();
     });
@@ -95,7 +101,7 @@ describe('use chat send', () => {
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
@@ -103,7 +109,13 @@ describe('use chat send', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          handleRegenerateResponse: expect.any(Function),
+        })
+      )
+    );
     act(() => {
       result.current.handleRegenerateResponse();
     });
@@ -117,10 +129,14 @@ describe('use chat send', () => {
   });
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
-    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
+    const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({ handleChatSend: expect.any(Function) })
+      )
+    );
     act(() => {
       result.current.handleChatSend(promptText);
     });

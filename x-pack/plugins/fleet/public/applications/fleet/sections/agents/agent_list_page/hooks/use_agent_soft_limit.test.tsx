@@ -20,6 +20,7 @@ describe('useAgentSoftLimit', () => {
     mockedSendGetAgents.mockReset();
     mockedUseConfig.mockReset();
   });
+
   it('should return shouldDisplayAgentSoftLimit:false if soft limit is not enabled in config', async () => {
     const renderer = createFleetTestRendererMock();
     mockedUseConfig.mockReturnValue({} as any);
@@ -38,10 +39,13 @@ describe('useAgentSoftLimit', () => {
         total: 5,
       },
     } as any);
-    const { result } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => null);
+    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
 
-    expect(mockedSendGetAgents).toBeCalled();
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
+
+    // re-render so cache is updated to value from most recent call
+    rerender();
+
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(false);
   });
 
@@ -53,10 +57,13 @@ describe('useAgentSoftLimit', () => {
         total: 15,
       },
     } as any);
-    const { result } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => null);
+    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
 
-    expect(mockedSendGetAgents).toBeCalled();
+    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
+
+    // re-render so cache is updated to value from most recent call
+    rerender();
+
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(true);
   });
 });

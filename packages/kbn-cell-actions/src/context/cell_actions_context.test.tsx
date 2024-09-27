@@ -29,9 +29,8 @@ describe('CellActionContext', () => {
   });
 
   it('should throw error when context not found', () => {
-    const { result } = renderHook(useCellActionsContext);
-    expect(result.error).toEqual(
-      new Error('No CellActionsContext found. Please wrap the application with CellActionsProvider')
+    expect(() => renderHook(useCellActionsContext)).toThrow(
+      'No CellActionsContext found. Please wrap the application with CellActionsProvider'
     );
   });
 

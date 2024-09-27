@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import type { ProcessEventsPage } from '../../../common';
@@ -23,20 +23,20 @@ describe('TTYPlayer/hooks', () => {
       const events = sessionViewIOEventsMock?.events?.map((event) => event._source);
       const initial: ProcessEventsPage[] = [{ events, total: events?.length }];
 
-      const { result, rerender } = renderHook(({ pages }) => useIOLines(pages), {
-        initialProps: { pages: initial },
+      const { result, rerender } = renderHook(useIOLines, {
+        initialProps: initial,
       });
 
-      expect(result.current.lines.length).toBeGreaterThan(0);
+      await waitFor(() => expect(result.current.lines.length).toBeGreaterThan(0));
       expect(typeof result.current.lines[0].value).toBe('string');
 
       // test memoization
-      let last = result.current.lines;
+      let last = result.current.lines.slice(0);
       rerender();
-      expect(result.current.lines === last).toBeTruthy();
-      last = result.current.lines;
-      rerender({ pages: [...initial] });
-      expect(result.current.lines === last).toBeFalsy();
+      await waitFor(() => expect(result.current.lines).toEqual(last));
+      last = result.current.lines.slice(0);
+      rerender(initial);
+      await waitFor(() => expect(result.current.lines).not.toEqual(last));
     });
   });
 

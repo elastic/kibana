@@ -453,9 +453,7 @@ describe('useConversation', () => {
             },
             wrapper,
           })
-        ).toThrow(
-          expect.stringMatching(/Cannot set initialMessages if initialConversationId is set/)
-        );
+        ).toThrow(/Cannot set initialMessages if initialConversationId is set/);
       });
     });
 

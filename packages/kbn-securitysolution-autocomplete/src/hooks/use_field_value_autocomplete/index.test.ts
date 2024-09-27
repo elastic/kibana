@@ -148,22 +148,23 @@ describe('use_field_value_autocomplete', () => {
     }
 
     const { signal } = new AbortController();
-    renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(() =>
-      useFieldValueAutocomplete({
-        autocompleteService: {
-          ...autocompleteStartMock,
-          getValueSuggestions: suggestionsMock,
-        },
-        fieldValue: '',
-        indexPattern: stubIndexPatternWithFields,
-        operatorType: OperatorTypeEnum.MATCH,
-        query: '',
-        selectedField: { ...selectedField, name: 'child' },
-      })
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
+        useFieldValueAutocomplete({
+          autocompleteService: {
+            ...autocompleteStartMock,
+            getValueSuggestions: suggestionsMock,
+          },
+          fieldValue: '',
+          indexPattern: stubIndexPatternWithFields,
+          operatorType: OperatorTypeEnum.MATCH,
+          query: '',
+          selectedField: { ...selectedField, name: 'child' },
+        })
     );
 
     // Note: initial `waitFor` is hook initialization
-    await waitFor(() => null);
+    await waitFor(() => expect(suggestionsMock).toHaveBeenCalled());
 
     expect(suggestionsMock).toHaveBeenCalledWith({
       field: { ...getField('nestedField.child'), name: 'nestedField.child' },
@@ -203,7 +204,7 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current[1]).toBe(false));
 
     const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
@@ -229,7 +230,7 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current[1]).toBe(false));
 
     const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
@@ -254,7 +255,7 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current[2].length).toBeGreaterThan(0));
 
     const expectedResult: UseFieldValueAutocompleteReturn = [
       false,
@@ -289,7 +290,7 @@ describe('use_field_value_autocomplete', () => {
         })
     );
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current[2].length).toBeGreaterThan(0));
 
     expect(result.current[3]).not.toBeNull();
 
@@ -304,7 +305,7 @@ describe('use_field_value_autocomplete', () => {
       });
     }
 
-    await waitFor(() => null);
+    await waitFor(() => expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2));
 
     const expectedResult: UseFieldValueAutocompleteReturn = [
       false,
@@ -313,7 +314,6 @@ describe('use_field_value_autocomplete', () => {
       result.current[3],
     ];
 
-    expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2);
     expect(result.current).toEqual(expectedResult);
   });
 });

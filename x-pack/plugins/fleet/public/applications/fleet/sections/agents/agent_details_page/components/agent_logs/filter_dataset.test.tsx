@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { render, waitFor } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -50,7 +51,9 @@ describe('DatasetFilter', () => {
   });
 
   it('Renders all statuses', async () => {
-    fireEvent.click(getByRole('button'));
+    const user = userEvent.setup();
+
+    await user.click(getByRole('button'));
 
     await waitFor(() => expect(getByText('elastic_agent')).toBeInTheDocument());
 

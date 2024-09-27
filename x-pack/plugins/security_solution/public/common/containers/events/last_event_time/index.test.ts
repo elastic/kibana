@@ -58,7 +58,7 @@ describe('useTimelineLastEventTime', () => {
     (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
   });
 
-  it('should init', () => {
+  it('should init', async () => {
     const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,
@@ -66,7 +66,6 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-
     expect(result.current).toEqual([
       false,
       { errorMessage: undefined, lastSeen: null, refetch: noop },
@@ -81,13 +80,15 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => null);
-    expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
-      defaultIndex: [],
-      details: {},
-      factoryQueryType: 'eventsLastEventTime',
-      indexKey: 'hostDetails',
-    });
+
+    await waitFor(() =>
+      expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
+        defaultIndex: [],
+        details: {},
+        factoryQueryType: 'eventsLastEventTime',
+        indexKey: 'hostDetails',
+      })
+    );
   });
 
   it('should set response', async () => {
@@ -98,7 +99,7 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
-    await waitFor(() => null);
-    expect(result.current[1].lastSeen).toEqual('1 minute ago');
+
+    await waitFor(() => expect(result.current[1].lastSeen).toEqual('1 minute ago'));
   });
 });
