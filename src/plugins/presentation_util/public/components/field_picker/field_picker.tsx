@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import { comboBoxFieldOptionMatcher, getFieldIconType, isKnownFieldType } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher, getFieldIconType } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -90,7 +90,6 @@ export const FieldPicker = ({
             dataView.fields
               .filter((f) => (filterPredicate ? filterPredicate(f) : true))
               .map((f) => getFieldIconType(f))
-              .filter((type) => isKnownFieldType(type))
           )
         : [],
     [dataView, filterPredicate]
