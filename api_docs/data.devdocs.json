@@ -11789,14 +11789,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/types.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
-            },
-            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },

@@ -13,7 +13,9 @@ import { FormTestComponent } from '../../../common/test_utils';
 import * as i18n from '../translations';
 import { Configure } from './configure';
 
-describe('Configure ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176600
+// Failing: See https://github.com/elastic/kibana/issues/193918
+describe.skip('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {

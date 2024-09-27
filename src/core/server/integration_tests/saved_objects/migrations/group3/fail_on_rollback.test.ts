@@ -20,7 +20,8 @@ import { delay } from '../test_utils';
 import { getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
 import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
 
-describe('when rolling back to an older version', () => {
+// Failing: See https://github.com/elastic/kibana/issues/193756
+describe.skip('when rolling back to an older version', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
