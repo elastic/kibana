@@ -8,17 +8,31 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 type UserUrl = string | undefined;
+type IsAgentlessAvailable = boolean | undefined;
 
 export class OnboardingService {
   private usersUrlSubject$: BehaviorSubject<UserUrl>;
   public usersUrl$: Observable<UserUrl>;
 
+  private isAgentlessAvailableSubject$: BehaviorSubject<IsAgentlessAvailable>;
+  public isAgentlessAvailable$: Observable<IsAgentlessAvailable>;
+
   constructor() {
     this.usersUrlSubject$ = new BehaviorSubject<UserUrl>(undefined);
     this.usersUrl$ = this.usersUrlSubject$.asObservable();
+
+    this.isAgentlessAvailableSubject$ = new BehaviorSubject<IsAgentlessAvailable>(undefined);
+    this.isAgentlessAvailable$ = this.isAgentlessAvailableSubject$.asObservable();
   }
 
-  public setSettings({ userUrl }: { userUrl: UserUrl }) {
+  public setSettings({
+    userUrl,
+    isAgentlessAvailable,
+  }: {
+    userUrl: UserUrl;
+    isAgentlessAvailable: boolean;
+  }) {
     this.usersUrlSubject$.next(userUrl);
+    this.isAgentlessAvailableSubject$.next(isAgentlessAvailable);
   }
 }

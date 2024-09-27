@@ -51,6 +51,10 @@ describe('checkIntegrationsCardComplete', () => {
 
     expect(result).toEqual({
       isComplete: false,
+      metadata: {
+        integrationsInstalled: 0,
+        agentStillRequired: false,
+      },
     });
   });
 

@@ -51,6 +51,10 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
   if (!isComplete) {
     return {
       isComplete,
+      metadata: {
+        integrationsInstalled: 0,
+        agentStillRequired: false,
+      },
     };
   }
 
