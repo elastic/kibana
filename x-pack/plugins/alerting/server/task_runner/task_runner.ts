@@ -66,7 +66,12 @@ import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
+import {
+  createTaskRunnerLogger,
+  withAlertingSpan,
+  processRunResults,
+  clearExpiredSnoozes,
+} from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -505,6 +510,7 @@ export class TaskRunner<
         paramValidator: this.ruleType.validate.params,
         ruleId,
         spaceId,
+        logger: this.logger,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
       });
@@ -524,8 +530,10 @@ export class TaskRunner<
 
       (async () => {
         try {
-          await runRuleParams.rulesClient.clearExpiredSnoozes({
+          await clearExpiredSnoozes({
+            logger: this.logger,
             rule: runRuleParams.rule,
+            savedObjectsClient: this.internalSavedObjectsRepository,
             version: runRuleParams.version,
           });
         } catch (e) {
