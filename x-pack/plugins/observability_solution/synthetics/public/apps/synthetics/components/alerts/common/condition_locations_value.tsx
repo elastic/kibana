@@ -38,7 +38,7 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
       value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {
         defaultMessage:
           '{numberOfLocations} {numberOfLocations, plural, one {location} other {locations}}',
-        values: { numberOfLocations: locationsThreshold ?? 1 },
+        values: { numberOfLocations: locationsThreshold },
       })}
     >
       <EuiPopoverTitle>
