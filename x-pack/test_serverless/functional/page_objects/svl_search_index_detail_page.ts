@@ -20,6 +20,9 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
+    async expectUseInPlaygroundLinkExists() {
+      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 2000 });
+    },
     async expectBackToIndicesButtonExists() {
       await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });
     },
@@ -82,7 +85,20 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
     async expectMoreOptionsOverviewMenuIsShown() {
       await testSubjects.existOrFail('moreOptionsContextMenu');
     },
-    async expectDeleteIndexButtonExists() {
+    async expectPlaygroundButtonExistsInMoreOptions() {
+      await testSubjects.existOrFail('moreOptionsPlayground');
+    },
+    async expectToNavigateToPlayground(indexName: string) {
+      await testSubjects.click('moreOptionsPlayground');
+      expect(await browser.getCurrentUrl()).contain(
+        `/search_playground/chat?default-index=${indexName}`
+      );
+      await testSubjects.existOrFail('chatPage');
+    },
+    async expectAPIReferenceDocLinkExistsInMoreOptions() {
+      await testSubjects.existOrFail('moreOptionsApiReference', { timeout: 2000 });
+    },
+    async expectDeleteIndexButtonExistsInMoreOptions() {
       await testSubjects.existOrFail('moreOptionsDeleteIndex');
     },
     async clickDeleteIndexButton() {

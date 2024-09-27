@@ -139,7 +139,6 @@ export const SearchIndexDetailsPage = () => {
           },
     [isIndexError, indexLoadingError, mappingsError]
   );
-
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
   const handleDeleteIndexModal = useCallback(() => {
     setShowDeleteIndexModal(!isShowingDeleteModal);
