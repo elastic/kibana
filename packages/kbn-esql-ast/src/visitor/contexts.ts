@@ -35,7 +35,6 @@ import type {
   CommandVisitorInput,
   ESQLAstExpressionNode,
   ESQLAstQueryNode,
-  ExpressionVisitorInput,
   ExpressionVisitorOutput,
   UndefinedToVoid,
   VisitorAstNode,
@@ -72,7 +71,9 @@ export class VisitorContext<
   ) {}
 
   public *visitArguments(
-    input: VisitorInput<Methods, 'visitExpression'>
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
   ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
@@ -86,7 +87,12 @@ export class VisitorContext<
       if (arg.type === 'option' && arg.name !== 'as') {
         continue;
       }
-      yield this.visitExpression(arg, input as any);
+      yield this.visitExpression(
+        arg,
+        typeof input === 'function'
+          ? (input as () => VisitorInput<Methods, 'visitExpression'>)()
+          : (input as VisitorInput<Methods, 'visitExpression'>)
+      );
     }
   }
 
@@ -94,7 +100,7 @@ export class VisitorContext<
     const node = this.node;
 
     if (!isNodeWithArgs(node)) {
-      throw new Error('Node does not have arguments');
+      return [];
     }
 
     const args: ESQLAstExpressionNode[] = [];
@@ -148,6 +154,10 @@ export class QueryVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstQueryNode> {
+  public *commands(): Iterable<ESQLAstCommand> {
+    yield* this.node.commands;
+  }
+
   public *visitCommands(
     input: UndefinedToVoid<Parameters<NonNullable<Methods['visitCommand']>>[1]>
   ): Iterable<
@@ -156,7 +166,7 @@ export class QueryVisitorContext<
   > {
     this.ctx.assertMethodExists('visitCommand');
 
-    for (const cmd of this.node) {
+    for (const cmd of this.node.commands) {
       yield this.visitCommand(cmd, input as any);
     }
   }
@@ -337,7 +347,7 @@ export class LimitCommandVisitorContext<
   }
 
   public setLimit(value: number): void {
-    const literalNode = Builder.numericLiteral({ value });
+    const literalNode = Builder.expression.literal.numeric({ value, literalType: 'integer' });
 
     this.node.args = [literalNode];
   }
@@ -504,12 +514,14 @@ export class ListLiteralExpressionVisitorContext<
   Node extends ESQLList = ESQLList
 > extends ExpressionVisitorContext<Methods, Data, Node> {
   public *visitElements(
-    input: ExpressionVisitorInput<Methods>
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
   ): Iterable<ExpressionVisitorOutput<Methods>> {
     this.ctx.assertMethodExists('visitExpression');
 
     for (const value of this.node.values) {
-      yield this.visitExpression(value, input as any);
+      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
     }
   }
 }
