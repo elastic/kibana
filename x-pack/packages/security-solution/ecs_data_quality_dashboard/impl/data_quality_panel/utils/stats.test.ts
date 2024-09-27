@@ -15,6 +15,7 @@ import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_ind
 import { DataQualityCheckResult } from '../types';
 import {
   getDocsCount,
+  getDocsCountPercent,
   getSizeInBytes,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
@@ -248,5 +249,36 @@ describe('getTotalPatternIncompatible', () => {
 
   test('it returns undefined when `results` is undefined', () => {
     expect(getTotalPatternIncompatible(undefined)).toBeUndefined();
+  });
+});
+
+describe('getDocsCountPercent', () => {
+  test('it returns an empty string when `patternDocsCount` is zero', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 0,
+        patternDocsCount: 0,
+      })
+    ).toEqual('');
+  });
+
+  test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is undefined', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 2904,
+        locales: undefined,
+        patternDocsCount: 57410,
+      })
+    ).toEqual('5.1%');
+  });
+
+  test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is provided', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 2904,
+        locales: 'en-US',
+        patternDocsCount: 57410,
+      })
+    ).toEqual('5.1%');
   });
 });

@@ -113,6 +113,13 @@ export const getDataStreamDegradedFieldsResponseRt = rt.type({
 
 export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFieldsResponseRt>;
 
+export const degradedFieldValuesRt = rt.type({
+  field: rt.string,
+  values: rt.array(rt.string),
+});
+
+export type DegradedFieldValues = rt.TypeOf<typeof degradedFieldValuesRt>;
+
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
   integration: rt.string,

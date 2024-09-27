@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -61,8 +62,8 @@ const ExceptionsViewerSearchBarComponent = ({
   onSearch,
   onAddExceptionClick,
 }: ExceptionsViewerSearchBarProps): JSX.Element => {
-  const handleOnSearch = useCallback(
-    ({ queryText }): void => {
+  const handleOnSearch = useCallback<NonNullable<EuiSearchBarProps['onChange']>>(
+    ({ queryText }) => {
       onSearch({ search: queryText });
     },
     [onSearch]

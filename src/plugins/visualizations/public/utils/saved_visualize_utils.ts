@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -17,7 +18,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { VisualizationSavedObject } from '../../common/content_management';
+import { VisualizationSavedObject, Reference } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
@@ -223,7 +224,6 @@ export async function getSavedVisualization(
   if (typeof opts !== 'object') {
     opts = { id: opts } as GetVisOptions;
   }
-
   const id = (opts.id as string) || '';
   const savedObject = {
     id,
@@ -321,7 +321,8 @@ export async function saveVisualization(
   }: SaveVisOptions,
   services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
-  }
+  },
+  baseReferences: Reference[] = []
 ) {
   // Save the original id in case the save fails.
   const originalId = savedObject.id;
@@ -341,10 +342,11 @@ export async function saveVisualization(
     uiStateJSON: savedObject.uiStateJSON,
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
-    version: savedObject.version,
+    savedSearchRefName: savedObject.savedSearchRefName,
+    version: savedObject.version ?? '1',
     kibanaSavedObjectMeta: {},
   };
-  let references: SavedObjectReference[] = [];
+  let references: SavedObjectReference[] = baseReferences;
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =
@@ -387,6 +389,7 @@ export async function saveVisualization(
       migrationVersion: savedObject.migrationVersion,
       references: extractedRefs.references,
     };
+
     const resp = confirmOverwrite
       ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
       : savedObject.id

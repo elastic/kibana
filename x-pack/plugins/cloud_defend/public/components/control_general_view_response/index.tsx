@@ -139,7 +139,7 @@ export const ControlGeneralViewResponse = ({
   }, [closePopover, onDuplicate, response]);
 
   const onChangeMatches = useCallback(
-    (options) => {
+    (options: any) => {
       response.match = options.map((option: EuiComboBoxOptionOption) => option.value);
 
       onResponseChange(response, index);
@@ -148,7 +148,7 @@ export const ControlGeneralViewResponse = ({
   );
 
   const onChangeExcludes = useCallback(
-    (options) => {
+    (options: any) => {
       response.exclude = options.map((option: EuiComboBoxOptionOption) => option.value);
 
       if (response.exclude?.length === 0) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -30,15 +31,13 @@ export const GridPanel = ({
   setInteractionEvent: (interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex'>) => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const ghostRef = useRef<HTMLDivElement>(null);
   const thisPanelActive = activePanelId === panelData.id;
 
   const interactionStart = useCallback(
-    (type: 'drag' | 'resize', e: React.DragEvent) => {
-      if (!panelRef.current || !ghostRef.current) return;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.dropEffect = 'move';
-      e.dataTransfer.setDragImage(ghostRef.current, 0, 0);
+    (type: 'drag' | 'resize', e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      if (!panelRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
       const panelRect = panelRef.current.getBoundingClientRect();
       setInteractionEvent({
         type,
@@ -83,22 +82,8 @@ export const GridPanel = ({
           }
         `}
       >
-        {/* Hidden dragging ghost */}
-        <div
-          css={css`
-            top: 0;
-            left: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            pointer-events: none;
-          `}
-          ref={ghostRef}
-        />
         {/* drag handle */}
         <div
-          draggable="true"
           className="dragHandle"
           css={css`
             opacity: 0;
@@ -116,15 +101,14 @@ export const GridPanel = ({
             background-color: ${euiThemeVars.euiColorEmptyShade};
             border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
           `}
-          onDragStart={(e: React.DragEvent<HTMLDivElement>) => interactionStart('drag', e)}
+          onMouseDown={(e) => interactionStart('drag', e)}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>
         {/* Resize handle */}
         <div
-          draggable="true"
           className="resizeHandle"
-          onDragStart={(e) => interactionStart('resize', e)}
+          onMouseDown={(e) => interactionStart('resize', e)}
           css={css`
             right: 0;
             bottom: 0;

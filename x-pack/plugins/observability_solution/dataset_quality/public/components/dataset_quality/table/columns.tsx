@@ -46,6 +46,10 @@ const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumn
   defaultMessage: 'Namespace',
 });
 
+const typeColumnName = i18n.translate('xpack.datasetQuality.typeColumnName', {
+  defaultMessage: 'Type',
+});
+
 const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
   defaultMessage: 'Size',
 });
@@ -213,6 +217,15 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
+    {
+      name: typeColumnName,
+      field: 'type',
+      sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiBadge color="hollow">{dataStreamStat.type}</EuiBadge>
+      ),
+      width: '160px',
+    },
     ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
@@ -287,46 +300,37 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
-      ? [
-          {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
-                {lastActivityColumnName}
-              </EuiTableHeader>
-            ),
-            field: 'lastActivity',
-            render: (timestamp: number, { userPrivileges, title }: DataStreamStat) => (
-              <PrivilegesWarningIconWrapper
-                title={`lastActivity-${title}`}
-                hasPrivileges={userPrivileges?.canMonitor ?? true}
-              >
-                <EuiSkeletonRectangle
-                  width="200px"
-                  height="20px"
-                  borderRadius="m"
-                  isLoading={loadingDataStreamStats}
-                >
-                  {!isActiveDataset(timestamp) ? (
-                    <EuiFlexGroup gutterSize="xs" alignItems="center">
-                      <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                      <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                        <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-                      </EuiToolTip>
-                    </EuiFlexGroup>
-                  ) : (
-                    fieldFormats
-                      .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-                      .convert(timestamp)
-                  )}
-                </EuiSkeletonRectangle>
-              </PrivilegesWarningIconWrapper>
-            ),
-            width: '300px',
-            sortable: true,
-          },
-        ]
-      : []),
+    {
+      name: (
+        <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+          {lastActivityColumnName}
+        </EuiTableHeader>
+      ),
+      field: 'lastActivity',
+      render: (timestamp: number) => (
+        <EuiSkeletonRectangle
+          width="200px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {!isActiveDataset(timestamp) ? (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+              </EuiToolTip>
+            </EuiFlexGroup>
+          ) : (
+            fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+              .convert(timestamp)
+          )}
+        </EuiSkeletonRectangle>
+      ),
+      width: '300px',
+      sortable: true,
+    },
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (

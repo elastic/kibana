@@ -1,9 +1,4 @@
 [[saved-objects-api]]
 == Saved objects APIs
 
-Manage {kib} saved objects, including dashboards, visualizations, and more.
-
-For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved object API].
-
-WARNING: Do not write documents directly to the `.kibana` index. When you write directly
-to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved objects API].

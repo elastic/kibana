@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ESQLAstItem, ESQLSingleAstItem } from '../types';
@@ -33,4 +34,17 @@ export const firstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =
   for (const item of singleItems(items)) {
     return item;
   }
+};
+
+/**
+ * Returns the last normalized "single item" from the "item" list.
+ *
+ * @param items Returns the last "single item" from the "item" list.
+ * @returns A "single item", if any.
+ */
+export const lastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
+  const last = items[items.length - 1];
+  if (!last) return undefined;
+  if (Array.isArray(last)) return lastItem(last as ESQLAstItem[]);
+  return last as ESQLSingleAstItem;
 };

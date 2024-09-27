@@ -50,7 +50,7 @@ const PackTypeSelectableComponent = ({
   resetFormFields,
 }: PackTypeSelectableProps) => {
   const handleChange = useCallback(
-    (type) => {
+    (type: any) => {
       setPackType(type);
       if (resetFormFields) {
         resetFormFields();

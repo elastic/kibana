@@ -4,6 +4,7 @@ parameters:
     name: agentPolicyId
     in: path
     required: true
+  - $ref: ../components/parameters/format.yaml
 post:
   summary: Copy agent policy by ID
   tags:

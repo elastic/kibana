@@ -11,8 +11,9 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { ClientPluginsStart } from '../../../plugin';
-import { COMMON_SYNTHETICS_GROUPING, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 
 export const ADD_SYNTHETICS_OVERVIEW_ACTION_ID = 'CREATE_SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE';
 
@@ -21,8 +22,8 @@ export function createStatusOverviewPanelAction(
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
-    grouping: COMMON_SYNTHETICS_GROUPING,
-    order: 30,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 5,
     getIconType: () => 'online',
     isCompatible: async ({ embeddable }) => {
       const { compatibilityCheck } = await import('./compatibility_check');

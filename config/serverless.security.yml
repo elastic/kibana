@@ -75,10 +75,9 @@ telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
-xpack.fleet.internal.registry.spec.max: '3.0'
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.2'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
-xpack.fleet.internal.registry.spec.min: '1.0'
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
@@ -106,8 +105,3 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
-
-# mTLS cert paths for agentless-api calls
-xpack.fleet.agentless.api.tls.certificate: "/mnt/elastic-internal/http-certs/tls.crt"
-xpack.fleet.agentless.api.tls.key: "/mnt/elastic-internal/http-certs/tls.key"
-xpack.fleet.agentless.api.tls.ca: "/mnt/elastic-internal/http-certs/ca.crt"

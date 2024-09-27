@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -268,8 +269,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1Item 1 description', updatedAtValues[0].format('LL')],
-        ['Item 2Item 2 description', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 description', updatedAtValues[0].format('ll')],
+        ['Item 2Item 2 description', updatedAtValues[1].format('ll')],
       ]);
     });
 
@@ -1131,11 +1132,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);
@@ -1165,7 +1166,7 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item from search",
-            "July 1, 2023",
+            "Jul 1, 2023",
           ],
         ]
       `);
@@ -1207,11 +1208,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);

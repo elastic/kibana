@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { unzip } from 'lodash';
@@ -27,7 +28,7 @@ signals: [ {
 }]}`;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
+  const { timePicker, visualize, visChart, visEditor, vegaChart } = getPageObjects([
     'timePicker',
     'visualize',
     'visChart',
@@ -43,25 +44,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('vega chart in visualize app', () => {
     before(async () => {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await visualize.navigateToNewVisualization();
       log.debug('clickVega');
-      await PageObjects.visualize.clickVega();
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await visualize.clickVega();
+      await visChart.waitForVisualizationRenderingStabilized();
     });
 
     describe('vega chart', () => {
       describe('initial render', () => {
         it('should have some initial vega spec text', async function () {
-          const vegaSpec = await PageObjects.vegaChart.getSpec();
+          const vegaSpec = await vegaChart.getSpec();
           expect(vegaSpec).to.contain('{');
           expect(vegaSpec).to.contain('data');
           expect(vegaSpec.length).to.be.above(500);
         });
 
         it('should have view and control containers', async function () {
-          const view = await PageObjects.vegaChart.getViewContainer();
+          const view = await vegaChart.getViewContainer();
           expect(view).to.be.ok();
           const size = await view.getSize();
           expect(size).to.have.property('width');
@@ -69,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(size.width).to.be.above(0);
           expect(size.height).to.be.above(0);
 
-          const controls = await PageObjects.vegaChart.getControlContainer();
+          const controls = await vegaChart.getControlContainer();
           expect(controls).to.be.ok();
         });
       });
@@ -77,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('with filters', () => {
         before(async () => {
           log.debug('setAbsoluteRange');
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await timePicker.setDefaultAbsoluteRange();
         });
 
         afterEach(async () => {
@@ -85,15 +86,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await PageObjects.vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
-          await PageObjects.visEditor.clickGo();
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          await vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
+          await visEditor.clickGo();
+          await visChart.waitForVisualizationRenderingStabilized();
+          const fullDataLabels = await vegaChart.getYAxisLabels();
           expect(fullDataLabels[0]).to.eql('0');
           expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
           await filterBar.addFilter({ field: '@tags.raw', operation: 'is', value: 'error' });
-          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          await visChart.waitForVisualizationRenderingStabilized();
+          const filteredDataLabels = await vegaChart.getYAxisLabels();
           expect(filteredDataLabels[0]).to.eql('0');
           expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
         });
@@ -224,14 +225,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (filtersCount > 0) {
           await filterBar.removeAllFilters();
         }
-        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       const fillSpecAndGo = async (newSpec: string) => {
-        await PageObjects.vegaChart.fillSpec(newSpec);
-        await PageObjects.visEditor.clickGo();
+        await vegaChart.fillSpec(newSpec);
+        await visEditor.clickGo();
 
-        const viewContainer = await PageObjects.vegaChart.getViewContainer();
+        const viewContainer = await vegaChart.getViewContainer();
         const textElement = await viewContainer.findByTagName('text');
 
         await textElement.click();
@@ -240,7 +241,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should update global time range by calling "kibanaSetTimeFilter" expression', async () => {
         await fillSpecAndGo(getTestSpec('kibanaSetTimeFilter("2019", "2020")'));
 
-        const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
+        const currentTimeRange = await timePicker.getTimeConfig();
 
         expect(currentTimeRange.start).to.be('Jan 1, 2019 @ 00:00:00.000');
         expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');

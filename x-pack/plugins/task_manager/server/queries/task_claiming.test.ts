@@ -27,6 +27,7 @@ jest.mock('../constants', () => ({
 
 const taskManagerLogger = mockLogger();
 const taskPartitioner = new TaskPartitioner({
+  logger: taskManagerLogger,
   podName: 'test',
   kibanaDiscoveryService: {} as KibanaDiscoveryService,
   kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
@@ -90,7 +91,8 @@ describe('TaskClaiming', () => {
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-      'Unknown task claiming strategy "non-default", falling back to update_by_query'
+      'Unknown task claiming strategy "non-default", falling back to update_by_query',
+      { tags: ['taskClaiming'] }
     );
   });
 

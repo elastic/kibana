@@ -161,6 +161,21 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.ECS_FIELD_REFERENCE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_FIELD_REFERENCE_URL",
+        "description": [],
+        "signature": [
+          "\"https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html\""
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.ECS_REFERENCE_URL",
         "type": "string",
         "tags": [],
@@ -171,7 +186,7 @@
         "signature": [
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
-        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality_panel/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -200,6 +215,21 @@
           "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.MAPPING_URL",
+        "type": "string",
+        "tags": [],
+        "label": "MAPPING_URL",
+        "description": [],
+        "signature": [
+          "\"https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html\""
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

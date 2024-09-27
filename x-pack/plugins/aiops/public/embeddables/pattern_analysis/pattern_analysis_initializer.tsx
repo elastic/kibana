@@ -38,7 +38,10 @@ import {
   DEFAULT_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
 } from '../../components/log_categorization/sampling_menu/random_sampler';
-import type { MinimumTimeRangeOption } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
+import {
+  DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+  type MinimumTimeRangeOption,
+} from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 import { getMessageField } from '../../components/log_categorization/utils';
 import { FieldSelector } from '../../components/log_categorization/log_categorization_for_embeddable/field_selector';
 import { SamplingPanel } from '../../components/log_categorization/sampling_menu/sampling_panel';
@@ -67,7 +70,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
   const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableRuntimeState>(
     pick(
       initialInput ?? {
-        minimumTimeRangeOption: '1 week',
+        minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
         randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
         randomSamplerProbability: DEFAULT_PROBABILITY,
       },

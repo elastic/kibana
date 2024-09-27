@@ -6,7 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -18,16 +18,19 @@ type TransformId = string;
 export class DefaultSummaryTransformManager implements TransformManager {
   constructor(
     private generator: SummaryTransformGenerator,
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private logger: Logger
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
     const transformParams = await this.generator.generate(slo);
     try {
-      await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
-        logger: this.logger,
-      });
+      await retryTransientEsErrors(
+        () => this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams),
+        {
+          logger: this.logger,
+        }
+      );
     } catch (err) {
       this.logger.error(`Cannot create summary transform for SLO [${slo.id}]`);
       if (err.meta?.body?.error?.type === 'security_exception') {
@@ -47,7 +50,10 @@ export class DefaultSummaryTransformManager implements TransformManager {
   async preview(transformId: string): Promise<void> {
     try {
       await retryTransientEsErrors(
-        () => this.esClient.transform.previewTransform({ transform_id: transformId }),
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
+            transform_id: transformId,
+          }),
         { logger: this.logger }
       );
     } catch (err) {
@@ -60,8 +66,13 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
-        { logger: this.logger }
+          this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
+            { transform_id: transformId },
+            { ignore: [409] }
+          ),
+        {
+          logger: this.logger,
+        }
       );
     } catch (err) {
       this.logger.error(`Cannot start SLO summary transform [${transformId}]`);
@@ -73,7 +84,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.esClient.transform.stopTransform(
+          this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
             { transform_id: transformId, wait_for_completion: true, force: true },
             { ignore: [404] }
           ),
@@ -89,7 +100,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.esClient.transform.deleteTransform(
+          this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
             { ignore: [404] }
           ),

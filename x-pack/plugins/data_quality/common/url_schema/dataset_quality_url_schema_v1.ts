@@ -13,6 +13,7 @@ export const filtersRT = rt.exact(
     inactive: rt.boolean,
     fullNames: rt.boolean,
     timeRange: timeRangeRT,
+    types: rt.array(rt.string),
     integrations: rt.array(rt.string),
     namespaces: rt.array(rt.string),
     qualities: rt.array(rt.union([rt.literal('poor'), rt.literal('degraded'), rt.literal('good')])),

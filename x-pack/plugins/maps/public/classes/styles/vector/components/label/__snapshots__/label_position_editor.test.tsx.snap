@@ -2,12 +2,7 @@
 
 exports[`should render 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
-  display="row"
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   label="Label position"
-  labelType="label"
 >
   <EuiSelect
     aria-label="Select label position"
@@ -44,12 +39,7 @@ exports[`should render as disabled when label is not set 1`] = `
   position="top"
 >
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Label position"
-    labelType="label"
   >
     <EuiSelect
       aria-label="Select label position"
@@ -87,12 +77,7 @@ exports[`should render as disabled when label position is disabled 1`] = `
   position="top"
 >
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Label position"
-    labelType="label"
   >
     <EuiSelect
       aria-label="Select label position"

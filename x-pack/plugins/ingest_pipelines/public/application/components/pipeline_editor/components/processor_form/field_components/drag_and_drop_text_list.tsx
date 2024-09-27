@@ -78,7 +78,7 @@ function DragAndDropTextListComponent({
   const [firstItemId] = useState(() => uuidv4());
 
   const onDragEnd = useCallback(
-    ({ source, destination }) => {
+    ({ source, destination }: any) => {
       if (source && destination) {
         onMove(source.index, destination.index);
       }

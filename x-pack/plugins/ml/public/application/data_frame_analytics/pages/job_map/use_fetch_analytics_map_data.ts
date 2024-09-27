@@ -14,8 +14,7 @@ import {
   JOB_MAP_NODE_TYPES,
   type AnalyticsMapReturnType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ml } from '../../../services/ml_api_service';
-
+import { useMlApi } from '../../../contexts/kibana';
 interface GetDataObjectParameter {
   analyticsId?: string;
   id?: string;
@@ -24,6 +23,7 @@ interface GetDataObjectParameter {
 }
 
 export const useFetchAnalyticsMapData = () => {
+  const mlApi = useMlApi();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [error, setError] = useState<any>();
@@ -39,7 +39,7 @@ export const useFetchAnalyticsMapData = () => {
     }
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     const analyticsMap: AnalyticsMapReturnType =
-      await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(idToUse, treatAsRoot, type);
+      await mlApi.dataFrameAnalytics.getDataFrameAnalyticsMap(idToUse, treatAsRoot, type);
 
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
 

@@ -9,7 +9,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { getIndexResultBadgeColor, getIndexResultToolTip } from './helpers';
+import { getIndexResultToolTip } from '../utils/get_index_result_tooltip';
+import { getIndexResultBadgeColor } from './utils/get_index_result_badge_color';
 import * as i18n from './translations';
 
 const StyledBadge = styled(EuiBadge)`

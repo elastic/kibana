@@ -6,5 +6,5 @@
     "version": "kibana",
     "templateVersion": "0.1.0"
   },
-  "license": "SSPL-1.0 OR Elastic License 2.0"
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
 }

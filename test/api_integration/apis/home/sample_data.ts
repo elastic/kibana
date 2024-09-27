@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import type { Response } from 'superagent';
 import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -42,7 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (before install)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
@@ -57,13 +63,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`install in the ${space} space`, () => {
         it('should return 404 if id does not match any sample data sets', async () => {
-          await supertest.post(`${apiPath}/xxxx`).set('kbn-xsrf', 'kibana').expect(404);
+          await supertest
+            .post(`${apiPath}/xxxx`)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(404);
         });
 
         it('should return 200 if success', async () => {
           const resp = await supertest
             .post(`${apiPath}/flights`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
 
           expect(resp.body).to.eql({
@@ -96,7 +107,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should load elasticsearch index containing sample data with dates relative to now parameter', async () => {
             const nowString = `2000-01-01T00:00:00`;
-            await supertest.post(`${apiPath}/flights?now=${nowString}`).set('kbn-xsrf', 'kibana');
+            await supertest
+              .post(`${apiPath}/flights?now=${nowString}`)
+              .set('kbn-xsrf', 'kibana')
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',
@@ -114,7 +128,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (after install)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('installed');
@@ -142,7 +160,12 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`uninstall in the ${space} space`, () => {
         it('should uninstall sample data', async () => {
           // Note: the second time this happens, the index has already been removed, but the uninstall works anyway
-          await supertest.delete(`${apiPath}/flights`).set('kbn-xsrf', 'kibana').expect(204);
+          await supertest
+            .delete(`${apiPath}/flights`)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(204);
         });
 
         it('should remove elasticsearch index containing sample data', async () => {
@@ -155,7 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (after uninstall)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');

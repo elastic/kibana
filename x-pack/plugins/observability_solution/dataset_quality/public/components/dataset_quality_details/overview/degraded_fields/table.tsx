@@ -16,19 +16,32 @@ import {
 import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
 
 export const DegradedFieldTable = () => {
-  const { isLoading, pagination, renderedItems, onTableChange, sort, fieldFormats } =
-    useDegradedFields();
+  const {
+    isDegradedFieldsLoading,
+    pagination,
+    renderedItems,
+    onTableChange,
+    sort,
+    fieldFormats,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+  } = useDegradedFields();
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
-  const columns = getDegradedFieldsColumns({ dateFormatter, isLoading });
+  const columns = getDegradedFieldsColumns({
+    dateFormatter,
+    isLoading: isDegradedFieldsLoading,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+  });
 
   return (
     <EuiBasicTable
       tableLayout="fixed"
       columns={columns}
       items={renderedItems ?? []}
-      loading={isLoading}
+      loading={isDegradedFieldsLoading}
       sorting={sort}
       onChange={onTableChange}
       pagination={pagination}
@@ -37,7 +50,7 @@ export const DegradedFieldTable = () => {
         'data-test-subj': 'datasetQualityDetailsDegradedTableRow',
       }}
       noItemsMessage={
-        isLoading ? (
+        isDegradedFieldsLoading ? (
           overviewDegradedFieldsTableLoadingText
         ) : (
           <EuiEmptyPrompt

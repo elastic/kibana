@@ -86,6 +86,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/security-authorization-core",
     "@kbn/security-role-management-model",
+    "@kbn/security-ui-components",
   ],
   "exclude": [
     "target/**/*",

@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
     <EuiPageTemplate.Header
       css={{
         '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
-        backgroundColor: euiTheme.colors.ghost,
+        backgroundColor: euiTheme.colors.emptyShade,
       }}
       paddingSize="s"
       data-test-subj="chat-playground-home-page"
@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
-          <Toolbar />
+          <Toolbar selectedPageMode={selectedPageMode} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

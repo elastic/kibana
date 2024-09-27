@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { convertTimestamp } from '../lib/convert_timestamp';
 import { api as commonApi } from '../lib/servicenow/api';
 import {
   ExecutorSubActionAddEventParams,
@@ -15,8 +16,9 @@ import {
 const isValidDate = (d: Date) => !isNaN(d.valueOf());
 
 const formatTimeOfEvent = (timeOfEvent: string | null): string | undefined => {
-  if (timeOfEvent != null) {
-    const date = new Date(timeOfEvent);
+  const convertedTimestamp = convertTimestamp(timeOfEvent);
+  if (convertedTimestamp != null) {
+    const date = new Date(convertedTimestamp);
 
     return isValidDate(date)
       ? // The format is: yyyy-MM-dd HH:mm:ss GMT

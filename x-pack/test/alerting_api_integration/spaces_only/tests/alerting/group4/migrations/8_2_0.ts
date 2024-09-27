@@ -29,7 +29,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/alerting/8_2_0');
     });
 
-    describe('rule with null snoozeEndTime value', async () => {
+    describe('rule with null snoozeEndTime value', () => {
       it('has snoozeEndTime removed', async () => {
         const response = await es.get<{ alert: RawRule & { snoozeEndTime?: string } }>(
           {
@@ -60,7 +60,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('rules with snoozeEndTime value', async () => {
+    describe('rules with snoozeEndTime value', () => {
       it('has snoozeEndTime migrated to snoozeSchedule', async () => {
         const response = await es.get<{ alert: RawRule & { snoozeEndTime?: string } }>(
           {

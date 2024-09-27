@@ -8,21 +8,26 @@
 import React from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CasesParamsFields } from './cases_params';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../../configure_cases/__mock__';
+import { templatesConfigurationMock } from '../../../containers/mock';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../containers/configure/use_get_all_case_configurations');
 
 const useKibanaMock = jest.mocked(useKibana);
 const useAlertsDataViewMock = jest.mocked(useAlertsDataView);
 const useApplicationMock = useApplication as jest.Mock;
+const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 
 useKibanaMock.mockReturnValue({
   services: { ...createStartServicesMock(), data: { dataViews: {} } },
@@ -56,8 +61,21 @@ const defaultProps = {
 };
 
 describe('CasesParamsFields renders', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
     useApplicationMock.mockReturnValueOnce({ appId: 'management' });
     useAlertsDataViewMock.mockReturnValue({
       isLoading: false,
@@ -79,6 +97,11 @@ describe('CasesParamsFields renders', () => {
         ],
       },
     });
+    useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('all params fields are rendered', async () => {
@@ -87,6 +110,7 @@ describe('CasesParamsFields renders', () => {
     expect(await screen.findByTestId('group-by-alert-field-combobox')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
     expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
     expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
   });
 
@@ -127,6 +151,7 @@ describe('CasesParamsFields renders', () => {
       timeWindow: '7d',
       reopenClosedCases: false,
       groupingBy: [],
+      templateId: null,
     });
   });
 
@@ -145,7 +170,7 @@ describe('CasesParamsFields renders', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
@@ -157,13 +182,13 @@ describe('CasesParamsFields renders', () => {
     it('updates grouping by field', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('host.ip'));
+      await user.click(await screen.findByText('host.ip'));
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['host.ip']);
     });
@@ -198,22 +223,88 @@ describe('CasesParamsFields renders', () => {
 
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
-      userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
+      await user.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
+    });
+
+    it('renders default template correctly', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText('No template selected')).toBeInTheDocument();
+    });
+
+    it('renders selected templates correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      }));
+
+      const newProps = {
+        ...defaultProps,
+        producerId: 'siem',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+      expect(await screen.findByText(templatesConfigurationMock[1].name)).toBeInTheDocument();
+    });
+
+    it('updates template correctly', async () => {
+      useGetAllCaseConfigurationsMock.mockReturnValueOnce({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [
+          {
+            ...useGetAllCaseConfigurationsResponse.data[0],
+            templates: templatesConfigurationMock,
+          },
+        ],
+      });
+
+      const selectedTemplate = templatesConfigurationMock[4];
+      const newProps = { ...defaultProps, producerId: 'siem' };
+
+      render(<CasesParamsFields {...newProps} />);
+
+      await user.selectOptions(
+        screen.getByTestId('create-case-template-select'),
+        selectedTemplate.name
+      );
+
+      expect(editAction.mock.calls[0][1].templateId).toEqual(selectedTemplate.key);
+      expect(await screen.findByText(selectedTemplate.name)).toBeInTheDocument();
     });
 
     it('updates time window size', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
+      // There seems to be a bug with userEvent v14 and input[type=number]
+      // where it's not able to clear the input value, so falling back to fireEvent.
 
-      userEvent.clear(await screen.findByTestId('time-window-size-input'));
-      userEvent.paste(await screen.findByTestId('time-window-size-input'), '5');
+      const timeWindowSizeInput = await screen.findByTestId('time-window-size-input');
+
+      expect(timeWindowSizeInput).toBeInTheDocument();
+      expect(timeWindowSizeInput).toHaveValue(6);
+
+      fireEvent.change(timeWindowSizeInput, { target: { value: '5' } });
 
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('5w');
     });
@@ -235,7 +326,7 @@ describe('CasesParamsFields renders', () => {
 
       expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('reopen-case'));
+      await user.click(await screen.findByTestId('reopen-case'));
 
       expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
     });

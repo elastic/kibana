@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await loadTestData(getService);
     });

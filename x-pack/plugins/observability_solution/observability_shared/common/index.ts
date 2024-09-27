@@ -144,6 +144,11 @@ export {
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+export {
+  type DataTier,
+  indexLifeCyclePhaseToDataTier,
+  IndexLifecyclePhaseSelectOption,
+} from './ilm_types';
 
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
@@ -161,12 +166,18 @@ export type {
   HostsLocatorParams,
   InventoryLocator,
   InventoryLocatorParams,
+  MetricsExplorerLocator,
+  MetricsExplorerLocatorParams,
   FlamegraphLocatorParams,
   FlamegraphLocator,
   StacktracesLocatorParams,
   StacktracesLocator,
   TopNFunctionsLocatorParams,
   TopNFunctionsLocator,
+  ServiceEntityLocator,
+  ServiceEntityLocatorParams,
+  TransactionDetailsByTraceIdLocator,
+  TransactionDetailsByTraceIdLocatorParams,
 } from './locators';
 
 export {
@@ -176,10 +187,20 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
+  HOSTS_LOCATOR_ID,
+  ServiceEntityLocatorDefinition,
+  SERVICE_ENTITY_LOCATOR,
+  TransactionDetailsByTraceIdLocatorDefinition,
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
 } from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

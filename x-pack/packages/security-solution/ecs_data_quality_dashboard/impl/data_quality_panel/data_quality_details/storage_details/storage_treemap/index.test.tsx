@@ -11,7 +11,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { FlattenedBucket, getFlattenedBuckets, getLegendItems } from '../helpers';
 import { EMPTY_STAT } from '../../../constants';
 import { alertIndexWithAllResults } from '../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
@@ -25,6 +24,9 @@ import { StorageTreemap } from '.';
 import { DEFAULT_MAX_CHART_HEIGHT } from '../../indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/styles';
 import { NO_DATA_LABEL } from './translations';
 import { PatternRollup } from '../../../types';
+import { FlattenedBucket } from '../types';
+import { getFlattenedBuckets } from '../utils/get_flattened_buckets';
+import { getLegendItems } from './utils/get_legend_items';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -115,12 +117,12 @@ describe('StorageTreemap', () => {
             ).toHaveTextContent(`${index}${formatBytes(sizeInBytes)}`);
           });
 
-          test(`it invokes onIndexSelected() with the expected values for ilmPhase ${ilmPhase} pattern ${pattern} index ${index}`, () => {
+          test(`it invokes onIndexSelected() with the expected values for ilmPhase ${ilmPhase} pattern ${pattern} index ${index}`, async () => {
             const legendItem = screen.getByTestId(
               `chart-legend-item-${ilmPhase}${pattern}${index}`
             );
 
-            userEvent.click(legendItem);
+            await userEvent.click(legendItem);
 
             expect(onIndexSelected).toBeCalledWith({ indexName: index, pattern });
           });
