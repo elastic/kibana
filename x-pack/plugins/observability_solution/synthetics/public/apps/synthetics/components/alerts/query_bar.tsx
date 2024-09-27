@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Query, Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { EuiFormRow } from '@elastic/eui';
 import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
 import { ClientPluginsStart } from '../../../../plugin';
@@ -33,7 +33,7 @@ export function AlertSearchBar({
     const sub = query.state$.subscribe(() => {
       const queryState = query.getState();
       onChange({
-        kqlQuery: String((queryState.query as Query).query),
+        kqlQuery: String(queryState.query),
       });
     });
 
@@ -54,13 +54,13 @@ export function AlertSearchBar({
         indexPatterns={dataView ? [dataView] : []}
         onChange={(queryN) => {
           onChange({
-            kqlQuery: String((queryN.query as Query).query),
+            kqlQuery: String(queryN.query),
           });
         }}
         onSubmit={(queryN) => {
           if (queryN) {
             onChange({
-              kqlQuery: String((queryN.query as Query).query),
+              kqlQuery: String(queryN.query),
             });
           }
         }}
