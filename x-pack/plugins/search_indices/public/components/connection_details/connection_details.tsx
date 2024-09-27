@@ -7,22 +7,12 @@
 
 import React from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormInfoField } from '@kbn/search-shared-ui';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { FormInfoField } from '../form_info_field/form_info_field';
 
 export const ConnectionDetails: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const elasticsearchUrl = useElasticsearchUrl();
 
   return (
@@ -34,52 +24,5 @@ export const ConnectionDetails: React.FC = () => {
       copyValue={elasticsearchUrl}
       dataTestSubj="connectionDetailsEndpoint"
     />
-  );
-
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxxs">
-          <h1>
-            <FormattedMessage
-              id="xpack.searchIndices.connectionDetails.endpointTitle"
-              defaultMessage="Elasticsearch URL"
-            />
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-        <p
-          data-test-subj="connectionDetailsEndpoint"
-          css={{
-            color: euiTheme.colors.successText,
-            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-            backgroundColor: euiTheme.colors.lightestShade,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-          }}
-        >
-          {elasticsearchUrl}
-        </p>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy
-          textToCopy={elasticsearchUrl}
-          afterMessage={i18n.translate('xpack.searchIndices.connectionDetails.copyMessage', {
-            defaultMessage: 'Copied',
-          })}
-        >
-          {(copy) => (
-            <EuiButtonIcon
-              onClick={copy}
-              iconType="copy"
-              aria-label={i18n.translate('xpack.searchIndices.connectionDetails.copyMessage', {
-                defaultMessage: 'Copy Elasticsearch URL to clipboard',
-              })}
-            />
-          )}
-        </EuiCopy>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };

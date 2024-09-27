@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -59,11 +59,33 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <ApiKeyForm />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={true}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={true} color="plain">
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyTitle', {
+                    defaultMessage: 'Copy your API key',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued">
+                <p>
+                  {i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyDescription', {
+                    defaultMessage:
+                      'Make sure you keep it somewhere safe. You won’t be able to retrieve it later.',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <ApiKeyForm hasTitle={false} />
+        </EuiPanel>
+      </EuiFlexItem>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector

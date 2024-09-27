@@ -12,34 +12,58 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormInfoField } from '@kbn/search-shared-ui';
 import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
 
-export const ApiKeyForm = () => {
-  const { euiTheme } = useEuiTheme();
+interface ApiKeyFormProps {
+  hasTitle?: boolean;
+}
+
+export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, handleSaveKey, showAPIKey, displayedApiKey } = useSearchApiKey();
 
+  const titleLocale = i18n.translate('searchApiKeysComponents.apiKeyForm.title', {
+    defaultMessage: 'API Key',
+  });
+
+  if (apiKey && displayedApiKey) {
+    return (
+      <FormInfoField
+        label={hasTitle ? titleLocale : undefined}
+        value={displayedApiKey}
+        copyValue={apiKey}
+        actions={[
+          <EuiButtonIcon
+            iconType="eye"
+            color="success"
+            onClick={showAPIKey}
+            data-test-subj="showAPIKeyButton"
+            aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
+              defaultMessage: 'Show API Key',
+            })}
+          />,
+        ]}
+      />
+    );
+  }
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
-      <EuiFlexItem grow={0}>
-        <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
-          <h6>
-            <FormattedMessage
-              id="searchApiKeysComponents.apiKeyForm.title"
-              defaultMessage="API Key"
-            />
-          </h6>
-        </EuiTitle>
-      </EuiFlexItem>
+      {hasTitle && (
+        <EuiFlexItem grow={0}>
+          <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
+            <h6>{titleLocale}</h6>
+          </EuiTitle>
+        </EuiFlexItem>
+      )}
       {status === Status.showUserPrivilegesError && (
         <EuiFlexItem grow={0}>
           <EuiBadge data-test-subj="apiKeyFormNoUserPrivileges">
@@ -49,65 +73,10 @@ export const ApiKeyForm = () => {
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {status !== Status.showCreateButton && (
-        <>
-          <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-            <code
-              css={{
-                color: euiTheme.colors.successText,
-                padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-                backgroundColor: euiTheme.colors.lightestShade,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                borderRadius: euiTheme.border.radius.small,
-                fontWeight: euiTheme.font.weight.bold,
-              }}
-              data-test-subj="apiKeyFormAPIKey"
-            >
-              {displayedApiKey}
-            </code>
-          </EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            <EuiButtonIcon
-              iconType="eye"
-              color="success"
-              onClick={showAPIKey}
-              data-test-subj="showAPIKeyButton"
-              aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
-                defaultMessage: 'Show API Key',
-              })}
-            />
-          </EuiFlexItem>
-          {apiKey && (
-            <EuiFlexItem grow={0}>
-              <EuiCopy
-                textToCopy={apiKey}
-                afterMessage={i18n.translate('searchApiKeysComponents.apiKeyForm.copyMessage', {
-                  defaultMessage: 'Copied',
-                })}
-              >
-                {(copy) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copy"
-                    color="success"
-                    aria-label={i18n.translate(
-                      'searchApiKeysComponents.apiKeyForm.copyMessageLabel',
-                      {
-                        defaultMessage: 'Copy Elasticsearch URL to clipboard',
-                      }
-                    )}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          )}
-        </>
-      )}
       {status === Status.showCreateButton && (
         <EuiFlexItem grow={0}>
           <EuiButton
-            color="warning"
+            color="primary"
             size="s"
             iconSide="left"
             iconType="key"

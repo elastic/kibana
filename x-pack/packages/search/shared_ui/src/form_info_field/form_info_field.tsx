@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 interface FormInfoFieldProps {
   actions?: React.ReactNode[];
-  label: string;
+  label?: string;
   value: string;
   copyValue?: string;
   dataTestSubj?: string;
@@ -36,11 +36,13 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxxs">
-          <h1>{label}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
+      {label && (
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxxs">
+            <h1>{label}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <code
           data-test-subj={dataTestSubj}
@@ -52,6 +54,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             overflow: 'hidden',
             borderRadius: euiTheme.border.radius.small,
             fontWeight: euiTheme.font.weight.bold,
+            fontSize: euiTheme.size.m,
           }}
         >
           {value}
@@ -60,7 +63,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       <EuiFlexItem grow={false}>
         <EuiCopy
           textToCopy={copyValue ?? value}
-          afterMessage={i18n.translate('xpack.searchIndices.formInfoField.copyMessage', {
+          afterMessage={i18n.translate('xpack.search.shared-ui.formInfoField.copyMessage', {
             defaultMessage: 'Copied',
           })}
         >
@@ -68,7 +71,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             <EuiButtonIcon
               onClick={copy}
               iconType="copy"
-              aria-label={i18n.translate('xpack.searchIndices.formInfoField.copyMessage', {
+              aria-label={i18n.translate('xpack.search.shared-ui.formInfoField.copyMessage', {
                 defaultMessage: 'Copy to clipboard',
               })}
             />
