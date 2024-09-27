@@ -12,24 +12,18 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { getHealthColor } from '../helpers/get_health_color';
 
-interface PageTitleProps {
+interface PageTitleContentProps {
   rule: Rule;
 }
 
-export function PageTitle({ rule }: PageTitleProps) {
+export function PageTitleContent({ rule }: PageTitleContentProps) {
   const {
     triggersActionsUi: { getRuleTagBadge: RuleTagBadge },
   } = useKibana().services;
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false} data-test-subj="ruleName">
-          {rule.name}
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
         <EuiText size="xs">
           <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
             {rule.executionStatus.status.charAt(0).toUpperCase() +
