@@ -112,6 +112,6 @@ const createMigrationTask =
 // [x] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasn't finished)
 // [x] make logger append asset-criticality-ecs-migration to the logger context
 // [ ] write unit tests
-
 // [ ] bundle size might get very big because of the client import
+// [ ] update document generator to reproduce the issue
 // [ ] test with lots of data
