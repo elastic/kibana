@@ -338,6 +338,7 @@
     "installed_es.version",
     "installed_kibana",
     "installed_kibana_space_id",
+    "installed_misc",
     "internal",
     "keep_policies_up_to_date",
     "latest_executed_state",
