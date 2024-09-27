@@ -180,6 +180,42 @@ export default function ({ getService }: FtrProviderContext) {
         ingestedDocCount: 3,
       },
     },
+    {
+      suiteSuffix: 'with a file which does not generate a ingest pipeline',
+      filePath: require.resolve('./files_to_import/flights_small.json'),
+      indexName: 'user-import_4',
+      createIndexPattern: false,
+      fieldTypeFilters: [ML_JOB_FIELD_TYPES.KEYWORD],
+      fieldNameFilters: ['timestamp'],
+      expected: {
+        results: {
+          title: 'flights_small.json',
+          highlightedText: false,
+        },
+        metricFields: [],
+        nonMetricFields: [
+          {
+            fieldName: 'Carrier',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '20 (100%)',
+            exampleCount: 4,
+          },
+          {
+            fieldName: 'timestamp',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '20 (100%)',
+            exampleCount: 11,
+          },
+        ],
+        visibleMetricFieldsCount: 0,
+        totalMetricFieldsCount: 0,
+        populatedFieldsCount: 3,
+        totalFieldsCount: 25,
+        fieldTypeFiltersResultCount: 16,
+        fieldNameFiltersResultCount: 1,
+        ingestedDocCount: 20,
+      },
+    },
   ];
 
   const testDataListNegative = [
