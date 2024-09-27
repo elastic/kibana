@@ -28,6 +28,9 @@ export const findBackfillRoute = (
       validate: {
         query: findQuerySchemaV1,
       },
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

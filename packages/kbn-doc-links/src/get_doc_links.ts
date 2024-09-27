@@ -425,6 +425,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingPositionIncrementGap: `${ELASTICSEARCH_DOCS}position-increment-gap.html`,
       mappingRankFeatureFields: `${ELASTICSEARCH_DOCS}rank-feature.html`,
       mappingRouting: `${ELASTICSEARCH_DOCS}mapping-routing-field.html`,
+      mappingSettingsLimit: `${ELASTICSEARCH_DOCS}mapping-settings-limit.html`,
       mappingSimilarity: `${ELASTICSEARCH_DOCS}similarity.html`,
       mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
       mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
