@@ -91,6 +91,21 @@ describe('healthRoute', () => {
     const [config] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_health"`);
+    expect(config.options?.access).toBe('public');
+  });
+
+  it('should have internal access for serverless', async () => {
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    const router = httpServiceMock.createRouter();
+
+    const licenseState = licenseStateMock.create();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    healthRoute(router, licenseState, encryptedSavedObjects, undefined, true);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_health"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('throws error when user does not have any access to any rule types', async () => {

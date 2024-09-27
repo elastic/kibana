@@ -64,8 +64,6 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
 import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
@@ -136,8 +134,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
-  private maintenanceWindows: MaintenanceWindow[] = [];
-  private maintenanceWindowsWithoutScopedQueryIds: string[] = [];
   private ruleTypeRunner: RuleTypeRunner<
     Params,
     ExtractedParams,
@@ -299,8 +295,10 @@ export class TaskRunner<
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
+      maintenanceWindowsService: this.context.maintenanceWindowsService,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelaySettings.delay,
+      request: fakeRequest,
       ruleId,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -359,8 +357,6 @@ export class TaskRunner<
       alertsClient,
       executionId: this.executionId,
       executorServices,
-      maintenanceWindows: this.maintenanceWindows,
-      maintenanceWindowsWithoutScopedQueryIds: this.maintenanceWindowsWithoutScopedQueryIds,
       rule,
       ruleType: this.ruleType,
       startedAt: this.taskInstance.startedAt!,
@@ -525,30 +521,6 @@ export class TaskRunner<
 
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
-
-      // Load the maintenance windows
-      this.maintenanceWindows = await withAlertingSpan('alerting:load-maintenance-windows', () =>
-        getMaintenanceWindows({
-          context: this.context,
-          fakeRequest: runRuleParams.fakeRequest,
-          logger: this.logger,
-          ruleTypeId: this.ruleType.id,
-          ruleId,
-          ruleTypeCategory: this.ruleType.category,
-        })
-      );
-
-      // Set the event log MW Id field the first time with MWs without scoped queries
-      this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-        maintenanceWindows: this.maintenanceWindows,
-        withScopedQuery: false,
-      });
-
-      if (this.maintenanceWindowsWithoutScopedQueryIds.length) {
-        this.alertingEventLogger.setMaintenanceWindowIds(
-          this.maintenanceWindowsWithoutScopedQueryIds
-        );
-      }
 
       (async () => {
         try {

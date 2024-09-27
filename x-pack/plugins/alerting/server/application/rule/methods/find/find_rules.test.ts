@@ -128,6 +128,7 @@ describe('find()', () => {
           id: '1',
           type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
+            name: 'fakeRuleName',
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
             params: {
@@ -204,6 +205,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "name": "fakeRuleName",
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -1085,7 +1087,7 @@ describe('find()', () => {
             action: 'rule_find',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
         })
       );
     });
@@ -1124,7 +1126,7 @@ describe('find()', () => {
             action: 'rule_find',
             outcome: 'failure',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeRuleName' } },
           error: {
             code: 'Error',
             message: 'Unauthorized',

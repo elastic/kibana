@@ -15,13 +15,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { ALERT_REASON, ALERT_UUID, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
-import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -89,14 +83,12 @@ export const registerSyntheticsTLSCheckRule = (
         TLSAlert
       >
     ) => {
-      const { state: ruleState, params, services, spaceId, previousStartedAt, startedAt } = options;
+      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
-      const { basePath, share } = server;
-      const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
-        share.url.locators.get(alertsLocatorID);
+      const { basePath } = server;
 
       const tlsRule = new TLSRuleExecutor(
         previousStartedAt,
@@ -118,12 +110,11 @@ export const registerSyntheticsTLSCheckRule = (
         }
 
         const alertId = cert.sha256;
-        const { uuid, start } = alertsClient.report({
+        const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
           state: { ...updateState(ruleState, foundCerts), ...summary },
         });
-        const indexedStartedAt = start ?? startedAt.toISOString();
 
         const payload = {
           [CERT_COMMON_NAME]: cert.common_name,
@@ -136,13 +127,7 @@ export const registerSyntheticsTLSCheckRule = (
         };
 
         const context = {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            uuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+          [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, uuid),
           ...summary,
         };
 
@@ -156,9 +141,7 @@ export const registerSyntheticsTLSCheckRule = (
       await setTLSRecoveredAlertsContext({
         alertsClient,
         basePath,
-        defaultStartedAt: startedAt.toISOString(),
         spaceId,
-        alertsLocator,
         latestPings,
       });
 

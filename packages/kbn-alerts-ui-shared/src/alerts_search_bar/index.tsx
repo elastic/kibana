@@ -16,9 +16,10 @@ import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
 
-const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+export type { AlertsSearchBarProps } from './types';
 
 const EMPTY_RULE_TYPE_IDS: string[] = [];
+const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
 export const AlertsSearchBar = ({
   appName,
