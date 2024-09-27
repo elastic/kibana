@@ -1666,6 +1666,36 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.CreateKnowledgeBaseRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateKnowledgeBaseRequestQuery",
+        "description": [],
+        "signature": [
+          "{ modelId?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.CreateKnowledgeBaseRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateKnowledgeBaseRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ modelId?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.CreateKnowledgeBaseResponse",
         "type": "Type",
         "tags": [],
@@ -4491,6 +4521,21 @@
         "description": [],
         "signature": [
           "Zod.ZodObject<{ resource: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { resource?: string | undefined; }, { resource?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.CreateKnowledgeBaseRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "CreateKnowledgeBaseRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ modelId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { modelId?: string | undefined; }, { modelId?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,

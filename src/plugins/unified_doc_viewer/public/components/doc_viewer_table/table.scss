@@ -62,6 +62,10 @@
   color: $euiColorFullShade;
   vertical-align: top;
 
+  &--highlighted {
+    font-weight: $euiFontWeightBold;
+  }
+
   .euiDataGridRowCell__popover & {
     font-size: $euiFontSizeS;
   }

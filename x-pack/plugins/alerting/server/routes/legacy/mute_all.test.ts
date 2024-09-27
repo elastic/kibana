@@ -37,6 +37,7 @@ describe('muteAllAlertRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_mute_all"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.muteAll.mockResolvedValueOnce();
 
@@ -62,6 +63,18 @@ describe('muteAllAlertRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    muteAllAlertRoute(router, licenseState, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_mute_all"`);
+    expect(config.options?.access).toBe('internal');
   });
 
   it('ensures the alert type gets validated for the license', async () => {

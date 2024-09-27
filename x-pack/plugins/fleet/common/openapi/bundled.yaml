@@ -2938,11 +2938,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
         '400':
           $ref: '#/components/responses/error'
       parameters:

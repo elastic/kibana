@@ -4728,14 +4728,10 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/package_policy"
-                    },
-                    "sucess": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
-                    "item",
-                    "sucess"
+                    "item"
                   ]
                 }
               }

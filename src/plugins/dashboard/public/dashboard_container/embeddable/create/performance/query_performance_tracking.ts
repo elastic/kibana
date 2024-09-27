@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { combineLatest, map, of, pairwise, startWith, switchMap } from 'rxjs';
+
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
-import { apiPublishesPhaseEvents, PublishesPhaseEvents } from '@kbn/presentation-publishing';
-import { combineLatest, map, of, pairwise, startWith, switchMap } from 'rxjs';
+import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+
 import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
-import { pluginServices } from '../../../../services/plugin_services';
+import { coreServices } from '../../../../services/kibana_services';
 import { DashboardLoadType } from '../../../types';
 
 let isFirstDashboardLoadOfSession = true;
@@ -26,7 +28,6 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
 export const startQueryPerformanceTracking = (
   dashboard: PresentationContainer & TracksQueryPerformance
 ) => {
-  const { analytics } = pluginServices.getServices();
   const reportPerformanceMetrics = ({
     timeToData,
     panelCount,
@@ -41,7 +42,7 @@ export const startQueryPerformanceTracking = (
     const duration =
       loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-    reportPerformanceMetricEvent(analytics, {
+    reportPerformanceMetricEvent(coreServices.analytics, {
       eventName: DASHBOARD_LOADED_EVENT,
       duration,
       key1: 'time_to_data',

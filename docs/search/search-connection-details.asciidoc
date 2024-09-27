@@ -1,0 +1,7 @@
+[role="xpack"]
+[[search-space-connection-details]]
+== Find your connection details
+++++
+<titleabbrev>Connection details</titleabbrev>
+++++
+

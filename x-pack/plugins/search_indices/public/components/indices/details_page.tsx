@@ -43,11 +43,18 @@ export const SearchIndexDetailsPage = () => {
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
   const { console: consolePlugin, docLinks, application, history } = useKibana().services;
-  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const {
+    data: index,
+    refetch,
+    isError: isIndexError,
+    isInitialLoading,
+    error: indexLoadingError,
+  } = useIndex(indexName);
   const {
     data: mappings,
     isError: isMappingsError,
     isInitialLoading: isMappingsInitialLoading,
+    error: mappingsError,
   } = useIndexMapping(indexName);
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
@@ -103,6 +110,19 @@ export const SearchIndexDetailsPage = () => {
   const refetchIndex = useCallback(() => {
     refetch();
   }, [refetch]);
+  const indexError = useMemo(
+    () =>
+      isIndexError
+        ? {
+            title: indexLoadingError ? indexLoadingError.body?.error : '',
+            message: indexLoadingError ? indexLoadingError.body?.message : '',
+          }
+        : {
+            title: mappingsError ? mappingsError.body?.error : '',
+            message: mappingsError ? mappingsError.body?.message : '',
+          },
+    [isIndexError, indexLoadingError, mappingsError]
+  );
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
   const moreOptionsPopover = (
@@ -165,7 +185,7 @@ export const SearchIndexDetailsPage = () => {
     >
       {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
-          indexName={indexName}
+          error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
           reloadFunction={refetchIndex}
         />

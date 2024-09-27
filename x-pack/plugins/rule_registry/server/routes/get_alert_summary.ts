@@ -40,6 +40,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },

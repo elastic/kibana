@@ -21,11 +21,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import {
-  RuleNotifyWhen,
-  RuleNotifyWhenType,
-  SanitizedRuleAction,
-} from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 
@@ -557,7 +553,6 @@ describe('action_type_form', () => {
             index: 1,
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -611,7 +606,6 @@ describe('action_type_form', () => {
             index: 1,
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
-            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
           })}
         </IntlProvider>
       );
@@ -650,7 +644,6 @@ function getActionTypeForm({
   messageVariables = { context: [], state: [], params: [] },
   summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
-  defaultNotifyWhenValue,
   ruleTypeId,
   producerId = AlertConsumers.INFRASTRUCTURE,
   featureId = AlertConsumers.INFRASTRUCTURE,
@@ -671,7 +664,6 @@ function getActionTypeForm({
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
   ruleTypeId?: string;
   producerId?: string;
   featureId?: string;
@@ -766,7 +758,6 @@ function getActionTypeForm({
       messageVariables={messageVariables}
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
       producerId={producerId}
       featureId={featureId}
       ruleTypeId={ruleTypeId}

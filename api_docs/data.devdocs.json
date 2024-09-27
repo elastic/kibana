@@ -11789,14 +11789,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/types.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
-            },
-            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12689,22 +12681,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -12757,6 +12733,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -19240,22 +19224,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -19308,6 +19276,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",

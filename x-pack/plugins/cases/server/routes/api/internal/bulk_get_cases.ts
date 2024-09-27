@@ -17,6 +17,9 @@ export const bulkGetCasesRoute = createCasesRoute({
   params: {
     body: escapeHatch,
   },
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     const params = request.body as caseApiV1.CasesBulkGetRequest;
 

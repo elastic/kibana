@@ -30,6 +30,7 @@ export const aggregateRulesRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
+      options: { access: 'internal' },
       validate: {
         body: aggregateRulesRequestBodySchemaV1,
       },

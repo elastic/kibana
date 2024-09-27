@@ -14,6 +14,9 @@ import type { caseApiV1 } from '../../../../common/types/api';
 export const searchCasesRoute = createCasesRoute({
   method: 'post',
   path: `${CASES_INTERNAL_URL}/_search`,
+  routerOptions: {
+    access: 'internal',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

@@ -137,6 +137,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
           search: {} as any,
+          getMaintenanceWindowIds: async () => [],
           getSearchSourceClient: async () => ({} as ISearchStartSearchSource),
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,

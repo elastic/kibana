@@ -25,24 +25,47 @@ export const getKnowledgeBaseEntry = async ({
   id,
   user,
 }: GetKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
-  const filterByUser = [
-    {
-      nested: {
-        path: 'users',
-        query: {
-          bool: {
-            must: [
-              {
-                match: user.profile_uid
-                  ? { 'users.id': user.profile_uid }
-                  : { 'users.name': user.username },
-              },
-            ],
+  const userFilter = {
+    should: [
+      {
+        nested: {
+          path: 'users',
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: user.profile_uid
+                    ? { 'users.id': user.profile_uid }
+                    : { 'users.name': user.username },
+                },
+              ],
+            },
           },
         },
       },
-    },
-  ];
+      {
+        bool: {
+          must_not: [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    filter: {
+                      exists: {
+                        field: 'users',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
   try {
     const response = await esClient.search<EsKnowledgeBaseEntrySchema>({
       query: {
@@ -59,8 +82,9 @@ export const getKnowledgeBaseEntry = async ({
                 ],
               },
             },
-            ...filterByUser,
           ],
+          ...userFilter,
+          minimum_should_match: 1,
         },
       },
       _source: true,

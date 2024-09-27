@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_rules_bulk', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_rules_bulk', () => {
     describe('update rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

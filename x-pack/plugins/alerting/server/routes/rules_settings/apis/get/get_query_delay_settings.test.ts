@@ -37,6 +37,7 @@ describe('getQueryDelaySettingsRoute', () => {
     expect(config).toMatchInlineSnapshot(`
       Object {
         "options": Object {
+          "access": "internal",
           "tags": Array [
             "access:read-query-delay-settings",
           ],

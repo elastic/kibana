@@ -19,7 +19,6 @@ describe('Post Knowledge Base Route', () => {
 
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
   const mockUser = {
     username: 'my_username',
     authentication_realm: {
@@ -40,7 +39,7 @@ describe('Post Knowledge Base Route', () => {
       isModelInstalled: jest.fn().mockResolvedValue(true),
     });
 
-    postKnowledgeBaseRoute(server.router, mockGetElser);
+    postKnowledgeBaseRoute(server.router);
   });
 
   describe('Status codes', () => {

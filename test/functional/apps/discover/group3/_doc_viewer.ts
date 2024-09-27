@@ -66,13 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to search by string', async function () {
-        await discover.findFieldByNameInDocViewer('geo');
+        await discover.findFieldByNameOrValueInDocViewer('geo');
 
         await retry.waitFor('first updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
 
-        await discover.findFieldByNameInDocViewer('.sr');
+        await discover.findFieldByNameOrValueInDocViewer('.sr');
 
         await retry.waitFor('second updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
@@ -80,21 +80,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to search by wildcard', async function () {
-        await discover.findFieldByNameInDocViewer('relatedContent*image');
+        await discover.findFieldByNameOrValueInDocViewer('relatedContent*image');
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
 
       it('should be able to search with spaces as wildcard', async function () {
-        await discover.findFieldByNameInDocViewer('relatedContent image');
+        await discover.findFieldByNameOrValueInDocViewer('relatedContent image');
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
       });
 
       it('should be able to search with fuzzy search (1 typo)', async function () {
-        await discover.findFieldByNameInDocViewer('rel4tedContent.art');
+        await discover.findFieldByNameOrValueInDocViewer('rel4tedContent.art');
 
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should ignore empty search', async function () {
-        await discover.findFieldByNameInDocViewer('   '); // only spaces
+        await discover.findFieldByNameOrValueInDocViewer('   '); // only spaces
 
         await retry.waitFor('the clear button', async () => {
           return await testSubjects.exists('clearSearchButton');
@@ -111,6 +111,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // expect no changes in the list
         await retry.waitFor('all items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+        });
+      });
+
+      it('should be able to search by field value', async function () {
+        await discover.findFieldByNameOrValueInDocViewer('time');
+
+        await retry.waitFor('updates', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
+        });
+      });
+
+      it('should be able to search by field raw value', async function () {
+        await discover.findFieldByNameOrValueInDocViewer('2015-09-22T23:50:13.253Z');
+
+        await retry.waitFor('updates', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
         });
       });
     });
@@ -220,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should hide fields with null values ', async function () {
-        await discover.findFieldByNameInDocViewer('machine');
+        await discover.findFieldByNameOrValueInDocViewer('machine');
         const results = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
