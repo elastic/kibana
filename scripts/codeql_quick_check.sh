@@ -15,7 +15,10 @@ blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
 # Prompt for FILE_TO_ANALYZE if not set
-# Check if the input is a file or a directory
+if [ -z "$FILE_TO_ANALYZE" ]; then
+    read -rp "${blue}${bold}Enter the path to the file you want to analyze: ${reset}" FILE_TO_ANALYZE
+fi
+
 if [ -f "$FILE_TO_ANALYZE" ]; then
     SOURCE_ROOT="$(dirname "$FILE_TO_ANALYZE")"
 elif [ -d "$FILE_TO_ANALYZE" ]; then
