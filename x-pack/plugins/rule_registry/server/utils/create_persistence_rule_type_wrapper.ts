@@ -104,14 +104,6 @@ const augmentAlerts = async <T>({
 };
 
 const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) => {
-  // const sourceNoId = (alertSource) => {
-  //   if (Object.hasOwn(alertSource, '_id')) {
-  //     const { _id, _index, _source, ...source } = alertSource;
-  //     return { ..._source, ...source };
-  //   }
-  //   return alertSource;
-  // };
-  // return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, sourceNoId(alert._source)]); //sourceNoId(alert._source)]);
   return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
 };
 
@@ -644,18 +636,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 // only create building block alerts for the new eql shell alert
                 const matchingBuildingBlockAlerts =
                   newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
-                    ? newAlerts.flatMap((newAlert) =>
-                        getMatchingBuildingBlockAlerts(newAlert?._source)
+                    ? newAlerts.flatMap(
+                        (newAlert) =>
+                          getMatchingBuildingBlockAlerts(newAlert?._source) as Array<{
+                            _id: string;
+                            _source: Record<string, string | number | null>;
+                          }>
                       )
                     : [];
 
                 const augmentedBuildingBlockAlerts =
                   getMatchingBuildingBlockAlerts != null && newAlerts?.length > 0
-                    ? augmentAlerts({
-                        alerts: matchingBuildingBlockAlerts as unknown as Array<{
-                          _id: string;
-                          _source: unknown;
-                        }>,
+                    ? await augmentAlerts({
+                        alerts: matchingBuildingBlockAlerts,
                         options,
                         kibanaVersion: ruleDataClient.kibanaVersion,
                         currentTimeOverride,

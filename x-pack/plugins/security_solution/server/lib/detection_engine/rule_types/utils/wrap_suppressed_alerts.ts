@@ -155,7 +155,7 @@ export const wrapSuppressedSequenceAlerts = ({
     (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
       const fields = sequence.events?.reduce(
         (seqAcc, event) => ({ ...seqAcc, ...event.fields }),
-        {} as Record<string, unknown>
+        {}
       );
       const suppressionTerms = getSuppressionTerms({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
