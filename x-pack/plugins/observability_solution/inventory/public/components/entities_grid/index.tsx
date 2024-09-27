@@ -61,6 +61,21 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
   </>
 );
 
+// TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
+const parseServiceParams = (entityName: string) => {
+  const separatorIndex = entityName.indexOf(':');
+
+  const serviceName = entityName.slice(0, separatorIndex);
+  // Exclude the separator from the sliced string for the environment name.
+  // If the string is empty however, then we default to undefined.
+  const environment = entityName.slice(separatorIndex + 1) || undefined;
+
+  return {
+    serviceName,
+    environment,
+  };
+};
+
 const entityNameLabel = i18n.translate('xpack.inventory.entitiesGrid.euiDataGrid.entityNameLabel', {
   defaultMessage: 'Entity name',
 });
@@ -167,16 +182,13 @@ export function EntitiesGrid({
             assetType: type,
           });
 
-        case 'service': {
+        case 'service':
           // For services, the format of the display name is `service.name:service.environment`.
           // We just want the first part of the name for the locator.
           // TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-          const serviceName = entity[ENTITY_DISPLAY_NAME].split(':')[0];
-
-          return serviceOverviewLocator?.getRedirectUrl({
-            serviceName,
-          });
-        }
+          return serviceOverviewLocator?.getRedirectUrl(
+            parseServiceParams(entity[ENTITY_DISPLAY_NAME])
+          );
       }
     },
     [assetDetailsLocator, serviceOverviewLocator]
