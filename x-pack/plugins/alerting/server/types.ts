@@ -102,27 +102,28 @@ export interface RuleExecutorServices<
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
-  savedObjectsClient: SavedObjectsClientContract;
-  uiSettingsClient: IUiSettingsClient;
-  scopedClusterClient: IScopedClusterClient;
+  /**
+   * Only available when framework alerts are enabled and rule
+   * type has registered alert context with the framework with shouldWrite set to true
+   */
+  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
   /**
    * Deprecate alertFactory and remove when all rules are onboarded to
    * the alertsClient
    * @deprecated
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
-  /**
-   * Only available when framework alerts are enabled and rule
-   * type has registered alert context with the framework with shouldWrite set to true
-   */
-  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
-  shouldWriteAlerts: () => boolean;
-  shouldStopExecution: () => boolean;
-  ruleMonitoringService?: PublicRuleMonitoringService;
-  share: SharePluginStart;
-  ruleResultService?: PublicRuleResultService;
   getDataViews: () => Promise<DataViewsContract>;
+  getMaintenanceWindowIds: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
+  ruleMonitoringService?: PublicRuleMonitoringService;
+  ruleResultService?: PublicRuleResultService;
+  savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: IScopedClusterClient;
+  share: SharePluginStart;
+  shouldStopExecution: () => boolean;
+  shouldWriteAlerts: () => boolean;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export interface RuleExecutorOptions<
@@ -145,7 +146,6 @@ export interface RuleExecutorOptions<
   state: State;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
-  maintenanceWindowIds?: string[];
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
 }
 

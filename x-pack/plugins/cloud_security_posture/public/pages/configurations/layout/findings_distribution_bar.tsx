@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { EuiHealth, EuiBadge, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { statusColors } from '@kbn/cloud-security-posture';
-import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
 

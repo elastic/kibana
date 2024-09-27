@@ -18,7 +18,11 @@ import {
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertUrl, observabilityPaths, ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  getAlertDetailsUrl,
+  observabilityPaths,
+  ProcessorEvent,
+} from '@kbn/observability-plugin/common';
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -128,8 +132,8 @@ export function registerAnomalyRuleType({
         return { state: {} };
       }
 
-      const { params, services, spaceId, startedAt, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { params, services, spaceId, getTimeRange } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -283,6 +287,7 @@ export function registerAnomalyRuleType({
           apmIndices,
           scopedClusterClient,
           savedObjectsClient,
+          uiSettingsClient,
           serviceName,
           environment,
           transactionType,
@@ -302,11 +307,10 @@ export function registerAnomalyRuleType({
 
         const alertId = bucketKey.join('_');
 
-        const { uuid, start } = alertsClient.report({
+        const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: ruleTypeConfig.defaultActionGroupId,
         });
-        const indexedStartedAt = start ?? startedAt.toISOString();
 
         const relativeViewInAppUrl = getAlertUrlTransaction(
           serviceName,
@@ -318,13 +322,7 @@ export function registerAnomalyRuleType({
           spaceId,
           relativeViewInAppUrl
         );
-        const alertDetailsUrl = await getAlertUrl(
-          uuid,
-          spaceId,
-          indexedStartedAt,
-          alertsLocator,
-          basePath.publicBaseUrl
-        );
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
 
         const payload = {
           [SERVICE_NAME]: serviceName,
