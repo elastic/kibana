@@ -64,6 +64,7 @@ export const ReactEmbeddableRenderer = <
     PresentationPanelProps<Api>,
     | 'showShadow'
     | 'showBorder'
+    | 'showBevel'
     | 'showBadges'
     | 'showNotifications'
     | 'hideLoader'

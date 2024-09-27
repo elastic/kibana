@@ -34,8 +34,8 @@ export const SearchLabsBanner: React.FC = () => {
   );
   return (
     <EuiPanel
-      hasBorder
-      hasShadow
+      hasBevel={true}
+      hasShadow={false}
       color="success"
       css={css`
         background-image: url(${backgroundImagePath});

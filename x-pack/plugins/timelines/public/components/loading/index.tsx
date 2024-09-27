@@ -20,6 +20,7 @@ export interface LoadingPanelProps {
   text: string | React.ReactNode;
   height: number | string;
   showBorder?: boolean;
+  showBevel?: boolean;
   width: number | string;
   zIndex?: number | string;
   position?: string;
@@ -29,7 +30,8 @@ export const LoadingPanel = React.memo<LoadingPanelProps>(
   ({
     dataTestSubj = '',
     height = 'auto',
-    showBorder = true,
+    showBorder = false,
+    showBevel = true,
     text,
     width,
     position = 'relative',

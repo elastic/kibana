@@ -33,6 +33,7 @@ export interface ProductCardProps {
   emptyCta?: boolean;
   hasBorder?: boolean;
   hasShadow?: boolean;
+  hasBevel?: boolean;
   icon: IconType;
   iconSize?: IconSize;
   name: string;
@@ -47,6 +48,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   emptyCta = false,
   hasBorder,
   hasShadow,
+  hasBevel,
   icon,
   iconSize,
   productId,
@@ -60,6 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     <EuiPanel
       hasBorder={hasBorder ?? true}
       hasShadow={hasShadow ?? true}
+      hasBevel={hasBevel ?? true}
       paddingSize="l"
       data-test-subj={`${productId}ProductCard`}
       className="productCard"

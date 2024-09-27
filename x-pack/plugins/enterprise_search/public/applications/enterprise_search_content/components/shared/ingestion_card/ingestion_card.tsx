@@ -43,7 +43,8 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
 }) => {
   return (
     <EuiCard
-      hasBorder
+      hasBevel
+      hasShadow={false}
       isDisabled={isDisabled}
       textAlign="left"
       titleElement="h3"

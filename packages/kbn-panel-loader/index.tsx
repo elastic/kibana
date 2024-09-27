@@ -14,6 +14,7 @@ import { css } from '@emotion/react';
 export const PanelLoader = (props: {
   showShadow?: boolean;
   showBorder?: boolean;
+  showBevel?: boolean;
   dataTestSubj?: string;
 }) => {
   return (
@@ -33,6 +34,7 @@ export const PanelLoader = (props: {
       paddingSize="none"
       hasShadow={props.showShadow}
       hasBorder={props.showBorder}
+      hasBevel={props.showBevel}
       data-test-subj={props.dataTestSubj}
     >
       <EuiLoadingChart size="l" mono />

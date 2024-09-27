@@ -310,10 +310,10 @@ export const SelectConnector: React.FC = () => {
             value={searchTerm}
             fullWidth
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="l" />
           <EuiFlexGrid columns={3}>
             {filteredConnectors.map((connector) => (
-              <EuiFlexItem key={connector.name} grow>
+              <EuiFlexItem key={connector.name} grow >
                 <ConnectorCheckable
                   showNativePopover={(!hasNativeAccess && useNativeFilter) ?? false}
                   showLicensePopover={connector.platinumOnly && !hasPlatinumLicense && !isCloud}
