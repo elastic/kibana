@@ -19,7 +19,9 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
-    elasticsearchUrl: 'elasticsearch-url',
+    fetchElasticsearchConfig: jest
+      .fn()
+      .mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
     kibanaUrl: 'kibana-url',
     cloudHost: 'cloud-host',
     cloudDefaultPort: '443',
@@ -53,6 +55,7 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   serverless: {
     projectId: undefined,
   },
+  fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
 });
 
 export const cloudMock = {

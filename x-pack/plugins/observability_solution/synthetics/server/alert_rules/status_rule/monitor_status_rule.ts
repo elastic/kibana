@@ -14,16 +14,16 @@ import {
   RuleExecutorOptions,
   AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';
-import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema, StatusRuleParams } from '../../../common/rules/status_rule';
 import {
@@ -33,7 +33,6 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
@@ -105,7 +104,7 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {

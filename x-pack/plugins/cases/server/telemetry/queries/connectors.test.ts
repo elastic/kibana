@@ -7,11 +7,13 @@
 
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getConnectorsTelemetryData } from './connectors';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 describe('getConnectorsTelemetryData', () => {
   describe('getConnectorsTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
 
     const mockFind = (aggs: Record<string, unknown>) => {
       savedObjectsClient.find.mockResolvedValueOnce({
@@ -42,7 +44,10 @@ describe('getConnectorsTelemetryData', () => {
     it('it returns the correct res', async () => {
       mockResponse();
 
-      const res = await getConnectorsTelemetryData({ savedObjectsClient, logger });
+      const res = await getConnectorsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           all: {
@@ -71,7 +76,7 @@ describe('getConnectorsTelemetryData', () => {
     it('should call find with correct arguments', async () => {
       mockResponse();
 
-      await getConnectorsTelemetryData({ savedObjectsClient, logger });
+      await getConnectorsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
 
       expect(savedObjectsClient.find.mock.calls[0][0]).toEqual({
         aggs: {
@@ -101,6 +106,7 @@ describe('getConnectorsTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
 
       expect(savedObjectsClient.find.mock.calls[1][0]).toEqual({
@@ -151,6 +157,7 @@ describe('getConnectorsTelemetryData', () => {
         page: 0,
         perPage: 0,
         type: 'cases-user-actions',
+        namespaces: ['*'],
       });
 
       for (const [index, connector] of [
@@ -205,6 +212,7 @@ describe('getConnectorsTelemetryData', () => {
           page: 0,
           perPage: 0,
           type: 'cases-user-actions',
+          namespaces: ['*'],
         });
       }
     });
