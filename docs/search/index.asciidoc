@@ -10,8 +10,8 @@ The *Search* space in {kib} comprises the following features:
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-application-overview.html[Search Applications]
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html[Behavioral Analytics]
 * Inference Endpoints UI
-* AI Assistant for Search (coming in 8.16.0)
-* Persistent Dev Tools<<console-kibana, Console>>
+* AI Assistant for Search
+* Persistent Dev Tools <<console-kibana, Console>>
 
 [float]
 [[search-release-notes]]
