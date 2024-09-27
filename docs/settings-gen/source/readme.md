@@ -1,6 +1,5 @@
 Settings YAML file schema
 
-
 ```
 product: <Required (string) - the Elastic product name, e.g. 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'>
 collection: <Required (string) - the settings page title, e.g. Alerting and action settings in Kibana>
@@ -31,8 +30,6 @@ groups:
           - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
           - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
           - "`option-name` - description" <Optional (asciidoc enclosed in single or double quotation marks) - Text to describe the setting option.
-
-        # [Required] Any of `self-managed`, `cloud', and 'serverless'. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option description, above.
         platforms:
           - <Optional (one of 'self-managed', 'cloud', or 'serverless') - List each environment where the setting is available. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option-name details, above.
           - <Optional (one of 'self-managed', 'cloud', or 'serverless')
