@@ -316,7 +316,7 @@ export class DashboardContainer
             lastSavedId: undefined,
             managed: false,
           },
-      this.untilEmbeddableLoaded
+      (id: string) => this.untilEmbeddableLoaded(id)
     );
     this.animatePanelTransforms$ = dashboardApi.animatePanelTransforms$;
     this.fullScreenMode$ = dashboardApi.fullScreenMode$;
