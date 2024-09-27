@@ -15,7 +15,7 @@ used as it permits to skip the metadata.
 
 ## Usage
 
-Construct a `source` expression node:
+Construct a `literal` expression node:
 
 ```typescript
 import { Builder } from '@kbn/esql-ast';
