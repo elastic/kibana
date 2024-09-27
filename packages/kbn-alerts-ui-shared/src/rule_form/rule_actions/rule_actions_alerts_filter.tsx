@@ -1,35 +1,61 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { AlertsFilter } from '@kbn/alerting-plugin/common';
+import type { AlertsFilter } from '@kbn/alerting-types';
 import deepEqual from 'fast-deep-equal';
-import { AlertsSearchBar, AlertsSearchBarProps } from '../alerts_search_bar';
+import { useRuleFormState } from '../hooks';
+import { RuleAction } from '../../common';
+import { RuleFormPlugins } from '../types';
+import { AlertsSearchBar, AlertsSearchBarProps } from '../../alerts_search_bar';
 
-interface ActionAlertsFilterQueryProps {
-  state?: AlertsFilter['query'];
+const DEFAULT_QUERY = { kql: '', filters: [] };
+
+export interface RuleActionsAlertsFilterProps {
+  action: RuleAction;
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
   featureIds: ValidFeatureId[];
   ruleTypeId?: string;
+  plugins?: {
+    http: RuleFormPlugins['http'];
+    notifications: RuleFormPlugins['notifications'];
+    unifiedSearch: RuleFormPlugins['unifiedSearch'];
+    dataViews: RuleFormPlugins['dataViews'];
+  };
 }
 
-export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = ({
-  state,
+export const RuleActionsAlertsFilter = ({
+  action,
   onChange,
   appName,
   featureIds,
   ruleTypeId,
-}) => {
-  const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
+  plugins: propsPlugins,
+}: RuleActionsAlertsFilterProps) => {
+  const { plugins } = useRuleFormState();
+  const {
+    http,
+    notifications: { toasts },
+    unifiedSearch,
+    dataViews,
+  } = propsPlugins || plugins;
+
+  const [query, setQuery] = useState(action.alertsFilter?.query ?? DEFAULT_QUERY);
+
+  const state = useMemo(() => {
+    return action.alertsFilter?.query;
+  }, [action]);
 
   const queryEnabled = useMemo(() => Boolean(state), [state]);
 
@@ -66,7 +92,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
     <>
       <EuiSwitch
         label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
+          'alertsUIShared.ruleActionsAlertsFilter.ActionAlertsFilterQueryToggleLabel',
           {
             defaultMessage: 'If alert matches a query',
           }
@@ -79,6 +105,10 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
         <>
           <EuiSpacer size="s" />
           <AlertsSearchBar
+            http={http}
+            toasts={toasts}
+            unifiedSearchBar={unifiedSearch.ui.SearchBar}
+            dataViewsService={dataViews}
             appName={appName}
             featureIds={featureIds}
             ruleTypeId={ruleTypeId}
@@ -93,7 +123,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
             showDatePicker={false}
             showSubmitButton={false}
             placeholder={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryPlaceholder',
+              'alertsUIShared.ruleActionsAlertsFilter.ActionAlertsFilterQueryPlaceholder',
               {
                 defaultMessage: 'Filter alerts using KQL syntax',
               }
