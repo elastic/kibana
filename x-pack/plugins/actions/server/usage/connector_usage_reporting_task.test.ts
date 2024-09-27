@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import axios from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -15,7 +16,6 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
-  CONNECTOR_USAGE_REPORTING_MISSING_ID,
   CONNECTOR_USAGE_REPORTING_SOURCE_ID,
   CONNECTOR_USAGE_REPORTING_TASK_ID,
   CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE,
@@ -35,6 +35,7 @@ const nowDate = new Date(nowStr);
 
 jest.useFakeTimers();
 jest.setSystemTime(nowDate.getTime());
+jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('---CA CERTIFICATE---');
 
 describe('ConnectorUsageReportingTask', () => {
   const logger = loggingSystemMock.createLogger();
@@ -63,7 +64,7 @@ describe('ConnectorUsageReportingTask', () => {
     attempts = 0,
   }: {
     lastReportedUsageDate: Date;
-    projectId?: string;
+    projectId: string;
     attempts?: number;
   }) => {
     const timestamp = new Date(new Date().setMinutes(-15));
@@ -73,6 +74,7 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core: mockCore,
       taskManager: mockTaskManagerSetup,
+      caCertificatePath: './ca.crt',
     });
 
     await task.start(mockTaskManagerStart);
@@ -109,6 +111,7 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core: createSetup(),
       taskManager: mockTaskManagerSetup,
+      caCertificatePath: './ca.crt',
     });
 
     expect(mockTaskManagerSetup.registerTaskDefinitions).toBeCalledTimes(1);
@@ -131,6 +134,7 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
+      caCertificatePath: './ca.crt',
     });
 
     await task.start(taskManagerStart);
@@ -157,6 +161,7 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
+      caCertificatePath: './ca.crt',
     });
 
     await task.start();
@@ -178,6 +183,7 @@ describe('ConnectorUsageReportingTask', () => {
       logger,
       core,
       taskManager: mockTaskManagerSetup,
+      caCertificatePath: './ca.crt',
     });
 
     await task.start(taskManagerStart);
@@ -298,46 +304,6 @@ describe('ConnectorUsageReportingTask', () => {
 
     expect(logger.error).toHaveBeenCalledWith(
       'Usage data could not be pushed to usage-api. Stopped retrying after 5 attempts. Error:test-error'
-    );
-  });
-
-  it('logs a warning if the projectId is missing', async () => {
-    mockEsClient.search.mockResolvedValueOnce({
-      aggregations: { total_usage: 50 },
-    } as SearchResponse<unknown, unknown>);
-
-    mockedAxiosPost.mockResolvedValueOnce(200);
-
-    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
-    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
-
-    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: undefined });
-
-    await taskRunner.run();
-
-    const report = {
-      creation_timestamp: nowStr,
-      id: `connector-request-body-bytes-${lastReportedUsageDateStr}-${nowStr}`,
-      source: {
-        id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
-        instance_group_id: CONNECTOR_USAGE_REPORTING_MISSING_ID,
-      },
-      usage: {
-        period_seconds: 43200,
-        quantity: 0,
-        type: 'connector_request_body_bytes',
-      },
-      usage_timestamp: nowStr,
-    };
-
-    expect(mockedAxiosPost).toHaveBeenCalledWith(USAGE_API_URL, report, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 30000,
-      httpsAgent: expect.any(Object),
-    });
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      'project id missing for records starting from 2024-01-01T12:00:00.000Z'
     );
   });
 });

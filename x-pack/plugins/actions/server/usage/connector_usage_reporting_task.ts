@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import { Logger, CoreSetup, type ElasticsearchClient } from '@kbn/core/server';
 import {
   IntervalSchedule,
@@ -24,14 +25,14 @@ export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
 export const CONNECTOR_USAGE_TYPE = `connector_request_body_bytes`;
-export const CONNECTOR_USAGE_REPORTING_MISSING_ID = `missing_project_id`;
 export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`;
 export const MAX_PUSH_ATTEMPTS = 5;
 
 export class ConnectorUsageReportingTask {
-  private readonly projectId: string | undefined;
+  private readonly projectId: string;
   private readonly logger: Logger;
   private readonly eventLogIndex: string;
+  private readonly caCertificate: string;
 
   constructor({
     logger,
@@ -39,16 +40,19 @@ export class ConnectorUsageReportingTask {
     core,
     taskManager,
     projectId,
+    caCertificatePath,
   }: {
     logger: Logger;
     eventLogIndex: string;
     core: CoreSetup<ActionsPluginsStart>;
     taskManager: TaskManagerSetupContract;
-    projectId?: string;
+    projectId: string;
+    caCertificatePath: string;
   }) {
     this.projectId = projectId;
     this.logger = logger;
     this.eventLogIndex = eventLogIndex;
+    this.caCertificate = fs.readFileSync(caCertificatePath, 'utf8');
 
     taskManager.registerTaskDefinitions({
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
@@ -127,6 +131,9 @@ export class ConnectorUsageReportingTask {
     try {
       attempts = attempts + 1;
       await this.pushUsageRecord(record);
+      this.logger.info(
+        `Connector usage record has been successfully reported, ${record.creation_timestamp}, usage: ${record.usage.quantity}, period:${record.usage.period_seconds}`
+      );
     } catch (e) {
       if (attempts < MAX_PUSH_ATTEMPTS) {
         this.logger.error(
@@ -220,10 +227,6 @@ export class ConnectorUsageReportingTask {
     const fromStr = fromDate.toISOString();
     const toStr = toDate.toISOString();
 
-    if (!this.projectId) {
-      this.logger.warn(`project id missing for records starting from ${toStr}`);
-    }
-
     return {
       id: `connector-request-body-bytes-${fromStr}-${toStr}`,
       usage_timestamp: toStr,
@@ -235,7 +238,7 @@ export class ConnectorUsageReportingTask {
       },
       source: {
         id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
-        instance_group_id: this.projectId || CONNECTOR_USAGE_REPORTING_MISSING_ID,
+        instance_group_id: this.projectId,
       },
     };
   };
@@ -244,9 +247,8 @@ export class ConnectorUsageReportingTask {
     return axios.post(USAGE_API_URL, record, {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
-      // TODO remove when CRT is added
       httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
+        ca: this.caCertificate,
       }),
     });
   };
