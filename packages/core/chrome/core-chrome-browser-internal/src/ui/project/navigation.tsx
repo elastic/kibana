@@ -42,7 +42,6 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
       }, 50);
     });
 
-    // Observe changes to the document's styles or any element that might influence the variable
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['style'],
