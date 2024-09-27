@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, map, of, pairwise, startWith, switchMap, skipWhile, filter } from 'rxjs';
+import { combineLatest, map, pairwise, startWith, switchMap } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
