@@ -9,6 +9,7 @@ import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import {
   isLensBrushEvent,
+  isLensEditEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
@@ -27,7 +28,7 @@ export const prepareEventHandler =
     api: LensApi,
     getState: GetStateType,
     callbacks: LensPublicCallbacks,
-    { data, uiActions }: LensEmbeddableStartServices,
+    { data, uiActions, visualizationMap }: LensEmbeddableStartServices,
     disableTriggers: boolean | undefined
   ) =>
   async (event: ExpressionRendererEvent) => {
@@ -84,5 +85,25 @@ export const prepareEventHandler =
           true
         );
       }
+    }
+
+    const onEditAction = currentState.attributes.visualizationType
+      ? visualizationMap[currentState.attributes.visualizationType]?.onEditAction
+      : undefined;
+
+    // We allow for edit actions in the Embeddable for display purposes only (e.g. changing the datatable sort order).
+    // No state changes made here with an edit action are persisted.
+    if (isLensEditEvent(event) && onEditAction) {
+      // updating the state would trigger a reload
+      api.updateState({
+        ...currentState,
+        attributes: {
+          ...currentState.attributes,
+          state: {
+            ...currentState.attributes.state,
+            visualization: onEditAction(currentState.attributes.state.visualization, event),
+          },
+        },
+      });
     }
   };
