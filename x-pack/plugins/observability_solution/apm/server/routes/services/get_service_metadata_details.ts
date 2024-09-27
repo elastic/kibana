@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { serviceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   KUBERNETES_CONTAINER_NAME,
@@ -59,7 +60,6 @@ import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { normalizeFields } from '../../utils/normalize_fields';
 import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -243,7 +243,7 @@ export async function getServiceMetadataDetails({
 
   const fields = response.hits.hits[0]?.fields;
   // todo: missing `fields` property?
-  const fieldsNorm = (fields ? normalizeFields(fields) : undefined) as
+  const fieldsNorm = (fields ? serviceMetadataDetailsMapping(fields) : undefined) as
     | ServiceMetadataDetailsRaw
     | undefined;
 

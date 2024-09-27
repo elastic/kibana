@@ -66,6 +66,7 @@ import {
   CONTAINER_ID,
   CONTAINER_IMAGE,
   CLOUD_PROVIDER,
+  CLOUD_INSTANCE_NAME,
   AGENT_ACTIVATION_METHOD,
   HOST_ARCHITECTURE,
   HOST_HOSTNAME,
@@ -84,6 +85,16 @@ import {
   SERVICE_TARGET_NAME,
   SERVICE_TARGET_TYPE,
   SPAN_REPRESENTATIVE_COUNT,
+  SERVICE_LANGUAGE_VERSION,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_ID,
+  CLOUD_MACHINE_TYPE,
+  CLOUD_PROJECT_ID,
+  CLOUD_PROJECT_NAME,
+  CLOUD_REGION,
+  CLOUD_ACCOUNT_ID,
+  CLOUD_ACCOUNT_NAME,
+  CLOUD_IMAGE_ID,
 } from '@kbn/apm-types';
 import {
   KUBERNETES_CONTAINER_NAME,
@@ -102,7 +113,10 @@ import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
-
+type ServiceMetadataDetailsRaw = Pick<
+  TransactionRaw,
+  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
+>;
 const normalizeValue = <T>(field: unknown[] | unknown): T => {
   return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
 };
@@ -533,43 +547,160 @@ export const errorSampleDetailsMapping = (
   };
 };
 
+export const serviceMetadataDetailsMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): ServiceMetadataDetailsRaw | undefined => {
+  if (!fields) return undefined;
+  const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
+  const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
+  const cloudServiceName = normalizeValue<string>(fields[CLOUD_PROVIDER]);
+  return {
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      runtime: {
+        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+      },
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
+      },
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: normalizeValue<AgentName>(fields[AGENT_VERSION]),
+    },
+    host: {
+      architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
+      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      name: normalizeValue<string>(fields[HOST_NAME]),
+      ip: normalizeValue<string>(fields[HOST_IP]),
+      os: {
+        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
+      },
+    },
+    ...(containerId
+      ? {
+          container: {
+            id: containerId,
+            image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
+          },
+        }
+      : undefined),
+    ...(kubernetesNamespace
+      ? {
+          kubernetes: {
+            pod: {
+              name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+              uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+            },
+            namespace: kubernetesNamespace,
+            replicaset: {
+              name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
+            },
+            deployment: {
+              name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
+            },
+            container: {
+              id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
+              name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
+            },
+          },
+        }
+      : undefined),
+    ...(cloudServiceName
+      ? {
+          cloud: {
+            availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
+            instance: {
+              name: normalizeValue<string>(fields[CLOUD_INSTANCE_NAME]),
+              id: normalizeValue<string>(fields[CLOUD_INSTANCE_ID]),
+            },
+            machine: {
+              type: normalizeValue<string>(fields[CLOUD_MACHINE_TYPE]),
+            },
+            project: {
+              id: normalizeValue<string>(fields[CLOUD_PROJECT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_PROJECT_NAME]),
+            },
+            provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            region: normalizeValue<string>(fields[CLOUD_REGION]),
+            account: {
+              id: normalizeValue<string>(fields[CLOUD_ACCOUNT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_ACCOUNT_NAME]),
+            },
+            image: {
+              id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
+            },
+            service: {
+              name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            },
+          },
+        }
+      : undefined),
+  };
+};
+
 export const serviceMetadataIconsMapping = (
   fields: Partial<Record<string, unknown[]>>
 ): ServiceMetadataIconsRaw | undefined => {
   if (!fields) return undefined;
-
+  const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
+  const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
+  const cloudServiceName = normalizeValue<string>(fields[CLOUD_PROVIDER]);
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: '',
     },
-    cloud: {
-      provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
-      service: {
-        name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
-      },
-    },
-    container: {
-      id: normalizeValue<string>(fields[CONTAINER_ID]),
-      image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
-    },
-    kubernetes: {
-      pod: {
-        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
-        id: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
-      },
-      namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
-      replicaset: {
-        name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
-      },
-      deployment: {
-        name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
-      },
-      container: {
-        id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
-        name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
-      },
-    },
+    ...(cloudServiceName
+      ? {
+          cloud: {
+            provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            service: {
+              name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            },
+          },
+        }
+      : undefined),
+    ...(containerId
+      ? {
+          container: {
+            id: containerId,
+            image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
+          },
+        }
+      : undefined),
+    ...(kubernetesNamespace
+      ? {
+          kubernetes: {
+            pod: {
+              name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+              uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+            },
+            namespace: kubernetesNamespace,
+            replicaset: {
+              name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
+            },
+            deployment: {
+              name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
+            },
+            container: {
+              id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
+              name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
+            },
+          },
+        }
+      : undefined),
   };
 };
 
