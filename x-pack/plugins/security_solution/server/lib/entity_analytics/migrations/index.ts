@@ -18,5 +18,7 @@ export interface EntityAnalyticsMigrationsParams {
 }
 
 export const scheduleEntityAnalyticsMigration = (params: EntityAnalyticsMigrationsParams) => {
-  scheduleAssetCriticalityEcsCompliancyMigration(params);
+  const scopedLogger = params.logger.get('entityAnalytics.migration');
+
+  scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
 };

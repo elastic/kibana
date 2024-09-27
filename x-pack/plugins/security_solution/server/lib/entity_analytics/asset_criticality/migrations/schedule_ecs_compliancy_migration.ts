@@ -109,7 +109,9 @@ const createMigrationTask =
 // [X] single use kibana task which does the data migration using update by query, (in batches of 1k ?)
 // [X] kibana task only ever runs once
 // [X] Asset criticality APIs should be usable because the mapping is done on startup
-// [ ] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasnt finished)
-// [ ] test with lots of data
-// [ ] make looger append asset-criticality-ecs-migration to the logger context
+// [x] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasn't finished)
+// [x] make logger append asset-criticality-ecs-migration to the logger context
+// [ ] write unit tests
+
 // [ ] bundle size might get very big because of the client import
+// [ ] test with lots of data

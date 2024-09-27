@@ -214,15 +214,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       });
     }
 
-    // const esClient = (await context.core).elasticsearch.client;
-    // const esClient = (await context.core).elasticsearch.client;
     scheduleEntityAnalyticsMigration({
-      // coreStartPromise,
-      // pluginStartPromise,
       getStartServices: core.getStartServices,
-      kibanaVersion: pluginContext.env.packageInfo.version,
       taskManager: plugins.taskManager,
       logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
     });
 
     const requestContextFactory = new RequestContextFactory({
