@@ -43,6 +43,23 @@ Check the [requirements guidelines](https://www.elastic.co/guide/en/integrations
 Point the reader to the [Observability Getting started guide](https://www.elastic.co/guide/en/observability/master/observability-get-started.html) for generic, step-by-step instructions. Include any additional setup instructions beyond what’s included in the guide, which may include instructions to update the configuration of a third-party service.
 Check the [setup guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-setup) for more information.
 
+### Enabling the integration in Elastic:
+
+#### Create a new integration from a Zip file (optional)
+1. In Kibana go to Management > Integrations.
+2. Select "Create new integration"
+3. Select "Upload it as a .zip"
+4. Upload the .zip 
+5. Select "Add to elastic"
+
+### Install the integration
+1. In Kibana go to Management > Integrations.
+2. In "Search for integrations" search bar, type {{ package_name }}.
+3. Click on the "{{ package_name }}" integration from the search results.
+4. Click on the "Add {{ package_name }}" button to add the integration.
+5. Add all the required integration configuration parameters.
+6. Click on "Save and continue" to save the integration.
+
 ## Troubleshooting (optional)
 
 - If some fields appear conflicted under the ``logs-*`` or ``metrics-*`` data views, this issue can be resolved by [reindexing](https://www.elastic.co/guide/en/elasticsearch/reference/current/use-a-data-stream.html#reindex-with-a-data-stream) the concerned data stream.
