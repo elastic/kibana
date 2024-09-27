@@ -67,7 +67,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         return await testSubjects.exists('common-flyout-cancel');
       });
       await testSubjects.click('common-flyout-cancel');
-      await testSubjects.click('euiFlyoutCloseButton');
     });
   });
 }
