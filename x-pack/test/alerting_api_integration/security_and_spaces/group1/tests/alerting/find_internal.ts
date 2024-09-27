@@ -6,27 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { Space } from '../../../../common/types';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-const findTestUtils = (
-  describeType: 'internal' | 'public',
-  objectRemover: ObjectRemover,
-  supertest: SuperTestAgent,
-  supertestWithoutAuth: SupertestWithoutAuthProviderType
-) => {
-  describe(describeType, () => {
+// eslint-disable-next-line import/no-default-export
+export default function createFindTests({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  describe('find internal', () => {
+    const objectRemover = new ObjectRemover(supertest);
+
     afterEach(async () => {
       await objectRemover.removeAll();
     });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
@@ -37,11 +38,7 @@ const findTestUtils = (
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -97,14 +94,10 @@ const findTestUtils = (
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
-                ...(describeType === 'internal'
-                  ? {
-                      monitoring: match.monitoring,
-                      snooze_schedule: match.snooze_schedule,
-                      ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-                      is_snoozed_until: null,
-                    }
-                  : {}),
+                monitoring: match.monitoring,
+                snooze_schedule: match.snooze_schedule,
+                ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                is_snoozed_until: null,
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -115,49 +108,20 @@ const findTestUtils = (
         });
 
         it('should filter out types that the user is not authorized to `get` retaining pagination', async () => {
-          async function createNoOpAlert(overrides = {}) {
-            const alert = getTestRuleData(overrides);
-            const { body: createdAlert } = await supertest
-              .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(alert)
-              .expect(200);
-            objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
-            return {
-              id: createdAlert.id,
-              rule_type_id: alert.rule_type_id,
-            };
-          }
-          function createRestrictedNoOpAlert() {
-            return createNoOpAlert({
-              rule_type_id: 'test.restricted-noop',
-              consumer: 'alertsRestrictedFixture',
-            });
-          }
-          function createUnrestrictedNoOpAlert() {
-            return createNoOpAlert({
-              rule_type_id: 'test.unrestricted-noop',
-              consumer: 'alertsFixture',
-            });
-          }
           const allAlerts = [];
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createRestrictedNoOpAlert());
-          allAlerts.push(await createUnrestrictedNoOpAlert());
-          allAlerts.push(await createUnrestrictedNoOpAlert());
-          allAlerts.push(await createRestrictedNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createRestrictedNoOpAlert(space));
+          allAlerts.push(await createUnrestrictedNoOpAlert(space));
+          allAlerts.push(await createUnrestrictedNoOpAlert(space));
+          allAlerts.push(await createRestrictedNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
 
           const perPage = 4;
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -199,23 +163,24 @@ const findTestUtils = (
               expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(8);
 
-              {
-                const [firstPage, secondPage] = chunk(
-                  allAlerts.map((alert) => alert.id),
-                  perPage
-                );
-                expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
+              const [firstPage, secondPage] = chunk(
+                allAlerts.map((alert) => alert.id),
+                perPage
+              );
+              expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
-                const secondResponse = await supertestWithoutAuth
-                  .get(
-                    `${getUrlPrefix(space.id)}/${
-                      describeType === 'public' ? 'api' : 'internal'
-                    }/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
-                  )
-                  .auth(user.username, user.password);
+              const secondResponse = await supertestWithoutAuth
+                .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .send({
+                  per_page: perPage,
+                  sort_field: 'createdAt',
+                  page: '2',
+                });
 
-                expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
-              }
+              expect(secondResponse.statusCode).to.eql(200);
+              expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
 
               break;
             default:
@@ -254,11 +219,7 @@ const findTestUtils = (
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -320,14 +281,10 @@ const findTestUtils = (
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
-                ...(describeType === 'internal'
-                  ? {
-                      monitoring: match.monitoring,
-                      snooze_schedule: match.snooze_schedule,
-                      ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-                      is_snoozed_until: null,
-                    }
-                  : {}),
+                monitoring: match.monitoring,
+                snooze_schedule: match.snooze_schedule,
+                ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+                is_snoozed_until: null,
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -368,11 +325,7 @@ const findTestUtils = (
           objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -408,19 +361,15 @@ const findTestUtils = (
                 id: createdAlert.id,
                 actions: [],
                 tags: [myTag],
-                ...(describeType === 'internal' && {
-                  snooze_schedule: [],
-                  is_snoozed_until: null,
-                }),
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
-                ...(describeType === 'internal' && {
-                  snooze_schedule: [],
-                  is_snoozed_until: null,
-                }),
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               break;
             default:
@@ -459,11 +408,7 @@ const findTestUtils = (
           objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(space.id)}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -500,20 +445,16 @@ const findTestUtils = (
                 actions: [],
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
-                ...(describeType === 'internal' && {
-                  snooze_schedule: [],
-                  is_snoozed_until: null,
-                }),
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
-                ...(describeType === 'internal' && {
-                  snooze_schedule: [],
-                  is_snoozed_until: null,
-                }),
+                snooze_schedule: [],
+                is_snoozed_until: null,
               });
               break;
             default:
@@ -530,11 +471,7 @@ const findTestUtils = (
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix('other')}/${
-                describeType === 'public' ? 'api' : 'internal'
-              }/alerting/rules/_find`
-            )
+            .post(`${getUrlPrefix('other')}/internal/alerting/rules/_find`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -569,23 +506,93 @@ const findTestUtils = (
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should filter by rule type IDs correctly', async () => {
+          await createNoOpAlert(space);
+          await createRestrictedNoOpAlert(space);
+          await createUnrestrictedNoOpAlert(space);
+
+          const perPage = 10;
+          const ruleTypeIds = ['test.restricted-noop', 'test.noop'];
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              per_page: perPage,
+              sort_field: 'createdAt',
+              rule_type_ids: ruleTypeIds,
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find rules for any rule types`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.total).to.be.equal(1);
+
+              expect(
+                response.body.data.every(
+                  (rule: { rule_type_id: string }) => rule.rule_type_id === 'test.noop'
+                )
+              ).to.be.eql(true);
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.total).to.be.equal(2);
+
+              expect(
+                response.body.data.every((rule: { rule_type_id: string }) =>
+                  ruleTypeIds.includes(rule.rule_type_id)
+                )
+              ).to.be.eql(true);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
-  });
-};
 
-// eslint-disable-next-line import/no-default-export
-export default function createFindTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+    async function createNoOpAlert(space: Space, overrides = {}) {
+      const alert = getTestRuleData(overrides);
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(alert)
+        .expect(200);
 
-  describe('find with post', () => {
-    const objectRemover = new ObjectRemover(supertest);
+      objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-    afterEach(async () => {
-      await objectRemover.removeAll();
-    });
+      return {
+        id: createdAlert.id,
+        rule_type_id: alert.rule_type_id,
+      };
+    }
 
-    findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
+    function createRestrictedNoOpAlert(space: Space) {
+      return createNoOpAlert(space, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
+      });
+    }
+
+    function createUnrestrictedNoOpAlert(space: Space) {
+      return createNoOpAlert(space, {
+        rule_type_id: 'test.unrestricted-noop',
+        consumer: 'alertsFixture',
+      });
+    }
   });
 }

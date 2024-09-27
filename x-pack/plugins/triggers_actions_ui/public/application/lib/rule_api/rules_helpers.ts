@@ -24,7 +24,7 @@ export interface LoadRulesProps {
   ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
   kueryNode?: KueryNode;
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
   hasReference?: {
     type: string;
     id: string;

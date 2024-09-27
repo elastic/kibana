@@ -8,8 +8,13 @@
 export { findRulesRequestQuerySchema } from './schemas/latest';
 export type { FindRulesRequestQuery, FindRulesResponse } from './types/latest';
 
-export { findRulesRequestQuerySchema as findRulesRequestQuerySchemaV1 } from './schemas/v1';
+export {
+  findRulesRequestQuerySchema as findRulesRequestQuerySchemaV1,
+  findRulesInternalRequestQuerySchema as findRulesInternalRequestQuerySchemaV1,
+} from './schemas/v1';
+
 export type {
   FindRulesRequestQuery as FindRulesRequestQueryV1,
+  FindRulesInternalRequestQuery as FindRulesInternalRequestQueryV1,
   FindRulesResponse as FindRulesResponseV1,
 } from './types/latest';

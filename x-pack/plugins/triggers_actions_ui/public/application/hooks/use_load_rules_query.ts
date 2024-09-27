@@ -20,7 +20,7 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
   sort: LoadRulesProps['sort'];
   enabled: boolean;
   refresh?: Date;
-  filterConsumers?: string[];
+  ruleTypeIds?: string[];
   hasReference?: {
     type: string;
     id: string;
@@ -28,7 +28,7 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
 };
 
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
-  const { filterConsumers, filters, page, sort, onPage, enabled, refresh, hasReference } = props;
+  const { ruleTypeIds, filters, page, sort, onPage, enabled, refresh, hasReference } = props;
   const {
     http,
     notifications: { toasts },
@@ -56,7 +56,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       {
         refresh: refresh?.toISOString(),
       },
-      filterConsumers,
+      ruleTypeIds,
       hasReference,
     ],
     queryFn: () => {
@@ -73,7 +73,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         tagsFilter: filters.tags,
         kueryNode: filters.kueryNode,
         sort,
-        filterConsumers,
+        ruleTypeIds,
         hasReference,
       });
     },

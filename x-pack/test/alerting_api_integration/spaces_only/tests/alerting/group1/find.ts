@@ -386,5 +386,28 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
       });
     });
+
+    describe('public', function () {
+      it('should throw when using rule_type_ids', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?rule_type_ids=foo`
+        );
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body).to.eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: '[request query.rule_type_ids]: definition for this key is missing',
+        });
+      });
+    });
   });
 }

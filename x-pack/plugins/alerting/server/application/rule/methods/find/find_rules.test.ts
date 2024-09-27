@@ -15,7 +15,7 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
+import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
@@ -226,7 +226,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": null,
+          "filter": undefined,
           "sortField": undefined,
           "type": "alert",
         },
@@ -340,7 +340,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": null,
+          "filter": undefined,
           "sortField": undefined,
           "type": "alert",
         },
@@ -452,7 +452,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": null,
+          "filter": undefined,
           "sortField": undefined,
           "type": "alert",
         },
@@ -1025,11 +1025,53 @@ describe('find()', () => {
 
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
         fields: ['tags', 'alertTypeId', 'consumer'],
-        filter: null,
+        filter: undefined,
         sortField: undefined,
         type: RULE_SAVED_OBJECT_TYPE,
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
+    });
+
+    test('calls getFindAuthorizationFilter correctly', async () => {
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        ensureRuleTypeIsAuthorized() {},
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({ options: { ruleTypeIds: ['foo'] } });
+
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        authorizationEntity: 'rule',
+        filterOpts: {
+          fieldNames: {
+            consumer: 'alert.attributes.consumer',
+            ruleTypeId: 'alert.attributes.alertTypeId',
+          },
+          type: 'kql',
+        },
+      });
+    });
+
+    test('combines the filters with the auth filter correctly', async () => {
+      const filter = fromKueryExpression(
+        'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+      );
+
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter,
+        ensureRuleTypeIsAuthorized() {},
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({
+        options: { ruleTypeIds: ['foo'], filter: `alert.attributes.tags: ['bar']` },
+      });
+
+      const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: ['bar'] AND alert.attributes.alertTypeId: foo) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+      );
     });
   });
 
