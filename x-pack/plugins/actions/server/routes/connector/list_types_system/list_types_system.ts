@@ -27,6 +27,9 @@ export const listTypesWithSystemRoute = (
       validate: {
         query: connectorTypesQuerySchemaV1,
       },
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
