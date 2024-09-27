@@ -34,7 +34,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       log.info(`removing the TSDB index...`);
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb'
+      );
       log.info(`removing the TSDB dataView...`);
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb'
