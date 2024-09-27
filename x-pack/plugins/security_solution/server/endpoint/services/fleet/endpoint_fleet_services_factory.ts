@@ -12,7 +12,14 @@ import type {
   PackagePolicyClient,
   PackageClient,
 } from '@kbn/fleet-plugin/server';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  AgentPolicyNotFoundError,
+  PackagePolicyNotFoundError,
+} from '@kbn/fleet-plugin/server/errors';
+import { NotFoundError } from '../../errors';
 import type { SavedObjectsClientFactory } from '../saved_objects';
 
 /**
@@ -25,7 +32,18 @@ export interface EndpointFleetServicesInterface {
   packagePolicy: PackagePolicyClient;
   /** The `kuery` that can be used to filter for Endpoint integration policies */
   endpointPolicyKuery: string;
+
+  /**
+   * Will check the data provided to ensure it is visible for the current space
+   */
+  ensureInCurrentSpace(options: EnsureInCurrentSpaceOptions): Promise<void>;
 }
+
+type EnsureInCurrentSpaceOptions = Partial<{
+  agentIds: string[];
+  agentPolicyIds: string[];
+  integrationPolicyIds: string[];
+}>;
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
   savedObjects: SavedObjectsClientFactory;
@@ -51,17 +69,59 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentService,
       packageService,
     } = this.fleetDependencies;
+    const agent = spaceId
+      ? agentService.asInternalScopedUser(spaceId)
+      : agentService.asInternalUser;
+
+    // Lazily Initialized at the time it is needed
+    let soClient: SavedObjectsClientContract;
+
+    const ensureInCurrentSpace: EndpointFleetServicesInterface['ensureInCurrentSpace'] = async ({
+      integrationPolicyIds = [],
+      agentPolicyIds = [],
+      agentIds = [],
+    }): Promise<void> => {
+      if (!soClient) {
+        soClient = this.savedObjects.createInternalScopedSoClient(spaceId);
+      }
+
+      const handlePromiseErrors = (err: Error): never => {
+        // We wrap the error with our own Error class so that the API can property return a 404
+        if (
+          err instanceof AgentNotFoundError ||
+          err instanceof AgentPolicyNotFoundError ||
+          err instanceof PackagePolicyNotFoundError
+        ) {
+          throw new NotFoundError(err.message, err);
+        }
+
+        throw err;
+      };
+
+      await Promise.all([
+        agentIds.length ? agent.getByIds(agentIds).catch(handlePromiseErrors) : null,
+
+        agentPolicyIds.length
+          ? agentPolicy.getByIds(soClient, agentPolicyIds).catch(handlePromiseErrors)
+          : null,
+
+        integrationPolicyIds.length
+          ? packagePolicy.getByIDs(soClient, integrationPolicyIds).catch(handlePromiseErrors)
+          : null,
+      ]);
+    };
 
     return {
-      agent: spaceId ? agentService.asInternalScopedUser(spaceId) : agentService.asInternalUser,
+      agent,
       agentPolicy,
 
       packages: packageService.asInternalUser,
       packagePolicy,
 
-      endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
-
       savedObjects: this.savedObjects,
+
+      endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
+      ensureInCurrentSpace,
     };
   }
 }

@@ -83,14 +83,7 @@ export class EndpointMetadataService {
           '\n'
         )}`
       );
-      await this.fleetServices.agent.getByIds(agentIds).catch((err) => {
-        if (err instanceof AgentNotFoundError) {
-          // We wrap the error with our own Error class so that the API can property return a 404
-          throw new EndpointHostNotFoundError(err.message, err);
-        }
-
-        throw err;
-      });
+      await this.fleetServices.ensureInCurrentSpace({ agentIds });
     }
   }
 
