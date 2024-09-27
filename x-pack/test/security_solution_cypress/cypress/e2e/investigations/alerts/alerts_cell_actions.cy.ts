@@ -38,7 +38,8 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/193840
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
