@@ -42,23 +42,29 @@ import {
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
-  defaultMessage: 'added a note',
-});
+export const ADDED_A_NOTE = i18n.translate(
+  'xpack.securitySolution.flyout.left.notes.addedANoteLabel',
+  {
+    defaultMessage: 'added a note',
+  }
+);
 export const FETCH_NOTES_ERROR = i18n.translate(
-  'xpack.securitySolution.notes.fetchNotesErrorLabel',
+  'xpack.securitySolution.flyout.left.notes.fetchNotesErrorLabel',
   {
     defaultMessage: 'Error fetching notes',
   }
 );
-export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
+export const NO_NOTES = i18n.translate('xpack.securitySolution.flyout.left.notes.noNotesLabel', {
   defaultMessage: 'No notes have been created for this document',
 });
-export const DELETE_NOTE = i18n.translate('xpack.securitySolution.notes.deleteNoteLabel', {
-  defaultMessage: 'Delete note',
-});
+export const DELETE_NOTE = i18n.translate(
+  'xpack.securitySolution.flyout.left.notes.deleteNoteLabel',
+  {
+    defaultMessage: 'Delete note',
+  }
+);
 export const DELETE_NOTE_ERROR = i18n.translate(
-  'xpack.securitySolution.notes.deleteNoteErrorLabel',
+  'xpack.securitySolution.flyout.left.notes.deleteNoteErrorLabel',
   {
     defaultMessage: 'Error deleting note',
   }
@@ -93,7 +99,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const notes: Note[] = useSelector((state: State) =>
     selectSortedNotesByDocumentId(state, {
       documentId: eventId,
-      sort: { field: 'created', direction: 'desc' },
+      sort: { field: 'created', direction: 'asc' },
     })
   );
 
