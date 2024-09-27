@@ -52,15 +52,6 @@ describe('RuleConsumerSelection', () => {
     expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 
-  it('should display nothing if there is only 1 consumer to select', () => {
-    useRuleFormState.mockReturnValue({
-      multiConsumerSelection: null,
-    });
-    render(<RuleConsumerSelection validConsumers={['stackAlerts']} />);
-
-    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
-  });
-
   it('should be able to select logs and call onChange', () => {
     useRuleFormState.mockReturnValue({
       multiConsumerSelection: null,

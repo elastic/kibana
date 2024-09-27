@@ -24,19 +24,33 @@ function onFilterCell(
   mode: '+' | '-',
   field: DataViewField
 ) {
-  const row = context.rows[rowIndex];
-  const value = row.flattened[columnId];
+  const row = context.getRowByIndex(rowIndex);
 
-  if (field && context.onFilter) {
+  if (row && field && context.onFilter) {
+    const value = row.flattened[columnId];
     context.onFilter(field, value, mode);
   }
 }
 
-export const FilterInBtn = (
-  { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
-  field: DataViewField
-) => {
+const esqlMultivalueFilteringDisabled = i18n.translate(
+  'unifiedDataTable.grid.esqlMultivalueFilteringDisabled',
+  {
+    defaultMessage: 'Multivalue filtering is not supported in ES|QL',
+  }
+);
+
+export const FilterInBtn = ({
+  cellActionProps: { Component, rowIndex, columnId },
+  field,
+  isPlainRecord,
+}: {
+  cellActionProps: EuiDataGridColumnCellActionProps;
+  field: DataViewField;
+  isPlainRecord: boolean | undefined;
+}) => {
   const context = useContext(UnifiedDataTableContext);
+  const filteringDisabled =
+    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
     values: { value: columnId },
@@ -49,7 +63,8 @@ export const FilterInBtn = (
       }}
       iconType="plusInCircle"
       aria-label={buttonTitle}
-      title={buttonTitle}
+      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
+      disabled={filteringDisabled}
       data-test-subj="filterForButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterFor', {
@@ -59,11 +74,18 @@ export const FilterInBtn = (
   );
 };
 
-export const FilterOutBtn = (
-  { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
-  field: DataViewField
-) => {
+export const FilterOutBtn = ({
+  cellActionProps: { Component, rowIndex, columnId },
+  field,
+  isPlainRecord,
+}: {
+  cellActionProps: EuiDataGridColumnCellActionProps;
+  field: DataViewField;
+  isPlainRecord: boolean | undefined;
+}) => {
   const context = useContext(UnifiedDataTableContext);
+  const filteringDisabled =
+    isPlainRecord && Array.isArray(context.getRowByIndex(rowIndex)?.flattened[columnId]);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
     values: { value: columnId },
@@ -76,7 +98,8 @@ export const FilterOutBtn = (
       }}
       iconType="minusInCircle"
       aria-label={buttonTitle}
-      title={buttonTitle}
+      title={filteringDisabled ? esqlMultivalueFilteringDisabled : buttonTitle}
+      disabled={filteringDisabled}
       data-test-subj="filterOutButton"
     >
       {i18n.translate('unifiedDataTable.grid.filterOut', {
@@ -120,6 +143,7 @@ export function buildCopyValueButton(
 
 export function buildCellActions(
   field: DataViewField,
+  isPlainRecord: boolean | undefined,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
   onFilter?: DocViewFilterFn
@@ -127,16 +151,18 @@ export function buildCellActions(
   return [
     ...(onFilter && field.filterable
       ? [
-          ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
-            FilterInBtn(
-              { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
-              field
-            ),
-          ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
-            FilterOutBtn(
-              { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
-              field
-            ),
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            FilterInBtn({
+              cellActionProps,
+              field,
+              isPlainRecord,
+            }),
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            FilterOutBtn({
+              cellActionProps,
+              field,
+              isPlainRecord,
+            }),
         ]
       : []),
     ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
