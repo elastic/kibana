@@ -8,7 +8,7 @@
  */
 
 import { LATEST_VERSION } from '../../common/content_management';
-import { convertNumberToDashboardVersion } from '../services/dashboard_content_management/lib/dashboard_versioning';
+import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
