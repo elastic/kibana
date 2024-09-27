@@ -34,14 +34,14 @@ export const ApiKeyForm = () => {
       <EuiFlexItem grow={0}>
         <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
           <h6>
-            <FormattedMessage id="xpack.searchApiKeys.apiKeyForm.title" defaultMessage="API Key" />
+            <FormattedMessage id="searchApiKeysComponents.apiKeyForm.title" defaultMessage="API Key" />
           </h6>
         </EuiTitle>
       </EuiFlexItem>
       {status === Status.showUserPrivilegesError && (
         <EuiFlexItem grow={0}>
           <EuiBadge data-test-subj="apiKeyFormNoUserPrivileges">
-            {i18n.translate('xpack.searchApiKeys.apiKeyForm.noUserPrivileges', {
+            {i18n.translate('searchApiKeysComponents.apiKeyForm.noUserPrivileges', {
               defaultMessage: "You don't have access to manage API keys",
             })}
           </EuiBadge>
@@ -65,7 +65,7 @@ export const ApiKeyForm = () => {
               color="success"
               onClick={showAPIKey}
               data-test-subj="showAPIKeyButton"
-              aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.showApiKey', {
+              aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
                 defaultMessage: 'Show API Key',
               })}
             />
@@ -74,7 +74,7 @@ export const ApiKeyForm = () => {
             <EuiFlexItem grow={0}>
               <EuiCopy
                 textToCopy={apiKey}
-                afterMessage={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyMessage', {
+                afterMessage={i18n.translate('searchApiKeysComponents.apiKeyForm.copyMessage', {
                   defaultMessage: 'Copied',
                 })}
               >
@@ -83,7 +83,7 @@ export const ApiKeyForm = () => {
                     onClick={copy}
                     iconType="copy"
                     color="success"
-                    aria-label={i18n.translate('xpack.searchApiKeys.apiKeyForm.copyMessageLabel', {
+                    aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.copyMessageLabel', {
                       defaultMessage: 'Copy Elasticsearch URL to clipboard',
                     })}
                   />
@@ -104,7 +104,7 @@ export const ApiKeyForm = () => {
             data-test-subj="createAPIKeyButton"
           >
             <FormattedMessage
-              id="xpack.searchApiKeys.apiKeyForm.createButton"
+              id="searchApiKeysComponents.apiKeyForm.createButton"
               defaultMessage="Create an API Key"
             />
           </EuiButton>

@@ -752,7 +752,8 @@ src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-screenshotting-server @elastic/appex-sharedux
-x-pack/plugins/search_api_keys @elastic/search-kibana
+packages/kbn-search-api-keys-components @elastic/search-kibana
+packages/kbn-search-api-keys-api @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 x-pack/plugins/search_assistant @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana

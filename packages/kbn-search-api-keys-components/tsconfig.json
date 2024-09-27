@@ -8,14 +8,10 @@
     "public/hooks/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-elasticsearch-server",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/navigation-plugin",
-    "@kbn/logging",
     "@kbn/security-api-key-management",
     "@kbn/core-security-common"
   ],
