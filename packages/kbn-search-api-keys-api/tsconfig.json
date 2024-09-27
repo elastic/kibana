@@ -6,7 +6,12 @@
   "include": [
     "server/**/*",
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/core",
+    "@kbn/config-schema",
+  ],
   "exclude": [
     "target/**/*",
   ]
