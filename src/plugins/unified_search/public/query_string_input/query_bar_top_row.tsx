@@ -595,6 +595,7 @@ export const QueryBarTopRow = React.memo(
               fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
+              minWidth='220'
               toolTipProps={{
                 content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
                 delay: 'long',
@@ -776,7 +777,7 @@ export const QueryBarTopRow = React.memo(
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
               <EuiFlexItem
-                grow={!shouldShowDatePickerAsBadge()}
+                grow={true}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
                 {!isQueryLangSelected ? renderQueryInput() : null}

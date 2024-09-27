@@ -79,6 +79,7 @@ export const Template: FunctionComponent<Props> = ({
         >
           <div className="kbnLoaderWrap">
             {logo}
+            <div className="kbnProgress" />
             <div
               className="kbnWelcomeText"
               data-error-message-title={i18n.translate('core.ui.welcomeErrorMessageTitle', {
@@ -96,7 +97,6 @@ export const Template: FunctionComponent<Props> = ({
                 defaultMessage: 'Loading Elastic',
               })}
             </div>
-            <div className="kbnProgress" />
           </div>
         </div>
 

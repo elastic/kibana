@@ -9,10 +9,14 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import {
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiPanel,
   EuiProgress,
   EuiScreenReaderOnly,
+  EuiSkeletonLoading,
+  EuiSkeletonRectangle,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -339,7 +343,7 @@ function DiscoverDocumentsComponent({
         <EuiProgress
           data-test-subj="discoverDataGridUpdating"
           size="xs"
-          color="accent"
+          color="subdued"
           position="absolute"
           css={progressStyle}
         />
@@ -363,12 +367,49 @@ function DiscoverDocumentsComponent({
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
+      // <div className="dscDocuments__loading">
+      //   <div>
+      //     <EuiLoadingSpinner size="l" />
+      //   </div>
+      //   <EuiSpacer size="s" />
+      //   <EuiText size="s" color="subdued">
+      //     <p>
+      //       <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
+      //     </p>
+      //   </EuiText>
+      // </div>
       <div className="dscDocuments__loading">
-        <EuiText size="xs" color="subdued">
-          <EuiLoadingSpinner />
-          <EuiSpacer size="s" />
-          <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
-        </EuiText>
+        <EuiSkeletonLoading
+          contentAriaLabel="Loading documents"
+          loadingContent={
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+              <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexGroup gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiSkeletonRectangle width={120} height={32} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiSkeletonRectangle width={120} height={32} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiSkeletonRectangle width={100} height={32} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSpacer />
+                  <EuiSkeletonText lines={10} size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          }
+          loadedContent={
+            <EuiText size="m"><p><FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" /></p></EuiText>
+          }
+        />
       </div>
     );
   }

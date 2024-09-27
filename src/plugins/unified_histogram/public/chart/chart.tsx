@@ -349,8 +349,13 @@ export function Chart({
                 Updates to the time range can come earlier than the query updates which we delay on purpose for text based mode,
                 this is why it might get both loaders. We should find a way to resolve that better.
               */
-              <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
-                <EuiProgress size="xs" color="accent" position="absolute" />
+              <EuiDelayRender data-test-subj="unifiedHistogramProgressBar">
+                <EuiProgress
+                  css={{ top: '4px' }}
+                  size="xs"
+                  color="subdued"
+                  position="absolute"
+                />
               </EuiDelayRender>
             )}
             <HistogramMemoized

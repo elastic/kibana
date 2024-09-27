@@ -8,14 +8,14 @@
  */
 
 import React, { Suspense, type FC } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonRectangle } from '@elastic/eui';
 
 import type { Props as NavigationProps } from './side_navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./side_navigation'));
 
 export const SideNavComponent: FC<NavigationProps> = (props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+  <Suspense fallback={<div css={{ margin: '16px' }}><EuiSkeletonRectangle width={16} height={16} borderRadius="s" contentAriaLabel="Loading side navigation" /></div>}>
     <SideNavComponentLazy {...props} />
   </Suspense>
 );

@@ -10,7 +10,7 @@
 import React from 'react';
 import {
   EuiLoadingSpinner,
-  EuiTitle,
+  EuiText,
   EuiSpacer,
   useEuiPaddingSize,
   useEuiBackgroundColor,
@@ -33,13 +33,13 @@ export function LoadingSpinner() {
 
   return (
     <div className="dscLoading" css={loadingSpinnerCss}>
-      <EuiTitle size="s" data-test-subj="loadingSpinnerText">
-        <h2>
-          <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" data-test-subj="loadingSpinnerText">
+        <p>
+          <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
+        </p>
+      </EuiText>
     </div>
   );
 }

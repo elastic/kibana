@@ -325,7 +325,7 @@ export async function mountApp(
       }, [initCallback, initialInput, props.history, redirectCallback]);
 
       if (editorState === 'loading') {
-        return <EuiLoadingSpinner />;
+        return <EuiLoadingSpinner css={{ margin: '8px' }} />;
       }
 
       if (editorState === 'no_data') {

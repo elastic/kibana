@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
-interface Props {
-  type?: 'spinner' | 'elastic';
-}
-
-export const LoadingIndicator = ({ type = 'spinner' }: Props) => {
+export const LoadingIndicator = () => {
   return (
     <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        {type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingElastic size="xxl" />}
+        <EuiLoadingSpinner size="l" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
