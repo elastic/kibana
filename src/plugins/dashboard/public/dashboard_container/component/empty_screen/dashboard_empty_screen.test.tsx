@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
-import { buildMockDashboard } from '../../../mocks';
-import { DashboardEmptyScreen } from './dashboard_empty_screen';
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../../../dashboard_api/types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { buildMockDashboard } from '../../../mocks';
+import { coreServices, visualizationsService } from '../../../services/kibana_services';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
-pluginServices.getServices().visualizations.getAliases = jest
-  .fn()
-  .mockReturnValue([{ name: 'lens' }]);
+visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
@@ -57,7 +55,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
     const component = mountComponent(ViewMode.VIEW);
     expect(component.render()).toMatchSnapshot();
@@ -72,7 +70,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
 
     const component = mountComponent(ViewMode.EDIT);
     expect(component.render()).toMatchSnapshot();
