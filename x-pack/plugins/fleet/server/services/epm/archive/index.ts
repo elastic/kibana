@@ -100,7 +100,7 @@ export function getPathParts(path: string): AssetParts {
   }
 
   // if it's a knowledge base entry
-  if (type === 'kb_entry') {
+  if (type === 'knowledge_base_entry') {
     // there is an additional depth level
     dataset = file;
     file = path.split('/')[4];
