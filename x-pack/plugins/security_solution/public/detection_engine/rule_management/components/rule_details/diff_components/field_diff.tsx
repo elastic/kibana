@@ -58,7 +58,7 @@ export const FieldGroupDiffComponent = ({
       data-test-subj="ruleUpgradePerFieldDiff"
     >
       {fieldDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }, index) => {
-        const isLast = index !== fieldDiffs.length - 1;
+        const isLast = index === fieldDiffs.length - 1;
 
         return (
           <SubFieldComponent
