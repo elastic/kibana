@@ -67,6 +67,7 @@ As a result, the release notes for your features of interest might live in diffe
 
 // |===
 
+include::search-connection-details.asciidoc[]
 include::playground/index.asciidoc[]
 include::search-ai-assistant/index.asciidoc[]
 include::inference-endpoints/index.asciidoc[]
