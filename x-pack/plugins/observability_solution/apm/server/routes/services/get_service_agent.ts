@@ -24,7 +24,7 @@ interface ServiceAgent {
   };
   service?: {
     runtime?: {
-      name?: string;
+      name?: { text: string } | string; // TODO fix in the mapper
     };
   };
   cloud?: {
@@ -102,12 +102,16 @@ export async function getServiceAgent({
     return {};
   }
 
+  // TODO fix in the mapper
   const { agent, service, cloud } = normalizeFields(response.hits.hits[0].fields) as ServiceAgent;
   const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {
     agentName: agent?.name,
-    runtimeName: service?.runtime?.name,
+    runtimeName:
+      typeof service?.runtime?.name === 'string'
+        ? service?.runtime?.name
+        : service?.runtime?.name?.text,
     serverlessType,
   };
 }
