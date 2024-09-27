@@ -34,7 +34,8 @@ export interface EndpointFleetServicesInterface {
   endpointPolicyKuery: string;
 
   /**
-   * Will check the data provided to ensure it is visible for the current space
+   * Will check the data provided to ensure it is visible for the current space. Supports
+   * several types of data (ex. integration policies, agent policies, etc)
    */
   ensureInCurrentSpace(options: EnsureInCurrentSpaceOptions): Promise<void>;
 }
