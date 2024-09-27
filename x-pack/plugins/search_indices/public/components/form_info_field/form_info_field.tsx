@@ -17,55 +17,50 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { FormInfoField } from '../form_info_field/form_info_field';
+interface FormInfoFieldProps {
+  actions?: React.ReactNode[];
+  label: string;
+  value: string;
+  copyValue?: string;
+  dataTestSubj?: string;
+}
 
-export const ConnectionDetails: React.FC = () => {
+export const FormInfoField: React.FC<FormInfoFieldProps> = ({
+  actions = [],
+  label,
+  value,
+  copyValue,
+  dataTestSubj,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const elasticsearchUrl = useElasticsearchUrl();
-
-  return (
-    <FormInfoField
-      label={i18n.translate('xpack.searchIndices.connectionDetails.endpointTitle', {
-        defaultMessage: 'Elasticsearch URL',
-      })}
-      value={elasticsearchUrl}
-      copyValue={elasticsearchUrl}
-      dataTestSubj="connectionDetailsEndpoint"
-    />
-  );
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxxs">
-          <h1>
-            <FormattedMessage
-              id="xpack.searchIndices.connectionDetails.endpointTitle"
-              defaultMessage="Elasticsearch URL"
-            />
-          </h1>
+          <h1>{label}</h1>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-        <p
-          data-test-subj="connectionDetailsEndpoint"
+      <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        <code
+          data-test-subj={dataTestSubj}
           css={{
             color: euiTheme.colors.successText,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
             backgroundColor: euiTheme.colors.lightestShade,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
+            borderRadius: euiTheme.border.radius.small,
+            fontWeight: euiTheme.font.weight.bold,
           }}
         >
-          {elasticsearchUrl}
-        </p>
+          {value}
+        </code>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCopy
-          textToCopy={elasticsearchUrl}
-          afterMessage={i18n.translate('xpack.searchIndices.connectionDetails.copyMessage', {
+          textToCopy={copyValue ?? value}
+          afterMessage={i18n.translate('xpack.searchIndices.formInfoField.copyMessage', {
             defaultMessage: 'Copied',
           })}
         >
@@ -73,13 +68,18 @@ export const ConnectionDetails: React.FC = () => {
             <EuiButtonIcon
               onClick={copy}
               iconType="copy"
-              aria-label={i18n.translate('xpack.searchIndices.connectionDetails.copyMessage', {
-                defaultMessage: 'Copy Elasticsearch URL to clipboard',
+              aria-label={i18n.translate('xpack.searchIndices.formInfoField.copyMessage', {
+                defaultMessage: 'Copy to clipboard',
               })}
             />
           )}
         </EuiCopy>
       </EuiFlexItem>
+      {actions.map((action, index) => (
+        <EuiFlexItem key={index} grow={false}>
+          {action}
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

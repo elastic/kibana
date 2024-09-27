@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCode,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -52,15 +51,21 @@ export const ApiKeyForm = () => {
       )}
       {status !== Status.showCreateButton && (
         <>
-          <EuiFlexItem grow={0}>
-            <EuiCode
-              language="text"
-              color="success"
-              css={{ color: euiTheme.colors.successText }}
+          <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            <code
+              css={{
+                color: euiTheme.colors.successText,
+                padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+                backgroundColor: euiTheme.colors.lightestShade,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                borderRadius: euiTheme.border.radius.small,
+                fontWeight: euiTheme.font.weight.bold,
+              }}
               data-test-subj="apiKeyFormAPIKey"
             >
               {displayedApiKey}
-            </EuiCode>
+            </code>
           </EuiFlexItem>
           <EuiFlexItem grow={0}>
             <EuiButtonIcon
