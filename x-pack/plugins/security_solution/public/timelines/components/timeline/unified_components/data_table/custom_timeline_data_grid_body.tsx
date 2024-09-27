@@ -14,6 +14,7 @@ import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from '
 import styled from 'styled-components';
 import { AutoSizer } from 'react-virtualized';
 import { VariableSizeList } from 'react-window';
+import { useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
@@ -36,7 +37,7 @@ const DEFAULT_UDT_ROW_HEIGHT = 34;
 const SCROLLBAR_STYLE: CSSProperties = {
   scrollbarWidth: 'thin',
   scrollPadding: '0 0 0 0',
-  overflowX: 'hidden',
+  overflow: 'auto',
 };
 
 /**
@@ -68,6 +69,8 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       gridWidth,
     } = props;
 
+    const { euiTheme } = useEuiTheme();
+
     // // Set custom props onto the grid body wrapper
     const bodyRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -77,9 +80,10 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
           width: '100%',
           height: '100%',
           overflowY: 'hidden',
+          scrollbarColor: `${euiTheme.colors.mediumShade} ${euiTheme.colors.lightestShade}`,
         },
       });
-    }, [setCustomGridBodyProps]);
+    }, [setCustomGridBodyProps, euiTheme.colors.mediumShade, euiTheme.colors.lightestShade]);
 
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -101,63 +105,73 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       return rowHeights.current[index] ?? 100;
     }, []);
 
-    const [hasVerticalScrollBar, setHasVerticalScrollBar] = useState<boolean>(false);
-    const fakeListRef = useRef<HTMLDivElement>(null);
+    const innerRowContainer = useMemo(
+      () =>
+        React.forwardRef<HTMLDivElement, PropsWithChildren<{}>>(
+          ({ children, style, ...rest }, ref) => {
+            return (
+              <>
+                {headerRow}
+                <div
+                  className="row-container"
+                  ref={ref}
+                  style={{ ...style, position: 'relative' }}
+                  {...rest}
+                >
+                  {children}
+                </div>
 
-    const [listWidth, setListWidth] = useState<number>(gridWidth);
-
-    useEffect(() => {
-      if (!bodyRef.current) return;
-      const header = bodyRef.current.querySelector('.euiDataGridHeader');
-      const headerWidth = header?.clientWidth;
-      if (!headerWidth) return;
-      setListWidth((prev) => (prev !== headerWidth ? headerWidth : prev));
-    });
-
-    const headerRef = useRef<HTMLDivElement>(null);
-
+                {footerRow}
+              </>
+            );
+          }
+        ),
+      [headerRow, footerRow]
+    );
     return (
       <AutoSizer className="autosizer" disableWidth>
         {({ height }) => {
           return (
             <>
               {gridWidth !== 0 && (
-                <VariableSizeList
-                  id="variable__list"
-                  className="variable__list"
-                  width={(listWidth ?? gridWidth) + 5}
-                  height={height - 36}
-                  itemCount={visibleRows.length}
-                  itemSize={getRowHeight}
-                  overscanCount={5}
-                  ref={listRef}
-                  style={SCROLLBAR_STYLE}
-                >
-                  {({ index, style }) => {
-                    return (
-                      <div
-                        role="row"
-                        style={{
-                          ...style,
-                          width: '100%',
-                        }}
-                        key={visibleRows[index]._id}
-                      >
-                        <CustomDataGridSingleRow
-                          rowData={visibleRows[index]}
-                          rowIndex={index}
-                          visibleColumns={visibleColumns}
-                          Cell={Cell}
-                          enabledRowRenderers={enabledRowRenderers}
-                          refetch={refetch}
-                          setRowHeight={setRowHeight}
-                          rowHeight={rowHeight}
-                          maxWidth={listWidth}
-                        />
-                      </div>
-                    );
-                  }}
-                </VariableSizeList>
+                <>
+                  <VariableSizeList
+                    className="variable__list"
+                    width={gridWidth}
+                    height={height}
+                    itemCount={visibleRows.length}
+                    itemSize={getRowHeight}
+                    overscanCount={5}
+                    ref={listRef}
+                    style={SCROLLBAR_STYLE}
+                    innerElementType={innerRowContainer}
+                  >
+                    {({ index, style }) => {
+                      return (
+                        <div
+                          role="row"
+                          style={{
+                            ...style,
+                            width: 'fit-content',
+                          }}
+                          key={`${gridWidth}-${index}`}
+                        >
+                          <CustomDataGridSingleRow
+                            rowData={visibleRows[index]}
+                            rowIndex={index}
+                            visibleColumns={visibleColumns}
+                            Cell={Cell}
+                            enabledRowRenderers={enabledRowRenderers}
+                            refetch={refetch}
+                            setRowHeight={setRowHeight}
+                            rowHeight={rowHeight}
+                            maxWidth={gridWidth}
+                          />
+                        </div>
+                      );
+                    }}
+                  </VariableSizeList>
+                </>
               )}
             </>
           );
@@ -265,7 +279,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     setRowHeight,
     maxWidth,
   } = props;
-  console.log({ maxWidth });
 
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
