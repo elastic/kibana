@@ -79,7 +79,7 @@ Object {
   "data": Object {
     "aggregation": Object {
       "limit": 10,
-      "lookbackPeriod": "1h",
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "hostName",
@@ -94,7 +94,7 @@ Object {
   "data": Object {
     "aggregation": Object {
       "limit": 10,
-      "lookbackPeriod": "1h",
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "host.name",
@@ -109,7 +109,7 @@ Object {
   "data": Object {
     "aggregation": Object {
       "limit": 10,
-      "lookbackPeriod": "1h",
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "host.name",
@@ -124,7 +124,7 @@ Object {
   "data": Object {
     "aggregation": Object {
       "limit": 10,
-      "lookbackPeriod": "1h",
+      "lookbackPeriod": undefined,
       "type": "terms",
     },
     "destination": "hostName",
