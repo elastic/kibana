@@ -68,7 +68,14 @@ describe('bulkGetMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_bulk_get');
-    expect(config.options?.tags?.[0]).toEqual('access:read-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+        "tags": Array [
+          "access:read-maintenance-window",
+        ],
+      }
+    `);
 
     await handler(context, req, res);
 
