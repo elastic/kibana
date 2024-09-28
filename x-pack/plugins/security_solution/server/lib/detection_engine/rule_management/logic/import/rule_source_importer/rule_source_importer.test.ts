@@ -72,24 +72,24 @@ describe('ruleSourceImporter', () => {
   });
 
   describe('#isPrebuiltRule()', () => {
-    beforeEach(() => {});
+    beforeEach(() => {
+      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
+    });
 
     it("returns false if the rule's rule_id doesn't match an available rule asset", async () => {
-      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
+      ruleAssetsClientMock.fetchLatestVersions.mockReset().mockResolvedValue([]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(false);
     });
 
     it("returns true if the rule's rule_id matches an available rule asset", async () => {
-      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
-      ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([ruleToImport]);
       await subject.setup({ rules: [ruleToImport] });
 
       expect(() =>
