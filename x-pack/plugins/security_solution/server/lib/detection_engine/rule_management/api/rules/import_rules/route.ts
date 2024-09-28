@@ -201,7 +201,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             }
           });
 
-          const importedRules: ImportRulesResponse = {
+          const importRulesResponse: ImportRulesResponse = {
             success: errors.length === 0,
             success_count: successes.length,
             rules_count: rules.length,
@@ -215,7 +215,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             action_connectors_warnings: actionConnectorWarnings,
           };
 
-          return response.ok({ body: ImportRulesResponse.parse(importedRules) });
+          return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
