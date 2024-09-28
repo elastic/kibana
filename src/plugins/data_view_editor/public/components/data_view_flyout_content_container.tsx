@@ -60,9 +60,14 @@ const DataViewFlyoutContentContainer = ({
           await dataViews.updateSavedObject(editData);
         }
         if (editData?.id) {
+          // this won't work for ad-hoc data views
           dataViews.clearInstanceCache(editData.id);
         }
-        saveResponse = await dataViews.getDataViewLazy(editData.id!);
+        if (editData.isPersisted()) {
+          saveResponse = await dataViews.getDataViewLazy(editData.id!);
+        } else {
+          saveResponse = await dataViews.createDataViewLazy(dataViewSpec);
+        }
       } else {
         saveResponse = persist
           ? await dataViews.createAndSaveDataViewLazy(dataViewSpec)
