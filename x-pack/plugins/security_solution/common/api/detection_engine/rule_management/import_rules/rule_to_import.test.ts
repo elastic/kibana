@@ -550,7 +550,7 @@ describe('RuleToImport', () => {
     );
   });
 
-  test('You cannot set the immutable to a number when trying to create a rule', () => {
+  test('You cannot set immutable to a number', () => {
     const payload = getImportRulesSchemaMock({
       // @ts-expect-error assign unsupported value
       immutable: 5,
@@ -564,7 +564,7 @@ describe('RuleToImport', () => {
     );
   });
 
-  test('You can optionally set the immutable to be false', () => {
+  test('You can optionally set immutable to false', () => {
     const payload: RuleToImportInput = getImportRulesSchemaMock({
       immutable: false,
     });
@@ -574,7 +574,7 @@ describe('RuleToImport', () => {
     expectParseSuccess(result);
   });
 
-  test('You can optionally set the immutable to be true', () => {
+  test('You can optionally set immutable to true', () => {
     const payload = getImportRulesSchemaMock({
       immutable: true,
     });
@@ -582,20 +582,6 @@ describe('RuleToImport', () => {
     const result = RuleToImport.safeParse(payload);
 
     expectParseSuccess(result);
-  });
-
-  test('You cannot set the immutable to be a number', () => {
-    const payload = getImportRulesSchemaMock({
-      // @ts-expect-error assign unsupported value
-      immutable: 5,
-    });
-
-    const result = RuleToImport.safeParse(payload);
-    expectParseError(result);
-
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"immutable: Expected boolean, received number"`
-    );
   });
 
   test('You cannot set the risk_score to 101', () => {
