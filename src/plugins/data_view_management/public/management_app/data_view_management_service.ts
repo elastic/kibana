@@ -77,9 +77,6 @@ export interface DataViewMgmtServiceConstructorArgs {
 
 export interface DataViewMgmtState {
   dataView?: DataView;
-  indexPattern: string;
-  timestamp: string;
-  dataViewName: string;
   dataViewLazy?: DataViewLazy;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
@@ -110,9 +107,6 @@ const defaultDataViewEditorState: DataViewMgmtState = {
   isRefreshing: true,
   defaultIndex: '',
   conflictFieldsUrl: '',
-  indexPattern: '',
-  timestamp: '',
-  dataViewName: '',
 };
 
 export const stateSelectorFactory =
@@ -249,9 +243,6 @@ export class DataViewMgmtService {
 
     this.updateState({
       dataView,
-      indexPattern: dataView.getIndexPattern(),
-      timestamp: dataView.getTimeField()?.name || '',
-      dataViewName: dataView.getName(),
       dataViewLazy,
       fields,
       indexedFieldTypes: Array.from(indexedFieldTypes),

@@ -51,7 +51,6 @@ const removeTooltip = i18n.translate('indexPatternManagement.editDataView.remove
 export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   defaultIndex,
   indexPattern,
-  dataViewName,
   setDefault,
   editIndexPatternClick,
   deleteIndexPatternClick,
@@ -60,7 +59,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
 }) => {
   return (
     <EuiPageHeader
-      pageTitle={<span data-test-subj="indexPatternTitle">{dataViewName}</span>}
+      pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       rightSideItems={[
         canSave && (
           <EuiButton
