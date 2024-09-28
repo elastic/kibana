@@ -49,13 +49,14 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, placeholder, value, default_value } = configEntry;
+  const { isValid, placeholder, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(
     !value || value.toString().length === 0 ? default_value : value
   );
   return (
     <EuiFieldText
       disabled={isLoading}
+      data-test-subj={`${key}-input`}
       fullWidth
       value={ensureStringType(innerValue)}
       isInvalid={!isValid}
@@ -74,11 +75,12 @@ export const ConfigSwitchField: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { label, value, default_value } = configEntry;
+  const { label, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
   return (
     <EuiSwitch
       checked={ensureBooleanType(innerValue)}
+      data-test-subj={`${key}-switch`}
       disabled={isLoading}
       label={<p>{label}</p>}
       onChange={(event) => {
@@ -94,12 +96,14 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, placeholder, value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { isValid, placeholder, value, default_value, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? default_value);
   return (
     <EuiTextArea
       disabled={isLoading}
       fullWidth
+      data-test-subj={`${key}-textarea`}
       // ensures placeholder shows up when value is empty string
       value={ensureStringType(innerValue) || undefined}
       isInvalid={!isValid}
@@ -117,12 +121,14 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, placeholder, value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { isValid, placeholder, value, default_value, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? default_value);
   return (
     <EuiFieldNumber
       fullWidth
       disabled={isLoading}
+      data-test-subj={`${key}-number`}
       value={innerValue as number}
       isInvalid={!isValid}
       onChange={(event) => {
@@ -140,8 +146,9 @@ export const ConfigCheckableField: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   const radioCardId = useGeneratedHtmlId({ prefix: 'radioCard' });
-  const { value, options } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { value, options, default_value } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? default_value);
   return (
     <>
       {options?.map((o) => (

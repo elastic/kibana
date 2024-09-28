@@ -8,11 +8,11 @@
 import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { DisplayType, FieldType } from '../lib/dynamic_config/types';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -21,10 +21,8 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
     services: mockUseKibanaReturnValue,
   })),
 }));
-jest.mock('../lib/gen_ai/use_get_dashboard');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockDashboard = useGetDashboard as jest.Mock;
 const openAiConnector = {
   actionTypeId: '.inference',
   name: 'AI Connector',
@@ -36,13 +34,47 @@ const openAiConnector = {
       url: 'https://openaiurl.com',
       model_id: 'gpt-4o',
     },
-    taskTypeConfig: {},
-    providerSchema: [],
-    taskTypeSchema: [],
+    taskTypeConfig: {
+      max_tokens: 100,
+    },
+    providerSchema: [
+      {
+        key: 'access_key',
+        display: DisplayType.TEXTBOX,
+        label: 'Access Key',
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: `A valid AWS access key that has permissions to use Amazon Bedrock.`,
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+    ],
+    taskTypeSchema: [
+      {
+        key: 'max_tokens',
+        display: DisplayType.NUMERIC,
+        label: 'Max tokens',
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: 'The maximum number of tokens to generate before stopping.',
+        type: FieldType.INTEGER,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+    ],
   },
   secrets: {
     secretsConfig: {
-      apiKey: 'thats-a-nice-looking-key',
+      access_key: 'thats-a-nice-looking-key',
     },
   },
   isDeprecated: false,
@@ -65,9 +97,6 @@ describe('ConnectorFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
-    mockDashboard.mockImplementation(({ connectorId }) => ({
-      dashboardUrl: `https://dashboardurl.com/${connectorId}`,
-    }));
   });
   test('open ai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
@@ -75,16 +104,15 @@ describe('ConnectorFields renders', () => {
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+    expect(getAllByTestId('access_key-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('access_key-input')[0]).toHaveValue(
       openAiConnector.config?.providerConfig?.url
     );
     expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       openAiConnector.config.provider
     );
-    expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('max_tokens-number')[0]).toBeInTheDocument();
   });
 
   test('azure ai provider fields are rendered', async () => {
@@ -105,44 +133,6 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
-  describe('Dashboard link', () => {
-    it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
-      const { queryByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
-    });
-    it('Does not render if isEdit is true and dashboardUrl is null', async () => {
-      mockDashboard.mockImplementation((id: string) => ({
-        dashboardUrl: null,
-      }));
-      const { queryByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
-    });
-    it('Renders if isEdit is true and dashboardUrl is defined', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
-      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
-    });
-    it('On click triggers redirect with correct saved object id', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={openAiConnector}>
-          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
-      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
-      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
-    });
-  });
   describe('Validation', () => {
     const onSubmit = jest.fn();
 

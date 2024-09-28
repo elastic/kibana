@@ -40,7 +40,6 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
     <EuiFlexGroup direction={direction}>
       {items.map((configEntry) => {
         const {
-          default_value: defaultValue,
           depends_on: dependencies,
           key,
           display,
@@ -52,12 +51,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
           required,
         } = configEntry;
 
-        const helpText = defaultValue
-          ? i18n.translate('xpack.stackConnectors.components.inference.config.defaultValue', {
-              defaultMessage: 'Defaults to {defaultValue}',
-              values: { defaultValue },
-            })
-          : tooltip;
+        const helpText = tooltip;
         // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel =
           display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (

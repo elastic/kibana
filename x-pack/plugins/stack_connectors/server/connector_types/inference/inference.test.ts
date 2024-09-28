@@ -44,28 +44,16 @@ describe('InferenceConnector', () => {
   const logger = loggingSystemMock.createLogger();
   const mockResponseString = 'Hello! How can I assist you today?';
   const mockResponse = {
-    headers: {},
+    status: 'ok',
     data: {
-      result: 'success',
-      choices: [
+      completion: [
         {
-          message: {
-            role: 'assistant',
-            content: mockResponseString,
-          },
-          delta: {
-            content: mockResponseString,
-          },
-          finish_reason: 'stop',
-          index: 0,
+          result:
+            'Elastic is a company known for developing the Elasticsearch search and analytics engine, which allows for real-time data search, analysis, and visualization. Elasticsearch is part of the larger Elastic Stack (also known as the ELK Stack), which includes:\n\n1. **Elasticsearch**: A distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.\n  \n2. **Logstash**: A server-side data processing pipeline that ingests data from multiple sources simultaneously, transforms it, and sends it to your preferred "stash," such as Elasticsearch.\n  \n3. **Kibana**: A data visualization dashboard for Elasticsearch. It allows you to search, view, and interact with data stored in Elasticsearch indices. You can perform advanced data analysis and visualize data in various charts, tables, and maps.\n\n4. **Beats**: Lightweight data shippers for different types of data. They send data from hundreds or thousands of machines and systems to Elasticsearch or Logstash.\n\nThe Elastic Stack is commonly used for various applications, such as log and event data analysis, full-text search, security analytics, business analytics, and more. It is employed across many industries to derive insights from large volumes of structured and unstructured data.\n\nElastic offers both open-source and paid versions of its software, providing a variety of features ranging from basic data ingestion and visualization to advanced machine learning and security capabilities.',
         },
       ],
-      usage: {
-        prompt_tokens: 4,
-        completion_tokens: 5,
-        total_tokens: 9,
-      },
     },
+    connector_id: 'fd681683-de83-48df-8463-122ed7fddbe4',
   };
   beforeEach(() => {
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
@@ -94,45 +82,29 @@ describe('InferenceConnector', () => {
       services: actionsMock.createServices(),
     });
 
-    const sampleOpenAiBody = {
-      messages: [
-        {
-          role: 'user',
-          content: 'Hello world',
-        },
-      ],
-    };
-
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
 
-    describe('runApi', () => {
+    describe('performApiCompletion', () => {
       it('uses the default model if none is supplied', async () => {
         const response = await connector.performApiCompletion({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           ...mockDefaults,
           data: JSON.stringify({
-            ...sampleOpenAiBody,
-
             model: DEFAULT_OPENAI_MODEL,
           }),
-          headers: {
-            Authorization: 'Bearer 123',
-            'X-My-Custom-Header': 'foo',
-            'content-type': 'application/json',
-          },
         });
         expect(response).toEqual(mockResponse.data);
       });
 
       it('overrides the default model with the default model specified in the body', async () => {
-        const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
+        const requestBody = { model: 'gpt-3.5-turbo', input: 'What is Elastic?' };
         const response = await connector.performApiCompletion({
           input: JSON.stringify(requestBody),
         });
@@ -151,13 +123,13 @@ describe('InferenceConnector', () => {
 
       it('the OpenAI API call is successful with correct parameters', async () => {
         const response = await connector.performApiCompletion({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           ...mockDefaults,
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
@@ -204,16 +176,16 @@ describe('InferenceConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(
-          connector.performApiCompletion({ input: JSON.stringify(sampleOpenAiBody) })
-        ).rejects.toThrow('API Error');
+        await expect(connector.performApiCompletion({ input: 'What is Elastic?' })).rejects.toThrow(
+          'API Error'
+        );
       });
     });
 
     describe('streamApi', () => {
       it('the OpenAI API call is successful with correct parameters when stream = false', async () => {
         const response = await connector.performApiCompletionStream({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
@@ -221,7 +193,7 @@ describe('InferenceConnector', () => {
           method: 'post',
           responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
@@ -236,7 +208,7 @@ describe('InferenceConnector', () => {
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
         const response = await connector.performApiCompletionStream({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
@@ -245,7 +217,7 @@ describe('InferenceConnector', () => {
           method: 'post',
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
@@ -302,7 +274,7 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) })
+          connector.performApiCompletionStream({ input: 'What is Elastic?' })
         ).rejects.toThrow('API Error');
       });
     });
@@ -327,7 +299,7 @@ describe('InferenceConnector', () => {
       });
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) });
+        await connector.performApiCompletionStream({ input: 'What is Elastic?' });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
@@ -335,7 +307,7 @@ describe('InferenceConnector', () => {
           responseSchema: StreamingResponseSchema,
           responseType: 'stream',
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
@@ -349,7 +321,7 @@ describe('InferenceConnector', () => {
 
       it('signal is properly passed to streamApi', async () => {
         const signal = jest.fn();
-        await connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) });
+        await connector.performApiCompletionStream({ input: 'What is Elastic?' });
 
         expect(mockRequest).toHaveBeenCalledWith({
           url: 'https://api.openai.com/v1/chat/completions',
@@ -357,7 +329,7 @@ describe('InferenceConnector', () => {
           responseSchema: StreamingResponseSchema,
           responseType: 'stream',
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
@@ -375,7 +347,7 @@ describe('InferenceConnector', () => {
         connector.request = mockError;
 
         await expect(
-          connector.performApiCompletionStream({ input: JSON.stringify(sampleOpenAiBody) })
+          connector.performApiCompletionStream({ input: 'What is Elastic?' })
         ).rejects.toThrow('API Error');
       });
 
@@ -383,7 +355,7 @@ describe('InferenceConnector', () => {
         // @ts-ignore
         connector.request = mockStream();
         const response = await connector.performApiCompletionStream({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(response instanceof PassThrough).toEqual(true);
       });
@@ -392,13 +364,13 @@ describe('InferenceConnector', () => {
     describe('invokeAI', () => {
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.performApiCompletionStream({
-          input: JSON.stringify(sampleOpenAiBody),
+          input: 'What is Elastic?',
         });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
           ...mockDefaults,
           data: JSON.stringify({
-            ...sampleOpenAiBody,
+            input: 'What is Elastic?',
 
             model: DEFAULT_OPENAI_MODEL,
           }),
