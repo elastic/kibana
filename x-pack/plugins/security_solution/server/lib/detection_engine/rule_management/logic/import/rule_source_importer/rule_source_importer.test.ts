@@ -62,10 +62,10 @@ describe('ruleSourceImporter', () => {
       expect(ruleAssetsClientMock.fetchLatestAssets).toHaveBeenCalledTimes(1);
     });
 
-    it('throws an error if the ruleAsstClient does', () => {
+    it('throws an error if the ruleAsstClient does', async () => {
       ruleAssetsClientMock.fetchLatestAssets.mockReset().mockRejectedValue(new Error('failed'));
 
-      expect(() => subject.setup({ rules: [] })).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(() => subject.setup({ rules: [] })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"failed"`
       );
     });
