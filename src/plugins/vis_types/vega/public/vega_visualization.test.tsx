@@ -8,8 +8,9 @@
  */
 
 import 'jest-canvas-mock';
+import { render, screen } from '@testing-library/react';
 
-import { createVegaVisualization } from './vega_visualization';
+import { VegaVisType, createVegaVisualization } from './vega_visualization';
 
 import vegaliteGraph from './test_utils/vegalite_graph.json';
 import vegaGraph from './test_utils/vega_graph.json';
@@ -21,37 +22,41 @@ import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { VegaVisualizationDependencies } from './plugin';
+import React from 'react';
+import { TimeCache } from './data_model/time_cache';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
 
 describe('VegaVisualizations', () => {
-  let domNode;
-  let VegaVisualization;
-  let vegaVisualizationDependencies;
-
-  let mockGetBoundingClientRect;
-  let mockedWidthValue;
-  let mockedHeightValue;
+  let domNode: HTMLDivElement;
+  let VegaVisualization: VegaVisType;
+  let vegaVisualizationDependencies: VegaVisualizationDependencies;
+  let mockedHeightValue: number;
+  let mockedWidthValue: number;
 
   const coreStart = coreMock.createStart();
   const dataPluginStart = dataPluginMock.createStartContract();
   const dataViewsPluginStart = dataViewPluginMocks.createStartContract();
 
   const setupDOM = (width = 512, height = 512) => {
+    render(<div data-test-subj="vega-vis-text" />);
+    domNode = screen.getByTestId('vega-vis-text');
+    domNode.style.height = `${height}px`;
+    domNode.style.width = `${width}px`;
     mockedWidthValue = width;
     mockedHeightValue = height;
-    domNode = document.createElement('div');
 
-    mockGetBoundingClientRect = jest
-      .spyOn(Element.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => ({ width: mockedWidthValue, height: mockedHeightValue }));
+    // rtl does not update client dimensions on element, see https://github.com/testing-library/react-testing-library/issues/353
+    jest
+      .spyOn(Element.prototype, 'clientHeight', 'get')
+      .mockImplementation(() => mockedHeightValue);
+    jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => mockedWidthValue);
   };
 
-  const mockGetServiceSettings = () => {
-    return {};
-  };
+  const mockGetServiceSettings = jest.fn() as any;
 
   beforeEach(() => {
     setInjectedVars({
@@ -68,7 +73,7 @@ describe('VegaVisualizations', () => {
       getServiceSettings: mockGetServiceSettings,
     };
 
-    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
+    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies, 'view');
   });
 
   describe('VegaVisualization - basics', () => {
@@ -76,15 +81,11 @@ describe('VegaVisualizations', () => {
       setupDOM();
     });
 
-    afterEach(() => {
-      mockGetBoundingClientRect.mockRestore();
-    });
-
     test('should show vegalite graph and update on resize (may fail in dev env)', async () => {
       const mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
       mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging comment this line
 
-      let vegaVis;
+      let vegaVis: InstanceType<VegaVisType>;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
 
@@ -95,8 +96,8 @@ describe('VegaVisualizations', () => {
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
           }),
-          0,
-          0,
+          new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
+          {},
           mockGetServiceSettings
         );
         await vegaParser.parseAsync();
@@ -106,12 +107,14 @@ describe('VegaVisualizations', () => {
         mockedWidthValue = 256;
         mockedHeightValue = 250;
 
+        // @ts-expect-error - accessing private member
         await vegaVis.vegaView.resize();
 
         expect(domNode.innerHTML).toMatchSnapshot();
       } finally {
         vegaVis.destroy();
       }
+      // eslint-disable-next-line no-console
       expect(console.log).toBeCalledTimes(2);
       mockedConsoleLog.mockRestore();
     });
@@ -127,8 +130,8 @@ describe('VegaVisualizations', () => {
             indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
           }),
-          0,
-          0,
+          new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
+          {},
           mockGetServiceSettings
         );
         await vegaParser.parseAsync();
