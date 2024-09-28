@@ -33,8 +33,9 @@ const INITIAL_DATA = {
 };
 
 export function AgentKeys() {
-  const { toasts } = useApmPluginContext().core.notifications;
-
+  const { core } = useApmPluginContext();
+  const { toasts } = core.notifications;
+  const canSave = core.application.capabilities.apm['settings:save'];
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [createdAgentKey, setCreatedAgentKey] = useState<CreateApiKeyResponse>();
 
@@ -75,7 +76,7 @@ export function AgentKeys() {
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {areApiKeysEnabled && canManage && !isEmpty(agentKeys) && (
+        {areApiKeysEnabled && canSave && !isEmpty(agentKeys) && (
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="apmAgentKeysCreateApmAgentKeyButton"

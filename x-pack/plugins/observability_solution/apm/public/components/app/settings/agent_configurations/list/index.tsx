@@ -39,7 +39,7 @@ interface Props {
 
 export function AgentConfigurationList({ status, configurations, refetch }: Props) {
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = core.application.capabilities.apm['settings:save'];
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(null);
 
@@ -177,7 +177,9 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Edit"
+                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                  defaultMessage: 'Edit',
+                })}
                 iconType="pencil"
                 href={apmRouter.link('/settings/agent-configuration/edit', {
                   query: {
@@ -194,7 +196,9 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Delete"
+                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+                  defaultMessage: 'Delete',
+                })}
                 iconType="trash"
                 onClick={() => setConfigToBeDeleted(config)}
               />

@@ -120,8 +120,8 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
   );
 
   const mlManageJobsHref = useMlManageJobsHref();
-
-  const displayMlCallout = shouldDisplayMlCallout(setupState);
+  const canSave = core.application.capabilities.apm['settings:save'];
+  const displayMlCallout = shouldDisplayMlCallout(setupState) && canSave;
 
   const filteredJobs = showLegacyJobs ? jobs : jobs.filter((job) => job.version >= 3);
 
@@ -204,27 +204,56 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="apmJobsListManageJobsButton"
-            href={mlManageJobsHref}
-            color="primary"
+          <EuiToolTip
+            content={
+              !canSave &&
+              i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.noPermissionManageMlJobsButtonTooltipLabel',
+                {
+                  defaultMessage: "Your user role doesn't have permissions to manage jobs",
+                }
+              )
+            }
           >
-            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText', {
-              defaultMessage: 'Manage jobs',
-            })}
-          </EuiButton>
+            <EuiButton
+              data-test-subj="apmJobsListManageJobsButton"
+              href={mlManageJobsHref}
+              color="primary"
+              isDisabled={!canSave}
+            >
+              {i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
+                {
+                  defaultMessage: 'Manage jobs',
+                }
+              )}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="apmJobsListCreateJobButton"
-            fill
-            iconType="plusInCircle"
-            onClick={onAddEnvironments}
+          <EuiToolTip
+            content={
+              !canSave &&
+              i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.noPermissionAddEnvironmentsTooltipLabel',
+                {
+                  defaultMessage: "Your user role doesn't have permissions to create jobs",
+                }
+              )
+            }
           >
-            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.addEnvironments', {
-              defaultMessage: 'Create job',
-            })}
-          </EuiButton>
+            <EuiButton
+              data-test-subj="apmJobsListCreateJobButton"
+              fill
+              iconType="plusInCircle"
+              onClick={onAddEnvironments}
+              isDisabled={!canSave}
+            >
+              {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.addEnvironments', {
+                defaultMessage: 'Create job',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
