@@ -81,20 +81,39 @@ describe('createPromiseFromRuleImportStream', () => {
     ]);
   });
 
-  // TODO - Yara - there's a integration test testing this, but causing timeouts here
-  test.skip('returns error when ndjson stream is larger than limit', async () => {
+  test('throws an error when the number of rules in the stream is equal to the limit', async () => {
     const sample1 = getOutputSample();
     const sample2 = getOutputSample();
     sample2.rule_id = 'rule-2';
     const ndJsonStream = new Readable({
       read() {
         this.push(getSampleAsNdjson(sample1));
+        this.push('\n');
         this.push(getSampleAsNdjson(sample2));
+        this.push(null);
       },
     });
 
     await expect(
       createPromiseFromRuleImportStream({ stream: ndJsonStream, objectLimit: 2 })
+    ).rejects.toThrowError("Can't import more than 2 rules");
+  });
+
+  test('throws an error when the number of rules in the stream is larger than the limit', async () => {
+    const sample1 = getOutputSample();
+    const sample2 = getOutputSample();
+    sample2.rule_id = 'rule-2';
+    const ndJsonStream = new Readable({
+      read() {
+        this.push(getSampleAsNdjson(sample1));
+        this.push('\n');
+        this.push(getSampleAsNdjson(sample2));
+        this.push(null);
+      },
+    });
+
+    await expect(
+      createPromiseFromRuleImportStream({ stream: ndJsonStream, objectLimit: 1 })
     ).rejects.toThrowError("Can't import more than 1 rules");
   });
 
