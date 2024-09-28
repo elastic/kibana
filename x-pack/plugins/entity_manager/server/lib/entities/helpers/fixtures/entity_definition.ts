@@ -17,8 +17,8 @@ export const rawEntityDefinition = {
     interval: '1m',
     lookbackPeriod: '10m',
     settings: {
-      frequency: '2m',
-      syncDelay: '2m',
+      frequency: '30s',
+      syncDelay: '10s',
     },
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
