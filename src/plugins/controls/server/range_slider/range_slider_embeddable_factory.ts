@@ -13,7 +13,7 @@ import { RANGE_SLIDER_CONTROL } from '../../common';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,
-} from '../../common/range_slider/range_slider_persistable_state';
+} from './range_slider_persistable_state';
 
 export const rangeSliderPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
   return {

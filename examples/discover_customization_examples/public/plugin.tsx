@@ -28,7 +28,7 @@ import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
-import type { ControlsPanels } from '@kbn/controls-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -357,7 +357,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             }
 
             const stateSubscription = stateStorage
-              .change$<ControlsPanels>('controlPanels')
+              .change$<ControlPanelsState>('controlPanels')
               .subscribe((panels) =>
                 controlGroupAPI.updateInput({ initialChildControlState: panels ?? undefined })
               );
@@ -410,7 +410,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               <ControlGroupRenderer
                 onApiAvailable={setControlGroupAPI}
                 getCreationOptions={async (initialState, builder) => {
-                  const panels = stateStorage.get<ControlsPanels>('controlPanels');
+                  const panels = stateStorage.get<ControlPanelsState>('controlPanels');
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
