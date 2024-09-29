@@ -7,13 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
-import {
-  ScriptBasedSortClause,
-  ScriptClause,
-  mustBeAllOf,
-  MustCondition,
-  MustNotCondition,
-} from './query_clauses';
+import { ScriptClause, mustBeAllOf, MustCondition, MustNotCondition } from './query_clauses';
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
@@ -96,22 +90,8 @@ export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition = {
   },
 };
 
-const SortByRunAtAndRetryAtScript: ScriptBasedSortClause = {
-  _script: {
-    type: 'number',
-    order: 'asc',
-    script: {
-      lang: 'painless',
-      source: `
-if (doc['task.retryAt'].size()!=0) {
-  return doc['task.retryAt'].value.toInstant().toEpochMilli();
-}
-if (doc['task.runAt'].size()!=0) {
-  return doc['task.runAt'].value.toInstant().toEpochMilli();
-}
-    `,
-    },
-  },
+const SortByRunAtAndRetryAtScript: estypes.Sort = {
+  'task.claimAt': { order: 'asc', missing: '_first' },
 };
 export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
 
@@ -119,33 +99,34 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
   if (definitions.size() === 0) return;
 
   return {
-    _script: {
-      type: 'number',
-      order: 'desc',
-      script: {
-        lang: 'painless',
-        // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
-        // TODO: we could do this locally as well, but they may starve
-        source: `
-          String taskType = doc['task.taskType'].value;
-          if (params.priority_map.containsKey(taskType)) {
-            return params.priority_map[taskType];
-          } else {
-            return ${TaskPriority.Normal};
-          }
-        `,
-        params: {
-          priority_map: definitions
-            .getAllDefinitions()
-            .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
-              if (taskDefinition.priority) {
-                acc[taskDefinition.type] = taskDefinition.priority;
-              }
-              return acc;
-            }, {}),
-        },
-      },
-    },
+    'task.priority': { order: 'desc', missing: '_first' },
+    // _script: {
+    //   type: 'number',
+    //   order: 'desc',
+    //   script: {
+    //     lang: 'painless',
+    //     // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
+    //     // TODO: we could do this locally as well, but they may starve
+    //     source: `
+    //       String taskType = doc['task.taskType'].value;
+    //       if (params.priority_map.containsKey(taskType)) {
+    //         return params.priority_map[taskType];
+    //       } else {
+    //         return ${TaskPriority.Normal};
+    //       }
+    //     `,
+    //     params: {
+    //       priority_map: definitions
+    //         .getAllDefinitions()
+    //         .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
+    //           if (taskDefinition.priority) {
+    //             acc[taskDefinition.type] = taskDefinition.priority;
+    //           }
+    //           return acc;
+    //         }, {}),
+    //     },
+    //   },
+    // },
   };
 }
 
