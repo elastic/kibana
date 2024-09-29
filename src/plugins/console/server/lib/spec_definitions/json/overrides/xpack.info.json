@@ -5,8 +5,7 @@
         "build",
         "license",
         "features"
-      ],
-      "human": "__flag__"
+      ]
     }
   }
 }
