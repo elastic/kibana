@@ -1550,10 +1550,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
@@ -11729,7 +11725,7 @@
                 "section": "def-server.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ", outputId: string) => Promise<void>"
+              ", outputId: string, options?: { force?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -11770,6 +11766,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.removeOutputFromAll.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.removeOutputFromAll.$3.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -19351,7 +19374,13 @@
           ],
           "signature": [
             "(packageName: string) => ",
-            "FleetArtifactsClient"
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.ArtifactsClientInterface",
+              "text": "ArtifactsClientInterface"
+            }
           ],
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
@@ -23906,10 +23935,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
               },
               {
                 "plugin": "securitySolution",

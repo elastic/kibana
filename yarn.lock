@@ -8037,10 +8037,10 @@
   resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.15.1.tgz#7a20ca06297f947f6060852e072b0bc24e03f126"
   integrity sha512-PaJETh/fr4N8BVQlgb5vBH8VdN25VhxaVvL0s4Wv3kAUC+MXi7B9hEVM1GUlI9CrjxRExlbAAYtLY7kzjE7SXg==
 
-"@openfeature/web-sdk@^1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.2.3.tgz#5a248e8ae53c22397cde5e5324e69a833bf8fb21"
-  integrity sha512-vsqEvkY5Z78C5W1UW57uMN+a70UgaObzQ1QNIp0lV77aCQnGJi7FHeYmyrfLm8XjtJbj/5PAaclAyqudf+xgaA==
+"@openfeature/web-sdk@^1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.2.4.tgz#5b3e1805f81fd0e50bbe10776292ba24a2239ac4"
+  integrity sha512-v3RYqMIq+/UXH7eVqfTfp7iWPJ4/Ck5a3RwxAEhypocq5IxUDyEUxXvVU82bkVkbNEKvXYLUWlxT+IuHvh8Eng==
 
 "@opentelemetry/api-metrics@0.31.0", "@opentelemetry/api-metrics@^0.31.0":
   version "0.31.0"
@@ -23834,7 +23834,7 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@^2.4.8:
+msw@^2.4.9:
   version "2.4.9"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.4.9.tgz#350a84cedb90b578a32c7764431e3750900f8407"
   integrity sha512-1m8xccT6ipN4PTqLinPwmzhxQREuxaEJYdx4nIbggxP8aM7r1e71vE7RtOUSQoAm1LydjGfZKy7370XD/tsuYg==
