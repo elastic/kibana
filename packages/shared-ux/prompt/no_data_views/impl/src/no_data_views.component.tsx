@@ -108,6 +108,12 @@ const PromptTryEsql = ({
   NoDataViewsPromptComponentProps,
   'onClickCreate' | 'onTryESQL' | 'esqlDocLink' | 'emptyPromptColor'
 >) => {
+  if (!onTryESQL) {
+    // we need to handle the case where the Try ES|QL click handler is not set because
+    // onTryESQL is set via a useEffect that has asynchronous dependencies
+    return null;
+  }
+
   // Load this illustration lazily
   const Illustration = withSuspense(
     React.lazy(() =>
@@ -136,14 +142,12 @@ const PromptTryEsql = ({
 
   const footer = (
     <>
-      {onTryESQL && (
-        <EuiButton onClick={onTryESQL} fill={true} data-test-subj="tryESQLLink">
-          <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.tryEsqlText"
-            defaultMessage="Try ES|QL"
-          />
-        </EuiButton>
-      )}
+      <EuiButton onClick={onTryESQL} fill={true} data-test-subj="tryESQLLink">
+        <FormattedMessage
+          id="sharedUXPackages.noDataViewsPrompt.tryEsqlText"
+          defaultMessage="Try ES|QL"
+        />
+      </EuiButton>
       <EuiHorizontalRule />
       {esqlDocLink && <DocumentationLink href={esqlDocLink} data-test-subj="docLinkEsql" />}
     </>

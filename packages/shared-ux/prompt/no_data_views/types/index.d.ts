@@ -104,6 +104,8 @@ export interface NoDataViewsPromptProps {
   allowAdHocDataView?: boolean;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** Handler for someone wanting to try ES|QL. */
+  onTryESQL?: () => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
   /** Empty prompt color **/

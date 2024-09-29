@@ -59,6 +59,8 @@ export interface KibanaNoDataPageProps {
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
+  /** **/
+  onTryESQL?: () => void;
   showPlainSpinner: boolean;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;

@@ -61,7 +61,7 @@ export class StorybookMock extends AbstractStorybookMock<
     let onTryESQL;
 
     if (canTryEsql !== false) {
-      onTryESQL = action('onTryESQL');
+      onTryESQL = action('onTryESQL-from-services');
     }
 
     return {

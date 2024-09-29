@@ -70,6 +70,8 @@ export interface AnalyticsNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** If the cluster has data, the user can be prompted to try ES|QL. This click handler customizes the action */
+  onTryESQL?: () => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;
 }
