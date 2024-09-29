@@ -8,8 +8,7 @@
 import type { UnstructuredLogState } from '../../types';
 import type { GrokResult, HandleUnstructuredNodeParams } from './types';
 import { testPipeline } from '../../util';
-import { onFailure } from './constants';
-import { createGrokProcessor } from '../../util/processors';
+import { createGrokProcessor, createOnFailureProcessor } from '../../util/processors';
 
 export async function handleUnstructuredValidate({
   state,
@@ -17,7 +16,7 @@ export async function handleUnstructuredValidate({
 }: HandleUnstructuredNodeParams): Promise<Partial<UnstructuredLogState>> {
   const grokPatterns = state.grokPatterns;
   const grokProcessor = createGrokProcessor(grokPatterns);
-  const pipeline = { processors: grokProcessor, on_failure: [onFailure] };
+  const pipeline = { processors: grokProcessor, on_failure: [createOnFailureProcessor()] };
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
     pipelineResults: GrokResult[];

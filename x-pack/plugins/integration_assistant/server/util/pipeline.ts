@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ESProcessorItem } from '../../common';
+import { createOnFailureProcessor, createRemoveProcessor } from './processors';
 
 interface DocTemplate {
   _index: string;
@@ -29,9 +31,9 @@ export async function testPipeline(
   samples: string[],
   pipeline: object,
   client: IScopedClusterClient
-): Promise<{ pipelineResults: object[]; errors: object[] }> {
+): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
   const docs = samples.map((sample) => formatSample(sample));
-  const pipelineResults: object[] = [];
+  const pipelineResults: Array<{ [key: string]: unknown }> = [];
   const errors: object[] = [];
 
   try {
@@ -47,5 +49,18 @@ export async function testPipeline(
     errors.push({ error: (e as Error).message });
   }
 
+  return { pipelineResults, errors };
+}
+
+export async function createJSONInput(
+  processor: ESProcessorItem,
+  formattedSamples: string[],
+  client: IScopedClusterClient
+): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
+  const pipeline = {
+    processors: [processor, createRemoveProcessor()],
+    on_failure: [createOnFailureProcessor()],
+  };
+  const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
   return { pipelineResults, errors };
 }

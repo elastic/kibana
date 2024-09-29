@@ -25,14 +25,6 @@ export const KV_HEADER_ERROR_EXAMPLE_ANSWER = {
     '%{TIMESTAMP:timestamp}:%{WORD:value1};%{WORD:key2}:%{WORD:value2}:%{GREEDYDATA:message}',
 };
 
-export const onFailure = {
-  append: {
-    field: 'error.message',
-    value:
-      '{% raw %}Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.on_failure_pipeline}}} failed with message: {{{_ingest.on_failure_message}}}{% endraw %}',
-  },
-};
-
 export const COMMON_ERRORS = [
   {
     error: 'field [message] does not contain value_split [=]',

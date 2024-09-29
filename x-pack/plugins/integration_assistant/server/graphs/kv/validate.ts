@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
-import { testPipeline } from '../../util';
-import { onFailure } from './constants';
-import { createGrokProcessor } from '../../util/processors';
+import { testPipeline, createJSONInput } from '../../util';
+import { createGrokProcessor, createOnFailureProcessor } from '../../util/processors';
 
 interface KVResult {
   [packageName: string]: { [dataStreamName: string]: unknown };
@@ -36,8 +33,7 @@ export async function handleKVValidate({
   const { pipelineResults: kvOutputSamples, errors } = (await createJSONInput(
     kvProcessor,
     samples,
-    client,
-    state
+    client
   )) as { pipelineResults: KVResult[]; errors: object[] };
 
   if (errors.length > 0) {
@@ -66,7 +62,7 @@ export async function handleHeaderValidate({
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const grokPattern = state.grokPattern;
   const grokProcessor = createGrokProcessor([grokPattern]);
-  const pipeline = { processors: grokProcessor, on_failure: [onFailure] };
+  const pipeline = { processors: grokProcessor, on_failure: [createOnFailureProcessor()] };
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
     pipelineResults: GrokResult[];
@@ -87,17 +83,4 @@ export async function handleHeaderValidate({
     errors: [],
     lastExecutedChain: 'kv_header_validate',
   };
-}
-
-async function createJSONInput(
-  kvProcessor: ESProcessorItem,
-  formattedSamples: string[],
-  client: IScopedClusterClient,
-  state: KVState
-): Promise<{ pipelineResults: object[]; errors: object[] }> {
-  // This processor removes the original message field in the JSON output
-  const removeProcessor = { remove: { field: 'message', ignore_missing: true } };
-  const pipeline = { processors: [kvProcessor[0], removeProcessor], on_failure: [onFailure] };
-  const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
-  return { pipelineResults, errors };
 }

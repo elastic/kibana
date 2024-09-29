@@ -77,3 +77,40 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
   const kvProcessor = load(renderedTemplate) as ESProcessorItem;
   return kvProcessor;
 }
+
+// Processor for the csv input to convert it to JSON.
+export function createCSVProcessor(source: string, targets: string[]): ESProcessorItem {
+  return {
+    csv: {
+      field: source,
+      target_fields: targets,
+      description: 'Parse CSV input',
+      tag: 'parse_csv',
+    },
+  };
+}
+
+// Standard processor for the on_failure part of the pipeline.
+export function createOnFailureProcessor(): ESProcessorItem {
+  return {
+    append: {
+      field: 'error.message',
+      description: 'Append the error message',
+      tag: 'append_error_message',
+      value:
+        '{% raw %}Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.on_failure_pipeline}}} failed with message: {{{_ingest.on_failure_message}}}{% endraw %}',
+    },
+  };
+}
+
+// Processor to remove the message field.
+export function createRemoveProcessor(): ESProcessorItem {
+  return {
+    remove: {
+      field: 'message',
+      ignore_missing: true,
+      description: 'Remove the message field',
+      tag: 'remove_message_field',
+    },
+  };
+}
