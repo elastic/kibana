@@ -63,6 +63,57 @@ describe('EmailParamsFields renders', () => {
     expect(await screen.findByTestId('messageTextArea')).toBeVisible();
   });
 
+  const emailTestCases = [
+    {
+      field: 'to',
+      fieldValue: 'new1@test.com, new2@test.com , new1@test.com, ',
+      expected: ['test@test.com', 'new1@test.com', 'new2@test.com'],
+    },
+    {
+      field: 'cc',
+      fieldValue: 'newcc1@test.com, newcc2@test.com , newcc1@test.com, ',
+      expected: ['cc@test.com', 'newcc1@test.com', 'newcc2@test.com'],
+    },
+    {
+      field: 'bcc',
+      fieldValue: 'newbcc1@test.com, newbcc2@test.com , newbcc1@test.com, ',
+      expected: ['bcc@test.com', 'newbcc1@test.com', 'newbcc2@test.com'],
+    },
+  ];
+
+  emailTestCases.forEach(({ field, fieldValue, expected }) => {
+    test(`"${field}" field value updates correctly when comma-separated emails are pasted`, async () => {
+      const actionParams = {
+        cc: ['cc@test.com'],
+        bcc: ['bcc@test.com'],
+        to: ['test@test.com'],
+        subject: 'test',
+        message: 'test message',
+      };
+
+      const editAction = jest.fn();
+
+      render(
+        <IntlProvider locale="en">
+          <EmailParamsFields
+            actionParams={actionParams}
+            errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+            editAction={editAction}
+            defaultMessage={'Some default message'}
+            index={0}
+          />
+        </IntlProvider>
+      );
+
+      const input = screen.getByTestId(`${field}EmailAddressInput`).querySelector('input')!;
+      fireEvent.change(input, { target: { value: fieldValue } });
+      expect(input.value).toStrictEqual(fieldValue);
+
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      expect(editAction).toHaveBeenCalledWith(field, expected, 0);
+    });
+  });
+
   test('message param field is rendered with default value if not set', () => {
     const actionParams = {
       cc: [],
