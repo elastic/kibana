@@ -84,7 +84,7 @@ describe('columnsFromHeader', () => {
     const headerObject = { column0: 'name', column2: 'location' };
     expect(columnsFromHeader(tempColumnNames, headerObject)).toEqual([
       'name',
-      'column1',
+      undefined,
       'location',
     ]);
   });

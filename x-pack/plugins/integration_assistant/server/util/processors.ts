@@ -114,3 +114,27 @@ export function createRemoveProcessor(): ESProcessorItem {
     },
   };
 }
+
+// Processor to drop the specific values.
+// values is a record of key value pairs to match against the fields
+// root is the root of the fields to match against
+export function createDropProcessor(
+  values: Record<string, unknown>,
+  prefix: string[],
+  tag: string,
+  description: string
+): ESProcessorItem {
+  const prefixExpression = prefix.join('?.');
+  const conditions = Object.entries(values)
+    .map(([key, value]) => `ctx.${prefixExpression}?.${key} == '${String(value)}'`)
+    .join(' && ');
+
+  return {
+    drop: {
+      if: conditions,
+      ignore_failure: true,
+      description,
+      tag,
+    },
+  };
+}

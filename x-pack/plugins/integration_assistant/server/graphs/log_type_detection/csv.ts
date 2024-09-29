@@ -7,7 +7,7 @@
 import type { LogFormatDetectionState } from '../../types';
 import type { LogDetectionNodeParams } from './types';
 import { createJSONInput } from '../../util';
-import { createCSVProcessor } from '../../util/processors';
+import { createCSVProcessor, createDropProcessor } from '../../util/processors';
 
 // We will only create the processor for the first MAX_CSV_COLUMNS columns.
 const MAX_CSV_COLUMNS = 100;
@@ -22,22 +22,25 @@ export function generateColumnNames(count: number): string[] {
   return Array.from({ length: count }).map((_, i) => `column${i}`);
 }
 
+function toSafeColumnName(columnName: unknown): string | undefined {
+  if (typeof columnName !== 'string') {
+    return undefined;
+  }
+  return columnName.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
 // Returns the column list from a header row. We skip values that are not strings.
 export function columnsFromHeader(
   tempColumnNames: string[],
   headerObject: { [key: string]: unknown }
-): string[] {
+): Array<string | undefined> {
   const maxIndex = tempColumnNames.findLastIndex(
     (columnName) => headerObject[columnName] !== undefined
   );
   return tempColumnNames
     .slice(0, maxIndex + 1)
-    .map(
-      (columnName) =>
-        (typeof headerObject[columnName] === 'string'
-          ? headerObject[columnName]
-          : columnName) as string
-    );
+    .map((columnName) => headerObject[columnName])
+    .map(toSafeColumnName);
 }
 
 // Count the number of columns actually present in the rows.
@@ -75,37 +78,52 @@ export async function convertCSVSamples({
   const temporaryProcessor = createCSVProcessor('message', temporaryColumns);
 
   const { pipelineResults: tempResults, errors: tempErrors } = await createJSONInput(
-    temporaryProcessor,
+    [temporaryProcessor],
     samples,
     client
   );
 
   if (tempErrors.length > 0) {
-    return { errors: tempErrors, lastExecutedChain: 'convertCSVSamples' };
+    return { errors: tempErrors, lastExecutedChain: 'convertCSVSamples-temporary' };
   }
 
   const headerColumns = state.header ? columnsFromHeader(temporaryColumns, tempResults[0]) : [];
-  const columns = [
-    ...headerColumns,
-    ...temporaryColumns.slice(
-      headerColumns.length,
-      totalColumnCount(temporaryColumns, tempResults)
-    ),
-  ];
+  const needColumns = totalColumnCount(temporaryColumns, tempResults);
+  const columns: string[] = [];
 
-  const csvProcessor = createCSVProcessor(
-    'message',
-    prefixColumns(columns, [packageName, dataStreamName])
-  );
+  for (let i = 0; i < needColumns; i++) {
+    columns[i] = headerColumns[i] || temporaryColumns[i];
+  }
+
+  const prefix = [packageName, dataStreamName];
+  const prefixedColumns = prefixColumns(columns, prefix);
+  const csvProcessor = createCSVProcessor('message', prefixedColumns);
+  const csvHandlingProcessors = [csvProcessor];
+
+  if (headerColumns) {
+    const dropValues = columns.reduce((acc, column, index) => {
+      if (headerColumns[index] !== undefined) {
+        acc[column] = String(headerColumns[index]);
+      }
+      return acc;
+    }, {} as Record<string, string>);
+    const dropProcessor = createDropProcessor(
+      dropValues,
+      prefix,
+      'remove_csv_header',
+      'Remove the CSV header line'
+    );
+    csvHandlingProcessors.push(dropProcessor);
+  }
 
   const { pipelineResults: finalResults, errors: finalErrors } = await createJSONInput(
-    csvProcessor,
+    csvHandlingProcessors,
     samples,
     client
   );
 
   if (finalErrors.length > 0) {
-    return { errors: finalErrors, lastExecutedChain: 'convertCSVSamples' };
+    return { errors: finalErrors, lastExecutedChain: 'convertCSVSamples-final' };
   }
 
   // Converts JSON Object into a string and parses it as a array of JSON strings
@@ -116,7 +134,7 @@ export async function convertCSVSamples({
 
   return {
     jsonSamples,
-    additionalProcessors: [...state.additionalProcessors, csvProcessor],
+    additionalProcessors: [...state.additionalProcessors, ...csvHandlingProcessors],
     lastExecutedChain: 'convertCSVSamples',
   };
 }

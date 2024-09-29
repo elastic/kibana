@@ -39,7 +39,9 @@ export async function testPipeline(
   try {
     const output = await client.asCurrentUser.ingest.simulate({ docs, pipeline });
     for (const doc of output.docs) {
-      if (doc.doc?._source?.error) {
+      if (!doc) {
+        // Nothing to do – the document was dropped.
+      } else if (doc.doc?._source?.error) {
         errors.push(doc.doc._source.error);
       } else if (doc.doc?._source) {
         pipelineResults.push(doc.doc._source);
@@ -53,12 +55,12 @@ export async function testPipeline(
 }
 
 export async function createJSONInput(
-  processor: ESProcessorItem,
+  processors: ESProcessorItem[],
   formattedSamples: string[],
   client: IScopedClusterClient
 ): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
   const pipeline = {
-    processors: [processor, createRemoveProcessor()],
+    processors: [...processors, createRemoveProcessor()],
     on_failure: [createOnFailureProcessor()],
   };
   const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);

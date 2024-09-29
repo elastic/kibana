@@ -31,7 +31,7 @@ export async function handleKVValidate({
   const samples = state.header ? state.kvLogMessages : state.logSamples;
 
   const { pipelineResults: kvOutputSamples, errors } = (await createJSONInput(
-    kvProcessor,
+    [kvProcessor],
     samples,
     client
   )) as { pipelineResults: KVResult[]; errors: object[] };
