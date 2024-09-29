@@ -6,7 +6,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
 
@@ -23,7 +23,7 @@ export const OPEN_FINDINGS_FLYOUT = 'open-findings-flyout';
 export const GROUP_BY_CLICK = 'group-by-click';
 export const CHANGE_RULE_STATE = 'change-rule-state';
 
-type cloudSecurityUiCounters =
+type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_MISCONFIGURATION_VIEW_VISITS
   | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
   | typeof VULNERABILITIES_FLYOUT_VISITS
@@ -41,7 +41,7 @@ export class UiMetricService {
     this.usageCollection = usageCollection;
   }
 
-  private track(metricType: UiCounterMetricType, eventName: cloudSecurityUiCounters) {
+  private track(metricType: UiCounterMetricType, eventName: CloudSecurityUiCounters) {
     if (!this.usageCollection) {
       // Usage collection might be disabled in Kibana config.
       return;
@@ -49,7 +49,7 @@ export class UiMetricService {
     return this.usageCollection.reportUiCounter(APP_NAME, metricType, eventName);
   }
 
-  public trackUiMetric(metricType: UiCounterMetricType, eventName: cloudSecurityUiCounters) {
+  public trackUiMetric(metricType: UiCounterMetricType, eventName: CloudSecurityUiCounters) {
     return this.track(metricType, eventName);
   }
 }
