@@ -38,6 +38,9 @@ export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
 
+export const LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY =
+  'cloudPosture:findings:3pIntegrationsCallout';
+
 export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
 export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
 
