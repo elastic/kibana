@@ -233,6 +233,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
 };
+
 export const VULNERABILITY_FIELDS = {
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
@@ -245,8 +246,9 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
-  SOURCE: 'data_stream.dataset',
+  VENDOR: 'observer.vendor',
 } as const;
+
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
   RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,

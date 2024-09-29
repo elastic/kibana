@@ -37,8 +37,10 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
+  CSP_VULN_DATASET,
   getDatasetDisplayName,
 } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
@@ -200,13 +202,20 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-const isNativeCspFinding = (finding: CspFinding) =>
-  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET;
+export const isNativeCspFinding = (finding: CspFinding | CspVulnerabilityFinding) =>
+  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET ||
+  finding.data_stream.dataset === CSP_VULN_DATASET;
 
-const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
+export const MissingFieldsCallout = ({
+  finding,
+}: {
+  finding: CspFinding | CspVulnerabilityFinding;
+}) => {
   const { euiTheme } = useEuiTheme();
   const datasetDisplayName =
-    getDatasetDisplayName(finding.data_stream.dataset) || finding.data_stream.dataset;
+    finding.observer?.vendor ||
+    getDatasetDisplayName(finding.data_stream.dataset) ||
+    finding.data_stream.dataset;
 
   return (
     <EuiCallOut

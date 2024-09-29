@@ -107,11 +107,14 @@ const getDetailsList = (
     description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
-      defaultMessage: 'Source',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle', {
+      defaultMessage: 'Vendor',
     }),
     description:
-      getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
+      data.observer?.vendor ||
+      getDatasetDisplayName(data.data_stream?.dataset) ||
+      data.data_stream?.dataset ||
+      EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {

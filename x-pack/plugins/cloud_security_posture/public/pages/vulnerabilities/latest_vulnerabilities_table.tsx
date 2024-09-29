@@ -89,9 +89,11 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
       {({ finding }) => <SeverityStatusBadge severity={finding.vulnerability.severity} />}
     </CspVulnerabilityFindingRenderer>
   ),
-  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <>{getDatasetDisplayName(finding.data_stream.dataset) || '-'}</>}
+      {({ finding }) => (
+        <>{finding.observer?.vendor || getDatasetDisplayName(finding.data_stream.dataset) || '-'}</>
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
 });

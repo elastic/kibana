@@ -63,11 +63,12 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 
     return <CspEvaluationBadge type={finding?.result?.evaluation} />;
   },
-  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    const source = getDatasetDisplayName(finding?.data_stream?.dataset);
+    const vendor =
+      finding?.observer?.vendor || getDatasetDisplayName(finding?.data_stream?.dataset);
 
-    return <>{source || finding?.data_stream?.dataset || ''}</>;
+    return <>{vendor || finding?.data_stream?.dataset || ''}</>;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
