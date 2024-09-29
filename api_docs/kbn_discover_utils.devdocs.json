@@ -605,6 +605,131 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.dismissAllFlyoutsExceptFor",
+        "type": "Function",
+        "tags": [],
+        "label": "dismissAllFlyoutsExceptFor",
+        "description": [],
+        "signature": [
+          "(excludedFlyout: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          ") => void"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissAllFlyoutsExceptFor.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "excludedFlyout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.dismissFlyouts",
+        "type": "Function",
+        "tags": [],
+        "label": "dismissFlyouts",
+        "description": [],
+        "signature": [
+          "(selectedFlyouts?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          "[], excludedFlyout?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          " | undefined) => void"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissFlyouts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedFlyouts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissFlyouts.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludedFlyout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.formatFieldValue",
         "type": "Function",
         "tags": [],
@@ -2845,6 +2970,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverFlyouts",
+        "type": "Enum",
+        "tags": [],
+        "label": "DiscoverFlyouts",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.IgnoredReason",
