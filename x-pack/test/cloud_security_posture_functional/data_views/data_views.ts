@@ -57,6 +57,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     let findings: typeof pageObjects.findings;
 
     before(async () => {
+      await spacesService.delete(TEST_SPACE);
+
+      // NOTE: Logout needs to happen before any test to avoid flaky behavior
+      await pageObjects.security.forceLogout();
+
       cspSecurity = pageObjects.cspSecurity;
       findings = pageObjects.findings;
       await cspSecurity.createRoles();
@@ -81,7 +86,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Verify data view is created once user reach the findings page - default space', async () => {
         const expectedDataViewId = `${dataViewPrefix}-default`;
 
-        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: expectedDataViewId,
+          space: 'default',
+        });
         await retry.try(async () => {
           const idDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
@@ -107,7 +116,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Verify data view is created once user reach the dashboard page - default space', async () => {
         const expectedDataViewId = `${dataViewPrefix}-default`;
 
-        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: expectedDataViewId,
+          space: 'default',
+        });
         await retry.try(async () => {
           const idDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
@@ -139,8 +152,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
         const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
-
-        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: expectedDataViewId,
+          space: TEST_SPACE,
+        });
         await retry.try(async () => {
           const idDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
@@ -169,9 +185,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await pageObjects.spaceSelector.openSpacesNav();
         await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-        const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
+        const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
 
-        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: expectedDataViewId,
+          space: TEST_SPACE,
+        });
         await retry.try(async () => {
           const idDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
@@ -201,7 +221,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await cspSecurity.login('csp_read_user');
         const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
-        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: expectedDataViewId,
+          space: 'default',
+        });
         await retry.try(async () => {
           const idDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
