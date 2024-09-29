@@ -538,4 +538,41 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(err.statusCode).toBe(500);
     expect(err.message).toBe('plain error message');
   });
+
+  it('should apply the rule type IDs filter', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+    expect(arg0.params.body.query).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "terms": Object {
+                "kibana.alert.rule.rule_type_id": Array [
+                  "siem.esqlRule",
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
 });

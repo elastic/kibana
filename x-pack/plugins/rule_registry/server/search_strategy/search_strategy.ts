@@ -27,6 +27,7 @@ import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../.
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
+import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 
 export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
@@ -90,8 +91,7 @@ export const ruleRegistrySearchStrategyProvider = (
         if (!isAnyRuleTypeESAuthorized && ruleTypeIds.length > 0) {
           authzFilter = (await getAuthzFilter(
             authorization,
-            ReadOperations.Find,
-            ruleTypeIds
+            ReadOperations.Find
           )) as estypes.QueryDslQueryContainer;
         }
 
@@ -120,11 +120,19 @@ export const ruleRegistrySearchStrategyProvider = (
               ? request.query?.bool?.filter
               : [request.query?.bool?.filter]
             : [];
+
           if (authzFilter) {
             filter.push(authzFilter);
           }
+
           if (space?.id) {
             filter.push(getSpacesFilter(space.id) as estypes.QueryDslQueryContainer);
+          }
+
+          const ruleTypeFilter = getRuleTypeIdsFilter(request.ruleTypeIds);
+
+          if (ruleTypeFilter) {
+            filter.push(ruleTypeFilter);
           }
 
           const sort = request.sort ?? [];

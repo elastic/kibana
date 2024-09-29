@@ -95,7 +95,7 @@ describe('healthRoute', () => {
   });
 
   it('should have internal access for serverless', async () => {
-    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(ruleTypes);
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();

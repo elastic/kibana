@@ -169,7 +169,7 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   eventLogger: IEventLogger;
   executionContext: ExecutionContextStart;
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
   maintenanceWindowsService: MaintenanceWindowsService;

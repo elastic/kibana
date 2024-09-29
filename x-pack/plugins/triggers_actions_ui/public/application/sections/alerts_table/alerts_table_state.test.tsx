@@ -897,9 +897,7 @@ describe('AlertsTableState', () => {
     });
 
     it('should insert a new field as column when its not a default one', async () => {
-      const { getByTestId, findByTestId, queryByTestId } = render(
-        <TestComponent {...tableProps} />
-      );
+      const { findByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
 
       expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
       fireEvent.click(await findByTestId('show-field-browser'));
