@@ -84,6 +84,16 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
+   */
+  endpointManagementSpaceAwarenessEnabled: false,
+
+  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -109,6 +119,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantBedrockChat: true,
 
   /**
+   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
+   */
+  assistantNaturalLanguageESQLTool: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -127,6 +142,11 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
+
+  /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -163,6 +183,12 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
@@ -182,6 +208,11 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
+
+  /**
+   * Enables visualization: session viewer and analyzer in expandable flyout
+   */
+  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.

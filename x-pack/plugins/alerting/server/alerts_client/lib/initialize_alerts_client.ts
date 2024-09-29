@@ -65,7 +65,14 @@ export const initializeAlertsClient = async <
     },
   } = taskInstance;
 
-  const alertsClientParams = { logger, ruleType };
+  const alertsClientParams = {
+    alertingEventLogger: context.alertingEventLogger,
+    logger,
+    maintenanceWindowsService: context.maintenanceWindowsService,
+    request: context.request,
+    ruleType,
+    spaceId: context.spaceId,
+  };
 
   // Create AlertsClient if rule type has registered an alerts context
   // with the framework. The AlertsClient will handle reading and

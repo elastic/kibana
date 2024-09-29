@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to copy the response of a request', async () => {
       await sendRequest('GET /_search?pretty');
 
+      await PageObjects.console.focusOutputEditor();
       await PageObjects.console.clickCopyOutput();
 
       const resultToast = await toasts.getElementByIndex(1);
@@ -65,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendMultipleRequests(['\n GET /_search?pretty', '\n GET /_search?pretty']);
 
       const response = await PageObjects.console.getOutputText();
-      expect(response).to.contain('# 2: GET /_search?pretty');
+      expect(response).to.contain('# 2: GET /_search?pretty [200 OK]');
     });
 
     it('should clear the console output', async () => {

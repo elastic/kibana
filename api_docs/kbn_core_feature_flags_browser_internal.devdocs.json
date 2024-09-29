@@ -1,0 +1,218 @@
+{
+  "id": "@kbn/core-feature-flags-browser-internal",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+        "id": "def-public.FeatureFlagsService",
+        "type": "Class",
+        "tags": [
+          "private"
+        ],
+        "label": "FeatureFlagsService",
+        "description": [
+          "\nThe browser-side Feature Flags Service"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+            "id": "def-public.FeatureFlagsService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nThe core service's constructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+                "id": "def-public.FeatureFlagsService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [
+                  "{@link CoreContext }"
+                ],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+            "id": "def-public.FeatureFlagsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [
+              "\nSetup lifecycle method"
+            ],
+            "signature": [
+              "(deps: ",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
+                "section": "def-public.FeatureFlagsSetupDeps",
+                "text": "FeatureFlagsSetupDeps"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              }
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+                "id": "def-public.FeatureFlagsService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [
+                  "{@link FeatureFlagsSetup } including the {@link InternalInjectedMetadataSetup } used to retrieve the feature flags."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-feature-flags-browser-internal",
+                    "scope": "public",
+                    "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
+                    "section": "def-public.FeatureFlagsSetupDeps",
+                    "text": "FeatureFlagsSetupDeps"
+                  }
+                ],
+                "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+            "id": "def-public.FeatureFlagsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "\nStart lifecycle method"
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+            "id": "def-public.FeatureFlagsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [
+              "\nStop lifecycle method"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+        "id": "def-public.FeatureFlagsSetupDeps",
+        "type": "Interface",
+        "tags": [
+          "private"
+        ],
+        "label": "FeatureFlagsSetupDeps",
+        "description": [
+          "\nsetup method dependencies"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-internal",
+            "id": "def-public.FeatureFlagsSetupDeps.injectedMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "injectedMetadata",
+            "description": [
+              "\nUsed to read the flag overrides set up in the configuration file."
+            ],
+            "signature": [
+              "InternalInjectedMetadataSetup"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

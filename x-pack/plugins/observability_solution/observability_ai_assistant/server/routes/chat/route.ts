@@ -10,6 +10,7 @@ import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { Readable } from 'stream';
+import { AssistantScope } from '../../../common/types';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
@@ -20,7 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { functionRt, messageRt, screenContextRt } from '../runtime_types';
+import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = t.type({
@@ -60,6 +61,7 @@ const chatCompleteInternalRt = t.intersection([
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
+      scope: assistantScopeType,
     }),
   }),
 ]);
@@ -81,10 +83,12 @@ async function initializeChatRequest({
   request,
   plugins: { cloud, actions },
   params: {
-    body: { connectorId },
+    body: { connectorId, scope },
   },
   service,
-}: ObservabilityAIAssistantRouteHandlerResources & { params: { body: { connectorId: string } } }) {
+}: ObservabilityAIAssistantRouteHandlerResources & {
+  params: { body: { connectorId: string; scope: AssistantScope } };
+}) {
   await withAssistantSpan('guard_against_invalid_connector', async () => {
     const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
 
@@ -97,7 +101,7 @@ async function initializeChatRequest({
   });
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request }),
+    service.getClient({ request, scope }),
     cloud?.start(),
     (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
@@ -132,6 +136,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
+        scope: assistantScopeType,
       }),
       t.partial({
         functionCall: t.string,
@@ -177,6 +182,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       prompt: t.string,
       context: t.string,
       connectorId: t.string,
+      scope: assistantScopeType,
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -304,6 +310,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       params: {
         body: {
           ...restOfBody,
+          scope: 'observability',
           screenContexts: [
             {
               actions,
