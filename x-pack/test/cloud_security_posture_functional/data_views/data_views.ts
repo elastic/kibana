@@ -8,10 +8,16 @@
 import expect from '@kbn/expect';
 import { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
+import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_SPACE = 'space-1';
+
+const DATA_VIEW_PREFIXES = [
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
+];
 
 const getDataViewSafe = async (
   soClient: KbnClientSavedObjects,
@@ -33,6 +39,7 @@ const getDataViewSafe = async (
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
+  const retry = getService('retry');
 
   const pageObjects = getPageObjects([
     'common',
@@ -41,15 +48,29 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     'header',
     'spaceSelector',
     'cspSecurity',
+    'security',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189854
-  describe.skip('Data Views', async function () {
+  describe('Data Views', async function () {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
     let cspSecurity = pageObjects.cspSecurity;
     let findings: typeof pageObjects.findings;
 
     before(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['index-pattern'],
+        space: 'default',
+      });
+      await kibanaServer.savedObjects.clean({
+        types: ['index-pattern'],
+        space: TEST_SPACE,
+      });
+
+      await spacesService.delete(TEST_SPACE);
+
+      // NOTE: Logout needs to happen before any test to avoid flaky behavior
+      await pageObjects.security.forceLogout();
+
       cspSecurity = pageObjects.cspSecurity;
       findings = pageObjects.findings;
       await cspSecurity.createRoles();
@@ -67,127 +88,154 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       await spacesService.delete(TEST_SPACE);
+      await pageObjects.security.forceLogout();
     });
 
-    it('Verify data view is created once user reach the findings page - default space', async () => {
-      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
-      expect(idDataViewExists).to.be(false);
+    DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
+      it('Verify data view is created once user reach the findings page - default space', async () => {
+        const expectedDataViewId = `${dataViewPrefix}-default`;
 
-      await findings.navigateToLatestVulnerabilitiesPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await retry.try(async () => {
+          const idDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            expectedDataViewId,
+            'default'
+          );
+          expect(idDataViewExists).to.be(false);
+        });
 
-      const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
-      expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        await findings.navigateToLatestVulnerabilitiesPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          expectedDataViewId,
+          'default'
+        );
+        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+      });
     });
 
-    it('Verify data view is created once user reach the dashboard page - default space', async () => {
-      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
-      expect(idDataViewExists).to.be(false);
+    DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
+      it('Verify data view is created once user reach the dashboard page - default space', async () => {
+        const expectedDataViewId = `${dataViewPrefix}-default`;
 
-      const cspDashboard = pageObjects.cloudPostureDashboard;
-      await cspDashboard.navigateToComplianceDashboardPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
+        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await retry.try(async () => {
+          const idDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            expectedDataViewId,
+            'default'
+          );
+          expect(idDataViewExists).to.be(false);
+        });
 
-      const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
-      expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        const cspDashboard = pageObjects.cloudPostureDashboard;
+        await cspDashboard.navigateToComplianceDashboardPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          expectedDataViewId,
+          'default'
+        );
+        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+      });
     });
 
-    it('Verify data view is created once user reach the findings page -  non default space', async () => {
-      await pageObjects.common.navigateToApp('home');
-      await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-      await pageObjects.spaceSelector.openSpacesNav();
-      await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-      await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
+    DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
+      it('Verify data view is created once user reach the findings page -  non default space', async () => {
+        await pageObjects.common.navigateToApp('home');
+        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
+        await pageObjects.spaceSelector.openSpacesNav();
+        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
+        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
-      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-      const idDataViewExists = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        TEST_SPACE
-      );
+        const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
 
-      expect(idDataViewExists).to.be(false);
+        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await retry.try(async () => {
+          const idDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            expectedDataViewId,
+            TEST_SPACE
+          );
+          expect(idDataViewExists).to.be(false);
+        });
 
-      await findings.navigateToLatestFindingsPage(TEST_SPACE);
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        TEST_SPACE
-      );
+        await findings.navigateToLatestFindingsPage(TEST_SPACE);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          expectedDataViewId,
+          TEST_SPACE
+        );
 
-      expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+      });
     });
 
-    it('Verify data view is created once user reach the dashboard page -  non default space', async () => {
-      // await pageObjects.header.waitUntilLoadingHasFinished();
-      await pageObjects.common.navigateToApp('home');
-      await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-      await pageObjects.spaceSelector.openSpacesNav();
-      await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-      await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-      const idDataViewExists = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        TEST_SPACE
-      );
+    DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
+      it('Verify data view is created once user reach the dashboard page -  non default space', async () => {
+        await pageObjects.common.navigateToApp('home');
+        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
+        await pageObjects.spaceSelector.openSpacesNav();
+        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
+        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
+        const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
-      expect(idDataViewExists).to.be(false);
+        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await retry.try(async () => {
+          const idDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            expectedDataViewId,
+            TEST_SPACE
+          );
+          expect(idDataViewExists).to.be(false);
+        });
 
-      const cspDashboard = pageObjects.cloudPostureDashboard;
-      await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        TEST_SPACE
-      );
+        const cspDashboard = pageObjects.cloudPostureDashboard;
+        await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          expectedDataViewId,
+          TEST_SPACE
+        );
 
-      expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+      });
     });
 
-    it('Verify data view is created once user with read permissions reach the dashboard page', async () => {
-      await pageObjects.common.navigateToApp('home');
-      await cspSecurity.logout();
-      await cspSecurity.login('csp_read_user');
-      const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
+    DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
+      it('Verify data view is created once user with read permissions reach the dashboard page', async () => {
+        await pageObjects.common.navigateToApp('home');
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_read_user');
+        const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
-      expect(idDataViewExists).to.be(false);
+        // Ensures that the remove operation in the `afterEach` hook has already taken effect.
+        await retry.try(async () => {
+          const idDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            expectedDataViewId,
+            'default'
+          );
+          expect(idDataViewExists).to.be(false);
+        });
 
-      const cspDashboard = pageObjects.cloudPostureDashboard;
-      await cspDashboard.navigateToComplianceDashboardPage();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        kibanaServer.savedObjects,
-        expectedDataViewId,
-        'default'
-      );
+        const cspDashboard = pageObjects.cloudPostureDashboard;
+        await cspDashboard.navigateToComplianceDashboardPage();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          expectedDataViewId,
+          'default'
+        );
 
-      expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+      });
     });
   });
 };
