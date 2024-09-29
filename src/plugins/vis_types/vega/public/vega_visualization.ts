@@ -15,12 +15,19 @@ import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
-export type VegaVisType = ReturnType<typeof createVegaVisualization>;
+export type VegaVisType = new (
+  el: HTMLDivElement,
+  fireEvent: IInterpreterRenderHandlers['event']
+) => {
+  render(visData: VegaParser): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
+  destroy(): void;
+};
 
 export const createVegaVisualization = (
   { core, getServiceSettings }: VegaVisualizationDependencies,
   renderMode: RenderMode
-) =>
+): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
