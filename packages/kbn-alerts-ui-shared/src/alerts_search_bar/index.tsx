@@ -18,13 +18,11 @@ import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../c
 
 export type { AlertsSearchBarProps } from './types';
 
-const EMPTY_RULE_TYPE_IDS: string[] = [];
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  ruleTypeIds = EMPTY_RULE_TYPE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -45,7 +43,7 @@ export const AlertsSearchBar = ({
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    ruleTypeIds,
+    ruleTypeIds: [ruleTypeId],
     http,
     toasts,
     dataViewsService,
@@ -74,7 +72,7 @@ export const AlertsSearchBar = ({
   });
 
   const isSecurity =
-    (ruleTypeIds && ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0])) ||
+    (ruleTypeId && isSiemRuleType(ruleTypeId)) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

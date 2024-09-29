@@ -96,7 +96,7 @@ export type ActionTypeFormProps = {
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   featureId: string;
   producerId: string;
-  ruleTypeId?: string;
+  ruleTypeId: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
@@ -507,7 +507,6 @@ export const ActionTypeForm = ({
               <RuleActionsAlertsFilter
                 action={actionItem}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-                ruleTypeIds={ruleTypeId ? [ruleTypeId] : []}
                 appName={featureId!}
                 ruleTypeId={ruleTypeId}
                 plugins={{

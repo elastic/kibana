@@ -17,7 +17,6 @@ export type QueryLanguageType = 'lucene' | 'kuery';
 export interface AlertsSearchBarProps {
   appName: string;
   disableQueryLanguageSwitcher?: boolean;
-  ruleTypeIds: string[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
@@ -27,7 +26,7 @@ export interface AlertsSearchBarProps {
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;
-  ruleTypeId?: string;
+  ruleTypeId: string;
   onQueryChange?: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;

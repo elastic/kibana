@@ -168,7 +168,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -185,7 +184,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -224,7 +222,6 @@ describe('ruleActionsSettings', () => {
             notifyWhen: 'onActionGroupChange',
           },
         })}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -261,7 +258,6 @@ describe('ruleActionsSettings', () => {
             notifyWhen: 'onActionGroupChange',
           },
         })}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -278,7 +274,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -304,7 +299,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -341,7 +335,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -375,7 +368,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -418,7 +410,6 @@ describe('ruleActionsSettings', () => {
     render(
       <RuleActionsSettings
         action={getAction('1')}
-        producerId="stackAlerts"
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}

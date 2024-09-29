@@ -24,8 +24,7 @@ export interface RuleActionsAlertsFilterProps {
   action: RuleAction;
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
-  ruleTypeIds: string[];
-  ruleTypeId?: string;
+  ruleTypeId: string;
   plugins?: {
     http: RuleFormPlugins['http'];
     notifications: RuleFormPlugins['notifications'];
@@ -38,7 +37,6 @@ export const RuleActionsAlertsFilter = ({
   action,
   onChange,
   appName,
-  ruleTypeIds,
   ruleTypeId,
   plugins: propsPlugins,
 }: RuleActionsAlertsFilterProps) => {
@@ -109,7 +107,6 @@ export const RuleActionsAlertsFilter = ({
             unifiedSearchBar={unifiedSearch.ui.SearchBar}
             dataViewsService={dataViews}
             appName={appName}
-            ruleTypeIds={ruleTypeIds}
             ruleTypeId={ruleTypeId}
             disableQueryLanguageSwitcher={true}
             query={query.kql}
