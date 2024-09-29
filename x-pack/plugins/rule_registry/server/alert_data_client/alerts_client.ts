@@ -62,6 +62,7 @@ import {
   MAX_ALERTS_PAGES,
   MAX_PAGINATED_ALERTS,
 } from './constants';
+import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -456,13 +457,12 @@ export class AlertsClient {
     ruleTypeIds?: string[]
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(
-        this.authorization,
-        operation,
-        ruleTypeIds
-      )) as Filter;
+      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
+      const ruleTypeIdsFilter = getRuleTypeIdsFilter(ruleTypeIds) as unknown as Filter;
+
       let esQuery;
+
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
       } else if (typeof query === 'string') {
@@ -470,12 +470,14 @@ export class AlertsClient {
       } else if (query != null && typeof query === 'object') {
         esQuery = [];
       }
+
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [authzFilter, spacesFilter],
+        [authzFilter, spacesFilter, ruleTypeIdsFilter],
         config
       );
+
       if (query != null && typeof query === 'object') {
         return {
           ...builtQuery,
