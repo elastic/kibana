@@ -86,19 +86,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Verify data view is created once user reach the findings page - default space', async () => {
         const expectedDataViewId = `${dataViewPrefix}-default`;
 
-        await kibanaServer.savedObjects.delete({
-          type: 'index-pattern',
-          id: expectedDataViewId,
-          space: 'default',
-        });
-        await retry.try(async () => {
-          const idDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            expectedDataViewId,
-            'default'
-          );
-          expect(idDataViewExists).to.be(false);
-        });
+        if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: expectedDataViewId,
+            space: 'default',
+          });
+
+          await retry.try(async () => {
+            expect(
+              await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')
+            ).to.be(false);
+          });
+        }
 
         await findings.navigateToLatestVulnerabilitiesPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -116,19 +116,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Verify data view is created once user reach the dashboard page - default space', async () => {
         const expectedDataViewId = `${dataViewPrefix}-default`;
 
-        await kibanaServer.savedObjects.delete({
-          type: 'index-pattern',
-          id: expectedDataViewId,
-          space: 'default',
-        });
-        await retry.try(async () => {
-          const idDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            expectedDataViewId,
-            'default'
-          );
-          expect(idDataViewExists).to.be(false);
-        });
+        if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: expectedDataViewId,
+            space: 'default',
+          });
+
+          await retry.try(async () => {
+            expect(
+              await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')
+            ).to.be(false);
+          });
+        }
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage();
@@ -152,19 +152,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
         const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
-        await kibanaServer.savedObjects.delete({
-          type: 'index-pattern',
-          id: expectedDataViewId,
-          space: TEST_SPACE,
-        });
-        await retry.try(async () => {
-          const idDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            expectedDataViewId,
-            TEST_SPACE
-          );
-          expect(idDataViewExists).to.be(false);
-        });
+        if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: expectedDataViewId,
+            space: 'default',
+          });
+
+          await retry.try(async () => {
+            expect(
+              await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)
+            ).to.be(false);
+          });
+        }
 
         await findings.navigateToLatestFindingsPage(TEST_SPACE);
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -187,19 +187,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
         const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
 
-        await kibanaServer.savedObjects.delete({
-          type: 'index-pattern',
-          id: expectedDataViewId,
-          space: TEST_SPACE,
-        });
-        await retry.try(async () => {
-          const idDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            expectedDataViewId,
-            TEST_SPACE
-          );
-          expect(idDataViewExists).to.be(false);
-        });
+        if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: expectedDataViewId,
+            space: 'default',
+          });
+
+          await retry.try(async () => {
+            expect(
+              await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)
+            ).to.be(false);
+          });
+        }
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
@@ -221,19 +221,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await cspSecurity.login('csp_read_user');
         const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
-        await kibanaServer.savedObjects.delete({
-          type: 'index-pattern',
-          id: expectedDataViewId,
-          space: 'default',
-        });
-        await retry.try(async () => {
-          const idDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            expectedDataViewId,
-            'default'
-          );
-          expect(idDataViewExists).to.be(false);
-        });
+        if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: expectedDataViewId,
+            space: 'default',
+          });
+
+          await retry.try(async () => {
+            expect(
+              await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, 'default')
+            ).to.be(false);
+          });
+        }
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage();
