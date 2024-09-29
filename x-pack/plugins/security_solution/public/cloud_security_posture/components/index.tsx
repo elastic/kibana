@@ -38,7 +38,7 @@ export const EntityInsight = <T,>({
   if (hasVulnerabilitiesFindings && fieldName === 'host.name')
     insightContent.push(
       <>
-        <VulnerabilitiesPreview hostName={name} />
+        <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
         <EuiSpacer size="m" />
       </>
     );

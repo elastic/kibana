@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import numeral from '@elastic/numeral';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
 
 export const getAbbreviatedNumber = (value: number) => {
   if (isNaN(value)) {
@@ -163,9 +174,15 @@ const VulnerabilitiesCount = ({
   );
 };
 
-export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
+export const VulnerabilitiesPreview = ({
+  name,
+  isPreviewMode,
+}: {
+  name: string;
+  isPreviewMode?: boolean;
+}) => {
   const { data } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    query: buildEntityFlyoutPreviewQuery('host.name', name),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -174,11 +191,65 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, UNKNOWN = 0 } = data?.count || {};
 
   const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + UNKNOWN;
-  const { euiTheme } = useEuiTheme();
   const hasVulnerabilities = totalVulnerabilities > 0;
+
+  const { euiTheme } = useEuiTheme();
+
+  const { data: dataMisconfiguration } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', name),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = dataMisconfiguration?.count.passed || 0;
+  const failedFindings = dataMisconfiguration?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+
+  const buildFilterQuery = useMemo(() => buildHostNamesFilter([name]), [name]);
+  const riskScoreState = useRiskScore({
+    riskEntity: RiskScoreEntity.host,
+    filterQuery: buildFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+  });
+  const { data: hostRisk } = riskScoreState;
+  const riskData = hostRisk?.[0];
+  const isRiskScoreExist = riskData?.host.risk;
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const goToEntityInsightTab = useCallback(() => {
+    openLeftPanel({
+      id: HostDetailsPanelKey,
+      params: {
+        name,
+        isRiskScoreExist,
+        hasMisconfigurationFindings,
+        hasVulnerabilitiesFindings: hasVulnerabilities,
+        path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
+      },
+      path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
+    });
+  }, [hasMisconfigurationFindings, hasVulnerabilities, isRiskScoreExist, name, openLeftPanel]);
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToEntityInsightTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
+                defaultMessage="Show all misconfiguration findings"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToEntityInsightTab]
+  );
   return (
     <ExpandablePanel
       header={{
+        iconType: !isPreviewMode && hasVulnerabilities ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -192,6 +263,7 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
             />
           </EuiText>
         ),
+        link,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >

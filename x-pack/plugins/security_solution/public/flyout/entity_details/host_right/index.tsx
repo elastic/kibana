@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -107,6 +108,24 @@ export const HostPanel = ({
 
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
+  const { data: vulnerabilitiesData } = useVulnerabilitiesPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const {
+    CRITICAL = 0,
+    HIGH = 0,
+    MEDIUM = 0,
+    LOW = 0,
+    UNKNOWN = 0,
+  } = vulnerabilitiesData?.count || {};
+
+  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + UNKNOWN;
+  const hasVulnerabilitiesFindings = totalVulnerabilities > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -130,10 +149,19 @@ export const HostPanel = ({
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
           hasMisconfigurationFindings,
+          hasVulnerabilitiesFindings,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, scopeId, isRiskScoreExist, hasMisconfigurationFindings]
+    [
+      telemetry,
+      openLeftPanel,
+      hostName,
+      scopeId,
+      isRiskScoreExist,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+    ]
   );
 
   const openDefaultPanel = useCallback(
