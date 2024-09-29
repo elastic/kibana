@@ -57,20 +57,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     let findings: typeof pageObjects.findings;
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['index-pattern'],
-        space: 'default',
-      });
-      await kibanaServer.savedObjects.clean({
-        types: ['index-pattern'],
-        space: TEST_SPACE,
-      });
-
-      await spacesService.delete(TEST_SPACE);
-
-      // NOTE: Logout needs to happen before any test to avoid flaky behavior
-      await pageObjects.security.forceLogout();
-
       cspSecurity = pageObjects.cspSecurity;
       findings = pageObjects.findings;
       await cspSecurity.createRoles();
