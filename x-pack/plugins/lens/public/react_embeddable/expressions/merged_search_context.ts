@@ -19,7 +19,7 @@ export interface MergedSearchContext {
 }
 
 export function getMergedSearchContext(
-  state: LensRuntimeState,
+  { attributes }: LensRuntimeState,
   {
     filters,
     query,
@@ -46,8 +46,10 @@ export function getMergedSearchContext(
             mode: 'absolute' as const,
           }
         : timeRange,
-    query: isOfAggregateQueryType(state.query) ? [] : [state.query].filter(NonNullable),
-    filters: injectFilterReferences(state.filters || [], state.attributes.references),
+    query: isOfAggregateQueryType(attributes.state.query)
+      ? []
+      : [attributes.state.query].filter(NonNullable),
+    filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
   };
   // Prepend query and filters from dashboard to the visualization ones

@@ -90,15 +90,6 @@ export function loadEmbeddableData(
 
     const currentState = getState();
 
-    // Publish the used dataViews on the Lens API
-    dataViews$.next(
-      await getUsedDataViews(
-        currentState.attributes.references,
-        currentState.attributes.state?.adHocDataViews,
-        services.dataViews
-      )
-    );
-
     const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
 
     const getExecutionContext = () => {
@@ -135,32 +126,49 @@ export function loadEmbeddableData(
       onLoad?.(false, adapters, dataLoading$);
     };
 
-    const { params, abortController, ...rest } = await getExpressionRendererParams(currentState, {
-      unifiedSearch,
+    const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
       api,
-      settings: {
-        syncColors: currentState.syncColors,
-        syncCursor: currentState.syncCursor,
-        syncTooltips: currentState.syncTooltips,
-      },
-      renderMode: currentState.viewMode as RenderMode,
+      parentApi,
+      getState,
       services,
-      searchSessionId,
-      abortController: expressionAbortController$.getValue(),
       getExecutionContext,
-      logError: getLogError(getExecutionContext),
-      addUserMessages,
-      ...prepareCallbacks(
+      onDataCallback,
+      dispatchRenderComplete,
+      callbacks
+    );
+
+    // Go concurrently: build the expression and fetch the dataViews
+    const [{ params, abortController, ...rest }, dataViews] = await Promise.all([
+      getExpressionRendererParams(currentState, {
+        unifiedSearch,
         api,
-        parentApi,
-        getState,
+        settings: {
+          syncColors: currentState.syncColors,
+          syncCursor: currentState.syncCursor,
+          syncTooltips: currentState.syncTooltips,
+        },
+        renderMode: currentState.viewMode as RenderMode,
         services,
+        searchSessionId,
+        abortController: expressionAbortController$.getValue(),
         getExecutionContext,
-        onDataCallback,
-        dispatchRenderComplete,
-        callbacks
+        logError: getLogError(getExecutionContext),
+        addUserMessages,
+        onRender,
+        onData,
+        handleEvent,
+        disableTriggers,
+      }),
+      getUsedDataViews(
+        currentState.attributes.references,
+        currentState.attributes.state?.adHocDataViews,
+        services.dataViews
       ),
-    });
+    ]);
+
+    // Publish the used dataViews on the Lens API
+    dataViews$.next(dataViews);
+
     if (params?.expression != null) {
       expressionParams$.next(params);
     } else {
