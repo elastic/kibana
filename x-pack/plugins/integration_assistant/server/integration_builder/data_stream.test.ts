@@ -86,4 +86,16 @@ describe('createDataStream', () => {
       expect.anything()
     );
   });
+
+  it('Should return the list of fields', async () => {
+    const fields = createDataStream(packageName, dataStreamPath, firstDataStream);
+
+    expect(Array.isArray(fields)).toBe(true);
+    fields.forEach((field) => {
+      expect(field).toMatchObject({
+        name: expect.any(String),
+        type: expect.any(String),
+      });
+    });
+  });
 });
