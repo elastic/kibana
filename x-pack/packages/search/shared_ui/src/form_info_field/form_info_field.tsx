@@ -63,7 +63,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       <EuiFlexItem grow={false}>
         <EuiCopy
           textToCopy={copyValue ?? value}
-          afterMessage={i18n.translate('xpack.search.shared-ui.formInfoField.copyMessage', {
+          afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
             defaultMessage: 'Copied',
           })}
         >
@@ -71,7 +71,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
             <EuiButtonIcon
               onClick={copy}
               iconType="copy"
-              aria-label={i18n.translate('xpack.search.shared-ui.formInfoField.copyMessage', {
+              aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
                 defaultMessage: 'Copy to clipboard',
               })}
             />
