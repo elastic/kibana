@@ -119,7 +119,7 @@ export const SelectConnector: React.FC = () => {
           'xpack.enterpriseSearch.content.indices.selectConnector.description',
           {
             defaultMessage:
-              "Select which third-party data source you'd like to sync to Elastic. All data sources are supported by self-managed connectors. Check the availability for Elastic managed connectors, by using the filters.",
+              "Select which third-party data source you'd like to sync to Elastic. All data sources are supported by self-managed connectors. Check the availability for Elastic managed connectors by using the filters.",
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
