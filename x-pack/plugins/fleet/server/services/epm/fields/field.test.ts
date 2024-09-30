@@ -836,9 +836,7 @@ describe('filterForKnowledgeBaseEntryAssets', () => {
   });
   it('returns false for assets outside of a knowledge base entry folder', () => {
     expect(
-      filterForKnowledgeBaseEntryAssets('foo')(
-        '/kb-1.0/kibana/dashboard/some_dashboard.json'
-      )
+      filterForKnowledgeBaseEntryAssets('foo')('/kb-1.0/kibana/dashboard/some_dashboard.json')
     ).toBe(false);
   });
 });
