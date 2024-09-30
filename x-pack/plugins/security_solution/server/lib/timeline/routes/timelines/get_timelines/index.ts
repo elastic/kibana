@@ -40,7 +40,7 @@ export const getTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
       async (context, request, response): Promise<IKibanaResponse<GetTimelinesResponse>> => {
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
-          const onlyUserFavorite = request.query?.only_user_favorite === 'true' ? true : false;
+          const onlyUserFavorite = request.query?.only_user_favorite === 'true';
           const pageSize = request.query?.page_size ? parseInt(request.query.page_size, 10) : null;
           const pageIndex = request.query?.page_index
             ? parseInt(request.query.page_index, 10)
