@@ -98,11 +98,7 @@ export function useBulkGetAgentPolicies({
     ['agentPolicies', policyIds],
 
     async () => {
-      if (policyIds.length > 0) {
-        return (await sendBulkGetAgentPolicies({ http, requestBody: { ids: policyIds } }))?.items;
-      } else {
-        return [];
-      }
+      return (await sendBulkGetAgentPolicies({ http, requestBody: { ids: policyIds } }))?.items;
     },
 
     { enabled: isEnabled, refetchOnWindowFocus: false }
