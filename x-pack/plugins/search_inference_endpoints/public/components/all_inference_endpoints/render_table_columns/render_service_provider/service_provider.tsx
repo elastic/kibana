@@ -37,7 +37,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys['alibabacloud-ai-search']]: {
     icon: alibabaCloudAISearchIcon,
     name: 'AlibabaCloud AI Search',
-  },  
+  },
   [ServiceProviderKeys.amazonbedrock]: {
     icon: amazonBedrockIcon,
     name: 'Amazon Bedrock',

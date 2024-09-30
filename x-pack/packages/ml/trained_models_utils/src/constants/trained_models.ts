@@ -275,7 +275,7 @@ export type InferenceServiceSettings =
         http_schema: 'https' | 'http';
         rate_limit: {
           requests_per_minute: number;
-        };        
+        };
       };
     }
   | {
