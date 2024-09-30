@@ -1,6 +1,6 @@
 [role="xpack"]
 [[playground]]
-= Playground
+== Playground
 
 preview::[]
 
@@ -22,7 +22,7 @@ Refer to the following for more advanced topics:
 
 [float]
 [[playground-how-it-works]]
-== How {x} works
+=== How {x} works
 
 Here's a simpified overview of how {x} works:
 
@@ -43,7 +43,7 @@ Here's a simpified overview of how {x} works:
 
 [float]
 [[playground-availability-prerequisites]]
-== Availability and prerequisites
+=== Availability and prerequisites
 
 For Elastic Cloud and self-managed deployments {x} is available in the *Search* space in {kib}, under *Content* > *{x}*.
 
@@ -102,14 +102,14 @@ Refer to the following for examples:
 
 [float]
 [[playground-getting-started]]
-== Getting started
+=== Getting started
 
 [.screenshot]
 image::get-started.png[width=600]
 
 [float]
 [[playground-getting-started-connect]]
-=== Connect to LLM provider
+==== Connect to LLM provider
 
 To get started with {x}, you need to create a <<action-types,connector>> for your LLM provider.
 You can also connect to <<playground-local-llms,locally hosted LLMs>> which are compatible with the OpenAI API, by using the OpenAI connector.
@@ -129,7 +129,7 @@ If you need to update a connector, or add a new one, click the 🔧 *Manage* but
 
 [float]
 [[playground-getting-started-ingest]]
-=== Ingest data (optional)
+==== Ingest data (optional)
 
 _You can skip this step if you already have data in one or more {es} indices._
 
@@ -168,7 +168,7 @@ These notebooks use the official {es} Python client.
 
 [float]
 [[playground-getting-started-index]]
-=== Select {es} indices
+==== Select {es} indices
 
 Once you've connected to your LLM provider, it's time to choose the data you want to search.
 
@@ -186,7 +186,7 @@ image::images/data-button.png[width=100]
 
 [float]
 [[playground-getting-started-chat-query-modes]]
-=== Chat and query modes
+==== Chat and query modes
 
 Since 8.15.0 (and earlier for {es} Serverless), the main {x} UI has two modes:
 
@@ -210,7 +210,7 @@ Learn more about the underlying {es} queries used to search your data in <<playg
 
 [float]
 [[playground-getting-started-setup-chat]]
-=== Set up the chat interface
+==== Set up the chat interface
 
 You can start chatting with your data immediately, but you might want to tweak some defaults first.
 
@@ -235,7 +235,7 @@ Click *⟳ Clear chat* to clear chat history and start a new conversation.
 
 [float]
 [[playground-getting-started-view-code]]
-=== View and download Python code
+==== View and download Python code
 
 Use the *View code* button to see the Python code that powers the chat interface.
 You can integrate it into your own application, modifying as needed.
@@ -249,7 +249,7 @@ image::images/view-code-button.png[width=100]
 
 [float]
 [[playground-next-steps]]
-=== Next steps
+==== Next steps
 
 Once you've got {x} up and running, and you've tested out the chat interface, you might want to explore some more advanced topics:
 
