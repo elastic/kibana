@@ -10,7 +10,7 @@ import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from '@kbn/telemetry-plugin/serve
 import { DatasetIndexPattern } from './types';
 
 export const LOGS_DATA_TELEMETRY_TASK_TYPE = 'logs-data-telemetry';
-export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task-2';
+export const LOGS_DATA_TELEMETRY_TASK_ID = 'logs-data-telemetry:collect-and-report-task';
 
 export const TELEMETRY_TASK_INTERVAL = 24 * 60; // 24 hours (in minutes)
 export const TELEMETRY_TASK_TIMEOUT = 10; // 10 minutes
@@ -22,8 +22,6 @@ export const MAX_STREAMS_TO_REPORT = 1000;
 
 export const NON_LOG_SIGNALS = ['metrics', 'traces', 'internal', 'synthetics'];
 export const EXCLUDE_ELASTIC_LOGS = ['logs-synth', 'logs-elastic', 'logs-endpoint'];
-
-export const TELEMETRY_CHANNEL = 'logs-data-telemetry';
 
 type ObsPatternName = (typeof DATA_DATASETS_INDEX_PATTERNS_UNIQUE)[number]['patternName'];
 const LOGS_INDEX_PATTERN_NAMES: ObsPatternName[] = [
