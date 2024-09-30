@@ -125,9 +125,6 @@ spec:
               mountPath: /sys/kernel/debug
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #- name: universal-profiling-cache
-            #  mountPath: /var/cache/Elastic
       volumes:
         - name: datastreams
           configMap:
@@ -166,12 +163,6 @@ spec:
           hostPath:
             path: /var/lib/elastic-agent/kube-system/state
             type: DirectoryOrCreate
-        # Mount required for Universal Profiling.
-        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-        #- name: universal-profiling-cache
-        #  hostPath:
-        #    path: /var/cache/Elastic
-        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -440,9 +431,6 @@ spec:
               mountPath: /sys/kernel/debug
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #- name: universal-profiling-cache
-            #  mountPath: /var/cache/Elastic
       volumes:
         - name: proc
           hostPath:
@@ -483,12 +471,6 @@ spec:
           hostPath:
             path: /var/lib/elastic-agent-managed/kube-system/state
             type: DirectoryOrCreate
-        # Mount required for Universal Profiling.
-        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-        #- name: universal-profiling-cache
-        #  hostPath:
-        #    path: /var/cache/Elastic
-        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -21,13 +21,6 @@ import { getAuthorizationHeader } from '../lib/request_authorization';
  * Routes for datafeed service
  */
 export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /internal/ml/datafeeds Get all datafeeds
-   * @apiName GetDatafeeds
-   * @apiDescription Retrieves configuration information for datafeeds
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds`,
@@ -35,6 +28,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
+      summary: 'Gets all datafeeds',
+      description: 'Retrieves configuration information for datafeeds.',
     })
     .addVersion(
       {
@@ -53,15 +48,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /internal/ml/datafeeds/:datafeedId Get datafeed for given datafeed id
-   * @apiName GetDatafeed
-   * @apiDescription Retrieves configuration information for datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
@@ -69,6 +55,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
+      summary: 'Get datafeed for given datafeed id',
+      description: 'Retrieves configuration information for a datafeed.',
     })
     .addVersion(
       {
@@ -93,13 +81,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /internal/ml/datafeeds/_stats Get stats for all datafeeds
-   * @apiName GetDatafeedsStats
-   * @apiDescription Retrieves usage information for datafeeds
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/_stats`,
@@ -107,6 +88,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
+      summary: 'Gets stats for all datafeeds',
+      description: 'Retrieves usage information for datafeeds.',
     })
     .addVersion(
       {
@@ -125,15 +108,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /internal/ml/datafeeds/:datafeedId/_stats Get datafeed stats for given datafeed id
-   * @apiName GetDatafeedStats
-   * @apiDescription Retrieves usage information for datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stats`,
@@ -141,6 +115,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canGetDatafeeds'],
       },
+      summary: 'Get datafeed stats for given datafeed id',
+      description: 'Retrieves usage information for a datafeed.',
     })
     .addVersion(
       {
@@ -167,16 +143,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {put} /internal/ml/datafeeds/:datafeedId Creates datafeed
-   * @apiName CreateDatafeed
-   * @apiDescription Instantiates a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) datafeedConfigSchema
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
@@ -184,6 +150,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canCreateDatafeed'],
       },
+      summary: 'Creates a datafeed',
+      description: 'Instantiates a datafeed.',
     })
     .addVersion(
       {
@@ -216,16 +184,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /internal/ml/datafeeds/:datafeedId/_update Updates datafeed for given datafeed id
-   * @apiName UpdateDatafeed
-   * @apiDescription Updates certain properties of a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) datafeedConfigSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_update`,
@@ -233,6 +191,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canUpdateDatafeed'],
       },
+      summary: 'Updates a datafeed',
+      description: 'Updates certain properties of a datafeed.',
     })
     .addVersion(
       {
@@ -265,16 +225,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {delete} /internal/ml/datafeeds/:datafeedId Deletes datafeed
-   * @apiName DeleteDatafeed
-   * @apiDescription Deletes an existing datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (query) deleteDatafeedQuerySchema
-   */
   router.versioned
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
@@ -282,6 +232,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canDeleteDatafeed'],
       },
+      summary: 'Deletes a datafeed',
+      description: 'Deletes an existing datafeed.',
     })
     .addVersion(
       {
@@ -314,16 +266,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /internal/ml/datafeeds/:datafeedId/_start Starts datafeed for given datafeed id(s)
-   * @apiName StartDatafeed
-   * @apiDescription Starts one or more datafeeds
-   *
-   * @apiSchema (params) datafeedIdSchema
-   * @apiSchema (body) startDatafeedSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_start`,
@@ -331,6 +273,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canStartStopDatafeed'],
       },
+      summary: 'Starts a datafeed',
+      description: 'Starts one or more datafeeds',
     })
     .addVersion(
       {
@@ -364,15 +308,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {post} /internal/ml/datafeeds/:datafeedId/_stop Stops datafeed for given datafeed id(s)
-   * @apiName StopDatafeed
-   * @apiDescription Stops one or more datafeeds
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stop`,
@@ -380,6 +315,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canStartStopDatafeed'],
       },
+      summary: 'Stops a datafeed',
+      description: 'Stops one or more datafeeds',
     })
     .addVersion(
       {
@@ -407,15 +344,6 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup DatafeedService
-   *
-   * @api {get} /internal/ml/datafeeds/:datafeedId/_preview Preview datafeed for given datafeed id
-   * @apiName PreviewDatafeed
-   * @apiDescription Previews a datafeed
-   *
-   * @apiSchema (params) datafeedIdSchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_preview`,
@@ -423,6 +351,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
       options: {
         tags: ['access:ml:canPreviewDatafeed'],
       },
+      summary: 'Previews a datafeed',
+      description: 'Previews a datafeed',
     })
     .addVersion(
       {

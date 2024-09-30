@@ -8,7 +8,7 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  CreateInvestigationInput,
+  CreateInvestigationParams,
   CreateInvestigationResponse,
   FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
@@ -26,13 +26,16 @@ export function useCreateInvestigation() {
   return useMutation<
     CreateInvestigationResponse,
     ServerError,
-    { investigation: CreateInvestigationInput },
+    { investigation: CreateInvestigationParams },
     { previousData?: FindInvestigationsResponse; queryKey?: QueryKey }
   >(
     ['createInvestigation'],
     ({ investigation }) => {
       const body = JSON.stringify(investigation);
-      return http.post<CreateInvestigationResponse>(`/api/observability/investigations`, { body });
+      return http.post<CreateInvestigationResponse>(`/api/observability/investigations`, {
+        body,
+        version: '2023-10-31',
+      });
     },
     {
       onError: (error, { investigation }, context) => {

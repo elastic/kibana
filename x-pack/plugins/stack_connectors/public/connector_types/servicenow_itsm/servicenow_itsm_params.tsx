@@ -58,7 +58,7 @@ const CorrelationIdField: React.FunctionComponent<
     <EuiFormRow
       fullWidth
       label={i18n.CORRELATION_ID}
-      error={errors['subActionParams.incident.correlation_id']}
+      error={errors['subActionParams.incident.correlation_id'] as string}
       isInvalid={
         errors['subActionParams.incident.correlation_id'] !== undefined &&
         Number(errors['subActionParams.incident.correlation_id'].length) > 0 &&
@@ -167,7 +167,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -262,7 +262,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
   const additionalFieldsOnChange = useCallback(
-    (value) => editSubActionProperty('additional_fields', value),
+    (value: string | null) => editSubActionProperty('additional_fields', value),
     [editSubActionProperty]
   );
 
@@ -422,7 +422,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
-                error={errors['subActionParams.incident.short_description']}
+                error={errors['subActionParams.incident.short_description'] as string[]}
                 isInvalid={
                   errors['subActionParams.incident.short_description'] !== undefined &&
                   Number(errors['subActionParams.incident.short_description'].length) > 0 &&

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { z } from 'zod';
-
+import { z } from '@kbn/zod';
 import {
+  AlertSuppression,
   AnomalyThreshold,
-  ConcurrentSearches,
   EventCategoryOverride,
   HistoryWindowStart,
+  InvestigationFields,
   InvestigationGuide,
-  ItemsPerSearch,
+  KqlQueryLanguage,
   MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
@@ -39,6 +39,7 @@ import {
   ThreatIndicatorPath,
   ThreatMapping,
   Threshold,
+  ThresholdAlertSuppression,
   TiebreakerField,
   TimestampField,
 } from '../../../../model/rule_schema';
@@ -90,6 +91,7 @@ export const DiffableCommonFields = z.object({
   max_signals: MaxSignals,
 
   // Optional fields
+  investigation_fields: InvestigationFields.optional(),
   rule_name_override: RuleNameOverrideObject.optional(), // NOTE: new field
   timestamp_override: TimestampOverrideObject.optional(), // NOTE: new field
   timeline_template: TimelineTemplateReference.optional(), // NOTE: new field
@@ -101,6 +103,7 @@ export const DiffableCustomQueryFields = z.object({
   type: z.literal('query'),
   kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
@@ -108,6 +111,7 @@ export const DiffableSavedQueryFields = z.object({
   type: z.literal('saved_query'),
   kql_query: RuleKqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableEqlFields = z.infer<typeof DiffableEqlFields>;
@@ -118,6 +122,7 @@ export const DiffableEqlFields = z.object({
   event_category_override: EventCategoryOverride.optional(),
   timestamp_field: TimestampField.optional(),
   tiebreaker_field: TiebreakerField.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 // this is a new type of rule, no prebuilt rules created yet.
@@ -126,6 +131,7 @@ export type DiffableEsqlFields = z.infer<typeof DiffableEsqlFields>;
 export const DiffableEsqlFields = z.object({
   type: z.literal('esql'),
   esql_query: RuleEsqlQuery, // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
@@ -137,8 +143,8 @@ export const DiffableThreatMatchFields = z.object({
   threat_mapping: ThreatMapping,
   data_source: RuleDataSource.optional(), // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
-  concurrent_searches: ConcurrentSearches.optional(),
-  items_per_search: ItemsPerSearch.optional(),
+  threat_language: KqlQueryLanguage.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableThresholdFields = z.infer<typeof DiffableThresholdFields>;
@@ -147,6 +153,7 @@ export const DiffableThresholdFields = z.object({
   kql_query: RuleKqlQuery, // NOTE: new field
   threshold: Threshold,
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: ThresholdAlertSuppression.optional(),
 });
 
 export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearningFields>;
@@ -154,6 +161,7 @@ export const DiffableMachineLearningFields = z.object({
   type: z.literal('machine_learning'),
   machine_learning_job_id: MachineLearningJobId,
   anomaly_threshold: AnomalyThreshold,
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type DiffableNewTermsFields = z.infer<typeof DiffableNewTermsFields>;
@@ -163,6 +171,7 @@ export const DiffableNewTermsFields = z.object({
   new_terms_fields: NewTermsFields,
   history_window_start: HistoryWindowStart,
   data_source: RuleDataSource.optional(), // NOTE: new field
+  alert_suppression: AlertSuppression.optional(),
 });
 
 /**
@@ -192,36 +201,48 @@ export const DiffableNewTermsFields = z.object({
  * top-level fields.
  */
 
+export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+]);
+
 export type DiffableRule = z.infer<typeof DiffableRule>;
-const DiffableRule = z.intersection(
-  DiffableCommonFields,
-  z.discriminatedUnion('type', [
-    DiffableCustomQueryFields,
-    DiffableSavedQueryFields,
-    DiffableEqlFields,
-    DiffableEsqlFields,
-    DiffableThreatMatchFields,
-    DiffableThresholdFields,
-    DiffableMachineLearningFields,
-    DiffableNewTermsFields,
-  ])
-);
+export const DiffableRule = z.intersection(DiffableCommonFields, DiffableFieldsByTypeUnion);
+
+/**
+ * Union of all possible rule types
+ */
+export type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
+export const DiffableRuleTypes = z.union([
+  DiffableCustomQueryFields.shape.type,
+  DiffableSavedQueryFields.shape.type,
+  DiffableEqlFields.shape.type,
+  DiffableEsqlFields.shape.type,
+  DiffableThreatMatchFields.shape.type,
+  DiffableThresholdFields.shape.type,
+  DiffableMachineLearningFields.shape.type,
+  DiffableNewTermsFields.shape.type,
+]);
 
 /**
  * This is a merge of all fields from all rule types into a single TS type.
  * This is NOT a union discriminated by rule type, as DiffableRule is.
  */
-export type DiffableAllFields = DiffableCommonFields &
-  Omit<DiffableCustomQueryFields, 'type'> &
-  Omit<DiffableSavedQueryFields, 'type'> &
-  Omit<DiffableEqlFields, 'type'> &
-  Omit<DiffableEsqlFields, 'type'> &
-  Omit<DiffableThreatMatchFields, 'type'> &
-  Omit<DiffableThresholdFields, 'type'> &
-  Omit<DiffableMachineLearningFields, 'type'> &
-  Omit<DiffableNewTermsFields, 'type'> &
-  DiffableRuleTypeField;
-
-interface DiffableRuleTypeField {
-  type: DiffableRule['type'];
-}
+export type DiffableAllFields = z.infer<typeof DiffableAllFields>;
+export const DiffableAllFields = DiffableCommonFields.merge(
+  DiffableCustomQueryFields.omit({ type: true })
+)
+  .merge(DiffableSavedQueryFields.omit({ type: true }))
+  .merge(DiffableEqlFields.omit({ type: true }))
+  .merge(DiffableEsqlFields.omit({ type: true }))
+  .merge(DiffableThreatMatchFields.omit({ type: true }))
+  .merge(DiffableThresholdFields.omit({ type: true }))
+  .merge(DiffableMachineLearningFields.omit({ type: true }))
+  .merge(DiffableNewTermsFields.omit({ type: true }))
+  .merge(z.object({ type: DiffableRuleTypes }));

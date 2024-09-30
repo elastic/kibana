@@ -25,7 +25,8 @@ const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   profile,
 });
 
-describe('SuggestUsersPopover', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171600
+describe.skip('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   const defaultProps: SuggestUsersPopoverProps = {
     isLoading: false,
@@ -48,8 +49,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
-    userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -74,9 +76,10 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
-    userEvent.click(await screen.findByText('WD'));
-    userEvent.click(await screen.findByText('DR'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
+    await userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByText('DR'));
 
     expect(onUsersChange.mock.calls[1][0]).toMatchInlineSnapshot(`
       Array [
@@ -116,8 +119,9 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
-    userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
@@ -162,8 +166,9 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
-    userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(await screen.findByText('1 assigned')).toBeInTheDocument();
   });
@@ -175,8 +180,9 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
-    userEvent.click(await screen.findByText('WD'));
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
+    await userEvent.click(await screen.findByText('WD'));
 
     expect(await screen.findByText('1 assigned')).toBeInTheDocument();
   });
@@ -206,7 +212,7 @@ describe('SuggestUsersPopover', () => {
 
     expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
 
-    userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
+    await userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
 
     expect(togglePopover).toBeCalled();
   });

@@ -135,7 +135,7 @@ export function isTrialLicense(license: ILicense) {
 }
 
 export function isMinimumLicense(license: ILicense) {
-  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
+  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid' || license.isAvailable;
 }
 
 export function isMlEnabled(license: ILicense) {

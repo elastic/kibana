@@ -10,13 +10,11 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
 
 export function getMockedRouterDeps() {
   const httpService = httpServiceMock.createSetupContract();
   const elasticsearch = elasticsearchServiceMock.createSetup();
-  const bfetch = bfetchPluginMock.createSetupContract();
   const expressions = expressionsPluginMock.createSetupContract();
   const router = httpService.createRouter();
 
@@ -24,7 +22,6 @@ export function getMockedRouterDeps() {
     router,
     expressions,
     elasticsearch,
-    bfetch,
     logger: loggingSystemMock.create().get(),
   };
 }

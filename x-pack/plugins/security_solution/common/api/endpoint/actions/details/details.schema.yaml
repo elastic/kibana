@@ -5,9 +5,9 @@ info:
 paths:
   /api/endpoint/action/{action_id}:
     get:
-      summary: Get Action details schema
+      summary: Get action details
       operationId: EndpointGetActionsDetails
-      description: Get action details
+      description: Get the details of a response action using the action ID.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:

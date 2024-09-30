@@ -136,7 +136,8 @@ export const useInvestigateInTimeline = ({
   );
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 

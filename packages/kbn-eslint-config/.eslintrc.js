@@ -116,6 +116,12 @@ module.exports = {
           exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
         },
         {
+          from: 'zod',
+          to: '@kbn/zod',
+          disallowedMessage: `import from @kbn/zod instead`,
+          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+        },
+        {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,

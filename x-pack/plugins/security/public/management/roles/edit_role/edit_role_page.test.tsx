@@ -19,6 +19,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
+import { createRawKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
@@ -31,7 +32,6 @@ import { TransformErrorSection } from './privileges/kibana/transform_error_secti
 import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
-import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 
 const spacesManager = spacesManagerMock.create();

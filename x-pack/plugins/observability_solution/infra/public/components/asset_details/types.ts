@@ -26,7 +26,6 @@ export enum ContentTabIds {
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
-  LINK_TO_APM = 'linkToApm',
   DASHBOARDS = 'dashboards',
 }
 
@@ -35,9 +34,6 @@ export type TabIds = `${ContentTabIds}`;
 export interface OverridableTabState {
   metadata?: {
     showActionsColumn?: boolean;
-  };
-  anomalies?: {
-    onClose?: () => void;
   };
   alertRule?: {
     options?: Partial<Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>>;

@@ -102,7 +102,7 @@ export function useSetupTechnology({
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       supports_agentless: true,
-      monitoring_enabled: [],
+      monitoring_enabled: ['logs', 'metrics'],
     })
   );
 

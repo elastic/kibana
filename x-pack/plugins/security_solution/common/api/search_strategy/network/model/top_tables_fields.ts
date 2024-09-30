@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',

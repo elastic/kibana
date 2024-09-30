@@ -348,6 +348,29 @@
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.contentInsightsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "contentInsightsClient",
+            "description": [
+              "\nContent insights client to enable content insights features."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsClientPublic",
+                "text": "ContentInsightsClientPublic"
+              },
+              " | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

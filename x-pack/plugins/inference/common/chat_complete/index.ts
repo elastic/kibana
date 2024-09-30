@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Observable } from 'rxjs';
-import type { InferenceTaskEventBase } from '../tasks';
+import type { InferenceTaskEventBase } from '../inference_task';
 import type { ToolCall, ToolCallsOf, ToolOptions } from './tools';
 
 export enum MessageRole {
@@ -33,7 +34,7 @@ export type ToolMessage<TToolResponse extends Record<string, any> | unknown> =
 
 export type Message = UserMessage | AssistantMessage | ToolMessage<unknown>;
 
-export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions> =
+export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {
     content: string;
   } & { toolCalls: ToolCallsOf<TToolOptions>['toolCalls'] };
@@ -77,6 +78,8 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
   | ChatCompletionTokenCountEvent
   | ChatCompletionMessageEvent<TToolOptions>;
 
+export type FunctionCallingMode = 'native' | 'simulated';
+
 /**
  * Request a completion from the LLM based on a prompt or conversation.
  *
@@ -86,10 +89,11 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
  * @param {ToolChoice} [options.toolChoice] Force the LLM to call a (specific) tool, or no tool
  * @param {Record<string, ToolDefinition>} [options.tools] A map of tools that can be called by the LLM
  */
-export type ChatCompleteAPI<TToolOptions extends ToolOptions = ToolOptions> = (
+export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
   options: {
     connectorId: string;
     system?: string;
     messages: Message[];
+    functionCalling?: FunctionCallingMode;
   } & TToolOptions
 ) => ChatCompletionResponse<TToolOptions>;

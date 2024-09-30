@@ -22,6 +22,8 @@ import {
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
   RISK_ENGINE_PRIVILEGES_URL,
+  RISK_ENGINE_CLEANUP_URL,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
@@ -569,6 +571,23 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
     await supertest
       .get(RISK_ENGINE_PRIVILEGES_URL)
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
+
+  delete: async (expectStatusCode: number = 200) =>
+    await supertest
+      .delete(routeWithNamespace(RISK_ENGINE_CLEANUP_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send()
+      .expect(expectStatusCode),
+
+  scheduleNow: async (expectStatusCode: number = 200) =>
+    await supertest
+      .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(expectStatusCode),

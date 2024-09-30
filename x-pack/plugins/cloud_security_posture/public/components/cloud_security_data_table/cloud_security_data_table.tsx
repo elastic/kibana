@@ -7,6 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import {
+  DataGridDensity,
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
   useColumns,
@@ -26,10 +27,10 @@ import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
-import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
@@ -258,12 +259,12 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width: number }) => {
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
     const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
-    newColumns[colSettings.columnId] = {
-      width: Math.round(colSettings.width),
-    };
+    newColumns[colSettings.columnId] = colSettings.width
+      ? { width: Math.round(colSettings.width) }
+      : {};
     const newGrid = { ...grid, columns: newColumns };
     setPersistedSettings(newGrid);
   };
@@ -362,6 +363,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          dataGridDensityState={DataGridDensity.EXPANDED}
         />
       </div>
     </CellActionsProvider>

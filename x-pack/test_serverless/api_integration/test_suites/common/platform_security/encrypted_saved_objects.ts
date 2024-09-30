@@ -32,9 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .post('/api/encrypted_saved_objects/_rotate_key')
-            // .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader));
-          // svlCommonApi.assertApiNotFound(body, status);
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,

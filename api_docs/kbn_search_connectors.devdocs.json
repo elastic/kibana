@@ -5250,7 +5250,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+              "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6850,7 +6850,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"contains\" | \"<\" | \">\" | \"equals\" | \"regex\" | \"ends_with\" | \"starts_with\""
+          "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "packages/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,

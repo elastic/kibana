@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -165,7 +165,7 @@ export default function (providerContext: FtrProviderContext) {
         assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
         assertIndexStatus(
           res.indicesDetails,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
           'unprivileged'
         );
       });
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
         assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'empty');
         assertIndexStatus(
           res.indicesDetails,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
           'unprivileged'
         );
       });
@@ -218,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
         await createCSPOnlyRole(
           security,
           UNPRIVILEGED_ROLE,
-          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
         );
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
@@ -254,7 +254,11 @@ export default function (providerContext: FtrProviderContext) {
         assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
         assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
         assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
-        assertIndexStatus(res.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, 'empty');
+        assertIndexStatus(
+          res.indicesDetails,
+          CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+          'empty'
+        );
       });
     });
   });

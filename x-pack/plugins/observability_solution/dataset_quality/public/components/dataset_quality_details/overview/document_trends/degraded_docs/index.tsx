@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -29,13 +30,15 @@ import {
   openInLogsExplorerText,
   overviewDegradedDocsText,
 } from '../../../../../../common/translations';
-import { useDegradedDocs } from '../../../../../hooks/use_degraded_docs';
 import { DegradedDocsChart } from './degraded_docs_chart';
 import {
-  useDatasetQualityDetailsRedirectLink,
+  useDatasetDetailsRedirectLinkTelemetry,
   useDatasetQualityDetailsState,
+  useDegradedDocsChart,
+  useRedirectLink,
 } from '../../../../../hooks';
 import { _IGNORED } from '../../../../../../common/es_fields';
+import { NavigationSource } from '../../../../../services/telemetry';
 
 const degradedDocsTooltip = (
   <FormattedMessage
@@ -55,7 +58,7 @@ const degradedDocsTooltip = (
 // eslint-disable-next-line import/no-default-export
 export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
   const { timeRange, updateTimeRange, datasetDetails } = useDatasetQualityDetailsState();
-  const { dataView, breakdown, ...chartProps } = useDegradedDocs();
+  const { dataView, breakdown, ...chartProps } = useDegradedDocsChart();
 
   const accordionId = useGeneratedHtmlId({
     prefix: overviewDegradedDocsText,
@@ -65,10 +68,16 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
     undefined
   );
 
-  const degradedDocLinkLogsExplorer = useDatasetQualityDetailsRedirectLink({
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
+    navigationSource: NavigationSource.Trend,
+  });
+
+  const degradedDocLinkLogsExplorer = useRedirectLink({
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
+    sendTelemetry,
   });
 
   useEffect(() => {
@@ -125,7 +134,10 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
             <EuiButtonIcon
               display="base"
               iconType="discoverApp"
-              aria-label="Discover"
+              aria-label={i18n.translate(
+                'xpack.datasetQuality.degradedDocs.euiButtonIcon.discoverLabel',
+                { defaultMessage: 'Discover' }
+              )}
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
               {...degradedDocLinkLogsExplorer.linkProps}

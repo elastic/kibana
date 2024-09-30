@@ -14,7 +14,7 @@ import type {
   RouteValidationResultFactory,
   RouteValidationError,
 } from '@kbn/core/server';
-import type { TypeOf, ZodType } from 'zod';
+import type { TypeOf, ZodType } from '@kbn/zod';
 import { stringifyZodError } from '@kbn/zod-helpers';
 
 type RequestValidationResult<T> =

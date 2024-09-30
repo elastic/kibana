@@ -22,6 +22,7 @@ import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
+import { PageTitleWithPopover } from '../header/page_title_with_popover';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -83,7 +84,13 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
       dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
-        pageTitle: loading ? <EuiLoadingSpinner size="m" /> : asset.name,
+        pageTitle: loading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : asset.type === 'host' ? (
+          <PageTitleWithPopover name={asset.name} />
+        ) : (
+          asset.name
+        ),
         tabs: tabEntries,
         rightSideItems,
         breadcrumbs: headerBreadcrumbs,

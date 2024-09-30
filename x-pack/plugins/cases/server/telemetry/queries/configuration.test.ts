@@ -8,11 +8,14 @@
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { getConfigurationTelemetryData } from './configuration';
+import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
 describe('configuration', () => {
   describe('getConfigurationTelemetryData', () => {
     const logger = loggingSystemMock.createLogger();
     const savedObjectsClient = savedObjectsRepositoryMock.create();
+    const telemetrySavedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsClient);
+
     savedObjectsClient.find.mockResolvedValue({
       total: 5,
       saved_objects: [],
@@ -66,7 +69,10 @@ describe('configuration', () => {
     });
 
     it('it returns the correct res', async () => {
-      const res = await getConfigurationTelemetryData({ savedObjectsClient, logger });
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           closure: {
@@ -82,7 +88,10 @@ describe('configuration', () => {
     });
 
     it('should call find with correct arguments', async () => {
-      await getConfigurationTelemetryData({ savedObjectsClient, logger });
+      await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
           closureType: {
@@ -95,6 +104,7 @@ describe('configuration', () => {
         page: 1,
         perPage: 5,
         type: 'cases-configure',
+        namespaces: ['*'],
       });
     });
 
@@ -135,7 +145,10 @@ describe('configuration', () => {
         },
       });
 
-      const res = await getConfigurationTelemetryData({ savedObjectsClient, logger });
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           closure: {
@@ -205,7 +218,10 @@ describe('configuration', () => {
         },
       });
 
-      const res = await getConfigurationTelemetryData({ savedObjectsClient, logger });
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
       expect(res).toEqual({
         all: {
           closure: {

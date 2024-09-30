@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiRange } from '@elastic/eui';
+import { EuiFieldNumber, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -344,7 +344,7 @@ export const percentileOperation: OperationDefinition<
     const step = isInline ? 1 : 0.0001;
     const upperBound = isInline ? 99 : 99.9999;
     const onChange = useCallback(
-      (value) => {
+      (value?: string) => {
         if (
           !isValidNumber(value, isInline, upperBound, step, ALLOWED_DECIMAL_DIGITS) ||
           Number(value) === currentColumn.params.percentile
@@ -384,7 +384,12 @@ export const percentileOperation: OperationDefinition<
       ALLOWED_DECIMAL_DIGITS
     );
 
-    const handleInputChange = useCallback(
+    const handleInputChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+      (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
+      [handleInputChangeWithoutValidation]
+    );
+
+    const handleRangeChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
       (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
       [handleInputChangeWithoutValidation]
     );
@@ -420,7 +425,7 @@ export const percentileOperation: OperationDefinition<
             min={step}
             max={upperBound}
             step={step}
-            onChange={handleInputChange}
+            onChange={handleRangeChange}
             showInput
             aria-label={percentileLabel}
           />

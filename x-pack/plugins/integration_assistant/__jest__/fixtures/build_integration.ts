@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Integration } from '../../common/api/model/common_attributes';
+import { Integration } from '../../common';
 
 export const testIntegration: Integration = {
   name: 'integration',
@@ -42,6 +42,7 @@ export const testIntegration: Integration = {
           },
         ],
       },
+      samplesFormat: { name: 'ndjson', multiline: false },
     },
   ],
 };

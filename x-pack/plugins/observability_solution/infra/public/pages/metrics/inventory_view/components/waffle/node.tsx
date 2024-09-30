@@ -48,7 +48,6 @@ export const Node = ({
   setFlyoutUrlState,
   detailsItemId,
 }: Props) => {
-  const [isToolTipOpen, { off: hideToolTip, on: showToolTip }] = useBoolean(false);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const metric = first(node.metrics);
@@ -57,11 +56,11 @@ export const Node = ({
   const value = formatter(rawValue);
 
   const isContainerAssetViewEnabled = useUiSetting(enableInfrastructureContainerAssetView);
-
   const showContainerAssetDetailPage = nodeType === 'container' && isContainerAssetViewEnabled;
+  const isFlyoutMode = nodeType === 'host' || showContainerAssetDetailPage;
 
   const toggleAssetPopover = () => {
-    if (nodeType === 'host' || showContainerAssetDetailPage) {
+    if (isFlyoutMode) {
       setFlyoutUrlState({ detailsItemId: node.id, assetType: nodeType });
     } else {
       togglePopover();
@@ -69,46 +68,40 @@ export const Node = ({
   };
 
   const nodeSquare = (
-    <NodeSquare
-      squareSize={squareSize}
-      togglePopover={toggleAssetPopover}
-      showToolTip={showToolTip}
-      hideToolTip={hideToolTip}
-      color={color}
-      nodeName={node.name}
-      value={value}
-      showBorder={detailsItemId === node.id || isPopoverOpen}
-    />
+    <EuiToolTip
+      delay="regular"
+      position="right"
+      content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
+    >
+      <div>
+        <NodeSquare
+          squareSize={squareSize}
+          togglePopover={toggleAssetPopover}
+          color={color}
+          nodeName={node.name}
+          value={value}
+          showBorder={detailsItemId === node.id || isPopoverOpen}
+        />
+      </div>
+    </EuiToolTip>
   );
 
-  return (
-    <>
-      {isPopoverOpen ? (
-        <EuiPopover
-          button={nodeSquare}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition="downCenter"
-          style={{ height: squareSize }}
-        >
-          <NodeContextMenu
-            node={node}
-            nodeType={nodeType}
-            options={options}
-            currentTime={currentTime}
-          />
-        </EuiPopover>
-      ) : isToolTipOpen ? (
-        <EuiToolTip
-          delay="regular"
-          position="right"
-          content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
-        >
-          {nodeSquare}
-        </EuiToolTip>
-      ) : (
-        nodeSquare
-      )}
-    </>
+  return !isFlyoutMode ? (
+    <EuiPopover
+      button={nodeSquare}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downCenter"
+      zIndex={0}
+    >
+      <NodeContextMenu
+        node={node}
+        nodeType={nodeType}
+        options={options}
+        currentTime={currentTime}
+      />
+    </EuiPopover>
+  ) : (
+    nodeSquare
   );
 };

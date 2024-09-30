@@ -12,8 +12,9 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { ClientPluginsStart } from '../../../plugin';
-import { COMMON_SYNTHETICS_GROUPING, SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 
 export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =
   'CREATE_SYNTHETICS_MONITORS_OVERVIEW_EMBEDDABLE';
@@ -23,8 +24,8 @@ export function createMonitorsOverviewPanelAction(
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
-    grouping: COMMON_SYNTHETICS_GROUPING,
-    order: 30,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 5,
     getIconType: () => 'play',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);

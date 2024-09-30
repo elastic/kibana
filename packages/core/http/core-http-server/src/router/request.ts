@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { URL } from 'url';
@@ -12,8 +13,14 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
 import type { Headers } from './headers';
+
+export type RouteSecurityGetter = (request: {
+  headers: KibanaRequest['headers'];
+  query?: KibanaRequest['query'];
+}) => RouteSecurity | undefined;
+export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
 
 /**
  * @public
@@ -21,6 +28,7 @@ import type { Headers } from './headers';
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
+  security?: InternalRouteSecurity;
 }
 
 /**
@@ -31,6 +39,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  authzResult?: Record<string, boolean>;
   measureElu?: () => void;
 }
 
@@ -135,6 +144,12 @@ export interface KibanaRequest<
    * Even if the API facade is the same, fake requests have some stubbed functionalities.
    */
   readonly isFakeRequest: boolean;
+
+  /**
+   * Authorization check result, passed to the route handler.
+   * Indicates whether the specific privilege was granted or denied.
+   */
+  readonly authzResult?: Record<string, boolean>;
 
   /**
    * An internal request has access to internal routes.

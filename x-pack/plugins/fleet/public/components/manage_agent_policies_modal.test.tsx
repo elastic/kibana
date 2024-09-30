@@ -151,16 +151,24 @@ describe('ManageAgentPoliciesModal', () => {
     });
   });
 
-  it('should display callout and disable confirm if policy is removed', async () => {
+  it('should display callout and allow to submit if all policies are removed', async () => {
     const results = render();
 
     await act(async () => {
       results.getByTestId('comboBoxClearButton').click();
     });
-    expect(results.getByText('Confirm').getAttribute('disabled')).toBeDefined();
+    expect(results.getByText('Confirm').getAttribute('disabled')).toBeNull();
     expect(results.getByTestId('confirmRemovePoliciesCallout')).toBeInTheDocument();
     expect(results.getByTestId('confirmRemovePoliciesCallout').textContent).toContain(
       'Test policy will no longer use this integration.'
     );
+
+    await act(async () => {
+      results.getByText('Confirm').click();
+    });
+    expect(usePackagePolicyWithRelatedData('', {}).savePackagePolicy).toHaveBeenCalledWith({
+      policy_id: undefined,
+      policy_ids: [],
+    });
   });
 });

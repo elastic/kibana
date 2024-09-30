@@ -7,9 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useQueryParams } from './use_query_params';
 
 function addClickHandlers(
@@ -37,14 +38,18 @@ function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
 
 export const useBreadcrumbs = (
   extraCrumbs: ChromeBreadcrumb[],
-  app?: { id: string; label: string },
-  breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
+  options?: {
+    app?: { id: string; label: string };
+    breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension;
+    serverless?: ServerlessPluginStart;
+  }
 ) => {
   const params = useQueryParams();
+  const { app, breadcrumbsAppendExtension, serverless } = options ?? {};
 
   const {
     services: {
-      chrome: { docTitle, setBreadcrumbs, setBreadcrumbsAppendExtension },
+      chrome: { docTitle, setBreadcrumbs: chromeSetBreadcrumbs, setBreadcrumbsAppendExtension },
       application: { getUrlForApp, navigateToUrl },
     },
   } = useKibana<{
@@ -53,6 +58,11 @@ export const useBreadcrumbs = (
   }>();
   const setTitle = docTitle.change;
   const appPath = getUrlForApp(app?.id ?? 'observability-overview') ?? '';
+
+  const setBreadcrumbs = useMemo(
+    () => serverless?.setBreadcrumbs ?? chromeSetBreadcrumbs,
+    [serverless, chromeSetBreadcrumbs]
+  );
 
   useEffect(() => {
     if (breadcrumbsAppendExtension) {
@@ -66,22 +76,34 @@ export const useBreadcrumbs = (
   }, [breadcrumbsAppendExtension, setBreadcrumbsAppendExtension]);
 
   useEffect(() => {
-    const breadcrumbs = [
-      {
-        text:
-          app?.label ??
-          i18n.translate('xpack.observabilityShared.breadcrumbs.observabilityLinkText', {
-            defaultMessage: 'Observability',
-          }),
-        href: appPath + '/overview',
-      },
-      ...extraCrumbs,
-    ];
+    const breadcrumbs = serverless
+      ? extraCrumbs
+      : [
+          {
+            text:
+              app?.label ??
+              i18n.translate('xpack.observabilityShared.breadcrumbs.observabilityLinkText', {
+                defaultMessage: 'Observability',
+              }),
+            href: appPath + '/overview',
+          },
+          ...extraCrumbs,
+        ];
+
     if (setBreadcrumbs) {
       setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
     }
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [app?.label, appPath, extraCrumbs, navigateToUrl, params, setBreadcrumbs, setTitle]);
+  }, [
+    app?.label,
+    appPath,
+    extraCrumbs,
+    navigateToUrl,
+    params,
+    serverless,
+    setBreadcrumbs,
+    setTitle,
+  ]);
 };

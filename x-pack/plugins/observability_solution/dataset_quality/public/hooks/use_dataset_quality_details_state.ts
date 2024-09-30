@@ -15,14 +15,20 @@ import { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
-  const { service } = useDatasetQualityDetailsContext();
+  const { service, telemetryClient } = useDatasetQualityDetailsContext();
 
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { dataStream, degradedFields, timeRange, breakdownField, isIndexNotFoundError } =
-    useSelector(service, (state) => state.context) ?? {};
+  const {
+    dataStream,
+    degradedFields,
+    timeRange,
+    breakdownField,
+    isIndexNotFoundError,
+    expandedDegradedField,
+  } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
     state.matches('initializing.nonAggregatableDataset.done')
@@ -34,6 +40,14 @@ export const useDatasetQualityDetailsState = () => {
     state.matches('initializing.checkBreakdownFieldIsEcs.done')
       ? state.context.isBreakdownFieldEcs
       : false
+  );
+
+  const isBreakdownFieldAsserted = useSelector(
+    service,
+    (state) =>
+      state.matches('initializing.checkBreakdownFieldIsEcs.done') &&
+      breakdownField &&
+      isBreakdownFieldEcs
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
@@ -67,7 +81,9 @@ export const useDatasetQualityDetailsState = () => {
       )
   );
 
-  const canUserViewIntegrations = dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations;
+  const canUserViewIntegrations = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations
+  );
 
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
@@ -115,6 +131,7 @@ export const useDatasetQualityDetailsState = () => {
 
   return {
     service,
+    telemetryClient,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,
@@ -123,6 +140,7 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamDetails,
     breakdownField,
     isBreakdownFieldEcs,
+    isBreakdownFieldAsserted,
     isNonAggregatable,
     timeRange,
     loadingState,
@@ -131,5 +149,6 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
+    expandedDegradedField,
   };
 };

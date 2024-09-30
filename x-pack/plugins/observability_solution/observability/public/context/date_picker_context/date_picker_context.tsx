@@ -108,7 +108,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   );
 
   const updateRefreshInterval = useCallback(
-    ({ interval, isPaused }) => {
+    ({ interval, isPaused }: any) => {
       updateUrl({ refreshInterval: interval, refreshPaused: isPaused });
       data.query.timefilter.timefilter.setRefreshInterval({ value: interval, pause: isPaused });
       setLastUpdated(Date.now());

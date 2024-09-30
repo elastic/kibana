@@ -8,6 +8,7 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   useChangeCspRuleState,
   createRulesWithUpdatedState,
@@ -17,7 +18,6 @@ import { CSP_RULES_STATES_QUERY_KEY } from './use_csp_rules_state';
 import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { CSPM_STATS_QUERY_KEY, KSPM_STATS_QUERY_KEY } from '../../common/api';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
-import { RuleStateAttributes } from '../../../common/types/rules/v4';
 
 const initialRules = {
   rule_1: {

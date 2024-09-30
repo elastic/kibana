@@ -23,6 +23,7 @@ import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/se
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -293,6 +294,7 @@ export class ActionExecutor {
       actionExecutionId,
       isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
+      actionTypeId: this.actionInfo.actionTypeId,
     });
 
     eventLogger.logEvent(event);
@@ -394,6 +396,14 @@ export class ActionExecutor {
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        const logger = this.actionExecutorContext!.logger.get(loggerId);
+
+        const connectorUsageCollector = new ConnectorUsageCollector({
+          logger,
+          connectorId: actionId,
+        });
+
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
         }
@@ -433,9 +443,6 @@ export class ActionExecutor {
         } catch (err) {
           return err.result;
         }
-
-        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
-        const logger = this.actionExecutorContext!.logger.get(loggerId);
 
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
@@ -477,6 +484,7 @@ export class ActionExecutor {
           actionExecutionId,
           isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
+          actionTypeId,
         });
 
         eventLogger.startTiming(event);
@@ -510,6 +518,7 @@ export class ActionExecutor {
             logger,
             source,
             ...(actionType.isSystemActionType ? { request } : {}),
+            connectorUsageCollector,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -548,6 +557,11 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
+          set(
+            event,
+            'kibana.action.execution.usage.request_body_bytes',
+            connectorUsageCollector.getRequestBodyByte()
+          );
 
           if (result.status === 'ok') {
             span?.setOutcome('success');
@@ -561,7 +575,7 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed'],
+                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
@@ -591,15 +605,15 @@ export class ActionExecutor {
             .then((tokenTracking) => {
               if (tokenTracking != null) {
                 set(event, 'kibana.action.execution.gen_ai.usage', {
-                  total_tokens: tokenTracking.total_tokens,
-                  prompt_tokens: tokenTracking.prompt_tokens,
-                  completion_tokens: tokenTracking.completion_tokens,
+                  total_tokens: tokenTracking.total_tokens ?? 0,
+                  prompt_tokens: tokenTracking.prompt_tokens ?? 0,
+                  completion_tokens: tokenTracking.completion_tokens ?? 0,
                 });
                 analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
-                  total_tokens: tokenTracking.total_tokens,
-                  prompt_tokens: tokenTracking.prompt_tokens,
-                  completion_tokens: tokenTracking.completion_tokens,
+                  total_tokens: tokenTracking.total_tokens ?? 0,
+                  prompt_tokens: tokenTracking.prompt_tokens ?? 0,
+                  completion_tokens: tokenTracking.completion_tokens ?? 0,
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),

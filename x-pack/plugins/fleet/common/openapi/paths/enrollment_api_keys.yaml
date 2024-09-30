@@ -2,6 +2,10 @@ get:
   summary: List enrollment API keys
   tags:
     - Fleet enrollment API keys
+  parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/kuery.yaml
   responses:
     '200':
       description: OK
@@ -33,7 +37,6 @@ get:
     '400':
       $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-keys
-  parameters: []
 post:
   summary: Create enrollment API key
   tags:
@@ -54,6 +57,20 @@ post:
                   - created
     '400':
       $ref: ../components/responses/error.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the enrollment API key. Must be unique.
+            policy_id:
+              type: string
+              description: The ID of the agent policy the Elastic Agent will be enrolled in.
+          required:
+            - policy_id
   operationId: create-enrollment-api-keys
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

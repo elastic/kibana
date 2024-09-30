@@ -9,6 +9,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AgentState, NodeParamsBase } from '../types';
+import { NodeType } from '../constants';
 
 export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: string) =>
   llmType === 'bedrock'
@@ -48,25 +49,21 @@ export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: s
       ]);
 
 export interface GenerateChatTitleParams extends NodeParamsBase {
-  llmType?: string;
-  responseLanguage: string;
   state: AgentState;
   model: BaseChatModel;
 }
 
-export const GENERATE_CHAT_TITLE_NODE = 'generateChatTitle';
-
-export const generateChatTitle = async ({
-  llmType,
-  responseLanguage,
+export async function generateChatTitle({
   logger,
-  model,
   state,
-}: GenerateChatTitleParams) => {
-  logger.debug(() => `Node state:\n ${JSON.stringify(state, null, 2)}`);
+  model,
+}: GenerateChatTitleParams): Promise<Partial<AgentState>> {
+  logger.debug(
+    () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
+  );
 
   const outputParser = new StringOutputParser();
-  const graph = GENERATE_CHAT_TITLE_PROMPT(responseLanguage, llmType)
+  const graph = GENERATE_CHAT_TITLE_PROMPT(state.responseLanguage, state.llmType)
     .pipe(model)
     .pipe(outputParser);
 
@@ -77,5 +74,6 @@ export const generateChatTitle = async ({
 
   return {
     chatTitle,
+    lastNode: NodeType.GENERATE_CHAT_TITLE,
   };
-};
+}

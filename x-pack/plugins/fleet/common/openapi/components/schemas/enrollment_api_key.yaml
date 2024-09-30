@@ -5,14 +5,19 @@ properties:
     type: string
   api_key_id:
     type: string
+    description: The ID of the API key in the Security API.
   api_key:
     type: string
+    description: The enrollment API key (token) used for enrolling Elastic Agents.
   name:
     type: string
+    description: The name of the enrollment API key.
   active:
     type: boolean
+    description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
   policy_id:
     type: string
+    description: The ID of the agent policy the Elastic Agent will be enrolled in.
   created_at:
     type: string
 required:

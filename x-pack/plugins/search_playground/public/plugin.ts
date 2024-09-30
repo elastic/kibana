@@ -12,7 +12,7 @@ import type {
   AppMountParameters,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { Playground, getPlaygroundProvider } from './embeddable';
@@ -42,7 +42,7 @@ export class SearchPlaygroundPlugin
 
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: '/app/search_playground',
+      appRoute: PLUGIN_PATH,
       title: PLUGIN_NAME,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { RuleName, RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
 
 export type AggregatedPrebuiltRuleError = z.infer<typeof AggregatedPrebuiltRuleError>;

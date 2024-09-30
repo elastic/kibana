@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
-} from '../../../common/api_schemas/reset_transforms';
+} from '../../../server/routes/api_schemas/reset_transforms';
 import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 

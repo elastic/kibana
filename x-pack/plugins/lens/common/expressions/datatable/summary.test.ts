@@ -72,7 +72,7 @@ describe('Summary row helpers', () => {
       it(`should return formatted value for a ${op} summary function`, () => {
         expect(
           computeSummaryRowForColumn(
-            { summaryRow: op, columnId: 'myColumn', type: 'lens_datatable_column' },
+            { summaryRow: op, columnId: 'myColumn' },
             mockNumericTable,
             {
               myColumn: customNumericFormatter,
@@ -86,7 +86,7 @@ describe('Summary row helpers', () => {
     it('should ignore the column formatter, rather return the raw value for count operation', () => {
       expect(
         computeSummaryRowForColumn(
-          { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
+          { summaryRow: 'count', columnId: 'myColumn' },
           mockNumericTable,
           {
             myColumn: customNumericFormatter,
@@ -99,7 +99,7 @@ describe('Summary row helpers', () => {
     it('should only count non-null/empty values', () => {
       expect(
         computeSummaryRowForColumn(
-          { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
+          { summaryRow: 'count', columnId: 'myColumn' },
           { ...mockNumericTable, rows: [...mockNumericTable.rows, { myColumn: null }] },
           {
             myColumn: customNumericFormatter,
@@ -112,7 +112,7 @@ describe('Summary row helpers', () => {
     it('should count numeric arrays as valid and distinct values', () => {
       expect(
         computeSummaryRowForColumn(
-          { summaryRow: 'count', columnId: 'myColumn', type: 'lens_datatable_column' },
+          { summaryRow: 'count', columnId: 'myColumn' },
           mockNumericTableWithArray,
           {
             myColumn: defaultFormatter,

@@ -83,7 +83,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Organization Manual Assume Role', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187470
+    describe.skip('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);

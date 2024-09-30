@@ -194,8 +194,8 @@ export const GcpCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORD_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
-  } && ./deploy_service_account.sh`;
+    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
+  } ./deploy_service_account.sh`;
 
   return (
     <>
@@ -252,7 +252,7 @@ export const GcpCredentialsFormAgentless = ({
         packageInfo={packageInfo}
       />
       <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
   );
