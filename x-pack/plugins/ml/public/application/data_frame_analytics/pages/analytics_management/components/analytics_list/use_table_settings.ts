@@ -32,7 +32,7 @@ export interface CriteriaWithPagination<T extends object> extends Criteria<T> {
 
 interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
-  pagination: Required<Omit<Pagination, 'showPerPageOptions'>>;
+  pagination: Required<Omit<Pagination, 'showPerPageOptions'>> | boolean;
   sorting: {
     sort: {
       field: keyof T;
@@ -66,15 +66,19 @@ export function useTableSettings<TypeOfItem extends object>(
     [pageState, updatePageState]
   );
 
-  const pagination = useMemo(
-    () => ({
+  const pagination = useMemo(() => {
+    if (totalItemCount <= Math.min(...PAGE_SIZE_OPTIONS)) {
+      // Hide pagination if total number of items is lower that the smallest per page option
+      return false;
+    }
+
+    return {
       pageIndex,
       pageSize,
       totalItemCount,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
-    }),
-    [totalItemCount, pageIndex, pageSize]
-  );
+    };
+  }, [totalItemCount, pageIndex, pageSize]);
 
   const sorting = useMemo(
     () => ({
