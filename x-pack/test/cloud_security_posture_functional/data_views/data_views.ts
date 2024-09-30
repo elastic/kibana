@@ -59,9 +59,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       await spacesService.delete(TEST_SPACE);
 
-      // NOTE: Logout needs to happen before any test to avoid flaky behavior
-      await pageObjects.security.forceLogout();
-
       cspSecurity = pageObjects.cspSecurity;
       findings = pageObjects.findings;
       await cspSecurity.createRoles();
