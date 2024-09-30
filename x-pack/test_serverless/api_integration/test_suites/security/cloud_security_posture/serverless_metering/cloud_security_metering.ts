@@ -38,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  // FLAKY: https://github.com/elastic/kibana/issues/188660
-  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
+  describe('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
