@@ -8,21 +8,20 @@
 import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { MisconfigurationsPreview } from './misconfiguration_preview';
+import { VulnerabilitiesPreview } from './vulnerabilities_preview';
 
-const mockProps: { name: string; fieldName: 'host.name' | 'user.name' } = {
-  name: 'testContextID',
-  fieldName: 'host.name',
+const mockProps: { hostName: string } = {
+  hostName: 'testContextID',
 };
 
-describe('MisconfigurationsPreview', () => {
+describe('VulnerabilitiesPreview', () => {
   it('renders', () => {
-    const { queryByTestId } = render(<MisconfigurationsPreview {...mockProps} />, {
+    const { queryByTestId } = render(<VulnerabilitiesPreview {...mockProps} />, {
       wrapper: TestProviders,
     });
     expect(
-      queryByTestId('securitySolutionFlyoutInsightsMisconfigurationsContent')
+      queryByTestId('securitySolutionFlyoutInsightsVulnerabilitiesContent')
     ).toBeInTheDocument();
-    expect(queryByTestId('noFindingsDataTestSubj')).toBeInTheDocument();
+    expect(queryByTestId('noVulnerabilitiesDataTestSubj')).toBeInTheDocument();
   });
 });

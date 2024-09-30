@@ -193,7 +193,7 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
           </EuiText>
         ),
       }}
-      data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
+      data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >
       <EuiFlexGroup gutterSize="none">
         {hasVulnerabilities ? (

@@ -17,8 +17,8 @@ import { login } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { visit } from '../../../tasks/navigation';
 
-const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutInsightsMisconfigurationsTitleText'
+const CSP_INSIGHT_VULNERABILITIES_TITLE = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInsightsVulnerabilitiesTitleText'
 );
 
 const NO_VULNERABILITIES_TEXT = getDataTestSubjectSelector('noVulnerabilitiesDataTestSubj');
@@ -145,16 +145,16 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     waitForAlertsToPopulate();
   });
 
-  context('No Misconfiguration Findings', () => {
-    it('should not display Misconfiguration preview under Insights Entities when it does not have Misconfiguration Findings', () => {
+  context('No Vulnerabilities Findings', () => {
+    it('should not display Vulnerabilities preview under Insights Entities when it does not have Vulnerabilities Findings', () => {
       expandFirstAlertHostFlyout();
 
-      cy.log('check if Misconfiguration preview title is not shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+      cy.log('check if Vulnerabilities preview title is not shown');
+      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('not.exist');
     });
   });
 
-  context('Host name - Has misconfiguration findings', () => {
+  context('Host name - Has Vulnerabilities findings', () => {
     beforeEach(() => {
       createMockVulnerability(true);
       cy.reload();
@@ -165,18 +165,18 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       deleteDataStream();
     });
 
-    it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+    it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
       createMockVulnerability(true);
       cy.reload();
       expandFirstAlertHostFlyout();
 
-      cy.log('check if Misconfiguration preview title shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
+      cy.log('check if Vulnerabilities preview title shown');
+      cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
     });
   });
 
   context(
-    'Host name - Has misconfiguration findings but host name is not the same as alert host name',
+    'Host name - Has Vulnerabilities findings but host name is not the same as alert host name',
     () => {
       beforeEach(() => {
         createMockVulnerability(false);
@@ -188,9 +188,9 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
         deleteDataStream();
       });
 
-      it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-        cy.log('check if Misconfiguration preview title shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
+      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+        cy.log('check if Vulnerabilities preview title shown');
+        cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
         cy.get(NO_VULNERABILITIES_TEXT).should('be.visible');
       });
     }
