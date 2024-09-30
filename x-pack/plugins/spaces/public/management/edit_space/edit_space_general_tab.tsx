@@ -301,7 +301,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
       <EuiSpacer />
 
-      <CustomizeAvatar space={formValues} onChange={onChangeSpaceSettings} validator={validator} />
+      <CustomizeAvatar
+        space={getSpaceFromFormValues(formValues)}
+        onChange={onChangeSpaceSettings}
+        validator={validator}
+      />
 
       {doShowUserImpactWarning()}
 
