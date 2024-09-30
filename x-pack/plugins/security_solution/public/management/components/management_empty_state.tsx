@@ -201,7 +201,7 @@ const EndpointsEmptyState = React.memo<{
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.list.notAddedIntegrations.title',
                 {
-                  defaultMessage: 'Integrations not added to an Agent Policy',
+                  defaultMessage: 'Integrations not added to an Agent policy',
                 }
               )}
               data-test-subj="integrationsNotAddedToAgentPolicyCallout"
@@ -211,7 +211,7 @@ const EndpointsEmptyState = React.memo<{
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.notAddedIntegrations.description"
-                  defaultMessage="There are some Elastic Defend integrations which are not added to an Agent Policy, therefore they cannot be deployed to an Agent."
+                  defaultMessage="The following Elastic Defend integrations aren't added to an Agent policy, so they can't be deployed to an Agent. Click on an integration to edit it, and add it to an Agent policy:"
                 />
 
                 <EuiSpacer size="s" />
@@ -236,7 +236,7 @@ const EndpointsEmptyState = React.memo<{
 
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.notAddedIntegrations.visitIntegrations"
-                  defaultMessage="You can also visit the {integrationPolicies} page to get an overview."
+                  defaultMessage="You can also view a list of all {integrationPolicies}."
                   values={{
                     integrationPolicies: (
                       <EuiLink
@@ -250,7 +250,7 @@ const EndpointsEmptyState = React.memo<{
                       >
                         <FormattedMessage
                           id="xpack.securitySolution.endpoint.list.notAddedIntegrations.integrationPolicies"
-                          defaultMessage="Elastic Defend Integration policies"
+                          defaultMessage="Elastic Defend integration policies"
                         />
                       </EuiLink>
                     ),
@@ -304,7 +304,7 @@ const EndpointsEmptyState = React.memo<{
                     >
                       <FormattedMessage
                         id="xpack.securitySolution.endpoint.list.noPoliciesAssignedToAgentPolicies"
-                        defaultMessage="There are no Elastic Defend integrations added to Agent Policies."
+                        defaultMessage="There are no Elastic Defend integrations added to Agent policies. To deploy Elastic Defend, add it to an Agent policy."
                       />
                     </EuiCallOut>
                   );
