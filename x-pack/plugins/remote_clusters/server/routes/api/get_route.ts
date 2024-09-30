@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 
-import type { IndicesResolveClusterResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -35,46 +34,45 @@ export const register = (deps: RouteDependencies): void => {
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
-      // Retrieve the cluster information for all the configured remote clusters.
-      // _none is never a valid index/alias/data-stream name so that way we can avoid
-      // using * which could be computationally expensive.
-      let clustersStatus: IndicesResolveClusterResponse = {};
-      if (clusterNames.length > 0) {
-        clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
-          name: clusterNames.map((cluster) => `${cluster}:_none`),
-        });
-      }
+      const body = await Promise.all(
+        clusterNames.map(async (clusterName: string): Promise<any> => {
+          const cluster = clustersByName[clusterName];
+          const isTransient = transientClusterNames.includes(clusterName);
+          const isPersistent = persistentClusterNames.includes(clusterName);
+          const { config } = deps;
 
-      const body = clusterNames.map((clusterName: string): any => {
-        const cluster = clustersByName[clusterName];
-        const isTransient = transientClusterNames.includes(clusterName);
-        const isPersistent = persistentClusterNames.includes(clusterName);
-        const { config } = deps;
+          // If the cluster hasn't been stored in the cluster state, then it's defined by the
+          // node's config file.
+          const isConfiguredByNode = !isTransient && !isPersistent;
 
-        // If the cluster hasn't been stored in the cluster state, then it's defined by the
-        // node's config file.
-        const isConfiguredByNode = !isTransient && !isPersistent;
+          // Pre-7.6, ES supported an undocumented "proxy" field
+          // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
+          // This value is not available via the GET /_remote/info API, so we get it from the cluster settings
+          const deprecatedProxyAddress = isPersistent
+            ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
+            : undefined;
 
-        // Pre-7.6, ES supported an undocumented "proxy" field
-        // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
-        // This value is not available via the GET /_remote/info API, so we get it from the cluster settings
-        const deprecatedProxyAddress = isPersistent
-          ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
-          : undefined;
+          // Resolve cluster status for this specific cluster.
+          // `none` is never a valid index/alias/data-stream name so that way we can
+          // avoid using * which could be computationally expensive.
+          const clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
+            name: `${clusterName}:none`,
+          });
 
-        return {
-          ...deserializeCluster(
-            clusterName,
-            cluster,
-            deprecatedProxyAddress,
-            config.isCloudEnabled
-          ),
-          isConfiguredByNode,
-          // We prioritize the cluster status from the resolve cluster api, and fallback to
-          // the cluster connected status in case its not present.
-          isConnected: clustersStatus[clusterName]?.connected || cluster.connected,
-        };
-      });
+          return {
+            ...deserializeCluster(
+              clusterName,
+              cluster,
+              deprecatedProxyAddress,
+              config.isCloudEnabled
+            ),
+            isConfiguredByNode,
+            // We prioritize the cluster status from the resolve cluster API, and fallback to
+            // the cluster connected status in case it's not present.
+            isConnected: clustersStatus[clusterName]?.connected || cluster.connected,
+          };
+        })
+      );
 
       return response.ok({ body });
     } catch (error) {
