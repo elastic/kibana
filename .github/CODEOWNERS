@@ -918,9 +918,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
@@ -1461,6 +1461,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
+/x-pack/test/functional/es_archives/entity/host_risk @elastic/security-solution @elastic/security-detection-engine
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution OpenAPI bundles
@@ -1667,6 +1668,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/cti @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/entity/risks @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
