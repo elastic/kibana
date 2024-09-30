@@ -23,7 +23,6 @@ import {
   EVENT_OUTCOME,
   EVENT_SUCCESS_COUNT,
   FAAS_COLDSTART,
-  LABEL_SOME_RESOURCE_ATTRIBUTE,
   OBSERVER_HOSTNAME,
   OBSERVER_TYPE,
   OBSERVER_VERSION,
@@ -96,6 +95,11 @@ import {
   CLOUD_ACCOUNT_NAME,
   CLOUD_IMAGE_ID,
   CLOUD_SERVICE_NAME,
+  LABEL_GC,
+  LABEL_LIFECYCLE_STATE,
+  LABEL_NAME,
+  LABEL_TELEMETRY_AUTO_VERSION,
+  LABEL_TYPE,
 } from '@kbn/apm-types';
 import {
   KUBERNETES_CONTAINER_NAME,
@@ -305,7 +309,7 @@ export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknow
 };
 
 export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) => {
-  if (!fields) return undefined;
+  if (!fields) return { transaction: undefined };
 
   return {
     transaction: {
@@ -365,8 +369,15 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
       us: normalizeValue<number>(fields[TIMESTAMP]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
+    // todo check for labels before mapping
     labels: {
-      some_resource_attribute: normalizeValue<string>(fields[LABEL_SOME_RESOURCE_ATTRIBUTE]),
+      name: normalizeValue<string | undefined>(fields[LABEL_NAME]),
+      gc: normalizeValue<string | undefined>(fields[LABEL_GC]),
+      type: normalizeValue<string | undefined>(fields[LABEL_TYPE]),
+      telemetry_auto_version: normalizeValue<string | undefined>(
+        fields[LABEL_TELEMETRY_AUTO_VERSION]
+      ),
+      lifecycle_state: normalizeValue<string | undefined>(fields[LABEL_LIFECYCLE_STATE]),
     },
   };
 };

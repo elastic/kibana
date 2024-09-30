@@ -159,7 +159,6 @@ export const LABEL_GC = 'labels.gc';
 export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
-export const LABEL_SOME_RESOURCE_ATTRIBUTE = 'labels.some_resource_attribute';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
