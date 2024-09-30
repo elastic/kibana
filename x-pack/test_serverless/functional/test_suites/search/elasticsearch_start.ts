@@ -133,6 +133,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);
+      it('should have file upload link', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
+      });
+
+      it('should have o11y links', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
       });
     });
     describe('viewer', function () {
