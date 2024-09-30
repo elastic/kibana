@@ -22,6 +22,16 @@ export const investigationKeys = {
     [...investigationKeys.detail(investigationId), 'notes'] as const,
   detailItems: (investigationId: string) =>
     [...investigationKeys.detail(investigationId), 'items'] as const,
+  entities: ({
+    investigationId,
+    ...params
+  }: {
+    investigationId: string;
+    serviceName?: string;
+    serviceEnvironment?: string;
+    hostName?: string;
+    containerId?: string;
+  }) => [...investigationKeys.detail(investigationId), 'entities', params] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;
