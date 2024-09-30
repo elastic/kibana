@@ -10,6 +10,7 @@ import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
+import type { StartServices } from '../types';
 
 export interface CheckCompleteResult {
   /**
@@ -62,7 +63,9 @@ export type OnboardingCardComponent = React.ComponentType<{
   checkCompleteMetadata?: Record<string, unknown>;
 }>;
 
-export type OnboardingCardCheckComplete = () => Promise<CheckCompleteResponse>;
+export type OnboardingCardCheckComplete = (
+  services: StartServices
+) => Promise<CheckCompleteResponse>;
 
 export interface OnboardingCardConfig {
   id: OnboardingCardId;

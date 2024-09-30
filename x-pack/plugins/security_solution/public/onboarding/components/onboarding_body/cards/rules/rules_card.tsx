@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -16,49 +15,16 @@ import { OnboardingCardContentImagePanel } from '../common/card_content_image_pa
 import { CardCallOut } from '../common/card_callout';
 import rulesImageSrc from './images/rules.png';
 import * as i18n from './translations';
-import { checkRulesComplete } from './rules_check_complete';
 
-export const RulesCard: OnboardingCardComponent = ({
-  isCardComplete,
-  setExpandedCardId,
-  setComplete,
-}) => {
+export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
   );
 
-  const {
-    http: kibanaServicesHttp,
-    notifications: { toasts },
-  } = useKibana().services;
-
-  const addError = useRef(toasts.addError.bind(toasts)).current;
-
   const expandIntegrationsCard = useCallback(() => {
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
-
-  useEffect(() => {
-    const abortSignal = new AbortController();
-    const autoCheckStepCompleted = async () => {
-      const isDone = await checkRulesComplete({
-        abortSignal,
-        kibanaServicesHttp,
-        onError: (error: Error) => {
-          addError(error, { title: `Failed to check Card Rules completion.` });
-        },
-      });
-
-      if (isDone) {
-        setComplete(true);
-      }
-    };
-    autoCheckStepCompleted();
-    return () => {
-      abortSignal.abort();
-    };
-  }, [kibanaServicesHttp, addError, setComplete]);
 
   return (
     <OnboardingCardContentImagePanel imageSrc={rulesImageSrc} imageAlt={i18n.RULES_CARD_TITLE}>

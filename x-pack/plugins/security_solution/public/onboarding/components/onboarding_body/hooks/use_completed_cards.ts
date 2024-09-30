@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
 import type { OnboardingCardId } from '../../../constants';
 import type {
   CheckCompleteResult,
   CheckCompleteResponse,
-  OnboardingCardConfig,
   OnboardingGroupConfig,
+  OnboardingCardConfig,
 } from '../../../types';
 import { useOnboardingContext } from '../../onboarding_context';
 
@@ -33,7 +34,7 @@ export type CardCheckCompleteResult = Partial<Record<OnboardingCardId, CheckComp
  */
 export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => {
   const { spaceId, reportCardComplete } = useOnboardingContext();
-
+  const services = useKibana().services;
   // Use stored state to keep localStorage in sync, and a local state to avoid unnecessary re-renders.
   const [storedCompleteCardIds, setStoredCompleteCardIds] = useStoredCompletedCardIds(spaceId);
   const [completeCardIds, setCompleteCardIds] = useState<OnboardingCardId[]>(storedCompleteCardIds);
@@ -111,22 +112,22 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
       const cardConfig = cardsWithAutoCheck.find(({ id }) => id === cardId);
 
       if (cardConfig) {
-        cardConfig.checkComplete?.().then((checkCompleteResult) => {
+        cardConfig.checkComplete?.(services).then((checkCompleteResult) => {
           processCardCheckCompleteResult(cardId, checkCompleteResult);
         });
       }
     },
-    [cardsWithAutoCheck, processCardCheckCompleteResult]
+    [cardsWithAutoCheck, processCardCheckCompleteResult, services]
   );
 
   // Initial auto-check for all cards, it should run only once, after cardsGroupConfig is properly populated
   useEffect(() => {
     cardsWithAutoCheck.map((card) =>
-      card.checkComplete?.().then((checkCompleteResult) => {
+      card.checkComplete?.(services).then((checkCompleteResult) => {
         processCardCheckCompleteResult(card.id, checkCompleteResult);
       })
     );
-  }, [cardsWithAutoCheck, processCardCheckCompleteResult]);
+  }, [cardsWithAutoCheck, processCardCheckCompleteResult, services]);
 
   return {
     isCardComplete,

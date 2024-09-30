@@ -6,24 +6,19 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import type { OnboardingCardCheckComplete } from '../../../../types';
 import { ENABLED_FIELD } from '../../../../../../common';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../common/constants';
 import type { FetchRulesResponse } from '../../../../../detection_engine/rule_management/logic';
 
-export const checkRulesComplete = async ({
-  abortSignal,
-  kibanaServicesHttp,
-  onError,
-}: {
-  abortSignal: AbortController;
-  kibanaServicesHttp: HttpSetup;
-  onError?: (e: Error) => void;
+export const checkRulesComplete: OnboardingCardCheckComplete = async ({
+  http,
+  notifications: { toasts },
 }) => {
   // Check if there are any rules installed and enabled
   try {
     const data = await fetchRuleManagementFilters({
-      http: kibanaServicesHttp,
-      signal: abortSignal.signal,
+      http,
       query: {
         page: 1,
         per_page: 20,
@@ -32,13 +27,15 @@ export const checkRulesComplete = async ({
         filter: `${ENABLED_FIELD}: true`,
       },
     });
-    return data?.total > 0;
+    return {
+      isComplete: data?.total > 0,
+    };
   } catch (e) {
-    if (!abortSignal.signal.aborted) {
-      onError?.(e);
-    }
+    toasts.addError(e, { title: `Failed to check Card Rules completion.` });
 
-    return false;
+    return {
+      isComplete: false,
+    };
   }
 };
 
