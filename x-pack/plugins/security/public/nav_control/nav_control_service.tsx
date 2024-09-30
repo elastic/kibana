@@ -8,13 +8,13 @@
 import { sortBy } from 'lodash';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from '@kbn/react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   AuthenticationServiceSetup,

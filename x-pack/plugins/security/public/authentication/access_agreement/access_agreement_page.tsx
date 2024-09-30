@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import type { FormEvent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from '@kbn/react-dom';
 import ReactMarkdown from 'react-markdown';
 
 import type {
@@ -29,6 +28,7 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { parseNextURL } from '@kbn/std';
 

@@ -7,10 +7,10 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from '@kbn/react-dom';
 
 import type { AppMountParameters, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { parseNextURL } from '@kbn/std';

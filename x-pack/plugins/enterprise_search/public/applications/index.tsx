@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import ReactDOM from '@kbn/react-dom';
+
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
@@ -18,6 +18,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 

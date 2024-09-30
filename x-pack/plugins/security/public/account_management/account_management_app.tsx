@@ -7,7 +7,6 @@
 
 import type { History } from 'history';
 import React, { FC, PropsWithChildren } from 'react';
-import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import type {
   ApplicationSetup,
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';

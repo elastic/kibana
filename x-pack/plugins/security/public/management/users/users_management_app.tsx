@@ -7,13 +7,13 @@
 
 import type { History } from 'history';
 import React, { FC, PropsWithChildren } from 'react';
-import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { Redirect } from 'react-router-dom';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';

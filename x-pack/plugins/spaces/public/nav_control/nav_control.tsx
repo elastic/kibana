@@ -7,9 +7,9 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from '@kbn/react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { EventTracker } from '../analytics';
