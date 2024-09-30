@@ -61,7 +61,7 @@ export const OBSERVER_TYPE = 'observer.type';
 export const OBSERVER_VERSION = 'observer.version';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const PROCESSOR_EVENT = 'processor.event';
-export const PROCESOR_NAME = 'processor.name';
+export const PROCESSOR_NAME = 'processor.name';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';

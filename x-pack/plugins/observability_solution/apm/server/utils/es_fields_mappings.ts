@@ -29,7 +29,7 @@ import {
   OBSERVER_VERSION,
   OBSERVER_VERSION_MAJOR,
   PARENT_ID,
-  PROCESOR_NAME,
+  PROCESSOR_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -198,7 +198,7 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
       success_count: normalizeValue<number>(fields[EVENT_SUCCESS_COUNT]),
     },
     processor: {
-      name: normalizeValue<'transaction'>(fields[PROCESOR_NAME]),
+      name: normalizeValue<'transaction'>(fields[PROCESSOR_NAME]),
       event: normalizeValue<'span'>(fields[PROCESSOR_EVENT]),
     },
     transaction: {
@@ -518,7 +518,7 @@ export const errorSampleDetailsMapping = (
       grouping_key: normalizeValue<string>(fields[ERROR_GROUP_ID]),
     },
     processor: {
-      name: normalizeValue<'error'>(fields[PROCESOR_NAME]),
+      name: normalizeValue<'error'>(fields[PROCESSOR_NAME]),
       event: normalizeValue<'error'>(fields[PROCESSOR_EVENT]),
     },
     transaction: {
@@ -553,7 +553,7 @@ export const serviceMetadataIconsMapping = (
   };
 };
 
-// todo(milosz): test it
+// todo: check https://github.com/jennypavlova/kibana/pull/6#discussion_r1771611817
 export const serviceVersionMapping = (
   fields: Partial<Record<string, unknown[]>>
 ): Pick<Transaction | Span | APMError, 'observer'> | undefined => {
@@ -622,7 +622,7 @@ export const serviceInstanceMetadataDetailsMapping = (
   };
 };
 
-// todo: missing cloud and service properties
+// todo: missing `cloud` and `service` properties
 export const serviceAgentNameMapping = (fields: Partial<Record<string, unknown[]>>) => {
   if (!fields) return undefined;
 
