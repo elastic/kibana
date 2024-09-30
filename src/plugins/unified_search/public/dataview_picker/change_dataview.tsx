@@ -238,7 +238,7 @@ export function ChangeDataView({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiFlexItem
               grow={false}
@@ -254,23 +254,25 @@ export function ChangeDataView({
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
-            <EuiPopover
-              panelClassName="changeDataViewPopover"
-              button={createTrigger()}
-              panelProps={{
-                ['data-test-subj']: 'changeDataViewPopover',
-              }}
-              isOpen={isPopoverOpen}
-              closePopover={() => setPopoverIsOpen(false)}
-              panelPaddingSize="none"
-              initialFocus={`[id="${searchListInputId}"]`}
-              display="block"
-              buffer={8}
-            >
-              <div css={styles.popoverContent}>
-                <EuiContextMenuPanel size="s" items={getPanelItems()} />
-              </div>
-            </EuiPopover>
+            <EuiFlexItem grow={true}>
+              <EuiPopover
+                panelClassName="changeDataViewPopover"
+                button={createTrigger()}
+                panelProps={{
+                  ['data-test-subj']: 'changeDataViewPopover',
+                }}
+                isOpen={isPopoverOpen}
+                closePopover={() => setPopoverIsOpen(false)}
+                panelPaddingSize="none"
+                initialFocus={`[id="${searchListInputId}"]`}
+                display="block"
+                buffer={8}
+              >
+                <div css={styles.popoverContent}>
+                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </>
