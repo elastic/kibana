@@ -68,7 +68,7 @@ import {
 
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
 import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
-import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
+import { LogRateAnalysisInfoPopover } from './log_rate_analysis_info_popover';
 import type { ColumnNames } from '../log_rate_analysis_results_table';
 
 const groupResultsMessage = i18n.translate(
@@ -430,6 +430,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onCancel={cancelHandler}
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
+        analysisInfo={<LogRateAnalysisInfoPopover />}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -485,8 +486,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </EuiFlexItem>
       </ProgressControls>
 
-      <LogRateAnalysisTypeCallOut />
-
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -535,7 +534,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
         </>
       )}
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {!isRunning && !showLogRateAnalysisResultsTable && (
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"

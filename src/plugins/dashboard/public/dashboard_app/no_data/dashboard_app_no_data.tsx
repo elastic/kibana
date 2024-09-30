@@ -10,44 +10,30 @@
 import React from 'react';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { pluginServices } from '../../services/plugin_services';
+
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import {
+  coreServices,
+  dataService,
+  dataViewEditorService,
+  embeddableService,
+  noDataPageService,
+  shareService,
+} from '../../services/kibana_services';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
 }: {
   onDataViewCreated: () => void;
 }) => {
-  const {
-    application,
-    data: { dataViews },
-    dataViewEditor,
-    http: { basePath, get },
-    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink, esqlDocLink },
-    customBranding,
-    noDataPage,
-    share,
-  } = pluginServices.getServices();
-
   const analyticsServices = {
-    coreStart: {
-      docLinks: {
-        links: {
-          kibana: { guide: kibanaGuideDocLink },
-          indexPatterns: { introduction: indexPatternsDocLink },
-          query: { queryESQL: esqlDocLink },
-        },
-      },
-      application,
-      http: { basePath, get },
-      customBranding: {
-        hasCustomBranding$: customBranding.hasCustomBranding$,
-      },
-    },
-    dataViews,
-    dataViewEditor,
-    noDataPage,
-    share: share.url ? { url: share.url } : undefined,
+    coreStart: coreServices,
+    dataViews: dataService.dataViews,
+    dataViewEditor: dataViewEditorService,
+    noDataPage: noDataPageService,
+    share: shareService,
   };
 
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
@@ -74,29 +60,22 @@ export const DashboardAppNoDataPage = ({
 };
 
 export const isDashboardAppInNoDataState = async () => {
-  const {
-    data: { dataViews },
-    embeddable,
-    dashboardContentManagement,
-    dashboardBackup,
-  } = pluginServices.getServices();
-
-  const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
+  const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
 
   if (hasUserDataView) return false;
 
   // consider has data if there is an incoming embeddable
-  const hasIncomingEmbeddable = embeddable
+  const hasIncomingEmbeddable = embeddableService
     .getStateTransfer()
     .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false);
   if (hasIncomingEmbeddable) return false;
 
   // consider has data if there is unsaved dashboard with edits
-  if (dashboardBackup.dashboardHasUnsavedEdits()) return false;
+  if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await dashboardContentManagement.findDashboards
-    .search({ search: '', size: 1 })
+  const { total } = await getDashboardContentManagementService()
+    .findDashboards.search({ search: '', size: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 
