@@ -1425,9 +1425,12 @@ components:
         settings:
           $ref: '#/components/schemas/settings'
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          type: string
-          example: some.field
+          description: optional group by field or fields to use to generate an SLO per distinct value
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
         tags:
           description: List of tags
           type: array
@@ -1487,6 +1490,13 @@ components:
           $ref: '#/components/schemas/objective'
         settings:
           $ref: '#/components/schemas/settings'
+        groupBy:
+          description: optional group by field or fields to use to generate an SLO per distinct value
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
         tags:
           description: List of tags
           type: array
