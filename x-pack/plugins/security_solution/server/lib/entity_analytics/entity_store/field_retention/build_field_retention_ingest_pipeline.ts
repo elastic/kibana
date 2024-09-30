@@ -18,6 +18,15 @@ import {
 } from './ingest_processor_steps';
 import { DEBUG_MODE, ENRICH_FIELD } from './constants';
 
+/**
+ * Builds the ingest pipeline for the field retention policy.
+ * Broadly the pipeline enriches the entity with the field retention enrich policy,
+ * then applies the field retention policy to the entity fields, and finally removes
+ * the enrich field and any empty fields.
+ *
+ * While developing, be sure to set DEBUG_MODE to true this will keep the enrich field
+ * and the context field in the document to help with debugging.
+ */
 export const buildFieldRetentionIngestPipeline = ({
   fieldRetentionDefinition,
   enrichPolicyName,
@@ -47,12 +56,8 @@ export const buildFieldRetentionIngestPipeline = ({
       value: `{{${getIdentityFieldForEntityType(fieldRetentionDefinition.entityType)}}}`,
     },
   },
-  arrayToSingleValueStep({
-    field: `${fieldRetentionDefinition.entityType}.risk.calculated_level`,
-  }),
-  arrayToSingleValueStep({
-    field: 'asset.criticality',
-  }),
+  arrayToSingleValueStep(`${fieldRetentionDefinition.entityType}.risk.calculated_level`),
+  arrayToSingleValueStep('asset.criticality'),
   ...getDotExpanderSteps(allEntityFields),
   ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
     enrichField: ENRICH_FIELD,

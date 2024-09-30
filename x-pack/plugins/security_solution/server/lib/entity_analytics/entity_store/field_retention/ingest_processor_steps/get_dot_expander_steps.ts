@@ -7,6 +7,11 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
+/**
+ * Returns the ingest processor steps for the dot expander processor for the given fields.
+ * We need to expand the dot notation fields to be able to use them in the field retention processors.
+ * Painless treats { "a.b" : "c" } and { "a" : { "b" : "c" } } as different fields.
+ */
 export const getDotExpanderSteps = (fields: string[]): IngestProcessorContainer[] =>
   fields.map((field) => {
     return {

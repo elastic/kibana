@@ -10,6 +10,10 @@ import { preferNewestValueProcessor } from './prefer_newest_value';
 import { preferOldestValueProcessor } from './prefer_oldest_value';
 import { collectValuesProcessor } from './collect_values';
 
+/**
+ * Converts a field retention operator to an ingest processor.
+ * An ingest processor is a step that can be added to an ingest pipeline.
+ */
 export const fieldOperatorToIngestProcessor: FieldRetentionOperatorBuilder<
   FieldRetentionOperator
 > = (fieldOperator, options) => {

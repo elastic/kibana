@@ -12,6 +12,10 @@ export interface PreferOldestValue extends BaseFieldRetentionOperator {
   operation: 'prefer_oldest_value';
 }
 
+/**
+ * A field retention operator that prefers the oldest value of the specified field.
+ * If the historical field is missing or empty, the latest value is used.
+ */
 export const preferOldestValueProcessor: FieldRetentionOperatorBuilder<PreferOldestValue> = (
   { field },
   { enrichField }

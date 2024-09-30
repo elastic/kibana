@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+// the field that the enrich processor writes to
 export const ENRICH_FIELD = 'historical';
-export const DEBUG_MODE = true; // TODO: do not commit this value
+
+// only to be used in development, adds debug steps to the ingest pipeline
+export const DEBUG_MODE = false;

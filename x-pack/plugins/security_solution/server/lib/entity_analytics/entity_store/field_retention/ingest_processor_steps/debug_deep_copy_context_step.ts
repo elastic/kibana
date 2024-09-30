@@ -10,8 +10,6 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 /**
  * Deeply copies ctx object to the debug_ctx field for debugging purposes
  * Deep copy is necessary because the context is a mutable object and painless copies by ref
- *
- * @return {*}  {IngestProcessorContainer}
  */
 export const debugDeepCopyContextStep = (): IngestProcessorContainer => ({
   script: {
