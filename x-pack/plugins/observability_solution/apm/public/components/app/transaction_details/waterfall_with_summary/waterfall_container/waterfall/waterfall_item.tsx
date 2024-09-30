@@ -193,7 +193,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
       let name = item.doc.span.name;
-      if (item.doc.span.composite) {
+      if (item.doc.span.composite && item.doc.span.composite.count) {
         const compositePrefix =
           item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;

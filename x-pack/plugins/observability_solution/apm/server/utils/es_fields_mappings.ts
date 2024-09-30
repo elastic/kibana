@@ -294,9 +294,9 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
 
 // todo: pending #192337
 export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
-  if (!fields) return undefined;
+  if (!fields ?? !fields[SPAN_LINKS_TRACE_ID]) return [];
 
-  return (fields[SPAN_LINKS_TRACE_ID] as string[]).map((v, index) => {
+  return (fields[SPAN_LINKS_TRACE_ID] as string[])?.map((v, index) => {
     return {
       trace: {
         id: v,
