@@ -27,7 +27,7 @@ export const transparentApiProxy = (
 
       const port = options?.port || 3623;
 
-      log.info(`====== [Transparent API] Starting transparent API proxy on port ${port}`);
+      log.debug(`[Transparent API] Starting transparent API proxy on port ${port}`);
 
       try {
         proxy = new DebugProxy({
@@ -47,9 +47,7 @@ export const transparentApiProxy = (
                 const parsedBody = JSON.parse(body);
                 interceptedRequestBody.push(parsedBody);
               } catch (err) {
-                throw new Error(
-                  `====== [Transparent API] Failed to parse request body as JSON: ${err}`
-                );
+                throw new Error(`[Transparent API] Failed to parse request body as JSON: ${err}`);
               }
               res.writeHead(201);
               res.end();
@@ -57,7 +55,7 @@ export const transparentApiProxy = (
           },
         });
       } catch (e) {
-        log.error(`====== [Transparent API] Error starting transparent API proxy: ${e}`);
+        log.error(`[Transparent API] Error starting transparent API proxy: ${e}`);
         throw e;
       }
       if (!proxy) {
@@ -65,7 +63,7 @@ export const transparentApiProxy = (
       }
 
       await proxy.start(port);
-      log.info(`====== [Transparent API] proxy started on port ${port}`);
+      log.debug(`[Transparent API] proxy started on port ${port}`);
       return null;
     },
     getInterceptedRequestsFromTransparentApiProxy: async (): Promise<UsageRecord[][]> => {

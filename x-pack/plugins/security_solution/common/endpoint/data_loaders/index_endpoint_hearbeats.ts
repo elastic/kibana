@@ -37,7 +37,7 @@ export const indexEndpointHeartbeats = async (
   count: number = 1,
   unbilledCount: number = 1
 ): Promise<IndexedEndpointHeartbeats> => {
-  log.info(`======= Indexing ${count} endpoint heartbeats`);
+  log.debug(`Indexing ${count} endpoint heartbeats`);
   const startTime = new Date();
 
   const docs: EndpointHeartbeat[] = Array.from({ length: count }).map((_, i) => {
@@ -92,9 +92,11 @@ export const indexEndpointHeartbeats = async (
   });
 
   if (response.errors) {
-    log.error(`=======There was an error indexing endpoint heartbeats `);
+    log.error(
+      `There was an error indexing endpoint heartbeats ${JSON.stringify(response.items, null, 2)}`
+    );
   } else {
-    log.info(`=======Indexed ${docs.length} endpoint heartbeats successfully`);
+    log.debug(`Indexed ${docs.length} endpoint heartbeats successfully`);
   }
 
   return {
@@ -128,7 +130,7 @@ export const deleteIndexedEndpointHeartbeats = async (
       response = await esClient.bulk({
         operations: idsToDelete,
       });
-      log.info('===== Indexed endpoint heartbeats deleted successfully');
+      log.debug('Indexed endpoint heartbeats deleted successfully');
     }
   }
 
