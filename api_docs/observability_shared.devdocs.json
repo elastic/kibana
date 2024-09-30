@@ -4514,7 +4514,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, serviceName, }: ",
+              "({ rangeFrom, rangeTo, serviceName, environment, }: ",
               {
                 "pluginId": "observabilityShared",
                 "scope": "common",
@@ -4533,7 +4533,7 @@
                 "id": "def-common.ServiceOverviewLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n    environment,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -5868,6 +5868,20 @@
           },
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceOverviewParams.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_overview_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-common.ServiceOverviewParams.rangeFrom",
             "type": "string",
             "tags": [],
@@ -6189,6 +6203,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.IndexLifecyclePhaseSelectOption",
+        "type": "Enum",
+        "tags": [],
+        "label": "IndexLifecyclePhaseSelectOption",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityShared",
         "id": "def-common.ObservabilityTriggerId",
@@ -6541,6 +6567,21 @@
           "\"container.id\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.DataTier",
+        "type": "Type",
+        "tags": [],
+        "label": "DataTier",
+        "description": [],
+        "signature": [
+          "\"data_hot\" | \"data_warm\" | \"data_cold\" | \"data_frozen\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8613,6 +8654,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.indexLifeCyclePhaseToDataTier",
+        "type": "Object",
+        "tags": [],
+        "label": "indexLifeCyclePhaseToDataTier",
+        "description": [],
+        "signature": [
+          "{ readonly hot: \"data_hot\"; readonly warm: \"data_warm\"; readonly cold: \"data_cold\"; readonly frozen: \"data_frozen\"; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/ilm_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

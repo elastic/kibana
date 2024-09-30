@@ -32,6 +32,7 @@ import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
+import { getRelatedAlertKuery } from '../../../../../common/utils/alerting/get_related_alerts_query';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
@@ -49,6 +50,7 @@ interface AppSectionProps {
   alert: CustomThresholdAlert;
   rule: CustomThresholdRule;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
+  setRelatedAlertsKuery: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -56,6 +58,7 @@ export default function AlertDetailsAppSection({
   alert,
   rule,
   setAlertSummaryFields,
+  setRelatedAlertsKuery,
 }: AppSectionProps) {
   const services = useKibana().services;
   const {
@@ -79,6 +82,7 @@ export default function AlertDetailsAppSection({
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
+  const tags = alert.fields.tags;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -97,7 +101,6 @@ export default function AlertDetailsAppSection({
     icon: 'alert',
     id: 'custom_threshold_alert_start_annotation',
   };
-
   const alertRangeAnnotation: RangeEventAnnotationConfig = {
     label: `${alertEnd ? 'Alert duration' : 'Active alert'}`,
     type: 'manual',
@@ -109,9 +112,12 @@ export default function AlertDetailsAppSection({
     color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
     id: `custom_threshold_${alertEnd ? 'recovered' : 'active'}_alert_range_annotation`,
   };
-
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
+
+  useEffect(() => {
+    setRelatedAlertsKuery(getRelatedAlertKuery(tags, groups));
+  }, [groups, setRelatedAlertsKuery, tags]);
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
