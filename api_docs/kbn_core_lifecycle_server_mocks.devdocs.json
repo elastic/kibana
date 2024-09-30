@@ -114,7 +114,15 @@
                 "section": "def-server.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
-              "; elasticsearch: MockedInternalElasticSearchServiceSetup; http: ",
+              "; elasticsearch: MockedInternalElasticSearchServiceSetup; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
+                "section": "def-server.InternalFeatureFlagsSetup",
+                "text": "InternalFeatureFlagsSetup"
+              },
+              ">; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
                 "scope": "server",
@@ -234,7 +242,15 @@
                 "section": "def-server.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
-              "; elasticsearch: MockedInternalElasticsearchServiceStart; http: ",
+              "; elasticsearch: MockedInternalElasticsearchServiceStart; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              },
+              ">; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
                 "scope": "server",

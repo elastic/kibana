@@ -6,7 +6,7 @@ info:
   title: Security Solution Timeline API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -15,6 +15,7 @@ servers:
 paths:
   /api/note:
     delete:
+      description: Delete a note from a Timeline using the note ID.
       operationId: DeleteNote
       requestBody:
         content:
@@ -37,7 +38,7 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: The id of the note to delete.
+        description: The ID of the note to delete.
         required: true
       responses:
         '200':
@@ -49,12 +50,12 @@ paths:
                   data:
                     type: object
           description: Indicates the note was successfully deleted.
-      summary: Deletes a note from a timeline.
+      summary: Delete a note
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
-      description: Gets notes
+      description: Get all notes for a given document.
       operationId: GetNotes
       parameters:
         - in: query
@@ -95,11 +96,12 @@ paths:
       responses:
         '200':
           description: Indicates the requested notes were returned.
-      summary: Get all notes for a given document.
+      summary: Get notes
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
+      description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
       requestBody:
         content:
@@ -129,7 +131,7 @@ paths:
                   type: string
               required:
                 - note
-        description: The note to persist or update along with additional metadata.
+        description: 'The note to add or update, along with additional metadata.'
         required: true
       responses:
         '200':
@@ -159,12 +161,13 @@ paths:
                 required:
                   - data
           description: Indicates the note was successfully created.
-      summary: Persists a note to a timeline.
+      summary: Add or update a note
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/pinned_event:
     patch:
+      description: Pin an event to an existing Timeline.
       operationId: PersistPinnedEventRoute
       requestBody:
         content:
@@ -182,7 +185,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: The pinned event to persist or update along with additional metadata.
+        description: 'The pinned event to add or update, along with additional metadata.'
         required: true
       responses:
         '200':
@@ -207,13 +210,14 @@ paths:
                       - persistPinnedEventOnTimeline
                 required:
                   - data
-          description: Indicate the event was successfully pinned in the timeline.
-      summary: Persists a pinned event to a timeline.
+          description: Indicates the event was successfully pinned to the Timeline.
+      summary: Pin an event
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline:
     delete:
+      description: Delete one or more Timelines or Timeline templates.
       operationId: DeleteTimelines
       requestBody:
         content:
@@ -234,7 +238,7 @@ paths:
                   type: array
               required:
                 - savedObjectIds
-        description: The ids of the timelines or timeline templates to delete.
+        description: The IDs of the Timelines or Timeline templates to delete.
         required: true
       responses:
         '200':
@@ -252,12 +256,13 @@ paths:
                       - deleteTimeline
                 required:
                   - data
-          description: Indicates the timeline was successfully deleted.
-      summary: Deletes one or more timelines or timeline templates.
+          description: Indicates the Timeline was successfully deleted.
+      summary: Delete Timelines or Timeline templates
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
+      description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
         - description: The ID of the template timeline to retrieve
@@ -265,7 +270,7 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-        - description: The ID of the timeline to retrieve
+        - description: The ID of the Timeline to retrieve.
           in: query
           name: id
           schema:
@@ -287,18 +292,16 @@ paths:
                       - getOneTimeline
                 required:
                   - data
-          description: Indicates that the (template) timeline was found and returned.
-      summary: >-
-        Get an existing saved timeline or timeline template. This API is used to
-        retrieve an existing saved timeline or timeline template.
+          description: Indicates that the (template) Timeline was found and returned.
+      summary: Get Timeline or Timeline template details
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
       description: >-
-        Updates an existing timeline. This API is used to update the title,
-        description, date range, pinned events, pinned queries, and/or pinned
-        saved queries of an existing timeline.
+        Update an existing Timeline. You can update the title, description, date
+        range, pinned events, pinned queries, and/or pinned saved queries of an
+        existing Timeline.
       operationId: PatchTimeline
       requestBody:
         content:
@@ -318,7 +321,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: The timeline updates along with the timeline ID and version.
+        description: 'The Timeline updates, along with the Timeline ID and version.'
         required: true
       responses:
         '200':
@@ -342,9 +345,9 @@ paths:
                 required:
                   - data
           description: >-
-            Indicates that the draft timeline was successfully created. In the
-            event the user already has a draft timeline, the existing draft
-            timeline is cleared and returned.
+            Indicates that the draft Timeline was successfully created. In the
+            event the user already has a draft Timeline, the existing draft
+            Timeline is cleared and returned.
         '405':
           content:
             application/json:
@@ -357,12 +360,13 @@ paths:
                     type: number
           description: >-
             Indicates that the user does not have the required access to create
-            a draft timeline.
-      summary: Updates an existing timeline.
+            a draft Timeline.
+      summary: Update a Timeline
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
+      description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
       requestBody:
         content:
@@ -393,7 +397,7 @@ paths:
               required:
                 - timeline
         description: >-
-          The required timeline fields used to create a new timeline along with
+          The required Timeline fields used to create a new Timeline, along with
           optional fields that will be created if not provided.
         required: true
       responses:
@@ -415,7 +419,7 @@ paths:
                       - persistTimeline
                 required:
                   - data
-          description: Indicates the timeline was successfully created.
+          description: Indicates the Timeline was successfully created.
         '405':
           content:
             application/json:
@@ -426,13 +430,17 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that there was an error in the timeline creation.
-      summary: Creates a new timeline.
+          description: Indicates that there was an error in the Timeline creation.
+      summary: Create a Timeline or Timeline template
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_draft:
     get:
+      description: >-
+        Get the details of the draft Timeline  or Timeline template for the
+        current user. If the user doesn't have a draft Timeline, an empty
+        Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
         - in: query
@@ -461,10 +469,10 @@ paths:
                       - persistTimeline
                 required:
                   - data
-          description: Indicates that the draft timeline was successfully retrieved.
+          description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -473,12 +481,12 @@ paths:
                   status_code:
                     type: number
           description: >-
-            If a draft timeline was not found and we attempted to create one, it
+            If a draft Timeline was not found and we attempted to create one, it
             indicates that the user does not have the required permissions to
-            create a draft timeline.
+            create a draft Timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -487,19 +495,21 @@ paths:
                   status_code:
                     type: number
           description: >-
-            This should never happen, but if a draft timeline was not found and
+            This should never happen, but if a draft Timeline was not found and
             we attempted to create one, it indicates that there is already a
-            draft timeline with the given timelineId.
-      summary: >-
-        Retrieves the draft timeline for the current user. If the user does not
-        have a draft timeline, an empty timeline is returned.
+            draft Timeline with the given `timelineId`.
+      summary: Get draft Timeline or Timeline template details
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
       description: >
-        Retrieves a clean draft timeline. If a draft timeline does not exist, it
-        is created and returned.
+        Create a clean draft Timeline or Timeline template for the current user.
+
+        > info
+
+        > If the user already has a draft Timeline, the existing draft Timeline
+        is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -512,7 +522,7 @@ paths:
               required:
                 - timelineType
         description: >-
-          The type of timeline to create. Valid values are `default` and
+          The type of Timeline to create. Valid values are `default` and
           `template`.
         required: true
       responses:
@@ -537,12 +547,12 @@ paths:
                 required:
                   - data
           description: >-
-            Indicates that the draft timeline was successfully created. In the
-            event the user already has a draft timeline, the existing draft
-            timeline is cleared and returned.
+            Indicates that the draft Timeline was successfully created. In the
+            event the user already has a draft Timeline, the existing draft
+            Timeline is cleared and returned.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -552,10 +562,10 @@ paths:
                     type: number
           description: >-
             Indicates that the user does not have the required permissions to
-            create a draft timeline.
+            create a draft Timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -564,14 +574,15 @@ paths:
                   status_code:
                     type: number
           description: >-
-            Indicates that there is already a draft timeline with the given
-            timelineId.
-      summary: Retrieves a draft timeline or timeline template.
+            Indicates that there is already a draft Timeline with the given
+            `timelineId`.
+      summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_export:
     post:
+      description: Export Timelines as an NDJSON file.
       operationId: ExportTimelines
       parameters:
         - description: The name of the file to export
@@ -591,16 +602,16 @@ paths:
                     type: string
                   nullable: true
                   type: array
-        description: The ids of the timelines to export
+        description: The IDs of the Timelines to export.
         required: true
       responses:
         '200':
           content:
             application/ndjson:
               schema:
-                description: NDJSON of the exported timelines
+                description: NDJSON of the exported Timelines
                 type: string
-          description: Indicates the timelines were successfully exported
+          description: Indicates the Timelines were successfully exported.
         '400':
           content:
             application/ndjson:
@@ -611,13 +622,14 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded
-      summary: Exports timelines as an NDJSON file
+          description: Indicates that the export size limit was exceeded.
+      summary: Export Timelines
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_favorite:
     patch:
+      description: Favorite a Timeline or Timeline template for the current user.
       operationId: PersistFavoriteRoute
       requestBody:
         content:
@@ -642,7 +654,7 @@ paths:
                 - templateTimelineId
                 - templateTimelineVersion
                 - timelineType
-        description: The required fields used to favorite a (template) timeline.
+        description: The required fields used to favorite a (template) Timeline.
         required: true
       responses:
         '200':
@@ -663,7 +675,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -674,12 +686,13 @@ paths:
           description: >-
             Indicates the user does not have the required permissions to persist
             the favorite status.
-      summary: Persists a given users favorite status of a timeline.
+      summary: Favorite a Timeline or Timeline template
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_import:
     post:
+      description: Import Timelines.
       operationId: ImportTimelines
       requestBody:
         content:
@@ -709,7 +722,7 @@ paths:
                             - headers
                       required:
                         - hapi
-        description: The timelines to import as a readable stream.
+        description: The Timelines to import as a readable stream.
         required: true
       responses:
         '200':
@@ -722,7 +735,7 @@ paths:
                     $ref: '#/components/schemas/ImportTimelineResult'
                 required:
                   - data
-          description: Indicates the import of timelines was successful.
+          description: Indicates the import of Timelines was successful.
         '400':
           content:
             application/json:
@@ -736,7 +749,7 @@ paths:
                   statusCode:
                     type: number
           description: >-
-            Indicates the import of timelines was unsuccessful because of an
+            Indicates the import of Timelines was unsuccessful because of an
             invalid file extension.
         '404':
           content:
@@ -763,13 +776,14 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the import of timelines was unsuccessful.
-      summary: Imports timelines.
+          description: Indicates the import of Timelines was unsuccessful.
+      summary: Import Timelines
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_prepackaged:
     post:
+      description: Install or update prepackaged Timelines.
       operationId: InstallPrepackedTimelines
       requestBody:
         content:
@@ -795,7 +809,7 @@ paths:
                 - timelinesToInstall
                 - timelinesToUpdate
                 - prepackagedTimelines
-        description: The timelines to install or update.
+        description: The Timelines to install or update.
         required: true
       responses:
         '200':
@@ -808,10 +822,10 @@ paths:
                     $ref: '#/components/schemas/ImportTimelineResult'
                 required:
                   - data
-          description: Indicates the installation of prepackaged timelines was successful.
+          description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -820,12 +834,12 @@ paths:
                   statusCode:
                     type: number
           description: >-
-            Indicates the installation of prepackaged timelines was
+            Indicates the installation of prepackaged Timelines was
             unsuccessful.
-      summary: Installs prepackaged timelines.
+      summary: Install prepackaged Timelines
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/resolve:
     get:
       operationId: ResolveTimeline
@@ -857,17 +871,18 @@ paths:
                       - getOneTimeline
                 required:
                   - data
-          description: The (template) timeline has been found
+          description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) timeline was not found
-      summary: Get an existing saved timeline or timeline template.
+          description: The (template) Timeline was not found
+      summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timelines:
     get:
+      description: Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
         - description: >-
@@ -953,10 +968,10 @@ paths:
                       - customTemplateTimelineCount
                 required:
                   - data
-          description: Indicates that the (template) timelines were found and returned.
+          description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -965,12 +980,10 @@ paths:
                   statusCode:
                     type: number
           description: Bad request. The user supplied invalid data.
-      summary: >-
-        This API is used to retrieve a list of existing saved timelines or
-        timeline templates.
+      summary: Get Timelines or Timeline templates
       tags:
         - Security Solution Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
 components:
   schemas:
     BareNote:

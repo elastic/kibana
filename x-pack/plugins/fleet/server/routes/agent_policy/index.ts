@@ -61,8 +61,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
     })
     .addVersion(

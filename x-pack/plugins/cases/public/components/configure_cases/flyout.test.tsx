@@ -93,7 +93,7 @@ describe('CommonFlyout ', () => {
   it('calls onCloseFlyout on cancel', async () => {
     appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
-    userEvent.click(await screen.findByTestId('common-flyout-cancel'));
+    await userEvent.click(await screen.findByTestId('common-flyout-cancel'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();
@@ -103,7 +103,7 @@ describe('CommonFlyout ', () => {
   it('calls onCloseFlyout on close', async () => {
     appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
-    userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
+    await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
       expect(props.onCloseFlyout).toBeCalled();
@@ -113,7 +113,7 @@ describe('CommonFlyout ', () => {
   it('does not call onSaveField when not valid data', async () => {
     appMockRender.render(<CommonFlyout {...props}>{children}</CommonFlyout>);
 
-    userEvent.click(await screen.findByTestId('common-flyout-save'));
+    await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
     expect(props.onSaveField).not.toBeCalled();
   });
@@ -135,8 +135,9 @@ describe('CommonFlyout ', () => {
     it('calls onSaveField form correctly', async () => {
       appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+      await userEvent.paste('Summary');
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -153,7 +154,7 @@ describe('CommonFlyout ', () => {
 
       const message = 'z'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
 
-      userEvent.type(await screen.findByTestId('custom-field-label-input'), message);
+      await userEvent.type(await screen.findByTestId('custom-field-label-input'), message);
 
       expect(
         await screen.findByText(
@@ -166,8 +167,9 @@ describe('CommonFlyout ', () => {
       it('calls onSaveField with correct params when a custom field is NOT required', async () => {
         appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -182,12 +184,11 @@ describe('CommonFlyout ', () => {
       it('calls onSaveField with correct params when a custom field is NOT required and has a default value', async () => {
         appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.paste(
-          await screen.findByTestId('text-custom-field-default-value'),
-          'Default value'
-        );
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+        await userEvent.paste('Default value');
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -203,13 +204,12 @@ describe('CommonFlyout ', () => {
       it('calls onSaveField with the correct params when a custom field is required', async () => {
         appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('text-custom-field-required'));
-        userEvent.paste(
-          await screen.findByTestId('text-custom-field-default-value'),
-          'Default value'
-        );
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+        await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+        await userEvent.paste('Default value');
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -225,9 +225,10 @@ describe('CommonFlyout ', () => {
       it('calls onSaveField with the correct params when a custom field is required and the defaultValue is missing', async () => {
         appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('text-custom-field-required'));
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -266,12 +267,11 @@ describe('CommonFlyout ', () => {
       it('shows an error if default value is too long', async () => {
         appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('text-custom-field-required'));
-        userEvent.paste(
-          await screen.findByTestId('text-custom-field-default-value'),
-          'z'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
-        );
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+        await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+        await userEvent.paste('z'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1));
 
         expect(
           await screen.findByText(
@@ -289,8 +289,9 @@ describe('CommonFlyout ', () => {
           target: { value: CustomFieldTypes.TOGGLE },
         });
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -310,9 +311,10 @@ describe('CommonFlyout ', () => {
           target: { value: CustomFieldTypes.TOGGLE },
         });
 
-        userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-        userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
-        userEvent.click(await screen.findByTestId('common-flyout-save'));
+        await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+        await userEvent.paste('Summary');
+        await userEvent.click(await screen.findByTestId('toggle-custom-field-required'));
+        await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
         await waitFor(() => {
           expect(props.onSaveField).toBeCalledWith({
@@ -457,16 +459,16 @@ describe('CommonFlyout ', () => {
     it('calls onSaveField form correctly', async () => {
       appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
-      );
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Template name');
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste('Template description');
       const templateTags = await screen.findByTestId('template-tags');
-      userEvent.paste(within(templateTags).getByRole('combobox'), 'foo');
-      userEvent.keyboard('{enter}');
+      await userEvent.click(within(templateTags).getByRole('combobox'));
+      await userEvent.paste('foo');
+      await userEvent.keyboard('{enter}');
 
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -508,18 +510,17 @@ describe('CommonFlyout ', () => {
       appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
       const caseTitle = await screen.findByTestId('caseTitle');
-      userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
+      await userEvent.click(within(caseTitle).getByTestId('input'));
+      await userEvent.paste('Case using template');
 
       const caseDescription = await screen.findByTestId('caseDescription');
-      userEvent.paste(
-        within(caseDescription).getByTestId('euiMarkdownEditorTextArea'),
-        'This is a case description'
-      );
+      await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.paste('This is a case description');
 
       const caseCategory = await screen.findByTestId('caseCategory');
-      userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+      await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -568,10 +569,11 @@ describe('CommonFlyout ', () => {
         `${customFieldsConfigurationMock[0].key}-text-create-custom-field`
       );
 
-      userEvent.clear(textCustomField);
-      userEvent.paste(textCustomField, 'this is a sample text!');
+      await userEvent.clear(textCustomField);
+      await userEvent.click(textCustomField);
+      await userEvent.paste('this is a sample text!');
 
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -649,9 +651,9 @@ describe('CommonFlyout ', () => {
 
       expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-      userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '1');
-      userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '1');
+      await userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -710,20 +712,23 @@ describe('CommonFlyout ', () => {
 
       appMockRender.render(<CommonFlyout {...props}>{newRenderBody}</CommonFlyout>);
 
-      userEvent.clear(await screen.findByTestId('template-name-input'));
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
+      await userEvent.clear(await screen.findByTestId('template-name-input'));
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Template name');
 
       const caseTitle = await screen.findByTestId('caseTitle');
-      userEvent.clear(within(caseTitle).getByTestId('input'));
-      userEvent.paste(within(caseTitle).getByTestId('input'), 'Updated case using template');
+      await userEvent.clear(within(caseTitle).getByTestId('input'));
+      await userEvent.click(within(caseTitle).getByTestId('input'));
+      await userEvent.paste('Updated case using template');
 
       const customField = await screen.findByTestId(
         'first_custom_field_key-text-create-custom-field'
       );
-      userEvent.clear(customField);
-      userEvent.paste(customField, 'Updated custom field value');
+      await userEvent.clear(customField);
+      await userEvent.click(customField);
+      await userEvent.paste('Updated custom field value');
 
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).toBeCalledWith({
@@ -760,12 +765,10 @@ describe('CommonFlyout ', () => {
     it('shows error when template name is empty', async () => {
       appMockRender.render(<CommonFlyout {...props}>{renderBody}</CommonFlyout>);
 
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
-      );
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste('Template description');
 
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
+      await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(props.onSaveField).not.toHaveBeenCalled();
@@ -779,7 +782,8 @@ describe('CommonFlyout ', () => {
 
       const message = 'z'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
 
-      userEvent.paste(await screen.findByTestId('template-name-input'), message);
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste(message);
 
       expect(
         await screen.findByText(i18n.MAX_LENGTH_ERROR('template name', MAX_TEMPLATE_NAME_LENGTH))
@@ -791,7 +795,8 @@ describe('CommonFlyout ', () => {
 
       const message = 'z'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1);
 
-      userEvent.paste(await screen.findByTestId('template-description-input'), message);
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste(message);
 
       expect(
         await screen.findByText(

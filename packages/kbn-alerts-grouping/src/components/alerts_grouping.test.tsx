@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
  * Adapted from x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.test.tsx
  */
 import React from 'react';
-import { render, within, screen, waitFor } from '@testing-library/react';
+import { render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Filter } from '@kbn/es-query';
 
@@ -33,8 +34,8 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregati
   useGetAlertsGroupAggregationsQuery: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_data_view', () => ({
-  useAlertDataView: jest.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
+  useAlertsDataView: jest.fn().mockReturnValue({ dataView: { fields: [] } }),
 }));
 
 jest.mock('../contexts/alerts_grouping_context', () => {
@@ -120,14 +121,14 @@ describe('AlertsGrouping', () => {
     expect(screen.getByTestId('empty-results-panel')).toBeInTheDocument();
   });
 
-  it('renders grouping table in first accordion level when single group is selected', () => {
+  it('renders grouping table in first accordion level when single group is selected', async () => {
     render(
       <TestProviders>
         <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
     expect(
@@ -158,7 +159,7 @@ describe('AlertsGrouping', () => {
             },
             {
               range: {
-                '@timestamp': {
+                'kibana.alert.time_range': {
                   gte: mockDate.from,
                   lte: mockDate.to,
                 },
@@ -172,7 +173,7 @@ describe('AlertsGrouping', () => {
     );
   });
 
-  it('renders grouping table in second accordion level when 2 groups are selected', () => {
+  it('renders grouping table in second accordion level when 2 groups are selected', async () => {
     mockUseAlertsGroupingState.mockReturnValue({
       ...mockAlertsGroupingState,
       grouping: {
@@ -185,13 +186,13 @@ describe('AlertsGrouping', () => {
         <AlertsGrouping {...mockGroupingProps}>{renderChildComponent}</AlertsGrouping>
       </TestProviders>
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
     expect(
       within(screen.getByTestId('level-0-group-0')).queryByTestId('alerts-table')
     ).not.toBeInTheDocument();
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
     expect(
@@ -213,19 +214,19 @@ describe('AlertsGrouping', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('pagination-button-1'));
-    userEvent.click(
+    await userEvent.click(screen.getByTestId('pagination-button-1'));
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('pagination-button-1')
     );
 
@@ -242,9 +243,9 @@ describe('AlertsGrouping', () => {
       ).toEqual('true');
     });
 
-    userEvent.click(screen.getAllByTestId('group-selector-dropdown')[0]);
+    await userEvent.click(screen.getAllByTestId('group-selector-dropdown')[0]);
     // Wait for element to have pointer events enabled
-    await waitFor(() => userEvent.click(screen.getAllByTestId('panel-user.name')[0]));
+    await userEvent.click(screen.getAllByTestId('panel-user.name')[0]);
 
     [
       screen.getByTestId('grouping-level-0-pagination'),
@@ -260,7 +261,7 @@ describe('AlertsGrouping', () => {
     });
   });
 
-  it('resets all levels pagination when global query updates', () => {
+  it('resets all levels pagination when global query updates', async () => {
     mockUseAlertsGroupingState.mockReturnValue({
       ...mockAlertsGroupingState,
       grouping: {
@@ -275,17 +276,17 @@ describe('AlertsGrouping', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('pagination-button-1'));
-    userEvent.click(
+    await userEvent.click(screen.getByTestId('pagination-button-1'));
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('pagination-button-1')
     );
 
@@ -313,7 +314,7 @@ describe('AlertsGrouping', () => {
     });
   });
 
-  it('resets only most inner group pagination when its parent groups open/close', () => {
+  it('resets only most inner group pagination when its parent groups open/close', async () => {
     mockUseAlertsGroupingState.mockReturnValue({
       ...mockAlertsGroupingState,
       grouping: {
@@ -329,31 +330,31 @@ describe('AlertsGrouping', () => {
     );
 
     // set level 0 page to 2
-    userEvent.click(screen.getByTestId('pagination-button-1'));
-    userEvent.click(
+    await userEvent.click(screen.getByTestId('pagination-button-1'));
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
 
     // set level 1 page to 2
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-0-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
 
     // set level 2 page to 2
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-2-group-0')).getByTestId('group-panel-toggle')
     );
 
     // open different level 1 group
 
     // level 0, 1 pagination is the same
-    userEvent.click(
+    await userEvent.click(
       within(screen.getByTestId('level-1-group-1')).getByTestId('group-panel-toggle')
     );
     [
@@ -396,26 +397,26 @@ describe('AlertsGrouping', () => {
       </TestProviders>
     );
 
-    userEvent.click(await screen.findByTestId('pagination-button-1'));
-    userEvent.click(
+    await userEvent.click(await screen.findByTestId('pagination-button-1'));
+    await userEvent.click(
       within(await screen.findByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-0-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-1-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('grouping-level-2')).getByTestId(
         'tablePaginationPopoverButton'
       )
     );
-    userEvent.click(await screen.findByTestId('tablePagination-100-rows'));
+    await userEvent.click(await screen.findByTestId('tablePagination-100-rows'));
 
     [
       await screen.findByTestId('grouping-level-0-pagination'),
@@ -453,24 +454,24 @@ describe('AlertsGrouping', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('pagination-button-1'));
-    userEvent.click(
+    await userEvent.click(screen.getByTestId('pagination-button-1'));
+    await userEvent.click(
       within(await screen.findByTestId('level-0-group-0')).getByTestId('group-panel-toggle')
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-0-group-0')).getByTestId('pagination-button-1')
     );
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-1-group-0')).getByTestId('group-panel-toggle')
     );
 
-    userEvent.click(
+    await userEvent.click(
       within(await screen.findByTestId('level-1-group-0')).getByTestId('pagination-button-1')
     );
     const tablePaginations = await screen.findAllByTestId('tablePaginationPopoverButton');
-    userEvent.click(tablePaginations[tablePaginations.length - 1]);
-    await waitFor(() => userEvent.click(screen.getByTestId('tablePagination-100-rows')));
+    await userEvent.click(tablePaginations[tablePaginations.length - 1]);
+    await userEvent.click(screen.getByTestId('tablePagination-100-rows'));
 
     [
       screen.getByTestId('grouping-level-0-pagination'),

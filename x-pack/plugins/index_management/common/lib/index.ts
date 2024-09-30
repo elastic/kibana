@@ -6,10 +6,10 @@
  */
 
 export {
-  deserializeDataStream,
-  deserializeDataStreamList,
   splitSizeAndUnits,
-} from './data_stream_serialization';
+  serializeAsESLifecycle,
+  deserializeESLifecycle,
+} from './data_stream_utils';
 
 export {
   deserializeTemplate,

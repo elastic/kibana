@@ -9,7 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import type { ConfigType } from '../config';
-import { RolesAPIClient } from '../management';
+import { PrivilegesAPIClient, RolesAPIClient } from '../management';
 
 interface SetupParams {
   config: ConfigType;
@@ -20,6 +20,7 @@ export class AuthorizationService {
   public setup({ config, http }: SetupParams): AuthorizationServiceSetup {
     const isRoleManagementEnabled = () => config.roleManagementEnabled;
     const rolesAPIClient = new RolesAPIClient(http);
+    const privilegesAPIClient = new PrivilegesAPIClient(http);
 
     return {
       isRoleManagementEnabled,
@@ -28,6 +29,9 @@ export class AuthorizationService {
         getRole: rolesAPIClient.getRole,
         deleteRole: rolesAPIClient.deleteRole,
         saveRole: rolesAPIClient.saveRole,
+      },
+      privileges: {
+        getAll: privilegesAPIClient.getAll.bind(privilegesAPIClient),
       },
     };
   }

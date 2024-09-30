@@ -7,7 +7,6 @@
 
 import { Observable } from 'rxjs';
 import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
-import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {
   return {
@@ -46,17 +45,6 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
     path,
     fetchOptions,
   };
-}
-
-/**
- * Function for making HTTP requests to Kibana's backend.
- * Wrapper for Kibana's HttpHandler.
- *
- * @deprecated use {@link HttpService} instead
- */
-export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
-  const { path, fetchOptions } = getFetchOptions(options);
-  return getHttp().fetch<T>(path, fetchOptions);
 }
 
 /**

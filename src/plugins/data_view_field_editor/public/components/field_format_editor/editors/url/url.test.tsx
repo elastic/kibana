@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -101,7 +102,7 @@ describe('UrlFormatEditor', () => {
 
     // TODO: sample image url emitted only during change event
     // So can't just path `type: img` and check rendered value
-    userEvent.selectOptions(getByLabelText('Type'), 'img');
+    await userEvent.selectOptions(getByLabelText('Type'), 'img');
     expect(sampleImageUrlTemplate).toContain(MY_BASE_PATH);
     expect(sampleImageUrlTemplate).toMatchInlineSnapshot(
       `"my-base-path/plugins/dataViewFieldEditor/assets/icons/{{value}}.png"`

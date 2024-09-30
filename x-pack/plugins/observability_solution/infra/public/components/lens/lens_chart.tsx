@@ -92,7 +92,10 @@ export const LensChart = React.memo(
                         defaultMessage="To display this chart, please ensure you are collecting the following fields:"
                       />
                     </p>
-                    <p>{missingFieldsMessage && missingFieldsMessage.longMessage}</p>
+                    <p>
+                      {missingFieldsMessage &&
+                        (missingFieldsMessage.longMessage as React.ReactNode)}
+                    </p>
                   </EuiText>
                   <EuiHorizontalRule margin="s" />
                   <EuiLink

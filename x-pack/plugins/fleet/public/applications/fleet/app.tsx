@@ -288,10 +288,12 @@ const FleetTopNav = memo(
   }
 );
 
-const AppLayout: React.FC<{
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  isReadOnly?: boolean;
-}> = ({ children, setHeaderActionMenu, isReadOnly }) => {
+const AppLayout: React.FC<
+  React.PropsWithChildren<{
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    isReadOnly?: boolean;
+  }>
+> = ({ children, setHeaderActionMenu, isReadOnly }) => {
   return (
     <>
       <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} isReadOnly={isReadOnly} />
@@ -433,7 +435,6 @@ export const AppRoutes = memo(
             }}
           />
         </Routes>
-
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
@@ -447,7 +448,6 @@ export const AppRoutes = memo(
             />
           </EuiPortal>
         )}
-
         {flyoutContext.isFleetServerFlyoutOpen && (
           <EuiPortal>
             <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

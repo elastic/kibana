@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -134,7 +135,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldText
-              value={authorName}
+              value={authorName ?? ''}
               onChange={(e) => attributesManager.authorName.next(e.target.value)}
             />
           </EuiFormRow>
@@ -144,7 +145,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldText
-              value={bookTitle}
+              value={bookTitle ?? ''}
               onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
             />
           </EuiFormRow>
@@ -154,7 +155,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiFieldNumber
-              value={numberOfPages}
+              value={numberOfPages ?? ''}
               onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
             />
           </EuiFormRow>
@@ -164,7 +165,7 @@ export const SavedBookEditor = ({
             })}
           >
             <EuiTextArea
-              value={synopsis}
+              value={synopsis ?? ''}
               onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
             />
           </EuiFormRow>

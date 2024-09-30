@@ -10,7 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
-import * as cborx from 'cbor-x';
+import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -236,7 +236,7 @@ export const sendEndpointActionResponse = async (
           {
             index: FILE_STORAGE_DATA_INDEX,
             id: `${fileMeta._id}.0`,
-            document: cborx.encode({
+            document: encode({
               bid: fileMeta._id,
               last: true,
               '@timestamp': new Date().toISOString(),

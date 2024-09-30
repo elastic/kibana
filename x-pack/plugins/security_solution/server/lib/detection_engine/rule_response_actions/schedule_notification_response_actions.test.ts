@@ -96,8 +96,13 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      await scheduleNotificationResponseActions({ signals, responseActions });
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions,
+      });
 
+      expect(response).not.toBeUndefined();
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultQueryResultParams,
         query: simpleQuery,
@@ -123,8 +128,13 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      await scheduleNotificationResponseActions({ signals, responseActions });
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions,
+      });
 
+      expect(response).not.toBeUndefined();
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultPackResultParams,
         queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
@@ -149,8 +159,12 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      await scheduleNotificationResponseActions({ signals, responseActions });
-
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions,
+      });
+      expect(response).not.toBeUndefined();
       expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledTimes(1);
       expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledWith({
         agentType: 'endpoint',
@@ -188,10 +202,13 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      await scheduleNotificationResponseActions({
+      const response = await scheduleNotificationResponseActions({
         signals,
+        signalsCount: signals.length,
         responseActions,
       });
+
+      expect(response).not.toBeUndefined();
 
       expect(mockedResponseActionsClient.killProcess).toHaveBeenCalledWith(
         {
@@ -223,12 +240,42 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      await scheduleNotificationResponseActions({
+      const response = await scheduleNotificationResponseActions({
         signals,
+        signalsCount: signals.length,
         responseActions,
       });
 
+      expect(response).not.toBeUndefined();
       expect(mockedResponseActionsClient.isolate).toHaveBeenCalledTimes(signals.length - 1);
+    });
+    it('should not call any action service if no response actions are provided', async () => {
+      const response = await scheduleNotificationResponseActions({
+        signals: getSignals(),
+        signalsCount: 2,
+        responseActions: [],
+      });
+      expect(response).toBeUndefined();
+    });
+    it('should  not call any action service if signalsCount is 0', async () => {
+      const signals = getSignals();
+      const responseActions: RuleResponseAction[] = [
+        {
+          actionTypeId: ResponseActionTypesEnum['.endpoint'],
+          params: {
+            command: 'isolate',
+            comment: 'test process comment',
+          },
+        },
+      ];
+
+      const response = await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: 0,
+        responseActions,
+      });
+
+      expect(response).toBeUndefined();
     });
   });
 });

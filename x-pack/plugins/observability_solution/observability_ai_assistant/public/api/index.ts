@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository-utils';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { ObservabilityAIAssistantServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
@@ -28,12 +28,12 @@ export type ObservabilityAIAssistantAPIClientOptions = Omit<
 export type ObservabilityAIAssistantAPIClient = RouteRepositoryClient<
   ObservabilityAIAssistantServerRouteRepository,
   ObservabilityAIAssistantAPIClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedObservabilityAIAssistantAPIClient = RouteRepositoryClient<
   ObservabilityAIAssistantServerRouteRepository,
   Omit<ObservabilityAIAssistantAPIClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type ObservabilityAIAssistantAPIEndpoint =
   keyof ObservabilityAIAssistantServerRouteRepository;
@@ -47,19 +47,11 @@ export type ObservabilityAIAssistantAPIClientRequestParamsOf<
   TEndpoint extends ObservabilityAIAssistantAPIEndpoint
 > = ClientRequestParamsOf<ObservabilityAIAssistantServerRouteRepository, TEndpoint>;
 
-export function createCallObservabilityAIAssistantAPI(core: CoreStart | CoreSetup) {
-  return ((endpoint, options) => {
-    const { params } = options as unknown as {
-      params?: Partial<Record<string, any>>;
-    };
-
-    const { method, pathname, version } = formatRequest(endpoint, params?.path);
-
-    return core.http[method](pathname, {
-      ...options,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-    });
-  }) as ObservabilityAIAssistantAPIClient;
+export function createCallObservabilityAIAssistantAPI(
+  core: CoreStart | CoreSetup
+): ObservabilityAIAssistantAPIClient {
+  return createRepositoryClient<
+    ObservabilityAIAssistantServerRouteRepository,
+    ObservabilityAIAssistantAPIClientOptions
+  >(core).fetch;
 }

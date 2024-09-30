@@ -10,6 +10,7 @@ import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
@@ -676,10 +677,13 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
@@ -715,11 +719,14 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        getTimeField: () => dataViewMock.fields[1],
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          getTimeField: () => dataViewMock.fields[1],
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {

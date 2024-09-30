@@ -29,10 +29,6 @@ main () {
 
   yarn make:defs $PARENT_DIR/elasticsearch
 
-  report_main_step "Generate function validation tests"
-  
-  yarn make:tests
-
   report_main_step "Generate inline function docs"
 
   cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"

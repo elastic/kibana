@@ -1,0 +1,131 @@
+{
+  "id": "inventory",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inventory",
+      "id": "def-public.InventoryPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InventoryPublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/inventory/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inventory",
+      "id": "def-public.InventoryPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InventoryPublicStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/inventory/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "inventory",
+        "id": "def-server.InventoryServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "InventoryServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"GET /internal/inventory/entities\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/inventory/entities\", ",
+          "TypeC",
+          "<{ query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ sortField: ",
+          "StringC",
+          "; sortDirection: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"asc\">, ",
+          "LiteralC",
+          "<\"desc\">]>; }>, ",
+          "PartialC",
+          "<{ entityTypes: ",
+          "Type",
+          "<(\"service\" | \"host\" | \"container\")[], string, unknown>; }>]>; }>, ",
+          "InventoryRouteHandlerResources",
+          ", { entities: ",
+          "LatestEntity",
+          "[]; }, ",
+          "InventoryRouteCreateOptions",
+          ">; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/inventory/server/routes/get_global_inventory_route_repository.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inventory",
+      "id": "def-server.InventoryServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InventoryServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/inventory/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inventory",
+      "id": "def-server.InventoryServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InventoryServerStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/inventory/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

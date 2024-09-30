@@ -7,7 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getAlertsCountQuery } from './get_alert_counts_query';

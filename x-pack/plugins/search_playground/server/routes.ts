@@ -57,9 +57,8 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
       const { indices } = request.body;
 
       const fields = await fetchFields(client, indices);
@@ -89,14 +88,14 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const [{ analytics }, { actions, cloud }] = await getStartServices();
 
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
-      const { messages, data } = await request.body;
+      const { messages, data } = request.body;
       const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
@@ -184,7 +183,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { name, expiresInDays, indices } = request.body;
       const { client } = (await context.core).elasticsearch;
 
@@ -223,7 +222,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { search_query: searchQuery, size } = request.query;
       const {
         client: { asCurrentUser },
@@ -239,6 +238,71 @@ export function defineRoutes({
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.post(
+    {
+      path: APIRoutes.POST_SEARCH_QUERY,
+      validate: {
+        body: schema.object({
+          search_query: schema.string(),
+          elasticsearch_query: schema.string(),
+          indices: schema.arrayOf(schema.string()),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
+
+      try {
+        if (indices.length === 0) {
+          return response.badRequest({
+            body: {
+              message: 'Indices cannot be empty',
+            },
+          });
+        }
+
+        const retriever = createRetriever(elasticsearchQuery)(request.body.search_query);
+        const searchResult = await client.asCurrentUser.search({
+          index: indices,
+          retriever: retriever.retriever,
+          from,
+          size,
+        });
+        const total = searchResult.hits.total
+          ? typeof searchResult.hits.total === 'object'
+            ? searchResult.hits.total.value
+            : searchResult.hits.total
+          : 0;
+
+        return response.ok({
+          body: {
+            results: searchResult.hits.hits,
+            pagination: {
+              from,
+              size,
+              total,
+            },
+          },
+        });
+      } catch (e) {
+        logger.error('Failed to search the query', e);
+
+        if (typeof e === 'object' && e.message) {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        throw e;
+      }
     })
   );
 }

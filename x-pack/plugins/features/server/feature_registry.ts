@@ -15,6 +15,7 @@ import {
   ElasticsearchFeatureConfig,
   ElasticsearchFeature,
   SubFeaturePrivilegeConfig,
+  KibanaFeatureScope,
 } from '../common';
 import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 import type { ConfigOverridesType } from './config';
@@ -39,6 +40,10 @@ export class FeatureRegistry {
 
     if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
+    }
+
+    if (!feature.scope) {
+      feature.scope = [KibanaFeatureScope.Security];
     }
 
     const featureCopy = cloneDeep(feature);

@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CreateEndpointList
-      summary: Creates an endpoint list
-      description: Creates an endpoint list or does nothing if the list already exists
+      summary: Create an endpoint exception list
+      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
       responses:
         200:
           description: Successful response

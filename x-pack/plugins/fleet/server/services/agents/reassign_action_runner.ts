@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
@@ -22,7 +22,7 @@ import { BulkActionTaskType } from './bulk_action_types';
 
 export class ReassignActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
-    return await reassignBatch(this.soClient, this.esClient, this.actionParams! as any, agents, {});
+    return await reassignBatch(this.esClient, this.actionParams! as any, agents, {});
   }
 
   protected getTaskType() {
@@ -35,16 +35,18 @@ export class ReassignActionRunner extends ActionRunner {
 }
 
 export async function reassignBatch(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: {
     newAgentPolicyId: string;
     actionId?: string;
     total?: number;
+    spaceId?: string;
   },
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>
 ): Promise<{ actionId: string }> {
+  const spaceId = options.spaceId;
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -86,8 +88,9 @@ export async function reassignBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-
   const now = new Date().toISOString();
+  const namespaces = spaceId ? [spaceId] : [];
+
   await createAgentAction(esClient, {
     id: actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
@@ -97,6 +100,7 @@ export async function reassignBatch(
     data: {
       policy_id: options.newAgentPolicyId,
     },
+    namespaces,
   });
 
   await createErrorActionResults(

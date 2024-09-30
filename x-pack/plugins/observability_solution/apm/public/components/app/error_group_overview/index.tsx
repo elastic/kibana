@@ -15,9 +15,12 @@ import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
+  const { serviceEntitySummary } = useApmServiceContext();
 
   const {
     query: { environment, kuery, comparisonEnabled },
@@ -29,6 +32,13 @@ export function ErrorGroupOverview() {
     environment,
     kuery,
   });
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  if (hasLogsOnlySignal) {
+    return <ServiceTabEmptyState id="errorGroupOverview" />;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

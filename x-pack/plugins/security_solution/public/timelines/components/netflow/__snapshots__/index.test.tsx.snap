@@ -119,13 +119,12 @@ tr:hover .c2:focus::before {
   margin-right: 5px;
 }
 
-.c14 {
-  position: relative;
-  top: 1px;
+.c6 {
+  margin-right: 3px;
 }
 
-.c13 {
-  margin-right: 5px;
+.c7 {
+  margin: 0 5px;
 }
 
 .c16 {
@@ -156,12 +155,13 @@ tr:hover .c2:focus::before {
   margin: 0 5px;
 }
 
-.c6 {
-  margin-right: 3px;
+.c14 {
+  position: relative;
+  top: 1px;
 }
 
-.c7 {
-  margin: 0 5px;
+.c13 {
+  margin-right: 5px;
 }
 
 .c11 {

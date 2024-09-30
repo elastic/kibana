@@ -12,6 +12,7 @@ import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
+import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
 
 export const bodySchema = schema.object({
   name: schema.string({
@@ -63,16 +64,24 @@ export const createActionRoute = (
         access: 'public',
         summary: 'Create a connector',
         tags: ['oas-tag:connectors'],
-        // description:
-        //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
-        params: schema.maybe(
-          schema.object({
-            id: schema.maybe(schema.string()),
-          })
-        ),
-        body: bodySchema,
+        request: {
+          params: schema.maybe(
+            schema.object({
+              id: schema.maybe(
+                schema.string({ meta: { description: 'An identifier for the connector.' } })
+              ),
+            })
+          ),
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
+          },
+        },
       },
     },
     router.handleLegacyErrors(

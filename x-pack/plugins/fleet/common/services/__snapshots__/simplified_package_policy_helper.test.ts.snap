@@ -228,6 +228,7 @@ Object {
   ],
   "name": "nginx-1",
   "namespace": "default",
+  "output_id": "output123",
   "package": Object {
     "name": "nginx",
     "title": "Nginx",

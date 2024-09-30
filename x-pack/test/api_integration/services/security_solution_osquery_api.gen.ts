@@ -93,6 +93,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Create and run a live query.
+     */
     osqueryCreateLiveQuery(props: OsqueryCreateLiveQueryProps) {
       return supertest
         .post('/api/osquery/live_queries')
@@ -101,6 +104,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create a query pack.
+     */
     osqueryCreatePacks(props: OsqueryCreatePacksProps) {
       return supertest
         .post('/api/osquery/packs')
@@ -109,6 +115,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create and run a saved query.
+     */
     osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps) {
       return supertest
         .post('/api/osquery/saved_queries')
@@ -117,6 +126,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Delete a query pack using the pack ID.
+     */
     osqueryDeletePacks(props: OsqueryDeletePacksProps) {
       return supertest
         .delete(replaceParams('/api/osquery/packs/{id}', props.params))
@@ -124,6 +136,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Delete a saved query using the query ID.
+     */
     osqueryDeleteSavedQuery(props: OsqueryDeleteSavedQueryProps) {
       return supertest
         .delete(replaceParams('/api/osquery/saved_queries/{id}', props.params))
@@ -131,6 +146,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get a list of all live queries.
+     */
     osqueryFindLiveQueries(props: OsqueryFindLiveQueriesProps) {
       return supertest
         .get('/api/osquery/live_queries')
@@ -139,6 +157,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all query packs.
+     */
     osqueryFindPacks(props: OsqueryFindPacksProps) {
       return supertest
         .get('/api/osquery/packs')
@@ -147,6 +168,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all saved queries.
+     */
     osqueryFindSavedQueries(props: OsqueryFindSavedQueriesProps) {
       return supertest
         .get('/api/osquery/saved_queries')
@@ -155,6 +179,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of a live query using the query ID.
+     */
     osqueryGetLiveQueryDetails(props: OsqueryGetLiveQueryDetailsProps) {
       return supertest
         .get(replaceParams('/api/osquery/live_queries/{id}', props.params))
@@ -163,6 +190,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the results of a live query using the query action ID.
+     */
     osqueryGetLiveQueryResults(props: OsqueryGetLiveQueryResultsProps) {
       return supertest
         .get(replaceParams('/api/osquery/live_queries/{id}/results/{actionId}', props.params))
@@ -171,6 +201,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of a query pack using the pack ID.
+     */
     osqueryGetPacksDetails(props: OsqueryGetPacksDetailsProps) {
       return supertest
         .get(replaceParams('/api/osquery/packs/{id}', props.params))
@@ -178,6 +211,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of a saved query using the query ID.
+     */
     osqueryGetSavedQueryDetails(props: OsqueryGetSavedQueryDetailsProps) {
       return supertest
         .get(replaceParams('/api/osquery/saved_queries/{id}', props.params))
@@ -185,6 +221,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+      * Update a query pack using the pack ID.
+> info
+> You cannot update a prebuilt pack.
+
+      */
     osqueryUpdatePacks(props: OsqueryUpdatePacksProps) {
       return supertest
         .put(replaceParams('/api/osquery/packs/{id}', props.params))
@@ -193,6 +235,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Update a saved query using the query ID.
+> info
+> You cannot update a prebuilt saved query.
+
+      */
     osqueryUpdateSavedQuery(props: OsqueryUpdateSavedQueryProps) {
       return supertest
         .put(replaceParams('/api/osquery/saved_queries/{id}', props.params))

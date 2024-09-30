@@ -18,7 +18,8 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
-  UserInstructionOrPlainText,
+  AdHocInstruction,
+  AssistantScope,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -29,7 +30,6 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -53,6 +53,7 @@ export interface ObservabilityAIAssistantChatService {
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       functionCall?: string;
       signal: AbortSignal;
+      scope: AssistantScope;
     }
   ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
@@ -67,10 +68,14 @@ export interface ObservabilityAIAssistantChatService {
           except: string[];
         };
     signal: AbortSignal;
-    responseLanguage?: string;
-    instructions?: UserInstructionOrPlainText[];
+    instructions?: AdHocInstruction[];
+    scope: AssistantScope;
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  getFunctions: (options?: {
+    contexts?: string[];
+    filter?: string;
+    scope: AssistantScope;
+  }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
   getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
@@ -78,7 +83,8 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler
+    onActionClick: ChatActionClickHandler,
+    scope?: AssistantScope
   ) => React.ReactNode;
 }
 
@@ -96,6 +102,7 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
+  scope: AssistantScope;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -135,7 +142,6 @@ export interface ObservabilityAIAssistantPublicStart {
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
   useChat: typeof useChat;
-  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
   createScreenContextAction: typeof createScreenContextAction;
 }

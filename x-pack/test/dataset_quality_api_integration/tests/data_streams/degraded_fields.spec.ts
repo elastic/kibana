@@ -87,14 +87,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns no results when dataStream does not have any degraded fields', async () => {
-        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        const resp = await callApiAs(
+          'datasetQualityMonitorUser',
+          `${type}-${dataset}-${namespace}`
+        );
         expect(resp.body.degradedFields.length).to.be(0);
       });
 
       it('returns results when dataStream do have degraded fields', async () => {
         const expectedDegradedFields = ['log.level', 'trace.id'];
         const resp = await callApiAs(
-          'datasetQualityLogsUser',
+          'datasetQualityMonitorUser',
           `${type}-${degradedFieldDataset}-${namespace}`
         );
         const degradedFields = resp.body.degradedFields.map((field: DegradedField) => field.name);
@@ -117,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ];
 
         const resp = await callApiAs(
-          'datasetQualityLogsUser',
+          'datasetQualityMonitorUser',
           `${type}-${degradedFieldDataset}-${namespace}`
         );
 

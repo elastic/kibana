@@ -22,7 +22,7 @@ export const createRule = async ({
   overwrites,
 }: {
   actionId: string;
-  pattern: { instance: boolean[] };
+  pattern?: { instance: boolean[] };
   supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
   overwrites?: any;

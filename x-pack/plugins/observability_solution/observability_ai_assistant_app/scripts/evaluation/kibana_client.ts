@@ -18,7 +18,10 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type {
+  AssistantScope,
+  ObservabilityAIAssistantScreenContext,
+} from '@kbn/observability-ai-assistant-plugin/common/types';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
 import {
   isSupportedConnectorType,
@@ -238,11 +241,13 @@ export class KibanaClient {
     evaluationConnectorId,
     persist,
     suite,
+    scope,
   }: {
     connectorId: string;
     evaluationConnectorId: string;
     persist: boolean;
     suite?: Mocha.Suite;
+    scope: AssistantScope;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -370,6 +375,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
+            scope,
           };
 
         return that.axios.post(
@@ -459,6 +465,7 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
+                scope,
               },
               { responseType: 'stream', timeout: NaN }
             )
@@ -534,7 +541,7 @@ export class KibanaClient {
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
-                
+
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
               },
@@ -544,13 +551,13 @@ export class KibanaClient {
               message: {
                 role: MessageRole.User,
                 content: `Evaluate the conversation according to the following criteria, using the "scores" tool:
-                
+
                 ${criteria.map((criterion, index) => {
                   return `${index}: ${criterion}`;
                 })}
-                
+
                 This is the conversation:
-                
+
                 ${JSON.stringify(
                   messages
                     .filter((msg) => msg.role !== MessageRole.System)
@@ -577,7 +584,7 @@ export class KibanaClient {
                         score: {
                           type: 'number',
                           description:
-                            'A score of either 0 (criterion failed) or 1 (criterion succeeded)',
+                            'A score between 0 (criterion failed) or 1 (criterion succeeded). Fractional results (e.g. 0.5) are allowed, if part of the criterion succeeded',
                         },
                         reasoning: {
                           type: 'string',

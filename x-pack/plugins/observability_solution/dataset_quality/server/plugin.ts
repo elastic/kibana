@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
+import { DataTelemetryService } from './services';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetQualityRouteHandlerResources } from './routes/types';
@@ -18,17 +19,17 @@ import {
 
 export class DatasetQualityServerPlugin implements Plugin {
   private readonly logger: Logger;
+  private readonly dataTelemetryService: DataTelemetryService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.dataTelemetryService = new DataTelemetryService(this.logger);
   }
 
   setup(
     core: CoreSetup<DatasetQualityPluginStartDependencies, DatasetQualityPluginStart>,
     plugins: DatasetQualityPluginSetupDependencies
   ) {
-    this.logger.debug('dataset_quality: Setup');
-
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -55,11 +56,17 @@ export class DatasetQualityServerPlugin implements Plugin {
       getEsCapabilities,
     });
 
+    // Setup Data Telemetry Service
+    this.dataTelemetryService.setup(core.analytics, plugins.taskManager);
+
     return {};
   }
 
-  start() {
-    this.logger.debug('dataset_quality: Started');
+  start(core: CoreStart, plugins: DatasetQualityPluginStartDependencies) {
+    // Start Data Telemetry Service
+    this.dataTelemetryService.start(plugins.telemetry, core, plugins.taskManager).catch((error) => {
+      this.logger.error(`[Data Telemetry Service]: ${error}`);
+    });
 
     return {};
   }

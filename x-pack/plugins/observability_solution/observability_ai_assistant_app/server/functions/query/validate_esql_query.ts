@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { splitIntoCommands } from './correct_common_esql_mistakes';
+import { splitIntoCommands } from '@kbn/inference-plugin/common';
 
 export async function runAndValidateEsqlQuery({
   query,
@@ -25,16 +25,20 @@ export async function runAndValidateEsqlQuery({
   error?: Error;
   errorMessages?: string[];
 }> {
-  const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
+  const queryWithoutLineBreaks = query.replaceAll(/\n/g, '');
+
+  const { errors } = await validateQuery(queryWithoutLineBreaks, getAstAndSyntaxErrors, {
     // setting this to true, we don't want to validate the index / fields existence
     ignoreOnMissingCallbacks: true,
   });
 
-  const asCommands = splitIntoCommands(query);
+  const asCommands = splitIntoCommands(queryWithoutLineBreaks);
 
   const errorMessages = errors?.map((error) => {
     if ('location' in error) {
-      const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
+      const commandsUntilEndOfError = splitIntoCommands(
+        queryWithoutLineBreaks.substring(0, error.location.max)
+      );
       const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
       if (lastCompleteCommand) {
         return `Error in ${lastCompleteCommand.command}\n: ${error.text}`;

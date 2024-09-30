@@ -72,7 +72,7 @@
     "@kbn/search-playground",
     "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
@@ -81,6 +81,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
     "@kbn/search-homepage",
-    "@kbn/security-plugin-types-common"
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-server",
+    "@kbn/core-security-server-mocks"
   ]
 }

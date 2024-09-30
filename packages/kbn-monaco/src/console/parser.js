@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
@@ -37,24 +38,7 @@ export const createParser = () => {
       requestStartOffset = at - 1;
       requests.push({ startOffset: requestStartOffset });
     },
-    addRequestMethod = function(method) {
-      const lastRequest = getLastRequest();
-      lastRequest.method = method;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
-    addRequestUrl = function(url) {
-      const lastRequest = getLastRequest();
-      lastRequest.url = url;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
-    addRequestData = function(data) {
-      const lastRequest = getLastRequest();
-      const dataArray = lastRequest.data || [];
-      dataArray.push(data);
-      lastRequest.data = dataArray;
-      requests.push(lastRequest);
+    updateRequestEnd = function () {
       requestEndOffset = at - 1;
     },
     addRequestEnd = function() {
@@ -409,17 +393,17 @@ export const createParser = () => {
     request = function () {
       white();
       addRequestStart();
-      const parsedMethod = method();
-      addRequestMethod(parsedMethod);
+      method();
+      updateRequestEnd();
       strictWhite();
-      const parsedUrl = url();
-      addRequestUrl(parsedUrl);
+      url();
+      updateRequestEnd();
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       if (ch == '{') {
-        const parsedObject = object();
-        addRequestData(parsedObject);
+        object();
+        updateRequestEnd();
       }
       // multi doc request
       strictWhite(); // advance to one new line
@@ -427,8 +411,8 @@ export const createParser = () => {
       strictWhite();
       while (ch == '{') {
         // another object
-        const parsedObject = object();
-        addRequestData(parsedObject);
+        object();
+        updateRequestEnd();
         strictWhite();
         newLine();
         strictWhite();

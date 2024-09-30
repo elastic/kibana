@@ -7,7 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
 import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
@@ -121,7 +121,7 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs };
   } else if (format === 'yml') {
-    const yaml = safeDump(
+    const yaml = dump(
       { inputs },
       {
         skipInvalid: true,

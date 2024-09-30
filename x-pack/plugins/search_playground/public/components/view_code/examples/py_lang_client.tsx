@@ -28,7 +28,7 @@ openai_client = OpenAI(
 
 index_source_fields = ${JSON.stringify(formValues.source_fields, null, 4)}
 
-def get_elasticsearch_results(query):
+def get_elasticsearch_results():
     es_query = ${getESQuery({
       ...formValues.elasticsearch_query,
       size: formValues.doc_size,
@@ -37,7 +37,7 @@ def get_elasticsearch_results(query):
     result = es_client.search(index="${formValues.indices.join(',')}", body=es_query)
     return result["hits"]["hits"]
 
-def create_openai_prompt(question, results):
+def create_openai_prompt(results):
     context = ""
     for hit in results:
         inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
@@ -71,7 +71,7 @@ def generate_openai_completion(user_prompt, question):
 
 if __name__ == "__main__":
     question = "my question"
-    elasticsearch_results = get_elasticsearch_results(question)
+    elasticsearch_results = get_elasticsearch_results()
     context_prompt = create_openai_prompt(elasticsearch_results)
     openai_completion = generate_openai_completion(context_prompt, question)
     print(openai_completion)

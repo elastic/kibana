@@ -71,6 +71,8 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   padding: $euiSize $euiSize 0;
   position: relative;
   z-index: $lnsZLevel1;
+  border-left: $euiBorderThin;
+  border-right: $euiBorderThin;
 
   &:first-child {
     padding-left: $euiSize;

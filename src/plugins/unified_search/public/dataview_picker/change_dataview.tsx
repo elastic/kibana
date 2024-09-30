@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,10 +25,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { type DataViewPickerPropsExtended } from './data_view_picker';
+import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
@@ -53,18 +53,13 @@ export function ChangeDataView({
   onDataViewCreated,
   trigger,
   selectableProps,
-  textBasedLanguage,
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
-}: DataViewPickerPropsExtended) {
+}: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
-  const [triggerLabel, setTriggerLabel] = useState('');
-  const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
-    Boolean(textBasedLanguage)
-  );
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
@@ -91,20 +86,6 @@ export function ChangeDataView({
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
-  useEffect(() => {
-    if (textBasedLanguage) {
-      setTriggerLabel(getLanguageDisplayName(textBasedLanguage));
-    } else {
-      setTriggerLabel(trigger.label);
-    }
-  }, [textBasedLanguage, trigger.label]);
-
-  useEffect(() => {
-    if (Boolean(textBasedLanguage) !== isTextBasedLangSelected) {
-      setIsTextBasedLangSelected(Boolean(textBasedLanguage));
-    }
-  }, [isTextBasedLangSelected, textBasedLanguage]);
-
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
   }, [adHocDataViews, currentDataViewId]);
@@ -121,14 +102,14 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'text'}
         iconSide="right"
         iconType="arrowDown"
-        title={triggerLabel}
+        title={trigger.label}
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
         {...rest}
       >
         <>
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && !isTextBasedLangSelected && (
+          {isAdHocSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -137,7 +118,7 @@ export function ChangeDataView({
               `}
             />
           )}
-          {triggerLabel}
+          {trigger.label}
         </>
       </EuiButtonEmpty>
     );
@@ -256,45 +237,43 @@ export function ChangeDataView({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {!isTextBasedLangSelected && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding: 11px;
-                  border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
-                  background-color: ${euiTheme.colors.lightestShade};
-                  border: ${euiTheme.border.thin};
-                  border-right: 0;
-                `}
-              >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                  defaultMessage: 'Data view',
-                })}
-              </EuiFlexItem>
-              <EuiPopover
-                panelClassName="changeDataViewPopover"
-                button={createTrigger()}
-                panelProps={{
-                  ['data-test-subj']: 'changeDataViewPopover',
-                }}
-                isOpen={isPopoverOpen}
-                closePopover={() => setPopoverIsOpen(false)}
-                panelPaddingSize="none"
-                initialFocus={`#${searchListInputId}`}
-                display="block"
-                buffer={8}
-              >
-                <div css={styles.popoverContent}>
-                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
-                </div>
-              </EuiPopover>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
-      )}
+      <>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                padding: 11px;
+                border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
+                background-color: ${euiTheme.colors.lightestShade};
+                border: ${euiTheme.border.thin};
+                border-right: 0;
+              `}
+            >
+              {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                defaultMessage: 'Data view',
+              })}
+            </EuiFlexItem>
+            <EuiPopover
+              panelClassName="changeDataViewPopover"
+              button={createTrigger()}
+              panelProps={{
+                ['data-test-subj']: 'changeDataViewPopover',
+              }}
+              isOpen={isPopoverOpen}
+              closePopover={() => setPopoverIsOpen(false)}
+              panelPaddingSize="none"
+              initialFocus={`[id="${searchListInputId}"]`}
+              display="block"
+              buffer={8}
+            >
+              <div css={styles.popoverContent}>
+                <EuiContextMenuPanel size="s" items={getPanelItems()} />
+              </div>
+            </EuiPopover>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </>
     </EuiFlexGroup>
   );
 }

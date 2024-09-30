@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
+import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -43,6 +45,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
+  /** {@link FeatureFlagsSetup} */
+  featureFlags: FeatureFlagsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
   /** {@link NotificationsSetup} */

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/maps-ems-plugin",
-  "owner": "@elastic/kibana-gis",
+  "owner": "@elastic/kibana-presentation",
   "plugin": {
     "id": "mapsEms",
     "server": true,

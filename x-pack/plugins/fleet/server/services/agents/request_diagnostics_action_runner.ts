@@ -39,6 +39,7 @@ export async function requestDiagnosticsBatch(
     actionId?: string;
     total?: number;
     additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
+    spaceId?: string;
   }
 ): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = {};
@@ -56,6 +57,8 @@ export async function requestDiagnosticsBatch(
   });
 
   const agentIds = givenAgents.map((agent) => agent.id);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -67,6 +70,7 @@ export async function requestDiagnosticsBatch(
     data: {
       additional_metrics: options.additionalMetrics,
     },
+    namespaces,
   });
 
   await createErrorActionResults(

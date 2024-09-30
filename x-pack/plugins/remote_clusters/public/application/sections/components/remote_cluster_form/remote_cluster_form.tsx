@@ -88,6 +88,8 @@ export class RemoteClusterForm extends Component<Props, State> {
   static contextType = AppContext;
   private readonly generateId: (idSuffix?: string) => string;
 
+  declare context: Context;
+
   constructor(props: Props, context: Context) {
     super(props, context);
 
@@ -287,7 +289,6 @@ export class RemoteClusterForm extends Component<Props, State> {
         <EuiFormRow
           data-test-subj="remoteClusterFormSkipUnavailableFormRow"
           className="remoteClusterSkipIfUnavailableSwitch"
-          hasEmptyLabelSpace
           fullWidth
           helpText={
             skipUnavailable !== defaultClusterValues.skipUnavailable ? (

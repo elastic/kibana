@@ -21,7 +21,7 @@ export interface RuleUpgradeStatsForReview {
   /** Number of installed prebuilt rules available for upgrade (stock + customized) */
   num_rules_to_upgrade_total: number;
 
-  /** Number of installed prebuilt rules with upgrade conflicts (SOLVABLE or NON_SOLVALBE) */
+  /** Number of installed prebuilt rules with upgrade conflicts (SOLVABLE or NON_SOLVABLE) */
   num_rules_with_conflicts: number;
 
   /** Number of installed prebuilt rules with NON_SOLVABLE upgrade conflicts */

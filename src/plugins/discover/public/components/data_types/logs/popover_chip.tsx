@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement, useCallback, useState } from 'react';
@@ -29,7 +30,11 @@ const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
 );
 
-interface ChipWithPopoverProps {
+type ChipWithPopoverChildrenType = (props: {
+  content: string;
+}) => React.ReactNode | React.ReactNode;
+
+export interface ChipWithPopoverProps {
   /**
    * ECS mapping for the key
    */
@@ -41,6 +46,7 @@ interface ChipWithPopoverProps {
   dataTestSubj?: string;
   leftSideIcon?: React.ReactNode;
   rightSideIcon?: EuiBadgeProps['iconType'];
+  children?: ChipWithPopoverChildrenType;
 }
 
 export function ChipWithPopover({
@@ -49,6 +55,7 @@ export function ChipWithPopover({
   dataTestSubj = `dataTablePopoverChip_${property}`,
   leftSideIcon,
   rightSideIcon,
+  children,
 }: ChipWithPopoverProps) {
   return (
     <ChipPopover
@@ -70,7 +77,9 @@ export function ChipWithPopover({
           </EuiFlexGroup>
         </EuiBadge>
       )}
-    />
+    >
+      {children}
+    </ChipPopover>
   );
 }
 
@@ -88,9 +97,10 @@ interface ChipPopoverProps {
     handleChipClickAriaLabel: string;
     chipCss: SerializedStyles;
   }) => ReactElement;
+  children?: ChipWithPopoverChildrenType;
 }
 
-export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
+export function ChipPopover({ property, text, renderChip, children }: ChipPopoverProps) {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -130,7 +140,8 @@ export function ChipPopover({ property, text, renderChip }: ChipPopoverProps) {
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
               <DataTablePopoverCellValue>
-                <span style={{ fontWeight: 700 }}>{property}</span> {text}
+                <span style={{ fontWeight: 700 }}>{property}</span>{' '}
+                {typeof children === 'function' ? children({ content: text }) : text}
               </DataTablePopoverCellValue>
             </EuiText>
           </div>

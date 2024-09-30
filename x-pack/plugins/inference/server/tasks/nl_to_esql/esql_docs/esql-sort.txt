@@ -1,0 +1,66 @@
+# SORT
+
+The SORT command is used to arrange a table based on one or more columns.
+
+## Syntax
+
+`SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]`
+
+### Parameters
+
+#### columnX
+
+The column on which the sorting is to be performed.
+
+## Examples
+
+Sort a table based on the 'height' column:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height
+```
+
+Explicitly sort in ascending order with `ASC`:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC
+```
+
+Provide additional sort expressions to act as tie breakers:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT height DESC, first_name ASC
+```
+
+Sort `null` values first using `NULLS FIRST`:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| SORT first_name ASC NULLS FIRST
+```
+
+## Notes
+
+If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
+or move the SORT before the KEEP, e.g.
+- not correct: KEEP date | SORT @timestamp,
+- correct: SORT @timestamp | KEEP date)
+
+By default, the sorting order is ascending. You can specify an explicit sort order by using `ASC` for ascending or `DESC` for descending.
+
+If two rows have the same sort key, they are considered equal. You can provide additional sort expressions to act as tie breakers.
+
+When sorting on multivalued columns, the lowest value is used when sorting in ascending order and the highest value is used when sorting in descending order.
+
+By default, `null` values are treated as being larger than any other value. This means that with an ascending sort order, `null` values are sorted last, and with a descending sort order, `null` values are sorted first. You can change this by providing `NULLS FIRST` or `NULLS LAST`.
+
+## Limitations
+- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
+- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.

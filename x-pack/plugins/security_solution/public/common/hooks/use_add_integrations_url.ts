@@ -27,7 +27,7 @@ export const useAddIntegrationsUrl = () => {
   const href = useMemo(() => prepend(integrationsUrl), [prepend, integrationsUrl]);
 
   const onClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateTo({ url: href });
     },

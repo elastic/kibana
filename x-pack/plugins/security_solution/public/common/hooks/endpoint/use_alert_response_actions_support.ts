@@ -9,6 +9,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { getEventDetailsAgentIdField } from '../../lib/endpoint/utils/get_event_details_agent_id_field';
 import { getHostPlatform } from '../../lib/endpoint/utils/get_host_platform';
 import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_details_field_values';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
@@ -16,10 +17,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import {
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
-  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
-} from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../translations';
 
 export const ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD = (
@@ -115,43 +113,22 @@ export const useAlertResponseActionsSupport = (
     return agentType ? isAgentTypeAndActionSupported(agentType) : false;
   }, [agentType]);
 
-  const agentId: string = useMemo(() => {
-    if (!agentType) {
-      return '';
+  const { agentIdField, agentId } = useMemo<{ agentIdField: string; agentId: string }>(() => {
+    let field = '';
+    let id = '';
+
+    if (agentType) {
+      const eventAgentIdInfo = getEventDetailsAgentIdField(agentType, eventData);
+      field = eventAgentIdInfo.field;
+      id = eventAgentIdInfo.agentId;
     }
 
-    if (agentType === 'endpoint') {
-      return getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, eventData);
-    }
-
-    if (agentType === 'sentinel_one') {
-      return getAlertDetailsFieldValue(
-        { category: 'observer', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one },
-        eventData
-      );
-    }
-
-    if (agentType === 'crowdstrike') {
-      return getAlertDetailsFieldValue(
-        { category: 'device', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
-        eventData
-      );
-    }
-
-    return '';
+    return { agentId: id, agentIdField: field };
   }, [agentType, eventData]);
 
   const doesHostSupportResponseActions = useMemo(() => {
     return Boolean(isFeatureEnabled && isAlert && agentId && agentType);
   }, [agentId, agentType, isAlert, isFeatureEnabled]);
-
-  const agentIdField = useMemo(() => {
-    if (agentType) {
-      return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType];
-    }
-
-    return '';
-  }, [agentType]);
 
   const supportedActions = useMemo(() => {
     return RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<AlertAgentActionsSupported>(

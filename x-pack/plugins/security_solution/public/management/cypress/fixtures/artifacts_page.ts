@@ -17,7 +17,7 @@ interface FormEditingDescription {
   }>;
 }
 
-interface ArtifactsFixtureType {
+export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: string;
@@ -188,14 +188,11 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'eventFilters-form-description-input',
           value: 'This is the event filter description',
         },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
+
         {
           type: 'input',
-          customSelector: '[data-test-subj="fieldAutocompleteComboBox"] input',
-          value: '@timestamp{downArrow}{enter}',
+          selector: 'fieldAutocompleteComboBox',
+          value: '@timestamp',
         },
         {
           type: 'click',
@@ -239,12 +236,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           value: 'This is the event filter description edited',
         },
         {
-          type: 'click',
+          type: 'input',
           selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.name"]',
+          value: '{selectAll}agent.name',
         },
         {
           type: 'input',
@@ -281,10 +275,10 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       entries: [
         {
-          field: 'agent.id',
+          field: 'process.name',
           operator: 'included',
           type: 'match',
-          value: 'mr agent',
+          value: 'notepad.exe',
         },
       ],
       os_types: ['windows'],

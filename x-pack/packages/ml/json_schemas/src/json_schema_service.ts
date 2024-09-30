@@ -68,7 +68,7 @@ export class JsonSchemaService {
     };
   }
 
-  private allComponents: Record<string, object> = {};
+  private allComponents: Record<string, object> = Object.create(null);
   private componentsDict = new Set<string>();
 
   /**

@@ -6,9 +6,9 @@
  */
 
 import { isArray, isNumber } from 'lodash';
-import { MetricsAPIRequest } from '../../../../common/http_api';
-import { ESSearchClient } from '../types';
+import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
+import type { ESSearchClient } from '../types';
 
 export const calculatedInterval = async (search: ESSearchClient, options: MetricsAPIRequest) => {
   const useModuleInterval =

@@ -29,7 +29,7 @@ describe('SyncAlertsSwitch', () => {
   it('it toggles the switch', async () => {
     appMockRender.render(<SyncAlertsSwitch disabled={false} />);
 
-    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+    await userEvent.click(await screen.findByTestId('sync-alerts-switch'));
 
     expect(await screen.findByTestId('sync-alerts-switch')).toHaveAttribute(
       'aria-checked',
@@ -56,7 +56,7 @@ describe('SyncAlertsSwitch', () => {
     expect(await screen.findByText('On')).toBeInTheDocument();
     expect(screen.queryByText('Off')).not.toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+    await userEvent.click(await screen.findByTestId('sync-alerts-switch'));
 
     expect(await screen.findByText('Off')).toBeInTheDocument();
     expect(screen.queryByText('On')).not.toBeInTheDocument();

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -89,7 +90,7 @@ describe('LinksEditor', () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    userEvent.click(saveButton);
+    await userEvent.click(saveButton);
     await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
     expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
@@ -98,7 +99,7 @@ describe('LinksEditor', () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    userEvent.click(saveButton);
+    await userEvent.click(saveButton);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });

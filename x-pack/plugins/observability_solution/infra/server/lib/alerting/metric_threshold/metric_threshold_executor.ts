@@ -12,7 +12,7 @@ import {
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { castArray, isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -28,7 +28,7 @@ import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/ut
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -99,8 +99,13 @@ type MetricThresholdAlertReporter = (params: {
   thresholds?: Array<number | null>;
 }) => void;
 
+// TODO: Refactor the executor code to have better flow-control with better
+// reasoning of different state/conditions for improved maintainability
 export const createMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, metricsExplorerLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -125,6 +130,8 @@ export const createMetricThresholdExecutor =
 
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
+    const groupBy = castArray<string>(params.groupBy);
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
       alertId: ruleId,
@@ -167,7 +174,7 @@ export const createMetricThresholdExecutor =
             uuid,
             spaceId,
             start ?? startedAt.toISOString(),
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
         },
@@ -199,10 +206,12 @@ export const createMetricThresholdExecutor =
           reason,
           timestamp,
           value: null,
+          // TODO: Check if we need additionalContext here or not?
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
+            groupBy,
+            assetDetailsLocator,
+            metricsExplorerLocator,
           }),
         };
 
@@ -217,7 +226,7 @@ export const createMetricThresholdExecutor =
           state: {
             lastRunTimestamp: startedAt.valueOf(),
             missingGroups: [],
-            groupBy: params.groupBy,
+            groupBy,
             filterQuery: params.filterQuery,
           },
         };
@@ -407,10 +416,11 @@ export const createMetricThresholdExecutor =
             }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
-            hostName: additionalContext?.host?.name,
+            groupBy,
+            assetDetailsLocator,
+            metricsExplorerLocator,
+            additionalContext,
           }),
           ...additionalContext,
         };
@@ -450,7 +460,7 @@ export const createMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -465,10 +475,11 @@ export const createMetricThresholdExecutor =
         timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
-          spaceId,
           timestamp: indexedStartedAt,
-          hostName: additionalContext?.host?.name,
+          groupBy,
+          assetDetailsLocator,
+          metricsExplorerLocator,
+          additionalContext,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
@@ -486,7 +497,7 @@ export const createMetricThresholdExecutor =
       state: {
         lastRunTimestamp: startedAt.valueOf(),
         missingGroups: [...nextMissingGroups],
-        groupBy: params.groupBy,
+        groupBy,
         filterQuery: params.filterQuery,
       },
     };

@@ -5,6 +5,6 @@
   },
   "exclude": ["target/**/*"],
   "extends": "../../tsconfig.base.json",
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../../typings/**/*"],
   "kbn_references": ["@kbn/tooling-log"]
 }

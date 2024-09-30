@@ -64,7 +64,7 @@ export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation>
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceName?.buckets?.[0]?.key}
+                    title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
                     <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>

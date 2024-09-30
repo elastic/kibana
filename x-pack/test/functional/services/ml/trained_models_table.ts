@@ -23,7 +23,7 @@ export interface TrainedModelRowData {
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
 export function TrainedModelsTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   trainedModelsActions: TrainedModelsActions
 ) {
@@ -31,6 +31,7 @@ export function TrainedModelsTableProvider(
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
+  const headerPage = getPageObject('header');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -194,6 +195,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
+      await headerPage.waitUntilLoadingHasFinished();
       return await testSubjects.exists(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
     }
 

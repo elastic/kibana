@@ -54,7 +54,10 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
 }) => {
-  const { yaml, onCreateApiKey, apiKey, downloadYaml } = useFetchFullPolicy(selectedPolicy, isK8s);
+  const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } = useFetchFullPolicy(
+    selectedPolicy,
+    isK8s
+  );
 
   const agentVersion = useAgentVersion();
 
@@ -88,6 +91,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         downloadYaml,
         apiKey,
         onCreateApiKey,
+        isCreatingApiKey,
       })
     );
 
@@ -116,6 +120,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     downloadYaml,
     apiKey,
     onCreateApiKey,
+    isCreatingApiKey,
     cloudSecurityIntegration,
     mode,
     setMode,

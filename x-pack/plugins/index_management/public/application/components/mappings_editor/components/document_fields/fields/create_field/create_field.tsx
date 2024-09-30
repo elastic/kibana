@@ -32,14 +32,16 @@ import { getRequiredParametersFormForType } from './required_parameters_forms';
 import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+export interface ModelIdMapEntry {
+  trainedModelId: string;
+  isDeployed: boolean;
+  isDeployable: boolean;
+  isDownloading: boolean;
+  modelStats?: TrainedModelStat; // third-party models don't have model stats
+}
 export interface InferenceToModelIdMap {
-  [key: string]: {
-    trainedModelId: string;
-    isDeployed: boolean;
-    isDeployable: boolean;
-    isDownloading: boolean;
-    modelStats?: TrainedModelStat; // third-party models don't have model stats
-  };
+  [key: string]: ModelIdMapEntry;
 }
 
 export interface SemanticTextInfo {

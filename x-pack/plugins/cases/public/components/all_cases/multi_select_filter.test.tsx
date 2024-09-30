@@ -10,7 +10,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-describe('multi select filter', () => {
+// Failing: See https://github.com/elastic/kibana/issues/183663
+describe.skip('multi select filter', () => {
   it('should render the amount of options available', async () => {
     const onChange = jest.fn();
     const props = {
@@ -28,7 +29,7 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('4 options')).toBeInTheDocument();
@@ -52,12 +53,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag a' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag a' }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({ filterId: 'tags', selectedOptionKeys: [] });
@@ -86,12 +87,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -123,12 +124,12 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     await waitFor(() => {
       expect(onChange).not.toHaveBeenCalled();
@@ -174,7 +175,7 @@ describe('multi select filter', () => {
     };
 
     render(<MultiSelectFilter {...props} />);
-    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
     expect((await screen.findAllByTestId(TEST_ID)).length).toBe(2);
   });

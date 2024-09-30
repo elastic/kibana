@@ -22,6 +22,6 @@ export const metrics: InventoryMetricsWithCharts<HostFormulas, HostCharts> = {
   snapshot,
   getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
   getCharts: async () => await import('./charts').then(({ charts }) => charts),
-  defaultSnapshot: 'cpuTotal',
+  defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

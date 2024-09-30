@@ -9,17 +9,15 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-
 import { isUrlInvalid } from '../../../../../common/utils/validators';
 import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
-
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -27,6 +25,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -67,21 +67,38 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   title,
   value,
 }) => {
+  const { openRightPanel } = useExpandableFlyoutApi();
+  const eventContext = useContext(StatefulEventContext);
+
   const ruleName = `${value}`;
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
+  const isInTimelineContext =
+    ruleName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+
   const goToRuleDetails = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRuleDetailsUrl(ruleId ?? '', search),
-        openInNewTab,
+
+      if (!eventContext || !isInTimelineContext) {
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsUrl(ruleId ?? '', search),
+          openInNewTab,
+        });
+        return;
+      }
+
+      openRightPanel({
+        id: RulePanelKey,
+        params: {
+          ruleId,
+        },
       });
     },
-    [navigateToApp, ruleId, search, openInNewTab]
+    [navigateToApp, ruleId, search, openInNewTab, openRightPanel, eventContext, isInTimelineContext]
   );
 
   const href = useMemo(

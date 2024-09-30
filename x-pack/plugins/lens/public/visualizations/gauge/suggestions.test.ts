@@ -232,7 +232,7 @@ describe('shows suggestions', () => {
           shape: 'semiCircle',
           ticksPosition: 'auto',
         },
-        title: 'Semi-circular Gauge',
+        title: 'Minor arc',
       },
       {
         hide: false,
@@ -247,7 +247,7 @@ describe('shows suggestions', () => {
           shape: 'arc',
           ticksPosition: 'auto',
         },
-        title: 'Arc Gauge',
+        title: 'Major arc',
       },
       {
         hide: false,
@@ -262,7 +262,7 @@ describe('shows suggestions', () => {
           shape: 'circle',
           ticksPosition: 'auto',
         },
-        title: 'Circular Gauge',
+        title: 'Circle',
       },
     ]);
   });

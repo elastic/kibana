@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -36,7 +36,7 @@ describe('useCopyToClipboardAction', () => {
 
     const button = getByTestId('aiopsTableActionButtonCopyToClipboard enabled');
 
-    userEvent.hover(button);
+    await userEvent.hover(button);
 
     // The tooltip from EUI takes 250ms to appear, so we must
     // use a `find*` query to asynchronously poll for it.
@@ -44,9 +44,7 @@ describe('useCopyToClipboardAction', () => {
       await findByText('Copy field/value pair as KQL syntax to clipboard')
     ).toBeInTheDocument();
 
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await userEvent.click(button);
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.
     // We can assert that is has been triggered, but the combo with jsdom doesn't
@@ -63,15 +61,13 @@ describe('useCopyToClipboardAction', () => {
 
     const button = getByText('Copy to clipboard');
 
-    userEvent.hover(button);
+    await userEvent.hover(button);
 
     // The tooltip from EUI takes 250ms to appear, so we must
     // use a `find*` query to asynchronously poll for it.
     expect(await findByText('Copy group items as KQL syntax to clipboard')).toBeInTheDocument();
 
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await userEvent.click(button);
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.
     // We can assert that is has been triggered, but the combo with jsdom doesn't

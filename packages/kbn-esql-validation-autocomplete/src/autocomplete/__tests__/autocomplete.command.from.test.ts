@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METADATA_FIELDS } from '../../shared/constants';
@@ -13,9 +14,6 @@ const visibleIndices = indexes
   .filter(({ hidden }) => !hidden)
   .map(({ name, suggestedAs }) => suggestedAs || name)
   .sort();
-
-const addTrailingSpace = (strings: string[], predicate: (s: string) => boolean = (_s) => true) =>
-  strings.map((string) => (predicate(string) ? `${string} ` : string));
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -36,17 +34,17 @@ describe('autocomplete.suggest', () => {
       test('suggests visible indices on space', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('FROM /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('from /index', addTrailingSpace(visibleIndices));
+        await assertSuggestions('from /', visibleIndices);
+        await assertSuggestions('FROM /', visibleIndices);
+        await assertSuggestions('from /index', visibleIndices);
       });
 
       test('suggests visible indices on comma', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('FROM a,/', addTrailingSpace(visibleIndices));
-        await assertSuggestions('FROM a, /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('from *,/', addTrailingSpace(visibleIndices));
+        await assertSuggestions('FROM a,/', visibleIndices);
+        await assertSuggestions('FROM a, /', visibleIndices);
+        await assertSuggestions('from *,/', visibleIndices);
       });
 
       test('can suggest integration data sources', async () => {
@@ -55,10 +53,7 @@ describe('autocomplete.suggest', () => {
           .filter(({ hidden }) => !hidden)
           .map(({ name, suggestedAs }) => suggestedAs || name)
           .sort();
-        const expectedSuggestions = addTrailingSpace(
-          visibleDataSources,
-          (s) => !integrations.find(({ name }) => name === s)
-        );
+        const expectedSuggestions = visibleDataSources;
         const { assertSuggestions, callbacks } = await setup();
         const cb = {
           ...callbacks,
@@ -74,7 +69,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... METADATA <fields>', () => {
-      const metadataFieldsSandIndex = metadataFields.filter((field) => field !== '_index');
+      const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
       test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const { assertSuggestions } = await setup();
@@ -102,8 +97,8 @@ describe('autocomplete.suggest', () => {
       test('filters out already used metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsSandIndex);
-        await assertSuggestions('from a, b metadata _index, /', metadataFieldsSandIndex);
+        await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsAndIndex);
+        await assertSuggestions('from a, b metadata _index, /', metadataFieldsAndIndex);
       });
     });
   });

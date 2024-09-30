@@ -37,6 +37,7 @@ describe('eql_executor', () => {
     maxSignals: params.maxSignals,
   };
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
+  const mockScheduleNotificationResponseActionsService = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,6 +73,8 @@ describe('eql_executor', () => {
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: false,
           experimentalFeatures: mockExperimentalFeatures,
+          scheduleNotificationResponseActionsService:
+            mockScheduleNotificationResponseActionsService,
         });
         expect(result.warningMessages).toEqual([
           `The following exceptions won't be applied to rule execution: ${
@@ -121,6 +124,8 @@ describe('eql_executor', () => {
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: true,
           experimentalFeatures: mockExperimentalFeatures,
+          scheduleNotificationResponseActionsService:
+            mockScheduleNotificationResponseActionsService,
         });
 
         expect(result.warningMessages).toContain(
@@ -154,8 +159,38 @@ describe('eql_executor', () => {
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
       });
       expect(result.userError).toEqual(true);
+    });
+
+    it('should handle scheduleNotificationResponseActionsService call', async () => {
+      const result = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+        completeRule: eqlCompleteRule,
+        tuple,
+        ruleExecutionLogger,
+        services: alertServices,
+        version,
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: false,
+        experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
+      });
+      expect(mockScheduleNotificationResponseActionsService).toBeCalledWith({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: eqlCompleteRule.ruleParams.responseActions,
+      });
     });
 
     it('should pass frozen tier filters in eql search request', async () => {
@@ -189,6 +224,7 @@ describe('eql_executor', () => {
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
       });
 
       const searchArgs =

@@ -43,8 +43,7 @@ API token::  Jira API authentication token for HTTP Basic authentication.
 [[jira-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/jira-params-test.png[Jira params test]

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -78,7 +79,7 @@ describe('Dashboard link component', () => {
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
@@ -125,7 +126,7 @@ describe('Dashboard link component', () => {
     expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
 
     // calls `window.open`
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
@@ -279,7 +280,7 @@ describe('Dashboard link component', () => {
 
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toBeCalledTimes(0);
   });
@@ -300,7 +301,7 @@ describe('Dashboard link component', () => {
     );
 
     const link = screen.getByTestId('dashboardLink--foo');
-    userEvent.hover(link);
+    await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
@@ -358,7 +359,7 @@ describe('Dashboard link component', () => {
     );
     const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
-    userEvent.hover(link);
+    await userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });

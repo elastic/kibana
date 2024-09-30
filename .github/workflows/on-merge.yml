@@ -10,21 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged == true
-      && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && (
         (
           github.event.action == 'labeled' && (
             github.event.label.name == 'backport:prev-minor'
             || github.event.label.name == 'backport:prev-major'
+            || github.event.label.name == 'backport:current-major'
             || github.event.label.name == 'backport:all-open'
-            || github.event.label.name == 'backport:auto-version'
+            || github.event.label.name == 'backport:version'
+            || github.event.label.name == 'auto-backport'
           )
         )
         || (github.event.action == 'closed')
       )
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: 'elastic/kibana-github-actions'
           ref: main

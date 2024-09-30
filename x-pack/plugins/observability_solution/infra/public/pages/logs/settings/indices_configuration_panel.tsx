@@ -140,11 +140,7 @@ export const IndicesConfigurationPanel = React.memo<{
         disabled={isReadOnly}
       >
         {isKibanaAdvancedSettingFormElement(indicesFormElement) && (
-          <KibanaAdvancedSettingConfigurationPanel
-            isLoading={isLoading}
-            isReadOnly={isReadOnly}
-            advancedSettingFormElement={indicesFormElement}
-          />
+          <KibanaAdvancedSettingConfigurationPanel />
         )}
       </EuiCheckableCard>
       <EuiSpacer size="m" />

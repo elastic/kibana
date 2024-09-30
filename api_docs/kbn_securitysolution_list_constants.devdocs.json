@@ -105,14 +105,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
           },
           {

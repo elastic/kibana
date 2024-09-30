@@ -7,16 +7,33 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
 import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 export const WorkplaceSearchHeaderActions: React.FC = () => {
+  const {
+    organization: { kibanaUIsEnabled },
+  } = useValues(AppLogic);
+
   if (!externalUrl.enterpriseSearchUrl) return null;
+
+  if (!kibanaUIsEnabled) {
+    // we can't just return a null here as it will not render
+    // the Endpoints and Keys flyout button
+    return (
+      <EndpointsHeaderAction>
+        <></>
+      </EndpointsHeaderAction>
+    );
+  }
 
   return (
     <EndpointsHeaderAction>

@@ -79,14 +79,19 @@ export class RequestContextFactory implements IRequestContextFactory {
         return appContextService.getRegisteredFeatures(pluginName);
       },
 
+      inference: startPlugins.inference,
+
       telemetry: core.analytics,
 
-      getAIAssistantKnowledgeBaseDataClient: memoize(() => {
+      // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
+      // Remove `initializeKnowledgeBase` once 'assistantKnowledgeBaseByDefault' feature flag is removed
+      getAIAssistantKnowledgeBaseDataClient: memoize((v2KnowledgeBaseEnabled = false) => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
+          v2KnowledgeBaseEnabled,
         });
       }),
 

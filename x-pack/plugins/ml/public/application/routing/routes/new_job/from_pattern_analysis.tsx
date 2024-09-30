@@ -40,7 +40,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       data,
       dashboard: dashboardService,
       uiSettings: kibanaConfig,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -48,7 +48,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     redirect: () =>
       resolver(
         {
-          mlApiServices,
+          mlApi,
           timeFilter: data.query.timefilter.timefilter,
           kibanaConfig,
           dashboardService,

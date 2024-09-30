@@ -7,13 +7,13 @@
 
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { CoreRequestHandlerContext } from '@kbn/core/server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { flattenObject, KeyValuePair } from '../../../../common/utils/flatten_object';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
+import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
 export interface LogCategory {
   errorCategory: string;
@@ -25,12 +25,12 @@ export interface LogCategory {
 export async function getLogCategories({
   apmEventClient,
   esClient,
-  coreContext,
+  logSourcesService,
   arguments: args,
 }: {
   apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
   arguments: {
     start: string;
     end: string;
@@ -52,7 +52,7 @@ export async function getLogCategories({
     Object.entries(args.entities).map(([key, value]) => ({ field: key, value }))
   );
 
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
   const search = getTypedSearch(esClient);
 
   const query = {
@@ -101,7 +101,7 @@ export async function getLogCategories({
           categories: {
             categorize_text: {
               field: 'message',
-              size: 500,
+              size: 10,
             },
             aggs: {
               sample: {
@@ -146,38 +146,4 @@ export async function getLogCategories({
     logCategories: await Promise.all(promises ?? []),
     entities: flattenObject(sampleDoc),
   };
-}
-
-// field/value pairs should match, or the field should not exist
-export function getShouldMatchOrNotExistFilter(
-  keyValuePairs: Array<{
-    field: string;
-    value?: string;
-  }>
-) {
-  return keyValuePairs
-    .filter(({ value }) => value)
-    .map(({ field, value }) => {
-      return {
-        bool: {
-          should: [
-            {
-              bool: {
-                filter: [{ term: { [field]: value } }],
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    filter: [{ exists: { field } }],
-                  },
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      };
-    });
 }

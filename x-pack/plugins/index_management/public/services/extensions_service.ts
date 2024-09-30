@@ -13,7 +13,7 @@ import {
   EmptyListContent,
   IndexContent,
   ExtensionsSetup,
-} from '@kbn/index-management';
+} from '@kbn/index-management-shared-types';
 import { IndexDetailsTab } from '../../common/constants';
 
 export class ExtensionsService {

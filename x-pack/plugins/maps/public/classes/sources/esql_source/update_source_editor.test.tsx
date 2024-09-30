@@ -63,7 +63,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByMapBoundsSwitch());
-      userEvent.click(getNarrowByMapBoundsSwitch());
+      await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
           { propName: 'narrowByMapBounds', value: true },
@@ -88,7 +88,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByMapBoundsSwitch());
-      userEvent.click(getNarrowByMapBoundsSwitch());
+      await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith({ propName: 'narrowByMapBounds', value: true })
       );
@@ -115,7 +115,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByTimeSwitch());
-      userEvent.click(getNarrowByTimeSwitch());
+      await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
           { propName: 'narrowByGlobalTime', value: true },
@@ -140,7 +140,7 @@ describe('UpdateSourceEditor', () => {
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
       await waitFor(() => getNarrowByTimeSwitch());
-      userEvent.click(getNarrowByTimeSwitch());
+      await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith({ propName: 'narrowByGlobalTime', value: true })
       );

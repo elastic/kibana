@@ -71,7 +71,7 @@ const CardStepComponent: React.FC<{
   const isDone = finishedSteps.has(stepId);
 
   const toggleStep = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       const newStatus = !isExpandedStep;
 

@@ -8,8 +8,9 @@
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ml } from '../../../../services/ml_api_service';
-import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+
+import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -36,10 +37,11 @@ import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_conf
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+import { jobCloningService } from '../../../../services/job_cloning_service';
 
 let blockingJobsRefreshTimeout = null;
 
-export class JobsListView extends Component {
+export class JobsListViewUI extends Component {
   constructor(props) {
     super(props);
 
@@ -98,7 +100,7 @@ export class JobsListView extends Component {
   }
 
   openAutoStartDatafeedModal() {
-    const job = checkForAutoStartDatafeed();
+    const job = jobCloningService.checkForAutoStartDatafeed();
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }
@@ -139,7 +141,7 @@ export class JobsListView extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        loadFullJob(jobId)
+        loadFullJob(this.props.kibana.services.mlServices.mlApi, jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             if (this.props.showNodeInfo === false) {
@@ -316,10 +318,11 @@ export class JobsListView extends Component {
       this.setState({ loading: true });
     }
 
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
     try {
       let jobsAwaitingNodeCount = 0;
-      const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
+      const jobs = await mlApi.jobs.jobsSummary(expandedJobsIds);
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
@@ -378,7 +381,8 @@ export class JobsListView extends Component {
       return;
     }
 
-    const { jobs } = await ml.jobs.blockingJobTasks();
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    const { jobs } = await mlApi.jobs.blockingJobTasks();
     const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
     const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
 
@@ -552,3 +556,5 @@ export class JobsListView extends Component {
     return <div>{this.renderJobsListComponents()}</div>;
   }
 }
+
+export const JobsListView = withKibana(JobsListViewUI);

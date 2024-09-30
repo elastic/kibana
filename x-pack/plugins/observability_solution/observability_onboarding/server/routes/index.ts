@@ -9,6 +9,7 @@ import { elasticAgentRouteRepository } from './elastic_agent/route';
 import { flowRouteRepository } from './flow/route';
 import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
 import { logsOnboardingRouteRepository } from './logs/route';
+import { firehoseOnboardingRouteRepository } from './firehose/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
@@ -16,6 +17,7 @@ function getTypedObservabilityOnboardingServerRouteRepository() {
     ...logsOnboardingRouteRepository,
     ...elasticAgentRouteRepository,
     ...kubernetesOnboardingRouteRepository,
+    ...firehoseOnboardingRouteRepository,
   };
 
   return repository;

@@ -15,30 +15,23 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-  # Remove operation-level security definitions
-  - target: "$.paths['/api/status']['get'].security"
-    description: Remove system security definitions
-    remove: true
-  # Add a document-level security definition
-  - target: '$.components.securitySchemes'
-    description: Add an API key security scheme
-    update:
-      apiKeyAuth:
-        in: header
-        name: Authorization
-        type: apiKey
-        description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/docs/current/serverless/api-keys).
-  - target: '$'
-    description: Add document-level security.
-    update:
-      security:
-        - apiKeyAuth: []
   # Mark all operations as beta
-  - target: '$.paths[*][*]'
+  - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
     description: Add x-beta
     update:
       x-beta: true
   # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="alerting")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Alerting enables you to define rules, which detect complex conditions within your data.
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
+        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      externalDocs:
+        description: Alerting documentation
+        url: https://www.elastic.co/docs/current/serverless/rules
+      x-displayName: "Alerting"
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
@@ -57,10 +50,6 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Machine learning"
-  - target: '$.tags[?(@.name=="saved objects")]'
-    description: Change displayName
-    update:
-      x-displayName: "Saved objects"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:

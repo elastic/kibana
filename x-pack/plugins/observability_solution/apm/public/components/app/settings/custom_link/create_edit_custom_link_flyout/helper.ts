@@ -41,7 +41,9 @@ export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
  */
 export const getSelectOptions = (filters: Filter[], selectedKey: Filter['key']) => {
   return FILTER_SELECT_OPTIONS.filter(
-    ({ value }) => !filters.some(({ key }) => key === value && key !== selectedKey)
+    ({ value }) =>
+      value === DEFAULT_OPTION.value ||
+      !filters.some(({ key }) => key === value && key !== selectedKey)
   );
 };
 

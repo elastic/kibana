@@ -239,7 +239,7 @@ async function getActions(
     ignore_unavailable: true,
     from: 0,
     size: getPerPage(options),
-    query: addNamespaceFilteringToQuery(query, namespace),
+    query: await addNamespaceFilteringToQuery(query, namespace),
     body: {
       sort: [{ '@timestamp': 'desc' }],
     },
@@ -390,7 +390,7 @@ async function getPolicyChangeActions(
     index: AGENT_POLICY_INDEX,
     ignore_unavailable: true,
     size: getPerPage(options),
-    query: addNamespaceFilteringToQuery(query, namespace),
+    query: await addNamespaceFilteringToQuery(query, namespace),
     sort: [
       {
         '@timestamp': {

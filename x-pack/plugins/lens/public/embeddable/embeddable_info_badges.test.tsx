@@ -12,9 +12,9 @@ import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { UserMessage } from '../types';
 
 describe('EmbeddableFeatureBadge', () => {
-  function renderPopup(messages: UserMessage[], count: number = messages.length) {
+  async function renderPopup(messages: UserMessage[], count: number = messages.length) {
     render(<EmbeddableFeatureBadge messages={messages} />);
-    userEvent.click(screen.getByText(`${count}`));
+    await userEvent.click(screen.getByText(`${count}`));
   }
 
   it('should render no badge', () => {
@@ -38,12 +38,12 @@ describe('EmbeddableFeatureBadge', () => {
       />
     );
     expect(screen.getByText('1')).toBeInTheDocument();
-    userEvent.click(screen.getByText('1'));
+    await userEvent.click(screen.getByText('1'));
     expect(await screen.findByText('Long text')).toBeInTheDocument();
   });
 
   it('should render a description of the badge in a tooltip on hover', async () => {
-    renderPopup([
+    await renderPopup([
       {
         uniqueId: 'unique_id',
         shortMessage: 'Short message',
@@ -57,7 +57,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should render a separate section for each unique-id', async () => {
-    renderPopup([
+    await renderPopup([
       {
         uniqueId: '1',
         shortMessage: 'Section1',
@@ -80,7 +80,7 @@ describe('EmbeddableFeatureBadge', () => {
   });
 
   it('should group multiple messages with same id', async () => {
-    renderPopup(
+    await renderPopup(
       [
         {
           uniqueId: '1',
@@ -108,7 +108,7 @@ describe('EmbeddableFeatureBadge', () => {
 
   describe('Horizontal rules', () => {
     it('should render no rule for single message', async () => {
-      renderPopup([
+      await renderPopup([
         {
           uniqueId: 'unique_id',
           shortMessage: `Section1`,
@@ -159,7 +159,7 @@ describe('EmbeddableFeatureBadge', () => {
           displayLocations: [],
         },
       ];
-      renderPopup(messages, 3);
+      await renderPopup(messages, 3);
       expect(await screen.getAllByTestId('lns-feature-badges-horizontal-rule')).toHaveLength(2);
     });
   });

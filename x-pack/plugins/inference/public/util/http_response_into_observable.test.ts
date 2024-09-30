@@ -9,7 +9,7 @@ import { lastValueFrom, of, toArray } from 'rxjs';
 import { httpResponseIntoObservable } from './http_response_into_observable';
 import type { StreamedHttpResponse } from './create_observable_from_http_response';
 import { ChatCompletionEventType } from '../../common/chat_complete';
-import { InferenceTaskEventType } from '../../common/tasks';
+import { InferenceTaskEventType } from '../../common/inference_task';
 import { InferenceTaskErrorCode } from '../../common/errors';
 
 function toSse(...events: Array<Record<string, any>>) {

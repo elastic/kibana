@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { filterQuery } from '../model/filter_query';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { timerange } from '../model/timerange';

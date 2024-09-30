@@ -12,8 +12,10 @@ import { registerCategorizationRoutes } from './categorization_routes';
 import { registerRelatedRoutes } from './related_routes';
 import { registerPipelineRoutes } from './pipeline_routes';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
 
 export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+  registerAnalyzeLogsRoutes(router);
   registerEcsRoutes(router);
   registerIntegrationBuilderRoutes(router);
   registerCategorizationRoutes(router);

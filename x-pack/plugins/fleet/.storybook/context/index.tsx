@@ -19,6 +19,7 @@ import type {
   UserProfileServiceStart,
 } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
+import { coreFeatureFlagsMock } from '@kbn/core/public/mocks';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -73,6 +74,7 @@ export const StorybookContext: React.FC<{
       },
       application: getApplication(),
       executionContext: getExecutionContext(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
       chrome: getChrome(),
       cloud: {
         ...getCloud({ isCloudEnabled }),

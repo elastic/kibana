@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-codeql
+  description: Run CodeQL
+  links:
+    - title: Pipeline link
+      url: https://buildkite.com/elastic/kibana-codeql
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-operations
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / codeql
+      description: Run CodeQL
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "false"
+      repository: elastic/kibana
+      branch_configuration: main
+      default_branch: main
+      pipeline_file: ".buildkite/pipelines/codeql/codeql.yml"
+      provider_settings:
+        trigger_mode: none
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY

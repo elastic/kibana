@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { MutableRefObject } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
 import { FIXED_PROGRESSION } from '@kbn/coloring';
-import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 
+import { css } from '@emotion/react';
+import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 export function PalettePanelContainer(props: {
   palette: string[];
   siblingRef: MutableRefObject<HTMLDivElement | null>;
@@ -30,6 +31,9 @@ export function PalettePanelContainer(props: {
               palette={props.palette}
               type={FIXED_PROGRESSION}
               onClick={onClick}
+              css={css`
+                cursor: pointer;
+              `}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -46,6 +50,7 @@ export function PalettePanelContainer(props: {
                 iconType="controlsHorizontal"
                 onClick={onClick}
                 size="xs"
+                color="text"
               />
             </EuiToolTip>
           </EuiFlexItem>

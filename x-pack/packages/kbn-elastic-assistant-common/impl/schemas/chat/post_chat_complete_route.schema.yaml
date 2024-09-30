@@ -8,8 +8,8 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: ChatComplete
-      description: Creates a model response for the given chat conversation.
-      summary: Creates a model response for the given chat conversation.
+      description: Create a model response for the given chat conversation.
+      summary: Create a model response
       tags:
         - Chat Complete API
       requestBody:

@@ -170,7 +170,7 @@
           "Item",
           "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
           "CustomValidators",
-          " | undefined; showActivityView?: boolean | undefined; }"
+          " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,

@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import { State, XYLayerConfig } from '../../types';
-import { VisualOptionsPopover } from '.';
-import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
-import { MissingValuesOptions } from './missing_values_option';
-import { FillOpacityOption } from './fill_opacity_option';
+import { SeriesType, State } from '../../types';
+import { VisualOptionsPopover, VisualOptionsPopoverProps } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -45,170 +44,43 @@ describe('Visual options popover', () => {
     };
   });
 
-  it('should disable the values and fitting for percentage area charts', () => {
+  const renderVisualOptionsPopover = (overrideProps?: Partial<VisualOptionsPopoverProps>) => {
     const state = testState();
-    const component = shallow(
+    return render(
       <VisualOptionsPopover
         datasourceLayers={frame.datasourceLayers}
         setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYLayerConfig],
-        }}
+        state={state}
+        {...overrideProps}
       />
     );
+  };
 
-    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
-    expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
-  });
+  const openAppearancePopover = async () => {
+    await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
+  };
 
-  it('should not disable the fill opacity for percentage area charts', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYLayerConfig],
-        }}
-      />
-    );
-
-    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(true);
-  });
-
-  it('should not disable the visual options for percentage area charts', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' } as XYLayerConfig],
-        }}
-      />
-    );
-
-    expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(false);
-  });
-
-  it('should hide the fitting option for bar series', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYLayerConfig],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(MissingValuesOptions).prop('isFittingEnabled')).toEqual(false);
-  });
-
-  it('should hide the fill opacity option for bar series', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYLayerConfig],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(false);
-  });
-
-  it('should hide the fill opacity option for line series', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'line' } as XYLayerConfig],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(FillOpacityOption).prop('isFillOpacityEnabled')).toEqual(false);
-  });
-
-  it('should show the popover and display field enabled for bar and horizontal_bar series', () => {
-    const state = testState();
-
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYLayerConfig],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
-  });
-
-  it('should hide in the popover the display option for area and line series', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'area' } as XYLayerConfig],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(false);
-  });
-
-  it('should keep the display option for bar series with multiple layers', () => {
-    frame.datasourceLayers = {
-      ...frame.datasourceLayers,
-      second: createMockDatasource('test').publicAPIMock,
-    };
-
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [
-            { ...state.layers[0], seriesType: 'bar' } as XYLayerConfig,
-            {
-              seriesType: 'bar',
-              layerType: LayerTypes.DATA,
-              layerId: 'second',
-              splitAccessor: 'baz',
-              xAccessor: 'foo',
-              accessors: ['bar'],
-            },
-          ],
-          fittingFunction: 'Carry',
-        }}
-      />
-    );
-
-    expect(component.find(ValueLabelsSettings).prop('isVisible')).toEqual(true);
-  });
+  it.each<{ seriesType: string; showsMissingValues?: boolean; showsFillOpacity?: boolean }>([
+    { seriesType: 'area_percentage_stacked', showsMissingValues: false, showsFillOpacity: true },
+    { seriesType: 'bar_horizontal', showsMissingValues: false, showsFillOpacity: false },
+    { seriesType: 'line', showsMissingValues: true, showsFillOpacity: false },
+  ])(
+    `should show settings for seriesTypes: $seriesType`,
+    async ({ seriesType, showsMissingValues = false, showsFillOpacity = false }) => {
+      const state = testState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = seriesType as SeriesType;
+      renderVisualOptionsPopover({ state });
+      await openAppearancePopover();
+      if (showsMissingValues) {
+        expect(screen.getByText('Missing values')).toBeInTheDocument();
+      } else {
+        expect(screen.queryByText('Missing values')).not.toBeInTheDocument();
+      }
+      if (showsFillOpacity) {
+        expect(screen.getAllByTestId('lnsFillOpacity')).toHaveLength(2);
+      } else {
+        expect(screen.queryAllByTestId('lnsFillOpacity')).toHaveLength(0);
+      }
+    }
+  );
 });

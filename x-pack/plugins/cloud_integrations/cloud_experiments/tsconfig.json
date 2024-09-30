@@ -18,7 +18,11 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/logging-mocks",
-    "@kbn/utility-types",
+    "@kbn/core-plugins-browser",
+    "@kbn/core-plugins-server",
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-feature-flags-server",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

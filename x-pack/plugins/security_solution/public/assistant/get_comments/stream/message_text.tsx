@@ -30,6 +30,7 @@ interface Props {
   content: string;
   index: number;
   loading: boolean;
+  ['data-test-subj']?: string;
 }
 
 const ANIMATION_TIME = 1;
@@ -143,7 +144,7 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content, index }: Props) {
+export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -151,7 +152,7 @@ export function MessageText({ loading, content, index }: Props) {
   const { parsingPluginList, processingPluginList } = getPluginDependencies();
 
   return (
-    <EuiText className={containerClassName}>
+    <EuiText className={containerClassName} data-test-subj={dataTestSubj}>
       <EuiMarkdownFormat
         // used by augmentMessageCodeBlocks
         className={`message-${index}`}

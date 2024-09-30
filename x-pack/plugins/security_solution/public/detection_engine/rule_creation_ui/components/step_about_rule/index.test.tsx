@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount, shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
@@ -149,7 +149,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -174,7 +174,7 @@ describe('StepAboutRuleComponent', () => {
         defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -198,7 +198,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -226,7 +226,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -249,7 +249,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -305,7 +305,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -367,7 +367,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -412,7 +412,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     const indexNames = ['.ml-anomalies-shared'];
@@ -433,7 +433,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(useFetchIndex).lastCalledWith(stepDefineStepMLRule.index);

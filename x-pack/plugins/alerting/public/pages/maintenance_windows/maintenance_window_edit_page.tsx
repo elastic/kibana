@@ -17,7 +17,6 @@ import { CreateMaintenanceWindowForm } from './components/create_maintenance_win
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 import { useGetMaintenanceWindow } from '../../hooks/use_get_maintenance_window';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { IS_SCOPED_QUERY_ENABLED } from './constants';
 
 export const MaintenanceWindowsEditPage = React.memo(() => {
   const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
@@ -44,7 +43,6 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
         maintenanceWindowId={maintenanceWindowId}
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}
-        scopedQueryFeatureFlag={IS_SCOPED_QUERY_ENABLED}
       />
     </EuiPageSection>
   );

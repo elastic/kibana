@@ -156,7 +156,6 @@ class DownloadSourceService {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
     await agentPolicyService.removeDefaultSourceFromAll(
-      soClient,
       appContextService.getInternalUserESClient(),
       id
     );

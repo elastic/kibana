@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -332,7 +332,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleOnNameBlur = useCallback(
+    const handleOnNameBlur = useCallback<NonNullable<EuiFieldTextProps['onBlur']>>(
       ({ target: { name } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));

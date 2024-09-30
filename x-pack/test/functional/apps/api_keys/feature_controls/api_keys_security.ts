@@ -14,7 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });

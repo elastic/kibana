@@ -56,7 +56,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       ...startServices
     },
   } = useMlKibana();
@@ -87,7 +87,7 @@ export function useModelActions({
 
   useEffect(() => {
     let isMounted = true;
-    mlApiServices
+    mlApi
       .hasPrivileges({
         cluster: ['manage_ingest_pipelines'],
       })
@@ -102,7 +102,7 @@ export function useModelActions({
     return () => {
       isMounted = false;
     };
-  }, [mlApiServices]);
+  }, [mlApi]);
 
   const getUserConfirmation = useMemo(
     () => getUserConfirmationProvider(overlays, startServices),
@@ -329,7 +329,7 @@ export function useModelActions({
             item.deployment_ids.some(
               (dId) =>
                 Array.isArray(item.inference_apis) &&
-                !item.inference_apis.some((inference) => inference.model_id === dId)
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {

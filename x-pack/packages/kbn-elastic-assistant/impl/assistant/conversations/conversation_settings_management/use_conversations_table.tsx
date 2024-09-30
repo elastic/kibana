@@ -40,6 +40,9 @@ export const useConversationsTable = () => {
     ({
       onDeleteActionClicked,
       onEditActionClicked,
+    }: {
+      onDeleteActionClicked: (conversation: ConversationTableItem) => void;
+      onEditActionClicked: (conversation: ConversationTableItem) => void;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {

@@ -13,8 +13,8 @@ import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './te
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
+import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';

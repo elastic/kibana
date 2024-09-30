@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { DataViewTitleSchema } from '../../api_schemas/common';
+import { dataViewTitleSchema } from '../../api_schemas/common';
+import type { FieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
+import { fieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
 import { addInternalBasePath } from '../../../../common/constants';
-
-import type { DataViewTitleSchema } from '../../../../common/api_schemas/common';
-import { dataViewTitleSchema } from '../../../../common/api_schemas/common';
-import type { FieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
-import { fieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
 import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';

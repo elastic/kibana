@@ -10,7 +10,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
-import { initialSourcererState, SourcererScopeName } from '../store/model';
+import { initialSourcererState, type SelectedDataView, SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
@@ -74,9 +74,12 @@ const { id, patternList } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-const sourcererDataView = {
+const sourcererDataView: Partial<SelectedDataView> = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {
+    title: 'myFakebeat-*',
+  },
 };
 
 describe('No data', () => {

@@ -1,0 +1,130 @@
+{
+  "id": "@kbn/core-feature-flags-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+        "id": "def-public.coreFeatureFlagsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreFeatureFlagsMock",
+        "description": [
+          "\nMocks for the Feature Flags service (browser-side)"
+        ],
+        "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "/**\n   * Mocks the entire feature flags service\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser-internal",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
+                "section": "def-public.FeatureFlagsService",
+                "text": "FeatureFlagsService"
+              },
+              ">>"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [
+              "/**\n   * Mocks the setup contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser-mocks",
+            "id": "def-public.coreFeatureFlagsMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [
+              "/**\n   * Mocks the start contract\n   */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/feature-flags/core-feature-flags-browser-mocks/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

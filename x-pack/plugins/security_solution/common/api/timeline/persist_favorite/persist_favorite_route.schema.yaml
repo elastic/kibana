@@ -15,11 +15,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistFavoriteRoute
-      summary: Persists a given users favorite status of a timeline.
+      summary: Favorite a Timeline or Timeline template
+      description: Favorite a Timeline or Timeline template for the current user.
       tags:
         - access:securitySolution
       requestBody:
-        description: The required fields used to favorite a (template) timeline.
+        description: The required fields used to favorite a (template) Timeline.
         required: true
         content:
           application/json:

@@ -36,7 +36,7 @@ const CaseCallOutComponent = ({
 }: CaseCallOutProps) => {
   const { navigateToConfigureCases } = useConfigureCasesNavigation();
   const handleCallOut = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       // if theres connectors open dropdown editor
       // if no connectors, redirect to create case page

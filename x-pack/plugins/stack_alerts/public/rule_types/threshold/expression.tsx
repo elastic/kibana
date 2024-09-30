@@ -301,7 +301,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         display="rowCompressed"
         // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.filterKuery.length > 0}
-        error={errors.filterKuery}
+        error={errors.filterKuery as string[]}
       >
         <EuiFieldSearch
           data-test-subj="filterKuery"

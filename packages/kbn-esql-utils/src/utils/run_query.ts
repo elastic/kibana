@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -14,11 +16,11 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
-export const hasStartEndParams = (query: string) => /\?start|\?end/i.test(query);
+export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
 export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?start/i.test(query);
-  const endNamedParams = /\?end/i.test(query);
+  const startNamedParams = /\?_tstart/i.test(query);
+  const endNamedParams = /\?_tend/i.test(query);
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
@@ -26,10 +28,10 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
     };
     const namedParams = [];
     if (timeParams?.start) {
-      namedParams.push({ start: timeParams.start });
+      namedParams.push({ _tstart: timeParams.start });
     }
     if (timeParams?.end) {
-      namedParams.push({ end: timeParams.end });
+      namedParams.push({ _tend: timeParams.end });
     }
     return namedParams;
   }

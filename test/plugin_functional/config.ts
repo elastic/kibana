@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
@@ -19,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/telemetry'),
       require.resolve('./test_suites/core'),
       require.resolve('./test_suites/custom_visualizations'),
+      require.resolve('./test_suites/hardening'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
@@ -26,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./test_suites/data_plugin'),
       require.resolve('./test_suites/saved_objects_management'),
       require.resolve('./test_suites/saved_objects_hidden_type'),
+      require.resolve('./test_suites/shared_ux'),
     ],
     services: {
       ...functionalConfig.get('services'),

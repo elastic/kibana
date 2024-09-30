@@ -7,6 +7,6 @@
 
 import { useMlKibana } from './kibana_context';
 
-export const useMlApiContext = () => {
-  return useMlKibana().services.mlServices.mlApiServices;
+export const useMlApi = () => {
+  return useMlKibana().services.mlServices.mlApi;
 };

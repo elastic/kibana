@@ -12,7 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, CreateRuleAdditionalOptions } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -46,9 +46,10 @@ import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & CreateRuleAdditionalOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger, licensing, experimentalFeatures } = createOptions;
+  const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -414,6 +415,15 @@ export const createNewTermsAlertType = (
 
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
+
+      if (scheduleNotificationResponseActionsService) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals,
+          signalsCount: result.createdSignalsCount,
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
+
       return { ...result, state };
     },
   };

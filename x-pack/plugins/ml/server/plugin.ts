@@ -25,6 +25,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { notificationsRoutes } from './routes/notifications';
@@ -129,6 +130,7 @@ export class MlServerPlugin
       }),
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {

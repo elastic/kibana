@@ -65,4 +65,4 @@ For example:
 * When {kib} is unable to connect to a healthy {es} cluster, errors like `master_not_discovered_exception` or `unable to revive connection` or `license is not available` errors appear.
 * When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.
 
-For more information, refer to our https://www.elastic.co/blog/troubleshooting-kibana-health[walkthrough on troubleshooting Kibana Health].
+You can find a Kibana health troubleshooting walkthrough in https://www.elastic.co/blog/troubleshooting-kibana-health[this blog] or in link:https://www.youtube.com/watch?v=AlgGYcpGvOA[this video]. 

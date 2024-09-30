@@ -79,7 +79,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     [selectedCases]
   );
 
-  const { data, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
+  const { data, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({
     uids: Array.from(assignees.values()),
   });
 
@@ -198,7 +198,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
   );
 
   const onSearchChange = useCallback(
-    (value) => {
+    (value: string) => {
       setSearchValue(value);
       onContentChange(value);
     },

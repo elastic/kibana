@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { LocatorDefinition } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import { CREATE_NEW_INDEX_URL, ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../constants';
 
-export type CreatIndexLocatorParams = SerializableRecord;
+export type CreateIndexLocatorParams = SerializableRecord;
 
-export class CreatIndexLocatorDefinition implements LocatorDefinition<CreatIndexLocatorParams> {
-  public readonly id = 'CREATE_INDEX_LOCATOR_ID';
-
+export class CreateIndexLocatorDefinition implements LocatorDefinition<CreateIndexLocatorParams> {
   public readonly getLocation = async () => {
     return {
       app: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
@@ -22,4 +20,6 @@ export class CreatIndexLocatorDefinition implements LocatorDefinition<CreatIndex
       state: {},
     };
   };
+
+  public readonly id = 'CREATE_INDEX_LOCATOR_ID';
 }

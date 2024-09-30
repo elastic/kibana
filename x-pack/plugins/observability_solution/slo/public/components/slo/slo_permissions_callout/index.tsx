@@ -46,7 +46,7 @@ export function SloPermissionsCallout() {
               <li>
                 <FormattedMessage
                   id="xpack.slo.permissionsCallout.readSloPermission"
-                  defaultMessage="'read' permission on index pattern: .slo-*"
+                  defaultMessage="'read' and 'view_index_metadata' permission on index pattern: .slo-observability.*"
                 />
               </li>
             </ul>
@@ -62,13 +62,7 @@ export function SloPermissionsCallout() {
               <li>
                 <FormattedMessage
                   id="xpack.slo.permissionsCallout.writeSloPermission"
-                  defaultMessage="'all' permission on index pattern: .slo-*"
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.slo.permissionsCallout.writeClusterPermission"
-                  defaultMessage="'manage_transform' and 'manage_ingest_pipelines' cluster permissions"
+                  defaultMessage="'read', 'view_index_metadata', 'write' and 'manage' permission on index pattern: .slo-observability.*"
                 />
               </li>
               <li>

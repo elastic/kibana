@@ -16,9 +16,11 @@ const defaultLabel = i18n.translate('xpack.lens.experimentalLabel', {
 export const ExperimentalBadge = ({
   label = defaultLabel,
   color,
+  size = 's',
 }: {
   label?: string;
   color?: 'subdued' | undefined;
+  size?: 's' | 'm';
 }) => {
   return (
     <EuiToolTip content={label}>
@@ -28,7 +30,7 @@ export const ExperimentalBadge = ({
         `}
         iconType="beaker"
         label={label}
-        size="s"
+        size={size}
         color={color}
       />
     </EuiToolTip>

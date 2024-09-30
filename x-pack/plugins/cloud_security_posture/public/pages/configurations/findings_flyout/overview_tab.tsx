@@ -18,19 +18,19 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+} from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import {
-  INTERNAL_FEATURE_FLAGS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_PATTERN,
-} from '../../../../common/constants';
-import { useDataView } from '../../../common/api/use_data_view';
+import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import {
   BenchmarkIcons,
   CodeBlock,
@@ -114,13 +114,13 @@ const getDetailsList = (
       getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
-      defaultMessage: 'Index',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
+      defaultMessage: 'Data View',
     }),
     description: discoverDataViewLink ? (
-      <EuiLink href={discoverDataViewLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+      <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
     ) : (
-      LATEST_FINDINGS_INDEX_DEFAULT_NS
+      CDR_MISCONFIGURATIONS_INDEX_PATTERN
     ),
   },
 ];
@@ -189,13 +189,13 @@ export const OverviewTab = ({
   ruleFlyoutLink?: string;
 }) => {
   const { discover } = useKibana().services;
-  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const cdrMisconfigurationsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding
   const discoverDataViewLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
-        dataViewId: latestFindingsDataView.data?.id,
+        dataViewId: cdrMisconfigurationsDataView.data?.id,
         ...(data.data_stream?.dataset && {
           filters: [
             {
@@ -212,7 +212,7 @@ export const OverviewTab = ({
           ],
         }),
       }),
-    [data.data_stream?.dataset, discover.locator, latestFindingsDataView.data?.id]
+    [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
   const hasEvidence = !isEmpty(data.result?.evidence);

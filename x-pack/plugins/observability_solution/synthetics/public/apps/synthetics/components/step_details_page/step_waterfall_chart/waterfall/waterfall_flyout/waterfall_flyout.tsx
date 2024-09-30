@@ -93,13 +93,7 @@ export const WaterfallFlyout = ({
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
               <EuiFlexItem>
-                <MiddleTruncatedText
-                  index={x + 1}
-                  text={url}
-                  url={url}
-                  ariaLabel={url}
-                  highestIndex={x + 1}
-                />
+                <MiddleTruncatedText index={x + 1} url={url} ariaLabel={url} highestIndex={x + 1} />
               </EuiFlexItem>
             </h2>
           </EuiTitle>

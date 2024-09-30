@@ -80,6 +80,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
+          scope: 'observability',
         } as UseChatProps,
       });
     });
@@ -109,6 +110,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
+          scope: 'observability',
         } as UseChatProps,
       });
 

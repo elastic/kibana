@@ -18,21 +18,24 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   const archiveName = 'apm_8.0.0';
 
   registry.when('Custom links with a basic license', { config: 'basic', archives: [] }, () => {
-    it('returns a 403 forbidden', async () => {
-      const customLink = {
-        url: 'https://elastic.co',
-        label: 'with filters',
-        filters: [
-          { key: 'service.name', value: 'baz' },
-          { key: 'transaction.type', value: 'qux' },
-        ],
-      } as CustomLink;
+    describe('basic', function () {
+      this.tags('skipFIPS');
+      it('returns a 403 forbidden', async () => {
+        const customLink = {
+          url: 'https://elastic.co',
+          label: 'with filters',
+          filters: [
+            { key: 'service.name', value: 'baz' },
+            { key: 'transaction.type', value: 'qux' },
+          ],
+        } as CustomLink;
 
-      const err = await expectToReject<ApmApiError>(() => createCustomLink(customLink));
-      expect(err.res.status).to.be(403);
-      expectSnapshot(err.res.body.message).toMatchInline(
-        `"To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."`
-      );
+        const err = await expectToReject<ApmApiError>(() => createCustomLink(customLink));
+        expect(err.res.status).to.be(403);
+        expectSnapshot(err.res.body.message).toMatchInline(
+          `"To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."`
+        );
+      });
     });
   });
 

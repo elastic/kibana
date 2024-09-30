@@ -2448,7 +2448,7 @@
             "section": "def-common.UseDataGridReturnType",
             "text": "UseDataGridReturnType"
           },
-          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"ccsWarning\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,

@@ -8,6 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -15,7 +18,7 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -23,8 +26,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
@@ -95,6 +96,19 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('user.name', userName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+    ignore_unavailable: true,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -120,11 +134,20 @@ export const UserPanel = ({
             name: userName,
             email,
           },
+          path: tab ? { tab } : undefined,
+          hasMisconfigurationFindings,
         },
-        path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
+    [
+      telemetry,
+      openLeftPanel,
+      userRiskData?.user?.risk,
+      scopeId,
+      userName,
+      email,
+      hasMisconfigurationFindings,
+    ]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
@@ -157,7 +180,9 @@ export const UserPanel = ({
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!isPreviewMode && hasUserDetailsData}
+              flyoutIsExpandable={
+                !isPreviewMode && (hasUserDetailsData || hasMisconfigurationFindings)
+              }
               expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader

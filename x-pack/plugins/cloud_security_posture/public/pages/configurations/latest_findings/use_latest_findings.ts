@@ -11,19 +11,18 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../../../common/types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
+import { showErrorToast } from '@kbn/cloud-security-posture';
+import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
-} from '../../../../common/constants';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
+} from '@kbn/cloud-security-posture-common';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -48,7 +47,7 @@ export const getFindingsQuery = (
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),

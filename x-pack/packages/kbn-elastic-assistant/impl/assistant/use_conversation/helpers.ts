@@ -10,7 +10,6 @@ import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../assistant_context/types';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
-import { DEFAULT_SYSTEM_PROMPT_NAME } from '../../content/prompts/system/translations';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -76,11 +75,10 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
  *
  * @param allSystemPrompts All available System Prompts
  */
-export const getDefaultNewSystemPrompt = (allSystemPrompts: PromptResponse[]) => {
-  const fallbackSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.name === DEFAULT_SYSTEM_PROMPT_NAME
-  );
-  return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? fallbackSystemPrompt;
+export const getDefaultNewSystemPrompt = (
+  allSystemPrompts: PromptResponse[]
+): PromptResponse | undefined => {
+  return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
 };
 
 /**
@@ -101,24 +99,6 @@ export const getDefaultSystemPrompt = ({
   );
 
   return conversationSystemPrompt;
-};
-
-/**
- * Returns the default system prompt
- *
- * @param allSystemPrompts All available System Prompts
- * @param conversation Conversation to get the default system prompt for
- */
-export const getFallbackDefaultSystemPrompt = ({
-  allSystemPrompts,
-}: {
-  allSystemPrompts: PromptResponse[];
-}): PromptResponse | undefined => {
-  const fallbackSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.name === DEFAULT_SYSTEM_PROMPT_NAME
-  );
-
-  return fallbackSystemPrompt;
 };
 
 /**

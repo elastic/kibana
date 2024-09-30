@@ -15,3 +15,4 @@ fi
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh
+.buildkite/scripts/steps/openapi_bundling/final_merge.sh

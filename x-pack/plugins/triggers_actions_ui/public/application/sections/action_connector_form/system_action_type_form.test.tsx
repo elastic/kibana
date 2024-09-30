@@ -175,7 +175,7 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    userEvent.click(await screen.findByTestId('system-action-delete-button'));
+    await userEvent.click(await screen.findByTestId('system-action-delete-button'));
 
     await waitFor(() => {
       expect(onDelete).toHaveBeenCalled();
@@ -205,7 +205,7 @@ describe('action_type_form', () => {
       </I18nProvider>
     );
 
-    userEvent.click(await screen.findByTestId('test-button'));
+    await userEvent.click(await screen.findByTestId('test-button'));
 
     expect(setActionParamsProperty).toHaveBeenCalledWith('my-key', 'my-value', 1);
   });

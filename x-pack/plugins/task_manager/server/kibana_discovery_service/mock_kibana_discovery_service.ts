@@ -10,6 +10,7 @@ import { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/serv
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION, DEFAULT_DISCOVERY_INTERVAL_MS } from '../config';
 
 export const createDiscoveryServiceMock = (currentNode: string) => {
   const savedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -18,6 +19,10 @@ export const createDiscoveryServiceMock = (currentNode: string) => {
     savedObjectsRepository,
     logger,
     currentNode,
+    config: {
+      active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+      interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+    },
   });
 
   for (const method of ['getActiveKibanaNodes'] as Array<keyof KibanaDiscoveryService>) {

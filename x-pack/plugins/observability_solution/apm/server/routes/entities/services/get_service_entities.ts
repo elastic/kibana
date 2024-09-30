@@ -7,7 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/core/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getEntities } from '../get_entities';
 import { calculateAvgMetrics } from '../utils/calculate_avg_metrics';

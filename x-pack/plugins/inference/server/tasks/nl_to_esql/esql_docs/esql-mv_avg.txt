@@ -1,0 +1,25 @@
+# MV_AVG
+
+The MV_AVG function calculates the average of all values in a multivalued field and returns a single value.
+
+## Syntax
+
+`MV_AVG(number)`
+
+### Parameters
+
+#### number
+
+A multivalued expression.
+
+## Examples
+
+```esql
+ROW a=[3, 5, 1, 6]
+| EVAL avg_a = MV_AVG(a)
+```
+
+```esql
+ROW scores=[10, 20, 30, 40]
+| EVAL average_score = MV_AVG(scores)
+```

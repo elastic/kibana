@@ -44,7 +44,6 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -58,10 +57,11 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
+import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
-  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
+  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: true, value: 5000 },
   [DEFAULT_APP_TIME_RANGE]: {
     from: DEFAULT_FROM,
     to: DEFAULT_TO,
@@ -123,7 +123,6 @@ export const createStartServicesMock = (
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
-  const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
@@ -214,7 +213,7 @@ export const createStartServicesMock = (
     ml: {
       locator,
     },
-    telemetry: {},
+    telemetry: createTelemetryServiceMock(),
     theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),
@@ -237,7 +236,6 @@ export const createStartServicesMock = (
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
-    cloudExperiments,
     guidedOnboarding,
     cloud: {
       ...cloud,

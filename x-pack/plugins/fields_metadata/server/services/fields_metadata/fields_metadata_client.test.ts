@@ -93,16 +93,16 @@ describe('FieldsMetadataClient class', () => {
 
       const timestampField = timestampFieldInstance.toPlain();
 
-      expect(timestampField.hasOwnProperty('dashed_name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('description')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('example')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('flat_name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('level')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('name')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('normalize')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('required')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('short')).toBeTruthy();
-      expect(timestampField.hasOwnProperty('type')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'dashed_name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'description')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'example')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'flat_name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'level')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'name')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'normalize')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'required')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'short')).toBeTruthy();
+      expect(Object.hasOwn(timestampField, 'type')).toBeTruthy();
     });
 
     it('should attempt resolving the field from an integration if it does not exist in ECS/Metadata and the integration and dataset params are provided', async () => {
@@ -118,14 +118,14 @@ describe('FieldsMetadataClient class', () => {
 
       const onePasswordField = onePasswordFieldInstance.toPlain();
 
-      expect(onePasswordField.hasOwnProperty('name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('type')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('description')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('flat_name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('source')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('dashed_name')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('normalize')).toBeTruthy();
-      expect(onePasswordField.hasOwnProperty('short')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'type')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'description')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'flat_name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'source')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'dashed_name')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'normalize')).toBeTruthy();
+      expect(Object.hasOwn(onePasswordField, 'short')).toBeTruthy();
     });
 
     it('should not resolve the field from an integration if the integration and dataset params are not provided', async () => {
@@ -148,7 +148,7 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
     });
 
     it('should resolve a FieldsMetadataDictionary of matching fields, including integration fields when integration and dataset params are provided', async () => {
@@ -162,8 +162,8 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
-      expect(fields.hasOwnProperty('onepassword.client.platform_version')).toBeTruthy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
     });
 
     it('should resolve a FieldsMetadataDictionary of matching fields, skipping unmatched fields', async () => {
@@ -177,9 +177,9 @@ describe('FieldsMetadataClient class', () => {
 
       const fields = fieldsDictionaryInstance.toPlain();
 
-      expect(fields.hasOwnProperty('@timestamp')).toBeTruthy();
-      expect(fields.hasOwnProperty('onepassword.client.platform_version')).toBeTruthy();
-      expect(fields.hasOwnProperty('not-existing-field')).toBeFalsy();
+      expect(Object.hasOwn(fields, '@timestamp')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'onepassword.client.platform_version')).toBeTruthy();
+      expect(Object.hasOwn(fields, 'not-existing-field')).toBeFalsy();
     });
   });
 });

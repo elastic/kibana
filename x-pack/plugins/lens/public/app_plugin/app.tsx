@@ -42,7 +42,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackUiCounterEvents } from '../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -325,7 +325,7 @@ export function App({
         prevVisState
       );
       if (telemetryEvents && telemetryEvents.length) {
-        trackUiCounterEvents(telemetryEvents);
+        trackSaveUiCounterEvents(telemetryEvents);
       }
       return runSaveLensVisualization(
         {

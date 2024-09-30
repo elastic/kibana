@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DashboardToolBar } from './dashboard_tool_bar';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -34,9 +34,7 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
-const mockDashboardContainer = {
-  select: jest.fn(),
-} as unknown as DashboardAPI;
+const mockDashboardContainer = {} as unknown as DashboardApi;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>

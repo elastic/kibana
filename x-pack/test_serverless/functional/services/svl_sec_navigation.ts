@@ -19,7 +19,7 @@ export function SvlSecNavigationServiceProvider({
     async navigateToLandingPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
-        await testSubjects.existOrFail('welcome-header', { timeout: 2000 });
+        await testSubjects.existOrFail('data-ingestion-hub-header', { timeout: 2000 });
       });
     },
   };

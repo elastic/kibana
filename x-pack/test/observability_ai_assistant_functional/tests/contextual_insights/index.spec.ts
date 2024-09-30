@@ -8,7 +8,6 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import OpenAI from 'openai';
 import {
   createLlmProxy,
   LlmProxy,
@@ -123,11 +122,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        const interceptor = proxy.intercept(
-          'conversation',
-          (body) => !isFunctionTitleRequest(body),
-          'This error is nothing to worry about. Have a nice day!'
-        );
+        const interceptor = proxy.interceptConversation({
+          response: 'This error is nothing to worry about. Have a nice day!',
+        });
 
         await openContextualInsights();
 
@@ -140,9 +137,4 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
 }

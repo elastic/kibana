@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { flatMap, uniq } from 'lodash';
+import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -23,8 +24,6 @@ import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types_ol
 import {
   SUPPORTED_POLICY_TEMPLATES,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {

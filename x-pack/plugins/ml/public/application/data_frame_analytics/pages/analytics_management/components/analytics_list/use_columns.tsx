@@ -216,7 +216,6 @@ export const useColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnId',
-      scope: 'row',
       render: (id: string) => {
         return <span title={id}>{id}</span>;
       },

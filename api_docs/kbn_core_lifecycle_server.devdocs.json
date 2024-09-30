@@ -302,6 +302,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreSetup.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "{@link FeatureFlagsSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
             "id": "def-server.CoreSetup.http",
             "type": "CompoundType",
             "tags": [],
@@ -749,6 +771,28 @@
                 "docId": "kibKbnCoreExecutionContextServerPluginApi",
                 "section": "def-server.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-server.CoreStart.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "{@link FeatureFlagsStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-feature-flags-server",
+                "scope": "server",
+                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+                "section": "def-server.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",

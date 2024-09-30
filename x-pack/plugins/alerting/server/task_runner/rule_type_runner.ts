@@ -31,6 +31,7 @@ import { ExecutorServices } from './get_executor_services';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
 import { withAlertingSpan } from './lib';
+import { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -203,6 +204,7 @@ export class RuleTypeRunner<
         };
 
         let executorResult: { state: RuleState } | undefined;
+        let wrappedSearchSourceClient: WrappedSearchSourceClient | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -219,17 +221,23 @@ export class RuleTypeRunner<
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
-                  dataViews: executorServices.dataViews,
                   ruleMonitoringService: executorServices.ruleMonitoringService,
                   ruleResultService: executorServices.ruleResultService,
                   savedObjectsClient: executorServices.savedObjectsClient,
                   scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
-                  searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
                   share: this.options.context.share,
                   shouldStopExecution: () => this.cancelled,
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
+                  getDataViews: executorServices.getDataViews,
+                  getSearchSourceClient: async () => {
+                    if (!wrappedSearchSourceClient) {
+                      wrappedSearchSourceClient =
+                        await executorServices.getWrappedSearchSourceClient();
+                    }
+                    return wrappedSearchSourceClient.searchSourceClient;
+                  },
                 },
                 params: validatedParams,
                 state: ruleTypeState as RuleState,
@@ -306,10 +314,12 @@ export class RuleTypeRunner<
         context.alertingEventLogger.setExecutionSucceeded(
           `rule executed: ${context.ruleLogPrefix}`
         );
-        context.ruleRunMetricsStore.setSearchMetrics([
-          executorServices.wrappedScopedClusterClient.getMetrics(),
-          executorServices.wrappedSearchSourceClient.getMetrics(),
-        ]);
+
+        const metrics = [executorServices.wrappedScopedClusterClient.getMetrics()];
+        if (wrappedSearchSourceClient) {
+          metrics.push(wrappedSearchSourceClient.getMetrics());
+        }
+        context.ruleRunMetricsStore.setSearchMetrics(metrics);
 
         return {
           updatedRuleTypeState: executorResult?.state || undefined,

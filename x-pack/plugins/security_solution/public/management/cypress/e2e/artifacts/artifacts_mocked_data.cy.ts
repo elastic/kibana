@@ -35,7 +35,8 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-describe('Artifacts pages', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/191914
+describe.skip('Artifacts pages', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {

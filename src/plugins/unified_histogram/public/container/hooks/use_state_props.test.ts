@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Suggestion } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
-import { UnifiedHistogramFetchStatus } from '../../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionContext } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
@@ -451,10 +452,12 @@ describe('useStateProps', () => {
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
 
     act(() => {
-      onSuggestionContextChange({ title: 'Stacked Bar' } as Suggestion);
+      onSuggestionContextChange({
+        suggestion: { title: 'Stacked Bar' },
+      } as UnifiedHistogramSuggestionContext);
     });
     expect(stateService.setCurrentSuggestionContext).toHaveBeenLastCalledWith({
-      title: 'Stacked Bar',
+      suggestion: { title: 'Stacked Bar' },
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
 
 export interface UseFetchRelatedAlertsByAncestryParams {

@@ -1286,6 +1286,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.callstacks.use_hardware',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.use_hardware',
+      {
+        defaultMessage:
+          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.exclude_hotpatch_extension_pages',
+    first_supported_version: '8.15.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.exclude_hotpatch_extension_pages',
+      {
+        defaultMessage:
+          'Exclude Windows 11 24H2 hotpatch extension pages, which resemble injected code, from callstack module stomp scanning.  Default: true',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.process_ancestry_length',
     first_supported_version: '8.15',
     documentation: i18n.translate(

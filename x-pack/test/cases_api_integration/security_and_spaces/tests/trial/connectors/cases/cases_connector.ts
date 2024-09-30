@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext): void => {
               "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
             duration: null,
             external_service: null,
-            id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
+            id: theCase.id,
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
@@ -335,6 +335,118 @@ export default ({ getService }: FtrProviderContext): void => {
             status: 'open',
             tags: ['auto-generated', 'rule:rule-test-id', 'rule', 'test'],
             title: 'Test rule (Auto-created)',
+            totalAlerts: 5,
+            totalComment: 0,
+            updated_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+          });
+        });
+
+        it('should create a case with template', async () => {
+          const customFields = [
+            {
+              key: 'first_custom_field_key',
+              label: 'text 1',
+              type: CustomFieldTypes.TEXT,
+              required: true,
+            },
+          ];
+
+          const connector = {
+            id: 'jira-1',
+            name: 'Jira',
+            type: ConnectorTypes.jira,
+            fields: { issueType: 'Task', priority: 'Low', parent: null },
+          };
+
+          const templates = [
+            {
+              key: 'test_template',
+              name: 'Test template',
+              description: 'This is a test template',
+              tags: ['foo', 'bar'],
+              caseFields: {
+                title: 'Case with sample template',
+                description: 'case desc',
+                severity: CaseSeverity.HIGH,
+                category: 'my category',
+                tags: ['sample'],
+                assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+                customFields: [
+                  {
+                    key: 'first_custom_field_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+                connector,
+              },
+            },
+          ];
+
+          const newReq = getRequest({ templateId: 'test_template' });
+
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: { templates, customFields, connector },
+            })
+          );
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req: newReq });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const theCase = removeServerGeneratedData(cases.cases[0]);
+
+          expect(theCase).to.eql({
+            assignees: [
+              {
+                uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+              },
+            ],
+            category: 'my category',
+            closed_at: null,
+            closed_by: null,
+            comments: [],
+            connector: {
+              fields: {
+                issueType: 'Task',
+                parent: null,
+                priority: 'Low',
+              },
+              id: 'jira-1',
+              name: 'Jira',
+              type: '.jira',
+            },
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            customFields: [
+              {
+                key: 'first_custom_field_key',
+                type: 'text',
+                value: 'this is a text field value',
+              },
+            ],
+            description: 'case desc',
+            duration: null,
+            external_service: null,
+            id: theCase.id,
+            owner: 'securitySolutionFixture',
+            settings: {
+              syncAlerts: false,
+            },
+            severity: 'high',
+            status: 'open',
+            tags: ['auto-generated', 'rule:rule-test-id', 'rule', 'test', 'sample'],
+            title: 'Case with sample template',
             totalAlerts: 5,
             totalComment: 0,
             updated_by: {
@@ -1174,6 +1286,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen: 5,
+      templateId: null,
       ...params,
     },
   };

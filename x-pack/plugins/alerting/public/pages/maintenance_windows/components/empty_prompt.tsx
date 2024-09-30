@@ -24,7 +24,12 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
     const renderActions = useMemo(() => {
       if (showCreateButton) {
         return [
-          <EuiButton key="create-action" fill onClick={onClickCreate}>
+          <EuiButton
+            data-test-subj="mw-create-button"
+            key="create-action"
+            fill
+            onClick={onClickCreate}
+          >
             {i18n.EMPTY_PROMPT_BUTTON}
           </EuiButton>,
           <EuiButtonEmpty

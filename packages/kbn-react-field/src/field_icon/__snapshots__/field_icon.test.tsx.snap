@@ -265,6 +265,16 @@ exports[`FieldIcon renders known field types rank_features is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types semantic_text is rendered 1`] = `
+<EuiToken
+  aria-label="semantic_text"
+  className="kbnFieldIcon"
+  iconType="tokenSemanticText"
+  size="s"
+  title="semantic_text"
+/>
+`;
+
 exports[`FieldIcon renders known field types shape is rendered 1`] = `
 <EuiToken
   aria-label="shape"

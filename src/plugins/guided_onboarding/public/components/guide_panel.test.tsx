@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { act } from 'react-dom/test-utils';
@@ -456,7 +457,7 @@ describe('Guided setup', () => {
         expect(
           find('guidePanelStepDescription')
             .first()
-            .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
+            .containsMatchingElement(<p>{testGuideConfig.steps[2].description as string}</p>)
         ).toBe(true);
       });
 
@@ -474,7 +475,7 @@ describe('Guided setup', () => {
             .containsMatchingElement(
               <ul>
                 {testGuideConfig.steps[0].descriptionList?.map((description, i) => (
-                  <li key={i}>{description}</li>
+                  <li key={i}>{description as string}</li>
                 ))}
               </ul>
             )

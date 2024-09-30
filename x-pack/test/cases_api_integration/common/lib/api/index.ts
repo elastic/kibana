@@ -423,7 +423,7 @@ export const updateCase = async ({
 }): Promise<Case[]> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -654,7 +654,7 @@ export const pushCase = async ({
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: res } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -831,7 +831,7 @@ export const replaceCustomField = async ({
     )}${CASES_INTERNAL_URL}/${caseId}/custom_fields/${customFieldId}`
   );
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: theCustomField } = await apiCall
     .set('kbn-xsrf', 'true')

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -24,7 +25,7 @@ import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { GRID_STYLE } from '../../constants';
+import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
@@ -55,7 +56,7 @@ export interface CompareDocumentsProps {
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
 const COMPARISON_IN_MEMORY: EuiDataGridInMemory = { level: 'sorting' };
-const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...GRID_STYLE, stripes: undefined };
+const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...DATA_GRID_STYLE_DEFAULT, stripes: undefined };
 
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGridComparison${key}`;
 

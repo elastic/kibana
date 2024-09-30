@@ -31,7 +31,7 @@ import { PipelineDetails } from './pipeline_details';
 import { TestTrainedModel } from './test_trained_model';
 import { OnFailureConfiguration } from '../../components/shared';
 import { ReviewAndCreatePipeline } from '../../components/shared';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
 import { type InferecePipelineCreationState } from './state';
@@ -67,7 +67,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
 
   const {
     trainedModels: { createInferencePipeline },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const createPipeline = async () => {
     setFormState({ ...formState, creatingPipeline: true });

@@ -243,21 +243,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('job creation inputs the query delay');
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
           await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
-          if (testData.datafeedConfig.hasOwnProperty('queryDelay')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'queryDelay')) {
             await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay!);
           }
 
           await ml.testExecution.logTestStep('job creation inputs the frequency');
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
           await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
-          if (testData.datafeedConfig.hasOwnProperty('frequency')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'frequency')) {
             await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency!);
           }
 
           await ml.testExecution.logTestStep('job creation inputs the scroll size');
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
           await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
-          if (testData.datafeedConfig.hasOwnProperty('scrollSize')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'scrollSize')) {
             await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize!);
           }
 
@@ -270,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('job creation selects the categorization field');
           await ml.jobWizardAdvanced.assertCategorizationFieldInputExists();
-          if (testData.pickFieldsConfig.hasOwnProperty('categorizationField')) {
+          if (Object.hasOwn(testData.pickFieldsConfig, 'categorizationField')) {
             await ml.jobWizardAdvanced.selectCategorizationField(
               testData.pickFieldsConfig.categorizationField!
             );
@@ -280,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('job creation selects the summary count field');
           await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-          if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
+          if (Object.hasOwn(testData.pickFieldsConfig, 'summaryCountField')) {
             await ml.jobWizardAdvanced.selectSummaryCountField(
               testData.pickFieldsConfig.summaryCountField!
             );
@@ -307,22 +307,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
             await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-            if (detector.hasOwnProperty('field')) {
+            if (Object.hasOwn(detector, 'field')) {
               await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
             }
-            if (detector.hasOwnProperty('byField')) {
+            if (Object.hasOwn(detector, 'byField')) {
               await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
             }
-            if (detector.hasOwnProperty('overField')) {
+            if (Object.hasOwn(detector, 'overField')) {
               await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
             }
-            if (detector.hasOwnProperty('partitionField')) {
+            if (Object.hasOwn(detector, 'partitionField')) {
               await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
             }
-            if (detector.hasOwnProperty('excludeFrequent')) {
+            if (Object.hasOwn(detector, 'excludeFrequent')) {
               await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
             }
-            if (detector.hasOwnProperty('description')) {
+            if (Object.hasOwn(detector, 'description')) {
               await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
             }
 
@@ -334,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               index,
               detector.identifier,
-              detector.hasOwnProperty('description') ? detector.description! : undefined
+              Object.hasOwn(detector, 'description') ? detector.description! : undefined
             );
           }
 
@@ -423,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...testData.expected.row,
           });
 
-          await ml.jobTable.assertJobRowDetailsCounts(
+          await ml.jobExpandedDetails.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,
@@ -459,20 +459,20 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('job cloning pre-fills the query delay');
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
-          if (testData.datafeedConfig.hasOwnProperty('queryDelay')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'queryDelay')) {
             await ml.jobWizardAdvanced.assertQueryDelayValue(testData.datafeedConfig.queryDelay!);
           }
 
           await ml.testExecution.logTestStep('job cloning pre-fills the frequency');
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
-          if (testData.datafeedConfig.hasOwnProperty('frequency')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'frequency')) {
             await ml.jobWizardAdvanced.assertFrequencyValue(testData.datafeedConfig.frequency!);
           }
 
           await ml.testExecution.logTestStep('job cloning pre-fills the scroll size');
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
           await ml.jobWizardAdvanced.assertScrollSizeValue(
-            testData.datafeedConfig.hasOwnProperty('scrollSize')
+            Object.hasOwn(testData.datafeedConfig, 'scrollSize')
               ? testData.datafeedConfig.scrollSize!
               : defaultValues.scrollSize
           );
@@ -487,7 +487,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('job cloning pre-fills the categorization field');
           await ml.jobWizardAdvanced.assertCategorizationFieldInputExists();
           await ml.jobWizardAdvanced.assertCategorizationFieldSelection(
-            testData.pickFieldsConfig.hasOwnProperty('categorizationField')
+            Object.hasOwn(testData.pickFieldsConfig, 'categorizationField')
               ? [testData.pickFieldsConfig.categorizationField!]
               : []
           );
@@ -495,7 +495,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('job cloning pre-fills the summary count field');
           await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
           await ml.jobWizardAdvanced.assertSummaryCountFieldSelection(
-            testData.pickFieldsConfig.hasOwnProperty('summaryCountField')
+            Object.hasOwn(testData.pickFieldsConfig, 'summaryCountField')
               ? [testData.pickFieldsConfig.summaryCountField!]
               : []
           );
@@ -505,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               index,
               detector.identifier,
-              detector.hasOwnProperty('description') ? detector.description! : undefined
+              Object.hasOwn(detector, 'description') ? detector.description! : undefined
             );
             await ml.jobWizardAdvanced.clickEditDetector(index);
 
@@ -519,23 +519,23 @@ export default function ({ getService }: FtrProviderContext) {
 
             await ml.jobWizardAdvanced.assertDetectorFunctionSelection([detector.function]);
             await ml.jobWizardAdvanced.assertDetectorFieldSelection(
-              detector.hasOwnProperty('field') ? [detector.field!] : []
+              Object.hasOwn(detector, 'field') ? [detector.field!] : []
             );
             await ml.jobWizardAdvanced.assertDetectorByFieldSelection(
-              detector.hasOwnProperty('byField') ? [detector.byField!] : []
+              Object.hasOwn(detector, 'byField') ? [detector.byField!] : []
             );
             await ml.jobWizardAdvanced.assertDetectorOverFieldSelection(
-              detector.hasOwnProperty('overField') ? [detector.overField!] : []
+              Object.hasOwn(detector, 'overField') ? [detector.overField!] : []
             );
             await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection(
-              detector.hasOwnProperty('partitionField') ? [detector.partitionField!] : []
+              Object.hasOwn(detector, 'partitionField') ? [detector.partitionField!] : []
             );
             await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection(
-              detector.hasOwnProperty('excludeFrequent') ? [detector.excludeFrequent!] : []
+              Object.hasOwn(detector, 'excludeFrequent') ? [detector.excludeFrequent!] : []
             );
             // Currently, a description different form the identifier is generated for detectors with partition field
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue(
-              detector.hasOwnProperty('description')
+              Object.hasOwn(detector, 'description')
                 ? detector.description!
                 : detector.identifier.replace('partition_field_name', 'partitionfield')
             );
@@ -638,7 +638,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...testData.expected.row,
           });
 
-          await ml.jobTable.assertJobRowDetailsCounts(
+          await ml.jobExpandedDetails.assertJobRowDetailsCounts(
             testData.jobIdClone,
             {
               job_id: testData.jobIdClone,

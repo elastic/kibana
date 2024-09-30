@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -132,7 +132,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
-            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -344,9 +343,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             !isQueryParams(params) &&
             !isEqlParams(params)
           ) {
+            const dataViews = await services.getDataViews();
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
-              dataViews: services.dataViews,
+              dataViews,
               language: params.language,
               ruleExecutionLogger,
             });
@@ -366,18 +366,26 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
-            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
-              experimentalFeatures,
-              alertTimestampOverride
+              experimentalFeatures
             );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
+            const [ignoreFieldsRegexes, ignoreFieldsStandard] = partition(
+              [...ignoreFields, ...legacySignalFields],
+              (field: string) => field.startsWith('/') && field.endsWith('/')
+            );
+            const ignoreFieldsObject: Record<string, boolean> = {};
+            ignoreFieldsStandard.forEach((field) => {
+              ignoreFieldsObject[field] = true;
+            });
             const wrapHits = wrapHitsFactory({
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
+              ignoreFields: ignoreFieldsObject,
+              ignoreFieldsRegexes,
               mergeStrategy,
               completeRule,
               spaceId,

@@ -142,7 +142,7 @@ export async function deleteFleetServerHost(
     );
   }
 
-  await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
+  await agentPolicyService.removeFleetServerHostFromAll(esClient, id);
 
   return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
 }

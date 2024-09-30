@@ -274,8 +274,16 @@ async function executor(
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, configurationUtilities, services, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    configurationUtilities,
+    services,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
@@ -366,7 +374,12 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
+    result = await sendEmail(
+      logger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',

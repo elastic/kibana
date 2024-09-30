@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // Please also add new aliases to .buildkite/scripts/steps/storybooks/build_and_upload.ts
@@ -21,7 +22,6 @@ export const storybookAliases = {
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
-  controls: 'src/plugins/controls/storybook',
   custom_icons: 'packages/kbn-custom-icons/.storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
@@ -44,6 +44,7 @@ export const storybookAliases = {
   grouping: 'packages/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/observability_solution/infra/.storybook',
+  inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
   investigate: 'x-pack/plugins/observability_solution/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',

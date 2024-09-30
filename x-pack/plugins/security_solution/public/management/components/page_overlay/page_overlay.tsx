@@ -197,9 +197,9 @@ export const PageOverlay = memo<PageOverlayProps>(
     const isMounted = useIsMounted();
     const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
-    const portalEleRef = useRef<Node>();
+    const portalEleRef = useRef<HTMLElement | null>();
 
-    const setPortalEleRef: EuiPortalProps['portalRef'] = useCallback((node) => {
+    const setPortalEleRef = useCallback<NonNullable<EuiPortalProps['portalRef']>>((node) => {
       portalEleRef.current = node;
     }, []);
 

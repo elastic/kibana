@@ -1,7 +1,7 @@
 post:
   summary: Delete agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   operationId: delete-agent-policy
   responses:
     '200':

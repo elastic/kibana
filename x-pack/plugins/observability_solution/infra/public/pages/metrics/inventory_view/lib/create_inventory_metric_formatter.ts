@@ -31,7 +31,7 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },
-  cpuTotal: {
+  cpuV2: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
   },

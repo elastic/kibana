@@ -208,6 +208,13 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataDrift', 'mlPageDataDrift');
     },
 
+    async navigateToSuppliedConfigurations() {
+      await this.navigateToArea(
+        '~mlMainTab & ~suppliedConfigurations',
+        'mlPageSuppliedConfigurations'
+      );
+    },
+
     async navigateToJobManagement() {
       await this.navigateToAnomalyDetection();
     },

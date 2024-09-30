@@ -9,8 +9,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
   cspBenchmarkRulesBulkActionRequestSchema,
-  CspBenchmarkRulesBulkActionResponse,
-} from '../../../../common/types/rules/v4';
+} from '@kbn/cloud-security-posture-common/schema/rules/v4';
+import type { CspBenchmarkRulesBulkActionResponse } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import { CspRouter } from '../../../types';
 
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';

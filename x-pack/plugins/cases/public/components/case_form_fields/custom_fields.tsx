@@ -58,7 +58,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
     <EuiFormRow fullWidth>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText size="m">
-          <h3>{i18n.ADDITIONAL_FIELDS}</h3>
+          <h3>{i18n.CUSTOM_FIELDS}</h3>
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiFlexItem data-test-subj="caseCustomFields">{customFieldsComponents}</EuiFlexItem>

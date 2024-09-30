@@ -9,8 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Subject } from 'rxjs';
-import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
@@ -21,10 +19,8 @@ function title(t?: number) {
   return t ?? '-';
 }
 
-export function OverviewStatus({ reload$ }: { reload$?: Subject<boolean> }) {
+export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode }) {
   const { statusFilter } = useGetUrlParams();
-
-  const { refreshApp } = useSyntheticsRefreshContext();
 
   const {
     status,
@@ -38,14 +34,6 @@ export function OverviewStatus({ reload$ }: { reload$?: Subject<boolean> }) {
     pending: status?.pending,
     disabledCount: status?.disabledCount,
   });
-
-  useEffect(() => {
-    const sub = reload$?.subscribe(() => {
-      refreshApp();
-    });
-
-    return () => sub?.unsubscribe();
-  }, [refreshApp, reload$]);
 
   useEffect(() => {
     if (statusError) {
@@ -104,9 +92,9 @@ export function OverviewStatus({ reload$ }: { reload$?: Subject<boolean> }) {
   }, [status, statusFilter]);
 
   return (
-    <EmbeddablePanelWrapper title={headingText} loading={loading}>
+    <EmbeddablePanelWrapper title={headingText} loading={loading} titleAppend={titleAppend}>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl">
+      <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat
             data-test-subj="xpack.uptime.synthetics.overview.status.up"

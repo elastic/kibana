@@ -82,12 +82,12 @@ export class IntegrationFieldsRepository {
     }
 
     // 2. Dataset is passed but was never fetched before
-    if (datasetName && !cachedIntegration.hasOwnProperty(datasetName)) {
+    if (datasetName && !Object.hasOwn(cachedIntegration, datasetName)) {
       return undefined;
     }
 
     // 3. Dataset is passed and it was previously fetched, should return the field
-    if (datasetName && cachedIntegration.hasOwnProperty(datasetName)) {
+    if (datasetName && Object.hasOwn(cachedIntegration, datasetName)) {
       const targetDataset = cachedIntegration[datasetName];
       return targetDataset[fieldName];
     }

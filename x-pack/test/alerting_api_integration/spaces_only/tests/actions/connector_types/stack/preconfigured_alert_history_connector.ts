@@ -44,9 +44,9 @@ export default function preconfiguredAlertHistoryConnectorTests({
     }
 
     const objectRemover = new ObjectRemover(supertest);
-    beforeEach(() => {
-      esDeleteAllIndices(AlertHistoryDefaultIndexName);
-      esDeleteAllIndices(ALERT_HISTORY_OVERRIDE_INDEX);
+    beforeEach(async () => {
+      await esDeleteAllIndices(AlertHistoryDefaultIndexName);
+      await esDeleteAllIndices(ALERT_HISTORY_OVERRIDE_INDEX);
     });
     after(() => objectRemover.removeAll());
 

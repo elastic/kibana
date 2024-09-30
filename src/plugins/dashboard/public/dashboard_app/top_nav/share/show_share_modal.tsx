@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiCheckboxGroup } from '@elastic/eui';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -17,15 +17,12 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import {
-  convertPanelMapToSavedPanels,
-  DashboardContainerInput,
-  DashboardPanelMap,
-} from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -34,7 +31,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
-  getDashboardState: () => DashboardContainerInput;
+  getPanelsState: () => DashboardPanelMap;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -50,7 +47,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
-  getDashboardState,
+  getPanelsState,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -139,7 +136,7 @@ export function ShowShareModal({
       return;
     }
 
-    const latestPanels = getDashboardState().panels;
+    const latestPanels = getPanelsState();
     // apply modifications to panels.
     const modifiedPanels = panelModifications
       ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
@@ -169,7 +166,9 @@ export function ShowShareModal({
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
+      controlGroupState: panelModifications?.[
+        PANELS_CONTROL_GROUP_KEY
+      ] as DashboardLocatorParams['controlGroupState'],
       panels: allUnsavedPanels as DashboardLocatorParams['panels'],
 
       // options

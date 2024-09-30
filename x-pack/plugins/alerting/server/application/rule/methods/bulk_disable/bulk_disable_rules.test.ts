@@ -430,7 +430,7 @@ describe('bulkDisableRules', () => {
     });
   });
 
-  test('should thow an error if number of matched rules greater than 10,000', async () => {
+  test('should throw an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {
@@ -464,12 +464,81 @@ describe('bulkDisableRules', () => {
     );
   });
 
-  test('should skip rule if it is already disabled', async () => {
+  test('should return both rules if one is already disabled and one is enabled when bulk disable is based on ids', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: [disabledRuleForBulkDisable1],
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result.rules[0].id).toBe('id1');
+    expect(result.rules[1].id).toBe('id2');
+  });
+
+  test('should return rules in correct format', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+    });
+
+    const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
+      total: 2,
+    });
+  });
+
+  test('should return both rules if one is already disabled and one is enabled when bulk disable is based on filter', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOps1, disabledRuleForBulkDisable2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
     });
 
     const result = await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
@@ -483,13 +552,19 @@ describe('bulkDisableRules', () => {
             enabled: false,
           }),
         }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: false,
+          }),
+        }),
       ]),
       { overwrite: true }
     );
 
     expect(result).toStrictEqual({
       errors: [],
-      rules: [returnedRuleForBulkDisable1],
+      rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
       total: 2,
     });
   });
@@ -712,8 +787,14 @@ describe('bulkDisableRules', () => {
               saved_objects: [
                 enabledRuleForBulkOps1,
                 enabledRuleForBulkOps2,
-                siemRuleForBulkOps1,
-                siemRuleForBulkOps2,
+                {
+                  ...siemRuleForBulkOps1,
+                  attributes: { ...siemRuleForBulkOps1.attributes, enabled: true },
+                },
+                {
+                  ...siemRuleForBulkOps2,
+                  attributes: { ...siemRuleForBulkOps2.attributes, enabled: true },
+                },
               ],
             };
           },
@@ -723,8 +804,14 @@ describe('bulkDisableRules', () => {
         saved_objects: [
           enabledRuleForBulkOps1,
           enabledRuleForBulkOps2,
-          siemRuleForBulkOps1,
-          siemRuleForBulkOps2,
+          {
+            ...siemRuleForBulkOps1,
+            attributes: { ...siemRuleForBulkOps1.attributes, enabled: true },
+          },
+          {
+            ...siemRuleForBulkOps2,
+            attributes: { ...siemRuleForBulkOps2.attributes, enabled: true },
+          },
         ],
       });
 

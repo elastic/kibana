@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import moment from 'moment';
 
 export const arrayOfStringsSchema = z.array(z.string());
@@ -84,24 +84,40 @@ export const keyMetricSchema = z.object({
 
 export type KeyMetric = z.infer<typeof keyMetricSchema>;
 
+export const metadataAggregation = z.union([
+  z.object({ type: z.literal('terms'), limit: z.number().default(1000) }),
+  z.object({
+    type: z.literal('top_value'),
+    sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
+    lookbackPeriod: z.optional(durationSchema),
+  }),
+]);
+
 export const metadataSchema = z
   .object({
     source: z.string(),
     destination: z.optional(z.string()),
-    limit: z.optional(z.number().default(1000)),
+    aggregation: z
+      .optional(metadataAggregation)
+      .default({ type: z.literal('terms').value, limit: 1000 }),
   })
+  .or(
+    z.string().transform((value) => ({
+      source: value,
+      destination: value,
+      aggregation: { type: z.literal('terms').value, limit: 1000 },
+    }))
+  )
   .transform((metadata) => ({
     ...metadata,
     destination: metadata.destination ?? metadata.source,
-    limit: metadata.limit ?? 1000,
   }))
-  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })))
   .superRefine((value, ctx) => {
-    if (value.limit < 1) {
+    if (value.aggregation.type === 'terms' && value.aggregation.limit < 1) {
       ctx.addIssue({
         path: ['limit'],
         code: z.ZodIssueCode.custom,
-        message: 'limit should be greater than 1',
+        message: 'limit for terms aggregation should be greater than 1',
       });
     }
     if (value.source.length === 0) {
@@ -119,6 +135,8 @@ export const metadataSchema = z
       });
     }
   });
+
+export type MetadataField = z.infer<typeof metadataSchema>;
 
 export const identityFieldsSchema = z
   .object({

@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render as reactRender } from '@testing-library/react';
+import { render as reactRender, waitFor } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -124,6 +124,7 @@ export interface AppMockRenderer {
   queryClient: QueryClient;
   AppWrapper: React.FC<{ children: React.ReactNode }>;
   getFilesClient: () => ScopedFilesClient;
+  clearQueryCache: () => Promise<void>;
 }
 
 export const testQueryClient = new QueryClient({
@@ -202,6 +203,12 @@ export const createAppMockRenderer = ({
     });
   };
 
+  const clearQueryCache = async () => {
+    queryClient.getQueryCache().clear();
+
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+  };
+
   return {
     coreStart: services,
     queryClient,
@@ -210,5 +217,6 @@ export const createAppMockRenderer = ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     getFilesClient,
+    clearQueryCache,
   };
 };

@@ -6,16 +6,15 @@
  */
 
 import type { ActionPayload } from '../../explorer_dashboard_service';
-import { getInfluencers } from '../../explorer_utils';
 
 import { getIndexPattern } from './get_index_pattern';
 import type { ExplorerState } from './state';
 
 export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload): ExplorerState => {
-  const { selectedJobs } = payload;
+  const { selectedJobs, noInfluencersConfigured } = payload;
   const stateUpdate: ExplorerState = {
     ...state,
-    noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
+    noInfluencersConfigured,
     selectedJobs,
   };
 

@@ -11,7 +11,8 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
@@ -20,7 +21,6 @@ import { CloudSecurityDataTable } from '../../../components/cloud_security_data_
 import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
-import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { findingsTableFieldLabels } from './findings_table_field_labels';

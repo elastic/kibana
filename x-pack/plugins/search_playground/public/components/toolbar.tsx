@@ -9,12 +9,15 @@ import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { DataActionButton } from './data_action_button';
 import { ViewCodeAction } from './view_code/view_code_action';
+import { PlaygroundPageMode } from '../types';
 
-export const Toolbar: React.FC = () => {
+export const Toolbar: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
+  selectedPageMode = PlaygroundPageMode.chat,
+}) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="playground-header-actions">
       <DataActionButton />
-      <ViewCodeAction />
+      <ViewCodeAction selectedPageMode={selectedPageMode} />
     </EuiFlexGroup>
   );
 };

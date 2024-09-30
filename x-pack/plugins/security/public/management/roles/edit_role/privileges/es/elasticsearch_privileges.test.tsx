@@ -103,7 +103,12 @@ test('it renders correctly in serverless mode', () => {
   expect(
     shallowWithIntl(
       // Enabled remote indices privilege to make sure remote indices is still not rendered due to build flavor
-      <ElasticsearchPrivileges {...getProps()} buildFlavor={'serverless'} canUseRemoteIndices />
+      <ElasticsearchPrivileges
+        {...getProps()}
+        validator={new RoleValidator({ buildFlavor: 'serverless' })}
+        buildFlavor={'serverless'}
+        canUseRemoteIndices
+      />
     )
   ).toMatchSnapshot();
 });

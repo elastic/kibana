@@ -77,11 +77,13 @@ const LogsApp: React.FC<{
               <Route
                 path="/"
                 exact
-                render={() =>
+                render={() => {
                   plugins.share.url.locators
                     .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                    ?.navigate({})
-                }
+                    ?.navigate({});
+
+                  return null;
+                }}
               />
               <Route path="/link-to" component={LinkToLogsPage} />
               {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}

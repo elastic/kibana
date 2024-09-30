@@ -47,12 +47,12 @@ export const gaugeTitlesByType: Record<GaugeShape, string> = {
     defaultMessage: 'Vertical Bullet',
   }),
   [GaugeShapes.SEMI_CIRCLE]: i18n.translate('xpack.lens.gaugeSemiCircle.gaugeLabel', {
-    defaultMessage: 'Semi-circular Gauge',
+    defaultMessage: 'Minor arc',
   }),
   [GaugeShapes.ARC]: i18n.translate('xpack.lens.gaugeArc.gaugeLabel', {
-    defaultMessage: 'Arc Gauge',
+    defaultMessage: 'Major arc',
   }),
   [GaugeShapes.CIRCLE]: i18n.translate('xpack.lens.gaugeCircle.gaugeLabel', {
-    defaultMessage: 'Circular Gauge',
+    defaultMessage: 'Circle',
   }),
 };

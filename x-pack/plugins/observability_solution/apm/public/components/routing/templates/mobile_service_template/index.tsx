@@ -92,7 +92,10 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink]
+    [query, router, selectedTab, serviceName, servicesLink],
+    {
+      omitRootOnServerless: true,
+    }
   );
 
   return (

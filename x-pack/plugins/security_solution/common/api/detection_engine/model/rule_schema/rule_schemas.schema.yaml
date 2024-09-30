@@ -292,6 +292,10 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
     EqlRuleCreateFields:
       allOf:
@@ -762,6 +766,10 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
     NewTermsRuleDefaultableFields:
       type: object
@@ -840,6 +848,10 @@ components:
       properties:
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
     EsqlRulePatchFields:
       allOf:

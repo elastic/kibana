@@ -15,12 +15,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PatchTimeline
-      summary: Updates an existing timeline.
-      description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+      summary: Update a Timeline
+      description: Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
       tags:
         - access:securitySolution
       requestBody:
-        description: The timeline updates along with the timeline ID and version.
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
         content:
           application/json:
@@ -38,7 +38,7 @@ paths:
                   $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
       responses:
         '200':
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
           content:
             application/json:
               schema:
@@ -56,7 +56,7 @@ paths:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
         '405':
-          description: Indicates that the user does not have the required access to create a draft timeline.
+          description: Indicates that the user does not have the required access to create a draft Timeline.
           content:
             application/json:
               schema:

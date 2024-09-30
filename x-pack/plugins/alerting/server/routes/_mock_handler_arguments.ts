@@ -12,7 +12,10 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
-import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
+import {
+  rulesSettingsClientMock,
+  RulesSettingsClientMock,
+} from '../rules_settings/rules_settings_client.mock';
 import {
   maintenanceWindowClientMock,
   MaintenanceWindowClientMock,

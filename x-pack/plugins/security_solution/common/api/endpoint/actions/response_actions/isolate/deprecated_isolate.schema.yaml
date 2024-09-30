@@ -5,7 +5,11 @@ info:
 paths:
   /api/endpoint/isolate:
     post:
-      summary: Permanently redirects to a new location
+      summary: Isolate an endpoint
+      description: |
+        Isolate an endpoint from the network.
+        > info
+        > This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
       operationId: EndpointIsolateRedirect
       deprecated: true
       x-codegen-enabled: true

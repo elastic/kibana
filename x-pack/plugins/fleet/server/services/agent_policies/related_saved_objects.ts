@@ -35,11 +35,20 @@ export async function fetchRelatedSavedObjects(
   const monitoringOutputId =
     agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
 
+  const outputIds = uniq([
+    dataOutputId,
+    monitoringOutputId,
+    ...(agentPolicy.package_policies || []).reduce((acc: string[], packagePolicy) => {
+      if (packagePolicy.output_id) {
+        acc.push(packagePolicy.output_id);
+      }
+      return acc;
+    }, []),
+  ]);
+
   const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
     await Promise.all([
-      outputService.bulkGet(soClient, uniq([dataOutputId, monitoringOutputId]), {
-        ignoreNotFound: true,
-      }),
+      outputService.bulkGet(soClient, outputIds, { ignoreNotFound: true }),
       getSourceUriForAgentPolicy(soClient, agentPolicy),
       getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
         appContextService

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AlertIds } from '../../model/alert.gen';
 import { NonEmptyString } from '../../model/primitives.gen';

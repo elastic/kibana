@@ -456,6 +456,10 @@ export interface ConcreteTaskInstance extends TaskInstance {
   partition?: number;
 }
 
+export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
+  id: ConcreteTaskInstance['id'];
+};
+
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */
   esId: string;
@@ -489,4 +493,8 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+};
+
+export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
+  id: SerializedConcreteTaskInstance['id'];
 };

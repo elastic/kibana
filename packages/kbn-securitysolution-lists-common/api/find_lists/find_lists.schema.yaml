@@ -8,7 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: FindLists
       x-codegen-enabled: true
-      summary: Finds lists
+      summary: Get lists
+      description: Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
       parameters:
         - name: page
           in: query

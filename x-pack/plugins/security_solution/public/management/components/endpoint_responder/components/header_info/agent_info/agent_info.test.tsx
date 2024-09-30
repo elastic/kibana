@@ -37,6 +37,14 @@ describe('Responder header Agent Info', () => {
     status: HostStatus.HEALTHY,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     render = (agentType?: ResponseActionAgentType, platform?: Platform) =>

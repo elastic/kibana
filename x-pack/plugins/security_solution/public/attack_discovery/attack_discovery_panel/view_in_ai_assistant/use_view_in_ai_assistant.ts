@@ -33,9 +33,11 @@ export const useViewInAiAssistant = ({
       }),
     [attackDiscovery]
   );
+
+  const lastFive = attackDiscovery.id ? ` - ${attackDiscovery.id.slice(-5)}` : '';
   const { promptContextId, showAssistantOverlay: showOverlay } = useAssistantOverlay(
     category,
-    attackDiscovery.title, // conversation title
+    attackDiscovery.title + lastFive, // conversation title
     attackDiscovery.title, // description used in context pill
     getPromptContext,
     attackDiscovery.id ?? null, // accept the UUID default for this prompt context

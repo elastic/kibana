@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../types';
 import { APP_ID, CASES_FEATURE_ID } from '../constants';
 import type { CasesFeatureParams } from './types';
@@ -27,6 +28,7 @@ export const getCasesBaseKibanaFeature = ({
     ),
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [CASES_FEATURE_ID, 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],

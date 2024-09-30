@@ -21,12 +21,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   // github.com/elastic/kibana/issues/153599
-  describe.skip('cross cluster replication - a11y tests', async () => {
+  describe.skip('cross cluster replication - a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('crossClusterReplication');
     });
 
-    describe('follower index tab', async () => {
+    describe('follower index tab', () => {
       const remoteName = `testremote${Date.now().toString()}`;
       const testIndex = `testindex${Date.now().toString()}`;
       const testFollower = `follower${Date.now().toString()}`;
@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('empty follower index table', async () => {
         await a11y.testAppSnapshot();
       });
-      describe('follower index tab', async () => {
-        describe('follower index form', async () => {
+      describe('follower index tab', () => {
+        describe('follower index form', () => {
           before(async () => {
             await PageObjects.common.navigateToApp('remoteClusters');
             await PageObjects.remoteClusters.createNewRemoteCluster(remoteName, 'localhost:9300');
@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
-      describe('auto-follower patterns', async () => {
-        describe('auto follower index form', async () => {
+      describe('auto-follower patterns', () => {
+        describe('auto follower index form', () => {
           before(async () => {
             await PageObjects.crossClusterReplication.clickAutoFollowerTab();
           });

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { safeLoad } from 'js-yaml';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { load } from 'js-yaml';
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -218,7 +219,7 @@ export function validateLogstashHosts(value: string[]) {
 
 export function validateYamlConfig(value: string) {
   try {
-    safeLoad(value);
+    load(value);
     return;
   } catch (error) {
     return [
@@ -307,13 +308,37 @@ export function validateSSLKey(value: string) {
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
 
-export function validateKafkaDefaultTopic(value: string) {
+export function validateKafkaStaticTopic(value: string) {
   if (!value || value === '') {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.kafkaDefaultTopicRequiredMessage', {
         defaultMessage: 'Default topic is required',
       }),
     ];
+  }
+}
+
+export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
+  const res = [];
+  value.forEach((val, idx) => {
+    if (!val) {
+      res.push(
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
+          defaultMessage: 'Topic is required',
+        })
+      );
+    }
+  });
+
+  if (value.length === 0) {
+    res.push(
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
+        defaultMessage: 'Topic is required',
+      })
+    );
+  }
+  if (res.length) {
+    return res;
   }
 }
 
@@ -341,49 +366,6 @@ export function validateKafkaPartitioningGroupEvents(value: string) {
           }
         ),
       ];
-}
-
-export function validateKafkaTopics(
-  topics: Array<{
-    topic: string;
-    when?: {
-      condition?: string;
-      type?: string;
-    };
-  }>
-) {
-  const errors: Array<{
-    message: string;
-    index: number;
-    condition?: boolean;
-  }> = [];
-
-  topics.forEach((topic, index) => {
-    if (!topic.topic || topic.topic === '') {
-      errors.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
-          defaultMessage: 'Topic is required',
-        }),
-        index,
-      });
-    }
-    if (
-      !topic.when?.condition ||
-      topic.when.condition === '' ||
-      topic.when.condition.split(':').length - 1 !== 1
-    ) {
-      errors.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicConditionRequired', {
-          defaultMessage: 'Must be a key, value pair i.e. "http.response.code: 200"',
-        }),
-        index,
-        condition: true,
-      });
-    }
-  });
-  if (errors.length) {
-    return errors;
-  }
 }
 
 export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }>) {

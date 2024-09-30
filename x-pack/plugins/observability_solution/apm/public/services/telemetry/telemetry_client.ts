@@ -13,6 +13,7 @@ import {
   TelemetryEventTypes,
   EntityInventoryPageStateParams,
   EntityInventoryAddDataParams,
+  EmptyStateClickParams,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -40,5 +41,13 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportEntityInventoryAddData = (params: EntityInventoryAddDataParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA, params);
+  };
+
+  public reportTryItClick = (params: EmptyStateClickParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TRY_IT_CLICK, params);
+  };
+
+  public reportLearnMoreClick = (params: EmptyStateClickParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.LEARN_MORE_CLICK, params);
   };
 }

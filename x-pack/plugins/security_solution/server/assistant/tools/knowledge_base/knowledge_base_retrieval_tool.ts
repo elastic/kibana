@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { APP_UI_ID } from '../../../../common';
@@ -45,7 +45,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const docs = await kbDataClient.getKnowledgeBaseDocuments({
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           query: input.query,
           kbResource: 'user',
           required: false,

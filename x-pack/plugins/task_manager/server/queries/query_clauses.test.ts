@@ -28,6 +28,7 @@ describe('matchesClauses', () => {
     expect(
       matchesClauses(
         mustBeAllOf(TaskWithSchedule),
+        undefined,
         shouldBeOneOf(RunningTask, IdleTaskWithExpiredRunAt)
       )
     ).toMatchObject({

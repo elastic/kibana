@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
-import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
+import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './legacy/embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
@@ -17,12 +18,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
-export {
-  apiHasVisualizeConfig,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VIS_EVENT_TO_TRIGGER,
-  COMMON_VISUALIZATION_GROUPING,
-} from './embeddable';
+export { VIS_EVENT_TO_TRIGGER } from './embeddable';
+export { apiHasVisualizeConfig, COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 
@@ -38,12 +35,13 @@ export type {
   VisualizationClient,
   SerializableAttributes,
 } from './vis_types';
+export type { VisualizeEditorInput } from './embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
-export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
+export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './legacy/embeddable';
 export type { PersistedState } from './persisted_state';
 export type {
   ISavedVis,
@@ -63,6 +61,7 @@ export {
   LegendSize,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
 export { prepareLogTable, XYCurveTypes } from '../common';

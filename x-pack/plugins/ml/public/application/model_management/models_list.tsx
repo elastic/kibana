@@ -52,6 +52,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
 import { dynamic } from '@kbn/shared-ux-utility';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { getModelStateColor, getModelDeploymentState } from './get_model_state';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -70,7 +71,6 @@ import type {
 } from '../../../common/types/trained_models';
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
-import type { ListingPageUrlState } from '../../../common/types/common';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
@@ -401,7 +401,7 @@ export const ModelsList: FC<Props> = ({
         });
 
         const elasticModels = models.filter((model) =>
-          ELASTIC_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+          Object.hasOwn(ELASTIC_MODEL_DEFINITIONS, model.model_id)
         );
         if (elasticModels.length > 0) {
           for (const model of elasticModels) {
@@ -707,7 +707,7 @@ export const ModelsList: FC<Props> = ({
         );
 
         return (
-          <EuiFlexGroup direction={'column'} gutterSize={'none'}>
+          <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>
             {isDownloadInProgress ? (
               <EuiFlexItem>
                 <EuiProgress

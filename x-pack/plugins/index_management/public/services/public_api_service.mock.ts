@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PublicApiServiceSetup } from '@kbn/index-management/src/services/public_api_service';
+import { PublicApiServiceSetup } from '@kbn/index-management-shared-types/src/services/public_api_service';
 
 export type PublicApiServiceSetupMock = jest.Mocked<PublicApiServiceSetup>;
 

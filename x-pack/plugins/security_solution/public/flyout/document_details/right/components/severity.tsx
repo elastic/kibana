@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 

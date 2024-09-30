@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Router } from '../router';
@@ -32,7 +33,12 @@ describe('Versioned router', () => {
 
   it('provides the expected metadata', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
-    versionedRouter.get({ path: '/test/{id}', access: 'internal', deprecated: true });
+    versionedRouter.get({
+      path: '/test/{id}',
+      access: 'internal',
+      deprecated: true,
+      discontinued: 'x.y.z',
+    });
     versionedRouter.post({
       path: '/test',
       access: 'internal',
@@ -48,6 +54,7 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "deprecated": true,
+            "discontinued": "x.y.z",
           },
           "path": "/test/{id}",
         },

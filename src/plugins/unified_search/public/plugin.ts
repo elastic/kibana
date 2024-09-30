@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { setIndexPatterns, setTheme, setOverlays, setAnalytics, setI18n } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';

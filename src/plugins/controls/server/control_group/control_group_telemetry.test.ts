@@ -1,18 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupTelemetry, RawControlGroupAttributes } from '../../common';
-import { controlGroupTelemetry, initializeControlGroupTelemetry } from './control_group_telemetry';
+import { SerializableRecord } from '@kbn/utility-types';
+import { type ControlGroupSerializedState } from '../../common';
+import {
+  type ControlGroupTelemetry,
+  controlGroupTelemetry,
+  initializeControlGroupTelemetry,
+} from './control_group_telemetry';
 
 // controls attributes with all settings ignored + 3 options lists + hierarchical chaining + label above
-const rawControlAttributes1: RawControlGroupAttributes = {
+const rawControlAttributes1: SerializableRecord & ControlGroupSerializedState = {
   controlStyle: 'twoLine',
   chainingSystem: 'NONE',
+  showApplySelections: true,
   panelsJSON:
     '{"6fc71ac6-62f9-4ff4-bf5a-d1e066065376":{"order":0,"width":"auto","type":"optionsListControl","explicitInput":{"title":"Carrier","fieldName":"Carrier","id":"6fc71ac6-62f9-4ff4-bf5a-d1e066065376","enhancements":{}}},"1ca90451-908b-4eae-ac4d-535f2e30c4ad":{"order":2,"width":"auto","type":"optionsListControl","explicitInput":{"title":"DestAirportID","fieldName":"DestAirportID","id":"1ca90451-908b-4eae-ac4d-535f2e30c4ad","enhancements":{}}},"71086bac-316d-415f-8aa8-b9a921bc7f58":{"order":1,"width":"auto","type":"optionsListControl","explicitInput":{"title":"DestRegion","fieldName":"DestRegion","id":"71086bac-316d-415f-8aa8-b9a921bc7f58","enhancements":{}}}}',
   ignoreParentSettingsJSON:
@@ -20,9 +27,10 @@ const rawControlAttributes1: RawControlGroupAttributes = {
 };
 
 // controls attributes with some settings ignored + 2 range sliders, 1 time slider + No chaining  + label inline
-const rawControlAttributes2: RawControlGroupAttributes = {
+const rawControlAttributes2: SerializableRecord & ControlGroupSerializedState = {
   controlStyle: 'oneLine',
   chainingSystem: 'NONE',
+  showApplySelections: false,
   panelsJSON:
     '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"f6b076c6-9ef5-483e-b08d-d313d60d4b8c":{"order":2,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceMiles","fieldName":"DistanceMiles","id":"f6b076c6-9ef5-483e-b08d-d313d60d4b8c","enhancements":{}}}}',
   ignoreParentSettingsJSON:
@@ -30,9 +38,10 @@ const rawControlAttributes2: RawControlGroupAttributes = {
 };
 
 // controls attributes with no settings ignored + 2 options lists, 1 range slider, 1 time slider + hierarchical chaining + label inline
-const rawControlAttributes3: RawControlGroupAttributes = {
+const rawControlAttributes3: SerializableRecord & ControlGroupSerializedState = {
   controlStyle: 'oneLine',
   chainingSystem: 'HIERARCHICAL',
+  showApplySelections: false,
   panelsJSON:
     '{"9cf90205-e94d-43c9-a3aa-45f359a7522f":{"order":0,"width":"auto","type":"rangeSliderControl","explicitInput":{"title":"DistanceKilometers","fieldName":"DistanceKilometers","id":"9cf90205-e94d-43c9-a3aa-45f359a7522f","enhancements":{}}},"ee325e9e-6ec1-41f9-953f-423d59850d44":{"order":2,"width":"auto","type":"optionsListControl","explicitInput":{"title":"Carrier","fieldName":"Carrier","id":"ee325e9e-6ec1-41f9-953f-423d59850d44","enhancements":{}}},"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b":{"order":3,"width":"auto","type":"optionsListControl","explicitInput":{"title":"DestCityName","fieldName":"DestCityName","id":"cb0f5fcd-9ad9-4d4a-b489-b75bd060399b","enhancements":{}}}}',
   ignoreParentSettingsJSON:

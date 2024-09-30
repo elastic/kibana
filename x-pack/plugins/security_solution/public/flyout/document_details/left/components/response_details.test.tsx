@@ -12,7 +12,6 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { rawEventData, TestProviders } from '../../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/lib/kibana', () => {
@@ -98,19 +97,6 @@ const renderResponseDetails = (contextValue: DocumentDetailsContext) =>
   );
 
 describe('<ResponseDetails />', () => {
-  let featureFlags: { endpointResponseActionsEnabled: boolean; responseActionsEnabled: boolean };
-
-  beforeEach(() => {
-    featureFlags = { endpointResponseActionsEnabled: true, responseActionsEnabled: true };
-
-    const useIsExperimentalFeatureEnabledMock = (feature: keyof typeof featureFlags) =>
-      featureFlags[feature];
-
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
-      useIsExperimentalFeatureEnabledMock
-    );
-  });
-
   it('should render the view with response actions', () => {
     const wrapper = renderResponseDetails(contextWithResponseActions);
 
@@ -118,17 +104,6 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
     // TODO mock osquery results
-  });
-
-  it('should render the view with osquery only', () => {
-    featureFlags.responseActionsEnabled = true;
-    featureFlags.endpointResponseActionsEnabled = false;
-
-    const wrapper = renderResponseDetails(contextWithResponseActions);
-
-    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.queryByTestId('responseActionsViewWrapper')).not.toBeInTheDocument();
-    expect(wrapper.getByTestId('osqueryViewWrapper')).toBeInTheDocument();
   });
 
   it('should render the empty information', () => {

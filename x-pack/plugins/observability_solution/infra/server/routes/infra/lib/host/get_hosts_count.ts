@@ -5,65 +5,52 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { BoolQuery } from '@kbn/es-query';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
+import { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
-import {
-  HOST_NAME_FIELD,
-  EVENT_MODULE,
-  METRICSET_MODULE,
-  SYSTEM_INTEGRATION,
-} from '../../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { assertQueryStructure } from '../utils';
+import { getDocumentsFilter } from '../helpers/query';
 
 export async function getHostsCount({
   infraMetricsClient,
+  apmDataAccessServices,
   query,
   from,
   to,
-}: {
+}: GetInfraAssetCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
-  query?: BoolQuery;
-  from: string;
-  to: string;
+  apmDataAccessServices?: ApmDataAccessServicesWrapper;
 }) {
-  const queryFilter = query?.filter ?? [];
-  const queryBool = query ?? {};
+  assertQueryStructure(query);
 
-  const params = {
+  const documentsFilter = await getDocumentsFilter({
+    apmDataAccessServices,
+    from,
+    to,
+  });
+
+  const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    ignore_unavailable: true,
     body: {
       size: 0,
       track_total_hits: false,
       query: {
         bool: {
-          ...queryBool,
-          filter: [
-            ...queryFilter,
-            ...rangeQuery(new Date(from).getTime(), new Date(to).getTime()),
-            {
-              bool: {
-                should: [
-                  ...termQuery(EVENT_MODULE, SYSTEM_INTEGRATION),
-                  ...termQuery(METRICSET_MODULE, SYSTEM_INTEGRATION),
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [query, ...rangeQuery(from, to)],
+          should: [...documentsFilter],
         },
       },
       aggs: {
-        count: {
+        totalCount: {
           cardinality: {
             field: HOST_NAME_FIELD,
           },
         },
       },
     },
-  };
+  });
 
-  const result = await infraMetricsClient.search(params);
-
-  return result.aggregations?.count.value ?? 0;
+  return response.aggregations?.totalCount.value ?? 0;
 }

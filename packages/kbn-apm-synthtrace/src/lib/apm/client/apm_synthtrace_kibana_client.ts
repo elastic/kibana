@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
 import { kibanaHeaders } from '../../shared/client_headers';
+import { getFetchAgent } from '../../../cli/utils/ssl';
 
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
@@ -34,6 +36,7 @@ export class ApmSynthtraceKibanaClient {
     const response = await fetch(url, {
       method: 'GET',
       headers: kibanaHeaders(),
+      agent: getFetchAgent(url),
     });
 
     const responseJson = await response.json();
@@ -62,6 +65,7 @@ export class ApmSynthtraceKibanaClient {
           method: 'POST',
           headers: kibanaHeaders(),
           body: '{"force":true}',
+          agent: getFetchAgent(url),
         });
 
         if (!res.ok) {
@@ -109,6 +113,7 @@ export class ApmSynthtraceKibanaClient {
           method: 'DELETE',
           headers: kibanaHeaders(),
           body: '{"force":true}',
+          agent: getFetchAgent(url),
         });
 
         if (!res.ok) {

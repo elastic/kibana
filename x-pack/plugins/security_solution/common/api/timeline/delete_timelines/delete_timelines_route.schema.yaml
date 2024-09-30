@@ -18,11 +18,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteTimelines
-      summary: Deletes one or more timelines or timeline templates.
+      summary: Delete Timelines or Timeline templates
+      description: Delete one or more Timelines or Timeline templates.
       tags:
         - access:securitySolution
       requestBody:
-        description: The ids of the timelines or timeline templates to delete.
+        description: The IDs of the Timelines or Timeline templates to delete.
         required: true
         content:
           application/json:
@@ -41,7 +42,7 @@ paths:
                     type: string
       responses:
         '200':
-          description: Indicates the timeline was successfully deleted.
+          description: Indicates the Timeline was successfully deleted.
           content:
             application/json:
               schema:

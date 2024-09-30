@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
+
 export function createScenarios(
   context: Pick<FtrProviderContext, 'getPageObjects' | 'getService'>
 ) {
@@ -74,35 +76,27 @@ export function createScenarios(
     await PageObjects.canvas.loadFirstWorkpad(title);
   };
 
-  const getSavedSearchPanel = async (savedSearchTitle: string) => {
-    return await testSubjects.find(`embeddablePanelHeading-${savedSearchTitle.replace(' ', '')}`);
-  };
   const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
-
-    if (!(await testSubjects.exists(actionItemTestSubj))) {
-      await testSubjects.click('embeddablePanelMore-mainMenu');
-    }
-
-    await testSubjects.click(actionItemTestSubj);
+    await dashboardPanelActions.clickContextMenuItemByTitle(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
+    );
     await testSubjects.existOrFail('generateCsvFail');
   };
   const tryDashboardGenerateCsvNotAvailable = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    await testSubjects.missingOrFail('embeddablePanelAction-generateCsvReport');
+    await dashboardPanelActions.expectMissingPanelAction(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
+    );
   };
   const tryDashboardGenerateCsvSuccess = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
-    await testSubjects.existOrFail(actionItemTestSubj);
-    /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
-      actionItemTestSubj
+    await dashboardPanelActions.expectExistsPanelAction(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
+    );
+    await dashboardPanelActions.clickContextMenuItemByTitle(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
     );
     await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
   };
@@ -127,7 +121,7 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    PageObjects.share.clickShareTopNavButton();
+    await PageObjects.share.clickShareTopNavButton();
     await testSubjects.missingOrFail(`Export`);
   };
   const tryGeneratePdfSuccess = async () => {

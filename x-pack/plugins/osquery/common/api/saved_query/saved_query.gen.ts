@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { FindSavedQueryRequestQuery } from './find_saved_query.gen';
 import { DefaultSuccessResponse, SavedQueryId } from '../model/schema/common_attributes.gen';

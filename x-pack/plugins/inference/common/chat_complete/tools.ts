@@ -48,11 +48,9 @@ export type ToolCallsOf<TToolOptions extends ToolOptions> = TToolOptions extends
   ? TToolOptions extends { toolChoice: ToolChoiceType.none }
     ? { toolCalls: [] }
     : {
-        toolCalls: ToolResponsesOf<
-          Assert<ToolsOfChoice<TToolOptions>, Record<string, ToolDefinition> | undefined>
-        >;
+        toolCalls: ToolResponsesOf<ToolsOfChoice<TToolOptions>>;
       }
-  : { toolCalls: never[] };
+  : { toolCalls: never };
 
 export enum ToolChoiceType {
   none = 'none',
@@ -70,7 +68,7 @@ export interface UnvalidatedToolCall {
 
 export interface ToolCall<
   TName extends string = string,
-  TArguments extends Record<string, any> | undefined = undefined
+  TArguments extends Record<string, any> | undefined = Record<string, any> | undefined
 > {
   toolCallId: string;
   function: {

@@ -10,6 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
 export interface EnabledFeatures {
+  showLogsSuppliedConfigurationsInfo: boolean;
   showContextualInsights: boolean;
   showNodeInfo: boolean;
   showMLNavMenu: boolean;
@@ -20,6 +21,7 @@ export interface EnabledFeatures {
   showRuleFormV2: boolean;
 }
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
+  showLogsSuppliedConfigurationsInfo: true,
   showContextualInsights: true,
   showNodeInfo: true,
   showMLNavMenu: true,
@@ -45,6 +47,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   experimentalFeatures,
 }) => {
   const features: EnabledFeatures = {
+    showLogsSuppliedConfigurationsInfo: !isServerless,
     showContextualInsights: isServerless,
     showNodeInfo: !isServerless,
     showMLNavMenu,

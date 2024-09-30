@@ -163,28 +163,33 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       });
     });
 
-    it('handles muted alerts', async () => {
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData())
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+    describe('muted alerts', function () {
+      this.tags('skipFIPS');
+      it('handles muted alerts', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await alertUtils.muteInstance(createdRule.id, '1');
-      await waitForEvents(createdRule.id, ['execute']);
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
-      );
+        await alertUtils.muteInstance(createdRule.id, '1');
+        await waitForEvents(createdRule.id, ['execute']);
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+            createdRule.id
+          }/_alert_summary`
+        );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.alerts).to.eql({
-        '1': {
-          status: 'OK',
-          muted: true,
-          flapping: false,
-          tracked: true,
-        },
+        expect(response.status).to.eql(200);
+        expect(response.body.alerts).to.eql({
+          '1': {
+            status: 'OK',
+            muted: true,
+            flapping: false,
+            tracked: true,
+          },
+        });
       });
     });
 
@@ -208,165 +213,176 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
       expect(errorMessage.message).to.be('this alert is intended to fail');
     });
 
-    it('handles multi-alert status', async () => {
-      // pattern of when the rule should fire
-      const pattern = {
-        alertA: [true, true, true, true],
-        alertB: [true, true, false, false],
-        alertC: [true, true, true, true],
-      };
+    describe('multi-alert', function () {
+      this.tags('skipFIPS');
+      it('handles multi-alert status', async () => {
+        // pattern of when the rule should fire
+        const pattern = {
+          alertA: [true, true, true, true],
+          alertB: [true, true, false, false],
+          alertC: [true, true, true, true],
+        };
 
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.patternFiring',
-            params: { pattern },
-            schedule: { interval: '1s' },
-          })
-        )
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.patternFiring',
+              params: { pattern },
+              schedule: { interval: '1s' },
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      await alertUtils.muteInstance(createdRule.id, 'alertC');
-      await alertUtils.muteInstance(createdRule.id, 'alertD');
-      await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
-      );
+        await alertUtils.muteInstance(createdRule.id, 'alertC');
+        await alertUtils.muteInstance(createdRule.id, 'alertD');
+        await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+            createdRule.id
+          }/_alert_summary`
+        );
 
-      const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
-        'alertA',
-        'alertB',
-        'alertC',
-      ]);
+        const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
+          'alertA',
+          'alertB',
+          'alertC',
+        ]);
 
-      const expectedAlerts = {
-        alertA: {
-          status: 'Active',
-          muted: false,
-          actionGroupId: 'default',
-          activeStartDate: actualAlerts.alertA.activeStartDate,
-          flapping: false,
-          tracked: true,
-        },
-        alertB: {
-          status: 'OK',
-          muted: false,
-          flapping: false,
-          tracked: true,
-        },
-        alertC: {
-          status: 'Active',
-          muted: true,
-          actionGroupId: 'default',
-          activeStartDate: actualAlerts.alertC.activeStartDate,
-          flapping: false,
-          tracked: true,
-        },
-        alertD: {
-          status: 'OK',
-          muted: true,
-          flapping: false,
-          tracked: true,
-        },
-      };
-      expect(actualAlerts).to.eql(expectedAlerts);
-    });
-
-    it('handles multi-alert status during maintenance window', async () => {
-      const { body: createdMaintenanceWindow } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          title: 'test-maintenance-window',
-          duration: 60 * 60 * 1000, // 1 hr
-          r_rule: {
-            dtstart: new Date().toISOString(),
-            tzid: 'UTC',
-            freq: 2, // weekly
+        const expectedAlerts = {
+          alertA: {
+            status: 'Active',
+            muted: false,
+            actionGroupId: 'default',
+            activeStartDate: actualAlerts.alertA.activeStartDate,
+            flapping: false,
+            tracked: true,
           },
-        });
-      objectRemover.add(
-        Spaces.space1.id,
-        createdMaintenanceWindow.id,
-        'rules/maintenance_window',
-        'alerting',
-        true
-      );
-
-      // pattern of when the rule should fire
-      const pattern = {
-        alertA: [true, true, true, true],
-        alertB: [true, true, false, false],
-        alertC: [true, true, true, true],
-      };
-
-      const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.patternFiring',
-            params: { pattern },
-            schedule: { interval: '1s' },
-          })
-        )
-        .expect(200);
-
-      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-      await alertUtils.muteInstance(createdRule.id, 'alertC');
-      await alertUtils.muteInstance(createdRule.id, 'alertD');
-      await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}/_alert_summary`
-      );
-
-      const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
-        'alertA',
-        'alertB',
-        'alertC',
-      ]);
-
-      const expectedAlerts = {
-        alertA: {
-          status: 'Active',
-          muted: false,
-          actionGroupId: 'default',
-          activeStartDate: actualAlerts.alertA.activeStartDate,
-          flapping: false,
-          tracked: true,
-          maintenanceWindowIds: [createdMaintenanceWindow.id],
-        },
-        alertB: {
-          status: 'OK',
-          muted: false,
-          flapping: false,
-          tracked: true,
-          maintenanceWindowIds: [createdMaintenanceWindow.id],
-        },
-        alertC: {
-          status: 'Active',
-          muted: true,
-          actionGroupId: 'default',
-          activeStartDate: actualAlerts.alertC.activeStartDate,
-          flapping: false,
-          tracked: true,
-          maintenanceWindowIds: [createdMaintenanceWindow.id],
-        },
-        alertD: {
-          status: 'OK',
-          muted: true,
-          flapping: false,
-          tracked: true,
-        },
-      };
-      expect(actualAlerts).to.eql(expectedAlerts);
+          alertB: {
+            status: 'OK',
+            muted: false,
+            flapping: false,
+            tracked: true,
+          },
+          alertC: {
+            status: 'Active',
+            muted: true,
+            actionGroupId: 'default',
+            activeStartDate: actualAlerts.alertC.activeStartDate,
+            flapping: false,
+            tracked: true,
+          },
+          alertD: {
+            status: 'OK',
+            muted: true,
+            flapping: false,
+            tracked: true,
+          },
+        };
+        expect(actualAlerts).to.eql(expectedAlerts);
+      });
     });
 
-    describe('legacy', () => {
+    describe('multi-alert maintenance window', function () {
+      this.tags('skipFIPS');
+      it('handles multi-alert status during maintenance window', async () => {
+        const { body: createdMaintenanceWindow } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            title: 'test-maintenance-window',
+            duration: 60 * 60 * 1000, // 1 hr
+            r_rule: {
+              dtstart: new Date().toISOString(),
+              tzid: 'UTC',
+              freq: 2, // weekly
+            },
+          });
+        objectRemover.add(
+          Spaces.space1.id,
+          createdMaintenanceWindow.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+
+        // pattern of when the rule should fire
+        const pattern = {
+          alertA: [true, true, true, true],
+          alertB: [true, true, false, false],
+          alertC: [true, true, true, true],
+        };
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.patternFiring',
+              params: { pattern },
+              schedule: { interval: '1s' },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        await alertUtils.muteInstance(createdRule.id, 'alertC');
+        await alertUtils.muteInstance(createdRule.id, 'alertD');
+        await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+            createdRule.id
+          }/_alert_summary`
+        );
+
+        const actualAlerts = checkAndCleanActualAlerts(response.body.alerts, [
+          'alertA',
+          'alertB',
+          'alertC',
+        ]);
+
+        const expectedAlerts = {
+          alertA: {
+            status: 'Active',
+            muted: false,
+            actionGroupId: 'default',
+            activeStartDate: actualAlerts.alertA.activeStartDate,
+            flapping: false,
+            tracked: true,
+            maintenanceWindowIds: [createdMaintenanceWindow.id],
+          },
+          alertB: {
+            status: 'OK',
+            muted: false,
+            flapping: false,
+            tracked: true,
+            maintenanceWindowIds: [createdMaintenanceWindow.id],
+          },
+          alertC: {
+            status: 'Active',
+            muted: true,
+            actionGroupId: 'default',
+            activeStartDate: actualAlerts.alertC.activeStartDate,
+            flapping: false,
+            tracked: true,
+            maintenanceWindowIds: [createdMaintenanceWindow.id],
+          },
+          alertD: {
+            status: 'OK',
+            muted: true,
+            flapping: false,
+            tracked: true,
+          },
+        };
+        expect(actualAlerts).to.eql(expectedAlerts);
+      });
+    });
+
+    describe('legacy', function () {
+      this.tags('skipFIPS');
       it('handles multi-alert status', async () => {
         // pattern of when the alert should fire
         const pattern = {

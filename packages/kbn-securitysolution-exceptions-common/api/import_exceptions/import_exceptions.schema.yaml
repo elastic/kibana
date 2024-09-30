@@ -8,8 +8,8 @@ paths:
       x-labels: [serverless, ess]
       operationId: ImportExceptionList
       x-codegen-enabled: true
-      summary: Imports an exception list
-      description: Imports an exception list and associated items
+      summary: Import an exception list
+      description: Import an exception list and its associated items from an NDJSON file.
       requestBody:
         required: true
         content:

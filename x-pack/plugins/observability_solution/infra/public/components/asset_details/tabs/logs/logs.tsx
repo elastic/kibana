@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import {
   DEFAULT_LOG_VIEW,
@@ -17,6 +17,7 @@ import {
   LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -106,18 +107,12 @@ export const Logs = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="infraAssetDetailsLogsTabOpenInLogsButton"
+            <OpenInLogsExplorerButton
+              href={logsUrl}
+              testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
               size="xs"
               flush="both"
-              iconType="popout"
-              href={logsUrl}
-            >
-              <FormattedMessage
-                id="xpack.infra.nodeDetails.logs.openLogsLink"
-                defaultMessage="Open in Logs"
-              />
-            </EuiButtonEmpty>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

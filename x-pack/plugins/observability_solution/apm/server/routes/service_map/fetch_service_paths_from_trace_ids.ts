@@ -113,6 +113,10 @@ export async function fetchServicePathsFromTraceIds({
 
   const numDocsPerShardAllowed = calculatedDocs > terminateAfter ? terminateAfter : calculatedDocs;
 
+  /*
+   * Any changes to init_script, map_script, combine_script and reduce_script
+   * must be replicated on https://github.com/elastic/elasticsearch-serverless/blob/main/distribution/archives/src/serverless-default-settings.yml
+   */
   const serviceMapAggs = {
     service_map: {
       scripted_metric: {
@@ -224,10 +228,9 @@ export async function fetchServicePathsFromTraceIds({
       
                   // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
                   if (parent['span.destination.service.resource'] != null
-                    && !parent['span.destination.service.resource'].equals("")
-                    && (!parent['service.name'].equals(event['service.name'])
-                      || !parent['service.environment'].equals(event['service.environment'])
-                    )
+                    && parent['span.destination.service.resource'] != ""
+                    && (parent['service.name'] != event['service.name']
+                      || parent['service.environment'] != event['service.environment'])
                   ) {
                     def parentDestination = getDestination(parent);
                     context.externalToServiceMap.put(parentDestination, service);

@@ -130,7 +130,10 @@ export class SpacesPlugin
         ([config, onCloud]): ConfigType => ({
           ...config,
           // We only allow "solution" to be set on cloud environments, not on prem
-          allowSolutionVisibility: onCloud ? config.allowSolutionVisibility : false,
+          // unless the forceSolutionVisibility flag is set.
+          allowSolutionVisibility:
+            (onCloud && config.allowSolutionVisibility) ||
+            Boolean(config.experimental?.forceSolutionVisibility),
         })
       )
     );
@@ -232,8 +235,8 @@ export class SpacesPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    const spacesClientStart = this.spacesClientService.start(core);
+  public start(core: CoreStart, plugins: PluginsStart) {
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

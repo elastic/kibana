@@ -78,6 +78,9 @@ export class SecuritySolutionServerlessPlugin
     securitySolution.setOnboardingPageSettings.setProjectsUrl(
       getCloudUrl('projects', services.cloud)
     );
+    securitySolution.setOnboardingPageSettings.setUsersUrl(
+      getCloudUrl('usersAndRoles', services.cloud)
+    );
     setOnboardingSettings(services);
     startNavigation(services);
 

@@ -20,13 +20,13 @@ export function useGetKnowledgeBaseEntries({
 }) {
   const { observabilityAIAssistant } = useKibana().services;
 
-  const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
+  const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
     queryFn: async ({ signal }) => {
-      if (!observabilityAIAssistantApi || !signal) {
-        return Promise.reject('Error with observabilityAIAssistantApi: API not found.');
+      if (!signal) {
+        throw new Error('Abort signal missing');
       }
 
       return observabilityAIAssistantApi(`GET /internal/observability_ai_assistant/kb/entries`, {

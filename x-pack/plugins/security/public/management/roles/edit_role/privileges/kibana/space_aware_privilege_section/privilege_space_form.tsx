@@ -29,16 +29,18 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { KibanaPrivileges } from '@kbn/security-role-management-model';
+import {
+  KibanaPrivilegeTable,
+  PrivilegeFormCalculator,
+  constants as UI_CONSTANTS,
+} from '@kbn/security-ui-components';
 import type { Space } from '@kbn/spaces-plugin/public';
 
 import { SpaceSelector } from './space_selector';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import { copyRole } from '../../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../../model';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../feature_table';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   role: Role;
@@ -254,7 +256,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <EuiSpacer size="l" />
 
-        <FeatureTable
+        <KibanaPrivilegeTable
           role={this.state.role}
           privilegeCalculator={this.state.privilegeCalculator}
           onChange={this.onFeaturePrivilegesChange}
@@ -447,7 +449,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     let isCustomizingFeaturePrivileges = false;
 
-    if (privilegeName === CUSTOM_PRIVILEGE_VALUE) {
+    if (privilegeName === UI_CONSTANTS.CUSTOM_PRIVILEGE_VALUE) {
       form.base = [];
       isCustomizingFeaturePrivileges = true;
     } else {
@@ -456,7 +458,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
 
     this.setState({
-      selectedBasePrivilege: privilegeName === CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
+      selectedBasePrivilege:
+        privilegeName === UI_CONSTANTS.CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
       role,
       isCustomizingFeaturePrivileges,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
@@ -507,7 +510,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       return `basePrivilege_${basePrivilege.id}`;
     }
 
-    return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
+    return `basePrivilege_${UI_CONSTANTS.CUSTOM_PRIVILEGE_VALUE}`;
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {

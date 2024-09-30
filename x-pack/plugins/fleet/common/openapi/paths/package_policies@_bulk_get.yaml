@@ -1,7 +1,7 @@
 post:
   summary: Bulk get package policies
   tags:
-    - Package policies
+    - Fleet package policies
   requestBody:
     content:
       application/json:

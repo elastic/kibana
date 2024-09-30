@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
@@ -52,72 +53,73 @@ describe('toSavedSearch', () => {
     };
     const savedSearch = await byValueToSavedSearch({ attributes }, mockServices);
     expect(savedSearch).toMatchInlineSnapshot(`
-        Object {
-          "breakdownField": undefined,
-          "columns": Array [
-            "message",
-            "extension",
-          ],
-          "description": "",
-          "grid": Object {},
-          "headerRowHeight": undefined,
-          "hideAggregatedPreview": undefined,
-          "hideChart": false,
-          "id": undefined,
-          "isTextBasedQuery": false,
-          "managed": false,
-          "references": Array [
-            Object {
-              "id": "1",
-              "name": "ref_0",
-              "type": "index-pattern",
-            },
-          ],
-          "refreshInterval": undefined,
-          "rowHeight": undefined,
-          "rowsPerPage": undefined,
-          "sampleSize": undefined,
-          "searchSource": Object {
-            "create": [MockFunction],
-            "createChild": [MockFunction],
-            "createCopy": [MockFunction],
-            "destroy": [MockFunction],
-            "fetch": [MockFunction],
-            "fetch$": [MockFunction],
-            "getActiveIndexFilter": [MockFunction],
-            "getField": [MockFunction],
-            "getFields": [MockFunction],
-            "getId": [MockFunction],
-            "getOwnField": [MockFunction],
-            "getParent": [MockFunction],
-            "getSearchRequestBody": [MockFunction],
-            "getSerializedFields": [MockFunction],
-            "history": Array [],
-            "loadDataViewFields": [MockFunction],
-            "onRequestStart": [MockFunction],
-            "parseActiveIndexPatternFromQueryString": [MockFunction],
-            "removeField": [MockFunction],
-            "serialize": [MockFunction],
-            "setField": [MockFunction],
-            "setOverwriteDataViewType": [MockFunction],
-            "setParent": [MockFunction],
-            "toExpressionAst": [MockFunction],
+      Object {
+        "breakdownField": undefined,
+        "columns": Array [
+          "message",
+          "extension",
+        ],
+        "density": undefined,
+        "description": "",
+        "grid": Object {},
+        "headerRowHeight": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": false,
+        "id": undefined,
+        "isTextBasedQuery": false,
+        "managed": false,
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "ref_0",
+            "type": "index-pattern",
           },
-          "sharingSavedObjectProps": undefined,
-          "sort": Array [
-            Array [
-              "@timestamp",
-              "desc",
-            ],
+        ],
+        "refreshInterval": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
+        "searchSource": Object {
+          "create": [MockFunction],
+          "createChild": [MockFunction],
+          "createCopy": [MockFunction],
+          "destroy": [MockFunction],
+          "fetch": [MockFunction],
+          "fetch$": [MockFunction],
+          "getActiveIndexFilter": [MockFunction],
+          "getField": [MockFunction],
+          "getFields": [MockFunction],
+          "getId": [MockFunction],
+          "getOwnField": [MockFunction],
+          "getParent": [MockFunction],
+          "getSearchRequestBody": [MockFunction],
+          "getSerializedFields": [MockFunction],
+          "history": Array [],
+          "loadDataViewFields": [MockFunction],
+          "onRequestStart": [MockFunction],
+          "parseActiveIndexPatternFromQueryString": [MockFunction],
+          "removeField": [MockFunction],
+          "serialize": [MockFunction],
+          "setField": [MockFunction],
+          "setOverwriteDataViewType": [MockFunction],
+          "setParent": [MockFunction],
+          "toExpressionAst": [MockFunction],
+        },
+        "sharingSavedObjectProps": undefined,
+        "sort": Array [
+          Array [
+            "@timestamp",
+            "desc",
           ],
-          "tags": undefined,
-          "timeRange": undefined,
-          "timeRestore": undefined,
-          "title": "saved-search-title",
-          "usesAdHocDataView": undefined,
-          "viewMode": undefined,
-          "visContext": undefined,
-        }
-      `);
+        ],
+        "tags": undefined,
+        "timeRange": undefined,
+        "timeRestore": undefined,
+        "title": "saved-search-title",
+        "usesAdHocDataView": undefined,
+        "viewMode": undefined,
+        "visContext": undefined,
+      }
+    `);
   });
 });

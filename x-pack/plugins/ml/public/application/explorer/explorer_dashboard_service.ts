@@ -14,12 +14,13 @@ import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { from, isObservable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs';
-import type { DeepPartial } from '../../../common/types/common';
+import type { DeepPartial } from '@kbn/utility-types';
 import { jobSelectionActionCreator } from './actions';
 import { EXPLORER_ACTION } from './explorer_constants';
 import type { ExplorerState } from './reducers';
 import { explorerReducer, getExplorerDefaultState } from './reducers';
 import type { MlFieldFormatService } from '../services/field_format_service';
+import type { MlJobService } from '../services/job_service';
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();
@@ -52,7 +53,10 @@ const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
 });
 
 // Export observable state and action dispatchers as service
-export const explorerServiceFactory = (mlFieldFormatService: MlFieldFormatService) => ({
+export const explorerServiceFactory = (
+  mlJobService: MlJobService,
+  mlFieldFormatService: MlFieldFormatService
+) => ({
   state$: explorerState$,
   clearExplorerData: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
@@ -64,7 +68,9 @@ export const explorerServiceFactory = (mlFieldFormatService: MlFieldFormatServic
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_JOBS });
   },
   updateJobSelection: (selectedJobIds: string[]) => {
-    explorerAction$.next(jobSelectionActionCreator(mlFieldFormatService, selectedJobIds));
+    explorerAction$.next(
+      jobSelectionActionCreator(mlJobService, mlFieldFormatService, selectedJobIds)
+    );
   },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));

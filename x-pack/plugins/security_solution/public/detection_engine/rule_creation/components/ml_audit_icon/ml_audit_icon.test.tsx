@@ -20,7 +20,7 @@ describe('MlAuditIcon', () => {
   it('should render tooltip with message text when hover over the icon', async () => {
     render(<MlAuditIcon message={{ text: 'mock audit text' }} />);
 
-    userEvent.hover(screen.getByTestId('mlJobAuditIcon'));
+    await userEvent.hover(screen.getByTestId('mlJobAuditIcon'));
 
     expect(await screen.findByText('mock audit text')).toBeInTheDocument();
   });

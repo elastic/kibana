@@ -89,6 +89,27 @@ simulate real life internet connection. This means that all requests have a fixe
 In order to keep track on performance metrics stability, journeys are run on main branch with a scheduled interval.
 Bare metal machine is used to produce results as stable and reproducible as possible.
 
+#### Running subset of journeys for the PR
+
+Some code changes might affect the Kibana performance and it might be benefitial to run relevant journeys against the PR
+and compare performance metrics vs. the ones on main branch.
+
+In oder to trigger the build for Kibana PR, you can follow these steps:
+
+- Create a new kibana-single-user-performance [build](https://buildkite.com/elastic/kibana-single-user-performance#new)
+- Provide the following arguments:
+  - Branch: `refs/pull/<PR_number>/head`
+  - Under Options, set the environment variable: `JOURNEYS_GROUP=<group_name>`
+
+Currently supported journey groups:
+
+- kibanaStartAndLoad
+- crud
+- dashboard
+- discover
+- maps
+- ml
+
 #### Machine specifications
 
 All benchmarks are run on bare-metal machines with the [following specifications](https://www.hetzner.com/dedicated-rootserver/ex100):

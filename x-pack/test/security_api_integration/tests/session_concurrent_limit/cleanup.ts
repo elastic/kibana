@@ -25,6 +25,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const esSupertest = getService('esSupertest');
   const es = getService('es');
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -150,6 +151,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
+  async function addESDebugLoggingSettings() {
+    const addLogging = {
+      persistent: {
+        'logger.org.elasticsearch.xpack.security.authc': 'debug',
+      },
+    };
+    await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
+  }
+
   describe('Session Concurrent Limit cleanup', () => {
     before(async () => {
       await security.user.create('anonymous_user', {
@@ -166,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async function () {
       this.timeout(120000);
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await addESDebugLoggingSettings();
       await esDeleteAllIndices('.kibana_security_session*');
     });
 

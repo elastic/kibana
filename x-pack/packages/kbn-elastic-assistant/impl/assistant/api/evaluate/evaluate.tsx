@@ -8,14 +8,15 @@
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import {
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   GetEvaluateResponse,
+  PostEvaluateRequestBodyInput,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
-import { PerformEvaluationParams } from './use_perform_evaluation';
 
 export interface PostEvaluationParams {
   http: HttpSetup;
-  evalParams?: PerformEvaluationParams;
+  evalParams: PostEvaluateRequestBodyInput;
   signal?: AbortSignal | undefined;
 }
 
@@ -33,35 +34,15 @@ export const postEvaluation = async ({
   http,
   evalParams,
   signal,
-}: PostEvaluationParams): Promise<PostEvaluateResponse | IHttpFetchError> => {
-  try {
-    const path = `/internal/elastic_assistant/evaluate`;
-    const query = {
-      agents: evalParams?.agents.sort()?.join(','),
-      datasetName: evalParams?.datasetName,
-      evaluationType: evalParams?.evaluationType.sort()?.join(','),
-      evalModel: evalParams?.evalModel.sort()?.join(','),
-      outputIndex: evalParams?.outputIndex,
-      models: evalParams?.models.sort()?.join(','),
-      projectName: evalParams?.projectName,
-      runName: evalParams?.runName,
-    };
-
-    return await http.post<PostEvaluateResponse>(path, {
-      body: JSON.stringify({
-        dataset: JSON.parse(evalParams?.dataset ?? '[]'),
-        evalPrompt: evalParams?.evalPrompt ?? '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      query,
-      signal,
-      version: API_VERSIONS.internal.v1,
-    });
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
+}: PostEvaluationParams): Promise<PostEvaluateResponse> => {
+  return http.post<PostEvaluateResponse>(ELASTIC_AI_ASSISTANT_EVALUATE_URL, {
+    body: JSON.stringify(evalParams),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    signal,
+    version: API_VERSIONS.internal.v1,
+  });
 };
 
 export interface GetEvaluationParams {
@@ -83,9 +64,7 @@ export const getEvaluation = async ({
   signal,
 }: GetEvaluationParams): Promise<GetEvaluateResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/evaluate`;
-
-    return await http.get<GetEvaluateResponse>(path, {
+    return await http.get<GetEvaluateResponse>(ELASTIC_AI_ASSISTANT_EVALUATE_URL, {
       signal,
       version: API_VERSIONS.internal.v1,
     });

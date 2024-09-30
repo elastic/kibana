@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -14,8 +15,8 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -29,10 +30,18 @@ export const RowControlCell = ({
 
   const Control: React.FC<RowControlProps> = useMemo(
     () =>
-      ({ 'data-test-subj': dataTestSubj, color, disabled, label, iconType, onClick }) => {
+      ({
+        'data-test-subj': dataTestSubj,
+        color,
+        disabled,
+        iconType,
+        label,
+        onClick,
+        tooltipContent,
+      }) => {
         return (
           <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={label} delay="long">
+            <EuiToolTip content={tooltipContent ?? label} delay="long">
               <EuiButtonIcon
                 data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
                 disabled={disabled}

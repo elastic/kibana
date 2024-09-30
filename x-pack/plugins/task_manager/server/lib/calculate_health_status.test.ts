@@ -15,6 +15,11 @@ Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const logger = loggingSystemMock.create().get();
 const config = {
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
+  kibanas_per_partition: 2,
   enabled: true,
   index: 'foo',
   max_attempts: 9,

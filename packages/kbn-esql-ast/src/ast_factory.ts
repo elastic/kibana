@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
@@ -52,7 +53,7 @@ import {
   visitDissect,
   visitGrok,
   collectBooleanExpression,
-  visitOrderExpression,
+  visitOrderExpressions,
   getPolicyName,
   getMatchField,
   getEnrichClauses,
@@ -237,7 +238,7 @@ export class AstListener implements ESQLParserListener {
   exitSortCommand(ctx: SortCommandContext) {
     const command = createCommand('sort', ctx);
     this.ast.push(command);
-    command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
+    command.args.push(...visitOrderExpressions(ctx.orderExpression_list()));
   }
 
   /**

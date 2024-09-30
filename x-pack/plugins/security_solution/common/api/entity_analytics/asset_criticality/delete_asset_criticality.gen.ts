@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { IdField, AssetCriticalityRecord } from './common.gen';
 
@@ -44,8 +44,11 @@ export type DeleteAssetCriticalityRecordResponse = z.infer<
 >;
 export const DeleteAssetCriticalityRecordResponse = z.object({
   /**
-   * If the record was deleted. If false the record did not exist.
+   * True if the record was deleted or false if the record did not exist.
    */
   deleted: z.boolean(),
+  /**
+   * The deleted record if it existed.
+   */
   record: AssetCriticalityRecord.optional(),
 });

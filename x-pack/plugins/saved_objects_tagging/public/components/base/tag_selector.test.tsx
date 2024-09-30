@@ -20,7 +20,7 @@ describe('tag selector', () => {
     onTagsSelected: jest.fn(),
   };
 
-  it('should exclude managed tags from the selection', () => {
+  it('should exclude managed tags from the selection', async () => {
     const tags = [
       { id: '1', name: 'tag1', managed: false, color: 'blue', description: 'description' },
       { id: '2', name: 'tag2', managed: true, color: 'blue', description: 'description' },
@@ -33,7 +33,7 @@ describe('tag selector', () => {
       </I18nProvider>
     );
 
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.queryByText('tag2')).toBeNull();

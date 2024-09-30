@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { TaskTypes } from '../../types';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
@@ -55,15 +55,8 @@ export interface EuiBasicTableSortTypes {
   field: string;
 }
 
-export enum DeploymentStatusEnum {
-  deployed = 'deployed',
-  notDeployed = 'not_deployed',
-  notDeployable = 'not_deployable',
-  notApplicable = 'not_applicable',
-}
-
 export interface InferenceEndpointUI {
-  deployment: DeploymentStatusEnum;
+  deployment: DeploymentState | undefined;
   endpoint: InferenceAPIConfigResponse;
   provider: string;
   type: string;

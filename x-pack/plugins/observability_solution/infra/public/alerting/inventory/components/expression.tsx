@@ -105,7 +105,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  metric: 'cpu' as SnapshotMetricType,
+  metric: 'cpuV2' as SnapshotMetricType,
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
@@ -128,7 +128,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const { metricsView } = useMetricsDataViewContext();
 
   const updateParams = useCallback(
-    (id, e: InventoryMetricConditions) => {
+    (id: any, e: InventoryMetricConditions) => {
       const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
       setRuleParams('criteria', exp);
@@ -444,7 +444,8 @@ const StyledHealthCss = css`
 export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, toggle] = useToggle(true);
 
-  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete } = props;
+  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, nodeType } =
+    props;
   const {
     metric,
     comparator = COMPARATORS.GREATER_THAN,
@@ -491,7 +492,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const updateThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
       }
@@ -500,7 +501,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const updateWarningThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }
@@ -554,7 +555,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   const ofFields = useMemo(() => {
     let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
 
-    switch (props.nodeType) {
+    switch (nodeType) {
       case 'awsEC2':
         myMetrics = awsEC2SnapshotMetricTypes;
         break;
@@ -577,8 +578,8 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         myMetrics = containerSnapshotMetricTypes;
         break;
     }
-    return myMetrics.map((myMetric) => toMetricOpt(myMetric, props.nodeType));
-  }, [props.nodeType]);
+    return myMetrics.map((myMetric) => toMetricOpt(myMetric, nodeType));
+  }, [nodeType]);
 
   return (
     <>
@@ -608,6 +609,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                     text: string;
                   }>
                 }
+                nodeType={nodeType}
                 onChange={updateMetric}
                 onChangeCustom={updateCustomMetric}
                 errors={errors}
@@ -772,7 +774,7 @@ export const nodeTypes: { [key: string]: any } = {
 const metricUnit: Record<string, { label: string }> = {
   count: { label: '' },
   cpu: { label: '%' },
-  cpuTotal: { label: '%' },
+  cpuV2: { label: '%' },
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },

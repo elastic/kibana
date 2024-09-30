@@ -33,7 +33,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');

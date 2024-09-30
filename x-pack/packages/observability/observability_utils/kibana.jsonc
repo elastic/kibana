@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/observability-utils",
+  "owner": "@elastic/observability-ui"
+}

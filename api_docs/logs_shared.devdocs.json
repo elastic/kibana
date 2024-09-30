@@ -1058,6 +1058,50 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.OpenInLogsExplorerButton",
+        "type": "Function",
+        "tags": [],
+        "label": "OpenInLogsExplorerButton",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Pick<(",
+          "DisambiguateSet",
+          "<EuiButtonEmptyPropsForAnchor, ",
+          "EuiButtonEmptyPropsForButton",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForButton",
+          ", EuiButtonEmptyPropsForAnchor> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.OpenInLogsExplorerButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.ScrollableLogTextStreamView",
         "type": "Function",
         "tags": [],
@@ -3167,6 +3211,137 @@
               }
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.UpdatedDateRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatedDateRange",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.startDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "startDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.endDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "endDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.VisibleInterval",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisibleInterval",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesBeforeStart",
+            "type": "number",
+            "tags": [],
+            "label": "pagesBeforeStart",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesAfterEnd",
+            "type": "number",
+            "tags": [],
+            "label": "pagesAfterEnd",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.startKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.middleKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "middleKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.endKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "endKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.fromScroll",
+            "type": "boolean",
+            "tags": [],
+            "label": "fromScroll",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5779,36 +5954,6 @@
           "\"logPosition\""
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/defaults.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.INFRA_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INFRA_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"INFRA_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/infra.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.INFRA_NODE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INFRA_NODE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"INFRA_NODE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/infra.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

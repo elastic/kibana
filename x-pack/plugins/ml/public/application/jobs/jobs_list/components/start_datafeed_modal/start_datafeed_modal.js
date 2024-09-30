@@ -7,6 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import moment from 'moment';
 
 import {
   EuiButton,
@@ -20,18 +21,20 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
+
+import { isManagedJob } from '../../../jobs_utils';
 
 import { forceStartDatafeeds } from '../utils';
 
 import { TimeRangeSelector } from './time_range_selector';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isManagedJob } from '../../../jobs_utils';
-
 export class StartDatafeedModal extends Component {
-  constructor(props) {
-    super(props);
+  static contextType = context;
+
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
 
     const now = moment();
     this.state = {
@@ -50,6 +53,8 @@ export class StartDatafeedModal extends Component {
     this.initialSpecifiedStartTime = now;
     this.refreshJobs = this.props.refreshJobs;
     this.getShowCreateAlertFlyoutFunction = this.props.getShowCreateAlertFlyoutFunction;
+    this.toastNotifications = constructorContext.services.notifications.toasts;
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   componentDidMount() {
@@ -114,7 +119,7 @@ export class StartDatafeedModal extends Component {
       ? this.state.endTime.valueOf()
       : this.state.endTime;
 
-    forceStartDatafeeds(jobs, start, end, () => {
+    forceStartDatafeeds(this.toastNotifications, this.mlApi, jobs, start, end, () => {
       if (this.state.createAlert && jobs.length > 0) {
         this.getShowCreateAlertFlyoutFunction()(jobs.map((job) => job.id));
       }

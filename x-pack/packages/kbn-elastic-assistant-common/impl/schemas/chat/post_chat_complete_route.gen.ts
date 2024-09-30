@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type RootContext = z.infer<typeof RootContext>;
 export const RootContext = z.literal('security');

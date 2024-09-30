@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,6 +13,9 @@ import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
+import { Router, Route, Routes } from '@kbn/shared-ux-router';
+import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import {
   createStorage,
   createHistory,
@@ -27,15 +31,20 @@ import { ServicesContextProvider, EditorContextProvider, RequestContextProvider 
 import { createApi, createEsHostService } from './lib';
 import { ConsoleStartServices } from '../types';
 
+const RedirectToShell = () => {
+  const location = useLocation();
+  return <Redirect to={`/console/shell${location.search}`} />;
+};
+
 export interface BootDependencies extends ConsoleStartServices {
   http: HttpSetup;
   docLinkVersion: string;
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  history: RouteComponentProps['history'];
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
-  isMonacoEnabled: boolean;
   isDevMode: boolean;
 }
 
@@ -44,10 +53,10 @@ export async function renderApp({
   docLinkVersion,
   usageCollection,
   element,
+  history,
   http,
   docLinks,
   autocompleteInfo,
-  isMonacoEnabled,
   isDevMode,
   ...startServices
 }: BootDependencies) {
@@ -60,7 +69,7 @@ export async function renderApp({
     prefix: 'sense:',
   });
   setStorage(storage);
-  const history = createHistory({ storage });
+  const storageHistory = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
@@ -78,7 +87,8 @@ export async function renderApp({
           services: {
             esHostService,
             storage,
-            history,
+            history: storageHistory,
+            routeHistory: history,
             settings,
             notifications,
             trackUiMetric,
@@ -87,14 +97,28 @@ export async function renderApp({
             autocompleteInfo,
           },
           config: {
-            isMonacoEnabled,
             isDevMode,
           },
         }}
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
+            {history ? (
+              <Router history={history}>
+                <Routes>
+                  {[SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID].map((tab) => (
+                    <Route key={tab} path={`/console/${tab}`}>
+                      <Main currentTabProp={tab} />
+                    </Route>
+                  ))}
+                  <Route key="redirect" path="/console">
+                    <RedirectToShell />
+                  </Route>
+                </Routes>
+              </Router>
+            ) : (
+              <Main />
+            )}
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

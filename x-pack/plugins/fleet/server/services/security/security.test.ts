@@ -886,4 +886,57 @@ describe('getAuthzFromRequest', () => {
       expect(res.fleet.readAgents).toBe(false);
     });
   });
+
+  describe('Fleet addFleetServer', () => {
+    beforeEach(() => {
+      mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(true);
+    });
+    it('should authorize user with Fleet:Agents:All Fleet:AgentsPolicies:All Fleet:Settings:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agent-policies-all',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-settings-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: true,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.addFleetServers).toBe(true);
+    });
+
+    it('should not authorize user with only Fleet:Agents:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: true,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.addFleetServers).toBe(false);
+    });
+  });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
@@ -27,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -37,8 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // FLAKY: https://github.com/elastic/kibana/issues/189023
     describe.skip('saved query management component functionality', function () {
       before(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
       });
 
       it('should show the saved query management load button as disabled when there are no saved queries', async () => {
@@ -70,19 +71,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await timePicker.setDefaultAbsoluteRange();
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(timePickerValues.start).to.not.eql(timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(timePicker.defaultEndTime);
       });
 
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
-        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(timePickerValues.start).to.not.eql(timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(timePicker.defaultEndTime);
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 

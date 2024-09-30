@@ -12,20 +12,20 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 import {
   ADD_BURN_RATE_ACTION_ID,
   SLO_BURN_RATE_EMBEDDABLE_ID,
 } from '../embeddable/slo/burn_rate/constants';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 
 export function createBurnRatePanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_BURN_RATE_ACTION_ID,
-    grouping: COMMON_SLO_GROUPING,
-    order: 30,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 20,
     getIconType: () => 'visGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);

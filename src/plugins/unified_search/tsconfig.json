@@ -5,10 +5,8 @@
   },
   "include": [
     "public/**/*",
-    "config.ts",
     "public/**/*.json",
     "server/**/*",
-    "config.ts",
   ],
   "kbn_references": [
     "@kbn/core",

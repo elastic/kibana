@@ -10,8 +10,8 @@ import { useObservedHostFields } from './use_observed_host_fields';
 import { mockObservedHostData } from '../../mocks';
 import { TestProviders } from '../../../../common/mock';
 
-describe('useManagedUserItems', () => {
-  it('returns managed user items for Entra user', () => {
+describe('useObservedHostFields', () => {
+  it('returns managed host items for Entra host', () => {
     const { result } = renderHook(() => useObservedHostFields(mockObservedHostData), {
       wrapper: TestProviders,
     });

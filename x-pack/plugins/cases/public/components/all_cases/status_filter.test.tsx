@@ -38,7 +38,7 @@ describe('StatusFilter', () => {
 
     expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
 
     await waitForEuiPopoverOpen();
 
@@ -53,9 +53,9 @@ describe('StatusFilter', () => {
   it('should call onStatusChanged when changing status to open', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
+    await userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -68,7 +68,7 @@ describe('StatusFilter', () => {
   it('should not render hidden statuses', async () => {
     render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
 
     await waitForEuiPopoverOpen();
 

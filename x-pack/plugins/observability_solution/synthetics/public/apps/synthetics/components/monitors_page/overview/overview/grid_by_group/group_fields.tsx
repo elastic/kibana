@@ -33,19 +33,27 @@ export const GroupFields = () => {
       if (!urlGroupField && groupField !== 'none' && !isUrlHydratedFromRedux.current) {
         // Hydrate url only during initialization
         updateUrlParams({ groupBy: groupField, groupOrderBy: groupOrder });
-      } else {
-        dispatch(
-          setOverviewGroupByAction({
-            field: urlGroupField ?? 'none',
-            order: urlGroupOrderBy ?? 'asc',
-          })
-        );
       }
     }
     isUrlHydratedFromRedux.current = true;
 
     // Only depend on the serialized snapshot
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, groupField, groupOrder, urlGroupField, urlGroupOrderBy]);
+
+  const isUReduxHydratedFromUrl = useRef(false);
+
+  useEffect(() => {
+    if (urlGroupField && urlGroupField !== groupField && !isUReduxHydratedFromUrl.current) {
+      dispatch(
+        setOverviewGroupByAction({
+          field: urlGroupField ?? 'none',
+          order: urlGroupOrderBy ?? 'asc',
+        })
+      );
+    }
+    isUReduxHydratedFromUrl.current = true;
+    // Only depend on the serialized snapshot
   }, [dispatch, groupField, groupOrder, urlGroupField, urlGroupOrderBy]);
 
   const handleChange = (groupByState: GroupByState) => {

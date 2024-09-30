@@ -173,25 +173,19 @@ components:
         body:
           $ref: '#/components/schemas/BaseActionSchema'
 
-    KillOrSuspendActionSchema:
-      allOf:
-        - $ref: '#/components/schemas/BaseActionSchema'
-        - type: object
-          required:
-            - parameters
-          properties:
-            parameters:
-              oneOf:
-                - type: object
-                  properties:
-                    pid:
-                      type: integer
-                      minimum: 1
-                - type: object
-                  properties:
-                    entity_id:
-                      type: string
-                      minLength: 1
+    Pid:
+      type: object
+      properties:
+        pid:
+          type: integer
+          minimum: 1
+
+    EntityId:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          minLength: 1
 
     ProtectionUpdatesNoteResponse:
       type: object

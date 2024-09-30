@@ -6,29 +6,36 @@
  */
 
 import { Observable } from 'rxjs';
+import { ServerSentEventBase } from '@kbn/sse-utils';
 import { FromToolSchema, ToolSchema } from '../chat_complete/tool_schema';
-import { InferenceTaskEventBase } from '../tasks';
+import type { Message, FunctionCallingMode } from '../chat_complete';
 
 export enum OutputEventType {
   OutputUpdate = 'output',
   OutputComplete = 'complete',
 }
 
-type Output = Record<string, any> | undefined;
+type Output = Record<string, any> | undefined | unknown;
 
-export type OutputUpdateEvent<TId extends string = string> =
-  InferenceTaskEventBase<OutputEventType.OutputUpdate> & {
+export type OutputUpdateEvent<TId extends string = string> = ServerSentEventBase<
+  OutputEventType.OutputUpdate,
+  {
     id: TId;
     content: string;
-  };
+  }
+>;
 
 export type OutputCompleteEvent<
   TId extends string = string,
   TOutput extends Output = Output
-> = InferenceTaskEventBase<OutputEventType.OutputComplete> & {
-  id: TId;
-  output: TOutput;
-};
+> = ServerSentEventBase<
+  OutputEventType.OutputComplete,
+  {
+    id: TId;
+    output: TOutput;
+    content: string;
+  }
+>;
 
 export type OutputEvent<TId extends string = string, TOutput extends Output = Output> =
   | OutputUpdateEvent<TId>
@@ -39,7 +46,8 @@ export type OutputEvent<TId extends string = string, TOutput extends Output = Ou
  *
  * @param {string} id The id of the operation
  * @param {string} options.connectorId The ID of the connector that is to be used.
- * @param {string} options.input The prompt for the LLM
+ * @param {string} options.input The prompt for the LLM.
+ * @param {string} options.messages Previous messages in a conversation.
  * @param {ToolSchema} [options.schema] The schema the response from the LLM should adhere to.
  */
 export type OutputAPI = <
@@ -52,6 +60,8 @@ export type OutputAPI = <
     system?: string;
     input: string;
     schema?: TOutputSchema;
+    previousMessages?: Message[];
+    functionCalling?: FunctionCallingMode;
   }
 ) => Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>
@@ -59,11 +69,13 @@ export type OutputAPI = <
 
 export function createOutputCompleteEvent<TId extends string, TOutput extends Output>(
   id: TId,
-  output: TOutput
+  output: TOutput,
+  content?: string
 ): OutputCompleteEvent<TId, TOutput> {
   return {
-    id,
     type: OutputEventType.OutputComplete,
+    id,
     output,
+    content: content ?? '',
   };
 }

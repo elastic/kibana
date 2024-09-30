@@ -8,7 +8,11 @@ paths:
       x-labels: [serverless, ess]
       operationId: UpdateListItem
       x-codegen-enabled: true
-      summary: Updates a list item
+      summary: Update a list item
+      description: |
+        Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` value.
       requestBody:
         description: List item's properties
         required: true

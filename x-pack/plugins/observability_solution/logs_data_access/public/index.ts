@@ -15,6 +15,8 @@ import {
 export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
 
 import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
+export { LogSourcesProvider, useLogSourcesContext } from './hooks/use_log_sources';
+export { LogSourcesSettingSynchronisationInfo } from './components/logs_sources_setting';
 
 export const plugin: PluginInitializer<
   LogsDataAccessPluginSetup,

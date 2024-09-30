@@ -13,6 +13,7 @@ import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
 import {
+  AssistantScope,
   KnowledgeBaseEntryRole,
   ObservabilityAIAssistantScreenContextRequest,
 } from '../../common/types';
@@ -248,8 +249,10 @@ export class ObservabilityAIAssistantService {
 
   async getClient({
     request,
+    scope,
   }: {
     request: KibanaRequest;
+    scope?: AssistantScope;
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -288,6 +291,7 @@ export class ObservabilityAIAssistantService {
           }
         : undefined,
       knowledgeBaseService: this.kbService!,
+      scope: scope || 'all',
     });
   }
 
@@ -323,7 +327,7 @@ export class ObservabilityAIAssistantService {
     return fnClient;
   }
 
-  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
+  addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
         this.kbService!.queue(
@@ -334,6 +338,7 @@ export class ObservabilityAIAssistantService {
               doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
+              type: 'contextual' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
@@ -364,7 +369,7 @@ export class ObservabilityAIAssistantService {
   }
 
   addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBase(
+    this.addToKnowledgeBaseQueue(
       entries.map((entry) => {
         return {
           ...entry,

@@ -53,7 +53,6 @@ export class ObservabilityOnboardingPlugin
     >,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
-    this.logger.debug('observability_onboarding: Setup');
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
 
     core.savedObjects.registerType(observabilityOnboardingFlow);
@@ -109,8 +108,6 @@ export class ObservabilityOnboardingPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('observability_onboarding: Started');
-
     return {};
   }
 

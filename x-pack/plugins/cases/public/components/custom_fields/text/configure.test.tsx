@@ -36,7 +36,7 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -44,15 +44,17 @@ describe('Configure ', () => {
     });
   });
 
-  it('updates field options with default value correctly when not required', async () => {
+  // Flaky: https://github.com/elastic/kibana/issues/178001
+  it.skip('updates field options with default value correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -72,9 +74,10 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid

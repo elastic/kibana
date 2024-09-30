@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -42,58 +43,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
 
-  const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
+  const { dashboard, common, share } = getPageObjects(['dashboard', 'common', 'share']);
 
   const getSharedUrl = async (mode: TestingModes): Promise<string> => {
     await retry.waitFor('share menu to open', async () => {
-      await PageObjects.share.clickShareTopNavButton();
-      return await PageObjects.share.isShareMenuOpen();
+      await share.clickShareTopNavButton();
+      return await share.isShareMenuOpen();
     });
-    return await PageObjects.share.getSharedUrl();
+    return await share.getSharedUrl();
+  };
+
+  const unpinnedFilterIsOnlyWhenDashboardIsUnsaved = async (mode: TestingModes) => {
+    await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
+    await dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    const { globalState, appState } = getStateFromUrl(sharedUrl);
+    expect(globalState).to.not.contain('filters');
+    if (mode === 'snapshot') {
+      expect(appState).to.contain('filters');
+    } else {
+      expect(sharedUrl).to.not.contain('appState');
+    }
+  };
+
+  const unpinnedFilterIsRemoved = async (mode: TestingModes) => {
+    await dashboard.clickQuickSave();
+    await dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    expect(sharedUrl).to.not.contain('appState');
+  };
+
+  const pinnedFilterIsWhenDashboardInGlobalState = async (mode: TestingModes) => {
+    await filterBar.toggleFilterPinned('geo.src');
+    await dashboard.clickQuickSave();
+    await dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    const { globalState, appState } = getStateFromUrl(sharedUrl);
+    expect(globalState).to.contain('filters');
+    if (mode === 'snapshot') {
+      expect(appState).to.not.contain('filters');
+    }
   };
 
   describe('share dashboard', () => {
-    const testFilterState = async (mode: TestingModes) => {
-      it('should not have "filters" state in either app or global state when no filters', async () => {
-        expect(await getSharedUrl(mode)).to.not.contain('filters');
-      });
-
-      it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
-        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
-        expect(globalState).to.not.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.contain('filters');
-        } else {
-          expect(sharedUrl).to.not.contain('appState');
-        }
-      });
-
-      it('unpinned filters should be removed from app state when dashboard is saved', async () => {
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        expect(sharedUrl).to.not.contain('appState');
-      });
-
-      it('pinned filter should show up only in global state', async () => {
-        await filterBar.toggleFilterPinned('geo.src');
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
-        expect(globalState).to.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.not.contain('filters');
-        }
-      });
-    };
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -104,21 +99,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const from = 'Sep 19, 2017 @ 06:31:44.000';
       const to = 'Sep 23, 2018 @ 18:31:44.000';
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await common.setTime({ from, to });
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('few panels');
+      await dashboard.switchToEditMode();
+      await dashboard.waitForRenderComplete();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
-    describe('snapshot share', async () => {
-      describe('test local state', async () => {
+    describe('snapshot share', () => {
+      describe('test local state', () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
@@ -128,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardPanelActions.customizePanel();
           await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
           await dashboardCustomizePanel.clickSaveButton();
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.waitForRenderComplete();
           await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 
           const sharedUrl = await getSharedUrl('snapshot');
@@ -137,27 +132,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should once again not have "panels" state when save is clicked', async () => {
-          await PageObjects.dashboard.clickQuickSave();
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.clickQuickSave();
+          await dashboard.waitForRenderComplete();
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
       });
 
-      describe('test filter state', async () => {
-        await testFilterState('snapshot');
+      describe('test filter state', () => {
+        const mode = 'snapshot';
+
+        it('should not have "filters" state in either app or global state when no filters', async () => {
+          expect(await getSharedUrl(mode)).to.not.contain('filters');
+        });
+
+        it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+          await unpinnedFilterIsOnlyWhenDashboardIsUnsaved(mode);
+        });
+
+        it('unpinned filters should be removed from app state when dashboard is saved', async () => {
+          await unpinnedFilterIsRemoved(mode);
+        });
+
+        it('pinned filter should show up only in global state', async () => {
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
+        });
       });
 
       after(async () => {
         await filterBar.removeAllFilters();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.clickQuickSave();
+        await dashboard.waitForRenderComplete();
       });
     });
 
-    describe('saved object share', async () => {
-      describe('test filter state', async () => {
-        await testFilterState('savedObject');
+    describe('saved object share', () => {
+      describe('test filter state', () => {
+        const mode = 'savedObject';
+
+        it('should not have "filters" state in either app or global state when no filters', async () => {
+          expect(await getSharedUrl(mode)).to.not.contain('filters');
+        });
+
+        it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+          await unpinnedFilterIsOnlyWhenDashboardIsUnsaved(mode);
+        });
+
+        it('unpinned filters should be removed from app state when dashboard is saved', async () => {
+          await unpinnedFilterIsRemoved(mode);
+        });
+
+        it('pinned filter should show up only in global state', async () => {
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
+        });
       });
     });
   });

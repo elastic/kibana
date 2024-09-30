@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -49,7 +49,9 @@ export const ModelSelector: React.FC<Props> = React.memo(
     );
 
     // Callback for when user types to create a new model
-    const onCreateOption = useCallback(
+    const onCreateOption = useCallback<
+      NonNullable<EuiComboBoxProps<string | number | string[] | undefined>['onCreateOption']>
+    >(
       (searchValue, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
@@ -58,8 +60,7 @@ export const ModelSelector: React.FC<Props> = React.memo(
         const normalizedSearchValue = searchValue.trim().toLowerCase();
         const optionExists =
           flattenedOptions.findIndex(
-            (option: EuiComboBoxOptionOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
+            (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
         const newOption = {

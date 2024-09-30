@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ApiConfig, Replacements } from '../conversations/common_attributes.gen';

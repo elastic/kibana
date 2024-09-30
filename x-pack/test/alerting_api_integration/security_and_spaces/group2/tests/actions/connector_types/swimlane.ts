@@ -9,16 +9,19 @@ import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import getPort from 'get-port';
 import http from 'http';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getSwimlaneServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockSwimlane = {
     name: 'A swimlane action',
@@ -459,6 +462,23 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { equal: 1 }],
+                ['execute', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(175);
         });
 
         it('should handle updating an incident', async () => {
@@ -490,6 +510,23 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               url: `${swimlaneSimulatorURL}/record/123456asdf/wowzeronza`,
             },
           });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { gte: 1 }],
+                ['execute', { gte: 2 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[3];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(193);
         });
       });
     });

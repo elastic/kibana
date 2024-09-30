@@ -419,6 +419,11 @@ export function registerVisualizeQueryRenderFunction({
           ? typedResponse.content.errorMessages
           : [];
 
+      const correctedQuery =
+        'data' in typedResponse && 'correctedQuery' in typedResponse.data
+          ? typedResponse.data.correctedQuery
+          : query;
+
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;
       }
@@ -472,7 +477,7 @@ export function registerVisualizeQueryRenderFunction({
           break;
       }
 
-      const trimmedQuery = query.trim();
+      const trimmedQuery = correctedQuery.trim();
 
       return (
         <VisualizeESQL

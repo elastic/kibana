@@ -11,13 +11,14 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import { basicCase } from '../../../containers/mock';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import * as api from '../../../containers/user_profiles/api';
 
 jest.mock('../../../containers/user_profiles/api');
 
 describe('EditAssigneesSelectable', () => {
+  let user: UserEvent;
   let appMock: AppMockRenderer;
 
   /**
@@ -57,6 +58,10 @@ describe('EditAssigneesSelectable', () => {
   });
 
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
     appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
@@ -118,7 +123,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await user.click(result.getByText(userProfile.user.full_name));
     }
 
     expect(props.onChangeAssignees).toBeCalledTimes(3);
@@ -140,7 +145,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await user.click(result.getByText(userProfile.user.full_name));
     }
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(3);
@@ -162,7 +167,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await user.click(result.getByText(userProfile.user.full_name));
     }
 
     for (const [uid, icon] of [
@@ -214,7 +219,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -242,7 +247,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -253,11 +258,11 @@ describe('EditAssigneesSelectable', () => {
     });
 
     // selects
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(result.getByTestId(searchedUserDataTestSubj));
     // deselect
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(result.getByTestId(searchedUserDataTestSubj));
     // clear search results
-    userEvent.click(result.getByTestId('clearSearchButton'));
+    await user.click(result.getByTestId('clearSearchButton'));
 
     await waitFor(() => {
       expect(result.getByText('Damaged Raccoon'));
@@ -273,7 +278,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -298,7 +303,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -308,7 +313,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId(searchedUserDataTestSubj));
     });
 
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(result.getByTestId(searchedUserDataTestSubj));
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [
         'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -326,7 +331,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     // @ts-ignore: full name exists
-    userEvent.click(result.getByText(userProfiles[0].user.full_name));
+    await user.click(result.getByText(userProfiles[0].user.full_name));
 
     // @ts-ignore: full name exists
     expect(result.getByText(userProfiles[0].user.full_name)).toBeInTheDocument();
@@ -372,7 +377,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 'not-exists');
+    await user.type(result.getByPlaceholderText('Find a user'), 'not-exists');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -415,7 +420,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByText('Unknown')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Unknown'));
+    await user.click(result.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: ['123'],
@@ -433,7 +438,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByText('Unknown')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Unknown'));
+    await user.click(result.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [],
@@ -449,7 +454,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
-    userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));
+    await user.click(result.getByRole('button', { name: 'Remove all assignees' }));
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({
@@ -459,5 +464,19 @@ describe('EditAssigneesSelectable', () => {
         'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
       ],
     });
+  });
+
+  it('renders even with no assignee set yet', async () => {
+    const selectedCases = [{ ...basicCase, assignees: [] }];
+    const result = appMock.render(
+      <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
+    expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
+    expect(result.getByText('Selected: 0')).toBeInTheDocument();
   });
 });

@@ -26,8 +26,7 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/185046
-describe.skip('Case View Page files tab', () => {
+describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
 
   useGetCaseFilesMock.mockReturnValue({
@@ -37,10 +36,11 @@ describe.skip('Case View Page files tab', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('should render the utility bar for the files table', async () => {
@@ -61,7 +61,7 @@ describe.skip('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('pagination-button-next'));
+    await userEvent.click(await screen.findByTestId('pagination-button-next'));
 
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({
@@ -79,13 +79,13 @@ describe.skip('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+    await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
 
     const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
 
     pageSizeOption.style.pointerEvents = 'all';
 
-    userEvent.click(pageSizeOption);
+    await userEvent.click(pageSizeOption);
 
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({

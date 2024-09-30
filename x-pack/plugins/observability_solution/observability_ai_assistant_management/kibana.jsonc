@@ -9,6 +9,6 @@
     "configPath": ["xpack", "observabilityAiAssistantManagement"],
     "requiredPlugins": ["management", "observabilityAIAssistant", "observabilityShared"],
     "optionalPlugins": ["actions", "home", "serverless", "enterpriseSearch"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "logsDataAccess"]
   }
 }

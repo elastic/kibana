@@ -48,3 +48,4 @@ export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostD
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
 export const profilingFetchTopNFunctionsFromStacktraces =
   'observability:profilingFetchTopNFunctionsFromStacktraces';
+export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';

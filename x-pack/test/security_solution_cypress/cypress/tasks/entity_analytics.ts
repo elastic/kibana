@@ -31,7 +31,8 @@ import { REFRESH_BUTTON } from '../screens/security_header';
 export const updateDashboardTimeRange = () => {
   // eslint-disable-next-line cypress/no-force
   cy.get(GET_DATE_PICKER_APPLY_BUTTON(GLOBAL_FILTERS_CONTAINER)).click({ force: true }); // Force to fix global timerange flakiness
-  cy.get(REFRESH_BUTTON).click();
+  // eslint-disable-next-line cypress/no-force
+  cy.get(REFRESH_BUTTON).click({ force: true }); // Force to fix even more global timerange flakiness
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 

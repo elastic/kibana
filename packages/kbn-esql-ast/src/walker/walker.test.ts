@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getAstAndSyntaxErrors } from '../ast_parser';
@@ -791,7 +792,8 @@ describe('Walker.params()', () => {
   });
 
   test('can collect all params from grouping functions', () => {
-    const query = 'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?start,?end)';
+    const query =
+      'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?_tstart,?_tend)';
     const { ast } = getAstAndSyntaxErrors(query);
     const params = Walker.params(ast);
 
@@ -800,13 +802,13 @@ describe('Walker.params()', () => {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'start',
+        value: '_tstart',
       },
       {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'end',
+        value: '_tend',
       },
     ]);
   });

@@ -7,76 +7,87 @@
 
 import { getSelectOptions, replaceTemplateVariables } from './helper';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { Filter } from '../../../../../../common/custom_link/custom_link_types';
 
 describe('Custom link helper', () => {
   describe('getSelectOptions', () => {
+    const options = {
+      default: { value: 'DEFAULT', text: 'Select field...' },
+      serviceName: { value: 'service.name', text: 'service.name' },
+      serviceEnvironment: { value: 'service.environment', text: 'service.environment' },
+      transactionType: { value: 'transaction.type', text: 'transaction.type' },
+      transactionName: { value: 'transaction.name', text: 'transaction.name' },
+    };
+
+    const filters: Record<string, Filter> = {
+      empty: { key: '', value: '' },
+      default: { key: 'DEFAULT' as Filter['key'], value: '' },
+      serviceName: { key: 'service.name', value: 'foo' },
+      serviceEnvironment: { key: 'service.environment', value: 'foo' },
+      transactionType: { key: 'transaction.type', value: 'foo' },
+      transactionName: { key: 'transaction.name', value: 'foo' },
+    };
+
     it('returns all available options when no filters were selected', () => {
       expect(
-        getSelectOptions(
-          [
-            { key: '', value: '' },
-            { key: '', value: '' },
-            { key: '', value: '' },
-            { key: '', value: '' },
-          ],
-          ''
-        )
+        getSelectOptions([filters.empty, filters.empty, filters.empty, filters.empty], '')
       ).toEqual([
-        { value: 'DEFAULT', text: 'Select field...' },
-        { value: 'service.name', text: 'service.name' },
-        { value: 'service.environment', text: 'service.environment' },
-        { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' },
+        options.default,
+        options.serviceName,
+        options.serviceEnvironment,
+        options.transactionType,
+        options.transactionName,
       ]);
     });
+
     it('removes item added in another filter', () => {
       expect(
-        getSelectOptions(
-          [
-            { key: 'service.name', value: 'foo' },
-            { key: '', value: '' },
-            { key: '', value: '' },
-            { key: '', value: '' },
-          ],
-          ''
-        )
+        getSelectOptions([filters.serviceName, filters.empty, filters.empty, filters.empty], '')
       ).toEqual([
-        { value: 'DEFAULT', text: 'Select field...' },
-        { value: 'service.environment', text: 'service.environment' },
-        { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' },
+        options.default,
+        options.serviceEnvironment,
+        options.transactionType,
+        options.transactionName,
       ]);
     });
+
     it('removes item added in another filter but keep the current selected', () => {
       expect(
         getSelectOptions(
-          [
-            { key: 'service.name', value: 'foo' },
-            { key: 'transaction.name', value: 'bar' },
-            { key: '', value: '' },
-            { key: '', value: '' },
-          ],
-          'transaction.name'
+          [filters.serviceName, filters.transactionName, filters.empty, filters.empty],
+          filters.transactionName.key
         )
       ).toEqual([
-        { value: 'DEFAULT', text: 'Select field...' },
-        { value: 'service.environment', text: 'service.environment' },
-        { value: 'transaction.type', text: 'transaction.type' },
-        { value: 'transaction.name', text: 'transaction.name' },
+        options.default,
+        options.serviceEnvironment,
+        options.transactionType,
+        options.transactionName,
       ]);
     });
+
     it('returns empty when all option were selected', () => {
       expect(
         getSelectOptions(
           [
-            { key: 'service.name', value: 'foo' },
-            { key: 'transaction.name', value: 'bar' },
-            { key: 'service.environment', value: 'baz' },
-            { key: 'transaction.type', value: 'qux' },
+            filters.serviceName,
+            filters.transactionName,
+            filters.serviceEnvironment,
+            filters.transactionType,
           ],
           ''
         )
-      ).toEqual([{ value: 'DEFAULT', text: 'Select field...' }]);
+      ).toEqual([options.default]);
+    });
+
+    it("does not remove item added if it's the default option", () => {
+      expect(
+        getSelectOptions([filters.serviceName, filters.empty, filters.empty], filters.default.key)
+      ).toEqual([
+        options.default,
+        options.serviceEnvironment,
+        options.transactionType,
+        options.transactionName,
+      ]);
     });
   });
 

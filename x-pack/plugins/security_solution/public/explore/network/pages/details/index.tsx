@@ -28,6 +28,7 @@ import { networkToCriteria } from '../../../../common/components/ml/criteria/net
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
+import type { IpOverviewProps } from '../../components/details';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -82,7 +83,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const type = networkModel.NetworkType.details;
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<IpOverviewProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(

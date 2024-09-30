@@ -121,7 +121,7 @@
         "signature": [
           "Omit<",
           "EuiSideNavProps",
-          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "<{}>, \"children\" | \"items\" | \"heading\"> & { name: string; icon?: ",
           "IconType",
           " | undefined; items?: ",
           "EuiSideNavItemType",

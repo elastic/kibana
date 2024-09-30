@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Handlebars from 'handlebars';
 import { resolve } from 'path';
-import { GenerationContext } from '../parser/get_generation_context';
+import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
@@ -18,6 +19,7 @@ export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
 
 export interface ITemplateService {
   compileTemplate: (templateName: TemplateName, context: GenerationContext) => string;
+  compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => string;
 }
 
 /**
@@ -32,6 +34,9 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
 
   return {
     compileTemplate: (templateName: TemplateName, context: GenerationContext) => {
+      return handlebars.compile(templates[templateName])(context);
+    },
+    compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => {
       return handlebars.compile(templates[templateName])(context);
     },
   };

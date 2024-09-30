@@ -34,7 +34,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Some Super User')).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
 
@@ -94,7 +94,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Some Super User')).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('some.user@google.com')).toBeInTheDocument();
@@ -151,7 +151,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(screen.queryByText('Some Super User')).not.toBeInTheDocument();
@@ -167,7 +167,7 @@ describe('UserToolTip', () => {
       </UserToolTip>
     );
 
-    userEvent.hover(await screen.findByText('case user'));
+    await userEvent.hover(await screen.findByText('case user'));
 
     expect(await screen.findByTestId('user-profile-tooltip')).toBeInTheDocument();
     expect(await screen.findByText('Unable to find user profile')).toBeInTheDocument();

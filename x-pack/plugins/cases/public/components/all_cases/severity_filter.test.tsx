@@ -34,7 +34,7 @@ describe.skip('Severity form field', () => {
     expect(popoverButton).toBeInTheDocument();
     expect(popoverButton).not.toBeDisabled();
 
-    userEvent.click(popoverButton);
+    await userEvent.click(popoverButton);
 
     await waitForEuiPopoverOpen();
 
@@ -52,11 +52,11 @@ describe.skip('Severity form field', () => {
   it('selects the correct value when changed', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
 
     await waitForEuiPopoverOpen();
 
-    userEvent.click(
+    await userEvent.click(
       await within(await screen.findByTestId('euiSelectableList')).findByRole('option', {
         name: 'high',
       })

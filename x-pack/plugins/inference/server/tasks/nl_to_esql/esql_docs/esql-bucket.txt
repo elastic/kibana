@@ -1,0 +1,93 @@
+# BUCKET
+
+The BUCKET function allows you to create groups of values, known as buckets, from a datetime or numeric input. The size of the buckets can be specified directly or determined based on a recommended count and values range.
+
+## Syntax
+
+`BUCKET(field, buckets, from, to)`
+
+### Parameters
+
+#### field
+
+A numeric or date expression from which to derive buckets.
+
+#### buckets
+
+The target number of buckets, or the desired bucket size if `from` and `to` parameters are omitted.
+
+#### from
+
+The start of the range. This can be a number, a date, or a date expressed as a string.
+
+#### to
+
+The end of the range. This can be a number, a date, or a date expressed as a string.
+
+## Examples
+
+BUCKET can operate in two modes: one where the bucket size is computed based on a bucket count recommendation and a range, and another where the bucket size is provided directly.
+
+For instance, asking for at most 20 buckets over a year results in monthly buckets:
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT hire_date
+```
+
+If the desired bucket size is known in advance, simply provide it as the second argument, leaving the range out:
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)
+| SORT week
+```
+
+BUCKET can also operate on numeric fields. For example, to create a salary histogram:
+
+```esql
+FROM employees
+| STATS COUNT(*) BY bs = BUCKET(salary, 20, 25324, 74999)
+| SORT bs
+```
+
+BUCKET may be used in both the aggregating and grouping part of the STATS ... BY ... command provided that in the aggregating part the function is referenced by an alias defined in the grouping part, or that it is invoked with the exact same expression:
+
+```esql
+FROM employees
+| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
+| SORT b1, b2
+| KEEP s1, b1, s2, b2
+```
+
+More examples:
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
+| SORT b
+```
+
+```esql
+FROM sample_data
+| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
+| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
+```
+
+```esql
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT bucket
+```
+
+```esql
+FROM employees
+| STATS s1 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
+| SORT b1, b2
+| KEEP b1, s1, b2
+```

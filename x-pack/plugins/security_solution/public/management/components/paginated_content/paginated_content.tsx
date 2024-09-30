@@ -163,7 +163,9 @@ export const PaginatedContent = memo(
       }
     }, [pageCount, onChange, pagination, loading]);
 
-    const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
+    const handleItemsPerPageChange = useCallback<
+      NonNullable<EuiTablePaginationProps['onChangeItemsPerPage']>
+    >(
       (pageSize) => {
         if (pagination?.pageIndex) {
           const pageIndex = Math.floor(
@@ -182,7 +184,7 @@ export const PaginatedContent = memo(
       [onChange, pagination]
     );
 
-    const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
+    const handlePageChange = useCallback<NonNullable<EuiTablePaginationProps['onChangePage']>>(
       (pageIndex) => {
         onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },

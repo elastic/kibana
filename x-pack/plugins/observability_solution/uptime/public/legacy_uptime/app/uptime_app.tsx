@@ -16,6 +16,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {
@@ -133,19 +134,21 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <UptimeStartupPluginsContextProvider {...startPlugins}>
                         <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
-                            <RedirectAppLinks
-                              coreStart={{
-                                application: core.application,
-                              }}
-                            >
-                              <InspectorContextProvider>
-                                <UptimeAlertsFlyoutWrapper />
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
+                          <PerformanceContextProvider>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                              <RedirectAppLinks
+                                coreStart={{
+                                  application: core.application,
+                                }}
+                              >
+                                <InspectorContextProvider>
+                                  <UptimeAlertsFlyoutWrapper />
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </PerformanceContextProvider>
                         </UptimeDataViewContextProvider>
                       </UptimeStartupPluginsContextProvider>
                     </UptimeThemeContextProvider>

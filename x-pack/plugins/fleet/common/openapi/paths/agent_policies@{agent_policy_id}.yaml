@@ -4,10 +4,11 @@ parameters:
     name: agentPolicyId
     in: path
     required: true
+  - $ref: ../components/parameters/format.yaml
 get:
   summary: Get agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK
@@ -28,7 +29,7 @@ get:
 put:
   summary: Update agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK

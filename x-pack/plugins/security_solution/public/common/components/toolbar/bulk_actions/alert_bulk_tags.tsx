@@ -18,7 +18,7 @@ import { createInitialTagsState } from './helpers';
 import { createAlertTagsReducer, initialState } from './reducer';
 import type { SetAlertTagsFunc } from './use_set_alert_tags';
 
-interface BulkAlertTagsPanelComponentProps {
+export interface BulkAlertTagsPanelComponentProps {
   alertItems: TimelineItem[];
   refetchQuery?: () => void;
   setIsLoading: (isLoading: boolean) => void;

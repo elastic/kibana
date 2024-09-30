@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -22,6 +23,7 @@ import {
 import { testGuideId } from '@kbn/guided-onboarding';
 import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
@@ -42,6 +44,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       const response = await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           status: 'in_progress',
         })
@@ -71,6 +74,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       const response = await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           status: 'in_progress',
         })
@@ -95,6 +99,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           guide: testGuideStep1ActiveState,
         })
@@ -114,6 +119,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           guide: testGuideNotActiveState,
         })
@@ -138,6 +144,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           guide: {
             ...testGuideStep1ActiveState,
@@ -174,6 +181,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       await supertest
         .put(putStatePath)
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({
           guide: {
             ...testGuideStep2ActiveState,

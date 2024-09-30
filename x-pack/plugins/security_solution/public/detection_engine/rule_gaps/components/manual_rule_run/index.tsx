@@ -127,10 +127,6 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
         iconType="warning"
         title={i18n.MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS}
       />
-
-      <EuiSpacer size="m" />
-
-      <EuiCallOut size="s" title={i18n.MANUAL_RULE_RUN_ALERT_LIMITATIONS} iconType="iInCircle" />
     </EuiConfirmModal>
   );
 };

@@ -45,6 +45,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+      * An exception list groups exception items and can be associated with detection rules. You can assign detection rules with multiple exception lists.
+> info
+> All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+      */
     createExceptionList(props: CreateExceptionListProps) {
       return supertest
         .post('/api/exception_lists')
@@ -53,6 +59,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Create an exception item and associate it with the specified exception list.
+> info
+> Before creating exception items, you must create an exception list.
+
+      */
     createExceptionListItem(props: CreateExceptionListItemProps) {
       return supertest
         .post('/api/exception_lists/items')
@@ -61,6 +73,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create exception items that apply to a single detection rule.
+     */
     createRuleExceptionListItems(props: CreateRuleExceptionListItemsProps) {
       return supertest
         .post(replaceParams('/api/detection_engine/rules/{id}/exceptions', props.params))
@@ -69,6 +84,12 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
+> info
+> All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
+
+      */
     createSharedExceptionList(props: CreateSharedExceptionListProps) {
       return supertest
         .post('/api/exceptions/shared')
@@ -77,6 +98,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Delete an exception list using the `id` or `list_id` field.
+     */
     deleteExceptionList(props: DeleteExceptionListProps) {
       return supertest
         .delete('/api/exception_lists')
@@ -85,6 +109,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete an exception list item using the `id` or `item_id` field.
+     */
     deleteExceptionListItem(props: DeleteExceptionListItemProps) {
       return supertest
         .delete('/api/exception_lists/items')
@@ -93,6 +120,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Duplicate an existing exception list.
+     */
     duplicateExceptionList(props: DuplicateExceptionListProps) {
       return supertest
         .post('/api/exception_lists/_duplicate')
@@ -102,7 +132,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Exports an exception list and its associated items to an .ndjson file
+     * Export an exception list and its associated items to an NDJSON file.
      */
     exportExceptionList(props: ExportExceptionListProps) {
       return supertest
@@ -112,6 +142,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all exception list items in the specified list.
+     */
     findExceptionListItems(props: FindExceptionListItemsProps) {
       return supertest
         .get('/api/exception_lists/items/_find')
@@ -120,6 +153,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all exception lists.
+     */
     findExceptionLists(props: FindExceptionListsProps) {
       return supertest
         .get('/api/exception_lists/_find')
@@ -129,7 +165,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Imports an exception list and associated items
+     * Import an exception list and its associated items from an NDJSON file.
      */
     importExceptionList(props: ImportExceptionListProps) {
       return supertest
@@ -139,6 +175,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an exception list using the `id` or `list_id` field.
+     */
     readExceptionList(props: ReadExceptionListProps) {
       return supertest
         .get('/api/exception_lists')
@@ -147,6 +186,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an exception list item using the `id` or `item_id` field.
+     */
     readExceptionListItem(props: ReadExceptionListItemProps) {
       return supertest
         .get('/api/exception_lists/items')
@@ -155,6 +197,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a summary of the specified exception list.
+     */
     readExceptionListSummary(props: ReadExceptionListSummaryProps) {
       return supertest
         .get('/api/exception_lists/summary')
@@ -163,6 +208,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Update an exception list using the `id` or `list_id` field.
+     */
     updateExceptionList(props: UpdateExceptionListProps) {
       return supertest
         .put('/api/exception_lists')
@@ -171,6 +219,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Update an exception list item using the `id` or `item_id` field.
+     */
     updateExceptionListItem(props: UpdateExceptionListItemProps) {
       return supertest
         .put('/api/exception_lists/items')

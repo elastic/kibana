@@ -6,31 +6,25 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { VisualizationContainer } from './visualization_container';
+import { render, screen } from '@testing-library/react';
 
 describe('VisualizationContainer', () => {
+  const renderVisContainer = (props?: React.HTMLAttributes<HTMLDivElement>) => {
+    return render(<VisualizationContainer {...props}>Hello!</VisualizationContainer>);
+  };
   test('renders child content', () => {
-    const component = mount(<VisualizationContainer>Hello!</VisualizationContainer>);
-
-    expect(component.text()).toEqual('Hello!');
+    renderVisContainer();
+    expect(screen.getByText('Hello!')).toBeInTheDocument();
   });
 
   test('renders style', () => {
-    const component = mount(
-      <VisualizationContainer style={{ color: 'blue' }}>Hello!</VisualizationContainer>
-    );
-    const el = component.find('.lnsVisualizationContainer').first();
-
-    expect(el.prop('style')).toEqual({ color: 'blue' });
+    renderVisContainer({ style: { color: 'blue' } });
+    expect(screen.getByText('Hello!')).toHaveStyle({ color: 'blue' });
   });
 
   test('combines class names with container class', () => {
-    const component = mount(
-      <VisualizationContainer className="myClass">Hello!</VisualizationContainer>
-    );
-    const el = component.find('.lnsVisualizationContainer').first();
-
-    expect(el.prop('className')).toEqual('myClass lnsVisualizationContainer');
+    renderVisContainer({ className: 'myClass' });
+    expect(screen.getByText('Hello!')).toHaveClass('myClass lnsVisualizationContainer');
   });
 });

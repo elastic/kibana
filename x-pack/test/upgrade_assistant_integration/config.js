@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+
 export default async function ({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(
@@ -13,15 +15,12 @@ export default async function ({ readConfigFile }) {
   const xPackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
-  const kibanaCommonConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-src/common/config')
-  );
 
   return {
     testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
-      ...kibanaCommonConfig.get('services'),
+      ...commonFunctionalServices,
       supertest: kibanaAPITestsConfig.get('services.supertest'),
     },
     junit: {

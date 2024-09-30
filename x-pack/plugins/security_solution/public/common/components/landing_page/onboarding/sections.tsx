@@ -111,10 +111,6 @@ export const sections: Section[] = [
         steps: createProjectSteps,
         hideSteps: true,
       },
-      {
-        id: QuickStartSectionCardsId.watchTheOverviewVideo,
-        steps: overviewVideoSteps,
-      },
     ],
   },
   {

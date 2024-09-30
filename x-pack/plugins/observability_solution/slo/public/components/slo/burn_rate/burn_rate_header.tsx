@@ -43,7 +43,11 @@ export function BurnRateHeader({
             legend={i18n.translate('xpack.slo.burnRate.timeRangeBtnLegend', {
               defaultMessage: 'Select the time range',
             })}
-            options={burnRateOptions.map((opt) => ({ id: opt.id, label: opt.label }))}
+            options={burnRateOptions.map((opt) => ({
+              id: opt.id,
+              label: opt.label,
+              'aria-label': opt.ariaLabel,
+            }))}
             idSelected={burnRateOption.id}
             onChange={onBurnRateOptionChange}
             buttonSize="compressed"

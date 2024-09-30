@@ -89,6 +89,17 @@ a|
 
 |===
 
+[[playground-local-llms]]
+[TIP]
+====
+You can also use locally hosted LLMs that are compatible with the OpenAI SDK.
+Once you've set up your LLM, you can connect to it using the OpenAI connector.
+Refer to the following for examples:
+
+* {security-guide}/connect-to-byo-llm.html[Using LM Studio]
+* https://www.elastic.co/search-labs/blog/localai-for-text-embeddings[LocalAI with `docker-compose`]
+====
+
 [float]
 [[playground-getting-started]]
 == Getting started
@@ -101,13 +112,15 @@ image::get-started.png[width=600]
 === Connect to LLM provider
 
 To get started with {x}, you need to create a <<action-types,connector>> for your LLM provider.
-Follow these steps on the {x} landing page:
+You can also connect to <<playground-local-llms,locally hosted LLMs>> which are compatible with the OpenAI API, by using the OpenAI connector.
+
+To connect to an LLM provider, follow these steps on the {x} landing page:
 
 . Under *Connect to an LLM*, click *Create connector*.
 . Select your *LLM provider*.
 . *Name* your connector.
 . Select a *URL endpoint* (or use the default).
-. Enter *access credentials* for your LLM provider.
+. Enter *access credentials* for your LLM provider. (If you're running a locally hosted LLM using the OpenAI connector, you must input a value in the API key form, but the specific value doesn't matter.)
 
 [TIP]
 ====

@@ -76,6 +76,8 @@ export class AIAssistantService {
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: boolean = false;
+  // Temporary 'feature flag' to determine if we should initialize the new kb mappings, toggled when accessing kbDataClient
+  private v2KnowledgeBaseEnabled: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -88,7 +90,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap,
+      fieldMap: knowledgeBaseFieldMap, // TODO: use v2 if FF is enabled
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -182,7 +184,7 @@ export class AIAssistantService {
         esClient,
         id: this.resourceNames.pipelines.knowledgeBase,
       });
-      if (!pipelineCreated) {
+      if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
         );
@@ -327,8 +329,15 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams
+    opts: CreateAIAssistantClientParams & { v2KnowledgeBaseEnabled: boolean }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
+    // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
+    if (opts.v2KnowledgeBaseEnabled) {
+      this.v2KnowledgeBaseEnabled = true;
+      await this.initializeResources();
+    }
+
     const res = await this.checkResourcesInstallation(opts);
 
     if (res === null) {
@@ -347,6 +356,7 @@ export class AIAssistantService {
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
+      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled,
     });
   }
 

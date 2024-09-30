@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   FindMetricsExplorerViewResponsePayload,
   CreateMetricsExplorerViewResponsePayload,
   UpdateMetricsExplorerViewResponsePayload,
   GetMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api';
-import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
+import type { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
-export type MetricsExplorerViewsServiceSetup = void;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MetricsExplorerViewsServiceSetup {}
 
 export interface MetricsExplorerViewsServiceStart {
-  client: IMetricsExplorerViewsClient;
+  getClient: () => Promise<IMetricsExplorerViewsClient>;
 }
 
 export interface MetricsExplorerViewsServiceStartDeps {

@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';

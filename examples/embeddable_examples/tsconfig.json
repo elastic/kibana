@@ -30,7 +30,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/unified-field-list",
     "@kbn/presentation-containers",
-    "@kbn/core-application-browser",
     "@kbn/developer-examples-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/discover-utils",
@@ -40,6 +39,8 @@
     "@kbn/unified-data-table",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-mount-utils-browser",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/std",
+    "@kbn/shared-ux-router"
   ]
 }

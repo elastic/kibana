@@ -20,6 +20,18 @@ import { DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 import { DatatableRenderProps } from './types';
+import { PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
+
+jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
+  const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
+  return {
+    ...mod,
+    getCellColorFn: jest.fn(mod.getCellColorFn),
+  };
+});
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
 
@@ -97,8 +109,12 @@ describe('DatatableComponent', () => {
     args = sample.args;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const renderDatatableComponent = (propsOverrides: Partial<DatatableRenderProps> = {}) => {
-    const props = {
+    const props: DatatableRenderProps = {
       data,
       args,
       formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
@@ -108,6 +124,7 @@ describe('DatatableComponent', () => {
       theme: setUpMockTheme,
       renderMode: 'edit' as const,
       interactive: true,
+      syncColors: false,
       renderComplete,
       ...propsOverrides,
     };
@@ -153,9 +170,9 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
+  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
     renderDatatableComponent({ renderMode: 'view' });
-    userEvent.click(screen.getByRole('button', { name: 'a' }));
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
       .getAllByRole('button')
@@ -165,8 +182,8 @@ describe('DatatableComponent', () => {
 
   test('it invokes executeTriggerActions with correct context on click on top value', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -186,8 +203,8 @@ describe('DatatableComponent', () => {
 
   test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -247,8 +264,8 @@ describe('DatatableComponent', () => {
       },
     });
 
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -268,7 +285,7 @@ describe('DatatableComponent', () => {
 
   test('it should not invoke executeTriggerActions if interactivity is set to false', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true], interactive: false });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
     expect(screen.queryByTestId('lensDatatableFilterOut')).not.toBeInTheDocument();
   });
 
@@ -282,7 +299,7 @@ describe('DatatableComponent', () => {
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
   });
 
-  test('it renders the table with the given sorting', () => {
+  test('it renders the table with the given sorting', async () => {
     renderDatatableComponent({
       args: {
         ...args,
@@ -294,7 +311,7 @@ describe('DatatableComponent', () => {
       'data-euiicon-type',
       'sortDown'
     );
-    userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-b'));
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-b'));
     fireEvent.click(screen.getByRole('button', { name: 'Sort ascending' }));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -345,9 +362,9 @@ describe('DatatableComponent', () => {
       args: {
         ...args,
         columns: [
-          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
-          { columnId: 'b', type: 'lens_datatable_column' },
-          { columnId: 'c', type: 'lens_datatable_column' },
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'c', type: 'lens_datatable_column', colorMode: 'none' },
         ],
         sortingColumnId: 'b',
         sortingDirection: 'desc',
@@ -358,44 +375,10 @@ describe('DatatableComponent', () => {
       .map((cell) => cell.className);
 
     expect(alignmentsClassNames).toEqual([
-      // set via args
-      'lnsTableCell--center',
-      // default for date
-      'lnsTableCell--left',
-      // default for number
-      'lnsTableCell--right',
+      'lnsTableCell--center', // set via args
+      'lnsTableCell--left', // default for date
+      'lnsTableCell--right', // default for number
     ]);
-    //   <DatatableComponent
-    //     data={data}
-    //     args={{
-    //       ...args,
-    //       columns: [
-    //         { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
-    //         { columnId: 'b', type: 'lens_datatable_column' },
-    //         { columnId: 'c', type: 'lens_datatable_column' },
-    //       ],
-    //       sortingColumnId: 'b',
-    //       sortingDirection: 'desc',
-    //     }}
-    //     formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-    //     dispatchEvent={onDispatchEvent}
-    //     getType={jest.fn()}
-    //     renderMode="view"
-    //     paletteService={chartPluginMock.createPaletteRegistry()}
-    //     theme={setUpMockTheme}
-    //     interactive
-    //     renderComplete={renderComplete}
-    //   />
-    // );
-
-    // expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
-    //   // set via args
-    //   a: 'center',
-    //   // default for date
-    //   b: 'left',
-    //   // default for number
-    //   c: 'right',
-    // });
   });
 
   test('it should refresh the table header when the datatable data changes', () => {
@@ -500,7 +483,9 @@ describe('DatatableComponent', () => {
         'true'
       );
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');
@@ -540,7 +525,7 @@ describe('DatatableComponent', () => {
       renderDatatableComponent({
         args,
       });
-      userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
       fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
 
@@ -571,7 +556,9 @@ describe('DatatableComponent', () => {
         data,
       });
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');
@@ -609,7 +596,9 @@ describe('DatatableComponent', () => {
         data,
       });
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');
@@ -631,6 +620,108 @@ describe('DatatableComponent', () => {
         'aria-label',
         'My fanci metric chart; Page 2 of 2.'
       );
+    });
+  });
+
+  describe('renderCellValue', () => {
+    describe('getCellColor', () => {
+      const palette: PaletteOutput<CustomPaletteState> = {
+        type: 'palette',
+        name: 'default',
+        params: {
+          colors: [],
+          gradient: false,
+          stops: [],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+        },
+      };
+
+      describe('caching', () => {
+        test('caches getCellColorFn by columnId', () => {
+          args.columns[0].palette = palette;
+          args.columns[0].colorMode = 'cell';
+          data.rows.push(
+            ...[
+              { a: 'pants', b: 1588024800000, c: 4 },
+              { a: 'hat', b: 1588024800000, c: 5 },
+              { a: 'bag', b: 1588024800000, c: 6 },
+            ]
+          );
+
+          renderDatatableComponent();
+
+          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+        });
+
+        test('caches getCellColorFn by columnId with transpose columns', () => {
+          const columnId1 = getTransposeId('a', 'test');
+          const columnId2 = getTransposeId('b', 'test');
+
+          renderDatatableComponent({
+            data: {
+              ...data,
+              rows: [{ [columnId1]: 'shoe', [columnId2]: 'hat' }],
+              columns: [columnId1, columnId2].map((id) => ({
+                ...data.columns[0],
+                id,
+              })),
+            },
+            args: {
+              ...args,
+              columns: [columnId1, columnId2].map((columnId) => ({
+                ...args.columns[0],
+                palette,
+                colorMode: 'cell',
+                columnId,
+              })),
+            },
+          });
+
+          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+        });
+      });
+
+      const color = 'red';
+
+      test('should correctly color numerical values', () => {
+        args.columns[0].palette = palette;
+        args.columns[0].colorMode = 'cell';
+
+        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+
+        renderDatatableComponent();
+
+        const cellColors = screen
+          .queryAllByRole('gridcell')
+          .map((cell) => [cell.textContent, cell.style.backgroundColor]);
+
+        expect(cellColors).toEqual([
+          ['shoes- a, column 1, row 1', 'red'],
+          ['1588024800000- b, column 2, row 1', ''],
+          ['3- c, column 3, row 1', ''],
+        ]);
+      });
+
+      test('should correctly color string values', () => {
+        args.columns[2].palette = palette;
+        args.columns[2].colorMode = 'cell';
+
+        (getCellColorFn as jest.Mock).mockReturnValue(() => color);
+
+        renderDatatableComponent();
+
+        const cellColors = screen
+          .queryAllByRole('gridcell')
+          .map((cell) => [cell.textContent, cell.style.backgroundColor]);
+
+        expect(cellColors).toEqual([
+          ['shoes- a, column 1, row 1', ''],
+          ['1588024800000- b, column 2, row 1', ''],
+          ['3- c, column 3, row 1', 'red'],
+        ]);
+      });
     });
   });
 });

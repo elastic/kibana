@@ -18,9 +18,10 @@ import {
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 
 import { calculateRuleFieldsDiff } from './calculation/calculate_rule_fields_diff';
-import { convertRuleToDiffable } from './normalization/convert_rule_to_diffable';
 
 export interface RuleVersions {
   current?: RuleResponse;
@@ -65,13 +66,19 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
   const { base, current, target } = args;
 
   invariant(current != null, 'current version is required');
-  const diffableCurrentVersion = convertRuleToDiffable(current);
+  const diffableCurrentVersion = convertRuleToDiffable(
+    convertPrebuiltRuleAssetToRuleResponse(current)
+  );
 
   invariant(target != null, 'target version is required');
-  const diffableTargetVersion = convertRuleToDiffable(target);
+  const diffableTargetVersion = convertRuleToDiffable(
+    convertPrebuiltRuleAssetToRuleResponse(target)
+  );
 
   // Base version is optional
-  const diffableBaseVersion = base ? convertRuleToDiffable(base) : undefined;
+  const diffableBaseVersion = base
+    ? convertRuleToDiffable(convertPrebuiltRuleAssetToRuleResponse(base))
+    : undefined;
 
   const fieldsDiff = calculateRuleFieldsDiff({
     base_version: diffableBaseVersion || MissingVersion,

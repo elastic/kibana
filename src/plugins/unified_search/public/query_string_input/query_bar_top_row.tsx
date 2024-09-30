@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dateMath from '@kbn/datemath';
@@ -50,6 +51,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { ESQLMenuPopover } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -151,6 +153,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
   refreshInterval?: number;
+  minRefreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
@@ -502,6 +505,7 @@ export const QueryBarTopRow = React.memo(
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
           refreshInterval={props.refreshInterval}
+          refreshMinInterval={props.minRefreshInterval}
           onTimeChange={onTimeChange}
           onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
@@ -621,22 +625,17 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderDataViewsPicker() {
-      if (!props.dataViewPickerComponentProps) return;
-      let textBasedLanguage;
-      if (Boolean(isQueryLangSelected)) {
-        const query = props.query as AggregateQuery;
-        textBasedLanguage = getAggregateQueryMode(query);
+      if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
+        return (
+          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+            <DataViewPicker
+              {...props.dataViewPickerComponentProps}
+              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+              isDisabled={props.isDisabled}
+            />
+          </EuiFlexItem>
+        );
       }
-      return (
-        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
-          <DataViewPicker
-            {...props.dataViewPickerComponentProps}
-            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            textBasedLanguage={textBasedLanguage}
-            isDisabled={props.isDisabled}
-          />
-        </EuiFlexItem>
-      );
     }
 
     function renderAddButton() {
@@ -775,6 +774,7 @@ export const QueryBarTopRow = React.memo(
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
+              {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

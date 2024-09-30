@@ -109,7 +109,12 @@ export const useAttackDiscovery = ({
   ]);
 
   useEffect(() => {
-    if (connectorId != null && connectorId !== '') {
+    if (
+      connectorId != null &&
+      connectorId !== '' &&
+      aiConnectors != null &&
+      aiConnectors.length > 0
+    ) {
       pollApi();
       setLoadingConnectorId?.(connectorId);
       setAlertsContextCount(null);
@@ -120,7 +125,7 @@ export const useAttackDiscovery = ({
       setGenerationIntervals([]);
       setPollStatus(null);
     }
-  }, [pollApi, connectorId, setLoadingConnectorId, setPollStatus]);
+  }, [aiConnectors, connectorId, pollApi, setLoadingConnectorId, setPollStatus]);
 
   useEffect(() => {
     if (pollStatus === 'running') {

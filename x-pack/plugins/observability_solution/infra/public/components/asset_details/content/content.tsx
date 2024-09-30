@@ -22,22 +22,30 @@ import {
   Profiling,
 } from '../tabs';
 import { ContentTabIds } from '../types';
+import { Callouts } from './callouts';
 
 export const Content = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <DatePickerWrapper
-          visibleFor={[
-            ContentTabIds.OVERVIEW,
-            ContentTabIds.LOGS,
-            ContentTabIds.METADATA,
-            ContentTabIds.METRICS,
-            ContentTabIds.PROCESSES,
-            ContentTabIds.ANOMALIES,
-            ContentTabIds.DASHBOARDS,
-          ]}
-        />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <Callouts />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DatePickerWrapper
+              visibleFor={[
+                ContentTabIds.OVERVIEW,
+                ContentTabIds.LOGS,
+                ContentTabIds.METADATA,
+                ContentTabIds.METRICS,
+                ContentTabIds.PROCESSES,
+                ContentTabIds.ANOMALIES,
+                ContentTabIds.DASHBOARDS,
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TabPanel activeWhen={ContentTabIds.ANOMALIES}>

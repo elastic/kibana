@@ -12,7 +12,6 @@ import {
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];
@@ -131,11 +130,9 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      enterCommand('help');
+      await enterCommand('help');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 
@@ -145,11 +142,9 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      enterCommand('help');
+      await enterCommand('help');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 });

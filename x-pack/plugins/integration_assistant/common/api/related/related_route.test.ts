@@ -6,7 +6,7 @@
  */
 
 import { expectParseSuccess } from '@kbn/zod-helpers';
-import { RelatedRequestBody } from './related_route';
+import { RelatedRequestBody } from './related_route.gen';
 import { getRelatedRequestMock } from '../model/api_test.mock';
 
 describe('Related request schema', () => {

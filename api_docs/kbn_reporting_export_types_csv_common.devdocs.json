@@ -396,22 +396,6 @@
         "references": [
           {
             "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/common/constants.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/common/constants.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/common/job_utils.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/common/job_utils.ts"
-          },
-          {
-            "plugin": "reporting",
             "path": "x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts"
           },
           {

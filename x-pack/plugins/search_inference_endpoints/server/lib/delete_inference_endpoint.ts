@@ -19,6 +19,6 @@ export const deleteInferenceEndpoint = async (
   id: string
 ) => {
   if (isTaskType(type)) {
-    return await client.inference.deleteModel({ inference_id: id, task_type: type });
+    return await client.inference.delete({ inference_id: id, task_type: type });
   }
 };

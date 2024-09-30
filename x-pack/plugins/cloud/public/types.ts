@@ -112,6 +112,12 @@ export interface CloudSetup {
    */
   cname?: string;
   /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
+  /**
    * This is the URL of the Cloud interface.
    */
   baseUrl?: string;

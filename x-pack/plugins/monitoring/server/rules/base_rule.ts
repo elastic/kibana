@@ -405,7 +405,7 @@ export class BaseRule {
   }
 
   protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
-    const globalState = [`cluster_uuid:${clusterUuid}`];
+    const globalState = [`cluster_uuid:'${clusterUuid}'`];
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }

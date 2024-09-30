@@ -7,7 +7,7 @@
 
 import { postEvaluation } from './evaluate';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 
 jest.mock('@kbn/core-http-browser');
 
@@ -16,39 +16,26 @@ const mockHttp = {
 } as unknown as HttpSetup;
 
 describe('postEvaluation', () => {
-  it('calls the knowledge base API when correct resource path', async () => {
+  const evalParams: PostEvaluateRequestBodyInput = {
+    graphs: ['not', 'alphabetical'],
+    datasetName: 'Test Dataset',
+    runName: 'Test Run Name',
+    connectorIds: ['not', 'alphabetical'],
+  };
+
+  it('calls the evaluate API when correct resource path', async () => {
     (mockHttp.post as jest.Mock).mockResolvedValue({ success: true });
+
     const testProps = {
       http: mockHttp,
-      evalParams: {
-        agents: ['not', 'alphabetical'],
-        dataset: '{}',
-        datasetName: 'Test Dataset',
-        projectName: 'Test Project Name',
-        runName: 'Test Run Name',
-        evalModel: ['not', 'alphabetical'],
-        evalPrompt: 'evalPrompt',
-        evaluationType: ['not', 'alphabetical'],
-        models: ['not', 'alphabetical'],
-        outputIndex: 'outputIndex',
-      },
+      evalParams,
     };
 
     await postEvaluation(testProps);
 
     expect(mockHttp.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
-      body: '{"dataset":{},"evalPrompt":"evalPrompt"}',
+      body: '{"graphs":["not","alphabetical"],"datasetName":"Test Dataset","runName":"Test Run Name","connectorIds":["not","alphabetical"]}',
       headers: { 'Content-Type': 'application/json' },
-      query: {
-        models: 'alphabetical,not',
-        agents: 'alphabetical,not',
-        datasetName: 'Test Dataset',
-        evaluationType: 'alphabetical,not',
-        evalModel: 'alphabetical,not',
-        outputIndex: 'outputIndex',
-        projectName: 'Test Project Name',
-        runName: 'Test Run Name',
-      },
       signal: undefined,
       version: API_VERSIONS.internal.v1,
     });
@@ -59,11 +46,12 @@ describe('postEvaluation', () => {
       throw new Error(error);
     });
 
-    const knowledgeBaseArgs = {
+    const evaluationArgs = {
       resource: 'a-resource',
       http: mockHttp,
+      evalParams,
     };
 
-    await expect(postEvaluation(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+    await expect(postEvaluation(evaluationArgs)).rejects.toThrowError('simulated error');
   });
 });

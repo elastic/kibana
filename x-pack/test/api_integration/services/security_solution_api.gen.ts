@@ -37,6 +37,10 @@ import {
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import {
+  DeleteEntityStoreRequestQueryInput,
+  DeleteEntityStoreRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
 import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
 import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
@@ -76,6 +80,8 @@ import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
+import { GetEntityStoreEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
+import { GetEntityStoreStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -91,12 +97,16 @@ import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/comm
 import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
+import {
+  InitEntityStoreRequestParamsInput,
+  InitEntityStoreRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
-  PerformBulkActionRequestQueryInput,
-  PerformBulkActionRequestBodyInput,
+  PerformRulesBulkActionRequestQueryInput,
+  PerformRulesBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
 import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
@@ -110,6 +120,8 @@ import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import { StartEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import { StopEntityStoreRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
@@ -212,6 +224,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+     */
     bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
       return supertest
         .post('/api/asset_criticality/bulk')
@@ -221,7 +236,9 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-      * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+      * Create a clean draft Timeline or Timeline template for the current user.
+> info
+> If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
 
       */
     cleanDraftTimelines(props: CleanDraftTimelinesProps) {
@@ -252,6 +269,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create or update a criticality record for a specific asset.
+     */
     createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
       return supertest
         .post('/api/asset_criticality')
@@ -271,6 +291,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Create a new Timeline or Timeline template.
+     */
     createTimelines(props: CreateTimelinesProps) {
       return supertest
         .post('/api/timeline')
@@ -296,6 +319,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Delete the asset criticality record for a specific asset if it exists.
+     */
     deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
       return supertest
         .delete('/api/asset_criticality')
@@ -304,6 +330,17 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    deleteEntityStore(props: DeleteEntityStoreProps) {
+      return supertest
+        .delete(replaceParams('/api/entity_store/engines/{entityType}', props.params))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Delete a note from a Timeline using the note ID.
+     */
     deleteNote(props: DeleteNoteProps) {
       return supertest
         .delete('/api/note')
@@ -323,6 +360,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Delete one or more Timelines or Timeline templates.
+     */
     deleteTimelines(props: DeleteTimelinesProps) {
       return supertest
         .delete('/api/timeline')
@@ -357,7 +397,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Execute a given command on an endpoint
+     * Run a shell command on an endpoint.
      */
     endpointExecuteAction(props: EndpointExecuteActionProps) {
       return supertest
@@ -368,32 +408,29 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Download a file from an endpoint
+     * Download a file from an endpoint.
      */
     endpointFileDownload(props: EndpointFileDownloadProps) {
       return supertest
         .get(
-          replaceParams(
-            '/api/endpoint/action/{action_id}/file/{file_id}/download&#x60;',
-            props.params
-          )
+          replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', props.params)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get file info
+     * Get information for the specified file using the file ID.
      */
     endpointFileInfo(props: EndpointFileInfoProps) {
       return supertest
-        .get(replaceParams('/api/endpoint/action/{action_id}/file/{file_id}&#x60;', props.params))
+        .get(replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get action details
+     * Get the details of a response action using the action ID.
      */
     endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
       return supertest
@@ -403,7 +440,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get a list of action requests and their responses
+     * Get a list of all response actions.
      */
     endpointGetActionsList(props: EndpointGetActionsListProps) {
       return supertest
@@ -413,6 +450,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a response actions state, which reports whether encryption is enabled.
+     */
     endpointGetActionsState() {
       return supertest
         .get('/api/endpoint/action/state')
@@ -421,7 +461,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get action status
+     * Get the status of response actions for the specified agent IDs.
      */
     endpointGetActionsStatus(props: EndpointGetActionsStatusProps) {
       return supertest
@@ -432,7 +472,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .query(props.query);
     },
     /**
-     * Get a file from an endpoint
+     * Get a file from an endpoint.
      */
     endpointGetFileAction(props: EndpointGetFileActionProps) {
       return supertest
@@ -443,7 +483,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Get list of running processes on an endpoint
+     * Get a list of all processes running on an endpoint.
      */
     endpointGetProcessesAction(props: EndpointGetProcessesActionProps) {
       return supertest
@@ -454,7 +494,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Isolate an endpoint
+     * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
      */
     endpointIsolateAction(props: EndpointIsolateActionProps) {
       return supertest
@@ -464,6 +504,12 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Isolate an endpoint from the network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
+
+      */
     endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
       return supertest
         .post('/api/endpoint/isolate')
@@ -473,7 +519,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Kill a running process on an endpoint
+     * Terminate a running process on an endpoint.
      */
     endpointKillProcessAction(props: EndpointKillProcessActionProps) {
       return supertest
@@ -484,7 +530,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Scan a file or directory
+     * Scan a specific file or directory on an endpoint for malware.
      */
     endpointScanAction(props: EndpointScanActionProps) {
       return supertest
@@ -495,7 +541,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Suspend a running process on an endpoint
+     * Suspend a running process on an endpoint.
      */
     endpointSuspendProcessAction(props: EndpointSuspendProcessActionProps) {
       return supertest
@@ -506,7 +552,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Release an endpoint
+     * Release an isolated endpoint, allowing it to rejoin a network.
      */
     endpointUnisolateAction(props: EndpointUnisolateActionProps) {
       return supertest
@@ -516,6 +562,12 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Release an isolated endpoint, allowing it to rejoin a network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
+
+      */
     endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
       return supertest
         .post('/api/endpoint/unisolate')
@@ -525,7 +577,7 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-     * Upload a file to an endpoint
+     * Upload a file to an endpoint.
      */
     endpointUploadAction(props: EndpointUploadActionProps) {
       return supertest
@@ -552,6 +604,9 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Export Timelines as an NDJSON file.
+     */
     exportTimelines(props: ExportTimelinesProps) {
       return supertest
         .post('/api/timeline/_export')
@@ -575,9 +630,12 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * List asset criticality records, paging, sorting and filtering as needed.
+     */
     findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
       return supertest
-        .post('/api/asset_criticality/list')
+        .get('/api/asset_criticality/list')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -602,6 +660,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the criticality record for a specific asset.
+     */
     getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
       return supertest
         .get('/api/asset_criticality')
@@ -617,6 +678,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
+     */
     getDraftTimelines(props: GetDraftTimelinesProps) {
       return supertest
         .get('/api/timeline/_draft')
@@ -641,8 +705,22 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    getEntityStoreEngine(props: GetEntityStoreEngineProps) {
+      return supertest
+        .get(replaceParams('/api/entity_store/engines/{entityType}', props.params))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    getEntityStoreStats(props: GetEntityStoreStatsProps) {
+      return supertest
+        .post(replaceParams('/api/entity_store/engines/{entityType}/stats', props.params))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
-     * Gets notes
+     * Get all notes for a given document.
      */
     getNotes(props: GetNotesProps) {
       return supertest
@@ -699,6 +777,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get the details of an existing saved Timeline or Timeline template.
+     */
     getTimeline(props: GetTimelineProps) {
       return supertest
         .get('/api/timeline')
@@ -707,6 +788,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Get a list of all saved Timelines or Timeline templates.
+     */
     getTimelines(props: GetTimelinesProps) {
       return supertest
         .get('/api/timelines')
@@ -729,9 +813,20 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Import Timelines.
+     */
     importTimelines(props: ImportTimelinesProps) {
       return supertest
         .post('/api/timeline/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    initEntityStore(props: InitEntityStoreProps) {
+      return supertest
+        .post(replaceParams('/api/entity_store/engines/{entityType}/init', props.params))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -757,6 +852,9 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Install or update prepackaged Timelines.
+     */
     installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
       return supertest
         .post('/api/timeline/_prepackaged')
@@ -772,6 +870,13 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    listEntityStoreEngines() {
+      return supertest
+        .get('/api/entity_store/engines')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
      */
@@ -784,7 +889,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     * Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
      */
     patchTimeline(props: PatchTimelineProps) {
       return supertest
@@ -797,7 +902,7 @@ finalize it.
     /**
      * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
      */
-    performBulkAction(props: PerformBulkActionProps) {
+    performRulesBulkAction(props: PerformRulesBulkActionProps) {
       return supertest
         .post('/api/detection_engine/rules/_bulk_action')
         .set('kbn-xsrf', 'true')
@@ -806,6 +911,9 @@ finalize it.
         .send(props.body as object)
         .query(props.query);
     },
+    /**
+     * Favorite a Timeline or Timeline template for the current user.
+     */
     persistFavoriteRoute(props: PersistFavoriteRouteProps) {
       return supertest
         .patch('/api/timeline/_favorite')
@@ -814,6 +922,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Add a note to a Timeline or update an existing note.
+     */
     persistNoteRoute(props: PersistNoteRouteProps) {
       return supertest
         .patch('/api/note')
@@ -822,6 +933,9 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Pin an event to an existing Timeline.
+     */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
       return supertest
         .patch('/api/pinned_event')
@@ -934,6 +1048,13 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    scheduleRiskEngineNow() {
+      return supertest
+        .post('/api/risk_score/engine/schedule_now')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Find and/or aggregate detection alerts that match the given query.
      */
@@ -983,6 +1104,20 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    startEntityStore(props: StartEntityStoreProps) {
+      return supertest
+        .post(replaceParams('/api/entity_store/engines/{entityType}/start', props.params))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    stopEntityStore(props: StopEntityStoreProps) {
+      return supertest
+        .post(replaceParams('/api/entity_store/engines/{entityType}/stop', props.params))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Suggests user profiles.
@@ -1072,6 +1207,10 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteEntityStoreProps {
+  query: DeleteEntityStoreRequestQueryInput;
+  params: DeleteEntityStoreRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -1166,6 +1305,12 @@ export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
+export interface GetEntityStoreEngineProps {
+  params: GetEntityStoreEngineRequestParamsInput;
+}
+export interface GetEntityStoreStatsProps {
+  params: GetEntityStoreStatsRequestParamsInput;
+}
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
@@ -1195,6 +1340,10 @@ export interface ImportRulesProps {
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
+export interface InitEntityStoreProps {
+  params: InitEntityStoreRequestParamsInput;
+  body: InitEntityStoreRequestBodyInput;
+}
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
@@ -1204,9 +1353,9 @@ export interface PatchRuleProps {
 export interface PatchTimelineProps {
   body: PatchTimelineRequestBodyInput;
 }
-export interface PerformBulkActionProps {
-  query: PerformBulkActionRequestQueryInput;
-  body: PerformBulkActionRequestBodyInput;
+export interface PerformRulesBulkActionProps {
+  query: PerformRulesBulkActionRequestQueryInput;
+  body: PerformRulesBulkActionRequestBodyInput;
 }
 export interface PersistFavoriteRouteProps {
   body: PersistFavoriteRouteRequestBodyInput;
@@ -1243,6 +1392,12 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface StartEntityStoreProps {
+  params: StartEntityStoreRequestParamsInput;
+}
+export interface StopEntityStoreProps {
+  params: StopEntityStoreRequestParamsInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;

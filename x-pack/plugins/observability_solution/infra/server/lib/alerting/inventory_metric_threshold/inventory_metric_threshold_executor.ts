@@ -34,7 +34,7 @@ import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
@@ -75,7 +75,10 @@ export type InventoryMetricThresholdAlert = Omit<
 };
 
 export const createInventoryMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, inventoryLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       InventoryMetricThresholdParams & Record<string, unknown>,
@@ -141,7 +144,7 @@ export const createInventoryMetricThresholdExecutor =
               uuid,
               spaceId,
               indexedStartedAt,
-              libs.alertsLocator,
+              alertsLocator,
               libs.basePath.publicBaseUrl
             ),
             alertState: stateToAlertMessage[AlertStates.ERROR],
@@ -151,11 +154,11 @@ export const createInventoryMetricThresholdExecutor =
             timestamp: startedAt.toISOString(),
             value: null,
             viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-              basePath: libs.basePath,
               criteria,
               nodeType,
               timestamp: indexedStartedAt,
-              spaceId,
+              assetDetailsLocator,
+              inventoryLocator,
             }),
           },
         });
@@ -293,7 +296,7 @@ export const createInventoryMetricThresholdExecutor =
             uuid,
             spaceId,
             indexedStartedAt,
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
           alertState: stateToAlertMessage[nextState],
@@ -306,12 +309,12 @@ export const createInventoryMetricThresholdExecutor =
             formatMetric(result[group].metric, result[group].currentValue)
           ),
           viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
             criteria,
             nodeType,
             timestamp: indexedStartedAt,
-            spaceId,
             hostName: additionalContext?.host?.name,
+            assetDetailsLocator,
+            inventoryLocator,
           }),
           ...additionalContext,
         };
@@ -347,7 +350,7 @@ export const createInventoryMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -356,12 +359,12 @@ export const createInventoryMetricThresholdExecutor =
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
           criteria,
           nodeType,
           timestamp: indexedStartedAt,
-          spaceId,
           hostName: additionalContext?.host?.name,
+          assetDetailsLocator,
+          inventoryLocator,
         }),
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,

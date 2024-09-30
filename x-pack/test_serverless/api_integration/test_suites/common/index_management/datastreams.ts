@@ -118,6 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
+          meteringDocsCount: 0,
+          meteringStorageSize: '0b',
+          meteringStorageSizeBytes: 0,
         });
       });
     });

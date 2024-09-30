@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { RuleActionPanel } from './rule_action_panel';
+
 jest.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
@@ -19,22 +28,18 @@ const mockTestFilter = {
     jobs: ['farequote'],
   },
 };
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    filters: {
-      filters: () => {
-        return Promise.resolve(mockTestFilter);
+
+const kibanaReactContextMock = createKibanaReactContext({
+  mlServices: {
+    mlApi: {
+      filters: {
+        filters: () => {
+          return Promise.resolve(mockTestFilter);
+        },
       },
     },
   },
-}));
-
-import React from 'react';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
-
-import { RuleActionPanel } from './rule_action_panel';
+});
 
 describe('RuleActionPanel', () => {
   const job = {
@@ -117,9 +122,21 @@ describe('RuleActionPanel', () => {
       ruleIndex: 0,
     };
 
-    const component = shallowWithIntl(<RuleActionPanel {...props} />);
+    render(
+      <IntlProvider>
+        <kibanaReactContextMock.Provider>
+          <RuleActionPanel {...props} />
+        </kibanaReactContextMock.Provider>
+      </IntlProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Rule')).toBeInTheDocument();
+    expect(screen.getByText('skip result when actual is less than 1')).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(screen.getByText('Update rule condition from 1 to')).toBeInTheDocument();
+    expect(screen.getByText('Update')).toBeInTheDocument();
+    expect(screen.getByText('Edit rule')).toBeInTheDocument();
+    expect(screen.getByText('Delete rule')).toBeInTheDocument();
   });
 
   test('renders panel for rule with scope, value in filter list', () => {
@@ -128,19 +145,46 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const component = shallowWithIntl(<RuleActionPanel {...props} />);
+    render(
+      <IntlProvider>
+        <kibanaReactContextMock.Provider>
+          <RuleActionPanel {...props} />
+        </kibanaReactContextMock.Provider>
+      </IntlProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Rule')).toBeInTheDocument();
+    expect(
+      screen.getByText('skip model update when airline is not in eu-airlines')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(screen.getByText('Edit rule')).toBeInTheDocument();
+    expect(screen.getByText('Delete rule')).toBeInTheDocument();
   });
 
-  test('renders panel for rule with a condition and scope, value not in filter list', () => {
+  test('renders panel for rule with a condition and scope, value not in filter list', async () => {
     const props = {
       ...requiredProps,
       ruleIndex: 1,
     };
 
-    const wrapper = shallowWithIntl(<RuleActionPanel {...props} />);
-    wrapper.setState({ showAddToFilterListLink: true });
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      render(
+        <IntlProvider>
+          <kibanaReactContextMock.Provider>
+            <RuleActionPanel {...props} />
+          </kibanaReactContextMock.Provider>
+        </IntlProvider>
+      );
+    });
+
+    expect(screen.getByText('Rule')).toBeInTheDocument();
+    expect(
+      screen.getByText('skip model update when airline is not in eu-airlines')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(screen.getByText('Add AAL to eu-airlines')).toBeInTheDocument();
+    expect(screen.getByText('Edit rule')).toBeInTheDocument();
+    expect(screen.getByText('Delete rule')).toBeInTheDocument();
   });
 });

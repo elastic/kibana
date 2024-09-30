@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 
@@ -105,7 +105,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       const newValidationResult = validatePackagePolicy(
         { ...packagePolicy, ...newPackagePolicy },
         packageInfo,
-        safeLoad
+        load
       );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console

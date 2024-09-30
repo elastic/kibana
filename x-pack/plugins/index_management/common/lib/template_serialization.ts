@@ -12,7 +12,7 @@ import {
   TemplateListItem,
   TemplateType,
 } from '../types';
-import { deserializeESLifecycle } from './data_stream_serialization';
+import { deserializeESLifecycle } from './data_stream_utils';
 import { allowAutoCreateRadioValues, allowAutoCreateRadioIds } from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;

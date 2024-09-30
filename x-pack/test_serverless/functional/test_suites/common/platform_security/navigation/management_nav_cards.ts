@@ -54,13 +54,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain('/management/security/roles');
       });
 
-      it('displays the Organization members management card, and will navigate to the cloud organization URL', async () => {
-        await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
-        await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
+      describe('Organization members', function () {
+        this.tags('skipSvlOblt'); // Observability will not support custom roles
+        it('displays the Organization members management card, and will navigate to the cloud organization URL', async () => {
+          await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
+          await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
 
-        const url = await browser.getCurrentUrl();
-        // `--xpack.cloud.organization_url: '/account/members'`,
-        expect(url).to.contain('/account/members');
+          const url = await browser.getCurrentUrl();
+          // `--xpack.cloud.organization_url: '/account/members'`,
+          expect(url).to.contain('/account/members');
+        });
       });
 
       it('displays the spaces management card, and will navigate to the spaces management UI', async () => {
@@ -97,14 +100,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
       });
 
-      it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
-        // The org members nav card is always visible because there is no way to check if a user has approprite privileges
-        await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
-        await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
+      describe('Organization members', function () {
+        this.tags('skipSvlOblt'); // Observability will not support custom roles
+        it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
+          // The org members nav card is always visible because there is no way to check if a user has approprite privileges
+          await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
+          await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
 
-        const url = await browser.getCurrentUrl();
-        // `--xpack.cloud.organization_url: '/account/members'`,
-        expect(url).to.contain('/account/members');
+          const url = await browser.getCurrentUrl();
+          // `--xpack.cloud.organization_url: '/account/members'`,
+          expect(url).to.contain('/account/members');
+        });
       });
 
       it('should not display the spaces management card', async () => {

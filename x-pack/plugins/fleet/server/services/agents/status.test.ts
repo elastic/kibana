@@ -15,7 +15,23 @@ import { getAgentStatusForAgentPolicy } from './status';
 
 describe('getAgentStatusForAgentPolicy', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'agentPolicyId',
+            attributes: {
+              name: 'Policy 1',
+            },
+          },
+        ],
+      }),
+    };
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient as any,
+      })
+    );
   });
 
   afterEach(() => {

@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
-import { of, ReplaySubject, take, map, Observable } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  HttpStart,
+} from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
@@ -64,10 +72,8 @@ export class NavigationPublicPlugin
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-
-    this.isSolutionNavEnabled = onCloud && !isServerless;
+    this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
     /*
      *
@@ -89,8 +95,7 @@ export class NavigationPublicPlugin
       return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
     };
 
-    // Initialize the solution navigation if it is enabled
-    activeSpace$.pipe(take(1)).subscribe((activeSpace) => {
+    const initSolutionNavigation = (activeSpace?: Space) => {
       this.initiateChromeStyleAndSideNav(chrome, {
         isServerless,
         activeSpace,
@@ -99,7 +104,14 @@ export class NavigationPublicPlugin
       if (!this.isSolutionNavEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
-    });
+    };
+
+    if (this.getIsUnauthenticated(core.http)) {
+      // Don't fetch the active space if the user is not authenticated
+      initSolutionNavigation();
+    } else {
+      activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
+    }
 
     return {
       ui: {
@@ -111,9 +123,14 @@ export class NavigationPublicPlugin
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
       },
-      isSolutionNavEnabled$: activeSpace$.pipe(
-        map((activeSpace) => {
-          return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
+      isSolutionNavEnabled$: of(this.getIsUnauthenticated(core.http)).pipe(
+        switchMap((isUnauthenticated) => {
+          if (isUnauthenticated) return of(false);
+          return activeSpace$.pipe(
+            map((activeSpace) => {
+              return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
+            })
+          );
         })
       ),
     };
@@ -171,6 +188,11 @@ export class NavigationPublicPlugin
     if (isProjectNav) {
       chrome.project.changeActiveSolutionNavigation(solutionView!);
     }
+  }
+
+  private getIsUnauthenticated(http: HttpStart) {
+    const { anonymousPaths } = http;
+    return anonymousPaths.isAnonymous(window.location.pathname);
   }
 }
 

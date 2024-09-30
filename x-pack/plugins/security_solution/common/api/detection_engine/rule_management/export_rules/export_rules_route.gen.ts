@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';

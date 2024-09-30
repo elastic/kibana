@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { isValidDateMath } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../model/primitives.gen';

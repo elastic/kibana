@@ -8,7 +8,7 @@
 import _ from 'lodash';
 
 import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
-
+import { AlertingApiProvider } from './alerting_api';
 /*
  * Some FTR services from api integration stateful tests are compatible with serverless environment
  * While adding a new one, make sure to verify that it works on both Kibana CI and MKI
@@ -35,4 +35,5 @@ const deploymentAgnosticApiIntegrationServices = _.pick(apiIntegrationServices, 
 export const services = {
   // deployment agnostic FTR services
   ...deploymentAgnosticApiIntegrationServices,
+  alertingApi: AlertingApiProvider,
 };

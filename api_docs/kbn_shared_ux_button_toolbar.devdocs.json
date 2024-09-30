@@ -571,7 +571,7 @@
           "\nProps for `ToolbarPopover`."
         ],
         "signature": [
-          "AllowedButtonProps & AllowedPopoverProps & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal; }"
+          "AllowedButtonProps & Omit<AllowedPopoverProps, \"children\"> & { children: (arg: { closePopover: () => void; }) => React.ReactNode; label: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal; }"
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,

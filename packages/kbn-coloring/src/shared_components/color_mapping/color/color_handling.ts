@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import chroma from 'chroma-js';
 import { findLast } from 'lodash';
 import { ColorMapping } from '../config';
@@ -74,7 +76,7 @@ export function getColorFactory(
         })
       : [];
 
-  // find all categories that doesn't match with an assignment
+  // find all categories that don't match with an assignment
   const notAssignedCategories =
     data.type === 'categories'
       ? data.categories.filter((category) => {

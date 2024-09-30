@@ -16,7 +16,7 @@
       "fleet",
       "customIntegrations"
     ],
-    "optionalPlugins": ["cloud", "cloudExperiments", "usageCollection"],
+    "optionalPlugins": ["cloud", "usageCollection"],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]
   }

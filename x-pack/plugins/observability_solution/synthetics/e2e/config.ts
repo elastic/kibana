@@ -7,6 +7,9 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { get } from 'lodash';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { readKibanaConfig } from './tasks/read_kibana_config';
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
@@ -22,12 +25,19 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
   const kibanaConfig = readKibanaConfig();
 
-  const manifestUrl = process.env.SYNTHETICS_SERVICE_MANIFEST ?? kibanaConfig[MANIFEST_KEY];
-  const serviceUsername = process.env.SYNTHETICS_SERVICE_USERNAME ?? kibanaConfig[SERVICE_USERNAME];
-  const servicePassword = process.env.SYNTHETICS_SERVICE_PASSWORD ?? kibanaConfig[SERVICE_PASSWORD];
+  const manifestUrl = process.env.SYNTHETICS_SERVICE_MANIFEST ?? get(kibanaConfig, MANIFEST_KEY);
+  const serviceUsername =
+    process.env.SYNTHETICS_SERVICE_USERNAME ?? get(kibanaConfig, SERVICE_USERNAME);
+  const servicePassword =
+    process.env.SYNTHETICS_SERVICE_PASSWORD ?? get(kibanaConfig, SERVICE_PASSWORD);
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+
+    services: {
+      ...commonFunctionalServices,
+      ...commonFunctionalUIServices,
+    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),

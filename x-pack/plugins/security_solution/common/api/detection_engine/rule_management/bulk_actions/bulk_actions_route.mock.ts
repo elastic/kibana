@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { PerformBulkActionRequestBody } from './bulk_actions_route.gen';
+import type { PerformRulesBulkActionRequestBody } from './bulk_actions_route.gen';
 import { BulkActionEditTypeEnum, BulkActionTypeEnum } from './bulk_actions_route.gen';
 
-export const getBulkDisableRuleActionSchemaMock = (): PerformBulkActionRequestBody => ({
+export const getBulkDisableRuleActionSchemaMock = (): PerformRulesBulkActionRequestBody => ({
   query: '',
   ids: undefined,
   action: BulkActionTypeEnum.disable,
 });
 
-export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionRequestBody => ({
+export const getPerformBulkActionEditSchemaMock = (): PerformRulesBulkActionRequestBody => ({
   query: '',
   ids: undefined,
   action: BulkActionTypeEnum.edit,

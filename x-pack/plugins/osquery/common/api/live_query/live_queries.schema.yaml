@@ -5,7 +5,8 @@ info:
 paths:
   /api/osquery/live_queries:
     get:
-      summary: Find live queries
+      summary: Get live queries
+      description: Get a list of all live queries.
       operationId: OsqueryFindLiveQueries
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -25,6 +26,7 @@ paths:
 
     post:
       summary: Create a live query
+      description: Create and run a live query.
       operationId: OsqueryCreateLiveQuery
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -45,6 +47,7 @@ paths:
   /api/osquery/live_queries/{id}:
     get:
       summary: Get live query details
+      description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
       x-codegen-enabled: true
       x-labels: [serverless, ess]
@@ -70,6 +73,7 @@ paths:
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       summary: Get live query results
+      description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       x-codegen-enabled: true
       x-labels: [serverless, ess]

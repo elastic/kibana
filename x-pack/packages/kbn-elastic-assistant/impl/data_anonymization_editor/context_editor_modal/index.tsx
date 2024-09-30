@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   AnonymizationFieldResponse,
-  PerformBulkActionRequestBody,
+  PerformAnonymizationFieldsBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { find, uniqBy } from 'lodash';
 import { ContextEditor } from '../context_editor';
@@ -57,7 +57,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
   const [contextUpdates, setContextUpdates] = React.useState<BatchUpdateListItem[]>([]);
   const [selectedPromptContext, setSelectedPromptContext] = React.useState(promptContext);
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
-    useState<PerformBulkActionRequestBody>({
+    useState<PerformAnonymizationFieldsBulkActionRequestBody>({
       create: [],
       update: [],
       delete: {},
@@ -94,7 +94,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
       setContextUpdates((prev) => [...prev, ...updates]);
 
       setAnonymizationFieldsBulkActions((prev) => {
-        return updates.reduce<PerformBulkActionRequestBody>(
+        return updates.reduce<PerformAnonymizationFieldsBulkActionRequestBody>(
           (acc, item) => {
             const persistedField = find(anonymizationFields.data, ['field', item.field]) as
               | AnonymizationFieldResponse

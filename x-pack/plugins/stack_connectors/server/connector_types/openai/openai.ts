@@ -16,6 +16,7 @@ import {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -156,7 +157,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async runApi({ body, signal, timeout }: RunActionParams): Promise<RunActionResponse> {
+
+  public async runApi(
+    { body, signal, timeout }: RunActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<RunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
@@ -164,20 +169,23 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
     const axiosOptions = getAxiosOptions(this.provider, this.key, false);
-    const response = await this.request({
-      url: this.url,
-      method: 'post',
-      responseSchema: RunActionResponseSchema,
-      data: sanitizedBody,
-      signal,
-      // give up to 2 minutes for response
-      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-      ...axiosOptions,
-      headers: {
-        ...this.config.headers,
-        ...axiosOptions.headers,
+    const response = await this.request(
+      {
+        url: this.url,
+        method: 'post',
+        responseSchema: RunActionResponseSchema,
+        data: sanitizedBody,
+        signal,
+        // give up to 2 minutes for response
+        timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+        ...axiosOptions,
+        headers: {
+          ...this.config.headers,
+          ...axiosOptions.headers,
+        },
       },
-    });
+      connectorUsageCollector
+    );
     return response.data;
   }
 
@@ -189,12 +197,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body request body for the API request
    * @param stream flag indicating whether it is a streaming request or not
    */
-  public async streamApi({
-    body,
-    stream,
-    signal,
-    timeout,
-  }: StreamActionParams): Promise<RunActionResponse> {
+  public async streamApi(
+    { body, stream, signal, timeout }: StreamActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<RunActionResponse> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -205,19 +211,22 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
 
-    const response = await this.request({
-      url: this.url,
-      method: 'post',
-      responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
-      data: executeBody,
-      signal,
-      ...axiosOptions,
-      headers: {
-        ...this.config.headers,
-        ...axiosOptions.headers,
+    const response = await this.request(
+      {
+        url: this.url,
+        method: 'post',
+        responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
+        data: executeBody,
+        signal,
+        ...axiosOptions,
+        headers: {
+          ...this.config.headers,
+          ...axiosOptions.headers,
+        },
+        timeout,
       },
-      timeout,
-    });
+      connectorUsageCollector
+    );
     return stream ? pipeStreamingResponse(response) : response.data;
   }
 
@@ -264,15 +273,21 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * returned directly to the client for streaming
    * @param body - the OpenAI Invoke request body
    */
-  public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
+  public async invokeStream(
+    body: InvokeAIActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<PassThrough> {
     const { signal, timeout, ...rest } = body;
 
-    const res = (await this.streamApi({
-      body: JSON.stringify(rest),
-      stream: true,
-      signal,
-      timeout, // do not default if not provided
-    })) as unknown as IncomingMessage;
+    const res = (await this.streamApi(
+      {
+        body: JSON.stringify(rest),
+        stream: true,
+        signal,
+        timeout, // do not default if not provided
+      },
+      connectorUsageCollector
+    )) as unknown as IncomingMessage;
 
     return res.pipe(new PassThrough());
   }
@@ -286,7 +301,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    *  tokenCountStream: Stream<ChatCompletionChunk>; the result for token counting stream
    * }
    */
-  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<{
+  public async invokeAsyncIterator(
+    body: InvokeAIActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<{
     consumerStream: Stream<ChatCompletionChunk>;
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
@@ -301,6 +319,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           rest.model ??
           ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
       };
+
+      connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
         timeout, // do not default if not provided
@@ -323,9 +343,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body - the OpenAI chat completion request body
    * @returns an object with the response string and the usage object
    */
-  public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
+  public async invokeAI(
+    body: InvokeAIActionParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<InvokeAIActionResponse> {
     const { signal, timeout, ...rest } = body;
-    const res = await this.runApi({ body: JSON.stringify(rest), signal, timeout });
+    const res = await this.runApi(
+      { body: JSON.stringify(rest), signal, timeout },
+      connectorUsageCollector
+    );
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();

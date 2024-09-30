@@ -179,7 +179,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"description\" | \"deprecated\" | \"access\"> | undefined; access: ",
+                  ">, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -187,7 +187,7 @@
                     "section": "def-server.RouteAccess",
                     "text": "RouteAccess"
                   },
-                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; }"
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -258,7 +258,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"description\" | \"deprecated\" | \"access\"> | undefined; access: ",
+                  ">, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -266,7 +266,7 @@
                     "section": "def-server.RouteAccess",
                     "text": "RouteAccess"
                   },
-                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; }"
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -337,7 +337,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"description\" | \"deprecated\" | \"access\"> | undefined; access: ",
+                  ">, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -345,7 +345,7 @@
                     "section": "def-server.RouteAccess",
                     "text": "RouteAccess"
                   },
-                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; }"
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -416,7 +416,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"description\" | \"deprecated\" | \"access\"> | undefined; access: ",
+                  ">, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -424,7 +424,7 @@
                     "section": "def-server.RouteAccess",
                     "text": "RouteAccess"
                   },
-                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; }"
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -495,7 +495,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"description\" | \"deprecated\" | \"access\"> | undefined; access: ",
+                  ">, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "server",
@@ -503,7 +503,7 @@
                     "section": "def-server.RouteAccess",
                     "text": "RouteAccess"
                   },
-                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; }"
+                  "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,

@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -27,15 +27,17 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
+import useObservable from 'react-use/lib/useObservable';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import type { LensGridDirection } from '../../../../common/expressions';
+import { getOriginalId, isTransposeId, LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
-import { findMinMaxByColumnId } from '../../../shared_components';
+import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
   DatatableRenderProps,
@@ -55,8 +57,9 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
+import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
+import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -72,6 +75,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
+  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -144,7 +148,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
-  const { getType, dispatchEvent, renderMode, formatFactory } = props;
+  const { getType, dispatchEvent, renderMode, formatFactory, syncColors } = props;
 
   const formatters: Record<string, ReturnType<FormatFactory>> = useMemo(
     () =>
@@ -179,13 +183,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onChangeItemsPerPage = useCallback(
-    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    (pageSize: number) => onEditAction({ action: 'pagesize', size: pageSize }),
     [onEditAction]
   );
 
   // active page isn't persisted, so we manage this state locally
   const onChangePage = useCallback(
-    (pageIndex) => {
+    (pageIndex: number) => {
       setPagination((_pagination) => {
         if (_pagination) {
           return { pageSize: _pagination?.pageSize, pageIndex };
@@ -220,7 +224,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onClickValue, untransposedDataRef, isInteractive]
   );
 
-  const bucketColumns = useMemo(
+  const bucketedColumns = useMemo(
     () =>
       columnConfig.columns
         .filter((_col, index) => {
@@ -236,8 +240,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
-    (bucketColumns.length &&
-      props.data.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
+    (bucketedColumns.length &&
+      props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
     () =>
@@ -302,7 +306,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
-        bucketColumns,
+        bucketedColumns,
         firstLocalTable,
         handleFilterClick,
         handleTransposedColumnClick,
@@ -320,7 +324,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         props.columnFilterable
       ),
     [
-      bucketColumns,
+      bucketedColumns,
       firstLocalTable,
       handleFilterClick,
       handleTransposedColumnClick,
@@ -385,17 +389,71 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     isInteractive,
   ]);
 
-  const renderCellValue = useMemo(
-    () =>
-      createGridCell(
-        formatters,
-        columnConfig,
-        DataContext,
-        props.theme,
-        props.args.fitRowToContent
-      ),
-    [formatters, columnConfig, props.theme, props.args.fitRowToContent]
-  );
+  const renderCellValue = useMemo(() => {
+    const cellColorFnMap = new Map<string, CellColorFn>();
+    const getCellColor = (
+      columnId: string,
+      palette?: PaletteOutput<CustomPaletteState>,
+      colorMapping?: string
+    ): CellColorFn => {
+      const originalId = getOriginalId(columnId); // workout what bucket the value belongs to
+
+      if (cellColorFnMap.has(originalId)) {
+        return cellColorFnMap.get(originalId)!;
+      }
+
+      const dataType = getFieldTypeFromDatatable(firstLocalTable, originalId);
+      const isBucketed = bucketedColumns.some((id) => id === columnId);
+      const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+
+      const data: ColorMappingInputData = colorByTerms
+        ? {
+            type: 'categories',
+            categories: getColorCategories(
+              firstLocalTable.rows,
+              originalId,
+              isTransposeId(columnId),
+              [null]
+            ),
+          }
+        : {
+            type: 'ranges',
+            bins: 0,
+            ...minMaxByColumnId[originalId],
+          };
+      const colorFn = getCellColorFn(
+        props.paletteService,
+        data,
+        colorByTerms,
+        isDarkMode,
+        syncColors,
+        palette,
+        colorMapping
+      );
+      cellColorFnMap.set(originalId, colorFn);
+
+      return colorFn;
+    };
+
+    return createGridCell(
+      formatters,
+      columnConfig,
+      DataContext,
+      isDarkMode,
+      getCellColor,
+      props.args.fitRowToContent
+    );
+  }, [
+    formatters,
+    columnConfig,
+    isDarkMode,
+    props.args.fitRowToContent,
+    props.paletteService,
+    firstLocalTable,
+    bucketedColumns,
+    minMaxByColumnId,
+    syncColors,
+  ]);
 
   const columnVisibility = useMemo(
     () => ({
@@ -471,7 +529,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
-          getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
           handleFilterClick,
         }}
       >

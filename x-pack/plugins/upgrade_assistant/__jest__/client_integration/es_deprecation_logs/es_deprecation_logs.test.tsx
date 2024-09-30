@@ -14,11 +14,11 @@ import { setupEnvironment, advanceTime } from '../helpers';
 import { DeprecationLoggingStatus } from '../../../common/types';
 import {
   DEPRECATION_LOGS_INDEX,
-  DEPRECATION_LOGS_SOURCE_ID,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../common/constants';
+import { stringifySearchParams } from '../helpers/app_context.mock';
 
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
@@ -176,23 +176,22 @@ describe('ES deprecation logs', () => {
       component.update();
 
       expect(exists('viewObserveLogs')).toBe(true);
-      const sourceId = DEPRECATION_LOGS_SOURCE_ID;
-      const logPosition = `(end:now,start:'${MOCKED_TIME}')`;
-      const logFilter = encodeURI(
-        `(language:kuery,query:'not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
-          ' or '
-        )})')`
-      );
-      const queryParams = `sourceId=${sourceId}&logPosition=${logPosition}&logFilter=${logFilter}`;
-      expect(find('viewObserveLogs').props().href).toBe(`/app/logs/stream?${queryParams}`);
-    });
-
-    test(`Doesn't show observability app link if infra app is not available`, async () => {
-      const { component, exists } = testBed;
-
-      component.update();
-
-      expect(exists('viewObserveLogs')).toBe(false);
+      const locatorParams = stringifySearchParams({
+        id: DEPRECATION_LOGS_INDEX,
+        timeRange: {
+          from: MOCKED_TIME,
+          to: 'now',
+        },
+        query: {
+          language: 'kuery',
+          query: `not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
+            ' or '
+          )})`,
+        },
+      });
+      const href = find('viewObserveLogs').props().href;
+      expect(href).toContain('logsExplorerUrl');
+      expect(href).toContain(locatorParams);
     });
 
     test('Has a link to see logs in discover app', async () => {

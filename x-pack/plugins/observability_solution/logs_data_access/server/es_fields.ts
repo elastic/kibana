@@ -6,3 +6,4 @@
  */
 
 export const LOG_LEVEL = 'log.level';
+export const ERROR_LOG_LEVEL = 'error.log.level';

@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
  */
 const HOVER_INTENT_DELAY = 100; // ms
 
-interface Props {
+export interface HoverPopoverProps {
   hoverContent: React.ReactNode;
   anchorPosition?: PopoverAnchorPosition;
 }
@@ -37,7 +37,7 @@ interface Props {
  * otherwise it will be difficult for keyboard-only and screen
  * reader users to navigate to and from your popover.
  */
-export const HoverPopover = React.memo<PropsWithChildren<Props>>(
+export const HoverPopover = React.memo<PropsWithChildren<HoverPopoverProps>>(
   ({ hoverContent, anchorPosition = 'downCenter', children }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null);
     const [showHoverContent, setShowHoverContent] = useState(false);

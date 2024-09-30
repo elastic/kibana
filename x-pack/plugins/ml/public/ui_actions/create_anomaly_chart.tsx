@@ -42,9 +42,7 @@ export function createAddAnomalyChartsPanelAction(
       },
     ],
     order: 30,
-    getIconType(): string {
-      return 'visLine';
-    },
+    getIconType: () => 'anomalyChart',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
         defaultMessage: 'Anomaly chart',

@@ -23,7 +23,10 @@ export const ListWithKuerySchema = schema.object({
 });
 
 export const BulkRequestBodySchema = schema.object({
-  ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  ids: schema.arrayOf(schema.string(), {
+    minSize: 1,
+    meta: { description: 'list of package policy ids' },
+  }),
   ignoreMissing: schema.maybe(schema.boolean()),
 });
 

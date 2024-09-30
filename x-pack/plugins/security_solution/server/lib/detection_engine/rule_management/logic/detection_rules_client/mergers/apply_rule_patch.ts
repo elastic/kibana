@@ -7,6 +7,7 @@
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   EqlRule,
   EqlRuleResponseFields,
@@ -44,7 +45,6 @@ import {
 } from '../../../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';
 
 interface ApplyRulePatchProps {
@@ -138,6 +138,7 @@ const patchEqlParams = (
       rulePatch.event_category_override ?? existingRule.event_category_override,
     tiebreaker_field: rulePatch.tiebreaker_field ?? existingRule.tiebreaker_field,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
+    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
   };
 };
 
@@ -150,6 +151,7 @@ const patchEsqlParams = (
     language: rulePatch.language ?? existingRule.language,
     query: rulePatch.query ?? existingRule.query,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
+    response_actions: rulePatch.response_actions ?? existingRule.response_actions,
   };
 };
 
@@ -258,6 +260,7 @@ const patchNewTermsParams = (
     new_terms_fields: params.new_terms_fields ?? existingRule.new_terms_fields,
     history_window_start: params.history_window_start ?? existingRule.history_window_start,
     alert_suppression: params.alert_suppression ?? existingRule.alert_suppression,
+    response_actions: params.response_actions ?? existingRule.response_actions,
   };
 };
 

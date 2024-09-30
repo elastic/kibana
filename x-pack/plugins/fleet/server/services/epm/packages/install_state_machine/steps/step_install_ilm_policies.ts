@@ -13,6 +13,8 @@ import { installILMPolicy } from '../../../elasticsearch/ilm/install';
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { deletePrerequisiteAssets, splitESAssets, deleteILMPolicies } from '../../remove';
+import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallILMPolicies(context: InstallContext) {
   const { logger, packageInstallContext, esClient, savedObjectsClient, installedPkg } = context;
@@ -42,4 +44,39 @@ export async function stepInstallILMPolicies(context: InstallContext) {
   }
   // always return esReferences even when isILMPoliciesDisabled is false as it's the first time we are writing to it
   return { esReferences };
+}
+
+export async function cleanupILMPoliciesStep(context: InstallContext) {
+  const { logger, esClient, installedPkg, retryFromLastState, force, initialState } = context;
+
+  // In case of retry clean up previous installed assets
+  if (
+    !force &&
+    retryFromLastState &&
+    initialState === INSTALL_STATES.INSTALL_ILM_POLICIES &&
+    installedPkg?.attributes?.installed_es &&
+    installedPkg.attributes.installed_es.length > 0
+  ) {
+    const { installed_es: installedEs } = installedPkg.attributes;
+    const { indexTemplatesAndPipelines, indexAssets, transformAssets } = splitESAssets(installedEs);
+
+    logger.debug('Retry transition - clean up prerequisite ES assets first');
+    await withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
+      await deletePrerequisiteAssets(
+        {
+          indexAssets,
+          transformAssets,
+          indexTemplatesAndPipelines,
+        },
+        esClient
+      );
+    });
+    logger.debug('Retry transition - clean up ilm Policies and datastream ilm policies');
+    await withPackageSpan(
+      'Retry transition - clean up ilm Policies and datastream ilm policies',
+      async () => {
+        await deleteILMPolicies(installedEs, esClient);
+      }
+    );
+  }
 }

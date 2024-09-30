@@ -32,6 +32,7 @@ export interface BurnRateOption {
   windowName: string;
   threshold: number;
   duration: number;
+  ariaLabel: string;
 }
 
 function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; duration: string }> {

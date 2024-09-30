@@ -362,7 +362,7 @@ export type BulkAction =
   | DuplicateBulkAction
   | ManualRuleRunBulkAction;
 
-export interface PerformBulkActionProps {
+export interface PerformRulesBulkActionProps {
   bulkAction: BulkAction;
   dryRun?: boolean;
 }
@@ -378,7 +378,7 @@ export interface PerformBulkActionProps {
 export async function performBulkAction({
   bulkAction,
   dryRun = false,
-}: PerformBulkActionProps): Promise<BulkActionResponse> {
+}: PerformRulesBulkActionProps): Promise<BulkActionResponse> {
   const params = {
     action: bulkAction.type,
     query: bulkAction.query,

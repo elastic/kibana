@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
-import type { GetTransformStatsQuerySchema } from '../../../../common/api_schemas/transforms_stats';
+import type { TransformIdParamSchema } from '../../api_schemas/common';
+import type { GetTransformStatsQuerySchema } from '../../api_schemas/transforms_stats';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 

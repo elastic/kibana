@@ -44,10 +44,11 @@ const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 const rule = getNewThreatIndicatorRule();
 
+// Skipping in MKI due to flake
 describe(
   'Detection rules, Indicator Match, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { GlobalVisitorContext, SharedData } from './global_visitor_context';
@@ -12,10 +13,12 @@ import { VisitorContext } from './contexts';
 import type {
   AstNodeToVisitorName,
   EnsureFunction,
+  ESQLAstExpressionNode,
   ESQLAstQueryNode,
   UndefinedToVoid,
   VisitorMethods,
 } from './types';
+import { ESQLCommand } from '../types';
 
 export interface VisitorOptions<
   Methods extends VisitorMethods = VisitorMethods,
@@ -86,6 +89,7 @@ export class Visitor<
    * Traverse the root node of ES|QL query with default context.
    *
    * @param node Query node to traverse.
+   * @param input Input to pass to the first visitor.
    * @returns The result of the query visitor.
    */
   public visitQuery(
@@ -94,5 +98,35 @@ export class Visitor<
   ) {
     const queryContext = new QueryVisitorContext(this.ctx, node, null);
     return this.visit(queryContext, input);
+  }
+
+  /**
+   * Traverse starting from known command node with default context.
+   *
+   * @param node Command node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitCommand(
+    node: ESQLCommand,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitCommand']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitCommand');
+    return this.ctx.visitCommand(null, node, input);
+  }
+
+  /**
+   * Traverse starting from known expression node with default context.
+   *
+   * @param node Expression node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitExpression(
+    node: ESQLAstExpressionNode,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitExpression']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitExpression');
+    return this.ctx.visitExpression(null, node, input);
   }
 }
