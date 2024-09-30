@@ -20,7 +20,7 @@ import { CaseStatuses } from '../../../common/types/domain';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
+import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from './translations';
 
 export const CasesMetrics: React.FC = () => {
   const {
@@ -72,7 +72,13 @@ export const CasesMetrics: React.FC = () => {
               data-test-subj={'mttrStatsHeader'}
               description={
                 <>
-                  {ATTC_STAT} <EuiIconTip content={ATTC_DESCRIPTION} position="right" />
+                  {ATTC_STAT}
+                  &nbsp;
+                  <EuiIconTip
+                    content={ATTC_DESCRIPTION}
+                    position="right"
+                    aria-label={ATTC_STAT_INFO_ARIA_LABEL}
+                  />
                 </>
               }
               title={
