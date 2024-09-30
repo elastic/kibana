@@ -13,21 +13,11 @@ import type { EpmPackageResponse } from './api';
  * TODO: Return the package name from the fleet API: https://github.com/elastic/kibana/issues/185932
  */
 export const getIntegrationNameFromResponse = (response: EpmPackageResponse) => {
-  const items = response?.items?.map((item) => item);
-  if (items != null) {
-    for (const item of items) {
-      if (item.type === 'ingest_pipeline') {
-        const ingestPipelineName = item.id;
-        if (ingestPipelineName) {
-          const match = ingestPipelineName.match(/^.*-([a-z\d_]+)\..*-([\d\.]+)\-*([a-z]*)$/);
-          const integrationName = match?.at(1);
-          const version = match?.at(2);
-          if (integrationName && version) {
-            return `${integrationName}-${version}`;
-          }
-        }
-      }
-    }
-  }
-  return '';
+  return (
+    response?.items
+      ?.find((item) => item.type === 'ingest_pipeline')
+      ?.id?.match(/^.*-([a-z\d_]+)\..*-([\d\.]+)\-*([a-z]*)$/)
+      ?.slice(1, 3)
+      ?.join('-') ?? ''
+  );
 };
