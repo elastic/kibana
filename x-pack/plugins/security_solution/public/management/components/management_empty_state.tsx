@@ -289,26 +289,32 @@ const EndpointsEmptyState = React.memo<{
                 data-test-subj="onboardingPolicySelect"
               >
                 {(list) => {
-                  return loading ? (
-                    <EuiSelectableMessage>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.loadingPolicies"
-                        defaultMessage="Loading integrations"
-                      />
-                    </EuiSelectableMessage>
-                  ) : selectionOptions.length ? (
-                    list
-                  ) : (
-                    <EuiCallOut
-                      color="warning"
-                      data-test-subj="noIntegrationsAddedToAgentPoliciesCallout"
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.noPoliciesAssignedToAgentPolicies"
-                        defaultMessage="There are no Elastic Defend integrations added to Agent policies. To deploy Elastic Defend, add it to an Agent policy."
-                      />
-                    </EuiCallOut>
-                  );
+                  if (loading) {
+                    return (
+                      <EuiSelectableMessage>
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.list.loadingPolicies"
+                          defaultMessage="Loading integrations"
+                        />
+                      </EuiSelectableMessage>
+                    );
+                  }
+
+                  if (!selectionOptions.length) {
+                    return (
+                      <EuiCallOut
+                        color="warning"
+                        data-test-subj="noIntegrationsAddedToAgentPoliciesCallout"
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.list.noPoliciesAssignedToAgentPolicies"
+                          defaultMessage="There are no Elastic Defend integrations added to Agent policies. To deploy Elastic Defend, add it to an Agent policy."
+                        />
+                      </EuiCallOut>
+                    );
+                  }
+
+                  return list;
                 }}
               </EuiSelectable>
 
