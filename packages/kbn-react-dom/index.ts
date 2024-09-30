@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPortal, type Renderer, Container } from 'react-dom';
+import { createPortal, type Renderer, Container, findDOMNode } from 'react-dom';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot, Root } from 'react-dom/client';
 
@@ -29,9 +29,9 @@ const unmountComponentAtNode = (container: Container) => {
   return false;
 };
 
-const ReactDOM = { render, unmountComponentAtNode, createPortal };
+const ReactDOM = { render, unmountComponentAtNode, createPortal, findDOMNode };
 
-export { render, createPortal, unmountComponentAtNode };
+export { render, createPortal, unmountComponentAtNode, findDOMNode };
 
 // eslint-disable-next-line import/no-default-export
 export default ReactDOM;
