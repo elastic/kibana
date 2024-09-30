@@ -589,7 +589,7 @@ describe('TemplateForm', () => {
     expect(
       await within(customFieldsElement).findAllByTestId('form-optional-field-label')
     ).toHaveLength(
-      customFieldsConfigurationMock.filter((field) => field.type === CustomFieldTypes.TEXT).length
+      customFieldsConfigurationMock.filter((field) => field.type !== CustomFieldTypes.TOGGLE).length
     );
 
     const textField = customFieldsConfigurationMock[0];
