@@ -6948,7 +6948,7 @@ paths:
         feature privileges, depending on the owner of the cases you're seeking.
       operationId: findCasesDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_assignees'
+        - $ref: '#/components/parameters/Cases_assignees_filter'
         - $ref: '#/components/parameters/Cases_category'
         - $ref: '#/components/parameters/Cases_defaultSearchOperator'
         - $ref: '#/components/parameters/Cases_from'
@@ -16440,11 +16440,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/Fleet_package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -24391,7 +24388,7 @@ components:
       schema:
         example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
         type: string
-    Cases_assignees:
+    Cases_assignees_filter:
       description: >
         Filters the returned cases by assignees. Valid values are `none` or
         unique identifiers for the user profiles. These identifiers can be found
@@ -37845,6 +37842,96 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+    Security_Entity_Analytics_API_EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    Security_Entity_Analytics_API_EntityRiskScoreRecord:
+      type: object
+      properties:
+        '@timestamp':
+          description: The time at which the risk score was calculated.
+          example: '2017-07-21T17:32:28Z'
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+          example: Critical
+        calculated_score:
+          description: The raw numeric value of the given entity's risk score.
+          format: double
+          type: number
+        calculated_score_norm:
+          description: >-
+            The normalized numeric value of the given entity's risk score.
+            Useful for comparing with other entities.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          description: >-
+            The number of risk input documents that contributed to the Category
+            1 score (`category_1_score`).
+          format: integer
+          type: number
+        category_1_score:
+          description: >-
+            The contribution of Category 1 to the overall risk score
+            (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          format: double
+          type: number
+        category_2_count:
+          format: integer
+          type: number
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: >-
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+        criticality_modifier:
+          format: double
+          type: number
+        id_field:
+          description: >-
+            The identifier field defining this risk score. Coupled with
+            `id_value`, uniquely identifies the entity being scored.
+          example: host.name
+          type: string
+        id_value:
+          description: >-
+            The identifier value defining this risk score. Coupled with
+            `id_field`, uniquely identifies the entity being scored.
+          example: example.host
+          type: string
+        inputs:
+          description: >-
+            A list of the highest-risk documents contributing to this risk
+            score. Useful for investigative purposes.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - id_field
+        - id_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - inputs
+        - notes
     Security_Entity_Analytics_API_EntityType:
       enum:
         - user
@@ -37853,6 +37940,14 @@ components:
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -37875,6 +37970,8 @@ components:
               format: date-time
               type: string
             schemaVersion:
+              type: string
+            source:
               type: string
             type:
               enum:
@@ -37919,6 +38016,9 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             type:
               items:
                 type: string
@@ -37961,6 +38061,44 @@ components:
       properties:
         success:
           type: boolean
+    Security_Entity_Analytics_API_RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -37976,6 +38114,14 @@ components:
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -37999,6 +38145,8 @@ components:
               type: string
             schemaVersion:
               type: string
+            source:
+              type: string
             type:
               enum:
                 - node
@@ -38013,6 +38161,7 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+            - source
         user:
           type: object
           properties:
@@ -38038,6 +38187,9 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             roles:
               items:
                 type: string
