@@ -11,7 +11,12 @@ import path from 'path';
 import globby from 'globby';
 import { load } from 'js-yaml';
 
-import { getField, processFields, processFieldsWithWildcard } from './field';
+import {
+  getField,
+  processFields,
+  processFieldsWithWildcard,
+  filterForKnowledgeBaseEntryAssets,
+} from './field';
 import type { Field, Fields } from './field';
 
 // Add our own serialiser to just do JSON.stringify
@@ -811,5 +816,29 @@ describe('processFields', () => {
         ]
       `);
     });
+  });
+});
+
+describe('filterForKnowledgeBaseEntryAssets', () => {
+  it('returns true for assets within the given knowledge base entry folder', () => {
+    expect(
+      filterForKnowledgeBaseEntryAssets('foo')(
+        '/kb-1.0/kibana/knowledge_base_entry/foo/manifest.yml'
+      )
+    ).toBe(true);
+  });
+  it('returns false for assets within another knowledge base entry folder', () => {
+    expect(
+      filterForKnowledgeBaseEntryAssets('bar')(
+        '/kb-1.0/kibana/knowledge_base_entry/foo/manifest.yml'
+      )
+    ).toBe(false);
+  });
+  it('returns false for assets outside of a knowledge base entry folder', () => {
+    expect(
+      filterForKnowledgeBaseEntryAssets('foo')(
+        '/kb-1.0/kibana/dashboard/some_dashboard.json'
+      )
+    ).toBe(false);
   });
 });

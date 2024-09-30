@@ -27,6 +27,7 @@ import { saveArchiveEntriesFromAssetsMap } from '../../archive/storage';
 jest.mock('../../elasticsearch/template/template');
 jest.mock('../../kibana/assets/install');
 jest.mock('../../kibana/index_pattern/install');
+jest.mock('../../kibana/knowledge_base/install');
 jest.mock('../get');
 jest.mock('../install_index_template_pipeline');
 
