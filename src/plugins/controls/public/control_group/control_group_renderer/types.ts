@@ -14,11 +14,6 @@ import type { ControlGroupApi } from '../..';
 export type ControlGroupRendererApi = ControlGroupApi & {
   reload: () => void;
   /**
-   * Passes the ability for styling to be compressed or not.
-   * @default true.
-   */
-  compressed: boolean;
-  /**
    * @deprecated
    * Calling `updateInput` will cause the entire control group to be re-initialized.
    *

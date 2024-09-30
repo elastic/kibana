@@ -178,7 +178,6 @@ export const ControlGroupRenderer = ({
       onApiAvailable={(controlGroupApi) => {
         const controlGroupRendererApi: ControlGroupRendererApi = {
           ...controlGroupApi,
-          compressed: compressed ?? true,
           reload: () => reload$.next(),
           updateInput: (newInput) => {
             updateInput(newInput);
