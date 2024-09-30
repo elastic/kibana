@@ -81,6 +81,7 @@ const mergeVersions = <TValue>({
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
     case ThreeWayDiffOutcome.StockValueCanUpdate:
+    // NOTE: This scenario is currently inaccessible via normal UI or API workflows, but the logic is covered just in case
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate:
     // Scenario -AB is treated as scenario ABC:
     // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293

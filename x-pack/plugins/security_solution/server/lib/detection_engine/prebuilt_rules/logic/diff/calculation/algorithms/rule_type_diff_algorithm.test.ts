@@ -38,9 +38,10 @@ describe('ruleTypeDiffAlgorithm', () => {
   });
 
   it('returns current_version as merged output if current_version is different and there is no update - scenario ABA', () => {
+    // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
     const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
       base_version: 'query',
-      current_version: 'eql',
+      current_version: 'saved_query',
       target_version: 'query',
     };
 
@@ -57,10 +58,11 @@ describe('ruleTypeDiffAlgorithm', () => {
   });
 
   it('returns target_version as merged output if current_version is the same and there is an update - scenario AAB', () => {
+    // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
     const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
       base_version: 'query',
       current_version: 'query',
-      target_version: 'eql',
+      target_version: 'saved_query',
     };
 
     const result = ruleTypeDiffAlgorithm(mockVersions);
@@ -76,10 +78,11 @@ describe('ruleTypeDiffAlgorithm', () => {
   });
 
   it('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
+    // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
     const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
       base_version: 'query',
-      current_version: 'eql',
-      target_version: 'eql',
+      current_version: 'saved_query',
+      target_version: 'saved_query',
     };
 
     const result = ruleTypeDiffAlgorithm(mockVersions);
@@ -95,6 +98,8 @@ describe('ruleTypeDiffAlgorithm', () => {
   });
 
   it('returns current_version as merged output if all three versions are different - scenario ABC', () => {
+    // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
+    // NOTE: This test case scenario is currently inaccessible via normal UI or API workflows, but the logic is covered just in case
     const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
       base_version: 'query',
       current_version: 'eql',
@@ -136,10 +141,11 @@ describe('ruleTypeDiffAlgorithm', () => {
     });
 
     it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
+      // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
       const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
         base_version: MissingVersion,
         current_version: 'query',
-        target_version: 'eql',
+        target_version: 'saved_query',
       };
 
       const result = ruleTypeDiffAlgorithm(mockVersions);
