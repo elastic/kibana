@@ -19,7 +19,7 @@ export function upperBoundForColumnCount(csvSamples: string[]): number {
 
 // Generates a list of temporary column names.
 export function generateColumnNames(count: number): string[] {
-  return Array.from({ length: count }).map((_, i) => `column${i}`);
+  return Array.from({ length: count }).map((_, i) => `column${i + 1}`);
 }
 
 function toSafeColumnName(columnName: unknown): string | undefined {
