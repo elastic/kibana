@@ -51,6 +51,7 @@ export const LanguageSelector = ({
       options={languageOptions}
       valueOfSelected={selectedLanguage}
       onChange={(value) => onSelectLanguage(value)}
+      data-test-subj="codeExampleLanguageSelect"
     />
   );
 };

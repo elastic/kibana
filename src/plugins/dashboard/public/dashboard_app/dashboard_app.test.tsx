@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, waitFor } from '@testing-library/react';
 import { MemoryHistory, createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
+
+import { render, waitFor } from '@testing-library/react';
+
+import { DashboardApi } from '..';
 import type { DashboardRendererProps } from '../dashboard_container/external_api/dashboard_renderer';
+import { LazyDashboardRenderer } from '../dashboard_container/external_api/lazy_dashboard_renderer';
+import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboard } from '../mocks';
+import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 
-import * as dashboardRendererStuff from '../dashboard_container/external_api/lazy_dashboard_renderer';
-import { DashboardApi } from '..';
-
-/* These tests circumvent the need to test the router and legacy code
-/* the dashboard app will be passed the expanded panel id from the DashboardRouter through mountApp()
-/* @link https://github.com/elastic/kibana/pull/190086/
-*/
+jest.mock('../dashboard_container/external_api/lazy_dashboard_renderer');
+jest.mock('../dashboard_top_nav');
 
 describe('Dashboard App', () => {
+  dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
+
   const mockDashboard = buildMockDashboard();
   let mockHistory: MemoryHistory;
   // this is in url_utils dashboardApi expandedPanel subscription
@@ -35,19 +38,20 @@ describe('Dashboard App', () => {
     historySpy = jest.spyOn(mockHistory, 'replace');
 
     /**
-     * Mock the LazyDashboardRenderer component to avoid rendering the actual dashboard
+     * Mock the DashboardTopNav + LazyDashboardRenderer component to avoid rendering the actual dashboard
      * and hitting errors that aren't relevant
      */
-    jest
-      .spyOn(dashboardRendererStuff, 'LazyDashboardRenderer')
-      // we need overwrite the onApiAvailable prop to get the dashboard Api in the dashboard app
-      .mockImplementation(({ onApiAvailable }: DashboardRendererProps) => {
+    (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
+    (LazyDashboardRenderer as jest.Mock).mockImplementation(
+      ({ onApiAvailable }: DashboardRendererProps) => {
+        // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
         useEffect(() => {
           onApiAvailable?.(mockDashboard as DashboardApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;
-      });
+      }
+    );
   });
 
   beforeEach(() => {
