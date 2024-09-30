@@ -112,7 +112,7 @@ const PolicyEmptyState = React.memo<{
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
-                  defaultMessage="From this page, you'll be able to view and manage the hosts in your environment running Elastic Defend."
+                  defaultMessage="From this page, you can view and manage the hosts in your environment running Elastic Defend."
                 />
               )}
             </EuiText>
