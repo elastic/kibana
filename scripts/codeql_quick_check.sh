@@ -14,6 +14,48 @@ green=$(tput setaf 2)
 blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
+# Detect platform
+case $(uname | tr '[:upper:]' '[:lower:]') in
+  linux*)
+    OS_NAME="linux"
+    ;;
+  darwin*)
+    OS_NAME="osx"
+    ;;
+  msys*|cygwin*|mingw*)
+    OS_NAME="windows"
+    ;;
+  *)
+    OS_NAME="notset"
+    ;;
+esac
+
+install_codeql() {
+    case "$OS_NAME" in
+        osx)
+            echo "${yellow}${bold}Installing CodeQL CLI using Homebrew...${reset}"
+            brew install codeql
+            ;;
+        linux)
+            echo "${yellow}${bold}Installing CodeQL CLI using apt...${reset}"
+            sudo apt update && sudo apt install -y wget unzip
+            wget -q "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64.zip" -O codeql.zip
+            unzip codeql.zip -d codeql && rm codeql.zip
+            export PATH="$PATH:$(pwd)/codeql"
+            ;;
+        windows)
+            echo "${yellow}${bold}Downloading and extracting CodeQL bundle for Windows...${reset}"
+            wget -q "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-bundle-win64.tar.gz" -O codeql.tar.gz
+            mkdir -p codeql && tar -xzf codeql.tar.gz -C codeql --strip-components 1 && rm codeql.tar.gz
+            export PATH="$PATH:$(pwd)/codeql"
+            ;;
+        *)
+            echo "${red}${bold}Unknown OS. Please install CodeQL CLI manually.${reset}"
+            exit 1
+            ;;
+    esac
+}
+
 # Prompt for FILE_TO_ANALYZE if not set
 if [ -z "$FILE_TO_ANALYZE" ]; then
     read -rp "${blue}${bold}Enter the path to the file you want to analyze: ${reset}" FILE_TO_ANALYZE
@@ -41,11 +83,11 @@ fi
 
 # 1. Check if CodeQL CLI is installed
 if ! command -v codeql &> /dev/null; then
-    echo "${yellow}${bold}CodeQL CLI not found. Installing CodeQL CLI using Homebrew...${reset}"
-    brew install codeql
+    install_codeql
 
+    # Verify if the installation was successful
     if ! command -v codeql &> /dev/null; then
-        echo "${red}${bold}CodeQL CLI could not be installed via Homebrew. Exiting.${reset}"
+        echo "${red}${bold}CodeQL CLI could not be installed. Exiting.${reset}"
         exit 1
     fi
 else
