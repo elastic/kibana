@@ -39,6 +39,7 @@ import {
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { ServerlessPluginStart } from '@kbn/serverless/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -56,6 +57,7 @@ export interface InfraServerPluginSetupDeps {
   metricsDataAccess: MetricsDataPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
+  serverless?: ServerlessPluginStart;
 }
 
 export interface InfraServerPluginStartDeps {
