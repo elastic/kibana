@@ -232,11 +232,8 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-      * Bulk upsert up to 1000 asset criticality records.
-
-If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
-
-      */
+     * Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
+     */
     bulkUpsertAssetCriticalityRecords(
       props: BulkUpsertAssetCriticalityRecordsProps,
       kibanaSpace: string = 'default'
@@ -291,11 +288,8 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object);
     },
     /**
-      * Create or update an asset criticality record for a specific entity.
-
-If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
-
-      */
+     * Create or update a criticality record for a specific asset.
+     */
     createAssetCriticalityRecord(
       props: CreateAssetCriticalityRecordProps,
       kibanaSpace: string = 'default'
@@ -318,9 +312,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Create a new Timeline or Timeline template.
-     */
     createTimelines(props: CreateTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/timeline', kibanaSpace))
@@ -382,9 +373,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Delete a note from a Timeline using the note ID.
-     */
     deleteNote(props: DeleteNoteProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/note', kibanaSpace))
@@ -404,9 +392,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Delete one or more Timelines or Timeline templates.
-     */
     deleteTimelines(props: DeleteTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(routeWithNamespace('/api/timeline', kibanaSpace))
@@ -682,9 +667,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .send(props.body as object)
         .query(props.query);
     },
-    /**
-     * Export Timelines as an NDJSON file.
-     */
     exportTimelines(props: ExportTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/timeline/_export', kibanaSpace))
@@ -762,9 +744,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
-     */
     getDraftTimelines(props: GetDraftTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/timeline/_draft', kibanaSpace))
@@ -897,9 +876,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Get the details of an existing saved Timeline or Timeline template.
-     */
     getTimeline(props: GetTimelineProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/timeline', kibanaSpace))
@@ -908,9 +884,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Get a list of all saved Timelines or Timeline templates.
-     */
     getTimelines(props: GetTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/timelines', kibanaSpace))
@@ -933,9 +906,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Import Timelines.
-     */
     importTimelines(props: ImportTimelinesProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/timeline/_import', kibanaSpace))
@@ -977,9 +947,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Install or update prepackaged Timelines.
-     */
     installPrepackedTimelines(
       props: InstallPrepackedTimelinesProps,
       kibanaSpace: string = 'default'
@@ -1050,9 +1017,6 @@ finalize it.
         .send(props.body as object)
         .query(props.query);
     },
-    /**
-     * Favorite a Timeline or Timeline template for the current user.
-     */
     persistFavoriteRoute(props: PersistFavoriteRouteProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(routeWithNamespace('/api/timeline/_favorite', kibanaSpace))
@@ -1061,9 +1025,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Add a note to a Timeline or update an existing note.
-     */
     persistNoteRoute(props: PersistNoteRouteProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(routeWithNamespace('/api/note', kibanaSpace))
@@ -1072,9 +1033,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Pin an event to an existing Timeline.
-     */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
       return supertest
         .patch(routeWithNamespace('/api/pinned_event', kibanaSpace))
@@ -1191,9 +1149,6 @@ detection engine rules.
         .send(props.body as object)
         .query(props.query);
     },
-    /**
-     * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-     */
     scheduleRiskEngineNow(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/risk_score/engine/schedule_now', kibanaSpace))
