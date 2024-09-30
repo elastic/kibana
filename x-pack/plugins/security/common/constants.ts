@@ -113,6 +113,11 @@ export const SESSION_ROUTE = '/internal/security/session';
 export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
 /**
+ * Prefix for API actions.
+ */
+export const API_OPERATION_PREFIX = 'api:';
+
+/**
  * The API version numbers used with the versioned router.
  */
 export const API_VERSIONS = {
