@@ -86,9 +86,7 @@ export function strictlyGetParamAtPosition(
 export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['from', 'row', 'show'].includes(commands[0].name)
-    ? ''
-    : queryString;
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name) ? '' : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {

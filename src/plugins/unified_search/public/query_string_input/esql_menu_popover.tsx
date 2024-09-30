@@ -11,23 +11,27 @@ import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiPopover,
   EuiButton,
-  EuiContextMenuPanel,
   type EuiContextMenuPanelProps,
   EuiContextMenuItem,
-  EuiHorizontalRule,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  adHocDataview?: DataView | string;
+  onESQLQuerySubmit?: (query: string) => void;
 }
 
 export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLDocsFlyoutVisibilityChanged,
+  adHocDataview,
+  onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
 
@@ -48,63 +52,143 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     [setIsLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]
   );
 
-  const esqlPanelItems = useMemo(() => {
-    const panelItems: EuiContextMenuPanelProps['items'] = [];
-    panelItems.push(
-      <EuiContextMenuItem
-        key="quickReference"
-        icon="documentation"
-        data-test-subj="esql-quick-reference"
-        onClick={() => toggleLanguageComponent()}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
-          defaultMessage: 'Quick Reference',
-        })}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="about"
-        icon="iInCircle"
-        data-test-subj="esql-about"
-        target="_blank"
-        href={docLinks.links.query.queryESQL}
-        onClick={() => setIsESQLMenuPopoverOpen(false)}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
-          defaultMessage: 'Documentation',
-        })}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="examples"
-        icon="nested"
-        data-test-subj="esql-examples"
-        target="_blank"
-        href={docLinks.links.query.queryESQLExamples}
-        onClick={() => setIsESQLMenuPopoverOpen(false)}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
-          defaultMessage: 'Example queries',
-        })}
-      </EuiContextMenuItem>,
-      <EuiHorizontalRule margin="xs" key="dataviewActions-divider" />,
-      <EuiContextMenuItem
-        key="feedback"
-        icon="editorComment"
-        data-test-subj="esql-feedback"
-        target="_blank"
-        href={FEEDBACK_LINK}
-        onClick={() => setIsESQLMenuPopoverOpen(false)}
-      >
-        {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
-          defaultMessage: 'Submit feedback',
-        })}
-      </EuiContextMenuItem>
-    );
-    return panelItems;
-  }, [
-    docLinks.links.query.queryESQL,
-    docLinks.links.query.queryESQLExamples,
-    toggleLanguageComponent,
-  ]);
+  const esqlContextMenuPanels = useMemo(() => {
+    const hasRecommendedQueries = adHocDataview && typeof adHocDataview !== 'string';
+    let queryString = '';
+    let timeFieldName = '';
+    if (hasRecommendedQueries) {
+      queryString = `from ${adHocDataview.name}`;
+      timeFieldName =
+        adHocDataview.timeFieldName ?? adHocDataview.fields.getByType('date')?.[0]?.name;
+    }
+    const panels = [
+      {
+        id: 0,
+        items: [
+          {
+            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
+              defaultMessage: 'Quick Reference',
+            }),
+            icon: 'nedocumentationsted',
+            renderItem: () => (
+              <EuiContextMenuItem
+                key="quickReference"
+                icon="documentation"
+                data-test-subj="esql-quick-reference"
+                onClick={() => toggleLanguageComponent()}
+              >
+                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
+                  defaultMessage: 'Quick Reference',
+                })}
+              </EuiContextMenuItem>
+            ),
+          },
+          {
+            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
+              defaultMessage: 'Documentation',
+            }),
+            icon: 'iInCircle',
+            renderItem: () => (
+              <EuiContextMenuItem
+                key="about"
+                icon="iInCircle"
+                data-test-subj="esql-about"
+                target="_blank"
+                href={docLinks.links.query.queryESQL}
+                onClick={() => setIsESQLMenuPopoverOpen(false)}
+              >
+                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
+                  defaultMessage: 'Documentation',
+                })}
+              </EuiContextMenuItem>
+            ),
+          },
+          ...(Boolean(hasRecommendedQueries)
+            ? [
+                {
+                  name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
+                    defaultMessage: 'Recommended queries',
+                  }),
+                  icon: 'nested',
+                  panel: 1,
+                },
+              ]
+            : []),
+          {
+            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+              defaultMessage: 'Submit feedback',
+            }),
+            icon: 'editorComment',
+            renderItem: () => (
+              <EuiContextMenuItem
+                key="feedback"
+                icon="editorComment"
+                data-test-subj="esql-feedback"
+                target="_blank"
+                href={FEEDBACK_LINK}
+                onClick={() => setIsESQLMenuPopoverOpen(false)}
+              >
+                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                  defaultMessage: 'Submit feedback',
+                })}
+              </EuiContextMenuItem>
+            ),
+          },
+        ],
+      },
+      {
+        id: 1,
+        initialFocusedItemIndex: 1,
+        title: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
+          defaultMessage: 'Recommended queries',
+        }),
+        items: [
+          {
+            name: 'Aggregate data with STATS',
+            onClick: () => {
+              onESQLQuerySubmit?.(`${queryString} | STATS count = COUNT(*) `);
+              setIsESQLMenuPopoverOpen(false);
+            },
+          },
+          {
+            name: 'Set a conditional with CASE',
+            onClick: () => {
+              onESQLQuerySubmit?.(
+                `${queryString} | STATS count =  COUNT(*) | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other") | KEEP newField`
+              );
+              setIsESQLMenuPopoverOpen(false);
+            },
+          },
+          {
+            name: 'Create a date histogram',
+            onClick: () => {
+              onESQLQuerySubmit?.(
+                `${queryString} | WHERE ${timeFieldName} <=?_tend and ${timeFieldName} >?_tstart | STATS count = COUNT(*) BY BUCKET(${timeFieldName}, 50, ?_tstart, ?_tend)`
+              );
+              setIsESQLMenuPopoverOpen(false);
+            },
+          },
+          {
+            name: 'Sort by time',
+            onClick: () => {
+              onESQLQuerySubmit?.(`${queryString} | SORT ${timeFieldName} DESC `);
+              setIsESQLMenuPopoverOpen(false);
+            },
+          },
+          {
+            name: 'Create field with EVAL',
+            onClick: () => {
+              onESQLQuerySubmit?.(
+                `${queryString} | EVAL buckets = DATE_TRUNC(5 minute, ${timeFieldName}) | KEEP buckets`
+              );
+              setIsESQLMenuPopoverOpen(false);
+            },
+          },
+        ],
+      },
+    ];
+    return panels as EuiContextMenuPanelProps[];
+  }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, toggleLanguageComponent]);
 
   return (
     <>
@@ -130,7 +214,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         panelPaddingSize="s"
         display="block"
       >
-        <EuiContextMenuPanel size="s" items={esqlPanelItems} />
+        {/* <EuiContextMenuPanel size="s" items={esqlPanelItems} /> */}
+        <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
       </EuiPopover>
       <LanguageDocumentationFlyout
         searchInDescription

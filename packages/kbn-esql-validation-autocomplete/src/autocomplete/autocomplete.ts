@@ -19,7 +19,7 @@ import type {
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
-import type { EditorContext, ItemKind, SuggestionRawDefinition } from './types';
+import type { EditorContext, ItemKind, SuggestionRawDefinition, GetFieldsByTypeFn } from './types';
 import {
   getColumnForASTNode,
   getCommandDefinition,
@@ -113,12 +113,8 @@ import {
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { countBracketsUnclosed } from '../shared/helpers';
+import { getRecommendedQueries } from './recommended_queries';
 
-type GetFieldsByTypeFn = (
-  type: string | string[],
-  ignored?: string[],
-  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
-) => Promise<SuggestionRawDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -176,7 +172,7 @@ export async function suggest(
   );
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
-    queryForFields,
+    queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
   const getSources = getSourcesHelper(resourceRetriever);
@@ -519,6 +515,7 @@ async function getExpressionSuggestionsByType(
     const optArg = optionsAlreadyDeclared.find(({ name: optionName }) => optionName === name);
     return (!optArg && !optionsAlreadyDeclared.length) || (optArg && index > optArg.index);
   });
+  const hasRecommendedQueries = Boolean(commandDef?.hasRecommendedQueries);
   // get the next definition for the given command
   let argDef = commandDef.signature.params[argIndex];
   // tune it for the variadic case
@@ -910,6 +907,11 @@ async function getExpressionSuggestionsByType(
 
         if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
           const sources = await getSources();
+
+          const recommendedQueriesSuggestions = hasRecommendedQueries
+            ? await getRecommendedQueries(getFieldsByType)
+            : [];
+
           const suggestionsToAdd = await handleFragment(
             innerText,
             (fragment) =>
@@ -952,8 +954,13 @@ async function getExpressionSuggestionsByType(
                     asSnippet: false, // turn this off because $ could be contained within the source name
                     rangeToReplace,
                   },
+                  ...recommendedQueriesSuggestions.map((suggestion) => ({
+                    ...suggestion,
+                    rangeToReplace,
+                    filterText: fragment,
+                    text: fragment + suggestion.text,
+                  })),
                 ];
-
                 return _suggestions;
               }
             }
@@ -1004,6 +1011,11 @@ async function getExpressionSuggestionsByType(
         sortText: shouldPushItDown ? `Z${sortText}` : sortText,
       }));
       suggestions.push(...finalSuggestions);
+    }
+
+    // / handle recommended queries for from
+    if (hasRecommendedQueries) {
+      suggestions.push(...(await getRecommendedQueries(getFieldsByType)));
     }
   }
   // Due to some logic overlapping functions can be repeated

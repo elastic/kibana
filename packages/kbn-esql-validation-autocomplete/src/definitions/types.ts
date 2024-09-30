@@ -204,6 +204,7 @@ export interface CommandDefinition extends CommandBaseDefinition {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
   modes: CommandModeDefinition[];
+  hasRecommendedQueries?: boolean;
 }
 
 export interface Literals {
