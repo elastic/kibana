@@ -16,9 +16,10 @@ import { FieldRow } from './field_row';
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
+  isEsqlMode: boolean | undefined;
 }
 
-export function isFilterInOutPairDisabled(
+function isFilterInOutPairDisabled(
   row: FieldRow | undefined,
   onFilter: DocViewFilterFn | undefined
 ): boolean {
@@ -58,9 +59,17 @@ export function getFilterInOutPairDisabledWarning(
     : undefined;
 }
 
-export const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
+const esqlMultivalueFilteringDisabled = i18n.translate(
+  'unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled',
+  {
+    defaultMessage: 'Multivalue filtering is not supported in ES|QL',
+  }
+);
+
+const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
   Component,
   row,
+  isEsqlMode,
   onFilter,
 }) => {
   if (!row) {
@@ -81,12 +90,14 @@ export const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn 
     return null;
   }
 
+  const filteringDisabled = isEsqlMode && Array.isArray(flattenedValue);
+
   return (
     <Component
       data-test-subj={`addFilterForValueButton-${name}`}
       iconType="plusInCircle"
-      disabled={isFilterInOutPairDisabled(row, onFilter)}
-      title={filterAddLabel}
+      disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
+      title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterAddLabel}
       flush="left"
       onClick={() => onFilter(dataViewField, flattenedValue, '+')}
     >
@@ -95,9 +106,10 @@ export const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn 
   );
 };
 
-export const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
+const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
   Component,
   row,
+  isEsqlMode,
   onFilter,
 }) => {
   if (!row) {
@@ -118,12 +130,14 @@ export const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn
     return null;
   }
 
+  const filteringDisabled = isEsqlMode && Array.isArray(flattenedValue);
+
   return (
     <Component
       data-test-subj={`addFilterOutValueButton-${name}`}
       iconType="minusInCircle"
-      disabled={isFilterInOutPairDisabled(row, onFilter)}
-      title={filterOutLabel}
+      disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
+      title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterOutLabel}
       flush="left"
       onClick={() => onFilter(dataViewField, flattenedValue, '-')}
     >
@@ -132,7 +146,7 @@ export const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn
   );
 };
 
-export function isFilterExistsDisabled(
+function isFilterExistsDisabled(
   row: FieldRow | undefined,
   onFilter: DocViewFilterFn | undefined
 ): boolean {
@@ -165,9 +179,11 @@ export function getFilterExistsDisabledWarning(
     : undefined;
 }
 
-export const FilterExist: React.FC<
-  TableActionsProps & { onFilter: DocViewFilterFn | undefined }
-> = ({ Component, row, onFilter }) => {
+const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
+  Component,
+  row,
+  onFilter,
+}) => {
   if (!row) {
     return null;
   }
@@ -198,7 +214,7 @@ export const FilterExist: React.FC<
   );
 };
 
-export const ToggleColumn: React.FC<
+const ToggleColumn: React.FC<
   TableActionsProps & {
     onToggleColumn: ((field: string) => void) | undefined;
   }
@@ -236,10 +252,12 @@ export const ToggleColumn: React.FC<
 
 export function getFieldCellActions({
   rows,
+  isEsqlMode,
   onFilter,
   onToggleColumn,
 }: {
   rows: FieldRow[];
+  isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
   onToggleColumn: ((field: string) => void) | undefined;
 }) {
@@ -247,7 +265,14 @@ export function getFieldCellActions({
     ...(onFilter
       ? [
           ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-            return <FilterExist row={rows[rowIndex]} Component={Component} onFilter={onFilter} />;
+            return (
+              <FilterExist
+                row={rows[rowIndex]}
+                Component={Component}
+                isEsqlMode={isEsqlMode}
+                onFilter={onFilter}
+              />
+            );
           },
         ]
       : []),
@@ -258,6 +283,7 @@ export function getFieldCellActions({
               <ToggleColumn
                 row={rows[rowIndex]}
                 Component={Component}
+                isEsqlMode={isEsqlMode}
                 onToggleColumn={onToggleColumn}
               />
             );
@@ -269,18 +295,34 @@ export function getFieldCellActions({
 
 export function getFieldValueCellActions({
   rows,
+  isEsqlMode,
   onFilter,
 }: {
   rows: FieldRow[];
+  isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
 }) {
   return onFilter
     ? [
         ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-          return <FilterIn row={rows[rowIndex]} Component={Component} onFilter={onFilter} />;
+          return (
+            <FilterIn
+              row={rows[rowIndex]}
+              Component={Component}
+              isEsqlMode={isEsqlMode}
+              onFilter={onFilter}
+            />
+          );
         },
         ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-          return <FilterOut row={rows[rowIndex]} Component={Component} onFilter={onFilter} />;
+          return (
+            <FilterOut
+              row={rows[rowIndex]}
+              Component={Component}
+              isEsqlMode={isEsqlMode}
+              onFilter={onFilter}
+            />
+          );
         },
       ]
     : [];
