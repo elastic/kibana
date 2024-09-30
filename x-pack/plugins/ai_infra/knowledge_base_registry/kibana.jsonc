@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/knowledge-base-registry-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  "plugin": {
+    "id": "knowledgeBaseRegistry",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "knowledgeBaseRegistry"],
+    "requiredPlugins": [],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
