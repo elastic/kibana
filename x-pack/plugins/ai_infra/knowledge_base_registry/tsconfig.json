@@ -14,5 +14,9 @@
     ".storybook/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+  ]
 }
