@@ -72,6 +72,7 @@ describe('ContextApp test', () => {
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     profilesManager: discoverServices.profilesManager,
+    ebtManager: discoverServices.ebtManager,
     timefilter: discoverServices.timefilter,
     uiActions: discoverServices.uiActions,
   } as unknown as DiscoverServices;

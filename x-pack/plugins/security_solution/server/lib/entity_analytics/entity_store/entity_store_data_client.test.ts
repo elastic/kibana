@@ -82,7 +82,7 @@ describe('EntityStoreDataClient', () => {
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ query: { bool: { filter: [{ match_all: {} }] } } })
+        expect.objectContaining({ query: { match_all: {} } })
       );
     });
 
