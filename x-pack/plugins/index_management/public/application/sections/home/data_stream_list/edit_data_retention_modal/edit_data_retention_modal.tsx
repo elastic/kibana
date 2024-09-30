@@ -72,7 +72,7 @@ const configurationFormSchema: FormSchema = {
     label: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.dataRetentionField',
       {
-        defaultMessage: 'Data retention',
+        defaultMessage: 'Data retention period',
       }
     ),
     formatters: [fieldFormatters.toInt],
@@ -142,7 +142,7 @@ const configurationFormSchema: FormSchema = {
     label: i18n.translate(
       'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
       {
-        defaultMessage: 'Keep data indefinitely',
+        defaultMessage: 'Keep data up to maximum retention period',
       }
     ),
   },
@@ -300,7 +300,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiModal onClose={() => onClose()} data-test-subj="editDataRetentionModal">
+    <EuiModal
+      onClose={() => onClose()}
+      data-test-subj="editDataRetentionModal"
+      css={{ minWidth: 450 }}
+    >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
@@ -319,6 +323,17 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                 ilmPolicyLink={ilmPolicyLink}
                 ilmPolicyName={ilmPolicyName}
                 dataStreamName={dataStreamName}
+              />
+              <EuiSpacer />
+            </>
+          )}
+
+          {enableProjectLevelRetentionChecks && lifecycle?.globalMaxRetention && (
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.modalTitleText"
+                defaultMessage="Maximum data retention period is {maxRetention} days"
+                values={{ maxRetention: lifecycle?.globalMaxRetention.slice(0, -1) }}
               />
               <EuiSpacer />
             </>
@@ -345,7 +360,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                   {i18n.translate(
                     'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.learnMoreLinkText',
                     {
-                      defaultMessage: 'How does it work?',
+                      defaultMessage: 'How does this work?',
                     }
                   )}
                 </EuiLink>
