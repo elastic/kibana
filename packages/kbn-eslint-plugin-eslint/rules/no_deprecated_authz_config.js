@@ -52,6 +52,33 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
 
       let currentNode = node;
 
+      const hasSecurityInRoot = (config) => {
+        const securityInRoot = config.properties.find(
+          (property) => property.key && property.key.name === 'security'
+        );
+
+        if (securityInRoot) {
+          return true;
+        }
+
+        const optionsProperty = config.properties.find(
+          (prop) => prop.key && prop.key.name === 'options'
+        );
+
+        if (optionsProperty?.value?.properties) {
+          const tagsProperty = optionsProperty.value.properties.find(
+            (prop) => prop.key.name === 'tags'
+          );
+
+          const accessTagsFilter = (el) => isLiteralAccessTag(el) || isTemplateLiteralAccessTag(el);
+          const accessTags = tagsProperty.value.elements.filter(accessTagsFilter);
+
+          return accessTags.length > 0;
+        }
+
+        return false;
+      };
+
       while (
         currentNode &&
         currentNode.type === 'CallExpression' &&
@@ -68,9 +95,7 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
           const [routeConfig] = currentNode.arguments;
 
           if (routeConfig && routeConfig.type === 'ObjectExpression') {
-            const securityInRoot = routeConfig.properties.find(
-              (property) => property.key && property.key.name === 'security'
-            );
+            const securityInRoot = hasSecurityInRoot(routeConfig);
 
             // If security is missing in both the root and the version
             if (!securityInRoot) {
