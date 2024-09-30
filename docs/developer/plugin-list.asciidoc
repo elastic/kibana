@@ -664,6 +664,10 @@ the infrastructure monitoring use-case within Kibana.
 |undefined
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/knowledge_base_registry/README.md[knowledgeBaseRegistry]
+|This plugin contains the registry for the knowledge base.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
