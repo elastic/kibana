@@ -66,6 +66,11 @@ export const OptionsListControl = ({
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 
+  const isCompressed =
+    api.parentApi.parentApi && api.parentApi.parentApi.compressed
+      ? api.parentApi.parentApi.compressed
+      : true;
+
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
       hasSelections: !isEmpty(selectedOptions),
@@ -174,11 +179,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup
-      fullWidth
-      compressed={api.parentApi.parentApi.compressed ?? true}
-      className={controlPanelClassName}
-    >
+    <EuiFilterGroup fullWidth compressed={isCompressed} className={controlPanelClassName}>
       <EuiInputPopover
         id={popoverId}
         ownFocus
