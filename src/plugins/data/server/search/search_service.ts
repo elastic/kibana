@@ -395,6 +395,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         switchMap((searchRequest) =>
           strategy.search(searchRequest, options, deps).pipe(
             concatMap((response) => {
+              response = {
+                ...response,
+                isRestored: !!searchRequest.id,
+              };
+
               if (
                 options.sessionId && // if within search session
                 options.isStored && // and search session was saved (saved object exists)
@@ -402,7 +407,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 !(options.isRestore && searchRequest.id) // and not restoring already tracked search
               ) {
                 // then track this search inside the search-session saved object
-                response.isRestored = !!searchRequest.id;
 
                 // check if search was already tracked and extended, don't track again in this case
                 if (options.isSearchStored || isInternalSearchStored) {
@@ -412,7 +416,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                   });
                 } else {
                   return from(
-                    deps.searchSessionsClient.trackId(request, response.id!, options)
+                    deps.searchSessionsClient.trackId(request, response.id, options)
                   ).pipe(
                     tap(() => {
                       isInternalSearchStored = true;

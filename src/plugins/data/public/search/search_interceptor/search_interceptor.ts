@@ -462,6 +462,9 @@ export class SearchInterceptor {
           }),
         })
         .then((response) => {
+          if ((response as Record<string, unknown>).error) {
+            throw { attributes: (response as Record<string, unknown>).error };
+          }
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
               if ((response as IKibanaSearchResponse).rawResponse) return response;
