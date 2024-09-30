@@ -325,15 +325,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     TResult extends UseBaseQueryResult = UseBaseQueryResult
   >(
     hookFn: HookRendererFunction<TProps, TResult>,
+    /**
+     * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
+     */
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
     const { result: hookResult } = renderHook<TProps, TResult>(hookFn, options);
 
     if (waitForHook) {
-      await waitFor(() => {
-        return hookResult.current[waitForHook];
-      });
+      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));
     }
 
     return hookResult.current;
