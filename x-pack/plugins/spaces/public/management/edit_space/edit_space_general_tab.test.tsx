@@ -442,32 +442,35 @@ describe('EditSpaceSettings', () => {
     );
 
     // update the space visible features
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    expect(feature1Checkbox).toBeChecked();
     await act(async () => {
-      const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
-      expect(feature1Checkbox).toBeChecked();
-
       await userEvent.click(feature1Checkbox);
-      await waitFor(() => {
-        expect(feature1Checkbox).not.toBeChecked();
-      });
+    });
+    await waitFor(() => {
+      expect(feature1Checkbox).not.toBeChecked();
+    });
 
-      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
-      const updateButton = screen.getByTestId('save-space-button');
+    const updateButton = screen.getByTestId('save-space-button');
+    await act(async () => {
       await userEvent.click(updateButton);
+    });
 
-      expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
 
-      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    await act(async () => {
       await userEvent.click(confirmButton);
+    });
 
-      await waitFor(() => {
-        expect(updateSpaceSpy).toHaveBeenCalledWith({
-          ...spaceToUpdate,
-          imageUrl: '',
-          disabledFeatures: ['feature-1'],
-        });
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalledWith({
+        ...spaceToUpdate,
+        imageUrl: '',
+        disabledFeatures: ['feature-1'],
       });
     });
 
