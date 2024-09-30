@@ -97,3 +97,5 @@ export type {
 } from './types';
 
 export { APMEventClient } from './lib/helpers';
+
+export { unflattenKnownApmEventFields } from './utils/unflatten_known_fields';
