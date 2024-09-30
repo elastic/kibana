@@ -875,8 +875,9 @@ export const UnifiedDataTable = ({
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
         onSetColumns(newColumns, dontModifyColumns);
       },
+      canDragAndDropColumns: !defaultColumns,
     }),
-    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
+    [visibleColumns, defaultColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
