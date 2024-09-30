@@ -31,3 +31,5 @@ export const RISK_SCORE_DELETE_STORED_SCRIPT =
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview` as const;
 export const RISK_SCORE_ENTITY_CALCULATION_URL =
   `${INTERNAL_RISK_SCORE_URL}/calculation/entity` as const;
+export const RISK_SCORE_CALCULATION_WITH_CUSTOM_FIELDS_URL =
+  `${PUBLIC_RISK_SCORE_URL}/calculation/custom_fields` as const;

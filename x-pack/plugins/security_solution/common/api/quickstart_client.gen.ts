@@ -274,6 +274,10 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  CustomRiskScoreCalculationRequestBodyInput,
+  CustomRiskScoreCalculationResponse,
+} from './entity_analytics/risk_engine/custom_score_calculation_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
@@ -645,6 +649,22 @@ If a record already exists for the specified entity, that record is overwritten 
           '/api/endpoint/protection_updates_note/{package_policy_id}',
           props.params
         ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Calculates and returns a list of Risk Scores, based on user-defined fields.
+   */
+  async customRiskScoreCalculation(props: CustomRiskScoreCalculationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CustomRiskScoreCalculation`);
+    return this.kbnClient
+      .request<CustomRiskScoreCalculationResponse>({
+        path: '/api/risk_score/calculation/custom_fields',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2008,6 +2028,9 @@ export interface CreateTimelinesProps {
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
+}
+export interface CustomRiskScoreCalculationProps {
+  body: CustomRiskScoreCalculationRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;

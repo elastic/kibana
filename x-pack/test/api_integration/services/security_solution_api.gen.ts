@@ -36,6 +36,7 @@ import {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import { CustomRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/custom_score_calculation_route.gen';
 import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import {
   DeleteEntityEngineRequestQueryInput,
@@ -345,6 +346,20 @@ If a record already exists for the specified entity, that record is overwritten 
             kibanaSpace
           )
         )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Calculates and returns a list of Risk Scores, based on user-defined fields.
+     */
+    customRiskScoreCalculation(
+      props: CustomRiskScoreCalculationProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(routeWithNamespace('/api/risk_score/calculation/custom_fields', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1365,6 +1380,9 @@ export interface CreateTimelinesProps {
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
+}
+export interface CustomRiskScoreCalculationProps {
+  body: CustomRiskScoreCalculationRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
