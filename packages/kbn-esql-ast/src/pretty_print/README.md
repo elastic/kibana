@@ -49,10 +49,37 @@ single line. Below is the summary of the top-level functions:
 - `BasicPrettyPrinter.expression()` &mdash; prints an expression to a single
   line.
 
-See `BasicPrettyPrinterOptions` for formatting options.
+See `BasicPrettyPrinterOptions` for formatting options. For example, a
+`lowercase` options allows you to lowercase all ES|QL keywords:
+
+```typescript
+const text = BasicPrettyPrinter.print(root, { lowercase: true });
+```
+
+The `BasicPrettyPrinter` prints only *left* and *right* multi-line comments,
+which do not have line breaks, as this formatter is designed to print a query
+to a single line. If you need to print a query to multiple lines, use the
+`WrappingPrettyPrinter`.
 
 
 ## `WrappingPrettyPrinter`
 
 The *wrapping pretty printer* can print a query to multiple lines, and can wrap
+the text to a new line if the line width exceeds a certain threshold. It also
+prints all comments attached to the AST (including ones that force the text
+to be wrapped).
+
+Usage:
+
+```typescript
+import { parse, WrappingPrettyPrinter } from '@kbn/esql-ast';
+
+const src = `
+  FROM index /* this is a comment */
+  | LIMIT 10`;
+const { root } = parse(src, { withFormatting: true });
+const text = WrappingPrettyPrinter.print(root);
+```
+
+See `WrappingPrettyPrinterOptions` interface for available formatting options.
 
