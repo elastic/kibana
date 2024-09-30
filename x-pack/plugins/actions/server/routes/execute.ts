@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 
@@ -14,16 +13,10 @@ import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
-
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: { description: 'An identifier for the connector.' },
-  }),
-});
-
-const bodySchema = schema.object({
-  params: schema.recordOf(schema.string(), schema.any()),
-});
+import {
+  executeConnectorRequestBodySchemaV1,
+  executeConnectorRequestParamsSchemaV1,
+} from '../../common/routes/connector/apis/execute';
 
 const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = ({
   actionId,
@@ -51,8 +44,8 @@ export const executeActionRoute = (
       },
       validate: {
         request: {
-          body: bodySchema,
-          params: paramSchema,
+          body: executeConnectorRequestBodySchemaV1,
+          params: executeConnectorRequestParamsSchemaV1,
         },
         response: {
           200: {
