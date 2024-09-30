@@ -144,6 +144,16 @@ export const getTypeLabel = (type: GeoipDatabase['type']): string => {
         defaultMessage: 'IPInfo',
       });
     }
+    case 'web': {
+      return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.webLabel', {
+        defaultMessage: 'Web',
+      });
+    }
+    case 'local': {
+      return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.localLabel', {
+        defaultMessage: 'Local',
+      });
+    }
     case 'unknown':
     default: {
       return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeUnknownLabel', {

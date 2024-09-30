@@ -33,7 +33,7 @@ export enum FieldCopyAction {
   Rename = 'rename',
 }
 
-export type DatabaseType = 'maxmind' | 'ipinfo' | 'unknown';
+export type DatabaseType = 'maxmind' | 'ipinfo' | 'web' | 'local' | 'unknown';
 
 export interface GeoipDatabase {
   name: string;
