@@ -22,7 +22,8 @@ const paramSchema = schema.object({
 export const enableAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.post(
     {
@@ -31,6 +32,7 @@ export const enableAlertRoute = (
         params: paramSchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Enable an alert',
         tags: ['oas-tag:alerting'],
         deprecated: true,
