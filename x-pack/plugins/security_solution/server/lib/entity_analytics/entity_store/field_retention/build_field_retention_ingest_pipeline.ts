@@ -35,43 +35,47 @@ export const buildFieldRetentionIngestPipeline = ({
   fieldRetentionDefinition: FieldRetentionDefinition;
   enrichPolicyName: string;
   allEntityFields: string[];
-}): IngestProcessorContainer[] => [
-  ...(DEBUG_MODE ? [debugDeepCopyContextStep()] : []),
-  {
-    enrich: {
-      policy_name: enrichPolicyName,
-      field: fieldRetentionDefinition.matchField,
-      target_field: ENRICH_FIELD,
+}): IngestProcessorContainer[] => {
+  const { entityType, matchField } = fieldRetentionDefinition;
+  return [
+    ...(DEBUG_MODE ? [debugDeepCopyContextStep()] : []),
+    {
+      enrich: {
+        policy_name: enrichPolicyName,
+        field: matchField,
+        target_field: ENRICH_FIELD,
+      },
     },
-  },
-  {
-    set: {
-      field: '@timestamp',
-      value: '{{entity.lastSeenTimestamp}}',
+    // TODO: is this a bug should the entity definition framework set this?
+    {
+      set: {
+        field: '@timestamp',
+        value: '{{entity.lastSeenTimestamp}}',
+      },
     },
-  },
-  {
-    set: {
-      field: 'entity.name',
-      value: `{{${getIdentityFieldForEntityType(fieldRetentionDefinition.entityType)}}}`,
+    {
+      set: {
+        field: 'entity.name',
+        value: `{{${getIdentityFieldForEntityType(entityType)}}}`,
+      },
     },
-  },
-  arrayToSingleValueStep(`${fieldRetentionDefinition.entityType}.risk.calculated_level`),
-  arrayToSingleValueStep('asset.criticality'),
-  ...getDotExpanderSteps(allEntityFields),
-  ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
-    enrichField: ENRICH_FIELD,
-  }),
-  ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', 'risk']),
-  removeEntityDefinitionFieldsStep(),
-  ...(!DEBUG_MODE
-    ? [
-        {
-          remove: {
-            ignore_failure: true,
-            field: ENRICH_FIELD,
+    arrayToSingleValueStep(`${entityType}.risk.calculated_level`),
+    arrayToSingleValueStep('asset.criticality'),
+    ...getDotExpanderSteps(allEntityFields),
+    ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
+      enrichField: ENRICH_FIELD,
+    }),
+    ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${entityType}.risk`]),
+    removeEntityDefinitionFieldsStep(),
+    ...(!DEBUG_MODE
+      ? [
+          {
+            remove: {
+              ignore_failure: true,
+              field: ENRICH_FIELD,
+            },
           },
-        },
-      ]
-    : []),
-];
+        ]
+      : []),
+  ];
+};

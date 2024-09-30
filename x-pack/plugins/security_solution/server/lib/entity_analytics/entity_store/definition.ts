@@ -12,6 +12,31 @@ import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/as
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
 import { buildEntityDefinitionId } from './utils/utils';
 
+const getSharedMetadataFields = (entityType: EntityType) => [
+  {
+    source: '_index',
+    destination: 'entity.source',
+  },
+  {
+    source: 'asset.criticality',
+    aggregation: {
+      type: 'top_value',
+      sort: {
+        '@timestamp': 'desc',
+      },
+    },
+  },
+  {
+    source: `${entityType}.risk.calculated_level`,
+    aggregation: {
+      type: 'top_value',
+      sort: {
+        '@timestamp': 'desc',
+      },
+    },
+  },
+];
+
 export const buildHostEntityDefinition = (namespace: string): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('host', namespace),
@@ -21,12 +46,7 @@ export const buildHostEntityDefinition = (namespace: string): EntityDefinition =
     identityFields: ['host.name'],
     displayNameTemplate: '{{host.name}}',
     metadata: [
-      // we have to use entityFields for entity.source because entity is a reserved field and deleted later
-      {
-        source: '_index',
-        destination: 'entity.source',
-      },
-      'asset.criticality',
+      ...getSharedMetadataFields('host'),
       'host.domain',
       'host.hostname',
       'host.id',
@@ -35,7 +55,6 @@ export const buildHostEntityDefinition = (namespace: string): EntityDefinition =
       'host.name',
       'host.type',
       'host.architecture',
-      'host.risk.calculated_level',
     ],
     history: {
       timestampField: '@timestamp',
@@ -54,11 +73,7 @@ export const buildUserEntityDefinition = (namespace: string): EntityDefinition =
     identityFields: ['user.name'],
     displayNameTemplate: '{{user.name}}',
     metadata: [
-      {
-        source: '_index',
-        destination: 'entity.source',
-      },
-      'asset.criticality',
+      ...getSharedMetadataFields('user'),
       'user.domain',
       'user.email',
       'user.full_name',
@@ -66,7 +81,6 @@ export const buildUserEntityDefinition = (namespace: string): EntityDefinition =
       'user.id',
       'user.name',
       'user.roles',
-      'user.risk.calculated_level',
     ],
     history: {
       timestampField: '@timestamp',
