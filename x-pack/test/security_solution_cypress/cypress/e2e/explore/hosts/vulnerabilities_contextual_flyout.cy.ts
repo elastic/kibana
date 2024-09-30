@@ -184,9 +184,10 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
         deleteDataStream();
       });
 
-      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
+      it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings but it should show no vulnerabilities title', () => {
         cy.log('check if Vulnerabilities preview title shown');
         cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
+        cy.log('check if no vulnerabilities text is shown');
         cy.get(NO_VULNERABILITIES_TEXT).should('be.visible');
       });
     }
