@@ -14,18 +14,23 @@ import {
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
-import { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import {
   LogCategoriesResultContent,
   LogCategoriesResultContentDependencies,
 } from './log_categories_result_content';
+import {
+  categoryDetailsService,
+  createCategoryDetailsServiceImplementations,
+} from '../../services/category_details_service';
+import { LogCategory } from '../../types';
 
 export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;
   documentFilters?: QueryDslQueryContainer[];
-  logsSource: IndexNameLogsSourceConfiguration;
+  logsSource: ResolvedIndexNameLogsSourceConfiguration;
   // The time range could be made optional if we want to support an internal
   // time range picker
   timeRange: {
@@ -61,11 +66,48 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
     }
   );
 
+  const [categoryDetailsServiceState, sendToCategoryDetailsService] = useMachine(
+    categoryDetailsService.provide(
+      createCategoryDetailsServiceImplementations({ search: dependencies.search })
+    ),
+    {
+      inspect: consoleInspector,
+      input: {
+        index: logsSource.indexName,
+        startTimestamp: timeRange.start,
+        endTimestamp: timeRange.end,
+        timeField: logsSource.timestampField,
+        messageField: logsSource.messageField,
+        additionalFilters: documentFilters,
+        dataView: logsSource.dataView,
+      },
+    }
+  );
+
   const cancelOperation = useCallback(() => {
     sendToCategorizeLogsService({
       type: 'cancel',
     });
   }, [sendToCategorizeLogsService]);
+
+  const closeFlyout = useCallback(() => {
+    sendToCategoryDetailsService({
+      type: 'setExpandedCategory',
+      category: null,
+      rowIndex: null,
+    });
+  }, [sendToCategoryDetailsService]);
+
+  const expandCategory = useCallback(
+    (category: LogCategory | null, rowIndex: number | null) => {
+      sendToCategoryDetailsService({
+        type: 'setExpandedCategory',
+        category,
+        rowIndex,
+      });
+    },
+    [sendToCategoryDetailsService]
+  );
 
   if (categorizeLogsServiceState.matches('done')) {
     return (
@@ -75,6 +117,9 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({
         logCategories={categorizeLogsServiceState.context.categories}
         logsSource={logsSource}
         timeRange={timeRange}
+        categoryDetailsServiceState={categoryDetailsServiceState}
+        onCloseFlyout={closeFlyout}
+        onExpandCategory={expandCategory}
       />
     );
   } else if (categorizeLogsServiceState.matches('failed')) {

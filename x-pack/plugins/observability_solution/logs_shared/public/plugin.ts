@@ -61,6 +61,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       logsDataAccess,
       observabilityAIAssistant,
       share,
+      fieldFormats,
     } = plugins;
 
     const logViews = this.logViews.start({
@@ -76,6 +77,12 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       search: data.search.search,
       uiSettings: settings,
       share,
+      dataViews,
+      fieldFormats,
+      columns: {
+        SummaryColumn: plugins.discover.logColumns.SummaryColumn,
+        LogLevelCell: plugins.discover.logColumns.getLogLevelCell('log.level'),
+      },
     });
 
     if (!observabilityAIAssistant) {

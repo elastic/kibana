@@ -9,12 +9,12 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
-import type { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { DiscoverLink } from '../discover_link';
 
 export interface LogCategoriesControlBarProps {
   documentFilters?: QueryDslQueryContainer[];
-  logsSource: IndexNameLogsSourceConfiguration;
+  logsSource: ResolvedIndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
     end: string;

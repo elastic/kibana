@@ -13,11 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React, { useCallback, useMemo } from 'react';
-import type { IndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
 export interface DiscoverLinkProps {
   documentFilters?: QueryDslQueryContainer[];
-  logsSource: IndexNameLogsSourceConfiguration;
+  logsSource: ResolvedIndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
     end: string;
