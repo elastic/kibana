@@ -1597,6 +1597,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-explore
 /x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
 
+/x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
+
 ## Generative AI owner connectors
 # OpenAI
 /x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
