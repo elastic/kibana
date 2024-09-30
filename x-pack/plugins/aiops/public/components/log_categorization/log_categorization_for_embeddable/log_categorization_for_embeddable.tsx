@@ -18,7 +18,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
 import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
@@ -224,7 +224,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           searchQuery,
           runtimeMappings,
           {
-            [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
         ),
         runCategorizeRequest(

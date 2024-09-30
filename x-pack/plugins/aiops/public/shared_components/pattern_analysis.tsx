@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
@@ -105,7 +105,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
 
   const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
     } as unknown as AiopsAppDependencies;
   }, [deps, embeddingOrigin]);

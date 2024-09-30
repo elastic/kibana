@@ -7,6 +7,8 @@
 
 import type { FC } from 'react';
 import React, { Suspense } from 'react';
+import { pick } from 'lodash';
+
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -17,13 +19,13 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-
-import { pick } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 import type { AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../../hooks/use_aiops_app_context';
+
 import type { LogCategorizationEmbeddableProps } from './log_categorization_for_discover';
 import { LogCategorizationDiscover } from './log_categorization_for_discover';
 

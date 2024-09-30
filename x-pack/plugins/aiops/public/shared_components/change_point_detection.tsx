@@ -6,7 +6,7 @@
  */
 import { css } from '@emotion/react';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
@@ -107,7 +107,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
 
   const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
     } as unknown as AiopsAppDependencies;
   }, [deps, embeddingOrigin]);

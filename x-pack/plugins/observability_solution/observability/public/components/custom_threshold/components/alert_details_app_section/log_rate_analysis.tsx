@@ -185,7 +185,7 @@ export function LogRateAnalysis({
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
-            embeddingOrigin="observability_log_threshold_alert_details"
+            embeddingOrigin="observability_custom_threshold_alert_details"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}

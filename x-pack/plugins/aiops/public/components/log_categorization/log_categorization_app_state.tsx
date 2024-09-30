@@ -15,7 +15,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -67,7 +67,7 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <DatePickerContextProvider {...datePickerDeps}>
-              <LogCategorizationPage embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE} />
+              <LogCategorizationPage embeddingOrigin={AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS} />
             </DatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>

@@ -19,7 +19,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import {
   useAppDispatch,
   useCurrentSelectedSignificantItem,
@@ -311,7 +311,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <LogRateAnalysisContent
-              embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
+              embeddingOrigin={AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS}
               esSearchQuery={searchQuery}
               onWindowParametersChange={onWindowParametersHandler}
               onAnalysisCompleted={onAnalysisCompleted}
