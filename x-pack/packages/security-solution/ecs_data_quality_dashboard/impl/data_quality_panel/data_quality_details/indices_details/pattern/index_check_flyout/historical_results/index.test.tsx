@@ -124,7 +124,7 @@ describe('HistoricalResults', () => {
   });
 
   describe('Super Date Picker', () => {
-    it('should render superdatepicker with last 7 days preselected', () => {
+    it('should render superdatepicker with last 30 days preselected', () => {
       const indexName = 'test';
       const historicalResult = getHistoricalResultStub(indexName);
       render(
@@ -150,7 +150,7 @@ describe('HistoricalResults', () => {
         within(superDatePicker).getByRole('button', { name: 'Date quick select' })
       ).toBeInTheDocument();
       expect(
-        within(superDatePicker).getByRole('button', { name: 'Last 7 days' })
+        within(superDatePicker).getByRole('button', { name: 'Last 30 days' })
       ).toBeInTheDocument();
       expect(within(superDatePicker).getByRole('button', { name: 'Refresh' })).toBeInTheDocument();
     });

@@ -6,6 +6,10 @@
  */
 
 import { INTERNAL_API_VERSION } from '../../../../../../../constants';
+import {
+  DEFAULT_HISTORICAL_RESULTS_END_DATE,
+  DEFAULT_HISTORICAL_RESULTS_START_DATE,
+} from '../../../constants';
 import { fetchHistoricalResults } from './fetch_historical_results';
 
 const indexName = 'test-index';
@@ -13,7 +17,10 @@ const indexName = 'test-index';
 const path = `/internal/ecs_data_quality_dashboard/results/${indexName}`;
 const opts = {
   method: 'GET',
-  query: { endDate: 'now', startDate: 'now-7d' },
+  query: {
+    endDate: DEFAULT_HISTORICAL_RESULTS_END_DATE,
+    startDate: DEFAULT_HISTORICAL_RESULTS_START_DATE,
+  },
   version: INTERNAL_API_VERSION,
 };
 
