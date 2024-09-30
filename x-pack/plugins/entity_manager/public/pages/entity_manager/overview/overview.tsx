@@ -8,16 +8,16 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { paths } from '../../../common/locators/paths';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../hooks/use_kibana';
-import { ENTITY_MANAGER_LABEL } from '../../../common/translations';
+import { paths } from '../../../../common/locators/paths';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../hooks/use_kibana';
+import { ENTITY_MANAGER_LABEL } from '../../../../common/translations';
 import { CreateEntityDefinitionBtn } from './components/create_entity_definition_btn';
 import { BuiltInDefinitionNotice } from './components/built_in_definition_notice';
 import { DefinitionListing } from './components/definition_listing';
-import { EntitiesListing } from '../../components/entities_listing';
+import { EntitiesListing } from '../../../components/entities_listing';
 
-export function EntityManagerPage() {
+export function EntityManagerOverviewPage() {
   const {
     http: { basePath },
   } = useKibana().services;

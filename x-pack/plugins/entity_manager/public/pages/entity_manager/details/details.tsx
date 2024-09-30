@@ -8,17 +8,17 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../hooks/use_kibana';
-import { paths } from '../../../common/locators/paths';
-import { ENTITY_MANAGER_LABEL } from '../../../common/translations';
-import { useFetchEntityDefinition } from '../../hooks/use_fetch_entity_definition';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../hooks/use_kibana';
+import { paths } from '../../../../common/locators/paths';
+import { ENTITY_MANAGER_LABEL } from '../../../../common/translations';
+import { useFetchEntityDefinition } from '../../../hooks/use_fetch_entity_definition';
 import { HeaderDetails } from './components/header_details';
 import { Transforms } from './components/transforms';
 import { DefinitionDetails } from './components/definition_details';
 import { Entities } from './components/entities';
 
-export function EntityManagerDetailPage() {
+export function EntityManagerDetailsPage() {
   const {
     http: { basePath },
   } = useKibana().services;

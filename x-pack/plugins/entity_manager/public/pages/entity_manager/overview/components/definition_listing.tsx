@@ -10,13 +10,13 @@ import { EntityDefinitionWithState, EntityDefintionResponse } from '@kbn/entitie
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { Badges } from '../../../components/badges';
-import { useKibana } from '../../../hooks/use_kibana';
-import { paths } from '../../../../common/locators/paths';
-import { LastSeenStat } from '../../../components/stats/last_seen';
-import { EntityCountStat } from '../../../components/stats/entity_count';
-import { HistoryCountStat } from '../../../components/stats/history_count';
-import { useFetchEntityDefinitions } from '../../../hooks/use_fetch_entity_definitions';
+import { Badges } from '../../../../components/badges';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { paths } from '../../../../../common/locators/paths';
+import { LastSeenStat } from '../../../../components/stats/last_seen';
+import { EntityCountStat } from '../../../../components/stats/entity_count';
+import { HistoryCountStat } from '../../../../components/stats/history_count';
+import { useFetchEntityDefinitions } from '../../../../hooks/use_fetch_entity_definitions';
 
 interface ListingProps {
   definition: EntityDefinitionWithState;

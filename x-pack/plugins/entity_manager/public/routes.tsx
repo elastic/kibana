@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
-import { ENTITY_MANAGER_DETAIL, ENTITY_MANAGER_OVERVIEW } from '../common/locators/paths';
-import { EntityManagerPage } from './pages/entity_manager/entity_manager';
-import { EntityManagerDetailPage } from './pages/entity_manager_detail/entity_manager_detail';
+import {
+  ENTITY_MANAGER_CREATE,
+  ENTITY_MANAGER_DETAIL,
+  ENTITY_MANAGER_OVERVIEW,
+} from '../common/locators/paths';
+import {
+  EntityManagerCreatePage,
+  EntityManagerDetailsPage,
+  EntityManagerOverviewPage,
+} from './pages/entity_manager';
 
 interface RouteDef {
   [key: string]: {
@@ -21,12 +28,17 @@ interface RouteDef {
 export function getRoutes(): RouteDef {
   return {
     [ENTITY_MANAGER_OVERVIEW]: {
-      handler: () => <EntityManagerPage />,
+      handler: () => <EntityManagerOverviewPage />,
+      params: {},
+      exact: true,
+    },
+    [ENTITY_MANAGER_CREATE]: {
+      handler: () => <EntityManagerCreatePage />,
       params: {},
       exact: true,
     },
     [ENTITY_MANAGER_DETAIL]: {
-      handler: () => <EntityManagerDetailPage />,
+      handler: () => <EntityManagerDetailsPage />,
       params: {},
       exact: true,
     },

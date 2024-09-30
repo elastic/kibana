@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { EntitiesListing } from '../../../components/entities_listing';
+import { EntitiesListing } from '../../../../components/entities_listing';
 
 interface EntitiesListingProps {
   definition?: EntityDefinitionWithState;

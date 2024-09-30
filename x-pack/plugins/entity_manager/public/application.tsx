@@ -29,9 +29,7 @@ function App() {
     <Routes>
       {Object.keys(routes).map((path) => {
         const { handler, exact } = routes[path];
-        const Wrapper = () => {
-          return handler();
-        };
+        const Wrapper = () => handler();
         return <Route key={path} path={path} exact={exact} component={Wrapper} />;
       })}
     </Routes>

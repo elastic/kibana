@@ -22,7 +22,7 @@ import moment from 'moment';
 import {
   TransformMessage,
   useFetchTransformMessages,
-} from '../../../hooks/use_fetch_transform_messages';
+} from '../../../../hooks/use_fetch_transform_messages';
 
 interface TransformMessagesProps {
   transform: TransformGetTransformTransformSummary;

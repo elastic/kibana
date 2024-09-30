@@ -8,10 +8,21 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { paths } from '../../../../../common/locators/paths';
 
 export function CreateEntityDefinitionBtn() {
+  const {
+    http: { basePath },
+  } = useKibana().services;
+
   return (
-    <EuiButton color="primary" data-test-subj="entityManagerCreateDefinitionButton" fill>
+    <EuiButton
+      color="primary"
+      data-test-subj="entityManagerCreateDefinitionButton"
+      fill
+      href={basePath.prepend(paths.entitiesCreate)}
+    >
       {i18n.translate('xpack.entityManager.createEntityDefinitionBtn.label', {
         defaultMessage: 'Create Definition',
       })}

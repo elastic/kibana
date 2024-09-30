@@ -7,11 +7,11 @@
 import React from 'react';
 import { EntityDefinitionWithState } from '@kbn/entities-schema';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LastSeenStat } from '../../../components/stats/last_seen';
-import { EntityCountStat } from '../../../components/stats/entity_count';
-import { HistoryCountStat } from '../../../components/stats/history_count';
-import { HistoryCheckpointDurationStat } from '../../../components/stats/history_checkpoint_duration';
-import { LatestCheckpointDurationStat } from '../../../components/stats/latest_checkpoint_duration';
+import { LastSeenStat } from '../../../../components/stats/last_seen';
+import { EntityCountStat } from '../../../../components/stats/entity_count';
+import { HistoryCountStat } from '../../../../components/stats/history_count';
+import { HistoryCheckpointDurationStat } from '../../../../components/stats/history_checkpoint_duration';
+import { LatestCheckpointDurationStat } from '../../../../components/stats/latest_checkpoint_duration';
 
 interface DefinitionDetailsProps {
   definition: EntityDefinitionWithState;

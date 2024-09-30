@@ -16,7 +16,7 @@ import { TransformContent } from './transform_content';
 import {
   generateHistoryTransformId,
   generateLatestTransformId,
-} from '../../../../common/helpers/generate_component_id';
+} from '../../../../../common/helpers/generate_component_id';
 
 interface TransformProps {
   type: 'history' | 'latest';

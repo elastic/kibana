@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { EntityDefinitionWithState } from '@kbn/entities-schema';
-import { Badges } from '../../../components/badges';
+import { Badges } from '../../../../components/badges';
 interface Props {
   definition: EntityDefinitionWithState;
 }
