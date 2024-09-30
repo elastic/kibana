@@ -34,6 +34,7 @@ import {
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
+import { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -54,7 +55,14 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
-import { hostsTitle, inventoryTitle, metricsExplorerTitle, metricsTitle } from './translations';
+import {
+  hostsTitle,
+  inventoryTitle,
+  logsTitle,
+  metricsExplorerTitle,
+  metricsTitle,
+} from './translations';
+import { LogsAppRoutes, LogsRoute, getLogsAppRoutes } from './pages/logs/routes';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -78,6 +86,8 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
+    const isLogsStreamEnabled = core.uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM);
+
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
@@ -126,6 +136,8 @@ export class Plugin implements InfraClientPluginClass {
       core.settings.client.get$<boolean>(enableInfrastructureHostsView),
     ]);
 
+    const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
+
     /** !! Need to be kept in sync with the deepLinks in x-pack/plugins/observability_solution/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
@@ -142,23 +154,9 @@ export class Plugin implements InfraClientPluginClass {
               ...(capabilities.logs.show
                 ? [
                     {
-                      label: 'Logs',
+                      label: logsTitle,
                       sortKey: 200,
-                      entries: [
-                        {
-                          label: 'Explorer',
-                          app: 'observability-logs-explorer',
-                          path: '/',
-                          isBetaFeature: true,
-                        },
-                        ...(this.config.featureFlags.logsUIEnabled
-                          ? [
-                              { label: 'Stream', app: 'logs', path: '/stream' },
-                              { label: 'Anomalies', app: 'logs', path: '/anomalies' },
-                              { label: 'Categories', app: 'logs', path: '/log-categories' },
-                            ]
-                          : []),
-                      ],
+                      entries: getLogsNavigationEntries({ routes: logRoutes, config: this.config }),
                     },
                   ]
                 : []),
@@ -226,37 +224,7 @@ export class Plugin implements InfraClientPluginClass {
         euiIconType: 'logoObservability',
         order: 8100,
         appRoute: '/app/logs',
-        // !! Need to be kept in sync with the routes in x-pack/plugins/observability_solution/infra/public/pages/logs/page_content.tsx
-        deepLinks: [
-          {
-            id: 'stream',
-            title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-              defaultMessage: 'Stream',
-            }),
-            path: '/stream',
-          },
-          {
-            id: 'anomalies',
-            title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-              defaultMessage: 'Anomalies',
-            }),
-            path: '/anomalies',
-          },
-          {
-            id: 'log-categories',
-            title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-              defaultMessage: 'Categories',
-            }),
-            path: '/log-categories',
-          },
-          {
-            id: 'settings',
-            title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-              defaultMessage: 'Settings',
-            }),
-            path: '/settings',
-          },
-        ],
+        deepLinks: Object.values(logRoutes),
         category: DEFAULT_APP_CATEGORIES.observability,
         mount: async (params: AppMountParameters) => {
           // mount callback should not use setup dependencies, get start dependencies instead
@@ -433,3 +401,34 @@ export class Plugin implements InfraClientPluginClass {
 
   stop() {}
 }
+
+const getLogsNavigationEntries = ({
+  routes,
+  config,
+}: {
+  routes: LogsAppRoutes;
+  config: InfraPublicConfig;
+}) => {
+  if (!config.featureFlags.logsUIEnabled) return [];
+
+  const entries: NavigationEntry[] = [
+    {
+      label: 'Explorer',
+      app: 'observability-logs-explorer',
+      path: '/',
+      isBetaFeature: true,
+    },
+  ];
+
+  if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
+  entries.push(createNavEntryFromRoute(routes.logsAnomalies));
+  entries.push(createNavEntryFromRoute(routes.logsCategories));
+
+  return entries;
+};
+
+const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry => ({
+  app: 'logs',
+  label: title,
+  path,
+});
