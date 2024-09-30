@@ -46,6 +46,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
+import { API_VERSIONS as SPACES_API_VERSIONS } from '@kbn/spaces-plugin/common';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -272,7 +273,7 @@ function useRole(
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    http.get<Space[]>('/api/spaces/space').then(
+    http.get<Space[]>('/api/spaces/space', { version: SPACES_API_VERSIONS.public.v1 }).then(
       (fetchedSpaces) => setSpaces({ enabled: true, list: fetchedSpaces }),
       (err: IHttpFetchError) => {
         // Spaces plugin can be disabled and hence this endpoint can be unavailable.
