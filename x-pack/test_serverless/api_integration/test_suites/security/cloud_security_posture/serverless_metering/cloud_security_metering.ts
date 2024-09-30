@@ -11,9 +11,9 @@ import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-pl
 import * as http from 'http';
 import {
   deleteIndex,
-  addIndex,
   createPackagePolicy,
   createCloudDefendPackagePolicy,
+  bulkIndex,
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
@@ -116,7 +116,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 10,
       });
 
-      await addIndex(
+      await bulkIndex(
         es,
         [...billableFindings, ...notBillableFindings],
         LATEST_FINDINGS_INDEX_DEFAULT_NS
@@ -160,7 +160,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 11,
       });
 
-      await addIndex(
+      await bulkIndex(
         es,
         [...billableFindings, ...notBillableFindings],
         LATEST_FINDINGS_INDEX_DEFAULT_NS
@@ -199,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 2,
       });
 
-      await addIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+      await bulkIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -233,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         isBlockActionEnables: false,
         numberOfHearbeats: 2,
       });
-      await addIndex(
+      await bulkIndex(
         es,
         [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
@@ -315,7 +315,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       await Promise.all([
-        addIndex(
+        bulkIndex(
           es,
           [
             ...billableFindingsCSPM,
@@ -325,8 +325,8 @@ export default function (providerContext: FtrProviderContext) {
           ],
           LATEST_FINDINGS_INDEX_DEFAULT_NS
         ),
-        addIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
-        addIndex(
+        bulkIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
+        bulkIndex(
           es,
           [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
           CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
