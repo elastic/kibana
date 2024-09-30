@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';

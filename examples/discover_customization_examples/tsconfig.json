@@ -14,6 +14,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/data-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

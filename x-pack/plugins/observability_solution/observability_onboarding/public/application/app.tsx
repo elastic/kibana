@@ -15,7 +15,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';

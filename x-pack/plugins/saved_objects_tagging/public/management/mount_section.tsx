@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';

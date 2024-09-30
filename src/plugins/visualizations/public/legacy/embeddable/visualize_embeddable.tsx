@@ -11,7 +11,7 @@ import _, { get } from 'lodash';
 import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render } from 'react-dom';
+import { render } from '@kbn/react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';

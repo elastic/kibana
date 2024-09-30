@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';

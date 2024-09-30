@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal } from '@kbn/react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local

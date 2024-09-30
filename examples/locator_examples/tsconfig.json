@@ -19,5 +19,6 @@
     "@kbn/utility-types",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/react-dom",
   ]
 }

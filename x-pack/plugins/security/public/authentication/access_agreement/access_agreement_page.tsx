@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { FormEvent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import ReactMarkdown from 'react-markdown';
 
 import type {

@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';

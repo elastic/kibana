@@ -16,5 +16,6 @@
     "@kbn/core",
     "@kbn/management-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/react-dom",
   ]
 }

@@ -20,5 +20,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/react-dom",
   ]
 }

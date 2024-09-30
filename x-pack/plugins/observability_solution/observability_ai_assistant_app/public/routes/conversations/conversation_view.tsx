@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import {

@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/react-dom';
 import { Page, PageProps } from './components/page';
 
 export const render = (container: HTMLElement, props: PageProps) => {

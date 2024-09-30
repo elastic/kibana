@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

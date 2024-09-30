@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import type { EventEmitter } from 'events';
 import type {
   Vis,

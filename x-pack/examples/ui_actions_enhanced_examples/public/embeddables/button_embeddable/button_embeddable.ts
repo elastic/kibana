@@ -6,7 +6,7 @@
  */
 
 import { createElement } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { Embeddable, EmbeddableInput, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';

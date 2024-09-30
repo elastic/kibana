@@ -17,5 +17,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/config",
+    "@kbn/react-dom",
   ]
 }

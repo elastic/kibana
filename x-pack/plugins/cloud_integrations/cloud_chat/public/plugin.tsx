@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, type PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { ReplaySubject, first } from 'rxjs';
 import type { Logger } from '@kbn/logging';

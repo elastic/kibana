@@ -15,6 +15,7 @@
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

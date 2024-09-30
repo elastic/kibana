@@ -36,6 +36,7 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/share-plugin",
     "@kbn/es-query",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

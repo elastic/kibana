@@ -18,6 +18,7 @@
     "@kbn/developer-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-dom"
   ]
 }

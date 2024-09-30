@@ -7,7 +7,7 @@
 
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import styled from 'styled-components';

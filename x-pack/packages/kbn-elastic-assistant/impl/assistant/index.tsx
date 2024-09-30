@@ -25,7 +25,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { createPortal } from 'react-dom';
+import { createPortal } from '@kbn/react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 

@@ -51,6 +51,7 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

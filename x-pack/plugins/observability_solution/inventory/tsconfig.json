@@ -41,6 +41,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-http-browser",
     "@kbn/es-query",
-    "@kbn/shared-svg"
+    "@kbn/shared-svg",
+    "@kbn/react-dom"
   ]
 }

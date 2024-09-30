@@ -16,5 +16,6 @@
     "@kbn/core",
     "@kbn/developer-examples-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/react-dom",
   ]
 }

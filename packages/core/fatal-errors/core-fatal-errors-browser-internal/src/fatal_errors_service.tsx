@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render } from '@kbn/react-dom';
 import { ReplaySubject, first, tap } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';

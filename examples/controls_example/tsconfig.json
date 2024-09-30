@@ -26,5 +26,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ]
 }

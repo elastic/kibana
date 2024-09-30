@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDom from '@kbn/react-dom';
 import { Subscription } from 'rxjs';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';

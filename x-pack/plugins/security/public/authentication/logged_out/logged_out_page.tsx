@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';

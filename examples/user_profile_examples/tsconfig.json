@@ -22,5 +22,6 @@
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
+    "@kbn/react-dom",
   ]
 }

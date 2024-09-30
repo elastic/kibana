@@ -11,7 +11,7 @@ import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactNode, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {

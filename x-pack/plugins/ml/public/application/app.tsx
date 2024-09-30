@@ -7,7 +7,7 @@
 
 import React, { type FC, useMemo } from 'react';
 import './_index.scss';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';

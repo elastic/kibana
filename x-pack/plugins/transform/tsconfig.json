@@ -79,7 +79,8 @@
     "@kbn/monaco",
     "@kbn/json-schemas",
     "@kbn/ml-field-stats-flyout",
-    "@kbn/ml-validators"
+    "@kbn/ml-validators",
+    "@kbn/react-dom"
   ],
   "exclude": [
     "target/**/*",

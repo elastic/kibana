@@ -13,7 +13,7 @@
 import deepEqual from 'fast-deep-equal';
 import type { ReactNode } from 'react';
 import { Component } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal } from '@kbn/react-dom';
 
 export interface CustomEuiPortalProps {
   /**

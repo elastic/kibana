@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { Subscription } from 'rxjs';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

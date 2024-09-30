@@ -8,7 +8,7 @@
 import { sortBy } from 'lodash';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 

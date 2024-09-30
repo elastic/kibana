@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render } from '@kbn/react-dom';
 import { App } from '../components/app';
 import { CanvasRenderedWorkpad } from '../types';
 

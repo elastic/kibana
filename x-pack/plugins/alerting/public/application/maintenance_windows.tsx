@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';

@@ -30,7 +30,8 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-context-render",
     "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser-mocks"
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/react-dom"
   ],
   "exclude": [
     "target/**/*",

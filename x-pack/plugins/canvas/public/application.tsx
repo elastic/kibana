@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Store } from 'redux';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';

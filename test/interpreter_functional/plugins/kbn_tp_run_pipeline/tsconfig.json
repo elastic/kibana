@@ -20,5 +20,6 @@
     "@kbn/data-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/config-schema",
+    "@kbn/react-dom",
   ]
 }

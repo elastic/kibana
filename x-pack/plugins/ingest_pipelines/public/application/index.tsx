@@ -7,7 +7,7 @@
 
 import { CoreStart, HttpSetup } from '@kbn/core/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import { ApplicationStart } from '@kbn/core/public';
 import { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';

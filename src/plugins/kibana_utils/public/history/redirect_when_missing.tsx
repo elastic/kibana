@@ -11,7 +11,7 @@ import React from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';

@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
 import { UiActionsExampleAppContextValue, context } from './context';

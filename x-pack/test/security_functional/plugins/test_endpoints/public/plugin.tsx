@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React from 'react';
 import { debounce, filter, first } from 'rxjs';
 import { timer } from 'rxjs';

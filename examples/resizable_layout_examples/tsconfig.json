@@ -10,6 +10,7 @@
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/developer-examples-plugin",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

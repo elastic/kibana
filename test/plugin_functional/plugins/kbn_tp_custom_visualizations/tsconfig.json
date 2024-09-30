@@ -19,5 +19,6 @@
     "@kbn/expressions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ]
 }

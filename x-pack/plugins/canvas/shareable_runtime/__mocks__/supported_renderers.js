@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React from 'react';
 
 const renderers = [

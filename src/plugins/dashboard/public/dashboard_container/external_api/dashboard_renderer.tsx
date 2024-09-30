@@ -118,10 +118,6 @@ export function DashboardRenderer({
         return;
       }
 
-      if (dashboardRoot.current) {
-        container.render(dashboardRoot.current);
-      }
-
       setDashboardContainer(container);
       onApiAvailable?.(container as DashboardApi);
     })();
@@ -131,6 +127,12 @@ export function DashboardRenderer({
     // Disabling exhaustive deps because embeddable should only be created on first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
+
+  useEffect(() => {
+    if (dashboardContainer && dashboardRoot.current) {
+      dashboardContainer.render(dashboardRoot.current);
+    }
+  }, [dashboardContainer]);
 
   useUnmount(() => {
     fatalError?.destroy();

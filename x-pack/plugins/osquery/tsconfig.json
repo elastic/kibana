@@ -79,6 +79,7 @@
     "@kbn/zod-helpers",
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/react-dom"
   ]
 }

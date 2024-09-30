@@ -20,7 +20,8 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/usage-collection-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/react-dom"
   ],
   "exclude": [
     "target/**/*",

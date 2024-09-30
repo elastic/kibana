@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@tanstack/react-query';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';

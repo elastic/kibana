@@ -16,6 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/developer-examples-plugin"
+    "@kbn/developer-examples-plugin",
+    "@kbn/react-dom"
   ]
 }

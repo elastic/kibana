@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { kibanaService } from '../../utils/kibana_service';

@@ -26,7 +26,7 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 interface Props {
   dataView?: DataView;

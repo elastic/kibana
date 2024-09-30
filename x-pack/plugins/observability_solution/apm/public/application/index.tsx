@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

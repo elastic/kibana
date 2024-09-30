@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-dom"
   ]
 }

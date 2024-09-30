@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../services';
 

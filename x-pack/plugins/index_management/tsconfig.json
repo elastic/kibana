@@ -55,6 +55,7 @@
     "@kbn/ml-error-utils",
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

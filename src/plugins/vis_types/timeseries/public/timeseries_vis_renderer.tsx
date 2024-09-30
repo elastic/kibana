@@ -9,7 +9,7 @@
 
 import React, { lazy } from 'react';
 import { get } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 

@@ -18,7 +18,7 @@ import {
   Capabilities,
   ScopedHistory,
 } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React from 'react';
 import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';

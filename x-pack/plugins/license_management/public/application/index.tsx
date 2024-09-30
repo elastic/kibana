@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { AppDependencies } from './app_context';

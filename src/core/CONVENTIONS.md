@@ -163,7 +163,7 @@ leverage this pattern.
 // my_plugin/public/applications/my_app.ts
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { CoreStart, AppMountParameters } from 'src/core/public';
 
 import { MyAppRoot } from './components/app.ts';

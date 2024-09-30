@@ -16,7 +16,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { parse, ParsedQuery } from 'query-string';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import {

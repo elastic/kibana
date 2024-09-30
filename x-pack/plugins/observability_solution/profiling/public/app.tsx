@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { CheckSetup } from './components/check_setup';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';

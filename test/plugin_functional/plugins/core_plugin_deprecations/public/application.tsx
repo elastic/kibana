@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { AppMountParameters } from '@kbn/core/public';
 
 const DeprecationsApp = () => <div>Deprcations App</div>;

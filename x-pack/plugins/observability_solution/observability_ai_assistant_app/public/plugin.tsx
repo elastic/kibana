@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import {
   type AppMountParameters,
   DEFAULT_APP_CATEGORIES,

@@ -8,6 +8,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

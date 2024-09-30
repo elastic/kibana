@@ -73,7 +73,8 @@
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",
     "@kbn/inference-plugin",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/react-dom"
   ],
   "exclude": ["target/**/*"]
 }

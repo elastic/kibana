@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';

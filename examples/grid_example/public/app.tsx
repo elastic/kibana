@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { EuiPageTemplate, EuiProvider } from '@elastic/eui';

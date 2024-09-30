@@ -7,7 +7,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 import type { AppMountParameters, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
