@@ -143,8 +143,10 @@ And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | algorithm | field_name | base_version | current_version | target_version | merged_version |
-| rule type | type       | "query"      | "eql"           | "query"        | "query"        |
+| rule type | type       | "query"      | "saved_query"   | "query"        | "query"        |
 ```
+
+Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
 
@@ -186,8 +188,10 @@ And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | algorithm | field_name | base_version | current_version | target_version | merged_version |
-| rule type | type       | "query"      | "query"         | "eql"          | "eql"          |
+| rule type | type       | "query"      | "query"         | "saved_query"  | "saved_query"  |
 ```
+
+Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered
 
 ### Rule field has an update and a custom value that are the same - `ABB`
 
@@ -231,8 +235,10 @@ And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | algorithm | field_name | base_version | current_version | target_version | merged_version |
-| rule type | type       | "query"      | "eql"           | "eql"          | "eql"          |
+| rule type | type       | "query"      | "saved_query"   | "saved_query"  | "saved_query"  |
 ```
+
+Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
 
@@ -250,8 +256,10 @@ And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | algorithm | field_name | base_version | current_version | target_version | merged_version |
-| rule type | type       | "query"      | "eql"           | "threshold"    | "threshold"    |
+| rule type | type       | "query"      | "saved_query"   | "threshold"    | "threshold"    |
 ```
+
+Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered. This test case scenario cannot currently be reached.
 
 #### **Scenario: `ABC` - Rule field is a number or single line string**
 
@@ -527,5 +535,7 @@ And data_source field should be shown in the upgrade preview UI
 
 Examples:
 | algorithm    | base_version | current_version | target_version | merged_version |
-| rule type    | N/A          | "query"         | "eql"          | "eql"          |
+| rule type    | N/A          | "query"         | "saved_query"  | "saved_query"  |
 ```
+
+Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered
