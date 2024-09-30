@@ -30,7 +30,7 @@ export class ApiActions implements ApiActionsType {
 
   public get(operation: string | ApiOperation, subject?: string) {
     if (typeof operation === 'string' && !this.isValidOperation(operation)) {
-      if (!isString(operation)) {
+      if (!isString(operation) || !operation) {
         throw new Error('operation is required and must be a string');
       }
 
@@ -41,6 +41,8 @@ export class ApiActions implements ApiActionsType {
       }
 
       return `${this.prefix}${operation}`;
+    } else if (!operation || !isString(operation)) {
+      throw new Error('operation is required and must be a string');
     } else if (this.isValidOperation(operation)) {
       if (!subject || !isString(subject)) {
         throw new Error('subject is required and must be a string');
