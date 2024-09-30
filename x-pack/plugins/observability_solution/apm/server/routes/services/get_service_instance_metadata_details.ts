@@ -7,11 +7,7 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  metadataAppMetricMapping,
-  metadataAppTransactionEventMapping,
-  metaDataAppTransactionMetricMapping,
-} from '../../utils/es_fields_mappings';
+import { serviceInstanceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
 import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
@@ -76,7 +72,7 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(metadataAppMetricMapping(response.hits.hits[0]?.fields));
+    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
   }
 
   async function getTransactionEventSample() {
@@ -96,7 +92,7 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(metadataAppTransactionEventMapping(response.hits.hits[0]?.fields));
+    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
   }
 
   async function getTransactionMetricSample() {
@@ -119,7 +115,7 @@ export async function getServiceInstanceMetadataDetails({
         },
       }
     );
-    return maybe(metaDataAppTransactionMetricMapping(response.hits.hits[0]?.fields));
+    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
   }
 
   // we can expect the most detail of application metrics,
@@ -138,7 +134,6 @@ export async function getServiceInstanceMetadataDetails({
     applicationMetricSample
   );
 
-  // todo: find scenarios for container and cloud then add to mappings
   const { agent, service, container, kubernetes, host, cloud } = sample;
 
   return {
