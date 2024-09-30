@@ -169,7 +169,11 @@ export const AgentsCountBreakDown = ({
         closePopover={closePopover}
         anchorPosition="downCenter"
         button={
-          <EuiButtonEmpty flush="left" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          <EuiButtonEmpty
+            flush="left"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="agentsCountsButton"
+          >
             {agentCount}
           </EuiButtonEmpty>
         }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
 import type { AgentPolicy } from '../../../../../../types';
@@ -19,6 +19,7 @@ jest.mock('../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../hooks'),
   useAuthz: jest.fn(),
   useMultipleAgentPolicies: jest.fn(),
+  useConfirmForceInstall: jest.fn(),
 }));
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
@@ -48,99 +49,141 @@ describe('PackagePolicyAgentsCell', () => {
         addFleetServers: true,
       },
     } as any);
-    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  test('it should display add agent if count is 0', async () => {
-    const utils = renderCell({});
-    utils.debug();
-    await act(async () => {
-      expect(utils.queryByText('Add agent')).toBeInTheDocument();
+  describe('when multiple agent policies is disabled', () => {
+    beforeEach(() => {
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    });
+
+    test('it should display add agent if count is 0', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+          } as AgentPolicy,
+        ],
+      });
+      utils.debug();
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).toBeInTheDocument();
+      });
+    });
+
+    test('it should display only count if count > 0', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 999,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByText('999')).toBeInTheDocument();
+      });
+    });
+
+    test('it should not display help popover if count is > 0 and hasHelpPopover=true', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 999,
+          } as AgentPolicy,
+        ],
+        hasHelpPopover: true,
+      });
+      await act(async () => {
+        expect(utils.queryByText('999')).toBeInTheDocument();
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(
+          utils.container.querySelector('[data-test-subj="addAgentHelpPopover"]')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    test('it should not display add agent if policy is managed', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+      });
+    });
+
+    test('it should display help popover if count = 0 and hasHelpPopover=true', async () => {
+      const utils = renderCell({
+        hasHelpPopover: true,
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('9999')).not.toBeInTheDocument();
+        expect(utils.queryByText('Add agent')).toBeInTheDocument();
+        expect(
+          utils.container.querySelector('[data-test-subj="addAgentHelpPopover"]')
+        ).toBeInTheDocument();
+      });
     });
   });
+  describe('when multiple agent policies is enabled', () => {
+    beforeEach(() => {
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+    });
 
-  test('it should not display add agent if policy is managed', async () => {
-    const utils = renderCell({
-      agentPolicies: [
-        {
-          is_managed: true,
-        } as AgentPolicy,
-      ],
-    });
-    await act(async () => {
-      expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
-    });
-  });
+    test('it should be disabled if canAddAgents is false', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          addAgents: false,
+        },
+      } as any);
 
-  test('it should display only count if count > 0', async () => {
-    const utils = renderCell({
-      agentPolicies: [
-        {
-          name: 'test Policy 1',
-        } as AgentPolicy,
-        {
-          name: 'test Policy 2',
-        } as AgentPolicy,
-        {
-          name: 'test Policy 3',
-        } as AgentPolicy,
-      ],
+      const utils = renderCell({});
+      await act(async () => {
+        expect(utils.container.querySelector('[data-test-subj="addAgentButton"]')).toBeDisabled();
+      });
     });
-    await act(async () => {
-      expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
-      expect(utils.queryByText('3')).toBeInTheDocument();
-    });
-  });
 
-  test('it should display help popover if count is 0 and hasHelpPopover=true', async () => {
-    const utils = renderCell({ hasHelpPopover: true });
-    await act(async () => {
-      expect(utils.queryByText('9999')).not.toBeInTheDocument();
-      expect(utils.queryByText('Add agent')).toBeInTheDocument();
-      expect(
-        utils.container.querySelector('[data-test-subj="addAgentHelpPopover"]')
-      ).toBeInTheDocument();
-    });
-  });
+    test('it should display agent count sum and popover if agent count > 0', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          addAgents: false,
+        },
+      } as any);
 
-  test('it should not display help popover if count is > 0 and hasHelpPopover=true', async () => {
-    const utils = renderCell({
-      agentPolicies: [
-        {
-          name: 'test Policy 1',
-        } as AgentPolicy,
-        {
-          name: 'test Policy 2',
-        } as AgentPolicy,
-        {
-          name: 'test Policy 3',
-        } as AgentPolicy,
-      ],
-      hasHelpPopover: true,
-    });
-    await act(async () => {
-      expect(utils.queryByText('3')).toBeInTheDocument();
-      expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
-      expect(
-        utils.container.querySelector('[data-test-subj="addAgentHelpPopover"]')
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  test('it should be disabled if canAddAgents is false', async () => {
-    jest.mocked(useAuthz).mockReturnValue({
-      fleet: {
-        addAgents: false,
-      },
-    } as any);
-
-    const utils = renderCell({});
-    await act(async () => {
-      expect(utils.container.querySelector('[data-test-subj="addAgentButton"]')).toBeDisabled();
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 100,
+          } as AgentPolicy,
+          {
+            name: 'test Policy 2',
+            agents: 200,
+          } as AgentPolicy,
+        ],
+      });
+      await act(async () => {
+        expect(utils.queryByText('300')).toBeInTheDocument();
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        const button = utils.getByTestId('agentsCountsButton');
+        fireEvent.click(button);
+        expect(utils.queryByTestId('agentCountsPopover')).toBeInTheDocument();
+      });
     });
   });
 });
