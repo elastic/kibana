@@ -63,12 +63,7 @@ properties:
     type: boolean
     example: true
   groupBy:
-    description: optional group by field or fields to use to generate an SLO per distinct value
-    oneOf:
-      - type: string
-      - type: array
-        items:
-          type: string
+    $ref: "group_by.yaml"
   tags:
     description: List of tags
     type: array
