@@ -24,7 +24,7 @@ export const buildHostEntityDefinition = (namespace: string): EntityDefinition =
       // we have to use entityFields for entity.source because entity is a reserved field and deleted later
       {
         source: '_index',
-        destination: 'metadata.source',
+        destination: 'entity.source',
       },
       'asset.criticality',
       'host.domain',
