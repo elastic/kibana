@@ -132,7 +132,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
                     {
                       defaultMessage:
-                        'Elastic managed connectors require a running Enterprise Search instance to sync content from source.',
+                        'Elastic managed connectors require a running Enterprise Search instance.',
                     }
                   )}
                 </p>
