@@ -24,6 +24,22 @@ const ECS_MAPPINGS_MIGRATION_QUERY = {
   },
 };
 
+const PAINLESS_SCRIPT = `
+Map asset = new HashMap();
+asset.put('criticality', ctx._source.criticality_level);
+ctx._source.asset = asset;
+if (ctx._source.id_field == 'user.name') {
+  Map user = new HashMap();
+  user.put('name', ctx._source.id_value);
+  user.put('asset', asset);
+  ctx._source.user = user;
+} else {
+  Map host = new HashMap();
+  host.put('name', ctx._source.id_value);
+  host.put('asset', asset);
+  ctx._source.host = host;
+}`;
+
 export class AssetCriticalityEcsMigrationClient {
   private readonly assetCriticalityDataClient: AssetCriticalityDataClient;
   constructor(private readonly options: AssetCriticalityEcsMigrationClientOpts) {
@@ -65,21 +81,7 @@ export class AssetCriticalityEcsMigrationClient {
         body: {
           query: ECS_MAPPINGS_MIGRATION_QUERY,
           script: {
-            source: `
-          Map asset = new HashMap();
-          asset.put('criticality', ctx._source.criticality_level);
-          ctx._source.asset = asset;
-          if (ctx._source.id_field == 'user.name') {
-            Map user = new HashMap();
-            user.put('name', ctx._source.id_value);
-            user.put('asset', asset);
-            ctx._source.user = user;
-          } else {
-            Map host = new HashMap();
-            host.put('name', ctx._source.id_value);
-            host.put('asset', asset);
-            ctx._source.host = host;
-          }`,
+            source: PAINLESS_SCRIPT,
             lang: 'painless',
           },
         },

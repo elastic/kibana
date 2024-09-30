@@ -22,6 +22,7 @@ import type { CriticalityValues } from './constants';
 import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getImplicitEntityFields } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -201,16 +202,6 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  private getImplicitEntityFields = (record: AssetCriticalityUpsert) => {
-    const entityType = record.idField === 'host.name' ? 'host' : 'user';
-    return {
-      [entityType]: {
-        asset: { criticality: record.criticalityLevel },
-        name: record.idValue,
-      },
-    };
-  };
-
   public async upsert(
     record: AssetCriticalityUpsert,
     refresh = 'wait_for' as const
@@ -224,7 +215,7 @@ export class AssetCriticalityDataClient {
       asset: {
         criticality: record.criticalityLevel,
       },
-      ...this.getImplicitEntityFields(record),
+      ...getImplicitEntityFields(record),
     };
 
     await this.options.esClient.update({
@@ -302,7 +293,7 @@ export class AssetCriticalityDataClient {
             asset: {
               criticality: record.criticalityLevel,
             },
-            ...this.getImplicitEntityFields(record),
+            ...getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,
