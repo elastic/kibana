@@ -79,6 +79,9 @@ interface BaseEntity {
   [ENTITY_DEFINITION_ID]: string;
 }
 
+/**
+ * These types are based on service, host and container from the built in definition.
+ */
 interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
