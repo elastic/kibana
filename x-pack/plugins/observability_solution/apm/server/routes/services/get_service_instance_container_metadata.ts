@@ -55,7 +55,7 @@ export const getServiceInstanceContainerMetadata = async ({
   const response = await infraMetricsClient.search({
     size: 1,
     track_total_hits: false,
-    fields: ['*'],
+    fields: ['kubernetes*'],
     query: {
       bool: {
         filter: [
