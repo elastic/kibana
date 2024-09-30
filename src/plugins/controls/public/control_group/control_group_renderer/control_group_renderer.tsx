@@ -173,7 +173,7 @@ export const ControlGroupRenderer = ({
         getRuntimeStateForChild: () => {
           return runtimeState$.getValue();
         },
-        compressed,
+        compressed: compressed ?? true,
       })}
       onApiAvailable={(controlGroupApi) => {
         const controlGroupRendererApi: ControlGroupRendererApi = {

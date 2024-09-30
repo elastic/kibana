@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { SearchState } from '../../hooks/use_url_search_state';
-import './quick_filters.scss';
 
 interface Props {
   initialState: SearchState;
@@ -93,6 +92,7 @@ export function QuickFilters({
           };
         }}
         timeRange={{ from: 'now-24h', to: 'now' }}
+        compressed={false}
       />
     </Container>
   );
