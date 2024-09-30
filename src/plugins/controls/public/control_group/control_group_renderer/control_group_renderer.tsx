@@ -40,6 +40,7 @@ export interface ControlGroupRendererProps {
   timeRange?: TimeRange;
   query?: Query;
   dataLoading?: boolean;
+  compressed?: boolean;
 }
 
 export const ControlGroupRenderer = ({
@@ -50,6 +51,7 @@ export const ControlGroupRenderer = ({
   query,
   viewMode,
   dataLoading,
+  compressed,
 }: ControlGroupRendererProps) => {
   const id = useMemo(() => uuidv4(), []);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -171,10 +173,12 @@ export const ControlGroupRenderer = ({
         getRuntimeStateForChild: () => {
           return runtimeState$.getValue();
         },
+        compressed,
       })}
       onApiAvailable={(controlGroupApi) => {
         const controlGroupRendererApi: ControlGroupRendererApi = {
           ...controlGroupApi,
+          compressed: compressed ?? true,
           reload: () => reload$.next(),
           updateInput: (newInput) => {
             updateInput(newInput);
