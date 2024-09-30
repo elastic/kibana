@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-import { AlertsSettings } from '../alerts/settings/alerts_settings';
+import { AlertsSettings } from '../assistant/settings/alerts_settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';

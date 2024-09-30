@@ -150,12 +150,12 @@ export class AIAssistantService {
     newDataStream.setIndexTemplate({
       name: this.resourceNames.indexTemplate[resource],
       componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
-      // Apply `final_pipeline` if pipeline exists for resource, note: must use final_pipeline or it won't run on updates
+      // Apply `default_pipeline` if pipeline exists for resource
       ...(resource in this.resourceNames.pipelines
         ? {
             template: {
               settings: {
-                'index.final_pipeline':
+                'index.default_pipeline':
                   this.resourceNames.pipelines[
                     resource as keyof typeof this.resourceNames.pipelines
                   ],

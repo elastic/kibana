@@ -12,7 +12,7 @@ import {
   MAX_LATEST_ALERTS,
   MIN_LATEST_ALERTS,
   TICK_INTERVAL,
-} from '../alerts/settings/alerts_settings';
+} from '../assistant/settings/alerts_settings/alerts_settings';
 import { KnowledgeBaseConfig } from '../assistant/types';
 import { ALERTS_RANGE } from './translations';
 

@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiSpacer, EuiText } from '@elas
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { KnowledgeBaseConfig } from '../../assistant/types';
-import { AlertsRange } from '../../knowledge_base/alerts_range';
-import * as i18n from '../../knowledge_base/translations';
+import { KnowledgeBaseConfig } from '../../types';
+import { AlertsRange } from '../../../knowledge_base/alerts_range';
+import * as i18n from '../../../knowledge_base/translations';
 
 export const MIN_LATEST_ALERTS = 10;
 export const MAX_LATEST_ALERTS = 100;

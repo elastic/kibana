@@ -29,7 +29,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
+import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
 import { useAssistantContext } from '../../assistant_context';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
