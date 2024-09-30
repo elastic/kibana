@@ -97,7 +97,7 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
 
   const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
     } as unknown as AiopsAppDependencies;
   }, [deps, embeddingOrigin]);
@@ -157,7 +157,7 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
                   <DatePickerContextProvider {...datePickerDeps}>
                     <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
                     <LogRateAnalysisContent
-                      embeddingOrigin={embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN}
+                      embeddingOrigin={embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT}
                     />
                   </DatePickerContextProvider>
                 </LogRateAnalysisReduxProvider>
