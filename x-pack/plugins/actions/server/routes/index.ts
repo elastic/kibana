@@ -17,7 +17,7 @@ import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
 import { executeActionRoute } from './execute';
 import { getConnectorRoute } from './connector/get';
-import { updateActionRoute } from './update';
+import { updateConnectorRoute } from './connector/update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -40,7 +40,7 @@ export function defineRoutes(opts: RouteOptions) {
   deleteActionRoute(router, licenseState);
   getConnectorRoute(router, licenseState);
   getAllConnectorsRoute(router, licenseState);
-  updateActionRoute(router, licenseState);
+  updateConnectorRoute(router, licenseState);
   listTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);

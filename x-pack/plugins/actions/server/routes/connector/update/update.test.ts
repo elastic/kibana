@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { bodySchema, updateActionRoute } from './update';
+import { bodySchema, updateConnectorRoute } from './update';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -21,12 +21,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('updateActionRoute', () => {
+describe('updateConnectorRoute', () => {
   it('updates an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateActionRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState);
 
     const [config, handler] = router.put.mock.calls[0];
 
@@ -97,7 +97,7 @@ describe('updateActionRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateActionRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState);
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -142,7 +142,7 @@ describe('updateActionRoute', () => {
       throw new Error('OMG');
     });
 
-    updateActionRoute(router, licenseState);
+    updateConnectorRoute(router, licenseState);
 
     const [, handler] = router.put.mock.calls[0];
 
