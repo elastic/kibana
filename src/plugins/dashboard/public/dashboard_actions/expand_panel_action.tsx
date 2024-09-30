@@ -31,8 +31,6 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return embeddable.parentApi.expandedPanelId.value
