@@ -10,11 +10,17 @@ import NotesTabContentComponent, { FETCH_NOTES_ERROR, NO_NOTES } from '.';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
 import { ReqStatus } from '../../../../../notes';
-import { NOTES_LOADING_TEST_ID } from '../../../../../notes/components/test_ids';
+import {
+  NOTES_LOADING_TEST_ID,
+  TIMELINE_DESCRIPTION_COMMENT_TEST_ID,
+} from '../../../../../notes/components/test_ids';
 import React from 'react';
 import { TimelineId } from '../../../../../../common/types';
+import { SAVE_TIMELINE_CALLOUT_TEST_ID } from '../../../notes/test_ids';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../common/components/user_privileges');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
@@ -32,15 +38,47 @@ jest.mock('react-redux', () => {
   };
 });
 
-const timelineId = TimelineId.test;
+const mockGlobalStateWithSavedTimeline = {
+  ...mockGlobalState,
+  timeline: {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      ...mockGlobalState.timeline.timelineById,
+      [TimelineId.active]: {
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+        savedObjectId: 'savedObjectId',
+      },
+    },
+  },
+};
+const mockGlobalStateWithUnSavedTimeline = {
+  ...mockGlobalState,
+  timeline: {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      ...mockGlobalState.timeline.timelineById,
+      [TimelineId.active]: {
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+      },
+    },
+  },
+};
 
 describe('NotesTabContentComponent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+  });
+
   it('should show the old note system', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <NotesTabContentComponent timelineId={timelineId} />
+        <NotesTabContentComponent timelineId={TimelineId.test} />
       </TestProviders>
     );
 
@@ -49,11 +87,11 @@ describe('NotesTabContentComponent', () => {
   });
 
   it('should show the new note system', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
 
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <NotesTabContentComponent timelineId={timelineId} />
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.test} />
       </TestProviders>
     );
 
@@ -61,52 +99,68 @@ describe('NotesTabContentComponent', () => {
     expect(queryByTestId('old-notes-screen')).not.toBeInTheDocument();
   });
 
-  it('should fetch notes for the document id', () => {
-    render(
-      <TestProviders>
-        <NotesTabContentComponent timelineId={timelineId} />
+  it('should fetch notes for the saved object id if timeline has been saved and hide callout', () => {
+    const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
+
+    const { queryByTestId } = render(
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.active} />
       </TestProviders>
     );
+
     expect(mockDispatch).toHaveBeenCalled();
+    expect(queryByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not fetch notes if timeline is unsaved', () => {
+    const mockStore = createMockStore(mockGlobalStateWithUnSavedTimeline);
+
+    const { getByTestId } = render(
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.test} />
+      </TestProviders>
+    );
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(getByTestId(SAVE_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading spinner if notes are being fetched', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const store = createMockStore({
-      ...mockGlobalState,
+    const mockStore = createMockStore({
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesBySavedObjectIds: ReqStatus.Loading,
         },
       },
     });
 
     const { getByTestId } = render(
-      <TestProviders store={store}>
-        <NotesTabContentComponent timelineId={timelineId} />
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.test} />
       </TestProviders>
     );
 
     expect(getByTestId(NOTES_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render no data message if no notes are present', () => {
-    const store = createMockStore({
-      ...mockGlobalState,
+  it('should render no data message if no notes are present and timeline has been saved', () => {
+    const mockStore = createMockStore({
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
         },
       },
     });
 
     const { getByText } = render(
-      <TestProviders store={store}>
-        <NotesTabContentComponent timelineId={timelineId} />
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.active} />
       </TestProviders>
     );
 
@@ -114,29 +168,54 @@ describe('NotesTabContentComponent', () => {
   });
 
   it('should render error toast if fetching notes fails', () => {
-    const store = createMockStore({
-      ...mockGlobalState,
+    const mockStore = createMockStore({
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesBySavedObjectIds: ReqStatus.Failed,
         },
         error: {
-          ...mockGlobalState.notes.error,
+          ...mockGlobalStateWithSavedTimeline.notes.error,
           fetchNotesBySavedObjectIds: { type: 'http', status: 500 },
         },
       },
     });
 
     render(
-      <TestProviders store={store}>
-        <NotesTabContentComponent timelineId={timelineId} />
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.test} />
       </TestProviders>
     );
 
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: FETCH_NOTES_ERROR,
     });
+  });
+
+  it('should render the timeline description at the top', () => {
+    const mockStore = createMockStore({
+      ...mockGlobalStateWithSavedTimeline,
+      timeline: {
+        ...mockGlobalStateWithSavedTimeline.timeline,
+        timelineById: {
+          ...mockGlobalStateWithSavedTimeline.timeline.timelineById,
+          [TimelineId.active]: {
+            ...mockGlobalStateWithSavedTimeline.timeline.timelineById[TimelineId.active],
+            description: 'description',
+          },
+        },
+      },
+    });
+
+    const { getByTestId, getByText } = render(
+      <TestProviders store={mockStore}>
+        <NotesTabContentComponent timelineId={TimelineId.active} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(TIMELINE_DESCRIPTION_COMMENT_TEST_ID)).toBeInTheDocument();
+    expect(getByText('description')).toBeInTheDocument();
   });
 });

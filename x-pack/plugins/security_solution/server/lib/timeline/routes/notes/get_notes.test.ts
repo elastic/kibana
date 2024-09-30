@@ -46,7 +46,7 @@ describe('get notes route', () => {
   let mockGetAllSavedNote: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetModules();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;

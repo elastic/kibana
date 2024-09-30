@@ -21,9 +21,13 @@ import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SaveTimelineCallout } from '../../../notes/save_timeline';
 import { AddNote } from '../../../../../notes/components/add_note';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { NOTES_LOADING_TEST_ID } from '../../../../../notes/components/test_ids';
+import {
+  NOTES_LOADING_TEST_ID,
+  TIMELINE_DESCRIPTION_COMMENT_TEST_ID,
+} from '../../../../../notes/components/test_ids';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { ADDED_A_DESCRIPTION } from '../../../open_timeline/note_previews/translations';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/components/empty_value';
@@ -89,19 +93,26 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   useScrollToTop('#scrollableNotes', !!scrollToTop);
 
   const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
+  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+  const isTimelineSaved: boolean = useMemo(
+    () => timelineSavedObjectId.length > 0,
+    [timelineSavedObjectId]
+  );
 
   const fetchNotes = useCallback(
-    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timeline.id] })),
-    [dispatch, timeline.id]
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
+    [dispatch, timelineSavedObjectId]
   );
 
   useEffect(() => {
-    fetchNotes();
-  }, [fetchNotes]);
+    if (isTimelineSaved) {
+      fetchNotes();
+    }
+  }, [fetchNotes, isTimelineSaved]);
 
   const notes: Note[] = useSelector((state: State) =>
     selectSortedNotesBySavedObjectId(state, {
-      savedObjectId: timeline.id,
+      savedObjectId: timelineSavedObjectId,
       sort: { field: 'created', direction: 'asc' },
     })
   );
@@ -117,6 +128,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
     }
   }, [addErrorToast, fetchError, fetchStatus]);
 
+  // if timeline was saved with a description, we show it at the very top of the notes tab
   const timelineDescription = useMemo(() => {
     if (!timeline?.description) {
       return null;
@@ -138,6 +150,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
           }
           event={ADDED_A_DESCRIPTION}
           timelineAvatar={<EuiAvatar size="l" name={timeline.updatedBy || '?'} />}
+          data-test-subj={TIMELINE_DESCRIPTION_COMMENT_TEST_ID}
         >
           <EuiText size="s">{timeline.description}</EuiText>
         </EuiComment>
@@ -162,7 +175,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                 {fetchStatus === ReqStatus.Loading && (
                   <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
                 )}
-                {fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
+                {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
                       <p>{NO_NOTES}</p>
@@ -174,7 +187,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                 {canCreateNotes && (
                   <>
                     <EuiSpacer />
-                    <AddNote timelineId={timeline.id} />
+                    <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
+                      {!isTimelineSaved && <SaveTimelineCallout />}
+                    </AddNote>
                   </>
                 )}
               </EuiFlexItem>

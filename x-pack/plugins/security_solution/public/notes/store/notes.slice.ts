@@ -314,7 +314,8 @@ export const selectNotesByDocumentId = createSelector(
 
 export const selectNotesBySavedObjectId = createSelector(
   [selectAllNotes, (state: State, savedObjectId: string) => savedObjectId],
-  (notes, savedObjectId) => notes.filter((note) => note.timelineId === savedObjectId)
+  (notes, savedObjectId) =>
+    savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
 );
 
 export const selectSortedNotesByDocumentId = createSelector(
@@ -355,6 +356,9 @@ export const selectSortedNotesBySavedObjectId = createSelector(
   ],
   (notes, { savedObjectId, sort }) => {
     const { field, direction } = sort;
+    if (savedObjectId.length === 0) {
+      return [];
+    }
     return notes
       .filter((note: Note) => note.timelineId === savedObjectId)
       .sort((first: Note, second: Note) => {

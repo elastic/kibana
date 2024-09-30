@@ -43,6 +43,8 @@ import {
   userSortedNotes,
   selectSortedNotesByDocumentId,
   fetchNotesBySavedObjectIds,
+  selectNotesBySavedObjectId,
+  selectSortedNotesBySavedObjectId,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -606,7 +608,7 @@ describe('notesSlice', () => {
       expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
     });
 
-    it('should return all notes sorted dor an existing document id', () => {
+    it('should return all notes sorted for an existing document id', () => {
       const oldestNote = {
         eventId: '1', // should be a valid id based on mockTimelineData
         noteId: '1',
@@ -655,6 +657,89 @@ describe('notesSlice', () => {
       expect(
         selectSortedNotesByDocumentId(mockGlobalState, {
           documentId: 'wrong-document-id',
+          sort: {
+            field: 'created',
+            direction: 'desc',
+          },
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should return all notes for an existing saved object id', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, 'timeline-1')).toEqual([
+        mockGlobalState.notes.entities['1'],
+      ]);
+    });
+
+    it('should return no notes if saved object id does not exist', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, 'wrong-saved-object-id')).toHaveLength(0);
+    });
+
+    it('should return no notes if saved object id is empty string', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, '')).toHaveLength(0);
+    });
+
+    it('should return all notes sorted for an existing saved object id', () => {
+      const oldestNote = {
+        eventId: '1', // should be a valid id based on mockTimelineData
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      };
+      const newestNote = {
+        ...oldestNote,
+        noteId: '2',
+        created: 1663882689000,
+      };
+
+      const state = {
+        ...mockGlobalState,
+        notes: {
+          ...mockGlobalState.notes,
+          entities: {
+            '1': oldestNote,
+            '2': newestNote,
+          },
+          ids: ['1', '2'],
+        },
+      };
+
+      const ascResult = selectSortedNotesBySavedObjectId(state, {
+        savedObjectId: 'timeline-1',
+        sort: { field: 'created', direction: 'asc' },
+      });
+      expect(ascResult[0]).toEqual(oldestNote);
+      expect(ascResult[1]).toEqual(newestNote);
+
+      const descResult = selectSortedNotesBySavedObjectId(state, {
+        savedObjectId: 'timeline-1',
+        sort: { field: 'created', direction: 'desc' },
+      });
+      expect(descResult[0]).toEqual(newestNote);
+      expect(descResult[1]).toEqual(oldestNote);
+    });
+
+    it('should also return no notes if saved object id does not exist', () => {
+      expect(
+        selectSortedNotesBySavedObjectId(mockGlobalState, {
+          savedObjectId: 'wrong-document-id',
+          sort: {
+            field: 'created',
+            direction: 'desc',
+          },
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should also return no notes if saved object id is empty string', () => {
+      expect(
+        selectSortedNotesBySavedObjectId(mockGlobalState, {
+          savedObjectId: '',
           sort: {
             field: 'created',
             direction: 'desc',

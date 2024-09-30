@@ -16,3 +16,4 @@ export const NOTE_AVATAR_TEST_ID = `${PREFIX}NoteAvatar` as const;
 export const DELETE_NOTE_BUTTON_TEST_ID = `${PREFIX}DeleteNotesButton` as const;
 export const OPEN_TIMELINE_BUTTON_TEST_ID = `${PREFIX}OpenTimelineButton` as const;
 export const OPEN_FLYOUT_BUTTON_TEST_ID = `${PREFIX}OpenFlyoutButton` as const;
+export const TIMELINE_DESCRIPTION_COMMENT_TEST_ID = `${PREFIX}TimelineDescriptionComment` as const;

@@ -48,6 +48,19 @@ jest.mock('react-redux', () => {
 const panelContextValue = {
   eventId: 'event id',
 } as unknown as DocumentDetailsContext;
+const mockGlobalStateWithSavedTimeline = {
+  ...mockGlobalState,
+  timeline: {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      ...mockGlobalState.timeline.timelineById,
+      [TimelineId.active]: {
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+        savedObjectId: 'savedObjectId',
+      },
+    },
+  },
+};
 
 const renderNotesDetails = () =>
   render(
@@ -60,6 +73,7 @@ const renderNotesDetails = () =>
 
 describe('NotesDetails', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
@@ -67,17 +81,26 @@ describe('NotesDetails', () => {
   });
 
   it('should fetch notes for the document id', () => {
-    renderNotesDetails();
+    const mockStore = createMockStore(mockGlobalStateWithSavedTimeline);
+
+    render(
+      <TestProviders store={mockStore}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
+          <NotesDetails />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
     expect(mockDispatch).toHaveBeenCalled();
   });
 
   it('should render loading spinner if notes are being fetched', () => {
     const store = createMockStore({
-      ...mockGlobalState,
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Loading,
         },
       },
@@ -96,11 +119,11 @@ describe('NotesDetails', () => {
 
   it('should render no data message if no notes are present', () => {
     const store = createMockStore({
-      ...mockGlobalState,
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Succeeded,
         },
       },
@@ -119,15 +142,15 @@ describe('NotesDetails', () => {
 
   it('should render error toast if fetching notes fails', () => {
     const store = createMockStore({
-      ...mockGlobalState,
+      ...mockGlobalStateWithSavedTimeline,
       notes: {
-        ...mockGlobalState.notes,
+        ...mockGlobalStateWithSavedTimeline.notes,
         status: {
-          ...mockGlobalState.notes.status,
+          ...mockGlobalStateWithSavedTimeline.notes.status,
           fetchNotesByDocumentIds: ReqStatus.Failed,
         },
         error: {
-          ...mockGlobalState.notes.error,
+          ...mockGlobalStateWithSavedTimeline.notes.error,
           fetchNotesByDocumentIds: { type: 'http', status: 500 },
         },
       },
@@ -166,56 +189,5 @@ describe('NotesDetails', () => {
     expect(getByTestId(ADD_NOTE_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render the attach to timeline checkbox disabled if timeline is not saved', () => {
-    const mockStore = createMockStore({
-      ...mockGlobalState,
-      timeline: {
-        ...mockGlobalState.timeline,
-        timelineById: {
-          ...mockGlobalState.timeline.timelineById,
-          [TimelineId.active]: {
-            ...mockGlobalState.timeline.timelineById[TimelineId.test],
-          },
-        },
-      },
-    });
-
-    const { getByTestId } = render(
-      <TestProviders store={mockStore}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toHaveProperty('disabled');
-  });
-
-  it('should render the attach to timeline enabled and checked', () => {
-    const mockStore = createMockStore({
-      ...mockGlobalState,
-      timeline: {
-        ...mockGlobalState.timeline,
-        timelineById: {
-          ...mockGlobalState.timeline.timelineById,
-          [TimelineId.active]: {
-            ...mockGlobalState.timeline.timelineById[TimelineId.test],
-            savedObjectId: 'savedObjectId',
-          },
-        },
-      },
-    });
-
-    const { getByTestId } = render(
-      <TestProviders store={mockStore}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <NotesDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
-    expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toHaveProperty('checked');
   });
 });

@@ -51,24 +51,18 @@ export const NotesDetails = memo(() => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
+  // will drive the value we send to the AddNote component
+  // if true (timeline is saved and the user kept the checkbox checked) we'll send the timelineId to the AddNote component
+  // if false (timeline is not saved or the user unchecked the checkbox manually ) we'll send an empty string
+  const [attachToTimeline, setAttachToTimeline] = useState<boolean>(true);
+
   // if the flyout is open from a timeline and that timeline is saved, we automatically check the checkbox to associate the note to it
   const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
 
-  const activeTimeline = useSelector((state: State) =>
+  const timeline = useSelector((state: State) =>
     timelineSelectors.selectTimelineById(state, TimelineId.active)
   );
-
-  // will drive the disabled state of the attach to timeline checkbox in the timeline flyout
-  const isTimelineSaved: boolean = useMemo(
-    () =>
-      activeTimeline != null &&
-      activeTimeline.savedObjectId != null &&
-      activeTimeline.savedObjectId.length > 0,
-    [activeTimeline]
-  );
-
-  // allow the attach to timeline component to set the timeline id to pass to the add note component
-  const [timelineId, setTimelineId] = useState<string>(activeTimeline?.savedObjectId || '');
+  const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
 
   const notes: Note[] = useSelector((state: State) =>
     selectSortedNotesByDocumentId(state, {
@@ -114,12 +108,14 @@ export const NotesDetails = memo(() => {
       {canCreateNotes && (
         <>
           <EuiSpacer />
-          <AddNote eventId={eventId} timelineId={timelineId}>
+          <AddNote
+            eventId={eventId}
+            timelineId={isTimelineFlyout && attachToTimeline ? timelineSavedObjectId : ''}
+          >
             {isTimelineFlyout && (
               <AttachToActiveTimeline
-                timelineId={timelineId}
-                setTimelineId={setTimelineId}
-                isCheckboxDisabled={!isTimelineSaved}
+                setAttachToTimeline={setAttachToTimeline}
+                isCheckboxDisabled={timelineSavedObjectId.length === 0}
               />
             )}
           </AddNote>

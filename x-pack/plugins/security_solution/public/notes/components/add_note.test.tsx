@@ -67,6 +67,19 @@ describe('AddNote', () => {
     expect(addButton).not.toHaveAttribute('disabled');
   });
 
+  it('should disable add button always is disableButton props is true', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AddNote eventId={'event-id'} disableButton={true} />
+      </TestProviders>
+    );
+
+    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+
+    const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
+    expect(addButton).toHaveAttribute('disabled');
+  });
+
   it('should render the add note button in loading state while creating a new note', () => {
     const store = createMockStore({
       ...mockGlobalState,

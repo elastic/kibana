@@ -27,10 +27,13 @@ import {
 } from './test_ids';
 import { type Note } from '../../../../common/api/timeline';
 
-export const PARTICIPANTS = i18n.translate('xpack.securitySolution.timeline.participantsTitle', {
-  defaultMessage: 'Participants',
-});
-export const CREATED_BY = i18n.translate('xpack.securitySolution.notes.createdByLabel', {
+export const PARTICIPANTS = i18n.translate(
+  'xpack.securitySolution.timeline.notes.participantsTitle',
+  {
+    defaultMessage: 'Participants',
+  }
+);
+export const CREATED_BY = i18n.translate('xpack.securitySolution.timeline notes.createdByLabel', {
   defaultMessage: 'Created by',
 });
 

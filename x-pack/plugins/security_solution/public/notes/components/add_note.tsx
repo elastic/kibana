@@ -50,9 +50,13 @@ export interface AddNewNoteProps {
    */
   eventId?: string;
   /**
-   *
+   * Id of the timeline
    */
   timelineId?: string | null | undefined;
+  /**
+   * Allows to override the default state of the add note button
+   */
+  disableButton?: boolean;
   /**
    * Children to render between the markdown and the add note button
    */
@@ -63,80 +67,82 @@ export interface AddNewNoteProps {
  * Renders a markdown editor and an add button to create new notes.
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
-export const AddNote = memo(({ eventId, timelineId, children }: AddNewNoteProps) => {
-  const { telemetry } = useKibana().services;
-  const dispatch = useDispatch();
-  const { addError: addErrorToast } = useAppToasts();
-  const [editorValue, setEditorValue] = useState('');
-  const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
+export const AddNote = memo(
+  ({ eventId, timelineId, disableButton = false, children }: AddNewNoteProps) => {
+    const { telemetry } = useKibana().services;
+    const dispatch = useDispatch();
+    const { addError: addErrorToast } = useAppToasts();
+    const [editorValue, setEditorValue] = useState('');
+    const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
-  const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
-  const createError = useSelector((state: State) => selectCreateNoteError(state));
+    const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
+    const createError = useSelector((state: State) => selectCreateNoteError(state));
 
-  const addNote = useCallback(() => {
-    dispatch(
-      createNote({
-        note: {
-          timelineId: timelineId || '',
-          eventId,
-          note: editorValue,
-        },
-      })
-    );
-    telemetry.reportAddNoteFromExpandableFlyoutClicked({
-      isRelatedToATimeline: timelineId != null,
-    });
-    setEditorValue('');
-  }, [dispatch, editorValue, eventId, telemetry, timelineId]);
-
-  // show a toast if the create note call fails
-  useEffect(() => {
-    if (createStatus === ReqStatus.Failed && createError) {
-      addErrorToast(null, {
-        title: CREATE_NOTE_ERROR,
+    const addNote = useCallback(() => {
+      dispatch(
+        createNote({
+          note: {
+            timelineId: timelineId || '',
+            eventId,
+            note: editorValue,
+          },
+        })
+      );
+      telemetry.reportAddNoteFromExpandableFlyoutClicked({
+        isRelatedToATimeline: timelineId != null,
       });
-    }
-  }, [addErrorToast, createError, createStatus]);
+      setEditorValue('');
+    }, [dispatch, editorValue, eventId, telemetry, timelineId]);
 
-  const buttonDisabled = useMemo(
-    () => editorValue.trim().length === 0 || isMarkdownInvalid,
-    [editorValue, isMarkdownInvalid]
-  );
+    // show a toast if the create note call fails
+    useEffect(() => {
+      if (createStatus === ReqStatus.Failed && createError) {
+        addErrorToast(null, {
+          title: CREATE_NOTE_ERROR,
+        });
+      }
+    }, [addErrorToast, createError, createStatus]);
 
-  return (
-    <>
-      <EuiCommentList>
-        <EuiComment username="">
-          <MarkdownEditor
-            dataTestSubj={ADD_NOTE_MARKDOWN_TEST_ID}
-            value={editorValue}
-            onChange={setEditorValue}
-            ariaLabel={MARKDOWN_ARIA_LABEL}
-            setIsMarkdownInvalid={setIsMarkdownInvalid}
-          />
-        </EuiComment>
-      </EuiCommentList>
-      <EuiSpacer size="m" />
-      {children && (
-        <>
-          {children}
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={addNote}
-            isLoading={createStatus === ReqStatus.Loading}
-            disabled={buttonDisabled}
-            data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
-          >
-            {ADD_NOTE_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    const buttonDisabled = useMemo(
+      () => disableButton || editorValue.trim().length === 0 || isMarkdownInvalid,
+      [disableButton, editorValue, isMarkdownInvalid]
+    );
+
+    return (
+      <>
+        <EuiCommentList>
+          <EuiComment username="">
+            <MarkdownEditor
+              dataTestSubj={ADD_NOTE_MARKDOWN_TEST_ID}
+              value={editorValue}
+              onChange={setEditorValue}
+              ariaLabel={MARKDOWN_ARIA_LABEL}
+              setIsMarkdownInvalid={setIsMarkdownInvalid}
+            />
+          </EuiComment>
+        </EuiCommentList>
+        <EuiSpacer size="m" />
+        {children && (
+          <>
+            {children}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={addNote}
+              isLoading={createStatus === ReqStatus.Loading}
+              disabled={buttonDisabled}
+              data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
+            >
+              {ADD_NOTE_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
 
 AddNote.displayName = 'AddNote';
