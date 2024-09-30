@@ -4514,7 +4514,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, serviceName, }: ",
+              "({ rangeFrom, rangeTo, serviceName, environment, }: ",
               {
                 "pluginId": "observabilityShared",
                 "scope": "common",
@@ -4533,7 +4533,7 @@
                 "id": "def-common.ServiceOverviewLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n    environment,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -5862,6 +5862,20 @@
             "tags": [],
             "label": "serviceName",
             "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_overview_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceOverviewParams.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_overview_locator.ts",
             "deprecated": false,
             "trackAdoption": false
