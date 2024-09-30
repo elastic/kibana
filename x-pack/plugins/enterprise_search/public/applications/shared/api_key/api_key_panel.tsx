@@ -50,7 +50,7 @@ export const ApiKeyPanel: React.FC = () => {
   return (
     <>
       {isFlyoutOpen && <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} />}
-      <EuiSplitPanel.Outer hasBorder={true}>
+      <EuiSplitPanel.Outer>
         {Boolean(cloud) && (
           <EuiSplitPanel.Inner>
             <EuiText size="s">

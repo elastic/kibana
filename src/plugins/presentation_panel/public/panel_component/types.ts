@@ -38,7 +38,6 @@ export interface PresentationPanelInternalProps<
 
   showShadow?: boolean;
   showBorder?: boolean;
-  showBevel?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
 

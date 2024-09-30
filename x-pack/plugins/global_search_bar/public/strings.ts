@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
   placeholderText: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Panels styling change',
+    defaultMessage: 'Test if that is the right PR',
   }),
   popoverButton: i18n.translate('xpack.globalSearchBar.searchBar.mobileSearchButtonAriaLabel', {
     defaultMessage: 'Site-wide search',

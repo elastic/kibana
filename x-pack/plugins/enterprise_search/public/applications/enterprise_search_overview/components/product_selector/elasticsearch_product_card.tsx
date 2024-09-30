@@ -19,9 +19,6 @@ import { SearchApplicationsProductCard } from './search_applications_product_car
 export const ElasticsearchProductCard = () => {
   return (
     <ProductCard
-      hasBevel={true}
-      hasBorder={false}
-      hasShadow={false}
       data-test-subj="productCard-elasticsearch"
       description={i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
         defaultMessage:

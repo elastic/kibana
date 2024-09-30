@@ -53,10 +53,6 @@ export default {
       name: 'Show Shadow',
       control: { type: 'boolean' },
     },
-    showBevel: {
-      name: 'Show Bevel',
-      control: { type: 'boolean' },
-    },
     title: {
       name: 'Title',
       control: { type: 'text' },
@@ -76,7 +72,6 @@ interface HelloWorldEmbeddablePanelProps {
   showShadow: boolean;
   showBorder: boolean;
   title: string;
-  showBevel: boolean;
   viewMode: boolean;
 }
 
@@ -92,7 +87,6 @@ const HelloWorldEmbeddablePanel = forwardRef<
       showShadow,
       showBorder,
       title,
-      showBevel,
       viewMode,
     }: HelloWorldEmbeddablePanelProps,
     ref
@@ -134,8 +128,7 @@ Default.args = {
   hideHeader: false,
   loading: false,
   showShadow: false,
-  showBorder: false,
-  showBevel: true,
+  showBorder: true,
   title: 'Hello World',
   viewMode: true,
 };

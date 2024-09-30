@@ -35,7 +35,7 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
   );
 
   return (
-    <EuiPanel paddingSize="l" hasShadow={false} hasBevel={true}>
+    <EuiPanel paddingSize="l">
       <EuiFlexGroup alignItems="center" gutterSize="xl">
         <EuiFlexItem>
           <EuiImage

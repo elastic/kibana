@@ -96,9 +96,8 @@ export const PresentationPanelInternal = <
       className={classNames('embPanel', {
         'embPanel--editing': viewMode === 'edit',
       })}
-      hasShadow={false}
-      hasBorder={false}
-      hasBevel={true}
+      hasShadow={showShadow}
+      hasBorder={showBorder}
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"

@@ -33,8 +33,6 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
       data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
     >
       <EuiCard
-        hasBevel={true}
-        hasShadow={false}
         className={`homSolutionPanel homSolutionPanel--${solution.id}`}
         description={solution.description}
         href={addBasePath(solution.path)}

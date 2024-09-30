@@ -34,8 +34,6 @@ export function Synopsis({ id, description, iconUrl, iconType, title, url, onCli
       title={title}
       titleElement="h3"
       titleSize="xs"
-      hasShadow={false}
-      hasBevel={true}
     />
   );
 }
