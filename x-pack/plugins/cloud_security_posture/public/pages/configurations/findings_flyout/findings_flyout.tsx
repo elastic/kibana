@@ -290,7 +290,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: euiThemeVars.euiSize }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}

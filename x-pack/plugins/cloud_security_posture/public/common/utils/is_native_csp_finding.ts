@@ -10,5 +10,5 @@ import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/sche
 import { CSP_MISCONFIGURATIONS_DATASET, CSP_VULN_DATASET } from './get_dataset_display_name';
 
 export const isNativeCspFinding = (finding: CspFinding | CspVulnerabilityFinding) =>
-  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET ||
-  finding.data_stream.dataset === CSP_VULN_DATASET;
+  finding.data_stream?.dataset === CSP_MISCONFIGURATIONS_DATASET ||
+  finding.data_stream?.dataset === CSP_VULN_DATASET;
