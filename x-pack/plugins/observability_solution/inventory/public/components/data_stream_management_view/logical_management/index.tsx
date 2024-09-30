@@ -22,9 +22,14 @@ import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
+import { useLocation } from 'react-router-dom';
 import { useEsqlQueryResult } from '../../../hooks/use_esql_query_result';
-import { Entity } from '../../../../common/entities';
+import { Entity, getRerouteCode } from '../../../../common/entities';
 import { useKibana } from '../../../hooks/use_kibana';
+import { MainPipelineView } from '../../management_overview_view';
+import { DatasetManagementSplitView } from '../../dataset_management_split_view';
+import { DatasetManagementParseView } from '../../dataset_management_parse_view';
+import { LogicalParseView } from './parse_view';
 
 export function LogicalManagementView({
   entity,
@@ -45,6 +50,13 @@ export function LogicalManagementView({
     timeRange,
     setTimeRange,
   } = useDateRange({ data });
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const [view, setView] = React.useState<'main' | 'parse' | 'reroute'>(
+    queryParams.get('initialView') || 'main'
+  );
 
   const relationshipQueryFetch = useAbortableAsync(
     async ({ signal }) => {
@@ -147,16 +159,20 @@ export function LogicalManagementView({
     return queryFetch.value?.entities ?? [];
   }, [queryFetch.value]);
 
+  function goBack() {
+    setView('main');
+  }
+
+  // if (view === 'reroute') {
+  //   return <DatasetManagementSplitView goBack={goBack} />;
+  // }
+
+  if (view === 'parse') {
+    return <LogicalParseView goBack={goBack} entity={entity} />;
+  }
+
   return (
     <EuiFlexGroup direction="column">
-      <EuiText>
-        <h2>
-          {i18n.translate('xpack.inventory.logicalManagementView.h2.dataStreamsOfLabel', {
-            defaultMessage: 'Data streams of ',
-          })}
-          {entity.displayName}
-        </h2>
-      </EuiText>
       <unifiedSearch.ui.SearchBar
         appName="inventory"
         showQueryInput={false}
@@ -177,6 +193,45 @@ export function LogicalManagementView({
         disableQueryLanguageSwitcher
         indexPatterns={[]}
       />
+      <EuiPanel>
+        <EuiFlexGroup direction="column">
+          <EuiText>
+            <h2>
+              {i18n.translate('xpack.inventory.logicalManagementView.h2.ingestProcessingLabel', {
+                defaultMessage: 'Ingest processing',
+              })}
+            </h2>
+          </EuiText>
+          <IngestPipelines entity={entity} />
+          <EuiFlexGroup>
+            <EuiButton
+              data-test-subj="inventoryDatasetManagementViewSplitUpButton"
+              onClick={() => setView('parse')}
+            >
+              {i18n.translate('xpack.inventory.datasetManagementView.splitUpButtonLabel', {
+                defaultMessage: 'Parse this entity',
+              })}
+            </EuiButton>
+            <EuiButton
+              data-test-subj="inventoryDatasetManagementViewSplitUpButton"
+              onClick={() => setView('parse')}
+            >
+              {i18n.translate('xpack.inventory.datasetManagementView.splitUpButtonLabel', {
+                defaultMessage: 'Parse entity type {type}',
+                values: { type: entity.type },
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiText>
+        <h2>
+          {i18n.translate('xpack.inventory.logicalManagementView.h2.dataStreamsOfLabel', {
+            defaultMessage: 'Data streams of ',
+          })}
+          {entity.displayName}
+        </h2>
+      </EuiText>
       {relatedDataStreams.map((dataStream) => (
         <RelatedDataStream
           key={dataStream.displayName}
@@ -186,6 +241,91 @@ export function LogicalManagementView({
         />
       ))}
     </EuiFlexGroup>
+  );
+}
+
+export function IngestPipelines({ entity }: { entity: Entity }) {
+  const {
+    dependencies: {
+      start: { data },
+    },
+    core: { http },
+  } = useKibana();
+  const {
+    absoluteTimeRange: { start, end },
+  } = useDateRange({ data });
+  const query = useMemo(() => {
+    // build a query dsl query that filters for all the identity fields of the entity
+    const identityFields = entity.properties['entity.identityFields'] as string[] | string;
+    const filters = (Array.isArray(identityFields) ? identityFields : [identityFields]).map(
+      (field) => ({
+        term: {
+          [field]: entity.properties[field],
+        },
+      })
+    );
+    // add time rang3e filter
+    filters.push({
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    // return as full query of a search request
+    return {
+      bool: {
+        filter: filters,
+      },
+    };
+  }, [end, entity.properties, start]);
+
+  const pipelines = useAsync(async () => {
+    return await http.post('/api/pipelines_for_entity', {
+      body: JSON.stringify({
+        query,
+      }),
+    });
+  }, [http, query]);
+
+  const executionCounts = useMemo(() => {
+    if (!pipelines.value) {
+      return undefined;
+    }
+    const perPipeline = pipelines.value.aggregations.pipelines.buckets.reduce(
+      (acc: Record<string, number>, pipeline: any) => {
+        acc[pipeline.key] = pipeline.doc_count;
+        return acc;
+      },
+      {}
+    );
+    return {
+      total: pipelines.value.hits.total.value,
+      perPipeline,
+    };
+  }, [pipelines.value]);
+
+  if (pipelines.loading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (pipelines.error) {
+    return (
+      <div>
+        {i18n.translate('xpack.inventory.mainPipelineView.div.errorLabel', {
+          defaultMessage: 'Error:',
+        })}
+        {pipelines.error.message}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <MainPipelineView executionCounts={executionCounts} />
+    </div>
   );
 }
 
@@ -256,7 +396,7 @@ function RelatedDataStream({
   const rerouteQueryParams = new URLSearchParams();
 
   rerouteQueryParams.set('initialView', 'reroute');
-  rerouteQueryParams.set('initialCode', getRerouteCode(dataStream, rootEntity));
+  rerouteQueryParams.set('initialCode', getRerouteCode(rootEntity));
 
   // Generate the full query string
   const rerouteQueryString = rerouteQueryParams.toString();
@@ -357,38 +497,4 @@ function RelatedDataStream({
       )}
     </EuiPanel>
   );
-}
-
-function getRerouteCode(dataStream: Entity, rootEntity: Entity) {
-  const normalizedEnityName = rootEntity.displayName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-
-  const identityFields = rootEntity.properties['entity.identityFields'] as string[] | string;
-  // per identity field, generate a painless snippet that is returning false if the field is not equal to the value of the root entity property.
-  // check both dotted field name and nested object in a safe way
-  const checks = (Array.isArray(identityFields) ? identityFields : [identityFields])
-    .map((field) => {
-      const fieldParts = field.split('.');
-      const dottedCheck = `
-      if (ctx['${field}'] != null && ctx['${field}'].value != null && ctx['${field}'].value != "${rootEntity.properties[field]}") {
-        return false;
-      }
-    `;
-      const nestedCheck = `if (ctx.${fieldParts.join('?.')} != null && ctx.${fieldParts.join(
-        '?.'
-      )} != "${rootEntity.properties[field]}") { return false }`;
-      return `
-      ${dottedCheck}
-      ${nestedCheck}
-      return true;`;
-    })
-    .join('\n\n');
-
-  const processor = {
-    reroute: {
-      if: checks,
-      dataset: normalizedEnityName,
-    },
-  };
-
-  return JSON.stringify(processor, null, 2);
 }

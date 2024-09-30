@@ -16,6 +16,7 @@ import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadc
 import { RedirectTo } from '../components/redirect_to';
 import { TypeInventoryView } from '../components/type_inventory_view';
 import { ManagementOverviewView } from '../components/management_overview_view';
+import { DefinitionView } from '../components/definition_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -41,6 +42,12 @@ const inventoryRoutes = {
       },
       '/definitions': {
         element: <DefinitionsView />,
+      },
+      '/definitions/{definition}': {
+        element: <DefinitionView />,
+        params: t.type({
+          path: t.type({ definition: t.string }),
+        }),
       },
       '/management_overview': {
         element: <ManagementOverviewView />,

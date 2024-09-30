@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { get, mapValues } from 'lodash';
+import { get, isEqual, mapValues } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { registerServerRoutes } from './routes/register_routes';
@@ -20,6 +20,12 @@ import type {
   InventoryStartDependencies,
 } from './types';
 import { fetchEntityDefinitions } from './routes/entities/route';
+import {
+  Entity,
+  InventoryEntityDefinition,
+  getPainlessCheck,
+  getPainlessDefinitionCheck,
+} from '../common/entities';
 
 export class InventoryPlugin
   implements
@@ -384,6 +390,452 @@ export class InventoryPlugin
       }
     );
 
+    router.post(
+      {
+        path: '/api/apply_per_entity_change/plan',
+        validate: {
+          body: schema.object({}, { unknowns: 'allow' }),
+        },
+      },
+      async (context, request, response) => {
+        const entity: Entity = request.body.entity;
+        const change = request.body.change;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const pipelines = await esClient.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline`,
+        });
+        const pipelineName = `${entity.displayName}@entity`;
+        const plan = [];
+        const matchingPipeline = pipelines[pipelineName] || { processors: [] };
+        matchingPipeline.processors.push(change);
+
+        const pipelineReferencedInMainPipeline = pipelines['logs@main'].processors.some(
+          (processor) => {
+            return processor.pipeline?.name === pipelineName;
+          }
+        );
+
+        if (!pipelineReferencedInMainPipeline) {
+          const lastProcessorIndex = pipelines['logs@main'].processors.findIndex(
+            (p) => p.remove?.field === '__original_doc'
+          );
+          const newProcessors = pipelines['logs@main'].processors.slice();
+          newProcessors.splice(lastProcessorIndex, 0, {
+            pipeline: { name: pipelineName, ignore_failure: true, if: getPainlessCheck(entity) },
+          });
+          plan.push({
+            title: 'Add pipeline to main pipeline',
+            method: 'PUT',
+            path: `/_ingest/pipeline/logs@main`,
+            body: {
+              ...pipelines['logs@main'],
+              processors: newProcessors,
+            },
+          });
+        }
+
+        plan.push({
+          title: 'Create custom pipeline',
+          method: 'PUT',
+          path: `/_ingest/pipeline/${pipelineName}`,
+          body: matchingPipeline,
+        });
+
+        let docs;
+        let simulatedRun;
+        try {
+          const identityFields = entity.properties['entity.identityFields'] as string[] | string;
+          const filters = (Array.isArray(identityFields) ? identityFields : [identityFields]).map(
+            (field) => ({
+              term: {
+                [field]: entity.properties[field],
+              },
+            })
+          );
+          // test the pipline by fetching some documents
+          const body = {
+            size: 100,
+            sort: [{ '@timestamp': { order: 'desc' } }],
+            query: {
+              bool: {
+                filter: [
+                  ...(request.body.filter !== '' ? kqlQuery(request.body.filter) : []),
+                  ...filters,
+                ],
+              },
+            },
+          };
+          const r = await esClient.transport.request({
+            method: 'GET',
+            path: `logs-*/_search`,
+            body,
+          });
+          console.log(JSON.stringify(body, null, 2));
+          docs = r.hits.hits;
+
+          // simulate the pipeline
+          simulatedRun = await esClient.transport.request({
+            method: 'POST',
+            path: `/_ingest/pipeline/_simulate`,
+            body: {
+              pipeline: {
+                description: 'Simulate pipeline',
+                processors: [change],
+              },
+              docs,
+            },
+          });
+        } catch (e) {
+          console.log(e);
+        }
+
+        function deepSortKeys(obj: any): any {
+          if (Array.isArray(obj)) {
+            return obj.map(deepSortKeys);
+          } else if (obj !== null && typeof obj === 'object') {
+            const sortedObj: { [key: string]: any } = {};
+            Object.keys(obj)
+              .sort()
+              .forEach((key) => {
+                sortedObj[key] = deepSortKeys(obj[key]);
+              });
+            return sortedObj;
+          }
+          return obj;
+        }
+
+        const fullSet = new Set<string>();
+        try {
+          const start = await startServicesPromise;
+          const { definitions } = await fetchEntityDefinitions({
+            plugins: { entityManager: { start: () => Promise.resolve(start.entityManager) } },
+            request,
+          });
+          simulatedRun.docs.forEach((after, i) => {
+            const before = docs[i];
+            if (after.error) return;
+            const hasChanges = Object.keys(after.doc._source).some((key) => {
+              const beforeJson = JSON.stringify(deepSortKeys(before._source[key]));
+              const afterJson = JSON.stringify(deepSortKeys(after.doc._source[key]));
+              return beforeJson !== afterJson;
+            });
+            if (!hasChanges) return;
+            // find all entity definitions that match the current doc after the change
+            definitions.filter((definition) => {
+              // check whether the "identifyingFields" are present in the document: { field: string; optional: boolean; }
+              const identifyingFields = definition.identityFields;
+              const matches = identifyingFields.every((field) => {
+                if (field.optional) {
+                  return true;
+                }
+                if (field.field === 'data_stream.type') {
+                  // for the sample data
+                  return true;
+                }
+                const hasAsDottedFieldName = field.field in after.doc._source;
+                const splitFieldName = field.field.split('.');
+                let obj = after.doc._source;
+                splitFieldName.forEach((part) => {
+                  if (obj && obj[part]) {
+                    obj = obj[part];
+                  } else {
+                    obj = null;
+                  }
+                });
+                const hasAsNestedFieldName = obj !== null;
+
+                return hasAsDottedFieldName || hasAsNestedFieldName;
+              });
+              if (matches) {
+                // concat all identifying fields to a string
+                const id = identifyingFields
+                  .map(
+                    (field) =>
+                      after.doc._source[field.field] ||
+                      get(after.doc._source, field.field) ||
+                      'logs'
+                  )
+                  .join('-');
+                fullSet.add(`${id} (${definition.type})`);
+              }
+            });
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+
+        return response.ok({
+          body: {
+            success: true,
+            plan,
+            docs,
+            simulatedRun,
+            affectedEntities: Array.from(fullSet),
+          },
+        });
+      }
+    );
+
+    router.post(
+      {
+        path: '/api/apply_per_entity_definition_change/plan',
+        validate: {
+          body: schema.object({}, { unknowns: 'allow' }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const entityDefinition: InventoryEntityDefinition = request.body.entityDefinition;
+          const change = request.body.change;
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const pipelines = await esClient.transport.request({
+            method: 'GET',
+            path: `/_ingest/pipeline`,
+          });
+          const pipelineName = `${entityDefinition.type}@entity-type`;
+          const plan = [];
+          const matchingPipeline = pipelines[pipelineName] || { processors: [] };
+          matchingPipeline.processors.push(change);
+
+          const pipelineReferencedInMainPipeline = pipelines['logs@main'].processors.some(
+            (processor) => {
+              return processor.pipeline?.name === pipelineName;
+            }
+          );
+
+          if (!pipelineReferencedInMainPipeline) {
+            const lastProcessorIndex = pipelines['logs@main'].processors.findIndex(
+              (p) => p.remove?.field === '__original_doc'
+            );
+            const newProcessors = pipelines['logs@main'].processors.slice();
+            newProcessors.splice(lastProcessorIndex, 0, {
+              pipeline: {
+                name: pipelineName,
+                ignore_failure: true,
+                if: getPainlessDefinitionCheck(entityDefinition),
+              },
+            });
+            plan.push({
+              title: 'Add pipeline to main pipeline',
+              method: 'PUT',
+              path: `/_ingest/pipeline/logs@main`,
+              body: {
+                ...pipelines['logs@main'],
+                processors: newProcessors,
+              },
+            });
+          }
+
+          plan.push({
+            title: 'Create custom pipeline',
+            method: 'PUT',
+            path: `/_ingest/pipeline/${pipelineName}`,
+            body: matchingPipeline,
+          });
+
+          let docs;
+          let simulatedRun;
+          try {
+            const filters = entityDefinition.identityFields.map((field) => ({
+              exists: {
+                field: field.field,
+              },
+            }));
+            // test the pipline by fetching some documents
+            const body = {
+              size: 100,
+              sort: [{ '@timestamp': { order: 'desc' } }],
+              query: {
+                bool: {
+                  filter: [
+                    ...(request.body.filter !== '' ? kqlQuery(request.body.filter) : []),
+                    ...filters,
+                  ],
+                },
+              },
+            };
+            const r = await esClient.transport.request({
+              method: 'GET',
+              path: `logs-*/_search`,
+              body,
+            });
+            console.log(JSON.stringify(body, null, 2));
+            docs = r.hits.hits;
+
+            // simulate the pipeline
+            simulatedRun = await esClient.transport.request({
+              method: 'POST',
+              path: `/_ingest/pipeline/_simulate`,
+              body: {
+                pipeline: {
+                  description: 'Simulate pipeline',
+                  processors: [change],
+                },
+                docs,
+              },
+            });
+          } catch (e) {
+            console.log(e);
+          }
+
+          function deepSortKeys(obj: any): any {
+            if (Array.isArray(obj)) {
+              return obj.map(deepSortKeys);
+            } else if (obj !== null && typeof obj === 'object') {
+              const sortedObj: { [key: string]: any } = {};
+              Object.keys(obj)
+                .sort()
+                .forEach((key) => {
+                  sortedObj[key] = deepSortKeys(obj[key]);
+                });
+              return sortedObj;
+            }
+            return obj;
+          }
+
+          const fullSet = new Set<string>();
+          try {
+            const start = await startServicesPromise;
+            const { definitions } = await fetchEntityDefinitions({
+              plugins: { entityManager: { start: () => Promise.resolve(start.entityManager) } },
+              request,
+            });
+            simulatedRun.docs.forEach((after, i) => {
+              const before = docs[i];
+              if (after.error) return;
+              const hasChanges = Object.keys(after.doc._source).some((key) => {
+                const beforeJson = JSON.stringify(deepSortKeys(before._source[key]));
+                const afterJson = JSON.stringify(deepSortKeys(after.doc._source[key]));
+                return beforeJson !== afterJson;
+              });
+              if (!hasChanges) return;
+              // find all entity definitions that match the current doc after the change
+              definitions.filter((definition) => {
+                // check whether the "identifyingFields" are present in the document: { field: string; optional: boolean; }
+                const identifyingFields = definition.identityFields;
+                const matches = identifyingFields.every((field) => {
+                  if (field.optional) {
+                    return true;
+                  }
+                  if (field.field === 'data_stream.type') {
+                    // for the sample data
+                    return true;
+                  }
+                  const hasAsDottedFieldName = field.field in after.doc._source;
+                  const splitFieldName = field.field.split('.');
+                  let obj = after.doc._source;
+                  splitFieldName.forEach((part) => {
+                    if (obj && obj[part]) {
+                      obj = obj[part];
+                    } else {
+                      obj = null;
+                    }
+                  });
+                  const hasAsNestedFieldName = obj !== null;
+
+                  return hasAsDottedFieldName || hasAsNestedFieldName;
+                });
+                if (matches) {
+                  // concat all identifying fields to a string
+                  const id = identifyingFields
+                    .map(
+                      (field) =>
+                        after.doc._source[field.field] ||
+                        get(after.doc._source, field.field) ||
+                        'logs'
+                    )
+                    .join('-');
+                  fullSet.add(`${id} (${definition.type})`);
+                }
+              });
+            });
+          } catch (e) {
+            console.log(e);
+            throw e;
+          }
+
+          return response.ok({
+            body: {
+              success: true,
+              plan,
+              docs,
+              simulatedRun,
+              affectedEntities: Array.from(fullSet),
+            },
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      }
+    );
+    router.post(
+      {
+        path: '/api/track_pipelines',
+        validate: {},
+      },
+      async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          // we need to do the following things here:
+          // * fetch all pipeline definitions
+          // * check whether they have a processor with tag "track-pipeline-invocation" already
+          // * if not, add it as an "append" processor to the top of the pipeline, adding the pipeline name to the "invoked_pipelines" field
+          // * if yes, check whether the processor is still at the top of the pipeline and sets the correct pipeline name. If not, update the pipeline
+          const pipelines = await esClient.transport.request({
+            method: 'GET',
+            path: '/_ingest/pipeline',
+          });
+          const plan = [];
+          Object.entries(pipelines).forEach(([id, pipeline]: [string, any]) => {
+            const updatedProcessors = pipeline.processors.filter(
+              (processor: any) => processor.append?.tag !== 'track-pipeline-invocation'
+            );
+            updatedProcessors.unshift({
+              append: {
+                field: 'invoked_pipelines',
+                value: id,
+                tag: 'track-pipeline-invocation',
+              },
+            });
+            if (!isEqual(updatedProcessors, pipeline.processors)) {
+              plan.push({
+                title: 'Add tracking processor to pipeline',
+                method: 'PUT',
+                path: `/_ingest/pipeline/${id}`,
+                body: {
+                  ...pipeline,
+                  processors: updatedProcessors,
+                },
+              });
+            }
+          });
+
+          // execute the plan
+          for (const step of plan) {
+            console.log('executing', JSON.stringify(step, null, 2));
+            await esClient.transport.request({
+              method: step.method,
+              path: step.path,
+              body: step.body,
+            });
+          }
+
+          return response.ok({
+            body: {
+              updatedPipelines: plan.map((p) => p.path),
+              plan,
+            },
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      }
+    );
+
     router.get(
       {
         path: '/api/datastream_retention_info/{datastream}',
@@ -435,6 +887,88 @@ export class InventoryPlugin
             affectedDatastreams,
           },
         });
+      }
+    );
+
+    router.post(
+      {
+        path: '/api/pipelines_for_entity',
+        validate: {
+          body: schema.object({
+            query: schema.object({}, { unknowns: 'allow' }),
+            kuery: schema.string({ defaultValue: '' }),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        // fetch terms invoked_pipelines for the given query on logs-*
+        const query = request.body.query;
+        const r = await esClient.transport.request({
+          method: 'POST',
+          path: '/logs-*/_search',
+          body: {
+            size: 0,
+            query: {
+              bool: {
+                filter: [...kqlQuery(request.body.kuery), query],
+              },
+            },
+            track_total_hits: true,
+            aggs: {
+              pipelines: {
+                terms: {
+                  field: 'invoked_pipelines',
+                  size: 100,
+                },
+              },
+            },
+          },
+        });
+
+        return response.ok({
+          body: r,
+        });
+      }
+    );
+
+    router.get(
+      {
+        path: '/api/main_pipeline',
+        validate: {},
+      },
+      async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const pipelines: any = await esClient.transport.request({
+            method: 'GET',
+            path: '/_ingest/pipeline',
+          });
+          const pipelineMap = new Map<string, any>();
+          Object.entries(pipelines).forEach(([id, pipeline]: any) => {
+            pipelineMap.set(id, { ...pipeline, name: `p:${id}` });
+          });
+          // recursively resolve all sub-pipelines
+          const resolvePipeline = (pipeline: any) => {
+            const processors = pipeline.processors || [];
+            processors.forEach((processor: any) => {
+              if (processor.pipeline) {
+                const subPipeline = pipelineMap.get(processor.pipeline.name);
+                const innerProcessors = resolvePipeline(subPipeline);
+                processor.pipeline.subProcessors = innerProcessors;
+              }
+            });
+            return processors;
+          };
+          const mainPipeline = pipelineMap.get('logs@main');
+          const processors = resolvePipeline(mainPipeline);
+          return response.ok({
+            body: { processors },
+          });
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
       }
     );
 
@@ -538,13 +1072,17 @@ export class InventoryPlugin
             }
             console.log('default pipeline', defaultPipeline);
             if (defaultPipeline) {
-              edges.push({ source: `p:${defaultPipeline}`, target: node.name });
+              nodes.push({
+                name: `p:${defaultPipeline} (for ${node.name})`,
+                processors: pipelineMap.get(defaultPipeline).processors,
+              });
+              edges.push({ source: `p:${defaultPipeline} (for ${node.name})`, target: node.name });
             }
           });
 
           nodes.forEach((node: any) => {
-            if (!node.processors) {
-              // only handle pipelines here
+            if (!node.processors || !node.name.includes('(for ')) {
+              // only handle pipelines here (and not their duplicates)
               return;
             }
             console.log('taking care of pipeline node', node.name);
@@ -589,7 +1127,19 @@ export class InventoryPlugin
                       }
 
                       if (defaultPipeline) {
-                        edges.push({ source: node.name, target: `p:${defaultPipeline}` });
+                        console.log(
+                          `Trying to add edge from ${node.name} to p:${defaultPipeline} (for ${datastream.name})`
+                        );
+                        // find all nodes that start with "p:${node.name} (for" and add the edge to the target
+                        // nodes.forEach((n: any) => {
+                        //   console.log(">>> probing node", n.name);
+                        //   if (n.name.startsWith(`p:${node.name} (for`)) {
+                        edges.push({
+                          source: node.name,
+                          target: `p:${defaultPipeline} (for ${datastream.name})`,
+                        });
+                        //   }
+                        // });
                       }
                     });
                 }

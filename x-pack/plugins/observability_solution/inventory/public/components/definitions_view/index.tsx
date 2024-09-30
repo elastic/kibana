@@ -109,10 +109,7 @@ function DefinitionsViewContent() {
           return (
             <EuiLink
               data-test-subj="definitionsView"
-              onClick={() => {
-                setSelectedEntityDefinition(definition);
-              }}
-              disabled={!selectedEntityDefinition}
+              href={`/app/entities/definitions/${definition.type}`}
             >
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 <EuiText size="s">{label}</EuiText>

@@ -64,3 +64,47 @@ export interface Entity {
   displayName: string;
   properties: Record<string, unknown>;
 }
+
+export function getRerouteCode(rootEntity: Entity) {
+  const normalizedEnityName = rootEntity.displayName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+
+  // per identity field, generate a painless snippet that is returning false if the field is not equal to the value of the root entity property.
+  // check both dotted field name and nested object in a safe way
+  const checks = getPainlessCheck(rootEntity);
+
+  const processor = {
+    reroute: {
+      if: checks,
+      dataset: normalizedEnityName,
+    },
+  };
+
+  return JSON.stringify(processor, null, 2);
+}
+export function getPainlessCheck(rootEntity: Entity) {
+  const identityFields = rootEntity.properties['entity.identityFields'] as string[] | string;
+  const checks = (Array.isArray(identityFields) ? identityFields : [identityFields])
+    .map((field) => {
+      const fieldParts = field.split('.');
+      return `if (ctx.__original_doc.${fieldParts.join('?.')} == null || ctx.__original_doc.${fieldParts.join('?.')} != "${
+        rootEntity.properties[field]
+      }") { return false }`;
+    })
+    .join('\n\n');
+  return `
+  ${checks}
+  return true;`;
+}
+
+export function getPainlessDefinitionCheck(rootEntity: InventoryEntityDefinition) {
+  const identityFields = rootEntity.identityFields.map((field) => field.field);
+  const checks = identityFields
+    .map((field) => {
+      const fieldParts = field.split('.');
+      return `if (ctx.__original_doc.${fieldParts.join('?.')} != null) { return false }`;
+    })
+    .join('\n\n');
+  return `
+  ${checks}
+  return true;`;
+}

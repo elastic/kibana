@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -24,14 +24,16 @@ import { CodeEditor } from '@kbn/code-editor';
 import { euiLightVars } from '@kbn/ui-theme';
 import { ThemeProvider } from 'styled-components';
 import { useLocation } from 'react-router-dom';
+import { Entity } from '../../../../common/entities';
 import { useInventoryParams } from '../../../hooks/use_inventory_params';
 import { useKibana } from '../../../hooks/use_kibana';
 import { planToConsoleOutput } from '../../dataset_detail_view/utils';
 import { Cytoscape } from './cytoscape';
 import { DatasetManagementSplitView } from '../../dataset_management_split_view';
 import { DatasetManagementParseView } from '../../dataset_management_parse_view';
+import { IngestPipelines } from '../logical_management';
 
-export function DataStreamManagementView() {
+export function DataStreamManagementView({ entity }: { entity: Entity }) {
   const {
     path: { displayName: id, type: entityType },
   } = useInventoryParams('/{type}/{displayName}/*');
@@ -93,7 +95,10 @@ export function DataStreamManagementView() {
     <>
       <StorageDetails details={details.value} />
       <RetentionDetails details={retentionInfo.value} />
-      <RoutingDetails id={id} />
+      {/* <RoutingDetails id={id} /> */}
+      <EuiPanel>
+        <IngestPipelines entity={entity} />
+      </EuiPanel>
       <EuiFlexGroup>
         <EuiButton
           data-test-subj="inventoryDatasetManagementViewSplitUpButton"

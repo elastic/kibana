@@ -16,8 +16,8 @@ export function GeneralManagementView({
   entity: Entity;
   dataStreams: Array<{ name: string }>;
 }) {
-  if (entity.type === 'data_stream') {
-    return <DataStreamManagementView />;
-  }
+  // if (entity.type === 'data_stream') {
+  //   return <DataStreamManagementView entity={entity} />;
+  // }
   return <LogicalManagementView entity={entity} dataStreams={dataStreams} />;
 }
