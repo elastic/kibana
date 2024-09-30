@@ -223,12 +223,23 @@ export default ({ getService }: FtrProviderContext) => {
       const startTime = Date.now() - 1000 * TEST_DATA_LENGTH;
       const records: AssetCriticalityRecord[] = Array.from(
         { length: TEST_DATA_LENGTH },
-        (__, i) => ({
-          id_field: 'host.name',
-          id_value: `host-${i}`,
-          criticality_level: LEVELS[Math.floor(i / 10)],
-          '@timestamp': new Date(startTime + i * 1000).toISOString(),
-        })
+        (__, i) => {
+          const hostName = `host-${i}`;
+          const criticality = LEVELS[Math.floor(i / 10)];
+          return {
+            id_field: 'host.name',
+            id_value: hostName,
+            criticality_level: criticality,
+            '@timestamp': new Date(startTime + i * 1000).toISOString(),
+            host: {
+              name: hostName,
+              criticality,
+            },
+            asset: {
+              criticality,
+            },
+          };
+        }
       );
 
       const createRecords = () => createAssetCriticalityRecords(records, es);
@@ -373,11 +384,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('bulk upload', () => {
-      const expectAssetCriticalityDocMatching = async (expectedDoc: {
-        id_field: string;
-        id_value: string;
-        criticality_level: string;
-      }) => {
+      const expectAssetCriticalityDocMatching = async (
+        expectedDoc: AssetCriticalityRecordWithoutTimestamp
+      ) => {
         const esDoc = await getAssetCriticalityDoc({
           es,
           idField: expectedDoc.id_field,
@@ -433,7 +442,7 @@ export default ({ getService }: FtrProviderContext) => {
           failed: 0,
         });
 
-        await expectAssetCriticalityDocMatching(validRecord);
+        await expectAssetCriticalityDocMatching(assetCreateTypeToAssetRecord(validRecord));
       });
 
       it('should correctly upload valid records for multiple entities', async () => {
@@ -454,7 +463,9 @@ export default ({ getService }: FtrProviderContext) => {
           failed: 0,
         });
 
-        await Promise.all(validRecords.map(expectAssetCriticalityDocMatching));
+        await Promise.all(
+          validRecords.map(assetCreateTypeToAssetRecord).map(expectAssetCriticalityDocMatching)
+        );
       });
 
       it('should return a 400 if a record is invalid', async () => {
@@ -517,4 +528,23 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
+};
+
+type AssetCriticalityRecordWithoutTimestamp = Omit<AssetCriticalityRecord, '@timestamp'>;
+
+const assetCreateTypeToAssetRecord = (
+  asset: CreateAssetCriticalityRecord
+): AssetCriticalityRecordWithoutTimestamp => {
+  return {
+    ...asset,
+    asset: {
+      criticality: asset.criticality_level,
+    },
+    host: {
+      name: asset.id_value,
+      asset: {
+        criticality: asset.criticality_level,
+      },
+    },
+  };
 };

@@ -217,7 +217,7 @@ describe('AssetCriticalityDataClient', () => {
                 criticality: 'high_impact',
               },
               host: {
-                name: 'host.name',
+                name: 'host1',
                 asset: {
                   criticality: 'high_impact',
                 },
@@ -252,7 +252,7 @@ describe('AssetCriticalityDataClient', () => {
                 criticality: 'medium_impact',
               },
               user: {
-                name: 'user.name',
+                name: 'user1',
                 asset: {
                   criticality: 'medium_impact',
                 },

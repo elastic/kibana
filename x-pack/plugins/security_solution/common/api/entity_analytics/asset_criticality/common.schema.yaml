@@ -80,7 +80,7 @@ components:
             'criticality':
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
-            - 'properties'
+            - 'asset'
         'host':
           type: object
           properties:
@@ -92,7 +92,7 @@ components:
                 'criticality':
                   $ref: '#/components/schemas/AssetCriticalityLevel'
               required:
-                - 'properties'
+                - 'criticality'
           required:
             - 'name'
         'user':
@@ -106,7 +106,7 @@ components:
                 'criticality':
                   $ref: '#/components/schemas/AssetCriticalityLevel'
               required:
-                - 'properties'
+                - 'criticality'
           required:
             - 'name'
       required:

@@ -17,8 +17,8 @@ export interface EntityAnalyticsMigrationsParams {
   auditLogger: AuditLogger | undefined;
 }
 
-export const scheduleEntityAnalyticsMigration = (params: EntityAnalyticsMigrationsParams) => {
+export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMigrationsParams) => {
   const scopedLogger = params.logger.get('entityAnalytics.migration');
 
-  scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
+  await scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
 };

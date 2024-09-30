@@ -63,7 +63,7 @@ export const AssetCriticalityRecordEcsParts = z.object({
       name: z.string(),
       asset: z
         .object({
-          criticality: AssetCriticalityLevel.optional(),
+          criticality: AssetCriticalityLevel,
         })
         .optional(),
     })
@@ -73,7 +73,7 @@ export const AssetCriticalityRecordEcsParts = z.object({
       name: z.string(),
       asset: z
         .object({
-          criticality: AssetCriticalityLevel.optional(),
+          criticality: AssetCriticalityLevel,
         })
         .optional(),
     })
