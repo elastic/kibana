@@ -66,15 +66,15 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
     );
 
     const onWidthChange = useCallback(
-      (newSizes: { left: number; right: number }) =>
+      (newSizes: { [key: string]: number }) =>
         dispatch(
           changeUserSectionWidthsAction({
-            ...newSizes,
+            ...(newSizes as { left: number; right: number }),
             savedToLocalStorage: true,
           })
         ),
       [dispatch]
-    ) as (newSizes: { [key: string]: number }) => unknown;
+    );
 
     return (
       <EuiResizableContainer
