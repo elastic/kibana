@@ -20,7 +20,7 @@ import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
 export const USAGE_API_URL = 'https://usage-api.elastic-system/api/v1/usage`';
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '10m' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1d' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
@@ -29,10 +29,10 @@ export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`
 export const MAX_PUSH_ATTEMPTS = 5;
 
 export class ConnectorUsageReportingTask {
-  private readonly projectId: string;
   private readonly logger: Logger;
   private readonly eventLogIndex: string;
-  private readonly caCertificate: string;
+  private readonly projectId: string | undefined;
+  private readonly caCertificate: string | undefined;
 
   constructor({
     logger,
@@ -46,13 +46,23 @@ export class ConnectorUsageReportingTask {
     eventLogIndex: string;
     core: CoreSetup<ActionsPluginsStart>;
     taskManager: TaskManagerSetupContract;
-    projectId: string;
-    caCertificatePath: string;
+    projectId: string | undefined;
+    caCertificatePath?: string;
   }) {
-    this.projectId = projectId;
     this.logger = logger;
+    this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.caCertificate = fs.readFileSync(caCertificatePath, 'utf8');
+
+    if (caCertificatePath && caCertificatePath.length > 0) {
+      try {
+        this.caCertificate = fs.readFileSync(caCertificatePath, 'utf8');
+      } catch (e) {
+        this.caCertificate = undefined;
+        this.logger.error(
+          `CA Certificate for the project "${projectId}" couldn't be loaded, Error: ${e.message}`
+        );
+      }
+    }
 
     taskManager.registerTaskDefinitions({
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
@@ -71,7 +81,7 @@ export class ConnectorUsageReportingTask {
   public start = async (taskManager?: TaskManagerStartContract) => {
     if (!taskManager) {
       this.logger.error(
-        `missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+        `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
       return;
     }
@@ -94,14 +104,34 @@ export class ConnectorUsageReportingTask {
   };
 
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
-    const [{ elasticsearch }] = await core.getStartServices();
-    const esClient = elasticsearch.client.asInternalUser;
     const { state } = taskInstance;
 
+    if (!this.projectId) {
+      this.logger.error(
+        `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
+    if (!this.caCertificate) {
+      this.logger.error(
+        `Missing required CA Certificate while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
+    const [{ elasticsearch }] = await core.getStartServices();
+    const esClient = elasticsearch.client.asInternalUser;
+
     const now = new Date();
+    const oneDayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
     const lastReportedUsageDate: Date = !!state.lastReportedUsageDate
       ? new Date(state.lastReportedUsageDate)
-      : new Date('1970-01-01');
+      : oneDayAgo;
 
     let attempts: number = state.attempts || 0;
 
@@ -126,7 +156,12 @@ export class ConnectorUsageReportingTask {
       };
     }
 
-    const record: ConnectorUsageReport = this.createUsageRecord({ totalUsage, fromDate, toDate });
+    const record: ConnectorUsageReport = this.createUsageRecord({
+      totalUsage,
+      fromDate,
+      toDate,
+      projectId: this.projectId,
+    });
 
     try {
       attempts = attempts + 1;
@@ -218,10 +253,12 @@ export class ConnectorUsageReportingTask {
     totalUsage,
     fromDate,
     toDate,
+    projectId,
   }: {
     totalUsage: number;
     fromDate: Date;
     toDate: Date;
+    projectId: string;
   }): ConnectorUsageReport => {
     const period = (toDate.getTime() - fromDate.getTime()) / 1000;
     const fromStr = fromDate.toISOString();
@@ -238,7 +275,7 @@ export class ConnectorUsageReportingTask {
       },
       source: {
         id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
-        instance_group_id: this.projectId,
+        instance_group_id: projectId,
       },
     };
   };
@@ -248,6 +285,7 @@ export class ConnectorUsageReportingTask {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
         ca: this.caCertificate,
       }),
     });

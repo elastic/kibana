@@ -35,7 +35,7 @@ const nowDate = new Date(nowStr);
 
 jest.useFakeTimers();
 jest.setSystemTime(nowDate.getTime());
-jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('---CA CERTIFICATE---');
+const readFileSpy = jest.spyOn(fs, 'readFileSync');
 
 describe('ConnectorUsageReportingTask', () => {
   const logger = loggingSystemMock.createLogger();
@@ -64,7 +64,7 @@ describe('ConnectorUsageReportingTask', () => {
     attempts = 0,
   }: {
     lastReportedUsageDate: Date;
-    projectId: string;
+    projectId?: string;
     attempts?: number;
   }) => {
     const timestamp = new Date(new Date().setMinutes(-15));
@@ -105,6 +105,7 @@ describe('ConnectorUsageReportingTask', () => {
   };
 
   it('registers the task', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     new ConnectorUsageReportingTask({
       eventLogIndex: 'test-index',
       projectId: 'test-projecr',
@@ -125,6 +126,7 @@ describe('ConnectorUsageReportingTask', () => {
   });
 
   it('schedules the task', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     const core = createSetup();
     const taskManagerStart = taskManagerStartMock();
 
@@ -152,6 +154,7 @@ describe('ConnectorUsageReportingTask', () => {
   });
 
   it('logs error if task manager is not ready', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     const core = createSetup();
     const taskManagerStart = taskManagerStartMock();
 
@@ -168,11 +171,12 @@ describe('ConnectorUsageReportingTask', () => {
 
     expect(taskManagerStart.ensureScheduled).not.toBeCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      `missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
     );
   });
 
   it('logs error if scheduling task fails', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     const core = createSetup();
     const taskManagerStart = taskManagerStartMock();
     taskManagerStart.ensureScheduled.mockRejectedValue(new Error('test'));
@@ -193,7 +197,59 @@ describe('ConnectorUsageReportingTask', () => {
     );
   });
 
+  it('returns the existin state and logs error when project id is missing', async () => {
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+
+    const taskRunner = await createTaskRunner({ lastReportedUsageDate });
+
+    const response = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Missing required project id while running actions:connector_usage_reporting'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
+  it('returns the existin state and logs error when the CA Certificate is missing', async () => {
+    const lastReportedUsageDateStr = '2024-01-01T00:00:00.000Z';
+    const lastReportedUsageDate = new Date(lastReportedUsageDateStr);
+    readFileSpy.mockImplementationOnce((func) => {
+      throw new Error('Mock file read error.');
+    });
+
+    const taskRunner = await createTaskRunner({ lastReportedUsageDate, projectId: 'test-id' });
+
+    const response = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(2);
+
+    expect(logger.error).toHaveBeenNthCalledWith(
+      1,
+      `CA Certificate for the project "test-id" couldn't be loaded, Error: Mock file read error.`
+    );
+
+    expect(logger.error).toHaveBeenNthCalledWith(
+      2,
+      'Missing required CA Certificate while running actions:connector_usage_reporting'
+    );
+
+    expect(response).toEqual({
+      state: {
+        attempts: 0,
+        lastReportedUsageDate,
+      },
+    });
+  });
+
   it('runs the task', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
       aggregations: { total_usage: 215 },
     } as SearchResponse<unknown, unknown>);
@@ -237,6 +293,7 @@ describe('ConnectorUsageReportingTask', () => {
   });
 
   it('re-runs the task when search for records fails', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockRejectedValue(new Error('500'));
 
     mockedAxiosPost.mockResolvedValueOnce(200);
@@ -257,6 +314,7 @@ describe('ConnectorUsageReportingTask', () => {
   });
 
   it('re-runs the task when it fails to push the usage record', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
       aggregations: { total_usage: 215 },
     } as SearchResponse<unknown, unknown>);
@@ -279,6 +337,7 @@ describe('ConnectorUsageReportingTask', () => {
   });
 
   it('stops retrying after 5 attempts', async () => {
+    readFileSpy.mockImplementationOnce(() => '---CA CERTIFICATE---');
     mockEsClient.search.mockResolvedValueOnce({
       aggregations: { total_usage: 215 },
     } as SearchResponse<unknown, unknown>);
