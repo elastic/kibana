@@ -648,7 +648,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
                   )
                   // Security solution's EQL rule consists of building block alerts which should be filtered out.
-                  .filter((alert) => alert['kibana.alert.building_block_type'] == null);
+                  .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
 
                 createdAlerts.forEach((alert) =>
                   options.services.alertFactory
