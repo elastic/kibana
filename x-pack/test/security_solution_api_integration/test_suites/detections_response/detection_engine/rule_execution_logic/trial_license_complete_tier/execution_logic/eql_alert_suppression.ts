@@ -50,7 +50,6 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>
   `sequence [any where id == "${id}"] [any where id == "${id}"]`;
-const getSequenceQueryTrue = () => `sequence [any where true] [any where true]`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -2432,7 +2431,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: [ALERT_ORIGINAL_TIME],
         });
-        const [sequenceAlert, buildingBlockAlerts] = partition(
+        const [sequenceAlert] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
@@ -2532,7 +2531,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 100,
           sort: [ALERT_SUPPRESSION_START], // sorting on null fields was preventing the alerts from yielding
         });
-        const [sequenceAlert, buildingBlockAlerts] = partition(
+        const [sequenceAlert] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
@@ -2678,7 +2677,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           size: 100,
         });
-        const [sequenceAlert, buildingBlockAlerts] = partition(
+        const [sequenceAlert] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
@@ -2756,7 +2755,7 @@ export default ({ getService }: FtrProviderContext) => {
           previewId,
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
-        const [sequenceAlert, buildingBlockAlerts] = partition(
+        const [sequenceAlert] = partition(
           previewAlerts,
           (alert) => alert?._source?.['kibana.alert.building_block_type'] == null
         );
