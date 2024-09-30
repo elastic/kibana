@@ -26,6 +26,7 @@ describe('configureToggleCustomFieldFactory ', () => {
       ],
       getDefaultValue: expect.any(Function),
       convertValueToDisplayText: expect.any(Function),
+      getFilterOptions: expect.any(Function),
     });
   });
 });

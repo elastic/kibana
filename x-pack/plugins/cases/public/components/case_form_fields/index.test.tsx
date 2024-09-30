@@ -230,6 +230,7 @@ describe('CaseFormFields', () => {
             test_key_1: 'My text test value 1',
             test_key_2: false,
             test_key_4: false,
+            test_key_5: 'option_1',
           },
         },
         true
@@ -268,6 +269,7 @@ describe('CaseFormFields', () => {
             test_key_1: 'Test custom filed value',
             test_key_2: true,
             test_key_4: false,
+            test_key_5: 'option_1',
           },
         },
         true
