@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,10 +16,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('validation', () => {
     describe('dashboards - create', () => {
       it('returns error when attributes object is not provided', async () => {
-        const response = await supertest.post('/api/dashboards/create').send({});
+        const response = await supertest.post(PUBLIC_API_PATH).send({});
         expect(response.status).to.be(400);
         expect(response.body.statusCode).to.be(400);
-        expect(response.body.message).to.be('foo');
+        expect(response.body.message).to.be(
+          '[request body.attributes.title]: expected value of type [string] but got [undefined]'
+        );
       });
     });
   });

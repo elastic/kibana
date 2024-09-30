@@ -9,8 +9,20 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   describe('dashboards - create', () => {
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+    });
     loadTestFile(require.resolve('./main'));
     loadTestFile(require.resolve('./validation'));
   });

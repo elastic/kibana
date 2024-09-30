@@ -26,3 +26,5 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
+
+export { PUBLIC_API_PATH } from './api/constants';
