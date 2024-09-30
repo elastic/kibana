@@ -1794,7 +1794,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('sequence queries with suppression "per rule execution"', () => {
+    describe('@skipInServerless sequence queries with suppression "per rule execution"', () => {
       it('suppresses alerts in a given rule execution', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:50:00.000Z';
@@ -2779,7 +2779,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('sequence queries with suppression duration', () => {
+    describe('@skipInServerless sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date(Date.now() - 1000).toISOString();
@@ -2895,7 +2895,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
 
-      // @skipInServerless
       it('does not suppress alerts outside of duration', async () => {
         const id = uuidv4();
         // this timestamp is 1 minute in the past

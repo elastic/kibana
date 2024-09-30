@@ -47,6 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'manualRuleRunEnabled',
           'loggingRequestsEnabled',
+          'alertSuppressionForSequenceEqlRuleEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
@@ -60,9 +61,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForSequenceEqlRuleEnabled',
-        ])}`,
       ],
     },
   };
