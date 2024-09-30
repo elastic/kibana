@@ -35,7 +35,8 @@
     "@kbn/search-index-documents",
     "@kbn/es-types",
     "@kbn/search-api-keys-api",
-    "@kbn/search-api-keys-components"
+    "@kbn/search-api-keys-components",
+    "@kbn/search-shared-ui"
   ],
   "exclude": [
     "target/**/*",
