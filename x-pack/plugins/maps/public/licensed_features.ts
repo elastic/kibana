@@ -7,6 +7,7 @@
 
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { firstValueFrom, take } from 'rxjs';
 import { APP_ID } from '../common/constants';
 
 export enum LICENSED_FEATURES {
@@ -50,7 +51,7 @@ export const whenLicenseInitialized = async (): Promise<void> => {
 };
 
 export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
-  const license = await licensingPlugin.refresh();
+  const license = await firstValueFrom(licensingPlugin.license$.pipe(take(1)));
   updateLicenseState(license);
 
   licensingPluginStart = licensingPlugin;

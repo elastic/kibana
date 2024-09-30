@@ -13,6 +13,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { firstValueFrom, take } from 'rxjs';
 import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
@@ -61,7 +62,7 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
         plugins.fleet.registerExternalCallback(
           'packagePolicyCreate',
           async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-            const license = await plugins.licensing.refresh();
+            const license = await firstValueFrom(plugins.licensing.license$.pipe(take(1)));
             if (isCloudDefendPackage(packagePolicy.package?.name)) {
               if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
                 throw new Error(
