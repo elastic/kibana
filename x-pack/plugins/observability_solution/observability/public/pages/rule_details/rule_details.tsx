@@ -18,7 +18,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { PageTitle } from './components/page_title';
+import { PageTitleContent } from './components/page_title_content';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { NoRuleFoundPanel } from './components/no_rule_found_panel';
@@ -200,7 +200,11 @@ export function RuleDetailsPage() {
     <ObservabilityPageTemplate
       data-test-subj="ruleDetails"
       pageHeader={{
-        pageTitle: <PageTitle rule={rule} />,
+        pageTitle: rule.name,
+        pageTitleProps: {
+          'data-test-subj': 'ruleName',
+        },
+        children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
         rightSideItems: [
           <HeaderActions

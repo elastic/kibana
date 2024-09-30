@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { SeverityFilterGroup } from './severity_filter_group';
+import { SeverityFilter } from './severity_filter';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -22,85 +22,43 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-describe('SeverityFilterGroup', () => {
+describe('SeverityFilter', () => {
   beforeEach(() => {
     mockedTelemetry.reportEntityRiskFiltered.mockClear();
-  });
-
-  it('preserves sort order when severityCount is out of order', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SeverityFilterGroup
-          selectedSeverities={[]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
-          onSelect={jest.fn()}
-          riskEntity={RiskScoreEntity.user}
-        />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('risk-filter-button'));
-
-    expect(getByTestId('risk-filter-selectable').textContent).toEqual(
-      ['Unknown', 'Low', 'Moderate', 'High', 'Critical'].join('')
-    );
   });
 
   it('sends telemetry when selecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilterGroup
-          selectedSeverities={[]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
-          onSelect={jest.fn()}
-          riskEntity={RiskScoreEntity.user}
-        />
+        <SeverityFilter selectedItems={[]} onSelect={jest.fn()} riskEntity={RiskScoreEntity.user} />
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('risk-filter-button'));
+    fireEvent.click(getByTestId('risk-filter-popoverButton'));
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
+
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(1);
   });
 
   it('does not send telemetry when deselecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilterGroup
-          selectedSeverities={[
+        <SeverityFilter
+          selectedItems={[
             RiskSeverity.Critical,
             RiskSeverity.High,
             RiskSeverity.Moderate,
             RiskSeverity.Low,
             RiskSeverity.Unknown,
           ]}
-          severityCount={{
-            [RiskSeverity.High]: 0,
-            [RiskSeverity.Low]: 0,
-            [RiskSeverity.Critical]: 0,
-            [RiskSeverity.Moderate]: 0,
-            [RiskSeverity.Unknown]: 0,
-          }}
           onSelect={jest.fn()}
           riskEntity={RiskScoreEntity.user}
         />
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('risk-filter-button'));
+    fireEvent.click(getByTestId('risk-filter-popoverButton'));
 
     fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(0);
