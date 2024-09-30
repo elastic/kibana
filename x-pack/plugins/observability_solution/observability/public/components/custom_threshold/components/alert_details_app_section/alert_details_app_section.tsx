@@ -171,9 +171,9 @@ export default function AlertDetailsAppSection({
                     <EuiIcon type="sortRight" />
                     &nbsp;
                     {i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.viewInDiscoverLabel',
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel',
                       {
-                        defaultMessage: 'View in Discover',
+                        defaultMessage: 'Open in Discover',
                       }
                     )}
                   </EuiLink>
