@@ -138,18 +138,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
 };
 
 const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
-  const { euiTheme } = useEuiTheme();
   return (
-    <EuiPanel
-      paddingSize="xs"
-      hasShadow={false}
-      color="subdued"
-      grow
-      css={css`
-        //width: ${euiTheme.base * 4}px;
-        //height: ${euiTheme.base * 3}px;
-      `}
-    >
+    <EuiPanel paddingSize="xs" hasShadow={false} color="subdued" grow>
       <EuiFlexGroup
         direction="column"
         responsive={false}

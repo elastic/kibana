@@ -27,9 +27,9 @@ import { MetaDataProps, ResultFieldProps } from './result_types';
 import { RichResultHeader } from './rich_result_header';
 import { ResultHeader } from './result_header';
 
-const DEFAULT_VISIBLE_FIELDS = 3;
+export const DEFAULT_VISIBLE_FIELDS = 3;
 
-interface ResultProps {
+export interface ResultProps {
   fields: ResultFieldProps[];
   metaData: MetaDataProps;
   defaultVisibleFields?: number;

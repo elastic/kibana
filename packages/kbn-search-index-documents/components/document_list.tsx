@@ -33,6 +33,8 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { resultMetaData, resultToField } from './result/result_metadata';
 
 import { Result } from '..';
+import { type ResultProps } from './result/result';
+
 interface DocumentListProps {
   dataTelemetryIdPrefix: string;
   docs: SearchHit[];
@@ -42,10 +44,8 @@ interface DocumentListProps {
   meta: Pagination;
   onPaginate: (newPageIndex: number) => void;
   setDocsPerPage?: (docsPerPage: number) => void;
-  defaultVisibleFields?: number;
-  compactCard?: boolean;
-  showScore?: boolean;
   onDocumentClick?: (doc: SearchHit) => void;
+  resultProps?: Partial<ResultProps>;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
@@ -57,10 +57,8 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   meta,
   onPaginate,
   setDocsPerPage,
-  defaultVisibleFields = 3,
-  compactCard = true,
-  showScore = false,
   onDocumentClick,
+  resultProps = {},
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -110,10 +108,8 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             <Result
               fields={resultToField(doc, mappings)}
               metaData={resultMetaData(doc)}
-              defaultVisibleFields={defaultVisibleFields}
-              showScore={showScore}
-              compactCard={compactCard}
               onDocumentClick={onDocumentClick ? () => onDocumentClick(doc) : undefined}
+              {...resultProps}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

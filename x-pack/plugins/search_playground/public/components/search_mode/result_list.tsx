@@ -53,10 +53,12 @@ export const ResultList: React.FC<ResultListArgs> = ({
         mappings={mappings}
         meta={documentMeta}
         onPaginate={onPaginationChange}
-        showScore
-        compactCard={false}
-        defaultVisibleFields={0}
         onDocumentClick={(searchHit: SearchHit) => setFlyoutDocId(searchHit._id)}
+        resultProps={{
+          showScore: true,
+          compactCard: false,
+          defaultVisibleFields: 0,
+        }}
       />
 
       {flyoutDocId && dataView && hit && (
