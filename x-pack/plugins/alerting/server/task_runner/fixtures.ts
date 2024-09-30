@@ -7,6 +7,7 @@
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { SavedObject } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   Rule,
   RuleTypeParams,
@@ -64,7 +65,7 @@ const defaultHistory = [
   },
 ];
 
-export const generateSavedObjectParams = ({
+export const generateRuleUpdateParams = ({
   error = null,
   warning = null,
   status = 'ok',
@@ -83,53 +84,59 @@ export const generateSavedObjectParams = ({
   history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
 }) => [
-  RULE_SAVED_OBJECT_TYPE,
-  '1',
   {
-    monitoring: {
-      run: {
-        calculated_metrics: {
-          success_ratio: successRatio,
-        },
-        history,
-        last_run: {
-          timestamp: '1970-01-01T00:00:00.000Z',
-          metrics: {
-            duration: 0,
-            gap_duration_s: null,
-            total_alerts_created: null,
-            total_alerts_detected: null,
-            total_indexing_duration_ms: null,
-            total_search_duration_ms: null,
+    id: `alert:1`,
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    doc: {
+      alert: {
+        monitoring: {
+          run: {
+            calculated_metrics: {
+              success_ratio: successRatio,
+            },
+            history,
+            last_run: {
+              timestamp: '1970-01-01T00:00:00.000Z',
+              metrics: {
+                duration: 0,
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
+            },
           },
         },
+        executionStatus: {
+          error,
+          lastDuration: 0,
+          lastExecutionDate: '1970-01-01T00:00:00.000Z',
+          status,
+          warning,
+        },
+        lastRun: {
+          outcome,
+          outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
+          outcomeMsg:
+            (error?.message && [error?.message]) ||
+            (warning?.message && [warning?.message]) ||
+            null,
+          warning: error?.reason || warning?.reason || null,
+          alertsCount: {
+            active: 0,
+            ignored: 0,
+            new: 0,
+            recovered: 0,
+            ...(alertsCount || {}),
+          },
+        },
+        nextRun,
+        running: false,
       },
     },
-    executionStatus: {
-      error,
-      lastDuration: 0,
-      lastExecutionDate: '1970-01-01T00:00:00.000Z',
-      status,
-      warning,
-    },
-    lastRun: {
-      outcome,
-      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
-      outcomeMsg:
-        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
-      warning: error?.reason || warning?.reason || null,
-      alertsCount: {
-        active: 0,
-        ignored: 0,
-        new: 0,
-        recovered: 0,
-        ...(alertsCount || {}),
-      },
-    },
-    nextRun,
-    running: false,
   },
-  { refresh: false, namespace: undefined },
+  { ignore: [404] },
 ];
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';

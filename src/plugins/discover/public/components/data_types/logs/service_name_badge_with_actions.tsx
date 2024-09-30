@@ -11,38 +11,50 @@ import React from 'react';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { EuiLink } from '@elastic/eui';
 import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-settings-ids';
-import { type ChipWithPopoverProps, ChipWithPopover } from './popover_chip';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from './cell_actions_popover';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
 
-export function ServiceNameChipWithPopover(props: ChipWithPopoverProps) {
+export function ServiceNameBadgeWithActions(props: FieldBadgeWithActionsProps) {
   const { share, core } = useDiscoverServices();
   const canViewApm = core.application.capabilities.apm?.show || false;
   const isEntityCentricExperienceSettingEnabled = canViewApm
     ? core.uiSettings.get(OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE)
     : false;
-  const urlService = share?.url;
 
-  const apmLinkToServiceEntityLocator = urlService?.locators.get<{ serviceName: string }>(
+  const derivedPropsForEntityExperience = isEntityCentricExperienceSettingEnabled
+    ? getDerivedPropsForEntityExperience({ serviceName: props.value, share })
+    : {};
+
+  return <FieldBadgeWithActions {...props} {...derivedPropsForEntityExperience} />;
+}
+
+const getDerivedPropsForEntityExperience = ({
+  serviceName,
+  share,
+}: {
+  serviceName: string;
+  share?: SharePublicStart;
+}): Pick<FieldBadgeWithActionsProps, 'renderValue'> => {
+  const apmLinkToServiceEntityLocator = share?.url?.locators.get<{ serviceName: string }>(
     SERVICE_ENTITY_LOCATOR
   );
-  const href = apmLinkToServiceEntityLocator?.getRedirectUrl({
-    serviceName: props.text,
-  });
+  const href = apmLinkToServiceEntityLocator?.getRedirectUrl({ serviceName });
 
   const routeLinkProps = href
     ? getRouterLinkProps({
         href,
-        onClick: () => apmLinkToServiceEntityLocator?.navigate({ serviceName: props.text }),
+        onClick: () => apmLinkToServiceEntityLocator?.navigate({ serviceName }),
       })
     : undefined;
 
-  return (
-    <ChipWithPopover {...props}>
-      {canViewApm && isEntityCentricExperienceSettingEnabled && routeLinkProps
-        ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
-        : undefined}
-    </ChipWithPopover>
-  );
-}
+  if (routeLinkProps) {
+    return {
+      renderValue: (value) => <EuiLink {...routeLinkProps}>{value}</EuiLink>,
+    };
+  }
+
+  return {};
+};

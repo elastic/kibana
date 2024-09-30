@@ -179,7 +179,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/assignees"
+            "$ref": "#/components/parameters/assignees_filter"
           },
           {
             "$ref": "#/components/parameters/category"
@@ -1897,7 +1897,7 @@
         },
         "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
       },
-      "assignees": {
+      "assignees_filter": {
         "in": "query",
         "name": "assignees",
         "description": "Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.\n",

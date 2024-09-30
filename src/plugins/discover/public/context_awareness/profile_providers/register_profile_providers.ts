@@ -23,20 +23,19 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
-import type { DiscoverStartPlugins } from '../../types';
+import type { DiscoverServices } from '../../build_services';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
  * @param options Register profile provider options
  */
 export const registerProfileProviders = async ({
-  plugins,
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
+  services,
 }: {
-  plugins: DiscoverStartPlugins;
   /**
    * Root profile service
    */
@@ -53,10 +52,9 @@ export const registerProfileProviders = async ({
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds: string[];
+  services: DiscoverServices;
 }) => {
-  const providerServices = await createProfileProviderServices({
-    logsDataAccessPlugin: plugins.logsDataAccess,
-  });
+  const providerServices = await createProfileProviderServices(services);
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);

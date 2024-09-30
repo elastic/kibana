@@ -24,7 +24,6 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
@@ -189,10 +188,11 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager({
-            plugins: discoverStartPlugins,
-            ebtContextManager,
-          }),
+          profilesManager: await this.createProfilesManager(
+            coreStart,
+            discoverStartPlugins,
+            ebtContextManager
+          ),
           ebtContextManager,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
@@ -318,47 +318,51 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices = once(async ({ plugins }: { plugins: DiscoverStartPlugins }) => {
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+  private createProfileServices() {
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
-    const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
-
-    await registerProfileProviders({
-      plugins,
-      rootProfileService,
-      dataSourceProfileService,
-      documentProfileService,
-      enabledExperimentalProfileIds,
-    });
 
     return { rootProfileService, dataSourceProfileService, documentProfileService };
-  });
+  }
 
-  private async createProfilesManager({
-    plugins,
-    ebtContextManager,
-  }: {
-    plugins: DiscoverStartPlugins;
-    ebtContextManager: DiscoverEBTContextManager;
-  }) {
+  private createProfilesManager = async (
+    core: CoreStart,
+    plugins: DiscoverStartPlugins,
+    ebtContextManager: DiscoverEBTContextManager
+  ) => {
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
     const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      await this.createProfileServices({ plugins });
+      this.createProfileServices();
 
-    return new ProfilesManager(
+    const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+
+    const profilesManager = new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       ebtContextManager
     );
-  }
+
+    await registerProfileProviders({
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      enabledExperimentalProfileIds,
+      services: this.getDiscoverServices(core, plugins, profilesManager, ebtContextManager),
+    });
+
+    return profilesManager;
+  };
 
   private createEmptyProfilesManager() {
+    const { rootProfileService, dataSourceProfileService, documentProfileService } =
+      this.createProfileServices();
+
     return new ProfilesManager(
-      new RootProfileService(),
-      new DataSourceProfileService(),
-      new DocumentProfileService(),
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
       new DiscoverEBTContextManager() // it's not enabled outside of Discover
     );
   }
@@ -395,10 +399,7 @@ export class DiscoverPlugin
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const ebtContextManager = new DiscoverEBTContextManager(); // it's not enabled outside of Discover
-      const profilesManager = await this.createProfilesManager({
-        plugins: deps,
-        ebtContextManager,
-      });
+      const profilesManager = await this.createProfilesManager(coreStart, deps, ebtContextManager);
       return this.getDiscoverServices(coreStart, deps, profilesManager, ebtContextManager);
     };
 

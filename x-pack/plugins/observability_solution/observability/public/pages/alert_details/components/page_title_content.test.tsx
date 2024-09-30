@@ -10,71 +10,28 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   AlertStatus,
-  ALERT_RULE_CATEGORY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { PageTitle, PageTitleProps } from './page_title';
+import { PageTitleContent, PageTitleContentProps } from './page_title_content';
 import { alert } from '../mock/alert';
 
-describe('Page Title', () => {
+describe('Page Title Content', () => {
   const defaultProps = {
     alert,
     alertStatus: ALERT_STATUS_ACTIVE as AlertStatus,
     dataTestSubj: 'ruleTypeId',
   };
 
-  const renderComp = (props: PageTitleProps) => {
+  const renderComp = (props: PageTitleContentProps) => {
     return render(
       <IntlProvider locale="en">
-        <PageTitle {...props} />
+        <PageTitleContent {...props} />
       </IntlProvider>
     );
   };
-
-  it('should display Log threshold title', () => {
-    const { getByTestId } = renderComp(defaultProps);
-
-    expect(getByTestId('ruleTypeId').textContent).toContain('Log threshold breached');
-  });
-
-  it('should display Anomaly title', () => {
-    const props: PageTitleProps = {
-      alert: {
-        ...defaultProps.alert,
-        fields: {
-          ...defaultProps.alert.fields,
-          [ALERT_RULE_CATEGORY]: 'Anomaly',
-        },
-      },
-      alertStatus: defaultProps.alertStatus as AlertStatus,
-      dataTestSubj: defaultProps.dataTestSubj,
-    };
-
-    const { getByTestId } = renderComp(props);
-
-    expect(getByTestId('ruleTypeId').textContent).toContain('Anomaly detected');
-  });
-
-  it('should display Inventory title', () => {
-    const props: PageTitleProps = {
-      alert: {
-        ...defaultProps.alert,
-        fields: {
-          ...defaultProps.alert.fields,
-          [ALERT_RULE_CATEGORY]: 'Inventory',
-        },
-      },
-      alertStatus: defaultProps.alertStatus as AlertStatus,
-      dataTestSubj: defaultProps.dataTestSubj,
-    };
-
-    const { getByTestId } = renderComp(props);
-
-    expect(getByTestId('ruleTypeId').textContent).toContain('Inventory threshold breached');
-  });
 
   it('should display an active badge when alert is active', async () => {
     const { getByText } = renderComp(defaultProps);

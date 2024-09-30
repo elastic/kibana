@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
+  EuiLoadingSpinner,
   EuiTabbedContentTab,
   useEuiTheme,
 } from '@elastic/eui';
@@ -36,7 +37,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { PageTitle, pageTitleContent } from './components/page_title';
+import { PageTitleContent } from './components/page_title_content';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -67,6 +68,16 @@ const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
+
+export const getPageTitle = (ruleCategory: string) => {
+  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
+    defaultMessage:
+      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
+    values: {
+      ruleCategory,
+    },
+  });
+};
 
 export function AlertDetails() {
   const {
@@ -154,7 +165,7 @@ export function AlertDetails() {
     },
     {
       text: alertDetail
-        ? pageTitleContent(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        ? getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
         : defaultBreadcrumb,
     },
   ]);
@@ -274,8 +285,13 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <PageTitle
+        pageTitle: alertDetail?.formatted ? (
+          getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        ) : (
+          <EuiLoadingSpinner />
+        ),
+        children: (
+          <PageTitleContent
             alert={alertDetail?.formatted ?? null}
             alertStatus={alertStatus}
             dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}

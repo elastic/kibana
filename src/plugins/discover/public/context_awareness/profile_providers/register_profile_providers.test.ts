@@ -8,7 +8,6 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { DiscoverStartPlugins } from '../../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_pofile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
@@ -70,12 +69,15 @@ describe('registerEnabledProfileProviders', () => {
 
 describe('registerProfileProviders', () => {
   it('should register enabled experimental profile providers', async () => {
-    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      documentProfileServiceMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
     await registerProfileProviders({
-      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -84,6 +86,7 @@ describe('registerProfileProviders', () => {
         exampleDataSourceProfileProvider.profileId,
         exampleDocumentProfileProvider.profileId,
       ],
+      services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({
@@ -106,16 +109,20 @@ describe('registerProfileProviders', () => {
   });
 
   it('should not register disabled experimental profile providers', async () => {
-    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      documentProfileServiceMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
     await registerProfileProviders({
-      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({

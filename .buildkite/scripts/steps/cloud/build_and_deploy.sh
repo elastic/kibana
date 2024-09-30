@@ -68,7 +68,6 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
-    .resources.enterprise_search[0].plan.enterprise_search.version = "'$VERSION'" |
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 

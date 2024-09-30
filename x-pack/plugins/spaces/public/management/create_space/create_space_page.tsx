@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 
 import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -92,10 +91,6 @@ export class CreateSpacePage extends Component<Props, State> {
     };
   }
 
-  private filterSpaceFeatures = (features: KibanaFeature[]) => {
-    return features.filter((feature) => feature.scope?.includes(KibanaFeatureScope.Spaces));
-  };
-
   public async componentDidMount() {
     if (!this.props.capabilities.spaces.manage) {
       return;
@@ -108,8 +103,7 @@ export class CreateSpacePage extends Component<Props, State> {
         await this.loadSpace(spaceId, getFeatures());
       } else {
         const features = await getFeatures();
-
-        this.setState({ isLoading: false, features: this.filterSpaceFeatures(features) });
+        this.setState({ isLoading: false, features });
       }
     } catch (e) {
       notifications.toasts.addError(e, {
@@ -416,7 +410,6 @@ export class CreateSpacePage extends Component<Props, State> {
         spacesManager.getSpace(spaceId),
         featuresPromise,
       ]);
-
       if (space) {
         if (onLoadSpace) {
           onLoadSpace(space);
@@ -433,7 +426,7 @@ export class CreateSpacePage extends Component<Props, State> {
               !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
             customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
           },
-          features: this.filterSpaceFeatures(features),
+          features,
           originalSpace: space,
           isLoading: false,
         });
