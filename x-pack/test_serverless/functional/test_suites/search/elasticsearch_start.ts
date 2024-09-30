@@ -133,51 +133,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);
-      it('should have file upload link', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
-      });
+        it('should have file upload link', async () => {
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+          await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
+        });
 
-      it('should have o11y links', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
-        await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+        it('should have o11y links', async () => {
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+          await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
+          await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+        });
       });
-    });
-    describe('viewer', function () {
-      before(async () => {
-        await pageObjects.svlCommonPage.loginAsViewer();
-        await deleteAllTestIndices();
-      });
-      beforeEach(async () => {
-        await svlSearchNavigation.navigateToElasticsearchStartPage();
-      });
-      after(async () => {
-        await deleteAllTestIndices();
-      });
+      describe('viewer', function () {
+        before(async () => {
+          await pageObjects.svlCommonPage.loginAsViewer();
+          await deleteAllTestIndices();
+        });
+        beforeEach(async () => {
+          await svlSearchNavigation.navigateToElasticsearchStartPage();
+        });
+        after(async () => {
+          await deleteAllTestIndices();
+        });
 
-      it('should default to code view when lacking create index permissions', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
-      });
+        it('should default to code view when lacking create index permissions', async () => {
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+          await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
+          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
+        });
 
-      it('should not create an API key if the user only has viewer permissions', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-        await pageObjects.svlApiKeys.expectNoPermissionsMessage();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
-        expect(apiKey).to.be(null);
-      });
+        it('should not create an API key if the user only has viewer permissions', async () => {
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+          await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+          await pageObjects.svlApiKeys.expectNoPermissionsMessage();
+          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
+          expect(apiKey).to.be(null);
+        });
 
-      it('should redirect to index details when index is created via API', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-        await es.indices.create({ index: 'test-my-api-index' });
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        it('should redirect to index details when index is created via API', async () => {
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+          await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+          await es.indices.create({ index: 'test-my-api-index' });
+          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        });
       });
     });
   });
