@@ -71,12 +71,7 @@ export const getModelStateColor = (
         }),
       };
     case MODEL_STATE.NOT_DOWNLOADED:
-      return {
-        color: '#d4dae5',
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.notDownloadedName', {
-          defaultMessage: 'Not downloaded',
-        }),
-      };
+      return null;
     default:
       return null;
   }
