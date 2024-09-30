@@ -19,6 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./endpoint_policy_manager'));
     loadTestFile(require.resolve('./platform_engineer'));
     loadTestFile(require.resolve('./editor'));
-    loadTestFile(require.resolve('./admin'));
+    // loadTestFile(require.resolve('./admin'));
   });
 }

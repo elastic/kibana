@@ -22,7 +22,6 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteConnector } from '../../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
   const es = getService('es');
@@ -39,12 +38,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     after(async () => {
-      await deleteConnector(supertest, webhookAction.id);
+      await deleteConnector(admin, webhookAction.id);
     });
 
-    beforeEach(async () => {
-      await deleteAllRules(supertest, log);
-      await deleteAllAlerts(supertest, log, es);
+    afterEach(async () => {
+      await deleteAllRules(admin, log);
+      await deleteAllAlerts(admin, log, es);
     });
 
     describe('create connector', () => {
@@ -60,8 +59,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // Expected 403, getting 200
     describe.skip('update action', () => {
+      afterEach(async () => {
+        await deleteAllRules(admin, log);
+        await deleteAllAlerts(admin, log, es);
+      });
+
       it('should return 403 for threat_intelligence_analyst', async () => {
-        await supertest
+        await admin
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -93,8 +97,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // Expected 403, getting 200
     describe.skip('remove action', () => {
+      afterEach(async () => {
+        await deleteAllRules(admin, log);
+        await deleteAllAlerts(admin, log, es);
+      });
+
       it('should return 403 for threat_intelligence_analyst', async () => {
-        await supertest
+        await admin
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')

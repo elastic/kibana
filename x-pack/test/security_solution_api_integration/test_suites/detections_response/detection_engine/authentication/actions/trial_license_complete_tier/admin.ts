@@ -41,11 +41,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteConnector(admin, webhookAction.id);
     });
 
-    afterEach(async () => {
-      await deleteAllRules(admin, log);
-      await deleteAllAlerts(admin, log, es);
-    });
-
     describe('create connector', () => {
       it('should return 200 for admin', async () => {
         await admin
@@ -58,6 +53,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('update action', () => {
+      afterEach(async () => {
+        await deleteAllRules(admin, log);
+        await deleteAllAlerts(admin, log, es);
+      });
+
       it('should return 200 for admin', async () => {
         await admin
           .post(DETECTION_ENGINE_RULES_URL)
@@ -90,6 +90,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('remove action', () => {
+      afterEach(async () => {
+        await deleteAllRules(admin, log);
+        await deleteAllAlerts(admin, log, es);
+      });
+
       it('should return 200 for admin', async () => {
         await admin
           .post(DETECTION_ENGINE_RULES_URL)
