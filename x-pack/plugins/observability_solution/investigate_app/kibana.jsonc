@@ -12,6 +12,7 @@
       "observabilityAIAssistant",
       "observabilityShared",
       "lens",
+      "charts",
       "dataViews",
       "data",
       "embeddable",
@@ -26,7 +27,7 @@
     "requiredBundles": [
       "esql",
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

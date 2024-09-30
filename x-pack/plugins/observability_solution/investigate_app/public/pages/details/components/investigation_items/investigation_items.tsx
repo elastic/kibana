@@ -6,8 +6,9 @@
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { InvestigateTimeLine } from '../investigation_timeline/investigation_timeline';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
@@ -17,8 +18,8 @@ export function InvestigationItems() {
   const { globalParams, updateInvestigationParams } = useInvestigation();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <InvestigationSearchBar
           dateRangeFrom={globalParams.timeRange.from}
           dateRangeTo={globalParams.timeRange.to}
@@ -31,13 +32,19 @@ export function InvestigationItems() {
             updateInvestigationParams({ timeRange: nextTimeRange });
           }}
         />
-      </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <InvestigationItemsList />
-      </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <InvestigateTimeLine />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <InvestigationItemsList />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
 
       <AddInvestigationItem />
-    </EuiFlexGroup>
+    </>
   );
 }
