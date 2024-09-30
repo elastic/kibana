@@ -357,7 +357,7 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
       rowIndex: 0,
     }
@@ -389,7 +389,9 @@ export class DataGridService extends FtrService {
       throw new Error('Unable to find row toggle element');
     }
 
-    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    if (defaultTabId !== false) {
+      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    }
   }
 
   public async isShowingDocViewer() {
