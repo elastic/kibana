@@ -41,7 +41,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveEventHandler: async ({ config, secrets, logger, scopedClusterClient, isUpdate }) => {
-    const esClient = scopedClusterClient?.asCurrentUser;
+    const esClient = scopedClusterClient?.asInternalUser;
     try {
       const taskSettings = config?.taskTypeConfig
         ? {
@@ -88,7 +88,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     }
   },
   postDeleteEventHandler: async ({ config, logger, scopedClusterClient }) => {
-    const esClient = scopedClusterClient?.asCurrentUser;
+    const esClient = scopedClusterClient?.asInternalUser;
     try {
       await esClient?.transport.request({
         path: `/_inference/${config?.taskType}/${config?.inferenceId}`,

@@ -432,7 +432,6 @@ describe('create()', () => {
         },
       ]
     `);
-    expect(preSaveEvent).toHaveBeenCalledTimes(1);
   });
 
   test('validates config', async () => {
@@ -1980,6 +1979,27 @@ describe('getOAuthAccessToken()', () => {
 describe('delete()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to delete actions', async () => {
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'delete' });
     });
@@ -1997,11 +2017,53 @@ describe('delete()', () => {
     });
 
     test(`deletes any existing authorization tokens`, async () => {
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
       await actionsClient.delete({ id: '1' });
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
@@ -2012,6 +2074,27 @@ describe('delete()', () => {
 
   describe('auditLogger', () => {
     test('logs audit event when deleting a connector', async () => {
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          isMissingSecrets: false,
+        },
+        references: [],
+      });
       await actionsClient.delete({ id: '1' });
 
       expect(auditLogger.log).toHaveBeenCalledWith(
@@ -2044,8 +2127,29 @@ describe('delete()', () => {
   });
 
   test('calls unsecuredSavedObjectsClient with id', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
@@ -2077,6 +2181,15 @@ describe('delete()', () => {
 
     const expectedResult = Symbol();
     unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-delete',
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
     const result = await actionsClient.delete({ id: 'my-action-delete' });
     expect(result).toEqual(expectedResult);
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
@@ -2166,7 +2279,6 @@ describe('delete()', () => {
 });
 
 describe('update()', () => {
-  const preSaveEvent = jest.fn();
   function updateOperation(): ReturnType<ActionsClient['update']> {
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -2179,9 +2291,6 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveEventHandler: async (params) => {
-        preSaveEvent(params);
-      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -2280,6 +2389,7 @@ describe('update()', () => {
   });
 
   test('updates an action with all given properties', async () => {
+    const preSaveEvent = jest.fn();
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
@@ -2291,6 +2401,9 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
+      preSaveEventHandler: async (params) => {
+        preSaveEvent(params);
+      },
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
