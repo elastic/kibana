@@ -37,6 +37,9 @@ export const validSlackApiChannelsRoute = (
       validate: {
         body: bodySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     handler
   );
