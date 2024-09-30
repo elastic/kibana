@@ -57,63 +57,63 @@ export const initSideNavigation = async (services: Services) => {
 };
 
 // Temporary configuration to render the stack management links in the panel
-const stackManagementLinksOld: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
-  {
-    title: 'Ingest',
-    children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
-  },
-  {
-    title: 'Data',
-    children: [
-      { link: 'management:index_management' },
-      { link: 'management:index_lifecycle_management' },
-      { link: 'management:snapshot_restore' },
-      { link: 'management:rollup_jobs' },
-      { link: 'management:transform' },
-      { link: 'management:cross_cluster_replication' },
-      { link: 'management:remote_clusters' },
-      { link: 'management:migrate_data' },
-    ],
-  },
-  {
-    title: 'Alerts and Insights',
-    children: [
-      { link: 'management:triggersActions' },
-      { link: 'management:cases' },
-      { link: 'management:triggersActionsConnectors' },
-      { link: 'management:reporting' },
-      { link: 'management:jobsListLink' },
-      { link: 'management:watcher' },
-      { link: 'management:maintenanceWindows' },
-    ],
-  },
-  {
-    title: 'Security',
-    children: [
-      { link: 'management:users' },
-      { link: 'management:roles' },
-      { link: 'management:api_keys' },
-      { link: 'management:role_mappings' },
-    ],
-  },
-  {
-    title: 'Kibana',
-    children: [
-      { link: 'management:dataViews' },
-      { link: 'management:filesManagement' },
-      { link: 'management:objects' },
-      { link: 'management:tags' },
-      { link: 'management:search_sessions' },
-      { link: 'management:aiAssistantManagementSelection' },
-      { link: 'management:spaces' },
-      { link: 'management:settings' },
-    ],
-  },
-  {
-    title: 'Stack',
-    children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
-  },
-];
+// const stackManagementLinksOld: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
+//   {
+//     title: 'Ingest',
+//     children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
+//   },
+//   {
+//     title: 'Data',
+//     children: [
+//       { link: 'management:index_management' },
+//       { link: 'management:index_lifecycle_management' },
+//       { link: 'management:snapshot_restore' },
+//       { link: 'management:rollup_jobs' },
+//       { link: 'management:transform' },
+//       { link: 'management:cross_cluster_replication' },
+//       { link: 'management:remote_clusters' },
+//       { link: 'management:migrate_data' },
+//     ],
+//   },
+//   {
+//     title: 'Alerts and Insights',
+//     children: [
+//       { link: 'management:triggersActions' },
+//       { link: 'management:cases' },
+//       { link: 'management:triggersActionsConnectors' },
+//       { link: 'management:reporting' },
+//       { link: 'management:jobsListLink' },
+//       { link: 'management:watcher' },
+//       { link: 'management:maintenanceWindows' },
+//     ],
+//   },
+//   {
+//     title: 'Security',
+//     children: [
+//       { link: 'management:users' },
+//       { link: 'management:roles' },
+//       { link: 'management:api_keys' },
+//       { link: 'management:role_mappings' },
+//     ],
+//   },
+//   {
+//     title: 'Kibana',
+//     children: [
+//       { link: 'management:dataViews' },
+//       { link: 'management:filesManagement' },
+//       { link: 'management:objects' },
+//       { link: 'management:tags' },
+//       { link: 'management:search_sessions' },
+//       { link: 'management:aiAssistantManagementSelection' },
+//       { link: 'management:spaces' },
+//       { link: 'management:settings' },
+//     ],
+//   },
+//   {
+//     title: 'Stack',
+//     children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
+//   },
+// ];
 
 // Temporary configuration to render the stack management links in the panel
 const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
