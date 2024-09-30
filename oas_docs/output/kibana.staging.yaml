@@ -6948,7 +6948,7 @@ paths:
         feature privileges, depending on the owner of the cases you're seeking.
       operationId: findCasesDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_assignees'
+        - $ref: '#/components/parameters/Cases_assignees_filter'
         - $ref: '#/components/parameters/Cases_category'
         - $ref: '#/components/parameters/Cases_defaultSearchOperator'
         - $ref: '#/components/parameters/Cases_from'
@@ -24388,7 +24388,7 @@ components:
       schema:
         example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
         type: string
-    Cases_assignees:
+    Cases_assignees_filter:
       description: >
         Filters the returned cases by assignees. Valid values are `none` or
         unique identifiers for the user profiles. These identifiers can be found
@@ -40005,9 +40005,7 @@ components:
           description: A description for the SLO.
           type: string
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: >-
             A optional and unique identifier for the SLO. Must be between 8 and
@@ -40166,6 +40164,21 @@ components:
           type: number
       title: Find SLO response
       type: object
+    SLOs_group_by:
+      description: >-
+        optional group by field or fields to use to generate an SLO per distinct
+        value
+      example:
+        - - service.name
+        - service.name
+        - - service.name
+          - service.environment
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      title: Group by
     SLOs_indicator_properties_apm_availability:
       description: Defines properties for the APM availability indicator type
       type: object
@@ -40756,9 +40769,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -40842,9 +40853,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -41065,6 +41074,8 @@ components:
         description:
           description: A description for the SLO.
           type: string
+        groupBy:
+          $ref: '#/components/schemas/SLOs_group_by'
         indicator:
           oneOf:
             - $ref: '#/components/schemas/SLOs_indicator_properties_custom_kql'
