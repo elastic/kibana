@@ -71,6 +71,7 @@ export async function mountManagementSection(
     },
     indexPatternManagementStart,
   ] = await getStartServices();
+
   const canSave = dataViews.getCanSaveSync();
 
   if (!canSave) {
@@ -91,6 +92,7 @@ export async function mountManagementSection(
     chrome,
     uiSettings,
     settings,
+    share,
     notifications,
     overlays,
     unifiedSearch,
