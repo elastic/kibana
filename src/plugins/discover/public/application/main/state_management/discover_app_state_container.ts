@@ -265,10 +265,6 @@ export const getDiscoverAppStateContainer = ({
     if (!currentSavedSearch.id) {
       const { columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
-      console.error(
-        'Reset profile state from initializeAndSync',
-        JSON.stringify({ columns, rowHeight }, null, 2)
-      );
       internalStateContainer.transitions.setResetDefaultProfileState({
         columns: columns === undefined,
         rowHeight: rowHeight === undefined,

@@ -36,7 +36,6 @@ export async function changeDataView(
   }
 ) {
   addLog('[ui] changeDataView', { id });
-  console.error('Triggered changeDataView');
 
   const { dataViews, uiSettings } = services;
   const dataView = internalState.getState().dataView;
@@ -44,7 +43,6 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   internalState.transitions.setIsDataViewLoading(true);
-  console.error('Reset profile state from changeDataView');
   internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 
   try {

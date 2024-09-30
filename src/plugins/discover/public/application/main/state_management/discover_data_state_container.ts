@@ -282,16 +282,11 @@ export function getDataStateContainer({
                 });
               };
 
-              console.error('Checking if has data view', dataView?.id);
               if (!dataView) {
                 clearResetProfileState();
                 return;
               }
 
-              console.error(
-                'Getting default profile state',
-                JSON.stringify(resetDefaultProfileState, null, 2)
-              );
               const stateUpdate = getDefaultProfileState({
                 profilesManager,
                 resetDefaultProfileState,
@@ -301,15 +296,11 @@ export function getDataStateContainer({
               });
 
               if (!stateUpdate) {
-                console.error('No default profile state found');
                 clearResetProfileState();
                 return;
               }
 
-              console.error('Default profile state found', JSON.stringify(stateUpdate, null, 2));
               await appStateContainer.replaceUrlState(stateUpdate);
-
-              console.error('Clear reset profile state after fetch');
               clearResetProfileState();
             }
           );
