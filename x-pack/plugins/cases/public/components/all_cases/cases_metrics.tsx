@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -68,23 +68,22 @@ export const CasesMetrics: React.FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiDescriptionList
+            <EuiStat
               data-test-subj={'mttrStatsHeader'}
-              textStyle="reverse"
-              listItems={[
-                {
-                  title: (
-                    <>
-                      {ATTC_STAT} <EuiIconTip content={ATTC_DESCRIPTION} position="right" />
-                    </>
-                  ),
-                  description: isCasesMetricsLoading ? (
-                    <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
-                  ) : (
-                    mttrValue
-                  ),
-                },
-              ]}
+              description={
+                <>
+                  {ATTC_STAT} <EuiIconTip content={ATTC_DESCRIPTION} position="right" />
+                </>
+              }
+              title={
+                isCasesMetricsLoading ? (
+                  <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
+                ) : (
+                  mttrValue
+                )
+              }
+              titleSize="xs"
+              text-align="left"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
