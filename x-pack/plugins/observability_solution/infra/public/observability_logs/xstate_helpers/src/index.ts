@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from '@kbn/xstate-utils';
-
 export * from './invalid_state_callout';
 export * from './state_machine_playground';

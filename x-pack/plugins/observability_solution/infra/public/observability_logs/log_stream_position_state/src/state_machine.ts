@@ -10,8 +10,8 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
 import { actions, ActorRefFrom, createMachine, EmittedFrom, SpecialTargets } from 'xstate';
+import { OmitDeprecatedState, sendIfDefined } from '@kbn/xstate-utils';
 import { isSameTimeKey } from '../../../../common/time';
-import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
 import { DESIRED_BUFFER_PAGES, RELATIVE_END_UPDATE_DELAY } from './defaults';
 import { LogStreamPositionNotificationEventSelectors } from './notifications';
 import type {
