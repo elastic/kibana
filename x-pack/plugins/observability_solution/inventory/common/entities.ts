@@ -7,6 +7,13 @@
 import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { isRight } from 'fp-ts/lib/Either';
+import {
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from './es_fields/entities';
 
 export const entityTypeRt = t.union([
   t.literal('service'),
@@ -57,3 +64,29 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   },
   (arr) => arr.join()
 );
+
+interface BaseEntity {
+  [ENTITY_LAST_SEEN]: string;
+  [ENTITY_ID]: string;
+  [ENTITY_TYPE]: EntityType;
+  [ENTITY_DISPLAY_NAME]: string;
+  [ENTITY_DEFINITION_ID]: string;
+}
+
+interface ServiceEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'service';
+  'service.name': string;
+  'service.environment'?: string | null;
+}
+
+interface HostEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'host';
+  'host.name': string;
+}
+
+interface ContainerEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'container';
+  'container.id': string;
+}
+
+export type Entity = ServiceEntity | HostEntity | ContainerEntity;
