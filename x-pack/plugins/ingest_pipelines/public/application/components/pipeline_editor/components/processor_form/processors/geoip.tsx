@@ -9,20 +9,30 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
+import { groupBy, map } from 'lodash';
 
-import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  UseField,
+  ToggleField,
+  ComboBoxField,
+} from '../../../../../../shared_imports';
 
+import { useKibana } from '../../../../../../shared_imports';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
+import type { GeoipDatabase } from '../../../../../../../common/types';
+import { getTypeLabel } from '../../../../../sections/manage_processors/constants';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
   database_file: {
-    type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v === 'GeoLite2-City.mmdb' || v === '' ? undefined : v),
+    type: FIELD_TYPES.COMBO_BOX,
+    deserializer: to.arrayOfStrings,
+    serializer: (v: string[]) => (v.length ? v[0] : undefined),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),
@@ -56,6 +66,20 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const GeoIP: FunctionComponent = () => {
+  const { services } = useKibana();
+  const { data, isLoading } = services.api.useLoadGeoipDatabases();
+
+  const dataAsOptions = (data || []).map((item) => ({
+    id: item.id,
+    type: item.type,
+    label: item.name,
+  }));
+  const optionsByGroup = groupBy(dataAsOptions, 'type');
+  const groupedOptions = map(optionsByGroup, (items, groupName) => ({
+    label: getTypeLabel(groupName as GeoipDatabase['type']),
+    options: map(items, (item) => item),
+  }));
+
   return (
     <>
       <FieldNameField
@@ -74,7 +98,17 @@ export const GeoIP: FunctionComponent = () => {
         )}
       />
 
-      <UseField component={Field} config={fieldsConfig.database_file} path="fields.database_file" />
+      <UseField
+        component={ComboBoxField}
+        config={fieldsConfig.database_file}
+        path="fields.database_file"
+        euiFieldProps={{
+          isLoading,
+          noSuggestions: false,
+          singleSelection: { asPlainText: true },
+          options: groupedOptions,
+        }}
+      />
 
       <PropertiesField
         helpText={i18n.translate(
