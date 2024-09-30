@@ -44,7 +44,7 @@ export class CustomizeAvatar extends Component<Props, State> {
     const { validator, space } = this.props;
 
     return (
-      <SectionPanel dataTestSubj="generalPanel">
+      <SectionPanel dataTestSubj="customizeAvatarSection">
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">
