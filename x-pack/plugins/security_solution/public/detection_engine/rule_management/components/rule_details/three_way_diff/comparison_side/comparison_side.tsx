@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { VersionsPicker } from '../versions_picker/versions_picker';
 import type { Version } from '../versions_picker/constants';
 import { SelectedVersions } from '../versions_picker/constants';
@@ -17,6 +16,7 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import { getSubfieldChanges } from './get_subfield_changes';
 import { SubfieldChanges } from './subfield_changes';
+import { SideHeader } from '../components/side_header';
 
 interface ComparisonSideProps<FieldName extends keyof DiffableAllFields> {
   fieldName: FieldName;
@@ -42,12 +42,13 @@ export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
 
   return (
     <>
-      <VersionsPicker
-        hasBaseVersion={fieldThreeWayDiff.has_base_version}
-        selectedVersions={selectedVersions}
-        onChange={setSelectedVersions}
-      />
-      <EuiSpacer size="m" />
+      <SideHeader>
+        <VersionsPicker
+          hasBaseVersion={fieldThreeWayDiff.has_base_version}
+          selectedVersions={selectedVersions}
+          onChange={setSelectedVersions}
+        />
+      </SideHeader>
       <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
     </>
   );
