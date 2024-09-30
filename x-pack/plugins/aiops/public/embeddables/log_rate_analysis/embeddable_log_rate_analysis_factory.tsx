@@ -22,6 +22,7 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
@@ -197,10 +198,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
           const lastReloadRequestTime = useObservable(reload$, Date.now());
           const timeRange = useObservable(timeRange$, undefined);
 
-          let embeddingOrigin;
-          if (apiHasExecutionContext(parentApi)) {
-            embeddingOrigin = parentApi.executionContext.type;
-          }
+          const embeddingOrigin = apiHasExecutionContext(parentApi)
+            ? parentApi.executionContext.type
+            : undefined;
 
           return (
             <LogRateAnalysisComponent
