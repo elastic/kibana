@@ -412,6 +412,7 @@ export function Detail() {
                   ...(defaultNavigateOptions[1]?.state ?? {}),
                   onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
                   onCancelUrl: onboardingLink,
+                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
                 },
               },
             ]
