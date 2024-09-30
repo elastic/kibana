@@ -12,7 +12,6 @@ import { fetchRuleVersionsTriad } from '../../../../../../detection_engine/prebu
 import { createPrebuiltRuleObjectsClient } from '../../../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleAssetsClient } from '../../../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { PrebuiltRulesMapByName } from '../../types';
-// import { getVersionBuckets } from '../../../../../detection_engine/prebuilt_rules/model/rule_versions/get_version_buckets';
 
 interface RetrievePrebuiltRulesParams {
   soClient: SavedObjectsClientContract;
