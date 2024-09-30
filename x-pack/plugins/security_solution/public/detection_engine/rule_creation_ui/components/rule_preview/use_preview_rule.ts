@@ -65,7 +65,7 @@ export const usePreviewRule = ({
     const createPreviewId = async () => {
       if (rule != null) {
         try {
-          trackPreview(enableLoggedRequests);
+          trackPreview(enableLoggedRequests ?? false);
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
             rule: {
