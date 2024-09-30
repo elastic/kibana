@@ -37,7 +37,6 @@ import { getRelatedAlertKuery } from '../../../../../common/utils/alerting/get_r
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
@@ -50,7 +49,6 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 interface AppSectionProps {
   alert: CustomThresholdAlert;
   rule: CustomThresholdRule;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
   setRelatedAlertsKuery: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
@@ -58,7 +56,6 @@ interface AppSectionProps {
 export default function AlertDetailsAppSection({
   alert,
   rule,
-  setAlertSummaryFields,
   setRelatedAlertsKuery,
 }: AppSectionProps) {
   const services = useKibana().services;

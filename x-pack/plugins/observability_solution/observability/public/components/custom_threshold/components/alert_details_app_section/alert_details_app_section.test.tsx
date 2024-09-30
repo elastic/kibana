@@ -76,7 +76,6 @@ jest.mock('../../../../utils/kibana_react', () => ({
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
-  const mockedSetAlertSummaryFields = jest.fn();
   const mockedSetRelatedAlertsKuery = jest.fn();
 
   const renderComponent = (
@@ -89,7 +88,6 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
-            setAlertSummaryFields={mockedSetAlertSummaryFields}
             setRelatedAlertsKuery={mockedSetRelatedAlertsKuery}
           />
         </QueryClientProvider>
@@ -123,7 +121,7 @@ describe('AlertDetailsAppSection', () => {
   it('should set relatedAlertsKuery', async () => {
     renderComponent();
 
-    expect(mockedSetAlertSummaryFields).toBeCalledTimes(2);
+    expect(mockedSetRelatedAlertsKuery).toBeCalledTimes(1);
     expect(mockedSetRelatedAlertsKuery).toHaveBeenLastCalledWith(
       '(tags: "tag 1" or tags: "tag 2") or (host.name: "host-1" or kibana.alert.group.value: "host-1")'
     );
