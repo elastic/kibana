@@ -60,15 +60,15 @@ export function testDocTemplate(mode: 'tsdb' | 'logsdb'): TestDoc {
   };
 }
 
-export function getDataMapping(
-  {
-    tsdb,
-    removeTSDBFields,
-    removeLogsDBFields,
-  }: { tsdb: boolean; removeTSDBFields?: boolean; removeLogsDBFields?: boolean } = {
-    tsdb: false,
-  }
-): Record<string, MappingProperty> {
+export function getDataMapping({
+  mode,
+  removeTSDBFields,
+  removeLogsDBFields,
+}: {
+  mode: 'tsdb' | 'logsdb';
+  removeTSDBFields?: boolean;
+  removeLogsDBFields?: boolean;
+}): Record<string, MappingProperty> {
   const dataStreamMapping: Record<string, MappingProperty> = {
     '@timestamp': {
       type: 'date',
@@ -126,23 +126,24 @@ export function getDataMapping(
         },
       },
     },
-    host: tsdb
-      ? {
-          fields: {
-            keyword: {
-              ignore_above: 256,
-              type: 'keyword',
+    host:
+      mode === 'tsdb'
+        ? {
+            fields: {
+              keyword: {
+                ignore_above: 256,
+                type: 'keyword',
+              },
+            },
+            type: 'text',
+          }
+        : {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
             },
           },
-          type: 'text',
-        }
-      : {
-          properties: {
-            name: {
-              type: 'keyword',
-            },
-          },
-        },
     index: {
       fields: {
         keyword: {
@@ -222,7 +223,7 @@ export function getDataMapping(
     },
   };
 
-  if (tsdb) {
+  if (mode === 'tsdb') {
     // augment the current mapping
     for (const [fieldName, fieldMapping] of Object.entries(dataStreamMapping || {})) {
       if (
@@ -397,7 +398,7 @@ export function setupScenarioRunner(
                 await dataStreams.createDataStream(
                   index,
                   getDataMapping({
-                    tsdb: Boolean(tsdb),
+                    mode: Boolean(tsdb) ? 'tsdb' : 'logsdb',
                     removeTSDBFields: Boolean(removeTSDBFields || logsdb),
                     removeLogsDBFields,
                   }),
@@ -409,7 +410,7 @@ export function setupScenarioRunner(
                   index,
                   mappings: {
                     properties: getDataMapping({
-                      tsdb: Boolean(tsdb),
+                      mode: Boolean(tsdb) ? 'tsdb' : 'logsdb',
                       removeTSDBFields,
                       removeLogsDBFields,
                     }),
