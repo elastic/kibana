@@ -21,11 +21,16 @@ export function toAsyncKibanaSearchResponse(
   headers: IncomingHttpHeaders,
   requestParams?: ConnectionRequestParams
 ): IKibanaSearchResponse<SqlGetAsyncResponse> {
+  const responseIsStream = response.id === undefined;
   return {
-    id: headers['x-elasticsearch-async-id'] as string,
+    id: responseIsStream ? (headers['x-elasticsearch-async-id'] as string) : response.id,
     rawResponse: response,
-    isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
-    isPartial: headers['x-elasticsearch-async-is-partial'] === '?1',
+    isRunning: responseIsStream
+      ? headers['x-elasticsearch-async-is-running'] === '?1'
+      : response.is_running,
+    isPartial: responseIsStream
+      ? headers['x-elasticsearch-async-is-partial'] === '?1'
+      : response.is_partial,
     ...(headers?.warning ? { warning: headers?.warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
   };
