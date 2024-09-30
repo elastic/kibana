@@ -8,7 +8,32 @@ import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { serviceInstanceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
-import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
+import {
+  AGENT_ACTIVATION_METHOD,
+  AGENT_NAME,
+  AGENT_VERSION,
+  AT_TIMESTAMP,
+  HOST_ARCHITECTURE,
+  HOST_HOSTNAME,
+  HOST_IP,
+  HOST_NAME,
+  HOST_OS_PLATFORM,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+  METRICSET_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
+  SERVICE_FRAMEWORK_VERSION,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_LANGUAGE_VERSION,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
+} from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -31,6 +56,34 @@ export interface ServiceInstanceMetadataDetailsResponse {
   host?: Host;
   cloud?: Cloud;
 }
+const SERVICE_INSTANCE_METADATA_FIELDS = [
+  AT_TIMESTAMP,
+  AGENT_NAME,
+  AGENT_VERSION,
+  AGENT_ACTIVATION_METHOD,
+  HOST_ARCHITECTURE,
+  HOST_HOSTNAME,
+  HOST_NAME,
+  HOST_IP,
+  HOST_OS_PLATFORM,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
+  SERVICE_FRAMEWORK_VERSION,
+  SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_LANGUAGE_VERSION,
+  SERVICE_VERSION,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+  // todo fix in the mapper: add all fields
+  'container*',
+  'cloud*',
+];
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
@@ -87,7 +140,7 @@ export async function getServiceInstanceMetadataDetails({
           terminate_after: 1,
           size: 1,
           query: { bool: { filter } },
-          fields: ['*'],
+          fields: SERVICE_INSTANCE_METADATA_FIELDS,
         },
       }
     );
@@ -111,7 +164,7 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
             },
           },
-          fields: ['*'],
+          fields: SERVICE_INSTANCE_METADATA_FIELDS,
         },
       }
     );
