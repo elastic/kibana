@@ -8,6 +8,9 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isFieldMissingOrEmpty } from '../painless_utils';
 
+/**
+ * This function creates an ingest processor step that removes a field if it is missing or empty.
+ */
 export const getRemoveEmptyFieldSteps = (fields: string[]): IngestProcessorContainer[] =>
   fields.map((field) => {
     return {

@@ -8,7 +8,11 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isFieldMissingOrEmpty } from '../painless_utils';
 
-export const arrayToSingleValueStep = ({ field }: { field: string }): IngestProcessorContainer => {
+/**
+ * This function creates an ingest processor step that takes the first value
+ * from a list or set and assigns it to the field.
+ */
+export const takeFirstValueStep = (field: string): IngestProcessorContainer => {
   const ctxField = `ctx.${field}`;
   return {
     script: {

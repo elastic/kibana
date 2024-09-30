@@ -8,12 +8,15 @@
 import { isFieldMissingOrEmpty } from '../painless_utils';
 import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
 
-// A field retention operator that collects up to `maxLength` values of the field. e.g collect up to 10 values of ip_address
 export interface CollectValues extends BaseFieldRetentionOperator {
   operation: 'collect_values';
   maxLength: number;
 }
 
+/**
+ * A field retention operator that collects up to `maxLength` values of the specified field.
+ * Values are first collected from the field, then from the enrich field if the field is not present or empty.
+ */
 export const collectValuesProcessor: FieldRetentionOperatorBuilder<CollectValues> = (
   { field, maxLength },
   { enrichField }

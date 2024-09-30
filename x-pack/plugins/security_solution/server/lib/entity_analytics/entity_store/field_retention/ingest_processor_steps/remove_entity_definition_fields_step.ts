@@ -7,6 +7,10 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
+/**
+ * This function creates an ingest processor step that removes entity definition fields which
+ * are not ECS.
+ */
 export const removeEntityDefinitionFieldsStep = (): IngestProcessorContainer => ({
   remove: {
     ignore_failure: true,

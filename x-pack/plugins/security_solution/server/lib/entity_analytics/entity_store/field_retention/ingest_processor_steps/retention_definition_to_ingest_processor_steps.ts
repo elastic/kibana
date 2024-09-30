@@ -10,6 +10,10 @@ import type { FieldRetentionDefinition } from '../field_retention_definitions';
 import { fieldOperatorToIngestProcessor } from '../operators';
 import type { FieldRetentionOperatorBuilderOptions } from '../operators/types';
 
+/**
+ * Converts a field retention definition to the ingest processor steps
+ * required to apply the field retention policy.
+ */
 export const retentionDefinitionToIngestProcessorSteps = (
   fieldRetentionDefinition: FieldRetentionDefinition,
   options: FieldRetentionOperatorBuilderOptions

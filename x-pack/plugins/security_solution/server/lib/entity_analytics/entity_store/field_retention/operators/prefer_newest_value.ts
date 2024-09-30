@@ -12,6 +12,10 @@ export interface PreferNewestValue extends BaseFieldRetentionOperator {
   operation: 'prefer_newest_value';
 }
 
+/**
+ * A field retention operator that prefers the newest value of the specified field.
+ * If the field is missing or empty, the value from the enrich field is used.
+ */
 export const preferNewestValueProcessor: FieldRetentionOperatorBuilder<PreferNewestValue> = (
   { field },
   { enrichField }
