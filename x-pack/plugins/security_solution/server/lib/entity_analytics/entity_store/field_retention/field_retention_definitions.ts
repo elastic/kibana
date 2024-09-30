@@ -6,7 +6,14 @@
  */
 
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
-import type { FieldRetentionDefinition } from './types';
+import type { FieldRetentionOperator } from './operators';
+
+export interface FieldRetentionDefinition {
+  version: number;
+  entityType: EntityType;
+  matchField: string;
+  fields: FieldRetentionOperator[];
+}
 
 const DEFAULT_FIELD_RETENTION_COUNT = 10;
 
