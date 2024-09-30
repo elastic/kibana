@@ -13,16 +13,22 @@ import type {
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 
 interface RuleUpgradeConflictsResolverTabProps {
+  ruleId: RuleSignatureId;
   ruleUpgradeState: RuleUpgradeState;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
+  setRuleFieldResolvedValue: (ruleId: RuleSignatureId) => SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolverTab({
+  ruleId,
   ruleUpgradeState,
   setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverTabProps): JSX.Element {
+  // TODO: Find a better name for this function to avoid confusion with the one that is not ruleId-specific
+  const setFieldResolvedValueForRule = setRuleFieldResolvedValue(ruleId);
+
   return (
     <>
       <EuiSpacer size="s" />
@@ -30,7 +36,7 @@ export function RuleUpgradeConflictsResolverTab({
       <EuiSpacer size="s" />
       <RuleUpgradeConflictsResolver
         ruleUpgradeState={ruleUpgradeState}
-        setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+        setRuleFieldResolvedValue={setFieldResolvedValueForRule}
       />
     </>
   );

@@ -14,7 +14,7 @@ interface FinalEditContextType {
   fieldName: string;
   finalDiffableRule: DiffableRule;
   setReadOnlyMode: () => void;
-  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 const FinalEditContext = createContext<FinalEditContextType | null>(null);

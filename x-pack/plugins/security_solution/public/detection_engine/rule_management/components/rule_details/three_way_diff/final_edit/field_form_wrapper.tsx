@@ -20,7 +20,7 @@ export function FieldFormWrapper({
   component: FieldComponent,
   fieldFormSchema,
 }: FieldFormWrapperProps) {
-  const { fieldName, finalDiffableRule, setReadOnlyMode, setFieldResolvedValue } =
+  const { fieldName, finalDiffableRule, setReadOnlyMode, setRuleFieldResolvedValue } =
     useFinalEditContext();
 
   const { form } = useForm({
@@ -28,7 +28,7 @@ export function FieldFormWrapper({
     defaultValue: { [fieldName]: finalDiffableRule[fieldName] },
     serializer: (value) => value,
     onSubmit: async (formData) => {
-      setFieldResolvedValue({
+      setRuleFieldResolvedValue({
         fieldName: fieldName as keyof DiffableAllFields, // TODO: This is temporary until we decide which type to use
         resolvedValue: formData[fieldName],
       });

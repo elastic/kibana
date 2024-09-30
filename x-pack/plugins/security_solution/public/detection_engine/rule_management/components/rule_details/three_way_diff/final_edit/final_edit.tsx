@@ -20,18 +20,18 @@ interface FinalEditProps {
   fieldName: string;
   finalDiffableRule: DiffableRule;
   setReadOnlyMode: () => void;
-  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function FinalEdit({
   fieldName,
   finalDiffableRule,
   setReadOnlyMode,
-  setFieldResolvedValue,
+  setRuleFieldResolvedValue,
 }: FinalEditProps) {
   return (
     <FinalEditContextProvider
-      value={{ fieldName, finalDiffableRule, setReadOnlyMode, setFieldResolvedValue }}
+      value={{ fieldName, finalDiffableRule, setReadOnlyMode, setRuleFieldResolvedValue }}
     >
       <FieldEdit fieldName={fieldName} ruleType={finalDiffableRule.type} />
     </FinalEditContextProvider>

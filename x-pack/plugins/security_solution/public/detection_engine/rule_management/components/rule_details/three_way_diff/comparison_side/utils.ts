@@ -17,7 +17,7 @@ import type {
  *
  * @param version - The version for which the field value is to be picked.
  * @param fieldThreeWayDiff - The three-way diff object containing the field values for different versions.
- * @param finalFieldValue - Final field value: the value that the user expects to see in the upgraded rule.
+ * @param resolvedValue - Field value that the upgraded rule will have.
  * @returns - The field value for the specified version
  */
 export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFields>(

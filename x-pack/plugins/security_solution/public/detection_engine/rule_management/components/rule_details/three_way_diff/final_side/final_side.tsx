@@ -18,13 +18,13 @@ import { FinalEdit } from '../final_edit/final_edit';
 interface FinalSideProps {
   fieldName: string;
   finalDiffableRule: DiffableRule;
-  setFieldResolvedValue: SetRuleFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function FinalSide({
   fieldName,
   finalDiffableRule,
-  setFieldResolvedValue,
+  setRuleFieldResolvedValue,
 }: FinalSideProps): JSX.Element {
   const [mode, setMode] = React.useState<'readonly' | 'edit'>('readonly'); // This is temporary, will be replaced with state from the context
   const setReadOnlyMode = useCallback(() => setMode('readonly'), []);
@@ -45,7 +45,7 @@ export function FinalSide({
           fieldName={fieldName}
           finalDiffableRule={finalDiffableRule}
           setReadOnlyMode={setReadOnlyMode}
-          setFieldResolvedValue={setFieldResolvedValue}
+          setRuleFieldResolvedValue={setRuleFieldResolvedValue}
         />
       ) : (
         <FinalReadOnly

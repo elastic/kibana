@@ -33,6 +33,7 @@ export function RuleUpgradeConflictsResolver({
       fieldName={fieldName}
       fieldThreeWayDiff={fieldDiff}
       finalDiffableRule={ruleUpgradeState.finalRule}
+      setRuleFieldResolvedValue={setRuleFieldResolvedValue}
     />
   ));
 
