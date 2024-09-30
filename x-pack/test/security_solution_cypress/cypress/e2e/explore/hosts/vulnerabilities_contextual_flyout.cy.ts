@@ -166,10 +166,6 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     it('should display Vulnerabilities preview under Insights Entities when it has Vulnerabilities Findings', () => {
-      createMockVulnerability(true);
-      cy.reload();
-      expandFirstAlertHostFlyout();
-
       cy.log('check if Vulnerabilities preview title shown');
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
     });
