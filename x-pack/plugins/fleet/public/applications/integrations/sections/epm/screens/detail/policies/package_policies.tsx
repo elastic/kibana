@@ -389,7 +389,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={undefined} // always show the agent policy selector in the flyout~
+          agentPolicy={undefined} // always show the agent policy selector in the flyout
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',
