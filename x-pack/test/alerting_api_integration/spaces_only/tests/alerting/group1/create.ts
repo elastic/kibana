@@ -340,11 +340,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         )
         .expect(200);
 
-      const response = await supertest.get(
-        `${getUrlPrefix(
-          Spaces.space1.id
-        )}/internal/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
-      );
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({ filter: 'alert.attributes.params.risk_score:40' });
 
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');

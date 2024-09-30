@@ -78,7 +78,7 @@ describe('rule_loader', () => {
     jest.restoreAllMocks();
   });
 
-  describe('await validateRuleAndCreateFakeRequest()', () => {
+  describe('validateRuleAndCreateFakeRequest()', () => {
     describe('succeeds', () => {
       test('validates and returns the results', async () => {
         const result = await validateRuleAndCreateFakeRequest({
