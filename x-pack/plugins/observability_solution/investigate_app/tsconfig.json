@@ -61,5 +61,9 @@
     "@kbn/observability-plugin",
     "@kbn/licensing-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/entities-schema",
+    "@kbn/inference-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/datemath",
   ],
 }
