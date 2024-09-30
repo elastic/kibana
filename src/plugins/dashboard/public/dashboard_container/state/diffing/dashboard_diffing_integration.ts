@@ -84,14 +84,16 @@ export function startDiffingDashboardState(
    * Create an observable stream that checks for unsaved changes in the Dashboard state
    * and the state of all of its legacy embeddable children.
    */
-  const dashboardUnsavedChanges = this.anyReducerRun.pipe(
-    startWith(null),
+  const dashboardUnsavedChanges = combineLatest([
+    this.anyReducerRun.pipe(startWith(null)),
+    this.lastSavedInput$,
+  ]).pipe(
     debounceTime(CHANGE_CHECK_DEBOUNCE),
-    switchMap(() => {
+    switchMap(([, lastSavedInput]) => {
       return (async () => {
         const { explicitInput: currentInput } = this.getState();
         const unsavedChanges = await getDashboardUnsavedChanges.bind(this)(
-          this.lastSavedInput$.value,
+          lastSavedInput,
           currentInput
         );
         return unsavedChanges;
