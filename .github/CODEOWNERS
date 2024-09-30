@@ -752,8 +752,8 @@ src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-screenshotting-server @elastic/appex-sharedux
-packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-api @elastic/search-kibana
+packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 x-pack/plugins/search_assistant @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
@@ -766,8 +766,8 @@ x-pack/plugins/search_indices @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
-x-pack/packages/search/shared_ui @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+x-pack/packages/search/shared_ui @elastic/search-kibana
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security

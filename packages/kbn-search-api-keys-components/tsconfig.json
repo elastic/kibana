@@ -7,14 +7,12 @@
     "public/**/*",
   ],
   "kbn_references": [
-    "@kbn/core",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/security-api-key-management",
-    "@kbn/core-security-common",
     "@kbn/search-shared-ui",
-    "@kbn/search-api-keys-api",
+    "@kbn/search-api-keys-api"
   ],
   "exclude": [
     "target/**/*",
