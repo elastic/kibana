@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
+
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+
 import { DashboardContainerInput } from '../../../../common';
-import { pluginServices } from '../../../services/plugin_services';
+import { embeddableService } from '../../../services/kibana_services';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
@@ -75,11 +77,8 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     const explicitInputComparePromises = Object.values(currentValue ?? {}).map(
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
-          const {
-            embeddable: { reactEmbeddableRegistryHasKey },
-          } = pluginServices.getServices();
           const embeddableId = panel.explicitInput.id;
-          if (!embeddableId || reactEmbeddableRegistryHasKey(panel.type)) {
+          if (!embeddableId || embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
             // if this is a new style embeddable, it will handle its own diffing.
             reject();
             return;
