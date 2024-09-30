@@ -202,8 +202,7 @@ export class CreateSpacePage extends Component<Props, State> {
         )}
 
         {this.props.allowFeatureVisibility &&
-          (this.state.space.solution == null ||
-            this.state.space.solution === SOLUTION_VIEW_CLASSIC) && (
+          (!this.state.space.solution || this.state.space.solution === SOLUTION_VIEW_CLASSIC) && (
             <>
               <EuiSpacer />
               <EnabledFeatures

@@ -288,7 +288,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         </>
       )}
 
-      {props.allowFeatureVisibility && (solution == null || solution === SOLUTION_VIEW_CLASSIC) && (
+      {props.allowFeatureVisibility && (!solution || solution === SOLUTION_VIEW_CLASSIC) && (
         <>
           <EuiSpacer />
           <EnabledFeatures
