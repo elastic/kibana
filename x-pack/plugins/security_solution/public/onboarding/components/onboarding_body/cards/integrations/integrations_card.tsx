@@ -22,7 +22,6 @@ export const IntegrationsCard: OnboardingCardComponent = ({
 
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-
   const { getAppUrl, navigateTo } = useNavigation();
   const addAgentLink = getAppUrl({ appId: 'fleet', path: '/agents' });
   const onAddAgentClick = useCallback(() => {

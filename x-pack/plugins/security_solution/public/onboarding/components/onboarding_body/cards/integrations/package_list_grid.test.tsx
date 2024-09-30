@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { PackageListGrid } from './package_list_grid';
 import {
   useStoredIntegrationSearchTerm,

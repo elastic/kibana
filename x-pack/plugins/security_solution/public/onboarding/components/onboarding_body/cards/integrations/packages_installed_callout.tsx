@@ -37,7 +37,6 @@ export const PackageInstalledCallout = React.memo(
             values={{
               desc1: checkCompleteMetadata?.agentStillRequired ? (
                 <FormattedMessage
-                  data-test-subj="agentRequiredText"
                   id="xpack.securitySolution.onboarding.integrationsCard.agent.text"
                   defaultMessage="Elastic Agent is required for one or more of your integrations. Add Elastic Agent"
                 />

@@ -6,11 +6,11 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useIntegrationCardList, useTabMetaData } from './hooks';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useNavigation } from '../../../../../common/lib/kibana';
 import { getFilteredCards } from './utils';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
+  useNavigation: jest.fn(),
 }));
 
 jest.mock('./utils', () => ({
@@ -18,7 +18,9 @@ jest.mock('./utils', () => ({
 }));
 
 describe('useIntegrationCardList', () => {
-  const mockBasePath = '/mock/base/path';
+  const mockUseNavigation = useNavigation as jest.Mock;
+  const mockNavigateTo = jest.fn();
+  const mockGetAppUrl = jest.fn();
   const mockIntegrationsList = [
     {
       id: 'security',
@@ -26,7 +28,6 @@ describe('useIntegrationCardList', () => {
       description: 'Integration for security monitoring',
       categories: ['security'],
       icons: [{ src: 'icon_url', type: 'image' }],
-      installStatus: null,
       integration: 'security',
       title: 'Security Integration',
       url: '/app/integrations/security',
@@ -35,10 +36,9 @@ describe('useIntegrationCardList', () => {
   ];
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        http: { basePath: { get: () => mockBasePath } },
-      },
+    mockUseNavigation.mockReturnValue({
+      navigateTo: mockNavigateTo,
+      getAppUrl: mockGetAppUrl,
     });
   });
 
@@ -55,7 +55,12 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(getFilteredCards).toHaveBeenCalledWith(mockIntegrationsList, undefined, mockBasePath);
+    expect(getFilteredCards).toHaveBeenCalledWith({
+      integrationsList: mockIntegrationsList,
+      customCardNames: undefined,
+      navigateTo: mockNavigateTo,
+      getAppUrl: mockGetAppUrl,
+    });
     expect(result.current).toEqual(mockFilteredCards.integrationCards);
   });
 
@@ -76,11 +81,12 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(getFilteredCards).toHaveBeenCalledWith(
-      mockIntegrationsList,
+    expect(getFilteredCards).toHaveBeenCalledWith({
+      integrationsList: mockIntegrationsList,
       customCardNames,
-      mockBasePath
-    );
+      navigateTo: mockNavigateTo,
+      getAppUrl: mockGetAppUrl,
+    });
     expect(result.current).toEqual([mockFilteredCards.featuredCards['Security Integration']]);
   });
 });

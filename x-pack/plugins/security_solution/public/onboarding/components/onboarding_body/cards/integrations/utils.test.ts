@@ -6,13 +6,17 @@
  */
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { extractFeaturedCards, getFilteredCards } from './utils'; // Update the path accordingly
+import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import { INTEGRATION_APP_ID } from './const';
+import { APP_UI_ID, ONBOARDING_PATH } from '../../../../../../common/constants';
 
 const maxCardHeight = 127;
 const cardTitleLineClamp = 1;
 const cardDescriptionLineClamp = 3;
-const expectedUrl = `/app/integrations?onboardingLink=${encodeURIComponent(
+const expectedPath = `?onboardingLink=${encodeURIComponent(
   '/app/security/get_started'
 )}&onboardingAppId=securitySolutionUI`;
+const expectedUrl = `/app/integrations${expectedPath}`;
 const mockIntegrationCardItem = {
   categories: ['security'],
   description: 'Security integration for monitoring.',
@@ -23,7 +27,6 @@ const mockIntegrationCardItem = {
     },
   ],
   id: 'security-integration',
-  installStatus: null,
   integration: 'security',
   name: 'Security Integration',
   title: 'Security Integration',
@@ -54,8 +57,23 @@ describe('extractFeaturedCards', () => {
 });
 
 describe('getFilteredCards', () => {
+  const mockGetAppUrl = jest
+    .fn()
+    .mockImplementation(({ appId }) =>
+      appId === SECURITY_UI_APP_ID ? '/app/security/get_started' : '/app/integrations'
+    );
+  const mockNavigateTo = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns integration cards without featured cards when no custom cards are provided', () => {
-    const result = getFilteredCards(mockIntegrationCardItems);
+    const result = getFilteredCards({
+      integrationsList: mockIntegrationCardItems,
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
+    });
 
     expect(result).toEqual({
       featuredCards: {},
@@ -67,6 +85,7 @@ describe('getFilteredCards', () => {
           maxCardHeight,
           showInstallationStatus: true,
           url: expectedUrl,
+          onCardClick: expect.any(Function),
         },
       ],
     });
@@ -74,7 +93,12 @@ describe('getFilteredCards', () => {
 
   it('returns both featured cards and integration cards when custom cards are provided', () => {
     const customCards = ['Security Integration'];
-    const result = getFilteredCards(mockIntegrationCardItems, customCards);
+    const result = getFilteredCards({
+      integrationsList: mockIntegrationCardItems,
+      customCardNames: customCards,
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
+    });
 
     expect(result).toEqual({
       featuredCards: {
@@ -85,6 +109,7 @@ describe('getFilteredCards', () => {
           maxCardHeight,
           showInstallationStatus: true,
           url: expectedUrl,
+          onCardClick: expect.any(Function),
         },
       },
       integrationCards: [
@@ -95,8 +120,29 @@ describe('getFilteredCards', () => {
           maxCardHeight,
           showInstallationStatus: true,
           url: expectedUrl,
+          onCardClick: expect.any(Function),
         },
       ],
+    });
+  });
+
+  it("should update routes' state when clicking an integration card", () => {
+    const result = getFilteredCards({
+      integrationsList: mockIntegrationCardItems,
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
+    });
+
+    result.integrationCards[0].onCardClick?.();
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({
+      appId: INTEGRATION_APP_ID,
+      path: expectedPath,
+      state: {
+        onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+        onCancelUrl: '/app/security/get_started',
+        onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+      },
     });
   });
 });
