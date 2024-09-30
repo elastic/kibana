@@ -8,7 +8,11 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
+import {
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+} from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { metadataForDependencyMapping } from '../../utils/es_fields_mappings';
 
@@ -47,7 +51,7 @@ export async function getMetadataForDependency({
           ],
         },
       },
-      fields: ['*'],
+      fields: [SPAN_TYPE, SPAN_SUBTYPE],
       sort: {
         '@timestamp': 'desc',
       },
