@@ -42,7 +42,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     application: { navigateToApp },
   } = useStartServices();
 
-  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
+  const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined;
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
 
@@ -174,7 +174,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       {isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicy}
+            agentPolicy={agentPolicies.length === 1 ? agentPolicies[0] : undefined} // in case of multiple policies, show the selector in the flyout
             onClose={onEnrollmentFlyoutClose}
             isIntegrationFlow={true}
             installedPackagePolicy={{

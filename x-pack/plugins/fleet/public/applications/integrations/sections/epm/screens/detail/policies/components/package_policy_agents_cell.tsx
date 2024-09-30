@@ -8,7 +8,6 @@
 import React, { Fragment, useState, useMemo } from 'react';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiLink,
   EuiPopover,
@@ -19,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverFooter,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,24 +48,22 @@ const AddAgentButton = ({
     setIsHelpOpen(false);
     onAddAgent();
   };
-
-  const button = (
-    <EuiButton
-      iconType="plusInCircle"
-      data-test-subj="addAgentButton"
-      onClick={onAddAgentCloseHelp}
-      size="s"
-      isDisabled={!canAddAgents}
-    >
-      <FormattedMessage
-        id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
-        defaultMessage="Add agent"
-      />
-    </EuiButton>
-  );
   return withPopover ? (
     <AddAgentHelpPopover
-      button={button}
+      button={
+        <EuiButton
+          iconType="plusInCircle"
+          data-test-subj="addAgentButton"
+          onClick={onAddAgentCloseHelp}
+          size="s"
+          isDisabled={!canAddAgents}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
+            defaultMessage="Add agent"
+          />
+        </EuiButton>
+      }
       isOpen={isHelpOpen}
       closePopover={() => setIsHelpOpen(false)}
     />
@@ -124,7 +122,6 @@ export const PackagePolicyAgentsCell = ({
       <AddAgentButton onAddAgent={onAddAgent} canAddAgents={canAddAgentsForPolicy} />;
     }
   }
-  // || agentPolicy.is_managed - handle case where some agent policies were managed and when some agent policies cannot add agents
   return (
     <AddAgentButton
       onAddAgent={onAddAgent}
@@ -160,25 +157,22 @@ export const AgentsCountBreakDown = ({
         : ''
     }`;
   const topFivePolicies = useMemo(
-    () => sortBy(agentPolicies, 'agents').slice(0, 5).reverse(),
+    () => sortBy(agentPolicies, 'agents').reverse().slice(0, 5),
     [agentPolicies]
   );
 
   return (
     <>
-      <EuiBadge
-        color="hollow"
-        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        onClickAriaLabel="Open agents count popover"
-        data-test-subj="agentsCountBreakDownBadge"
-      >
-        {agentCount}
-      </EuiBadge>
       <EuiPopover
         data-test-subj="agentCountsPopover"
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty flush="left" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+            {agentCount}
+          </EuiButtonEmpty>
+        }
       >
         <EuiPopoverTitle>
           {i18n.translate('xpack.fleet.agentsCountsBreakdown.popover.title', {
