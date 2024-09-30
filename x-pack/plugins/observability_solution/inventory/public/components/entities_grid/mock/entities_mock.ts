@@ -9,7 +9,7 @@ import { APIReturnType } from '../../../api';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
-export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
+export const entitiesMock = [
   {
     'entity.lastSeenTimestamp': '2023-08-20T10:50:06.384Z',
     'entity.type': 'host',
@@ -3011,4 +3011,4 @@ export const entitiesMock: InventoryEntitiesAPIReturnType['entities'] = [
     'entity.displayName': 'Troy McClure',
     'entity.id': '499',
   },
-];
+] as unknown as InventoryEntitiesAPIReturnType['entities'];

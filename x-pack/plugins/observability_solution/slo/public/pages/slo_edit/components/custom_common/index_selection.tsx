@@ -53,7 +53,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   ]);
 
   return (
-    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid}>
+    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid} fullWidth>
       <Controller
         defaultValue=""
         name={DATA_VIEW_FIELD}
@@ -64,10 +64,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             adHocDataViews={adHocDataViews}
             trigger={{
               label: currentIndexPattern || SELECT_DATA_VIEW,
-              fullWidth: true,
-              color: fieldState.invalid ? 'danger' : 'text',
+              color: fieldState.invalid ? 'danger' : 'primary',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
+              style: { width: '100%', maxWidth: '100%' },
             }}
             onChangeDataView={(newId: string) => {
               setValue(
