@@ -686,6 +686,7 @@ x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infr
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
+packages/kbn-react-dom @elastic/appex-sharedux
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-react-hooks @elastic/obs-ux-logs-team
 packages/react/kibana_context/common @elastic/appex-sharedux
