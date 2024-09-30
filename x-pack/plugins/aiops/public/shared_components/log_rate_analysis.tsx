@@ -23,7 +23,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
+import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import type { AiopsPluginStartDeps } from '../types';
@@ -74,19 +74,18 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
   lastReloadRequestTime,
 }) => {
   const deps = useMemo(() => {
-    const { http, uiSettings, notifications, ...startServices } = coreStart;
-    const { lens, data, usageCollection, fieldFormats, charts } = pluginStart;
+    const { lens, data, usageCollection, fieldFormats, charts, storage, unifiedSearch } =
+      pluginStart;
 
     return {
-      http,
-      uiSettings,
       data,
-      notifications,
       lens,
       usageCollection,
       fieldFormats,
       charts,
-      ...startServices,
+      storage,
+      unifiedSearch,
+      ...coreStart,
     };
   }, [coreStart, pluginStart]);
 
@@ -95,11 +94,11 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
     uiSettingsKeys: UI_SETTINGS,
   };
 
-  const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
+  const aiopsAppContextValue = useMemo<AiopsAppContextValue>(() => {
     return {
       embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT,
       ...deps,
-    } as unknown as AiopsAppDependencies;
+    };
   }, [deps, embeddingOrigin]);
 
   const [manualReload$] = useState<BehaviorSubject<number>>(
@@ -156,9 +155,7 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
                 <LogRateAnalysisReduxProvider>
                   <DatePickerContextProvider {...datePickerDeps}>
                     <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
-                    <LogRateAnalysisContent
-                      embeddingOrigin={embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN.DEFAULT}
-                    />
+                    <LogRateAnalysisContent />
                   </DatePickerContextProvider>
                 </LogRateAnalysisReduxProvider>
               </DataSourceContextProvider>

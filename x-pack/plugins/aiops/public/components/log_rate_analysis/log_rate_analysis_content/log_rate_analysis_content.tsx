@@ -37,6 +37,7 @@ import {
   LogRateAnalysisResults,
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
@@ -71,6 +72,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onAnalysisCompleted,
   onWindowParametersChange,
 }) => {
+  const { embeddingOrigin } = useAiopsAppContext();
+
   const dispatch = useAppDispatch();
 
   const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
