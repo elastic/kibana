@@ -62,6 +62,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
   allowSolutionVisibility: boolean;
+  isServerless: boolean;
 }
 
 interface State {
@@ -315,7 +316,8 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
 
-    const shouldShowFeaturesColumn = !activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC;
+    const shouldShowFeaturesColumn =
+      !this.props.isServerless && (!activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC);
     if (shouldShowFeaturesColumn) {
       config.push({
         field: 'disabledFeatures',
