@@ -10,6 +10,7 @@ import {
   generateColumnNames,
   columnsFromHeader,
   totalColumnCount,
+  toSafeColumnName,
 } from './csv';
 
 describe('upperBoundForColumnCount', () => {
@@ -149,5 +150,32 @@ describe('totalColumnCount', () => {
       { column1: 'jane', column2: '25', column3: 'los angeles', column4: 'usa' },
     ];
     expect(totalColumnCount(tempColumnNames, csvRows)).toBe(3);
+  });
+
+  describe('toSafeColumnName', () => {
+    it('should convert a number to a string', () => {
+      expect(toSafeColumnName(123)).toBe('123');
+    });
+
+    it('should return undefined for non-string and non-number inputs', () => {
+      expect(toSafeColumnName(null)).toBeUndefined();
+      expect(toSafeColumnName(undefined)).toBeUndefined();
+      expect(toSafeColumnName({})).toBeUndefined();
+      expect(toSafeColumnName([1, 2])).toBeUndefined();
+    });
+
+    it('should replace non-alphanumeric characters with underscores', () => {
+      expect(toSafeColumnName('name@age!location')).toBe('name_age_location');
+      expect(toSafeColumnName('column#1')).toBe('column_1');
+    });
+
+    it('should return the same string if it contains only alphanumeric characters and underscores', () => {
+      expect(toSafeColumnName('Column1')).toBe('Column1');
+      expect(toSafeColumnName('Location')).toBe('Location');
+    });
+
+    it('should handle empty strings', () => {
+      expect(toSafeColumnName('')).toBeUndefined();
+    });
   });
 });

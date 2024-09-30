@@ -22,8 +22,16 @@ export function generateColumnNames(count: number): string[] {
   return Array.from({ length: count }).map((_, i) => `column${i + 1}`);
 }
 
-function toSafeColumnName(columnName: unknown): string | undefined {
+// Converts a column name into a safe one to use in the `if ctx...` clause.
+// This is similar to getNameFromTitle in data_stream_step.tsx.
+export function toSafeColumnName(columnName: unknown): string | undefined {
+  if (typeof columnName === 'number') {
+    return String(columnName);
+  }
   if (typeof columnName !== 'string') {
+    return undefined;
+  }
+  if (columnName.length === 0) {
     return undefined;
   }
   return columnName.replace(/[^a-zA-Z0-9_]/g, '_');
@@ -111,7 +119,7 @@ export async function convertCSVSamples({
       dropValues,
       prefix,
       'remove_csv_header',
-      'Remove the CSV header line'
+      'Remove the CSV header line by comparing the values'
     );
     csvHandlingProcessors.push(dropProcessor);
   }
