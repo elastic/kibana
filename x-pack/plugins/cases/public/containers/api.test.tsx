@@ -73,7 +73,7 @@ import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
-import type { CaseUserActionTypeWithAll } from './types';
+import type { CaseUserActionTypeWithAll, CasesConfigurationUICustomField } from './types';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -88,6 +88,29 @@ jest.mock('../common/lib/kibana');
 const fetchMock = jest.fn();
 const postMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock, post: postMock } });
+
+const apiCustomFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'activeCustomFieldKey',
+    label: 'Active custom field',
+    required: true,
+    defaultValue: true,
+  },
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'inactiveCustomFieldKey',
+    label: 'Active custom field',
+    required: true,
+    defaultValue: false,
+  },
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'emptyCustomFieldKey',
+    label: 'Active custom field',
+    required: false,
+  },
+];
 
 describe('Cases API', () => {
   describe('deleteCases', () => {
@@ -214,6 +237,7 @@ describe('Cases API', () => {
         filterOptions: DEFAULT_FILTER_OPTIONS,
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -242,6 +266,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -269,6 +294,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -290,6 +316,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -310,6 +337,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -331,6 +359,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -351,6 +380,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -371,6 +401,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -392,6 +423,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -420,6 +452,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -444,6 +477,7 @@ describe('Cases API', () => {
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
       expect(resp).toEqual({ ...allCases });
     });
@@ -456,6 +490,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -489,6 +524,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
@@ -518,6 +554,7 @@ describe('Cases API', () => {
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
+        customFieldsConfiguration: apiCustomFieldsConfigurationMock,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_search`, {
