@@ -1550,10 +1550,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
               }
             ]
@@ -19378,7 +19374,13 @@
           ],
           "signature": [
             "(packageName: string) => ",
-            "FleetArtifactsClient"
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.ArtifactsClientInterface",
+              "text": "ArtifactsClientInterface"
+            }
           ],
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
@@ -23933,10 +23935,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/support/endpoint_package_policies.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/middleware/policy_settings_middleware.ts"
               },
               {
                 "plugin": "securitySolution",
