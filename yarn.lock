@@ -1787,16 +1787,25 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 "@elastic/eui-common@file:./elastic_eui_common_0.0.1_setup_05.tgz":
+"@elastic/eui-common@file:./elastic_eui_common_0.0.1_setup_08.tgz":
   version "0.0.1"
-  resolved "file:./elastic_eui_common_0.0.1_setup_05.tgz#2cdfd6ccac89c525c6cffd926ee7b5d6afcf394a"
+  resolved "file:./elastic_eui_common_0.0.1_setup_08.tgz#3e9c2d03ab6236e21d0ecc8eb4399f9bdc6b8d9e"
 
-"@elastic/eui-theme-base@file:./elastic_eui_theme_base_0.0.1_setup_06.tgz":
+"@elastic/eui-theme-base@file:./elastic_eui_theme_base_0.0.1_setup_08.tgz":
   version "0.0.1"
+<<<<<<< HEAD
   resolved "file:./elastic_eui_theme_base_0.0.1_setup_06.tgz#a801eee26b5eaf5d535fde89644f7972e16606c3"
 "@elastic/eui-theme-berlin@file:./elastic_eui_theme_berlin_0.0.1_setup_02.tgz":
   version "0.0.1"
   resolved "file:./elastic_eui_theme_berlin_0.0.1_setup_02.tgz#7972a60e5c5a2e342980fde9550a90201bba171e"
 >>>>>>> 6af88e983fc (add initial theme setup)
+=======
+  resolved "file:./elastic_eui_theme_base_0.0.1_setup_08.tgz#2ce9903eb93a54759c63d7e2b2a01e2c678bfd41"
+
+"@elastic/eui-theme-berlin@file:./elastic_eui_theme_berlin_0.0.1_setup_04.tgz":
+  version "0.0.1"
+  resolved "file:./elastic_eui_theme_berlin_0.0.1_setup_04.tgz#d11fad22cb6cd5b1348c76c607aa8b580029f14b"
+>>>>>>> f66a40e6d76 ([EUI-125]: add primitive and base semantic color tokens)
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
