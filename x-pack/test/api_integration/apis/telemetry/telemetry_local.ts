@@ -117,6 +117,13 @@ export default function ({ getService }: FtrProviderContext) {
         'number'
       );
 
+      // Logs data telemetry
+      const logsDataTelemetryData =
+        stats.stack_stats.kibana.plugins.usage_collector_stats.not_ready.names.includes('logs_data')
+          ? []
+          : stats.stack_stats.kibana.plugins.logs_data?.data;
+      expect(logsDataTelemetryData).to.an('array');
+
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
       expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
       expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
