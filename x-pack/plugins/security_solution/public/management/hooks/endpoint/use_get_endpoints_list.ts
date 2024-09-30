@@ -18,7 +18,7 @@ type GetEndpointsListResponse = Array<{
   selected: boolean;
 }>;
 
-const PAGING_PARAMS = Object.freeze({
+export const PAGING_PARAMS = Object.freeze({
   default: 50,
   all: 10000,
 });
