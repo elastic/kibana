@@ -204,31 +204,15 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              !canSave &&
-              i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.noPermissionManageMlJobsButtonTooltipLabel',
-                {
-                  defaultMessage: "Your user role doesn't have permissions to manage jobs",
-                }
-              )
-            }
+          <EuiButton
+            data-test-subj="apmJobsListManageJobsButton"
+            href={mlManageJobsHref}
+            color="primary"
           >
-            <EuiButton
-              data-test-subj="apmJobsListManageJobsButton"
-              href={mlManageJobsHref}
-              color="primary"
-              isDisabled={!canSave}
-            >
-              {i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
-                {
-                  defaultMessage: 'Manage jobs',
-                }
-              )}
-            </EuiButton>
-          </EuiToolTip>
+            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText', {
+              defaultMessage: 'Manage jobs',
+            })}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
