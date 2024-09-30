@@ -127,9 +127,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       events.filter((event) => event?.event?.action === 'execute');
       expect(events[0]?.event?.outcome).to.eql('failure');
       expect(events[0]?.kibana?.alerting?.status).to.eql('error');
-      expect(events[0]?.error?.message).to.eql(
-        'Search has been aborted due to cancelled execution'
-      );
+      // Timeouts will encounter one of the following two messages
+      const expectedMessages = [
+        'Request timed out',
+        'Search has been aborted due to cancelled execution',
+      ];
+      expect(expectedMessages.includes(events[0]?.error?.message || '')).to.be(true);
 
       // rule execution status should be in error with reason timeout
       const { status, body: rule } = await supertest.get(
@@ -137,9 +140,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       expect(status).to.eql(200);
       expect(rule.execution_status.status).to.eql('error');
-      expect(rule.execution_status.error.message).to.eql(
-        `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
-      );
+      expect(
+        [
+          'Request timed out',
+          `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`,
+        ].includes(rule.execution_status.error.message)
+      ).to.eql(true);
       expect(rule.execution_status.error.reason).to.eql('timeout');
     });
 
@@ -183,9 +189,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       expect(status).to.eql(200);
       expect(rule.execution_status.status).to.eql('error');
-      expect(rule.execution_status.error.message).to.eql(
-        `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
-      );
+      expect(
+        [
+          'Request timed out',
+          `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`,
+        ].includes(rule.execution_status.error.message)
+      ).to.eql(true);
       expect(rule.execution_status.error.reason).to.eql('timeout');
     });
 

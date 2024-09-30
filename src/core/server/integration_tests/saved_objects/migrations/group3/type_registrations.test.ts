@@ -124,6 +124,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'risk-engine-configuration',
+  'entity-engine-status',
   'server',
   'siem-detection-engine-rule-actions',
   'siem-detection-engine-rule-execution-info',

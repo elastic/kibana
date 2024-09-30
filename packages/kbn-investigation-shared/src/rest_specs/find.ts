@@ -15,8 +15,10 @@ const findInvestigationsParamsSchema = z
     query: z
       .object({
         alertId: z.string(),
-        page: z.string(),
-        perPage: z.string(),
+        search: z.string(),
+        filter: z.string(),
+        page: z.coerce.number(),
+        perPage: z.coerce.number(),
       })
       .partial(),
   })
