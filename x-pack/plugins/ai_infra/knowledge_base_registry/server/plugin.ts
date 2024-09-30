@@ -14,6 +14,7 @@ import type {
   KnowledgeBaseRegistrySetupDependencies,
   KnowledgeBaseRegistryStartDependencies,
 } from './types';
+import { knowledgeBaseEntrySavedObjectType } from './saved_objects';
 
 export class KnowledgeBaseRegistryPlugin
   implements
@@ -36,6 +37,7 @@ export class KnowledgeBaseRegistryPlugin
     >,
     pluginsSetup: KnowledgeBaseRegistrySetupDependencies
   ): KnowledgeBaseRegistrySetupContract {
+    coreSetup.savedObjects.registerType(knowledgeBaseEntrySavedObjectType);
     return {};
   }
 
