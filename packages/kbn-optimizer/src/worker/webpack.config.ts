@@ -260,19 +260,6 @@ export function getWebpackConfig(
           },
         },
         {
-          // Add support for the operator ?? used in `@hapi/boom` library
-          // TODO: May be able to remove once https://github.com/elastic/kibana/pull/191106 is merged
-          test: /node_modules\/@hapi\/(boom|hoek)\/lib\/\w+\.js$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET],
-            },
-          },
-        },
-        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
