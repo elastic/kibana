@@ -39,7 +39,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 // import { useStorage } from '@kbn/ml-local-storage';
-import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import {
@@ -334,13 +334,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         analysisInfo={<LogRateAnalysisInfoPopover />}
       >
         <>
-          {embeddingOrigin !== 'dashboard' && (
+          {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <LogRateAnalysisOptions
               foundGroups={foundGroups}
               onFieldsFilterChange={onFieldsFilterChange}
             />
           )}
-          {embeddingOrigin === 'dashboard' && (
+          {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 data-test-subj="aiopsLogRateAnalysisOptionsButton"
@@ -352,7 +352,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </>
       </ProgressControls>
 
-      {embeddingOrigin === 'dashboard' && embeddableOptionsVisible && (
+      {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && embeddableOptionsVisible && (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="s">

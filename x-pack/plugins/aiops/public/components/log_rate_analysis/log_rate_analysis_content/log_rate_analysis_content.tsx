@@ -30,6 +30,7 @@ import {
   useAppSelector,
   setGroupResults,
 } from '@kbn/aiops-log-rate-analysis/state';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
@@ -205,7 +206,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel
       hasBorder={false}
       hasShadow={false}
-      paddingSize={embeddingOrigin === 'dashboard' ? 'none' : 'm'}
+      paddingSize={embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? 'none' : 'm'}
     >
       {showDocumentCountContent && (
         <DocumentCountContent
