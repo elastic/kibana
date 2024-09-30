@@ -19,7 +19,7 @@ import {
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
@@ -61,7 +61,7 @@ export function Dashboards() {
   const {
     services: { share, telemetry },
   } = useKibanaContextForPlugin();
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
   const [trackingEventProperties, setTrackingEventProperties] = useState({});
@@ -124,11 +124,9 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
-    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
-    telemetry,
     urlState?.dashboardId,
   ]);
 
@@ -145,15 +143,13 @@ export function Dashboards() {
 
   useEffect(() => {
     if (!dashboard) return;
-    dashboard.updateInput({
-      filters:
-        metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
-          ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
-          : [],
-      timeRange: { from: dateRange.from, to: dateRange.to },
-      // forces data reload
-      lastReloadRequestTime: Date.now(),
-    });
+    dashboard.setFilters(
+      metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
+        ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
+        : []
+    );
+    dashboard.setTimeRange({ from: dateRange.from, to: dateRange.to });
+    dashboard.forceRefresh();
   }, [
     metrics.dataView,
     asset.name,
@@ -165,7 +161,7 @@ export function Dashboards() {
   ]);
 
   const getLocatorParams = useCallback(
-    (params, isFlyoutView) => {
+    (params: any, isFlyoutView: any) => {
       const searchParams = new URLSearchParams(location.search);
       const tableProperties = searchParams.get('tableProperties');
       const flyoutParams =
@@ -276,7 +272,7 @@ export function Dashboards() {
               <DashboardRenderer
                 savedObjectId={urlState?.dashboardId}
                 getCreationOptions={getCreationOptions}
-                ref={setDashboard}
+                onApiAvailable={setDashboard}
                 locator={locator}
               />
             )}

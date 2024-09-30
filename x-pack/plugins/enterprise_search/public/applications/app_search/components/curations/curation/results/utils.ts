@@ -43,7 +43,7 @@ export const convertToResultFormat = (document: CurationResult): SearchResult =>
   // Convert `key: 'value'` into `key: { raw: 'value' }`
   const result = Object.entries(document).reduce((acc, [key, value]) => {
     acc[key] =
-      isNestedObject(value) || Object.prototype.hasOwnProperty.call(value, 'raw')
+      isNestedObject(value) || (typeof value === 'object' && Object.hasOwn(value, 'raw'))
         ? value
         : { raw: value };
     return acc;

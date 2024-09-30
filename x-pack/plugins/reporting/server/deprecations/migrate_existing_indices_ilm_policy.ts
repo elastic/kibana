@@ -8,7 +8,7 @@
 import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import { IlmPolicyManager } from '../lib/store';
 
 export const getDeprecationsInfo = async ({
@@ -28,7 +28,7 @@ export const getDeprecationsInfo = async ({
           defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern "{indexPattern}".`,
           values: {
             reportingIlmPolicy: ILM_POLICY_NAME,
-            indexPattern: REPORTING_DATA_STREAM_WILDCARD,
+            indexPattern: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
           },
         }),
         correctiveActions: {

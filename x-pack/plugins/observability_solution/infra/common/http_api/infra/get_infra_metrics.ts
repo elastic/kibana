@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT, inRangeRt, dateRt } from '@kbn/io-ts-utils';
+import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { AssetTypeRT } from '../shared/asset_type';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -19,11 +20,6 @@ export const InfraMetricTypeRT = rt.keyof({
   tx: null,
   rxV2: null,
   txV2: null,
-});
-
-export const RangeRT = rt.type({
-  from: dateRt,
-  to: dateRt,
 });
 
 export const InfraAssetMetadataTypeRT = rt.keyof({
@@ -48,28 +44,33 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
     query: rt.UnknownRecord,
   }),
   rt.type({
-    type: rt.literal('host'),
-    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(20)]),
-    metrics: rt.array(rt.type({ type: InfraMetricTypeRT })),
-    range: RangeRT,
+    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
+    metrics: rt.array(InfraMetricTypeRT),
+    from: isoToEpochRt,
+    to: isoToEpochRt,
   }),
 ]);
+
+export const GetInfraMetricsRequestParamsRT = AssetTypeRT;
 
 export const InfraAssetMetricsItemRT = rt.intersection([
   rt.type({
     name: rt.string,
     metrics: rt.array(InfraAssetMetricsRT),
     metadata: rt.array(InfraAssetMetadataRT),
+    hasSystemMetrics: rt.boolean,
   }),
   rt.partial({
     alertsCount: rt.number,
   }),
 ]);
 
-export const GetInfraMetricsResponsePayloadRT = rt.type({
-  type: rt.literal('host'),
-  nodes: rt.array(InfraAssetMetricsItemRT),
-});
+export const GetInfraMetricsResponsePayloadRT = rt.intersection([
+  AssetTypeRT,
+  rt.type({
+    nodes: rt.array(InfraAssetMetricsItemRT),
+  }),
+]);
 
 export type InfraAssetMetrics = rt.TypeOf<typeof InfraAssetMetricsRT>;
 export type InfraAssetMetadata = rt.TypeOf<typeof InfraAssetMetadataRT>;
@@ -77,14 +78,12 @@ export type InfraAssetMetadataType = rt.TypeOf<typeof InfraAssetMetadataTypeRT>;
 export type InfraAssetMetricType = rt.TypeOf<typeof InfraMetricTypeRT>;
 export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
 
-export type GetInfraMetricsRequestBodyPayload = Omit<
-  rt.TypeOf<typeof GetInfraMetricsRequestBodyPayloadRT>,
-  'limit' | 'range'
-> & {
-  limit?: number;
-  range: {
-    from: string;
-    to: string;
-  };
-};
+export type GetInfraMetricsRequestBodyPayload = rt.TypeOf<
+  typeof GetInfraMetricsRequestBodyPayloadRT
+>;
+
+export type GetInfraMetricsRequestBodyPayloadClient = rt.OutputOf<
+  typeof GetInfraMetricsRequestBodyPayloadRT
+>;
+
 export type GetInfraMetricsResponsePayload = rt.TypeOf<typeof GetInfraMetricsResponsePayloadRT>;

@@ -10,6 +10,7 @@ import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
+  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 
@@ -31,6 +32,7 @@ describe('ResetSLO', () => {
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockScopedClusterClient: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
 
@@ -39,9 +41,11 @@ describe('ResetSLO', () => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     resetSLO = new ResetSLO(
       mockEsClient,
+      mockScopedClusterClient,
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
@@ -76,7 +80,7 @@ describe('ResetSLO', () => {
     expect(mockSummaryTransformManager.install).toMatchSnapshot();
     expect(mockSummaryTransformManager.start).toMatchSnapshot();
 
-    expect(mockEsClient.ingest.putPipeline).toMatchSnapshot();
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toMatchSnapshot();
 
     expect(mockTransformManager.install).toMatchSnapshot();
     expect(mockTransformManager.start).toMatchSnapshot();

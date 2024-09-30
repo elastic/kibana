@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DataStreamStatType } from '../data_streams_stats';
 import { Integration } from '../data_streams_stats/integration';
 
@@ -24,3 +25,16 @@ export interface BasicDataStream {
   namespace: string;
   integration?: Integration;
 }
+
+export interface TableCriteria<TSortField> {
+  page: number;
+  rowsPerPage: number;
+  sort: {
+    field: TSortField;
+    direction: SortDirection;
+  };
+}
+
+export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
+  refresh: RefreshInterval;
+};

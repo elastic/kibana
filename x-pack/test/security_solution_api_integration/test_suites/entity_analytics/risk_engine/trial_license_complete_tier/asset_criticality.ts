@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
       const createRecords = () => createAssetCriticalityRecords(records, es);
 
       before(async () => {
-        enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
       it('@skipInServerless should return the first 10 asset criticality records if no args provided', async () => {
@@ -461,7 +461,9 @@ export default ({ getService }: FtrProviderContext) => {
           es,
         });
 
-        expect(doc).to.eql(undefined);
+        const deletedDoc = { ...assetCriticality, criticality_level: 'deleted' };
+
+        expect(_.omit(doc, '@timestamp')).to.eql(deletedDoc);
       });
 
       it('should not return 404 if the asset criticality does not exist', async () => {

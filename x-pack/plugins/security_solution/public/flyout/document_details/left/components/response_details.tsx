@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useResponseActionsView } from '../../../../common/components/event_details/response_actions_view';
+import { useResponseActionsView } from '../hooks/use_response_actions_view';
 
 const ExtendedFlyoutWrapper = styled.div`
  figure {

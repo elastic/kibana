@@ -657,7 +657,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"image\" | \"select\" | \"json\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

@@ -55,6 +55,13 @@ function createDeepLinks(
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
           },
+          {
+            id: 'suppliedConfigurations',
+            title: i18n.translate('xpack.ml.deepLink.suppliedConfigurations', {
+              defaultMessage: 'Supplied configurations',
+            }),
+            path: `/${ML_PAGES.SUPPLIED_CONFIGURATIONS}`,
+          },
         ],
       };
     },

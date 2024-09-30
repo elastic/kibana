@@ -10,15 +10,15 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
 
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 
 /**
  * Loads the Elastic Security Labs mdx files into the Knowledge Base.
  */
 export const loadSecurityLabs = async (
-  esStore: ElasticsearchStore,
+  kbDataClient: AIAssistantKnowledgeBaseDataClient,
   logger: Logger
 ): Promise<boolean> => {
   try {
@@ -40,7 +40,10 @@ export const loadSecurityLabs = async (
 
     logger.info(`Loading ${docs.length} Security Labs docs into the Knowledge Base`);
 
-    const response = await esStore.addDocuments([...docs]);
+    const response = await kbDataClient.addKnowledgeBaseDocuments({
+      documents: docs,
+      global: true,
+    });
 
     logger.info(`Loaded ${response?.length ?? 0} Security Labs docs into the Knowledge Base`);
 

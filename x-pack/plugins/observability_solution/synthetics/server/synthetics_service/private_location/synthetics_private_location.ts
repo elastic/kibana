@@ -21,7 +21,9 @@ import {
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
+  PrivateLocation,
   SourceType,
+  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -50,7 +52,7 @@ export class SyntheticsPrivateLocation {
     const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
       soClient,
       'synthetics',
-      this.server.logger
+      { logger: this.server.logger, installMissingPackage: true }
     );
 
     if (!newPolicy) {
@@ -69,7 +71,7 @@ export class SyntheticsPrivateLocation {
 
   async generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocationAttributes,
+    privateLocation: PrivateLocation,
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>,
@@ -132,7 +134,7 @@ export class SyntheticsPrivateLocation {
 
   async createPackagePolicies(
     configs: PrivateConfig[],
-    privateLocations: PrivateLocationAttributes[],
+    privateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     testRunId?: string,
     runOnce?: boolean
@@ -253,24 +255,25 @@ export class SyntheticsPrivateLocation {
 
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     if (configs.length === 0) {
       return {};
     }
 
-    const newPolicyTemplate = await this.buildNewPolicy();
+    const [newPolicyTemplate, existingPolicies] = await Promise.all([
+      this.buildNewPolicy(),
+      this.getExistingPolicies(
+        configs.map(({ config }) => config),
+        allPrivateLocations,
+        spaceId
+      ),
+    ]);
 
     const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
-
-    const existingPolicies = await this.getExistingPolicies(
-      configs.map(({ config }) => config),
-      allPrivateLocations,
-      spaceId
-    );
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -340,7 +343,7 @@ export class SyntheticsPrivateLocation {
 
   async getExistingPolicies(
     configs: HeartbeatConfig[],
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();

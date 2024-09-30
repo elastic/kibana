@@ -6,3 +6,4 @@
  */
 
 export const isServerless = Cypress.env().IS_SERVERLESS;
+export const isCloudServerless = Cypress.env().CLOUD_SERVERLESS;

@@ -39,7 +39,7 @@
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/esql",
-    "@kbn/text-based-editor",
+    "@kbn/esql-editor",
     "@kbn/expressions-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-doc-links-browser",
@@ -54,7 +54,8 @@
     "@kbn/alerting-comparators",
     "@kbn/task-manager-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/observability-alerting-rule-utils"
   ],
   "exclude": [
     "target/**/*",

@@ -20,7 +20,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 
 jest.mock('../../shared/hooks/use_fetch_related_alerts_by_same_source_event');

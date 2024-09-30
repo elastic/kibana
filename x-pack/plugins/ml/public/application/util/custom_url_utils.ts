@@ -18,7 +18,8 @@ import type {
   MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '@kbn/ml-data-grid';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
@@ -141,8 +142,7 @@ function isKibanaUrl(urlConfig: MlUrlConfig) {
     urlValue.startsWith('apm#/') ||
     // BrowserRouter based plugins
     urlValue.startsWith('metrics/') ||
-    urlValue.startsWith('security/') ||
-    // Legacy links
+    urlValue.startsWith('security/') || // Legacy links
     urlValue.startsWith('siem#/')
   );
 }
@@ -308,7 +308,7 @@ function buildKibanaUrl(
 
         const q = rison.decode(queryDef);
 
-        if (isRisonObject(q) && q.hasOwnProperty('query')) {
+        if (isRisonObject(q) && Object.hasOwn(q, 'query')) {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
           const resultQuery = getQueryStringResult(
             resultPrefix,

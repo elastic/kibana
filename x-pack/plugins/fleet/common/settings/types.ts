@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import type { z } from '@kbn/zod';
 
 export type SettingsSection = 'AGENT_POLICY_ADVANCED_SETTINGS';
 

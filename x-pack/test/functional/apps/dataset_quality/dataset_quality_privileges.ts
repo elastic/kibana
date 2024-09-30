@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { getInitialTestLogs, getLogsForDataset } from './data';
+import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -20,11 +20,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const security = getService('security');
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
+  const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
+  const apacheAccessDataStreamName = `logs-${apacheAccessDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality handles user privileges', () => {
     before(async () => {
@@ -109,26 +110,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.clean();
         });
 
-        it('Active and Estimated data are not available due to underprivileged user', async () => {
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.activeDatasets}`
-          );
+        it('Estimated data are not available due to underprivileged user', async () => {
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`
           );
         });
 
-        it('"Show inactive datasets" is hidden when lastActivity is not available', async () => {
-          await find.waitForDeletedByCssSelector(
-            PageObjects.datasetQuality.selectors.showInactiveDatasetsNamesSwitch
-          );
-        });
-
-        it('does not show size and last activity columns for underprivileged data stream', async () => {
+        it('does not show size column for underprivileged data stream', async () => {
           const cols = await PageObjects.datasetQuality.getDatasetTableHeaderTexts();
 
           expect(cols).to.not.contain('Size');
-          expect(cols).to.not.contain('Last Activity');
         });
       });
 
@@ -147,58 +138,56 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await synthtrace.clean();
         });
 
-        it('shows underprivileged warning when size and last activity cannot be accessed for some data streams', async () => {
+        it('shows underprivileged warning when size cannot be accessed for some data streams', async () => {
           await PageObjects.datasetQuality.refreshTable();
 
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
           const datasetWithoutMonitorPrivilege = 'synth.1';
 
-          // "Size" and "Last Activity" should be available for `apacheAccessDatasetName`
+          // "Size" should be available for `apacheAccessDatasetName`
           await testSubjects.missingOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
           );
-          await testSubjects.missingOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithMonitorPrivilege}`
-          );
 
-          // "Size" and "Last Activity" should not be available for `datasetWithoutMonitorPrivilege`
+          // "Size" should not be available for `datasetWithoutMonitorPrivilege`
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
           );
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithoutMonitorPrivilege}`
-          );
         });
 
-        it('flyout shows insufficient privileges warning for underprivileged data stream', async () => {
-          await PageObjects.datasetQuality.openDatasetFlyout('synth.1');
+        it('Details page shows insufficient privileges warning for underprivileged data stream', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: regularDataStreamName,
+          });
 
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-Size`
           );
 
-          await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.navigateTo();
         });
 
         it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
-          await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: apacheAccessDataStreamName,
+          });
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
           // "See Integration" is hidden
           await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
               'Overview'
             )
           );
 
           // "View Dashboards" is hidden
           await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
               'ViewDashboards'
             )
           );
 
-          await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.navigateTo();
         });
       });
     });

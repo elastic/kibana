@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -13,12 +14,12 @@
  * visitor to traverse the AST and make changes to it, or how to extract useful
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
-import { ESQLAstQueryNode } from '../types';
+import { parse } from '../../parser';
+import { ESQLAstQueryExpression } from '../../types';
 import { Visitor } from '../visitor';
 
 test('change LIMIT from 24 to 42', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { root } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 24
@@ -30,7 +31,7 @@ test('change LIMIT from 24 to 42', () => {
       .on('visitLimitCommand', (ctx) => ctx.numeric())
       .on('visitCommand', () => null)
       .on('visitQuery', (ctx) => [...ctx.visitCommands()])
-      .visitQuery(ast)
+      .visitQuery(root)
       .filter(Boolean)[0];
 
   expect(limit()).toBe(24);
@@ -42,7 +43,7 @@ test('change LIMIT from 24 to 42', () => {
     })
     .on('visitCommand', () => {})
     .on('visitQuery', (ctx) => [...ctx.visitCommands()])
-    .visitQuery(ast);
+    .visitQuery(root);
 
   expect(limit()).toBe(42);
 });
@@ -55,7 +56,7 @@ test('change LIMIT from 24 to 42', () => {
 test.todo('can modify sorting orders');
 
 test('can remove a specific WHERE command', () => {
-  const query = getAstAndSyntaxErrors(`
+  const query = parse(`
     FROM employees
       | KEEP first_name, last_name, still_hired
       | WHERE still_hired == true
@@ -65,12 +66,12 @@ test('can remove a specific WHERE command', () => {
 
   const print = () =>
     new Visitor()
+      .on('visitExpression', (ctx) => '<expr>')
       .on('visitColumnExpression', (ctx) => ctx.node.name)
       .on(
         'visitFunctionCallExpression',
         (ctx) => `${ctx.node.name}(${[...ctx.visitArguments()].join(', ')})`
       )
-      .on('visitExpression', (ctx) => '<expr>')
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           const args = [...ctx.visitArguments()].join(', ');
@@ -84,12 +85,12 @@ test('can remove a specific WHERE command', () => {
 
   const removeFilter = (field: string) => {
     query.ast = new Visitor()
+      .on('visitExpression', (ctx) => ctx.node)
       .on('visitColumnExpression', (ctx) => (ctx.node.name === field ? null : ctx.node))
       .on('visitFunctionCallExpression', (ctx) => {
         const args = [...ctx.visitArguments()];
         return args.some((arg) => arg === null) ? null : ctx.node;
       })
-      .on('visitExpression', (ctx) => ctx.node)
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
           ctx.node.args = [...ctx.visitArguments()].filter(Boolean);
@@ -114,8 +115,11 @@ test('can remove a specific WHERE command', () => {
   expect(print()).toBe('');
 });
 
-export const prettyPrint = (ast: ESQLAstQueryNode) =>
+export const prettyPrint = (ast: ESQLAstQueryExpression | ESQLAstQueryExpression['commands']) =>
   new Visitor()
+    .on('visitExpression', (ctx) => {
+      return '<EXPRESSION>';
+    })
     .on('visitSourceExpression', (ctx) => {
       return ctx.node.name;
     })
@@ -140,9 +144,6 @@ export const prettyPrint = (ast: ESQLAstQueryNode) =>
     })
     .on('visitInlineCastExpression', (ctx) => {
       return '<CAST>';
-    })
-    .on('visitExpression', (ctx) => {
-      return '<EXPRESSION>';
     })
     .on('visitCommandOption', (ctx) => {
       let args = '';
@@ -182,7 +183,7 @@ export const prettyPrint = (ast: ESQLAstQueryNode) =>
     .visitQuery(ast);
 
 test('can print a query to text', () => {
-  const { ast } = getAstAndSyntaxErrors(
+  const { ast } = parse(
     'FROM index METADATA _id, asdf, 123 | STATS fn([1,2], 1d, 1::string, x in (1, 2)), a = b | LIMIT 1000'
   );
   const text = prettyPrint(ast);

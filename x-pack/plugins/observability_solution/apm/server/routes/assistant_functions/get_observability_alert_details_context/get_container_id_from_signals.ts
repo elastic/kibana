@@ -7,12 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
 import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
@@ -23,11 +23,12 @@ import { RollupInterval } from '../../../../common/rollup';
 export async function getContainerIdFromSignals({
   query,
   esClient,
-  coreContext,
+  logSourcesService,
   apmEventClient,
 }: {
   query: t.TypeOf<typeof alertDetailsContextRt>;
   esClient: ElasticsearchClient;
+  logSourcesService: LogSourcesService;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   apmEventClient: APMEventClient;
 }) {
@@ -66,19 +67,19 @@ export async function getContainerIdFromSignals({
     return containerId;
   }
 
-  return getContainerIdFromLogs({ params, esClient, coreContext });
+  return getContainerIdFromLogs({ params, esClient, logSourcesService });
 }
 
 async function getContainerIdFromLogs({
   params,
   esClient,
-  coreContext,
+  logSourcesService,
 }: {
   params: ESSearchRequest['body'];
   esClient: ElasticsearchClient;
-  coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
+  logSourcesService: LogSourcesService;
 }) {
-  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
+  const index = await logSourcesService.getFlattenedLogSources();
   const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
     index,
     ...params,

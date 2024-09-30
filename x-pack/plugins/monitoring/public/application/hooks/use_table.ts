@@ -72,7 +72,7 @@ export function useTable(storageKey: string) {
   );
 
   const updateTotalItemCount = useCallback(
-    (num) => {
+    (num: any) => {
       // only update pagination state if different
       if (num === pagination.totalItemCount) return;
       setPagination({

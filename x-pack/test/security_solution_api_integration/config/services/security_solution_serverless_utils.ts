@@ -9,7 +9,7 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { IEsSearchResponse } from '@kbn/search-types';
 import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
-import type { SendOptions } from '@kbn/test-suites-src/common/services/bsearch';
+import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureBsearchSendOptions } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SecuritySolutionUtilsInterface } from './types';
@@ -32,8 +32,6 @@ export function SecuritySolutionServerlessUtils({
   });
 
   async function invalidateApiKey(credentials: RoleCredentials) {
-    // load service to call it outside mocha context
-    await svlUserManager.init();
     await svlUserManager.invalidateM2mApiKeyWithRoleScope(credentials);
   }
 
@@ -55,8 +53,6 @@ export function SecuritySolutionServerlessUtils({
 
   const createSuperTest = async (role = 'admin') => {
     cleanCredentials(role);
-    // load service to call it outside mocha context
-    await svlUserManager.init();
     const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
     rolesCredentials.set(role, credentials);
 
@@ -66,8 +62,6 @@ export function SecuritySolutionServerlessUtils({
 
   return {
     getUsername: async (role = 'admin') => {
-      // load service to call it outside mocha context
-      await svlUserManager.init();
       const { username } = await svlUserManager.getUserData(role);
 
       return username;

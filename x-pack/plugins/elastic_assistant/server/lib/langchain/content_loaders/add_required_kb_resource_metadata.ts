@@ -23,20 +23,17 @@ import { Metadata } from '@kbn/elastic-assistant-common';
 export const addRequiredKbResourceMetadata = ({
   docs,
   kbResource,
-  required,
+  required = true,
 }: {
   docs: Array<Document<Record<string, unknown>>>;
   kbResource: string;
-  required: boolean;
+  required?: boolean;
 }): Array<Document<Metadata>> =>
-  docs.map(
-    (doc) =>
-      ({
-        ...doc,
-        metadata: {
-          ...doc.metadata,
-          kbResource,
-          required, // indicates that the document is required for searches on the kbResource topic
-        },
-      } as unknown as Document<Metadata>)
-  );
+  docs.map((doc) => ({
+    ...doc,
+    metadata: {
+      ...doc.metadata,
+      kbResource,
+      required, // indicates that the document is required for searches on the kbResource topic
+    },
+  }  as unknown as Document<Metadata>));

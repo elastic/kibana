@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { map } from 'rxjs';
@@ -22,7 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
 import { convertPanelMapToSavedPanels } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
+import { dataService } from '../../services/kibana_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -69,17 +70,6 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const {
-    data: {
-      query: {
-        queryString,
-        filterManager,
-        timefilter: { timefilter },
-      },
-      search: { session },
-    },
-  } = pluginServices.getServices();
-
-  const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
   } = container.getState();
@@ -88,11 +78,15 @@ function getLocatorParams({
     viewMode,
     useHash: false,
     preserveSavedFilters: false,
-    filters: filterManager.getFilters(),
-    query: queryString.formatQuery(query) as Query,
+    filters: dataService.query.filterManager.getFilters(),
+    query: dataService.query.queryString.formatQuery(query) as Query,
     dashboardId: container.getDashboardSavedObjectId(),
-    searchSessionId: shouldRestoreSearchSession ? session.getSessionId() : undefined,
-    timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
+    searchSessionId: shouldRestoreSearchSession
+      ? dataService.search.session.getSessionId()
+      : undefined,
+    timeRange: shouldRestoreSearchSession
+      ? dataService.query.timefilter.timefilter.getAbsoluteTime()
+      : dataService.query.timefilter.timefilter.getTime(),
     refreshInterval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session

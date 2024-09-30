@@ -7,14 +7,14 @@
 
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional } from 'fp-ts/lib/Option';
+import { map as mapOptional, none } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
 import {
   TaskMarkRunning,
@@ -94,6 +94,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
+  private currentPollInterval: number;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -122,6 +123,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -155,7 +160,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
     let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
       pollIntervalDelay$ = delayOnClaimConflicts(
         capacityConfiguration$,
         pollIntervalConfiguration$,
@@ -220,8 +225,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
-      eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
+      strategy: this.config.claim_strategy,
+      getPollInterval: () => this.currentPollInterval,
     });
   };
 
@@ -312,7 +319,21 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         this.emitEvent(
           map(
             result,
-            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            ({ timing, ...event }) => {
+              const anyTaskErrors = event.stats?.tasksErrors ?? 0;
+              if (anyTaskErrors > 0) {
+                return asTaskPollingCycleEvent<string>(
+                  asErr(
+                    new PollingError<string>(
+                      'Partially failed to poll for work: some tasks could not be claimed.',
+                      PollingErrorType.WorkError,
+                      none
+                    )
+                  )
+                );
+              }
+              return asTaskPollingCycleEvent<string>(asOk(event), timing);
+            },
             (event) => asTaskPollingCycleEvent<string>(asErr(event))
           )
         );

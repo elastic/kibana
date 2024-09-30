@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.useFakeTimers({ legacyFakeTimers: true });
@@ -17,15 +18,23 @@ import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+import { TimefilterConfig } from './types';
 
-const timefilterConfig = {
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+const minRefreshIntervalDefault = 1000;
+
+const defaultTimefilterConfig: TimefilterConfig = {
   timeDefaults: { from: 'now-15m', to: 'now' },
-  refreshIntervalDefaults: { pause: false, value: 0 },
+  refreshIntervalDefaults: { pause: false, value: minRefreshIntervalDefault },
+  minRefreshIntervalDefault,
 };
 
 const nowProviderMock = createNowProviderMock();
-const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history, nowProviderMock);
+let timefilter = new Timefilter(
+  defaultTimefilterConfig,
+  timefilterSetupMock.history,
+  nowProviderMock
+);
 
 function stubNowTime(nowTime: any) {
   nowProviderMock.get.mockImplementation(() => (nowTime ? new Date(nowTime) : new Date()));
@@ -118,21 +127,28 @@ describe('setRefreshInterval', () => {
   let fetchSub: Subscription;
   let refreshSub: Subscription;
   let autoRefreshSub: Subscription;
+  let prevTimefilter = timefilter;
 
-  beforeEach(() => {
+  function setup() {
     update = sinon.spy();
     fetch = sinon.spy();
     autoRefreshFetch = sinon.spy((done) => done());
     timefilter.setRefreshInterval({
       pause: false,
-      value: 0,
+      value: minRefreshIntervalDefault,
     });
     refreshSub = timefilter.getRefreshIntervalUpdate$().subscribe(update);
     fetchSub = timefilter.getFetch$().subscribe(fetch);
     autoRefreshSub = timefilter.getAutoRefreshFetch$().subscribe(autoRefreshFetch);
+  }
+
+  beforeEach(() => {
+    prevTimefilter = timefilter;
+    setup();
   });
 
   afterEach(() => {
+    timefilter = prevTimefilter;
     refreshSub.unsubscribe();
     fetchSub.unsubscribe();
     autoRefreshSub.unsubscribe();
@@ -142,16 +158,50 @@ describe('setRefreshInterval', () => {
     expect(timefilter.isRefreshIntervalTouched()).toBe(false);
   });
 
-  test('should register changes to the initial interval', () => {
-    timefilter.setRefreshInterval(timefilterConfig.refreshIntervalDefaults);
+  test('should limit initial default value to minRefreshIntervalDefault', () => {
+    timefilter = new Timefilter(
+      {
+        ...defaultTimefilterConfig,
+        refreshIntervalDefaults: { pause: false, value: minRefreshIntervalDefault - 100 },
+      },
+      timefilterSetupMock.history,
+      nowProviderMock
+    );
+    setup();
+
     expect(timefilter.isRefreshIntervalTouched()).toBe(false);
-    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(timefilter.getRefreshInterval()).toEqual({
+      pause: false,
+      value: minRefreshIntervalDefault,
+    });
+  });
+
+  test('should pause if initial value is set to 0 regardless of minRefreshInterval', () => {
+    timefilter = new Timefilter(
+      {
+        ...defaultTimefilterConfig,
+        refreshIntervalDefaults: { pause: false, value: 0 },
+      },
+      timefilterSetupMock.history,
+      nowProviderMock
+    );
+
+    expect(timefilter.getRefreshInterval()).toEqual({
+      pause: true,
+      value: minRefreshIntervalDefault,
+    });
+  });
+
+  test('should register changes to the initial interval', () => {
+    timefilter.setRefreshInterval(defaultTimefilterConfig.refreshIntervalDefaults);
+    expect(timefilter.isRefreshIntervalTouched()).toBe(false);
+    timefilter.setRefreshInterval({ pause: false, value: 5000 });
     expect(timefilter.isRefreshIntervalTouched()).toBe(true);
   });
 
   test('should update refresh interval', () => {
-    timefilter.setRefreshInterval({ pause: true, value: 10 });
-    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 10 });
+    timefilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 5000 });
   });
 
   test('should not add unexpected object keys to refreshInterval state', () => {
@@ -165,23 +215,40 @@ describe('setRefreshInterval', () => {
   });
 
   test('should allow partial updates to refresh interval', () => {
-    timefilter.setRefreshInterval({ value: 10 });
-    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 10 });
+    const { pause } = timefilter.getRefreshInterval();
+    timefilter.setRefreshInterval({ value: 5000 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause, value: 5000 });
   });
 
   test('should not allow negative intervals', () => {
     timefilter.setRefreshInterval({ value: -10 });
-    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: false, value: 1000 });
   });
 
   test('should set pause to true when interval is changed to zero from non-zero', () => {
+    timefilter = new Timefilter(
+      {
+        ...defaultTimefilterConfig,
+        minRefreshIntervalDefault: 0,
+      },
+      timefilterSetupMock.history,
+      nowProviderMock
+    );
+    setup();
+
     timefilter.setRefreshInterval({ value: 1000, pause: false });
     timefilter.setRefreshInterval({ value: 0, pause: false });
     expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });
 
+  test('should pause when interval is set to zero regardless of minRefreshInterval', () => {
+    timefilter.setRefreshInterval({ value: 5000, pause: false });
+    timefilter.setRefreshInterval({ value: 0 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 1000 });
+  });
+
   test('not emit anything if nothing has changed', () => {
-    timefilter.setRefreshInterval({ pause: false, value: 0 });
+    timefilter.setRefreshInterval(timefilter.getRefreshInterval());
     expect(update.called).toBe(false);
     expect(fetch.called).toBe(false);
   });
@@ -192,7 +259,25 @@ describe('setRefreshInterval', () => {
     expect(fetch.called).toBe(false);
   });
 
+  test('should not emit update, nor fetch, when setting interval below min', () => {
+    const prevInterval = timefilter.getRefreshInterval();
+    timefilter.setRefreshInterval({ value: minRefreshIntervalDefault - 100 });
+    expect(update.called).toBe(false);
+    expect(fetch.called).toBe(false);
+    expect(timefilter.getRefreshInterval()).toEqual(prevInterval);
+  });
+
   test('emit update, not fetch, when switching to value: 0', () => {
+    timefilter = new Timefilter(
+      {
+        ...defaultTimefilterConfig,
+        minRefreshIntervalDefault: 0,
+      },
+      timefilterSetupMock.history,
+      nowProviderMock
+    );
+    setup();
+
     timefilter.setRefreshInterval({ pause: false, value: 5000 });
     expect(update.calledOnce).toBe(true);
     expect(fetch.calledOnce).toBe(true);

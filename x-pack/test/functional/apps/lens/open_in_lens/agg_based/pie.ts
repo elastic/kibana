@@ -124,7 +124,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       let type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Donut');
+      expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('Small');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       await goBackBtn.click();
@@ -141,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Pie');
+      expect(await lens.getDonutHoleSize()).to.equal('None');
     });
   });
 }

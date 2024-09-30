@@ -6,35 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
 
 const API_BASE_PATH = '/api/painless_lab';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
   describe('Painless Lab Routes', function () {
     before(async () => {
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+        withCustomHeaders: { 'Content-Type': 'application/json;charset=UTF-8' },
+      });
     });
     after(async () => {
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await supertestWithAdminScope.destroy();
     });
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
         const script =
           '"{\\n  \\"script\\": {\\n    \\"source\\": \\"return true;\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
 
-        const { body } = await supertestWithoutAuth
+        const { body } = await supertestWithAdminScope
           .post(`${API_BASE_PATH}/execute`)
-          .set(internalHeaders)
-          .set(roleAuthc.apiKeyHeader)
-          .set('Content-Type', 'application/json;charset=UTF-8')
           .send(script)
           .expect(200);
 
@@ -47,11 +44,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const invalidScript =
           '"{\\n  \\"script\\": {\\n    \\"source\\": \\"foobar\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
 
-        const { body } = await supertestWithoutAuth
+        const { body } = await supertestWithAdminScope
           .post(`${API_BASE_PATH}/execute`)
-          .set(internalHeaders)
-          .set('Content-Type', 'application/json;charset=UTF-8')
-          .set(roleAuthc.apiKeyHeader)
           .send(invalidScript)
           .expect(200);
 

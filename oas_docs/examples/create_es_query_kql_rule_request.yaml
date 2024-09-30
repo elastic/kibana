@@ -1,0 +1,24 @@
+summary: Elasticsearch query rule (KQL)
+description: Create an Elasticsearch query rule that uses Kibana query language (KQL).
+value:
+  consumer: alerts
+  name: my Elasticsearch query KQL rule
+  params:
+    aggType: count
+    excludeHitsFromPreviousRun: true
+    groupBy: all
+    searchConfiguration:
+      query:
+        query: '""geo.src : "US" ""'
+        language: kuery
+      index: 90943e30-9a47-11e8-b64d-95841ca0b247
+    searchType: searchSource
+    size: 100
+    threshold:
+      - 1000
+    thresholdComparator: ">"
+    timeWindowSize: 5
+    timeWindowUnit: m
+  rule_type_id: .es-query
+  schedule:
+    interval: 1m

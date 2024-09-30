@@ -1,0 +1,304 @@
+{
+  "id": "@kbn/grid-layout",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "GridLayout",
+        "description": [],
+        "signature": [
+          "({ getCreationOptions, renderPanelContents, }: { getCreationOptions: () => { initialLayout: ",
+          {
+            "pluginId": "@kbn/grid-layout",
+            "scope": "public",
+            "docId": "kibKbnGridLayoutPluginApi",
+            "section": "def-public.GridLayoutData",
+            "text": "GridLayoutData"
+          },
+          "; gridSettings: ",
+          {
+            "pluginId": "@kbn/grid-layout",
+            "scope": "public",
+            "docId": "kibKbnGridLayoutPluginApi",
+            "section": "def-public.GridSettings",
+            "text": "GridSettings"
+          },
+          "; }; renderPanelContents: (panelId: string) => React.ReactNode; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridLayout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getCreationOptions,\n  renderPanelContents,\n}",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grid-layout",
+                "id": "def-public.GridLayout.$1.getCreationOptions",
+                "type": "Function",
+                "tags": [],
+                "label": "getCreationOptions",
+                "description": [],
+                "signature": [
+                  "() => { initialLayout: ",
+                  {
+                    "pluginId": "@kbn/grid-layout",
+                    "scope": "public",
+                    "docId": "kibKbnGridLayoutPluginApi",
+                    "section": "def-public.GridLayoutData",
+                    "text": "GridLayoutData"
+                  },
+                  "; gridSettings: ",
+                  {
+                    "pluginId": "@kbn/grid-layout",
+                    "scope": "public",
+                    "docId": "kibKbnGridLayoutPluginApi",
+                    "section": "def-public.GridSettings",
+                    "text": "GridSettings"
+                  },
+                  "; }"
+                ],
+                "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/grid-layout",
+                "id": "def-public.GridLayout.$1.renderPanelContents",
+                "type": "Function",
+                "tags": [],
+                "label": "renderPanelContents",
+                "description": [],
+                "signature": [
+                  "(panelId: string) => React.ReactNode"
+                ],
+                "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/grid-layout",
+                    "id": "def-public.GridLayout.$1.renderPanelContents.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "panelId",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridPanelData",
+        "type": "Interface",
+        "tags": [],
+        "label": "GridPanelData",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/grid-layout",
+            "scope": "public",
+            "docId": "kibKbnGridLayoutPluginApi",
+            "section": "def-public.GridPanelData",
+            "text": "GridPanelData"
+          },
+          " extends ",
+          "GridRect"
+        ],
+        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridPanelData.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridRowData",
+        "type": "Interface",
+        "tags": [],
+        "label": "GridRowData",
+        "description": [],
+        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridRowData.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridRowData.isCollapsed",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCollapsed",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridRowData.panels",
+            "type": "Object",
+            "tags": [],
+            "label": "panels",
+            "description": [],
+            "signature": [
+              "{ [key: string]: ",
+              {
+                "pluginId": "@kbn/grid-layout",
+                "scope": "public",
+                "docId": "kibKbnGridLayoutPluginApi",
+                "section": "def-public.GridPanelData",
+                "text": "GridPanelData"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "GridSettings",
+        "description": [],
+        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSettings.gutterSize",
+            "type": "number",
+            "tags": [],
+            "label": "gutterSize",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSettings.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridSettings.columnCount",
+            "type": "number",
+            "tags": [],
+            "label": "columnCount",
+            "description": [],
+            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridLayoutData",
+        "type": "Type",
+        "tags": [],
+        "label": "GridLayoutData",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/grid-layout",
+            "scope": "public",
+            "docId": "kibKbnGridLayoutPluginApi",
+            "section": "def-public.GridRowData",
+            "text": "GridRowData"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

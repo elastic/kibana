@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector', 'error']);
+  const { common, error } = getPageObjects(['common', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await common.navigateToActualUrl(
           'visualize',
           `${VisualizeConstants.EDIT_PATH}/custom_i-exist`,
           {
@@ -93,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show visualize navlink`, async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -101,16 +101,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new visualization shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
+        await common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
 
       it(`edit visualization for object which doesn't exist shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await common.navigateToActualUrl(
           'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
           {
@@ -119,20 +119,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await PageObjects.error.expectNotFound();
+        await error.expectNotFound();
       });
 
       it(`edit visualization for object which exists shows 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'visualize',
-          `${VisualizeConstants.EDIT_PATH}/i-exist`,
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await PageObjects.error.expectNotFound();
+        await common.navigateToActualUrl('visualize', `${VisualizeConstants.EDIT_PATH}/i-exist`, {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await error.expectNotFound();
       });
     });
   });

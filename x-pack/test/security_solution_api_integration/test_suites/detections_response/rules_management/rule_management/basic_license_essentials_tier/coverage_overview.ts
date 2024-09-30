@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // Both serverless and ESS
-    describe('@serverless @ess tests', () => {
+    describe('@ess @serverless @skipInServerlessMKI tests', () => {
       describe('base cases', () => {
         it('returns an empty response if there are no rules', async () => {
           const body = await getCoverageOverview(supertest);
@@ -614,7 +614,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('error cases', async () => {
+      describe('error cases', () => {
         it('throws error when request body is not valid', async () => {
           const { body } = await supertest
             .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)

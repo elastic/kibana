@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { MetricsAPITimerange } from '../../../../../common/http_api';
+import type { MetricsAPITimerange } from '@kbn/metrics-data-access-plugin/common';
 import { calculateAuto } from './calculate_auto';
 import {
   getUnitValue,

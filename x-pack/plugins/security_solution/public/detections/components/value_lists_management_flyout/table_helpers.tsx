@@ -88,6 +88,7 @@ export const buildColumns = (
                 aria-label={i18n.ACTION_DELETE_DESCRIPTION}
                 data-test-subj={`action-delete-value-list-${item.name}`}
                 iconType="trash"
+                color="danger"
                 onClick={() => onDelete(item)}
               />
             )}

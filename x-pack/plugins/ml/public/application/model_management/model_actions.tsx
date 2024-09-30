@@ -20,6 +20,7 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useEnabledFeatures } from '../contexts/ml';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -29,6 +30,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
 import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useCloudCheck } from '../components/node_available_warning/hooks';
 
 export function useModelActions({
   onDfaTestAction,
@@ -56,10 +58,14 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       ...startServices
     },
   } = useMlKibana();
+
+  const { showNodeInfo } = useEnabledFeatures();
+
+  const cloudInfo = useCloudCheck();
 
   const [
     canCreateTrainedModels,
@@ -87,7 +93,7 @@ export function useModelActions({
 
   useEffect(() => {
     let isMounted = true;
-    mlApiServices
+    mlApi
       .hasPrivileges({
         cluster: ['manage_ingest_pipelines'],
       })
@@ -102,7 +108,7 @@ export function useModelActions({
     return () => {
       isMounted = false;
     };
-  }, [mlApiServices]);
+  }, [mlApi]);
 
   const getUserConfirmation = useMemo(
     () => getUserConfirmationProvider(overlays, startServices),
@@ -114,9 +120,11 @@ export function useModelActions({
       getUserInputModelDeploymentParamsProvider(
         overlays,
         startServices,
-        startModelDeploymentDocUrl
+        startModelDeploymentDocUrl,
+        cloudInfo,
+        showNodeInfo
       ),
-    [overlays, startServices, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo, showNodeInfo]
   );
 
   const isBuiltInModel = useCallback(
@@ -212,14 +220,20 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.startModelAllocation(item.model_id, {
-              number_of_allocations: modelDeploymentParams.numOfAllocations,
-              threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
-              priority: modelDeploymentParams.priority!,
-              deployment_id: !!modelDeploymentParams.deploymentId
-                ? modelDeploymentParams.deploymentId
-                : item.model_id,
-            });
+            await trainedModelsApiService.startModelAllocation(
+              item.model_id,
+              {
+                priority: modelDeploymentParams.priority!,
+                threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
+                number_of_allocations: modelDeploymentParams.number_of_allocations,
+                deployment_id: modelDeploymentParams.deployment_id,
+              },
+              {
+                ...(modelDeploymentParams.adaptive_allocations?.enabled
+                  ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
+                  : {}),
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
@@ -263,24 +277,29 @@ export function useModelActions({
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
         onClick: async (item) => {
-          const deploymentToUpdate = item.deployment_ids[0];
+          const deploymentIdToUpdate = item.deployment_ids[0];
 
-          const deploymentParams = await getUserInputModelDeploymentParams(item, {
-            deploymentId: deploymentToUpdate,
-            numOfAllocations: item.stats!.deployment_stats.find(
-              (v) => v.deployment_id === deploymentToUpdate
-            )!.number_of_allocations,
-          });
+          const targetDeployment = item.stats!.deployment_stats.find(
+            (v) => v.deployment_id === deploymentIdToUpdate
+          )!;
+
+          const deploymentParams = await getUserInputModelDeploymentParams(item, targetDeployment);
 
           if (!deploymentParams) return;
 
           try {
             onLoading(true);
+
             await trainedModelsApiService.updateModelDeployment(
               item.model_id,
-              deploymentParams.deploymentId!,
+              deploymentParams.deployment_id!,
               {
-                number_of_allocations: deploymentParams.numOfAllocations,
+                ...(deploymentParams.adaptive_allocations
+                  ? { adaptive_allocations: deploymentParams.adaptive_allocations }
+                  : {
+                      number_of_allocations: deploymentParams.number_of_allocations!,
+                      adaptive_allocations: { enabled: false },
+                    }),
               }
             );
             displaySuccessToast(
@@ -329,7 +348,7 @@ export function useModelActions({
             item.deployment_ids.some(
               (dId) =>
                 Array.isArray(item.inference_apis) &&
-                !item.inference_apis.some((inference) => inference.model_id === dId)
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {

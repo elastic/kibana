@@ -350,7 +350,15 @@
           "\nHook for managing the URL state of the page."
         ],
         "signature": [
-          "<T extends PageUrlState>(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
+          "<T extends ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.PageUrlState",
+            "text": "PageUrlState"
+          },
+          ">(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
           {
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
@@ -485,6 +493,145 @@
             "description": [],
             "signature": [
               "[id: string]:  TValue"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.ListingPageUrlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListingPageUrlState",
+        "description": [],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.sortDirection",
+            "type": "string",
+            "tags": [],
+            "label": "sortDirection",
+            "description": [],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.queryText",
+            "type": "string",
+            "tags": [],
+            "label": "queryText",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.showPerPageOptions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showPerPageOptions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.showAll",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAll",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.PageUrlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "PageUrlState",
+        "description": [],
+        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlState.pageKey",
+            "type": "string",
+            "tags": [],
+            "label": "pageKey",
+            "description": [],
+            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlState.pageUrlState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pageUrlState",
+            "description": [],
+            "signature": [
+              "object"
             ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,

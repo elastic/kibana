@@ -28,8 +28,11 @@ import type {
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
+import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
@@ -37,7 +40,6 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  CSPM_POLICY_TEMPLATE,
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
@@ -49,6 +51,7 @@ import {
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
   POSTURE_NAMESPACE,
+  POLICY_TEMPLATE_FORM_DTS,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -67,6 +70,7 @@ import { SetupTechnologySelector } from './setup_technology_selector/setup_techn
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -537,6 +541,125 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
+const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyPostureInput;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
+
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+    updatePolicy(policy);
+  }, [newPolicy, input, updatePolicy]);
+};
+
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  isLoading,
+  integration,
+  newPolicy,
+  packagePolicyList,
+  updatePolicy,
+  setCanFetchIntegration,
+}: {
+  isEditPage: boolean;
+  isLoading: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  packagePolicyList: PackagePolicy[] | undefined;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+  setCanFetchIntegration: (canFetch: boolean) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
+
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
+      (policy) => policy?.vars?.posture?.value === integration
+    );
+
+    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
+
+    if (newPolicy.name === currentIntegrationName) {
+      return;
+    }
+
+    updatePolicy({
+      ...newPolicy,
+      name: currentIntegrationName,
+    });
+    setCanFetchIntegration(false);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage, packagePolicyList]);
+};
+
+const getSelectedOption = (
+  options: NewPackagePolicyInput[],
+  policyTemplate: string = CSPM_POLICY_TEMPLATE
+) => {
+  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
+  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
+  // Default selected policy template is CSPM
+  const selectedOption =
+    options.find((i) => i.enabled) ||
+    options.find((i) => i.policy_template === policyTemplate) ||
+    options[0];
+
+  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
+  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
+
+  return selectedOption;
+};
+
+/**
+ * Update CloudFormation template and stack name in the Agent Policy
+ * based on the selected policy template
+ */
+const useCloudFormationTemplate = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
+
+    // If the template is not available, do not update the policy
+    if (templateUrl === '') return;
+
+    const checkCurrentTemplate = newPolicy?.inputs?.find(
+      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
+    )?.config?.cloud_formation_template_url?.value;
+
+    // If the template is already set, do not update the policy
+    if (checkCurrentTemplate === templateUrl) return;
+
+    updatePolicy?.({
+      ...newPolicy,
+      inputs: newPolicy.inputs.map((input) => {
+        if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
+          return {
+            ...input,
+            config: { cloud_formation_template_url: { value: templateUrl } },
+          };
+        }
+        return input;
+      }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
+};
+
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
     newPolicy,
@@ -553,7 +676,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
+    const { cloud } = useKibana().services;
+    const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
+    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
+    const isSubscriptionValid = !!getIsSubscriptionValid.data;
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       isAgentlessEnabled,
@@ -615,6 +742,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
       [onChange, isValid]
     );
+
     /**
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
@@ -648,9 +776,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    useEffect(() => {
+      setIsLoading(getIsSubscriptionValid.isLoading);
+    }, [getIsSubscriptionValid.isLoading]);
+
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
+
+    useEffect(() => {
+      if (!isServerless) {
+        setIsValid(isSubscriptionValid);
+      }
+    }, [isServerless, isSubscriptionValid]);
 
     useEffect(() => {
       if (isEditPage) return;
@@ -693,7 +831,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     if (isLoading) {
       return (
-        <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
@@ -725,6 +863,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ),
       },
     ];
+
+    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
+      return <SubscriptionNotAllowed />;
+    }
 
     return (
       <>
@@ -857,122 +999,3 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
-
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  useEffect(() => {
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
-};
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  isLoading,
-  integration,
-  newPolicy,
-  packagePolicyList,
-  updatePolicy,
-  setCanFetchIntegration,
-}: {
-  isEditPage: boolean;
-  isLoading: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-  setCanFetchIntegration: (canFetch: boolean) => void;
-}) => {
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-    if (isLoading) return;
-
-    const packagePolicyListByIntegration = packagePolicyList?.filter(
-      (policy) => policy?.vars?.posture?.value === integration
-    );
-
-    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
-
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
-    setCanFetchIntegration(false);
-    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage, packagePolicyList]);
-};
-
-const getSelectedOption = (
-  options: NewPackagePolicyInput[],
-  policyTemplate: string = CSPM_POLICY_TEMPLATE
-) => {
-  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
-  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
-  const selectedOption =
-    options.find((i) => i.enabled) ||
-    options.find((i) => i.policy_template === policyTemplate) ||
-    options[0];
-
-  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
-
-  return selectedOption;
-};
-
-/**
- * Update CloudFormation template and stack name in the Agent Policy
- * based on the selected policy template
- */
-const useCloudFormationTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  useEffect(() => {
-    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
-
-    // If the template is not available, do not update the policy
-    if (templateUrl === '') return;
-
-    const checkCurrentTemplate = newPolicy?.inputs?.find(
-      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
-    )?.config?.cloud_formation_template_url?.value;
-
-    // If the template is already set, do not update the policy
-    if (checkCurrentTemplate === templateUrl) return;
-
-    updatePolicy?.({
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
-          return {
-            ...input,
-            config: { cloud_formation_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
-};

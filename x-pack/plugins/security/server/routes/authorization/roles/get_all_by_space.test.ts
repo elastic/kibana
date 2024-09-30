@@ -320,5 +320,81 @@ describe('GET all roles by space id', () => {
         ],
       },
     });
+
+    getRolesTest(`filters roles with reserved only privileges`, {
+      apiResponse: () => ({
+        first_role: {
+          description: 'first role description',
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        second_role: {
+          cluster: [],
+          indices: [],
+          applications: [
+            {
+              application,
+              privileges: ['space_all', 'space_read'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+          ],
+          run_as: [],
+          metadata: {
+            _reserved: true,
+          },
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+        third_role: {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          transient_metadata: {
+            enabled: true,
+          },
+        },
+      }),
+      spaceId: 'marketing',
+      asserts: {
+        statusCode: 200,
+        result: [
+          {
+            _transform_error: [],
+            _unrecognized_applications: [],
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              remote_cluster: undefined,
+              remote_indices: undefined,
+              run_as: [],
+            },
+            kibana: [
+              {
+                base: ['all', 'read'],
+                feature: {},
+                spaces: ['marketing', 'sales'],
+              },
+            ],
+            metadata: {
+              _reserved: true,
+            },
+            name: 'second_role',
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        ],
+      },
+    });
   });
 });

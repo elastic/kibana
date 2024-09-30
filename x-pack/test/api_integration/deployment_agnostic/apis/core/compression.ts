@@ -6,40 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
   describe('compression', () => {
     before(async () => {
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withCustomHeaders: { 'accept-encoding': 'gzip' },
+      });
     });
     after(async () => {
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await supertestWithAdminScope.destroy();
     });
     describe('against an application page', () => {
       it(`uses compression when there isn't a referer`, async () => {
-        const response = await supertestWithoutAuth
-          .get('/app/kibana')
-          .set('accept-encoding', 'gzip')
-          .set(internalHeaders)
-          .set(roleAuthc.apiKeyHeader);
+        const response = await supertestWithAdminScope.get('/app/kibana');
         expect(response.header).to.have.property('content-encoding', 'gzip');
       });
 
       it(`uses compression when there is a whitelisted referer`, async () => {
-        const response = await supertestWithoutAuth
+        const response = await supertestWithAdminScope
           .get('/app/kibana')
-          .set('accept-encoding', 'gzip')
-          .set(internalHeaders)
-          .set('referer', 'https://some-host.com')
-          .set(roleAuthc.apiKeyHeader);
+          .set('referer', 'https://some-host.com');
         expect(response.header).to.have.property('content-encoding', 'gzip');
       });
     });

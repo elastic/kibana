@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const INITIALIZING = Symbol('async instance initializing');
@@ -73,7 +74,7 @@ export const createAsyncInstance = <T>(
     },
 
     get(_, prop, receiver) {
-      if (loadingTarget.hasOwnProperty(prop)) {
+      if (Object.hasOwn(loadingTarget, prop)) {
         return Reflect.get(loadingTarget as any, prop, receiver);
       }
 
@@ -84,7 +85,7 @@ export const createAsyncInstance = <T>(
     },
 
     getOwnPropertyDescriptor(_, prop) {
-      if (loadingTarget.hasOwnProperty(prop)) {
+      if (Object.hasOwn(loadingTarget, prop)) {
         return Reflect.getOwnPropertyDescriptor(loadingTarget, prop);
       }
 
@@ -100,7 +101,7 @@ export const createAsyncInstance = <T>(
     },
 
     has(_, prop) {
-      if (!loadingTarget.hasOwnProperty(prop)) {
+      if (!Object.hasOwn(loadingTarget, prop)) {
         return Reflect.has(loadingTarget, prop);
       }
 

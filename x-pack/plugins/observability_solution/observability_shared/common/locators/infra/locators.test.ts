@@ -60,7 +60,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
@@ -72,8 +72,26 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=undefined`
+        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
       );
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+
+    it('should return correct fallback params for non-supported assetType using assetDetails', async () => {
+      const { assetDetailsLocator } = await setupAssetDetailsLocator();
+
+      const { app, path, state } = await assetDetailsLocator.getLocation({
+        ...params,
+        assetType: 'pod',
+      });
+
+      const expectedDetails = rison.encodeUnknown({
+        time: params.assetDetails.dateRange,
+      });
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/detail/pod/${params.assetId}?_a=${expectedDetails}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });

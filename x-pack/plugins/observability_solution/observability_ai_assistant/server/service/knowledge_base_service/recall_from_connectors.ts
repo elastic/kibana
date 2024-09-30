@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty } from 'lodash';
+import type { Logger } from '@kbn/logging';
 import { RecalledEntry } from '.';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 
@@ -16,15 +17,17 @@ export async function recallFromConnectors({
   esClient,
   uiSettingsClient,
   modelId,
+  logger,
 }: {
   queries: Array<{ text: string; boost?: number }>;
-  esClient: { asCurrentUser: ElasticsearchClient };
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   uiSettingsClient: IUiSettingsClient;
   modelId: string;
+  logger: Logger;
 }): Promise<RecalledEntry[]> {
   const ML_INFERENCE_PREFIX = 'ml.inference.';
-
-  const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient);
+  const connectorIndices = await getConnectorIndices(esClient, uiSettingsClient, logger);
+  logger.debug(`Found connector indices: ${connectorIndices}`);
 
   const fieldCaps = await esClient.asCurrentUser.fieldCaps({
     index: connectorIndices,
@@ -96,17 +99,25 @@ export async function recallFromConnectors({
 }
 
 async function getConnectorIndices(
-  esClient: { asCurrentUser: ElasticsearchClient },
-  uiSettingsClient: IUiSettingsClient
+  esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient },
+  uiSettingsClient: IUiSettingsClient,
+  logger: Logger
 ) {
   // improve performance by running this in parallel with the `uiSettingsClient` request
-  const responsePromise = esClient.asCurrentUser.transport.request({
-    method: 'GET',
-    path: '_connector',
-    querystring: {
-      filter_path: 'results.index_name',
-    },
-  });
+  const responsePromise = esClient.asInternalUser.transport
+    .request<{
+      results?: Array<{ index_name: string }>;
+    }>({
+      method: 'GET',
+      path: '_connector',
+      querystring: {
+        filter_path: 'results.index_name',
+      },
+    })
+    .catch((e) => {
+      logger.warn(`Failed to fetch connector indices due to ${e.message}`);
+      return { results: [] };
+    });
 
   const customSearchConnectorIndex = await uiSettingsClient.get<string>(
     aiAssistantSearchConnectorIndexPattern
@@ -116,7 +127,7 @@ async function getConnectorIndices(
     return customSearchConnectorIndex.split(',');
   }
 
-  const response = (await responsePromise) as { results?: Array<{ index_name: string }> };
+  const response = await responsePromise;
   const connectorIndices = response.results?.map((result) => result.index_name);
 
   // preserve backwards compatibility with 8.14 (may not be needed in the future)

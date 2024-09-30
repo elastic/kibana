@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { InjectedMetadataService } from './injected_metadata_service';
+import type { InjectedMetadataParams } from '..';
 
 describe('setup.getElasticsearchInfo()', () => {
   it('returns elasticsearch info from injectedMetadata', () => {
@@ -157,5 +159,31 @@ describe('setup.getLegacyMetadata()', () => {
       // @ts-expect-error TS knows this shouldn't be possible
       legacyMetadata.foo = false;
     }).toThrowError();
+  });
+});
+
+describe('setup.getFeatureFlags()', () => {
+  it('returns injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        featureFlags: {
+          overrides: {
+            'my-overridden-flag': 1234,
+          },
+        },
+      },
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toStrictEqual({ overrides: { 'my-overridden-flag': 1234 } });
+  });
+
+  it('returns empty injectedMetadata.featureFlags', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {},
+    } as unknown as InjectedMetadataParams);
+
+    const contract = injectedMetadata.setup();
+    expect(contract.getFeatureFlags()).toBeUndefined();
   });
 });

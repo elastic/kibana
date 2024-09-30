@@ -23,17 +23,19 @@ import {
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import type { CombinedField } from './types';
 import {
   createGeoPointCombinedField,
   isWithinLatRange,
   isWithinLonRange,
   getFieldNames,
   getNameCollisionMsg,
+  addCombinedFieldsToMappings,
+  addCombinedFieldsToPipeline,
 } from './utils';
+import type { AddCombinedField } from './combined_fields_form';
 
 interface Props {
-  addCombinedField: (combinedField: CombinedField) => void;
+  addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
   results: FindFileStructureResponse;
 }
@@ -99,13 +101,18 @@ export class GeoPointForm extends Component<Props, State> {
 
   onSubmit = () => {
     try {
-      this.props.addCombinedField(
-        createGeoPointCombinedField(
-          this.state.latField,
-          this.state.lonField,
-          this.state.geoPointField
-        )
+      const combinedField = createGeoPointCombinedField(
+        this.state.latField,
+        this.state.lonField,
+        this.state.geoPointField
       );
+
+      this.props.addCombinedField(
+        combinedField,
+        (mappings) => addCombinedFieldsToMappings(mappings, [combinedField]),
+        (pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField])
+      );
+
       this.setState({ submitError: '' });
     } catch (error) {
       this.setState({ submitError: error.message });

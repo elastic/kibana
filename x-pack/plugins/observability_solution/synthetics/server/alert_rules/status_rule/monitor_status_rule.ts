@@ -8,24 +8,22 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
+  AlertOverviewStatus,
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../../common/runtime_types/alert_rules/common';
-import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema, StatusRuleParams } from '../../../common/rules/status_rule';
 import {
@@ -35,7 +33,6 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
@@ -55,16 +52,15 @@ type MonitorStatusAlert = ObservabilityUptimeAlert;
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!alerting) {
+  if (!plugins.alerting) {
     throw new Error(
       'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
-  alerting.registerType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
@@ -108,7 +104,7 @@ export const registerSyntheticsStatusCheckRule = (
       );
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
@@ -172,10 +168,7 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: {
-      ...SyntheticsRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<MonitorStatusAlert>,
+    alerts: SyntheticsRuleTypeAlertDefinition,
     fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
