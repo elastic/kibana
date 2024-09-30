@@ -69,6 +69,7 @@ describe(
       testData.forEach((protection) => {
         cy.getByTestSubj(`endpointPolicyForm-${protection}`).within(() => {
           cy.getByTestSubj(`endpointPolicyForm-${protection}-enableDisableSwitch`).click();
+          // User should see the custom notification locked card since it is not enabled under Endpoint Essentials
           [
             'endpointPolicy-customNotificationLockedCard-title',
             'endpointPolicy-customNotificationLockedCard',
@@ -76,6 +77,7 @@ describe(
           ].forEach((testSubj) => {
             cy.getByTestSubj(testSubj, { timeout: 60000 }).should('exist').and('be.visible');
           });
+          // User should not see the custom message input since it is not enabled under Endpoint Essentials
           cy.getByTestSubj(`endpointPolicyForm-${protection}-notifyUser-customMessage`).should(
             'not.exist'
           );

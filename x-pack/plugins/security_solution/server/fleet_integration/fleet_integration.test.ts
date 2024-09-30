@@ -609,10 +609,10 @@ describe('ingest_integration tests ', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_notification')
         );
         const callback = getPackagePolicyUpdateCallback(
-          endpointAppContextMock.logger,
+          logger,
           licenseService,
-          endpointAppContextMock.featureUsageService,
-          endpointAppContextMock.endpointMetadataService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
           esClient,
           productFeaturesService

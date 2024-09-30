@@ -80,6 +80,7 @@ describe('Turn Off Policy Protections Migration', () => {
     return policy;
   };
 
+  // I’ve decided to keep the content hardcoded for better readability instead of generating it dynamically.
   const generateExpectedPolicyMock = ({
     defaultProtections,
     defaultNotes,

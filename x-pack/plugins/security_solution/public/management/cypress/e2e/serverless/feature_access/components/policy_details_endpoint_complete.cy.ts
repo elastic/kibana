@@ -76,7 +76,7 @@ describe(
       testData.forEach((protection) => {
         cy.getByTestSubj(`endpointPolicyForm-${protection}`).within(() => {
           cy.getByTestSubj(`endpointPolicyForm-${protection}-enableDisableSwitch`).click();
-
+          // User should not see the locked card since the feature is available under Endpoint Complete tier
           [
             'endpointPolicy-customNotificationLockedCard-title',
             'endpointPolicy-customNotificationLockedCard',
@@ -84,6 +84,7 @@ describe(
           ].forEach((testSubj) => {
             cy.getByTestSubj(testSubj).should('not.exist');
           });
+          // User should see the custom notification section
           cy.getByTestSubj(`endpointPolicyForm-${protection}-notifyUser-customMessage`)
             .should('exist')
             .and('be.visible');
