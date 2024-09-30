@@ -111,7 +111,7 @@ export const SolutionView: FunctionComponent<Props> = ({
 
   return (
     <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem>
           <EuiTitle size="xs">
             <EuiFlexGroup gutterSize="s">
