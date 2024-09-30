@@ -156,7 +156,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await kibanaServer.savedObjects.delete({
             type: 'index-pattern',
             id: expectedDataViewId,
-            space: 'default',
+            space: TEST_SPACE,
           });
 
           await retry.try(async () => {
@@ -191,7 +191,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await kibanaServer.savedObjects.delete({
             type: 'index-pattern',
             id: expectedDataViewId,
-            space: 'default',
+            space: TEST_SPACE,
           });
 
           await retry.try(async () => {
