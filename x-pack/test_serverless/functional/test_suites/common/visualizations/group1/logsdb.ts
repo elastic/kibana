@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 index: `${initialIndex}_no_host`,
                 removeLogsDBFields: true,
                 create: true,
-                logsdb: true,
+                mode: 'logsdb',
               },
             ],
           },
@@ -165,18 +165,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             name: 'LogsDB stream with an additional LogsDB stream',
             indexes: [
               { index: initialIndex },
-              { index: 'logsdb_index_2', create: true, logsdb: true },
+              { index: 'logsdb_index_2', create: true, mode: 'logsdb' },
             ],
           },
           {
             name: 'LogsDB stream with an additional TSDB stream',
-            indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, tsdb: true }],
+            indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, mode: 'tsdb' }],
           },
           {
             name: 'LogsDB stream with an additional TSDB stream downsampled',
             indexes: [
               { index: initialIndex },
-              { index: 'tsdb_index_downsampled', create: true, tsdb: true, downsample: true },
+              { index: 'tsdb_index_downsampled', create: true, mode: 'tsdb', downsample: true },
             ],
           },
         ];
@@ -191,7 +191,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           before(async () => {
             log.info(`Creating "${streamIndex}" data stream...`);
-            await dataStreams.createDataStream(streamIndex, getDataMapping(), undefined);
+            await dataStreams.createDataStream(
+              streamIndex,
+              getDataMapping({ mode: 'logsdb' }),
+              undefined
+            );
 
             // add some data to the stream
             await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
@@ -203,7 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
             log.info(`Upgrade "${streamIndex}" stream to LogsDB...`);
 
-            const logsdbMapping = getDataMapping();
+            const logsdbMapping = getDataMapping({ mode: 'logsdb' });
             await dataStreams.upgradeStream(streamIndex, logsdbMapping, 'logsdb');
             log.info(
               `Add more data to new "${streamConvertedToLogsDBIndex}" dataView (now with LogsDB backing index)...`
@@ -378,7 +382,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           before(async () => {
             log.info(`Creating "${logsdbStream}" data stream...`);
-            await dataStreams.createDataStream(logsdbStream, getDataMapping(), 'logsdb');
+            await dataStreams.createDataStream(
+              logsdbStream,
+              getDataMapping({ mode: 'logsdb' }),
+              'logsdb'
+            );
 
             // add some data to the stream
             await createDocs(logsdbStream, { isStream: true }, fromTimeForScenarios);
@@ -392,7 +400,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `Dowgrade "${logsdbStream}" stream into regular stream "${logsdbConvertedToStream}"...`
             );
 
-            await dataStreams.downgradeStream(logsdbStream, getDataMapping(), 'logsdb');
+            await dataStreams.downgradeStream(
+              logsdbStream,
+              getDataMapping({ mode: 'logsdb' }),
+              'logsdb'
+            );
             log.info(
               `Add more data to new "${logsdbConvertedToStream}" dataView (no longer LogsDB)...`
             );

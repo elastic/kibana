@@ -335,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           name: 'Dataview with an additional downsampled TSDB stream',
           indexes: [
             { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
@@ -343,12 +343,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           indexes: [
             { index: initialIndex },
             { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
           name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],
+          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, mode: 'tsdb' }],
         },
       ];
 
@@ -362,7 +362,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${streamIndex}" data stream...`);
-          await dataStreams.createDataStream(streamIndex, getDataMapping(), undefined);
+          await dataStreams.createDataStream(
+            streamIndex,
+            getDataMapping({ mode: 'tsdb' }),
+            undefined
+          );
 
           // add some data to the stream
           await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
@@ -374,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           log.info(`Upgrade "${streamIndex}" stream to TSDB...`);
 
-          const tsdbMapping = getDataMapping({ tsdb: true });
+          const tsdbMapping = getDataMapping({ mode: 'tsdb' });
           await dataStreams.upgradeStream(streamIndex, tsdbMapping, 'tsdb');
           log.info(
             `Add more data to new "${streamConvertedToTsdbIndex}" dataView (now with TSDB backing index)...`
@@ -465,7 +469,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${tsdbStream}" data stream...`);
-          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
+          await dataStreams.createDataStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
 
           // add some data to the stream
           await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
@@ -479,7 +483,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
           );
 
-          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ tsdb: true }), 'tsdb');
+          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
           log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
           // add some more data when upgraded
           await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
@@ -508,7 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
                 timeout: 500,
               })
-            ).to.eql(indexes.some(({ tsdb }) => tsdb));
+            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
           });
 
