@@ -186,13 +186,13 @@ const EndpointsEmptyState = React.memo<{
   }) => {
     const { getAppUrl } = useAppUrl();
     const policyItemsWithoutAgentPolicy = useMemo(
-      () => policyItems.filter((policy) => policy.policy_ids.length === 0),
+      () => policyItems.filter((policy) => !policy.policy_ids.length),
       [policyItems]
     );
 
     const policiesNotAddedToAgentPolicyCallout = useMemo(
       () =>
-        policyItemsWithoutAgentPolicy.length > 0 && (
+        policyItemsWithoutAgentPolicy.length && (
           <>
             <EuiSpacer size="xl" />
             <EuiCallOut
