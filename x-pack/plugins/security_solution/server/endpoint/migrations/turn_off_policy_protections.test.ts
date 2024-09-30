@@ -22,6 +22,8 @@ import type { ProductFeaturesService } from '../../lib/product_features_service/
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { merge } from 'lodash';
 import { DefaultPolicyNotificationMessage } from '../../../common/endpoint/models/policy_config';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -192,12 +194,13 @@ describe('Turn Off Policy Protections Migration', () => {
   beforeEach(() => {
     const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
 
-    ({ esClient, logger } = endpointContextStartContract);
-
+    logger = loggingSystemMock.createLogger();
+    ({ esClient } = endpointContextStartContract);
     productFeatureService = createFilteredProductFeaturesServiceMock();
 
     // productFeatureService = endpointContextStartContract.productFeaturesService;
-    fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
+
+    fleetServices = createEndpointFleetServicesFactoryMock().service.asInternalUser();
   });
 
   describe('when merging policy updates for different product features', () => {
@@ -391,7 +394,7 @@ describe('Turn Off Policy Protections Migration', () => {
         await callTurnOffPolicyProtections();
 
         expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
-          fleetServices.internalSoClient,
+          fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
           esClient,
           generateExpectedPolicyMock({
             id: policiesNeedingUpdate[0].id,
@@ -421,7 +424,7 @@ describe('Turn Off Policy Protections Migration', () => {
         await callTurnOffPolicyProtections();
 
         expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
-          fleetServices.internalSoClient,
+          fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
           esClient,
           generateExpectedPolicyMock({
             id: policiesNeedingUpdate[0].id,
@@ -446,7 +449,7 @@ describe('Turn Off Policy Protections Migration', () => {
         await callTurnOffPolicyProtections();
 
         expect(fleetServices.packagePolicy.bulkUpdate).toHaveBeenCalledWith(
-          fleetServices.internalSoClient,
+          fleetServices.savedObjects.createInternalUnscopedSoClient(),
           esClient,
           generateExpectedPolicyMock({
             id: policiesNeedingUpdate[0].id,
