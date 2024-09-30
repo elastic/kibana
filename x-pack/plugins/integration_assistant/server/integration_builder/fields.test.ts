@@ -74,7 +74,7 @@ describe('createFieldMapping', () => {
       },
     ];
 
-    const basedFields = `- name: data_stream.type
+    const baseFields = `- name: data_stream.type
   type: constant_keyword
   description: Data stream type.
 - name: data_stream.dataset
@@ -83,7 +83,7 @@ describe('createFieldMapping', () => {
   type: date
   description: Event timestamp.
 `;
-    (render as jest.Mock).mockReturnValue(basedFields);
+    (render as jest.Mock).mockReturnValue(baseFields);
 
     const fieldsResult = createFieldMapping(packageName, dataStreamName, dataStreamPath, docs);
 
