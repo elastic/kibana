@@ -554,34 +554,44 @@ describe('Utils', () => {
       expect(res).toMatchInlineSnapshot(
         [...customFieldsMock, fieldToAdd],
         `
-              Array [
-                Object {
-                  "key": "test_key_1",
-                  "type": "text",
-                  "value": "My text test value 1",
-                },
-                Object {
-                  "key": "test_key_2",
-                  "type": "toggle",
-                  "value": true,
-                },
-                Object {
-                  "key": "test_key_3",
-                  "type": "text",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_4",
-                  "type": "toggle",
-                  "value": null,
-                },
-                Object {
-                  "key": "my_test_key",
-                  "type": "text",
-                  "value": "my_test_value",
-                },
-              ]
-          `
+        Array [
+          Object {
+            "key": "test_key_1",
+            "type": "text",
+            "value": "My text test value 1",
+          },
+          Object {
+            "key": "test_key_2",
+            "type": "toggle",
+            "value": true,
+          },
+          Object {
+            "key": "test_key_3",
+            "type": "text",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_4",
+            "type": "toggle",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_5",
+            "type": "list",
+            "value": "option_1",
+          },
+          Object {
+            "key": "test_key_6",
+            "type": "list",
+            "value": null,
+          },
+          Object {
+            "key": "my_test_key",
+            "type": "text",
+            "value": "my_test_value",
+          },
+        ]
+      `
       );
     });
 
@@ -592,43 +602,45 @@ describe('Utils', () => {
       };
 
       const res = addOrReplaceField(customFieldsMock, fieldToUpdate as CaseUICustomField);
-      expect(res).toMatchInlineSnapshot(
-        [
-          { ...fieldToUpdate },
-          { ...customFieldsMock[1] },
-          { ...customFieldsMock[2] },
-          { ...customFieldsMock[3] },
-        ],
-        `
-              Array [
-                Object {
-                  "field": Object {
-                    "value": Array [
-                      "My text test value 1!!!",
-                    ],
-                  },
-                  "key": "test_key_1",
-                  "type": "text",
-                  "value": "My text test value 1",
-                },
-                Object {
-                  "key": "test_key_2",
-                  "type": "toggle",
-                  "value": true,
-                },
-                Object {
-                  "key": "test_key_3",
-                  "type": "text",
-                  "value": null,
-                },
-                Object {
-                  "key": "test_key_4",
-                  "type": "toggle",
-                  "value": null,
-                },
-              ]
-          `
-      );
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "field": Object {
+              "value": Array [
+                "My text test value 1!!!",
+              ],
+            },
+            "key": "test_key_1",
+            "type": "text",
+            "value": "My text test value 1",
+          },
+          Object {
+            "key": "test_key_2",
+            "type": "toggle",
+            "value": true,
+          },
+          Object {
+            "key": "test_key_3",
+            "type": "text",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_4",
+            "type": "toggle",
+            "value": null,
+          },
+          Object {
+            "key": "test_key_5",
+            "type": "list",
+            "value": "option_1",
+          },
+          Object {
+            "key": "test_key_6",
+            "type": "list",
+            "value": null,
+          },
+        ]
+      `);
     });
 
     it('adds new custom field configuration correctly', async () => {
@@ -642,41 +654,74 @@ describe('Utils', () => {
       expect(res).toMatchInlineSnapshot(
         [...customFieldsConfigurationMock, fieldToAdd],
         `
-              Array [
-                Object {
-                  "defaultValue": "My default value",
-                  "key": "test_key_1",
-                  "label": "My test label 1",
-                  "required": true,
-                  "type": "text",
-                },
-                Object {
-                  "defaultValue": true,
-                  "key": "test_key_2",
-                  "label": "My test label 2",
-                  "required": true,
-                  "type": "toggle",
-                },
-                Object {
-                  "key": "test_key_3",
-                  "label": "My test label 3",
-                  "required": false,
-                  "type": "text",
-                },
-                Object {
-                  "key": "test_key_4",
-                  "label": "My test label 4",
-                  "required": false,
-                  "type": "toggle",
-                },
-                Object {
-                  "key": "my_test_key",
-                  "label": "my_test_label",
-                  "required": true,
-                  "type": "text",
-                },
-              ]
-          `
+        Array [
+          Object {
+            "defaultValue": "My default value",
+            "key": "test_key_1",
+            "label": "My test label 1",
+            "required": true,
+            "type": "text",
+          },
+          Object {
+            "defaultValue": true,
+            "key": "test_key_2",
+            "label": "My test label 2",
+            "required": true,
+            "type": "toggle",
+          },
+          Object {
+            "key": "test_key_3",
+            "label": "My test label 3",
+            "required": false,
+            "type": "text",
+          },
+          Object {
+            "key": "test_key_4",
+            "label": "My test label 4",
+            "required": false,
+            "type": "toggle",
+          },
+          Object {
+            "defaultValue": "option_1",
+            "key": "test_key_5",
+            "label": "My test label 5",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": true,
+            "type": "list",
+          },
+          Object {
+            "key": "test_key_6",
+            "label": "My test label 6",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": false,
+            "type": "list",
+          },
+          Object {
+            "key": "my_test_key",
+            "label": "my_test_label",
+            "required": true,
+            "type": "text",
+          },
+        ]
+      `
       );
     });
 
@@ -687,44 +732,69 @@ describe('Utils', () => {
       };
 
       const res = addOrReplaceField(customFieldsConfigurationMock, fieldToUpdate);
-      expect(res).toMatchInlineSnapshot(
-        [
-          { ...fieldToUpdate },
-          { ...customFieldsConfigurationMock[1] },
-          { ...customFieldsConfigurationMock[2] },
-          { ...customFieldsConfigurationMock[3] },
-        ],
-        `
-              Array [
-                Object {
-                  "defaultValue": "My default value",
-                  "key": "test_key_1",
-                  "label": "My test label 1!!!",
-                  "required": true,
-                  "type": "text",
-                },
-                Object {
-                  "defaultValue": true,
-                  "key": "test_key_2",
-                  "label": "My test label 2",
-                  "required": true,
-                  "type": "toggle",
-                },
-                Object {
-                  "key": "test_key_3",
-                  "label": "My test label 3",
-                  "required": false,
-                  "type": "text",
-                },
-                Object {
-                  "key": "test_key_4",
-                  "label": "My test label 4",
-                  "required": false,
-                  "type": "toggle",
-                },
-              ]
-          `
-      );
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "defaultValue": "My default value",
+            "key": "test_key_1",
+            "label": "My test label 1!!!",
+            "required": true,
+            "type": "text",
+          },
+          Object {
+            "defaultValue": true,
+            "key": "test_key_2",
+            "label": "My test label 2",
+            "required": true,
+            "type": "toggle",
+          },
+          Object {
+            "key": "test_key_3",
+            "label": "My test label 3",
+            "required": false,
+            "type": "text",
+          },
+          Object {
+            "key": "test_key_4",
+            "label": "My test label 4",
+            "required": false,
+            "type": "toggle",
+          },
+          Object {
+            "defaultValue": "option_1",
+            "key": "test_key_5",
+            "label": "My test label 5",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": true,
+            "type": "list",
+          },
+          Object {
+            "key": "test_key_6",
+            "label": "My test label 6",
+            "options": Array [
+              Object {
+                "key": "option_1",
+                "label": "Option 1",
+              },
+              Object {
+                "key": "option_2",
+                "label": "Option 2",
+              },
+            ],
+            "required": false,
+            "type": "list",
+          },
+        ]
+      `);
     });
   });
 
