@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -17,6 +17,7 @@ import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
+import { getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
@@ -42,6 +43,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     avatarType: imageAvatarSelected ? 'image' : 'initials',
     imageUrl: imageAvatarSelected ? space.imageUrl : '',
   });
+
+  // space initials are blank by default, they must be calculated
+  const getSpaceFromFormValues = (newFormValues: CustomizeSpaceFormValues) => {
+    return { ...newFormValues, initials: getSpaceInitials(newFormValues) };
+  };
 
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
@@ -138,7 +144,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       setIsLoading(true);
 
       let disabledFeatures: string[] | undefined;
-      if (spaceClone.solution === SOLUTION_VIEW_CLASSIC) {
+      if (!spaceClone.solution || spaceClone.solution === SOLUTION_VIEW_CLASSIC) {
         disabledFeatures = spaceClone.disabledFeatures;
       }
 
@@ -182,13 +188,27 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, props]
   );
 
+  const validator = useMemo(() => new SpaceValidator(), []);
+
   const onClickSubmit = useCallback(() => {
+    validator.enableValidation();
+    const validationResult = validator.validateForSave(
+      formValues,
+      true,
+      props.allowSolutionVisibility
+    );
+
+    if (validationResult.isInvalid) {
+      // invalid form input fields will show the error message
+      return;
+    }
+
     if (showUserImpactWarning) {
       setShowAlteringActiveSpaceDialog(true);
     } else {
       performSave({ requiresReload: false });
     }
-  }, [performSave, showUserImpactWarning]);
+  }, [validator, formValues, props.allowSolutionVisibility, performSave, showUserImpactWarning]);
 
   const doShowAlteringActiveSpaceDialog = () => {
     return (
@@ -244,15 +264,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     );
   };
 
-  const validator = new SpaceValidator();
-
   return (
     <>
       {doShowAlteringActiveSpaceDialog()}
       {doShowConfirmDeleteSpaceDialog()}
 
       <CustomizeSpace
-        space={formValues}
+        space={getSpaceFromFormValues(formValues)}
         onChange={onChangeSpaceSettings}
         editingExistingSpace={true}
         validator={validator}
@@ -262,7 +280,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         <>
           <EuiSpacer />
           <SolutionView
-            space={formValues}
+            space={getSpaceFromFormValues(formValues)}
             onChange={onSolutionViewChange}
             validator={validator}
             isEditing={true}
@@ -273,7 +291,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       {props.allowFeatureVisibility && (solution == null || solution === SOLUTION_VIEW_CLASSIC) && (
         <>
           <EuiSpacer />
-          <EnabledFeatures features={features} space={formValues} onChange={onChangeFeatures} />
+          <EnabledFeatures
+            features={features}
+            space={getSpaceFromFormValues(formValues)}
+            onChange={onChangeFeatures}
+          />
         </>
       )}
 
