@@ -136,7 +136,7 @@
     },
     {
       "groupName": "HAPI ecosystem",
-      "matchDepNames": ["@hapi/**", "!@hapi/cookie", "brok"],
+      "matchDepNames": ["@hapi/**", "brok"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:prev-minor"],
