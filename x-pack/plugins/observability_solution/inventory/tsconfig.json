@@ -42,6 +42,7 @@
     "@kbn/shared-svg",
     "@kbn/features-plugin",
     "@kbn/es-query",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/react-dom"
   ]
 }
