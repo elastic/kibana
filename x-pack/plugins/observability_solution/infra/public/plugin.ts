@@ -33,6 +33,7 @@ import {
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -379,44 +380,47 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const { http } = core;
+    const { http, uiSettings } = core;
+    const isLogsStreamEnabled = uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM);
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();
 
-    plugins.uiActions.registerAction<EmbeddableApiContext>({
-      id: ADD_LOG_STREAM_ACTION_ID,
-      grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
-      order: 30,
-      getDisplayName: () =>
-        i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-          defaultMessage: 'Log stream (deprecated)',
-        }),
-      getDisplayNameTooltip: () =>
-        i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-          defaultMessage:
-            'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
-        }),
-      getIconType: () => 'logsApp',
-      isCompatible: async ({ embeddable }) => {
-        return apiCanAddNewPanel(embeddable);
-      },
-      execute: async ({ embeddable }) => {
-        if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-        embeddable.addNewPanel<LogStreamSerializedState>(
-          {
-            panelType: LOG_STREAM_EMBEDDABLE,
-            initialState: {
-              title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
-                defaultMessage: 'Log stream',
-              }),
+    if (isLogsStreamEnabled) {
+      plugins.uiActions.registerAction<EmbeddableApiContext>({
+        id: ADD_LOG_STREAM_ACTION_ID,
+        grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
+        order: 30,
+        getDisplayName: () =>
+          i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
+            defaultMessage: 'Log stream (deprecated)',
+          }),
+        getDisplayNameTooltip: () =>
+          i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+            defaultMessage:
+              'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
+          }),
+        getIconType: () => 'logsApp',
+        isCompatible: async ({ embeddable }) => {
+          return apiCanAddNewPanel(embeddable);
+        },
+        execute: async ({ embeddable }) => {
+          if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+          embeddable.addNewPanel<LogStreamSerializedState>(
+            {
+              panelType: LOG_STREAM_EMBEDDABLE,
+              initialState: {
+                title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
+                  defaultMessage: 'Log stream',
+                }),
+              },
             },
-          },
-          true
-        );
-      },
-    });
-    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
+            true
+          );
+        },
+      });
+      plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
+    }
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
