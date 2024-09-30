@@ -12,6 +12,7 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RuleToImport } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
@@ -115,34 +116,60 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
             getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
-          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
-            actionSOClient,
-            actionsClient
-          );
-
           // import actions-connectors
           const {
             successCount: actionConnectorSuccessCount,
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-            rulesWithMigratedActions,
           } = await importRuleActionConnectors({
             actionConnectors,
             actionsClient,
             actionsImporter,
-            rules: migratedParsedObjectsWithoutDuplicateErrors,
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
-          // original rules actions' ids were replaced with new destinationIds
-          const parsedRules = actionConnectorErrors.length
-            ? []
-            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
+            parsedObjectsWithoutDuplicateErrors,
+            actionSOClient,
+            actionsClient
+          );
 
-          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+          const rulesToImport = migratedParsedObjectsWithoutDuplicateErrors.filter(
+            (ruleOrError) => !(ruleOrError instanceof Error)
+          ) as RuleToImport[];
+
+          // After importing the actions and migrating action IDs on rules to import,
+          // validate that all actions referenced by rules exist
+          // Filter out rules that reference non-existent actions
+          const missingActionErrors: BulkError[] = [];
+          const allActions = await actionsClient.getAll();
+          const validatedActionRules = rulesToImport.filter((rule) => {
+            if (rule.actions == null || rule.actions.length === 0) {
+              return true;
+            }
+
+            const missingActions = rule.actions.filter(
+              (action) => !allActions.some((installedAction) => action.id === installedAction.id)
+            );
+
+            if (missingActions.length > 0) {
+              missingActionErrors.push({
+                id: rule.id,
+                rule_id: rule.rule_id,
+                error: {
+                  status_code: 404,
+                  message: `Rule actions reference the following missing action IDs: ${missingActions
+                    .map((action) => action.id)
+                    .join(',')}`,
+                },
+              });
+              return false;
+            }
+            return true;
+          });
+
+          const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
 
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
             ruleChunks: chunkParseObjects,
