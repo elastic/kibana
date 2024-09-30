@@ -82,6 +82,11 @@ const RuleAttributesAllowedForPartialUpdate = [
 ];
 
 // direct, partial update to a rule saved object via ElasticsearchClient
+
+// we do this direct partial update to avoid the overhead of the SavedObjectsClient for
+// only these allow-listed fields which don't impact encryption. in addition, because these
+// fields are only updated by the system user at the end of a rule run, they should not
+// need to be included in any (user-centric) audit logs.
 export async function partiallyUpdateRuleWithEs(
   esClient: ElasticsearchClient,
   id: string,
