@@ -38,9 +38,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
-  CSP_VULN_DATASET,
   getDatasetDisplayName,
 } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
@@ -201,10 +201,6 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
       assertNever(tab);
   }
 };
-
-export const isNativeCspFinding = (finding: CspFinding | CspVulnerabilityFinding) =>
-  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET ||
-  finding.data_stream.dataset === CSP_VULN_DATASET;
 
 export const MissingFieldsCallout = ({
   finding,
