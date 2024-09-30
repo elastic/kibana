@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  convertPathToBracketNotation,
-  getProgressivePathsNoCtx,
-} from './build_field_retention_ingest_pipeline';
+import { convertPathToBracketNotation, getProgressivePathsNoCtx } from './path_utils';
 
-describe('buildFieldRetentionIngestPipeline', () => {
+describe('painless path utils', () => {
   describe('convertPathToBracketNotation', () => {
     it('should do nothing with single value', () => {
       const path = 'a';

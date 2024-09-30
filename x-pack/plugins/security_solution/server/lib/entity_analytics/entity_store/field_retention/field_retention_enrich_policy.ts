@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { getFieldRetentionDefinition } from './field_retention_definitions';
-import type { FieldRetentionDefinition } from './types';
+import type { FieldRetentionDefinition } from './field_retention_definitions';
 import { getEntitiesIndexName } from '../utils/utils';
 import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
