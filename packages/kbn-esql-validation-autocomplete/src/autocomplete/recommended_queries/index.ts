@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { SuggestionRawDefinition, GetFieldsByTypeFn } from '../types';
 
 export const getRecommendedQueries = async (
-  getFieldsByType: GetFieldsByTypeFn
+  getFieldsByType: GetFieldsByTypeFn,
+  fromCommand: string = ''
 ): Promise<SuggestionRawDefinition[]> => {
   const fieldSuggestions = await getFieldsByType('date', [], {
     openSuggestions: true,
@@ -25,7 +26,7 @@ export const getRecommendedQueries = async (
           defaultMessage: 'Aggregate data with STATS',
         }
       ),
-      text: ` | STATS count = COUNT(*) `,
+      text: `${fromCommand} | STATS count = COUNT(*) `,
       kind: 'Issue',
       detail: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.recommended.countAgg.detail',
@@ -42,7 +43,7 @@ export const getRecommendedQueries = async (
           defaultMessage: 'Create a conditional with CASE',
         }
       ),
-      text: ` | STATS count =  COUNT(*) | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other") | KEEP newField `,
+      text: `${fromCommand} | STATS count =  COUNT(*) | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other") | KEEP newField `,
       kind: 'Issue',
       detail: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.recommended.conditional.detail',
@@ -66,7 +67,7 @@ export const getRecommendedQueries = async (
             defaultMessage: 'Create a date histogram',
           }
         ),
-        text: ` | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY BUCKET(${timeField}, 50, ?_tstart, ?_tend) `,
+        text: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY BUCKET(${timeField}, 50, ?_tstart, ?_tend) `,
         kind: 'Issue',
         detail: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.autocomplete.recommended.dateHistogram.details',
@@ -83,7 +84,7 @@ export const getRecommendedQueries = async (
             defaultMessage: 'Sort by time',
           }
         ),
-        text: ` | SORT ${timeField} DESC `,
+        text: `${fromCommand} | SORT ${timeField} DESC `,
         kind: 'Issue',
         detail: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.autocomplete.recommended.sortByTime.detail',
@@ -100,7 +101,7 @@ export const getRecommendedQueries = async (
             defaultMessage: 'Create field with EVAL',
           }
         ),
-        text: ` | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | KEEP buckets `,
+        text: `${fromCommand} | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | KEEP buckets `,
         kind: 'Issue',
         detail: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.autocomplete.recommended.dateIntervals.detail',

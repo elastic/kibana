@@ -183,7 +183,26 @@ export async function suggest(
     // filter source commands if already defined
     const suggestions = commandAutocompleteDefinitions;
     if (!ast.length) {
-      return suggestions.filter(isSourceCommand);
+      let fromCommand = '';
+      if (getSources) {
+        const sources = await getSources();
+        const visibleSources = sources.filter((source) => !source.hidden);
+        if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+          fromCommand = 'FROM logs*';
+        } else fromCommand = `FROM ${visibleSources[0].name}`;
+      }
+
+      const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
+        fromCommand,
+        resourceRetriever
+      );
+      // empty state
+      const recommendedQueriesSuggestions = await getRecommendedQueries(
+        getFieldsByTypeEmptyState,
+        fromCommand
+      );
+      const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
+      return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));
