@@ -21,13 +21,15 @@ export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
       'request_documentation',
       { keywords: string[]; requestedDocumentation: Record<string, string> }
     >
+  | OutputCompleteEvent<'summarize_discussion', { summary: string }>
+  | OutputCompleteEvent<'review_generation', { valid: boolean; review: string }>
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent<TToolOptions>;
 
 export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   client: Pick<InferenceClient, 'output' | 'chatComplete'>;
   connectorId: string;
-  logger: Pick<Logger, 'debug'>;
+  logger: Logger;
   functionCalling?: FunctionCallingMode;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });

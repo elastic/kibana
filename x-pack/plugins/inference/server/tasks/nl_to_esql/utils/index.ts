@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { requestDocumentationFn } from './request_documentation';
-export { generateEsqlTask } from './generate_esql';
-export type { ActionsOptionsBase } from './types';
+export { extractQueries, type QueryWithPosition } from './extract_queries';
+export { validateQueryAst } from './validate_query_ast';

@@ -30,6 +30,10 @@ export function processVertexStream() {
           });
         }
 
+        if(!value.candidates?.[0].content) {
+          console.log('*** WTF', JSON.stringify(value));
+        }
+
         const contentPart = value.candidates?.[0].content.parts[0];
         const completion = contentPart?.text;
         const toolCall = contentPart?.functionCall;
