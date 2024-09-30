@@ -187,9 +187,24 @@ describe('AgentService', () => {
   });
 
   describe('asInternalScopedUser', () => {
-    // FIXME:PT implement tests
+    it('should throw error if no space id is passed', () => {
+      const agentService = new AgentServiceImpl(
+        elasticsearchServiceMock.createElasticsearchClient(),
+        savedObjectsClientMock.create()
+      );
 
-    it.todo('should throw error if no space id is passed');
+      expect(() => agentService.asInternalScopedUser('')).toThrowError(TypeError);
+    });
+
+    {
+      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockSoClient = savedObjectsClientMock.create();
+      expectApisToCallServicesSuccessfully(
+        mockEsClient,
+        () => mockSoClient,
+        () => new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser
+      );
+    }
   });
 });
 
