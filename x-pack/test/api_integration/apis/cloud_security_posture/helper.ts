@@ -31,7 +31,7 @@ export const deleteIndex = async (es: Client, indexToBeDeleted: string[]) => {
 
 export const bulkIndex = async <T>(es: Client, findingsMock: T[], indexName: string) => {
   const operations = findingsMock.flatMap((finding) => [
-    { index: { _index: indexName } }, // Action description
+    { create: { _index: indexName } }, // Action description
     {
       ...finding,
       '@timestamp': new Date().toISOString(),

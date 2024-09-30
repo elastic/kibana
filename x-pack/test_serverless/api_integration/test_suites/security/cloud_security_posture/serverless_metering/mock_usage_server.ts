@@ -51,7 +51,7 @@ const usageAPIHandler = http.post(
   'api/v1/usage',
   async ({ request }): Promise<StrictResponse<UsageResponse>> => {
     const payload = (await request.clone().json()) as UsageRecord[];
-    interceptedRequestPayload.push(...payload);
+    interceptedRequestPayload = payload;
 
     return HttpResponse.json({
       response: payload,
