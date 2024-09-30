@@ -13,6 +13,7 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { logFormatDetectionTestState } from '../../../__jest__/fixtures/log_type_detection';
 import type { LogFormatDetectionState } from '../../types';
 import { handleLogFormatDetection } from './detection';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
   response: '{ "log_type": "structured"}',
@@ -22,7 +23,15 @@ const state: LogFormatDetectionState = logFormatDetectionTestState;
 
 describe('Testing log type detection handler', () => {
   it('handleLogFormatDetection()', async () => {
-    const response = await handleLogFormatDetection({ state, model });
+    const client = {
+      asCurrentUser: {
+        ingest: {
+          simulate: jest.fn(),
+        },
+      },
+    } as unknown as IScopedClusterClient;
+
+    const response = await handleLogFormatDetection({ state, model, client });
     expect(response.samplesFormat).toStrictEqual({ name: 'structured' });
     expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
