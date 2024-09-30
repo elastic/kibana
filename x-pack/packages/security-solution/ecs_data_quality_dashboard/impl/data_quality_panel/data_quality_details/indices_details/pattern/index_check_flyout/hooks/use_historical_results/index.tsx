@@ -12,7 +12,7 @@ import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { useIsMountedRef } from '../../../../../../hooks/use_is_mounted_ref';
 import { fetchHistoricalResults } from './utils/fetch_historical_results';
 import { FetchHistoricalResultsReducerState, UseHistoricalResultsReturnValue } from './types';
-import { FetchHistoricalResultsOpts } from '../../types';
+import { UseHistoricalResultsFetchOpts } from '../../types';
 import { fetchHistoricalResultsReducer } from './reducers/fetch_historical_results_reducer';
 
 export const initialFetchHistoricalResultsReducerState: FetchHistoricalResultsReducerState = {
@@ -39,7 +39,7 @@ export const useHistoricalResults = (): UseHistoricalResultsReturnValue => {
       startDate,
       endDate,
       outcome,
-    }: Omit<FetchHistoricalResultsOpts, 'httpFetch'>) => {
+    }: UseHistoricalResultsFetchOpts) => {
       dispatch({ type: 'FETCH_START' });
 
       try {

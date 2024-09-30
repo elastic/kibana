@@ -6,7 +6,7 @@
  */
 
 import { HistoricalResult } from '../../../../../../types';
-import { FetchHistoricalResultsOpts } from '../../types';
+import { UseHistoricalResultsFetch } from '../../types';
 
 export interface HistoricalResultsValue {
   historicalResultsState: {
@@ -15,5 +15,5 @@ export interface HistoricalResultsValue {
     isLoading: boolean;
     error: Error | null;
   };
-  fetchHistoricalResults: (opts: Omit<FetchHistoricalResultsOpts, 'httpFetch'>) => Promise<void>;
+  fetchHistoricalResults: UseHistoricalResultsFetch;
 }
