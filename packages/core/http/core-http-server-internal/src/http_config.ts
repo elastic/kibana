@@ -206,10 +206,7 @@ const configSchema = schema.object(
       }
     ),
     // disable access to internal routes by default
-    restrictInternalApis: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: true }),
-      traditional: schema.boolean({ defaultValue: true }),
-    }),
+    restrictInternalApis: schema.boolean({ defaultValue: true }),
 
     versioned: schema.object({
       /**

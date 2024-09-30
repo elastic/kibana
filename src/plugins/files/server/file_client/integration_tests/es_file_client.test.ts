@@ -237,13 +237,6 @@ describe('ES-index-backed file client', () => {
         name: 'cool name 1',
       })
     );
-
-    // await esClient.indices.refresh({ index: blobStorageIndex });
-
-    // await Promise.all([
-    //   deleteFile({ id: id1, hasContent: false, refreshIndex: false }),
-    //   deleteFile({ id: id2, hasContent: false, refreshIndex: false }),
-    // ]);
     await deleteFile({ id: id1, hasContent: false, refreshIndex: true });
     await deleteFile({ id: id2, hasContent: false, refreshIndex: true });
   });
