@@ -34,7 +34,7 @@ export async function inlineToProjectZip(
       archive.append(wrapInlineInProject(inlineJourney), {
         name: `${monitorId}.journey.ts`,
       });
-      archive.finalize();
+      return archive.finalize();
     });
   } catch (e) {
     logger.error(`Failed to create zip for inline monitor ${monitorId}`);
