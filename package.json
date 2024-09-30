@@ -592,6 +592,7 @@
     "@kbn/kibana-react-plugin": "link:src/plugins/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/plugins/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
+    "@kbn/knowledge-base-registry-plugin": "link:x-pack/plugins/ai_infra/knowledge_base_registry",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/langchain": "link:x-pack/packages/kbn-langchain",
     "@kbn/language-documentation": "link:packages/kbn-language-documentation",

@@ -5467,6 +5467,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/knowledge-base-registry-plugin@link:x-pack/plugins/ai_infra/knowledge_base_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
