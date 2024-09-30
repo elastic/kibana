@@ -8,6 +8,7 @@
  */
 
 export const TIMESTAMP = 'timestamp.us';
+export const AT_TIMESTAMP = '@timestamp';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
@@ -20,12 +21,18 @@ export const CLOUD_AVAILABILITY_ZONE = 'cloud.availability_zone';
 export const CLOUD_PROVIDER = 'cloud.provider';
 export const CLOUD_REGION = 'cloud.region';
 export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
+export const CLOUD_PROJECT_ID = 'cloud.project.id';
+export const CLOUD_PROJECT_NAME = 'cloud.project.name';
+export const CLOUD_IMAGE_ID = 'cloud.image.id';
 export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
+export const CLOUD_ACCOUNT_NAME = 'cloud.account.name';
 export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
 export const EVENT_SUCCESS_COUNT = 'event.success_count';
+export const EVENT_SUCCESS_COUNT_SUM = 'event.success_count.sum';
+export const EVENT_SUCCESS_COUNT_VALUE_COUNT = 'event.success_count.value_count';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -39,18 +46,28 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 export const SERVICE_TARGET_TYPE = 'service.target.type';
+export const SERVICE_TARGET_NAME = 'service.target.name';
 export const SERVICE_OVERFLOW_COUNT = 'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
 export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
+
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
+export const USER_AGENT_DEVICE_NAME = 'user_agent.device.name';
+export const USER_AGENT_VERSION = 'user_agent.version';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
+export const OBSERVER_ID = 'observer.id';
+export const OBSERVER_TYPE = 'observer.type';
+export const OBSERVER_NAME = 'observer.name';
+export const OBSERVER_VERSION = 'observer.version';
 export const OBSERVER_LISTENING = 'observer.listening';
+export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const PROCESSOR_EVENT = 'processor.event';
+export const PROCESSOR_NAME = 'processor.name';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
@@ -67,6 +84,9 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
+export const TRANSACTION_NAME_TEXT = 'transaction.name.text';
+export const TRANSACTION_REPRESENTATIVE_COUNT = 'transaction.representative_count';
+export const TRANSACTION_SPAN_COUNT_STARTED = 'transaction.span_count.started';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -95,6 +115,7 @@ export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
 export const SPAN_COMPOSITE_COMPRESSION_STRATEGY = 'span.composite.compression_strategy';
 
 export const SPAN_SYNC = 'span.sync';
+export const SPAN_REPRESENTATIVE_COUNT = 'span.representative_count';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
@@ -138,6 +159,7 @@ export const LABEL_GC = 'labels.gc';
 export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
+export const LABEL_SOME_RESOURCE_ATTRIBUTE = 'labels.some_resource_attribute';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
@@ -145,14 +167,19 @@ export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const HOST_ARCHITECTURE = 'host.architecture';
 export const HOST_OS_VERSION = 'host.os.version';
+export const HOST_IP = 'host.ip';
 
 export const CONTAINER_ID = 'container.id';
 export const CONTAINER = 'container';
 export const CONTAINER_IMAGE = 'container.image.name';
+export const CONTAINER_OS = 'container.os';
+export const CONTAINER_TTL_INSTANCES = 'container.totalNumberInstances';
 
 export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
+export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
 
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
@@ -180,6 +207,8 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 export const TIER = '_tier';
 export const INDEX = '_index';
 export const DATA_STEAM_TYPE = 'data_stream.type';
+export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';
+export const DATA_STREAM_DATASET = 'data_stream.dataset';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
@@ -194,6 +223,7 @@ export const CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code';
 export const CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name';
 export const CLIENT_GEO_CITY_NAME = 'client.geo.city_name';
 export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
+export const CLIENT_IP = 'client.ip';
 
 export const CHILD_ID = 'child.id';
 

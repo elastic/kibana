@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { serviceAgentNameMapping } from '../../utils/es_fields_mappings';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -16,7 +17,6 @@ import {
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData, ServerlessType } from '../../../common/serverless';
-import { normalizeFields } from '../../utils/normalize_fields';
 
 interface ServiceAgent {
   agent?: {
@@ -102,8 +102,9 @@ export async function getServiceAgent({
     return {};
   }
 
-  // TODO fix in the mapper
-  const { agent, service, cloud } = normalizeFields(response.hits.hits[0].fields) as ServiceAgent;
+  const { agent, service, cloud } = serviceAgentNameMapping(
+    response.hits.hits[0].fields
+  ) as ServiceAgent;
   const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {

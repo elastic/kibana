@@ -7,25 +7,42 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { TransactionRaw } from '@kbn/apm-types';
+import { serviceMetadataIconsMapping } from '../../utils/es_fields_mappings';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  KUBERNETES,
   SERVICE_NAME,
   KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
   LABEL_TELEMETRY_AUTO_VERSION,
   AGENT_VERSION,
   SERVICE_FRAMEWORK_NAME,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_NAME,
+  CLOUD_INSTANCE_ID,
+  CLOUD_MACHINE_TYPE,
+  CLOUD_PROJECT_ID,
+  CLOUD_PROJECT_NAME,
+  CLOUD_REGION,
+  CLOUD_ACCOUNT_ID,
+  CLOUD_ACCOUNT_NAME,
+  CLOUD_IMAGE_ID,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
-import { normalizeFields } from '../../utils/normalize_fields';
+import {
+  KUBERNETES_CONTAINER_ID,
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_REPLICASET_NAME,
+} from '../../../common/es_fields/infra_metrics';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
@@ -73,8 +90,32 @@ export async function getServiceMetadataIcons({
     body: {
       track_total_hits: 1,
       size: 1,
+      _source: false,
       query: { bool: { filter, should } },
-      fields: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
+      fields: [
+        KUBERNETES_NAMESPACE,
+        KUBERNETES_NODE_NAME,
+        KUBERNETES_POD_NAME,
+        KUBERNETES_REPLICASET_NAME,
+        KUBERNETES_DEPLOYMENT_NAME,
+        KUBERNETES_CONTAINER_ID,
+        KUBERNETES_CONTAINER_NAME,
+        CLOUD_AVAILABILITY_ZONE,
+        CLOUD_INSTANCE_NAME,
+        CLOUD_INSTANCE_ID,
+        CLOUD_MACHINE_TYPE,
+        CLOUD_PROJECT_ID,
+        CLOUD_PROJECT_NAME,
+        CLOUD_PROVIDER,
+        CLOUD_REGION,
+        CLOUD_ACCOUNT_ID,
+        CLOUD_ACCOUNT_NAME,
+        CLOUD_IMAGE_ID,
+        CLOUD_SERVICE_NAME,
+        CONTAINER_ID,
+        AGENT_NAME,
+        CLOUD_SERVICE_NAME,
+      ],
     },
   };
 
@@ -89,7 +130,7 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const { kubernetes, cloud, container, agent } = normalizeFields(
+  const { kubernetes, cloud, container, agent } = serviceMetadataIconsMapping(
     response.hits.hits[0].fields
   ) as ServiceMetadataIconsRaw;
 

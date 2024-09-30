@@ -8,8 +8,6 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { Span } from '@kbn/apm-types/es_schemas_ui';
-import type { TransactionRaw } from '@kbn/apm-types/es_schemas_raw';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -30,7 +28,10 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { normalizeFields } from '../../utils/normalize_fields';
+import {
+  topDependencySpansMapping,
+  transactionsForDependencySpansMapping,
+} from '../../utils/es_fields_mappings';
 
 const MAX_NUM_SPANS = 1000;
 
@@ -115,7 +116,7 @@ export async function getTopDependencySpans({
         ],
       },
     })
-  ).hits.hits.map((hit) => normalizeFields(hit?.fields) as unknown as Span);
+  ).hits.hits.map((hit) => topDependencySpansMapping(hit?.fields));
 
   const transactionIds = spans.map((span) => span.transaction!.id);
 
@@ -138,7 +139,7 @@ export async function getTopDependencySpans({
         },
       },
     })
-  ).hits.hits.map((hit) => normalizeFields(hit.fields) as unknown as TransactionRaw);
+  ).hits.hits.map((hit) => transactionsForDependencySpansMapping(hit.fields));
 
   const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 

@@ -7,32 +7,59 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { serviceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  AGENT,
-  CONTAINER,
-  CLOUD,
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_CONTAINER_ID,
+  KUBERNETES_NODE_NAME,
+  KUBERNETES_POD_NAME,
+} from '../../../common/es_fields/infra_metrics';
+import {
+  AGENT_NAME,
+  AGENT_VERSION,
+  CONTAINER_ID,
+  CONTAINER_IMAGE,
   CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_ID,
   CLOUD_REGION,
+  CLOUD_PROJECT_NAME,
   CLOUD_MACHINE_TYPE,
   CLOUD_SERVICE_NAME,
-  CONTAINER_ID,
-  HOST,
-  KUBERNETES,
-  SERVICE,
-  SERVICE_NAME,
+  CLOUD_INSTANCE_NAME,
+  CLOUD_PROVIDER,
+  CLOUD_ACCOUNT_ID,
+  CLOUD_ACCOUNT_NAME,
+  CLOUD_IMAGE_ID,
+  CLOUD_PROJECT_ID,
+  HOST_ARCHITECTURE,
+  HOST_HOSTNAME,
+  HOST_NAME,
+  HOST_IP,
+  SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
+  SERVICE_FRAMEWORK_VERSION,
   SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_LANGUAGE_VERSION,
   SERVICE_VERSION,
+  SERVICE_NAME,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
   LABEL_TELEMETRY_AUTO_VERSION,
+  CONTAINER_TTL_INSTANCES,
+  HOST_OS_PLATFORM,
 } from '../../../common/es_fields/apm';
 
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { normalizeFields } from '../../utils/normalize_fields';
 import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -113,16 +140,7 @@ export async function getServiceMetadataDetails({
     body: {
       track_total_hits: 1,
       size: 1,
-      fields: [
-        `${SERVICE}*`,
-        `${AGENT}*`,
-        `telemetry*`,
-        HOST,
-        CONTAINER,
-        KUBERNETES,
-        CLOUD,
-        LABEL_TELEMETRY_AUTO_VERSION,
-      ],
+      _source: false,
       query: {
         bool: { filter, should },
       },
@@ -178,13 +196,56 @@ export async function getServiceMetadataDetails({
         },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
+      fields: [
+        SERVICE_ENVIRONMENT,
+        SERVICE_FRAMEWORK_NAME,
+        SERVICE_FRAMEWORK_VERSION,
+        SERVICE_NODE_NAME,
+        SERVICE_RUNTIME_NAME,
+        SERVICE_RUNTIME_VERSION,
+        SERVICE_LANGUAGE_NAME,
+        SERVICE_LANGUAGE_VERSION,
+        SERVICE_VERSION,
+        SERVICE_NAME,
+        AGENT_NAME,
+        AGENT_VERSION,
+        CONTAINER_ID,
+        CONTAINER_IMAGE,
+        HOST_ARCHITECTURE,
+        HOST_HOSTNAME,
+        HOST_NAME,
+        HOST_IP,
+        HOST_OS_PLATFORM,
+        CONTAINER_TTL_INSTANCES,
+        KUBERNETES_NAMESPACE,
+        KUBERNETES_NODE_NAME,
+        KUBERNETES_POD_NAME,
+        KUBERNETES_REPLICASET_NAME,
+        KUBERNETES_DEPLOYMENT_NAME,
+        KUBERNETES_CONTAINER_ID,
+        KUBERNETES_CONTAINER_NAME,
+        CLOUD_AVAILABILITY_ZONE,
+        CLOUD_INSTANCE_NAME,
+        CLOUD_INSTANCE_ID,
+        CLOUD_MACHINE_TYPE,
+        CLOUD_PROJECT_ID,
+        CLOUD_PROJECT_NAME,
+        CLOUD_PROVIDER,
+        CLOUD_REGION,
+        CLOUD_ACCOUNT_ID,
+        CLOUD_ACCOUNT_NAME,
+        CLOUD_IMAGE_ID,
+        CLOUD_SERVICE_NAME,
+        LABEL_TELEMETRY_AUTO_VERSION,
+        `telemetry*`,
+      ],
     },
   };
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
   const fields = response.hits.hits[0]?.fields;
-  const fieldsNorm = (fields ? normalizeFields(fields) : undefined) as
+  const fieldsNorm = (fields ? serviceMetadataDetailsMapping(fields) : undefined) as
     | ServiceMetadataDetailsRaw
     | undefined;
 

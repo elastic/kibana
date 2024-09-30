@@ -7,13 +7,13 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { spanMapping } from '../../../utils/es_fields_mappings';
 import { SPAN_ID, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../get_transaction';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { normalizeFields } from '../../../utils/normalize_fields';
 
 export async function getSpan({
   spanId,
@@ -62,8 +62,7 @@ export async function getSpan({
       : undefined,
   ]);
 
-  const fields = spanResp.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields) as unknown as Span;
+  const fieldsNorm = spanMapping(spanResp.hits.hits[0]?.fields);
 
   return { span: fieldsNorm, parentTransaction };
 }

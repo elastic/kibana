@@ -7,6 +7,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
+import { spanLinksDetailsMapping } from '../../utils/es_fields_mappings';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -29,7 +30,6 @@ import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { normalizeFields } from '../../utils/normalize_fields';
 
 async function fetchSpanLinksDetails({
   apmEventClient,
@@ -126,7 +126,7 @@ async function fetchSpanLinksDetails({
     // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
     // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
     if (fields['processor.event']?.[0] === ProcessorEvent.span) {
-      const span = normalizeFields(fields) as unknown as SpanRaw;
+      const span = spanLinksDetailsMapping(fields);
       const hasSpanId = spanIdsMap[span.span.id] || false;
       return hasSpanId;
     }
