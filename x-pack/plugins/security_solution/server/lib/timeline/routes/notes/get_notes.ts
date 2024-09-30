@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
-
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
@@ -19,7 +18,7 @@ import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/note
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
-export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: NOTE_URL,
@@ -35,7 +34,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<GetNotesResponse>> => {
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
@@ -60,8 +59,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              const body: GetNotesResponse = res ?? {};
-              return response.ok({ body });
+              return response.ok({ body: res ?? {} });
             }
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
