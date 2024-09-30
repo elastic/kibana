@@ -78,6 +78,7 @@ function DocumentationFlyout({
           ownFocus
           onClose={() => onHelpMenuVisibilityChange(false)}
           aria-labelledby="esqlInlineDocumentationFlyout"
+          data-test-subj="esqlInlineDocumentationFlyout"
           type="push"
           size={DEFAULT_WIDTH}
           paddingSize="m"

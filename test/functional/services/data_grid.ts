@@ -357,7 +357,7 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
       rowIndex: 0,
     }
@@ -389,7 +389,9 @@ export class DataGridService extends FtrService {
       throw new Error('Unable to find row toggle element');
     }
 
-    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    if (defaultTabId !== false) {
+      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    }
   }
 
   public async isShowingDocViewer() {
@@ -700,12 +702,21 @@ export class DataGridService extends FtrService {
     await this.checkCurrentRowsPerPageToBe(newValue);
   }
 
-  public async selectRow(rowIndex: number) {
+  public async selectRow(rowIndex: number, { pressShiftKey }: { pressShiftKey?: boolean } = {}) {
     const checkbox = await this.find.byCssSelector(
       `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
     );
 
-    await checkbox.click();
+    if (pressShiftKey) {
+      await this.browser
+        .getActions()
+        .keyDown(Key.SHIFT)
+        .click(checkbox._webElement)
+        .keyUp(Key.SHIFT)
+        .perform();
+    } else {
+      await checkbox.click();
+    }
   }
 
   public async getNumberOfSelectedRows() {
