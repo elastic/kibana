@@ -147,8 +147,6 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -156,9 +154,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  embeddingOrigin,
 }) => {
-  const { analytics, http } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();

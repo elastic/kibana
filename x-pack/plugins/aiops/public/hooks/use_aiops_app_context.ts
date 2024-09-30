@@ -38,9 +38,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /**
- * AIOps App Dependencies to be provided via React context.
+ * AIOps app context value to be provided via React context.
  */
-export interface AiopsAppDependencies {
+export interface AiopsAppContextValue {
   /**
    * Used for telemetry/performance metrics.
    */
@@ -134,7 +134,7 @@ export interface AiopsAppDependencies {
   cases?: CasesPublicStart;
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin?: string;
+  embeddingOrigin: string;
   /** Observability AI Assistant */
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
@@ -142,12 +142,12 @@ export interface AiopsAppDependencies {
 /**
  * React AIOps app dependency context.
  */
-export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);
+export const AiopsAppContext = createContext<AiopsAppContextValue | undefined>(undefined);
 
 /**
  * Custom hook to get AIOps app dependency context.
  */
-export const useAiopsAppContext = (): AiopsAppDependencies => {
+export const useAiopsAppContext = (): AiopsAppContextValue => {
   const aiopsAppContext = useContext(AiopsAppContext);
 
   // if `undefined`, throw an error

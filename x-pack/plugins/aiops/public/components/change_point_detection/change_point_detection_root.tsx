@@ -27,7 +27,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
-import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
@@ -52,8 +52,8 @@ export interface ChangePointDetectionAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
-  /** App dependencies */
-  appDependencies: AiopsAppDependencies;
+  /** App context value */
+  appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
 }
@@ -61,11 +61,11 @@ export interface ChangePointDetectionAppStateProps {
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
   dataView,
   savedSearch,
-  appDependencies,
+  appContextValue,
   showFrozenDataTierChoice = true,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
   };
@@ -80,19 +80,19 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     return <>{warning}</>;
   }
 
-  appDependencies.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
+  appContextValue.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
 
   const PresentationContextProvider =
-    appDependencies.presentationUtil?.ContextProvider ?? React.Fragment;
+    appContextValue.presentationUtil?.ContextProvider ?? React.Fragment;
 
-  const CasesContext = appDependencies.cases?.ui.getCasesContext() ?? React.Fragment;
-  const casesPermissions = appDependencies.cases?.helpers.canUseCases();
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
     <PresentationContextProvider>
-      <KibanaThemeProvider theme={appDependencies.theme}>
+      <KibanaThemeProvider theme={appContextValue.theme}>
         <CasesContext owner={[]} permissions={casesPermissions!}>
-          <AiopsAppContext.Provider value={appDependencies}>
+          <AiopsAppContext.Provider value={appContextValue}>
             <UrlStateProvider>
               <DataSourceContext.Provider value={{ dataView, savedSearch }}>
                 <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>

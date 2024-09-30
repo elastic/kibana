@@ -64,8 +64,6 @@ export interface LogCategorizationPageProps {
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   onClose: () => void;
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
 }
 
@@ -76,7 +74,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   savedSearch,
   selectedField,
   onClose,
-  embeddingOrigin,
   additionalFilter,
 }) => {
   const {
@@ -85,6 +82,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
       query: { getState },
     },
     uiSettings,
+    embeddingOrigin,
   } = useAiopsAppContext();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =

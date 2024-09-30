@@ -59,14 +59,10 @@ import { useActions } from './category_table/use_actions';
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-interface LogCategorizationPageProps {
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
-}
-
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
