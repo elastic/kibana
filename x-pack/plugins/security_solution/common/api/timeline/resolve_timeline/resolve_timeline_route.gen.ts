@@ -36,5 +36,5 @@ export const ResolveTimelineResponse = z.union([
   z.object({
     data: ResolvedTimeline,
   }),
-  z.object({}),
+  z.object({}).strict(),
 ]);

@@ -38,5 +38,5 @@ export const GetTimelineResponse = z.union([
       getOneTimeline: TimelineResponse,
     }),
   }),
-  z.object({}),
+  z.object({}).strict(),
 ]);

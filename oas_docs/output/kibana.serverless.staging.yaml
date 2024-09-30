@@ -16369,7 +16369,8 @@ paths:
                           - getOneTimeline
                     required:
                       - data
-                  - type: object
+                  - additionalProperties: false
+                    type: object
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -16514,7 +16515,7 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates that the timeline has been successfully copied.
-      summary: Copies timeline or timeline template.
+      summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
@@ -16903,7 +16904,8 @@ paths:
                           #/components/schemas/Security_Timeline_API_ResolvedTimeline
                     required:
                       - data
-                  - type: object
+                  - additionalProperties: false
+                    type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
