@@ -9,6 +9,11 @@ import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { GroupOption, GroupPanelRenderer, GetGroupStats } from '@kbn/grouping/src';
+import {
+  GROUP_BY_CLICK,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
@@ -73,6 +78,7 @@ export const useCloudSecurityGrouping = ({
       setUrlQuery({
         groupBy: groupByFields,
       });
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GROUP_BY_CLICK);
     },
   });
 
