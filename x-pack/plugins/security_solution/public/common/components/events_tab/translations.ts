@@ -54,3 +54,10 @@ export const SHOW_EXTERNAL_ALERTS = i18n.translate(
 export const EVENTS_GRAPH_TITLE = i18n.translate('xpack.securitySolution.eventsGraphTitle', {
   defaultMessage: 'Events',
 });
+
+export const EVENTS_GRAPH_NO_BREAKDOWN_TITLE = i18n.translate(
+  'xpack.securitySolution.eventsHistogram.selectOptions.noBreakDownLabel',
+  {
+    defaultMessage: 'No breakdown',
+  }
+);
