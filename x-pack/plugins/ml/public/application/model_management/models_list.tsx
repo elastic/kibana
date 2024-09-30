@@ -107,6 +107,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   softwareLicense?: string;
   licenseUrl?: string;
   downloadState?: ModelDownloadState;
+  disclaimer?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -291,13 +292,14 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ model_id: modelId, hidden, recommended, supported }) => {
+          .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
             if (idMap.has(modelId)) {
               const model = idMap.get(modelId)!;
               if (recommended) {
                 model.recommended = true;
               }
               model.supported = supported;
+              model.disclaimer = disclaimer;
             }
             return !idMap.has(modelId) && !hidden;
           })
@@ -316,6 +318,7 @@ export const ModelsList: FC<Props> = ({
               softwareLicense: modelDefinition.license,
               licenseUrl: modelDefinition.licenseUrl,
               supported: modelDefinition.supported,
+              disclaimer: modelDefinition.disclaimer,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -615,10 +618,21 @@ export const ModelsList: FC<Props> = ({
       truncateText: false,
       textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
-      render: ({ description, model_id: modelId, recommended, supported, type }: ModelItem) => {
+      render: ({
+        description,
+        model_id: modelId,
+        recommended,
+        supported,
+        type,
+        disclaimer,
+      }: ModelItem) => {
         const isTechPreview = description?.includes('(Tech Preview)');
 
-        const descriptionText = description?.replace('(Tech Preview)', '');
+        let descriptionText = description?.replace('(Tech Preview)', '');
+
+        if (disclaimer) {
+          descriptionText += '. ' + disclaimer;
+        }
 
         const tooltipContent =
           supported === false ? (
