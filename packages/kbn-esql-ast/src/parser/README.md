@@ -42,8 +42,8 @@ happens in which case the `errors` array gets populated with a Syntax errors.
 ```js
 import { parse } from '@kbn/esql-ast';
 
-const queryString = "FROM index | STATS 1 + AVG(myColumn) ";
-const { root, errors } = await astProvider(queryString);
+const src = "FROM index | STATS 1 + AVG(myColumn) ";
+const { root, errors } = await parse(src);
 
 if(errors){
   console.log({ syntaxErrors: errors });
@@ -65,8 +65,8 @@ the AST will be populated with comments.
 ```js
 import { parse } from '@kbn/esql-ast';
 
-const queryString = "FROM /* COMMENT */ index";
-const { root } = await astProvider(queryString, { withFormatting: true });
+const src = "FROM /* COMMENT */ index";
+const { root } = await parse(src, { withFormatting: true });
 ```
 
 
