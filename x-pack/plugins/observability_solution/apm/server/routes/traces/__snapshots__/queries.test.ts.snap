@@ -11,17 +11,6 @@ Object {
     ],
   },
   "body": Object {
-    "_source": Array [
-      "timestamp.us",
-      "trace.id",
-      "transaction.id",
-      "parent.id",
-      "service.name",
-      "error.id",
-      "error.log.message",
-      "error.exception",
-      "error.grouping_key",
-    ],
     "fields": Array [
       "timestamp.us",
       "trace.id",

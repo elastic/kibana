@@ -160,7 +160,7 @@ export function ErrorSampleDetails({
   const status = error.http?.response?.status_code;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
-  const isUnhandled = error.error.exception?.[0].handled === false;
+  const isUnhandled = error.error.exception?.[0]?.handled === false;
 
   const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -352,8 +352,8 @@ export function ErrorSampleDetailTabContent({
   currentTab: ErrorTab;
 }) {
   const codeLanguage = error?.service.language?.name;
-  const exceptions = error?.error.exception || [];
-  const logStackframes = error?.error.log?.stacktrace;
+  const exceptions = error?.error?.exception || [];
+  const logStackframes = error?.error?.log?.stacktrace;
   const isPlaintextException =
     !!error?.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   switch (currentTab.key) {
@@ -362,8 +362,8 @@ export function ErrorSampleDetailTabContent({
     case ErrorTabKey.ExceptionStacktrace:
       return isPlaintextException ? (
         <PlaintextStacktrace
-          message={exceptions[0].message}
-          type={exceptions[0].type}
+          message={exceptions[0]?.message}
+          type={exceptions[0]?.type}
           stacktrace={error?.error.stack_trace}
           codeLanguage={codeLanguage}
         />

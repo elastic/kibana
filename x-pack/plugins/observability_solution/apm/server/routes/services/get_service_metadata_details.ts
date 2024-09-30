@@ -141,7 +141,9 @@ export async function getServiceMetadataDetails({
       track_total_hits: 1,
       size: 1,
       _source: false,
-      query: { bool: { filter, should } },
+      query: {
+        bool: { filter, should },
+      },
       aggs: {
         serviceVersions: {
           terms: {
@@ -235,6 +237,7 @@ export async function getServiceMetadataDetails({
         CLOUD_IMAGE_ID,
         CLOUD_SERVICE_NAME,
         LABEL_TELEMETRY_AUTO_VERSION,
+        `telemetry*`,
       ],
     },
   };

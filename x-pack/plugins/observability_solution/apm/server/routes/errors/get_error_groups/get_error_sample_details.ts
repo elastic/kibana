@@ -68,7 +68,6 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getTransaction } from '../../transactions/get_transaction';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { errorSampleDetailsMapping } from '../../../utils/es_fields_mappings';
 import {
   KUBERNETES_CONTAINER_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
@@ -194,9 +193,9 @@ export async function getErrorSampleDetails({
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
 
-  const errorNorm = errorSampleDetailsMapping(resp.hits.hits[0]?.fields);
-  const transactionId = errorNorm?.transaction?.id;
-  const traceId = errorNorm?.trace?.id;
+  const error = resp.hits.hits[0]?._source;
+  const transactionId = error?.transaction?.id;
+  const traceId = error?.trace?.id;
 
   let transaction;
   if (transactionId && traceId) {
@@ -211,6 +210,6 @@ export async function getErrorSampleDetails({
 
   return {
     transaction,
-    error: errorNorm,
+    error,
   };
 }

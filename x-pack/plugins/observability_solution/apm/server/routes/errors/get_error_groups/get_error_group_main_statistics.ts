@@ -25,7 +25,6 @@ import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { errorGroupMainStatisticsMapping } from '../../../utils/es_fields_mappings';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -130,7 +129,7 @@ export async function getErrorGroupMainStatistics({
             sample: {
               top_hits: {
                 size: 1,
-                fields: [
+                _source: [
                   TRACE_ID,
                   ERROR_LOG_MESSAGE,
                   ERROR_EXC_MESSAGE,
@@ -158,16 +157,15 @@ export async function getErrorGroupMainStatistics({
 
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
-      const fieldsNorm = errorGroupMainStatisticsMapping(bucket.sample.hits.hits[0]?.fields);
       return {
         groupId: bucket.key as string,
-        name: getErrorName(fieldsNorm),
-        lastSeen: new Date(fieldsNorm['@timestamp']).getTime(),
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
+        lastSeen: new Date(bucket.sample.hits.hits[0]._source['@timestamp']).getTime(),
         occurrences: bucket.doc_count,
-        culprit: fieldsNorm.error.culprit,
-        handled: fieldsNorm.error.exception?.[0]?.handled,
-        type: fieldsNorm.error.exception?.[0]?.type,
-        traceId: fieldsNorm.trace?.id,
+        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
+        handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
+        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+        traceId: bucket.sample.hits.hits[0]._source.trace?.id,
       };
     }) ?? [];
 
