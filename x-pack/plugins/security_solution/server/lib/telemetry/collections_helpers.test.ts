@@ -92,8 +92,12 @@ describe('telemetry.utils.findCommonPrefixes', () => {
     const output = findCommonPrefixes(indices, config);
 
     expect(output).toHaveLength(2);
-    expect(output.find((v, _) => v[0] === 'b' && v[1] === 1)).not.toBeFalsy();
-    expect(output.find((v, _) => v[0] === 'a' && v[1] === 2)).not.toBeFalsy();
+    expect(output.find((v, _) => v.parts.length === 1 && v.parts[0] === 'a')?.indexCount).toEqual(
+      2
+    );
+    expect(output.find((v, _) => v.parts.length === 1 && v.parts[0] === 'b')?.indexCount).toEqual(
+      1
+    );
   });
 
   it('should discard extra indices', async () => {
@@ -106,7 +110,9 @@ describe('telemetry.utils.findCommonPrefixes', () => {
     const output = findCommonPrefixes(indices, config);
 
     expect(output).toHaveLength(1);
-    expect(output.find((v, _) => v[0] === 'aaa' && v[1] === 2)).not.toBeFalsy();
+    expect(output.find((v, _) => v.parts.length === 1 && v.parts[0] === 'aaa')?.indexCount).toEqual(
+      2
+    );
   });
 
   it('should group many indices', async () => {
@@ -119,6 +125,6 @@ describe('telemetry.utils.findCommonPrefixes', () => {
     const output = findCommonPrefixes(indices, config);
 
     expect(output).toHaveLength(config.maxPrefixes);
-    expect(output.map((v, _) => v[1]).reduce((acc, i) => acc + i, 0)).toBe(indices.length);
+    expect(output.map((v, _) => v.indexCount).reduce((acc, i) => acc + i, 0)).toBe(indices.length);
   });
 });

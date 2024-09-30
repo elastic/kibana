@@ -96,10 +96,12 @@ function* idCounter(): Generator<number, number, number> {
   }
 }
 
-export function findCommonPrefixes(
-  indices: string[],
-  config: QueryConfig
-): Array<[string, number]> {
+interface Group {
+  parts: string[];
+  indexCount: number;
+}
+
+export function findCommonPrefixes(indices: string[], config: QueryConfig): Group[] {
   const idGen = idCounter();
 
   const root = newTrieNode('', '', idGen.next().value);
@@ -117,7 +119,7 @@ export function findCommonPrefixes(
   }
 
   const nodes = [root];
-  const prefixes: Array<[string, number]> = [];
+  const prefixes: Group[] = [];
 
   while (nodes.length > 0) {
     // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
@@ -126,7 +128,11 @@ export function findCommonPrefixes(
       (node.count <= config.maxGroupSize && node.prefix !== '') ||
       Object.keys(node.children).length === 0
     ) {
-      prefixes.push([node.prefix, node.count]);
+      const group: Group = {
+        parts: [node.prefix],
+        indexCount: node.count,
+      };
+      prefixes.push(group);
     } else {
       for (const child of Object.values(node.children)) {
         nodes.push(child);
@@ -135,17 +141,19 @@ export function findCommonPrefixes(
   }
 
   if (prefixes.length > config.maxPrefixes) {
-    prefixes.sort((a, b) => a[1] - b[1]);
+    prefixes.sort((a, b) => a.indexCount - b.indexCount);
 
     while (prefixes.length > config.maxPrefixes) {
       // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-      const [p1, c1] = prefixes.shift()!;
+      const g1 = prefixes.shift()!;
       // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-      const [p2, c2] = prefixes.shift()!;
-      const mergedPrefix = `${p1},${p2}`;
-      const mergedCount = c1 + c2;
-      prefixes.push([mergedPrefix, mergedCount]);
-      prefixes.sort((a, b) => a[1] - b[1]);
+      const g2 = prefixes.shift()!;
+      const mergedGroup: Group = {
+        parts: g1.parts.concat(g2.parts),
+        indexCount: g1.indexCount + g2.indexCount,
+      };
+      prefixes.push(mergedGroup);
+      prefixes.sort((a, b) => a.indexCount - b.indexCount);
     }
   }
 

@@ -1385,7 +1385,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       indices,
     } as LogMeta);
 
-    const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v[0].split(','));
+    const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
 
     this.logger.debug(`Splitted indices into ${groupedIndices.length} groups`, {
       groups: groupedIndices.length,
@@ -1433,9 +1433,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     this.logger.debug(`Fetching ilm stats for ${indices.length} indices`, { indices } as LogMeta);
 
-    const groupedIndices: string[][] = findCommonPrefixes(indices, config).map((v, _) =>
-      v[0].split(',')
-    );
+    const groupedIndices = findCommonPrefixes(indices, config).map((v, _) => v.parts);
 
     this.logger.debug(`Splitted indices into ${groupedIndices.length} groups`, {
       groups: groupedIndices.length,
@@ -1486,7 +1484,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     this.logger.debug(`Fetching ilms policies for ${ilms.length} ilms`, { ilms } as LogMeta);
 
-    const groupedIlms = findCommonPrefixes(ilms, config).map((v, _) => v[0].split(','));
+    const groupedIlms = findCommonPrefixes(ilms, config).map((v, _) => v.parts);
 
     this.logger.debug(`Splitted ilms into ${groupedIlms.length} groups`, {
       groups: groupedIlms.length,
