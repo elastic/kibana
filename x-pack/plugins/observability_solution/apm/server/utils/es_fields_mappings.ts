@@ -87,6 +87,7 @@ import {
   SERVICE_TARGET_NAME,
   SERVICE_TARGET_TYPE,
   SPAN_REPRESENTATIVE_COUNT,
+  SERVICE_LANGUAGE_VERSION,
 } from '@kbn/apm-types';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
@@ -566,24 +567,47 @@ export const serviceVersionMapping = (
   };
 };
 
-export const metadataAppMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
+// todo: missing `container` and `could` mappings
+export const serviceInstanceMetadataDetailsMapping = (
+  fields: Partial<Record<string, unknown[]>> = {}
+) => {
   if (!fields) return undefined;
 
   return {
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     agent: {
-      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      name: normalizeValue<string>(fields[AGENT_NAME]),
       version: normalizeValue<string>(fields[AGENT_VERSION]),
       activation_method: normalizeValue<string>(fields[AGENT_ACTIVATION_METHOD]),
     },
     host: {
       architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
       hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      name: normalizeValue<string>(fields[HOST_NAME]),
       ip: normalizeValue<string>(fields[HOST_IP]),
-      name: normalizeValue<string>(fields[HOST_NAME]),
       os: {
         platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
       },
+    },
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      runtime: {
+        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+      },
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
+      },
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
     },
     kubernetes: {
       namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
@@ -594,114 +618,6 @@ export const metadataAppMetricMapping = (fields: Partial<Record<string, unknown[
         name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
         uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
       },
-    },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
-      },
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
-      },
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      runtime: {
-        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-      },
-      version: normalizeValue<string>(fields[SERVICE_VERSION]),
-    },
-  };
-};
-
-export const metadataAppTransactionEventMapping = (fields: Partial<Record<string, unknown[]>>) => {
-  if (!fields) return undefined;
-
-  return {
-    kubernetes: {
-      namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
-      node: {
-        name: normalizeValue<string>(fields[KUBERNETES_NODE_NAME]),
-      },
-      pod: {
-        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
-        uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
-      },
-    },
-    agent: {
-      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
-      version: normalizeValue<string>(fields[AGENT_VERSION]),
-      activation_method: normalizeValue<string>(fields[AGENT_ACTIVATION_METHOD]),
-    },
-    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
-      },
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
-      },
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      runtime: {
-        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-      },
-      version: normalizeValue<string>(fields[SERVICE_VERSION]),
-    },
-    host: {
-      architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
-      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
-      ip: fields[HOST_IP] as string[] | undefined,
-      name: normalizeValue<string>(fields[HOST_NAME]),
-      os: {
-        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
-      },
-    },
-  };
-};
-
-export const metaDataAppTransactionMetricMapping = (fields: Partial<Record<string, unknown[]>>) => {
-  if (!fields) return undefined;
-
-  return {
-    '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
-    agent: {
-      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
-    },
-    host: {
-      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
-      name: normalizeValue<string>(fields[HOST_NAME]),
-      os: {
-        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
-      },
-    },
-    kubernetes: {
-      pod: {
-        name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
-      },
-    },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
-      },
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      runtime: {
-        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-      },
-      version: normalizeValue<string>(fields[SERVICE_VERSION]),
     },
   };
 };
