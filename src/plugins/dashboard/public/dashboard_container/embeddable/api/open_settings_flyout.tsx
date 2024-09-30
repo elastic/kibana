@@ -11,20 +11,14 @@ import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardSettings } from '../../component/settings/settings_flyout';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { coreServices } from '../../../services/kibana_services';
+import { DashboardSettings } from '../../component/settings/settings_flyout';
 
 export function openSettingsFlyout(dashboardApi: DashboardApi) {
-  const {
-    analytics,
-    settings: { i18n, theme },
-    overlays,
-  } = pluginServices.getServices();
-
   dashboardApi.openOverlay(
-    overlays.openFlyout(
+    coreServices.overlays.openFlyout(
       toMountPoint(
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardSettings
@@ -33,7 +27,7 @@ export function openSettingsFlyout(dashboardApi: DashboardApi) {
             }}
           />
         </DashboardContext.Provider>,
-        { analytics, i18n, theme }
+        { analytics: coreServices.analytics, i18n: coreServices.i18n, theme: coreServices.theme }
       ),
       {
         size: 's',
