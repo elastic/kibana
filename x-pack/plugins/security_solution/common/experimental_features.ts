@@ -258,6 +258,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new Entity Store engine routes
    */
   entityStoreEnabled: false,
+
+  /**
+   * Enables the siem migrations feature
+   */
+  siemMigrationsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

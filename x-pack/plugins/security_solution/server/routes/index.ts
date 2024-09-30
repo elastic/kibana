@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
 import { registerPrebuiltRulesRoutes } from '../lib/detection_engine/prebuilt_rules';
-// eslint-disable-next-line no-restricted-imports
+
 import { registerLegacyRuleActionsRoutes } from '../lib/detection_engine/rule_actions_legacy';
 import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_exceptions';
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';
@@ -139,14 +139,17 @@ export const initRoutes = (
   // Dashboards
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, siemMigrationsEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
   registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
-  registerSiemMigrationsRoutes(router, logger);
+
+  if (siemMigrationsEnabled) {
+    registerSiemMigrationsRoutes(router, logger);
+  }
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
