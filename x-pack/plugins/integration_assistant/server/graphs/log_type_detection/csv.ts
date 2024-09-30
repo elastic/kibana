@@ -92,7 +92,9 @@ export async function convertCSVSamples({
   );
 
   if (tempErrors.length > 0) {
-    return { errors: tempErrors, lastExecutedChain: 'convertCSVSamples-temporary' };
+    throw new Error(
+      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered)`
+    );
   }
 
   const headerColumns = state.header ? columnsFromHeader(temporaryColumns, tempResults[0]) : [];
@@ -131,7 +133,9 @@ export async function convertCSVSamples({
   );
 
   if (finalErrors.length > 0) {
-    return { errors: finalErrors, lastExecutedChain: 'convertCSVSamples-final' };
+    throw new Error(
+      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered)`
+    );
   }
 
   // Converts JSON Object into a string and parses it as a array of JSON strings

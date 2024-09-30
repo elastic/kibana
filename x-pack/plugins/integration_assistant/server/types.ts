@@ -103,8 +103,7 @@ export interface LogFormatDetectionState {
   header: boolean;
   ecsVersion: string;
   results: object;
-  errors: object[];
-  additionalProcessors: ESProcessorItem[]; // # This will be generated in the sub-graphs
+  additionalProcessors: ESProcessorItem[]; // Generated in handleXXX nodes or subgraphs.
 }
 
 export interface KVState {

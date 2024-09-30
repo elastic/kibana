@@ -58,10 +58,6 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '8.11.0',
   },
-  errors: {
-    value: (x: object[], y: object[]) => [...x, ...y],
-    default: () => [],
-  },
   results: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
