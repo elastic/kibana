@@ -69,6 +69,17 @@ export const EmbedContent = ({
     if (objectType !== 'dashboard') setIsNotSaved();
   }, [url, setIsNotSaved, objectType]);
 
+  const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return tempUrl.replace('?', `${embedParam}&`);
+    }
+
+    return `${tempUrl}${embedParam}`;
+  }, []);
+
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
       return urlParams
@@ -90,10 +101,11 @@ export const EmbedContent = ({
 
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
+      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       return tempUrl;
     },
-    [getUrlParamExtensions, urlParams]
+    [makeUrlEmbeddable, getUrlParamExtensions, urlParams, isEmbedded]
   );
 
   const getSnapshotUrl = useCallback(
