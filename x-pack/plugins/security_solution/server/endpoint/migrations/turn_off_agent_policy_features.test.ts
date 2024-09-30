@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createMockEndpointAppContextServiceStartContract } from '../mocks';
 import type { Logger } from '@kbn/logging';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
@@ -13,6 +12,9 @@ import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { turnOffAgentPolicyFeatures } from './turn_off_agent_policy_features';
+import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { allowedExperimentalValues } from '../../../common';
 
 describe('Turn Off Agent Policy Features Migration', () => {
   let fleetServices: EndpointInternalFleetServicesInterface;
@@ -23,12 +25,16 @@ describe('Turn Off Agent Policy Features Migration', () => {
     turnOffAgentPolicyFeatures(fleetServices, productFeatureService, logger);
 
   beforeEach(() => {
-    const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
+    const mockedFleetServices = createEndpointFleetServicesFactoryMock();
 
-    ({ logger } = endpointContextStartContract);
-
-    productFeatureService = endpointContextStartContract.productFeaturesService;
-    fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
+    fleetServices = mockedFleetServices.service.asInternalUser();
+    logger = loggingSystemMock.createLogger();
+    productFeatureService = createProductFeaturesServiceMock(
+      undefined,
+      allowedExperimentalValues,
+      undefined,
+      logger
+    );
   });
 
   describe('and `agentTamperProtection` is enabled', () => {
