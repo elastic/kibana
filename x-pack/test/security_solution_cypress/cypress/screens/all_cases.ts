@@ -27,8 +27,7 @@ export const ALL_CASES_STATUS_FILTER = '[data-test-subj="options-filter-popover-
 
 export const ALL_CASES_OPEN_FILTER = '[data-test-subj="options-filter-popover-item-open"]';
 
-export const ALL_CASES_OPEN_CASES_STATS =
-  '[data-test-subj="openStatsHeader"] .euiDescriptionList__description';
+export const ALL_CASES_OPEN_CASES_STATS = '[data-test-subj="openStatsHeader"] .euiStat__title';
 
 export const ALL_CASES_OPENED_ON = '[data-test-subj="case-table-column-createdAt"]';
 
