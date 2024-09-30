@@ -12,12 +12,15 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
-import type { AiopsPluginStartDeps } from '../types';
-import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
+import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
+
 import type {
   LogRateAnalysisEmbeddableApi,
   LogRateAnalysisEmbeddableInitialState,
 } from '../embeddables/log_rate_analysis/types';
+import type { AiopsPluginStartDeps } from '../types';
+
+import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -33,16 +36,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
 ): UiActionsActionDefinition<LogRateAnalysisActionContext> {
   return {
     id: 'create-log-rate-analysis-embeddable',
-    grouping: [
-      {
-        id: 'ml',
-        getDisplayName: () =>
-          i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
-            defaultMessage: 'Machine Learning and Analytics',
-          }),
-        getIconType: () => 'logRateAnalysis',
-      },
-    ],
+    grouping: AIOPS_EMBEDDABLE_GROUPING,
     getIconType: () => 'logRateAnalysis',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableLogRateAnalysisDisplayName', {
