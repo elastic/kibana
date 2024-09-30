@@ -12,9 +12,15 @@ import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { assistantScopeType } from '../runtime_types';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/functions',
+  endpoint: 'GET /internal/observability_ai_assistant/{scope}/functions',
+  params: t.type({
+    path: t.type({
+      scope: assistantScopeType,
+    }),
+  }),
   options: {
     tags: ['access:ai_assistant'],
   },
@@ -24,7 +30,13 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     functionDefinitions: FunctionDefinition[];
     systemMessage: string;
   }> => {
-    const { service, request } = resources;
+    const {
+      service,
+      request,
+      params: {
+        path: { scope },
+      },
+    } = resources;
 
     const controller = new AbortController();
     request.events.aborted$.subscribe(() => {
@@ -44,14 +56,14 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       client.getKnowledgeBaseUserInstructions(),
     ]);
 
-    const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
+    const functionDefinitions = functionClient.getFunctions({ scope }).map((fn) => fn.definition);
 
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
     return {
       functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
       systemMessage: getSystemMessageFromInstructions({
-        applicationInstructions: functionClient.getInstructions(),
+        applicationInstructions: functionClient.getInstructions(scope),
         userInstructions,
         adHocInstructions: [],
         availableFunctionNames,

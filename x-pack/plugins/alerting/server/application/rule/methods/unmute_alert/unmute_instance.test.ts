@@ -223,6 +223,7 @@ describe('unmuteInstance()', () => {
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
+          name: 'fake_rule_name',
           actions: [],
           schedule: { interval: '10s' },
           alertTypeId: '2',
@@ -240,7 +241,9 @@ describe('unmuteInstance()', () => {
             action: 'rule_alert_unmute',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'fake_rule_name' },
+          },
         })
       );
     });
@@ -251,6 +254,7 @@ describe('unmuteInstance()', () => {
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
+          name: 'fake_rule_name',
           actions: [],
           schedule: { interval: '10s' },
           alertTypeId: '2',
@@ -276,6 +280,7 @@ describe('unmuteInstance()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: 'fake_rule_name',
             },
           },
           error: {

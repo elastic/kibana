@@ -200,6 +200,7 @@ export const legacyEmbeddableToApi = (
   const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
     undefined
   );
+
   const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);

@@ -1,4 +1,5 @@
-summary: Update an index threshold rule.
+summary: Index threshold rule
+description: Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.
 value:
   actions:
     - frequency:

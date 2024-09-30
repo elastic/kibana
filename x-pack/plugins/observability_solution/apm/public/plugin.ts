@@ -19,7 +19,10 @@ import {
   PluginInitializerContext,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
+import {
+  EntityManagerPublicPluginSetup,
+  EntityManagerPublicPluginStart,
+} from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -145,7 +148,7 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
-  entityManager: EntityManagerPublicPluginSetup;
+  entityManager: EntityManagerPublicPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -153,7 +156,7 @@ const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
 });
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service Inventory',
 });
 
 const serviceGroupsTitle = i18n.translate('xpack.apm.navigation.serviceGroupsTitle', {
