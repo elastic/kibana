@@ -1,0 +1,12 @@
+### TLS/SSL Configuration (Optional)
+To enhance security, configure the server with TLS/SSL settings. This ensures secure communication between clients and the server. Below is an example of how to configure these settings:
+
+```yml
+ssl.certificate: "/etc/pki/server/cert.pem"
+ssl.key: "/etc/pki/server/cert.key"
+```
+
+ssl.key: The private key used by the server to decrypt data encrypted with its corresponding public key, as well as to sign data to authenticate its identity.
+ssl.certificate: The server's certificate, used to verify its identity. It contains the public key and is validated against a Certificate Authority (CA) to establish an encrypted connection with clients.
+
+In the input settings, include any relevant SSL Configuration and Secret Header values depending on the specific requirements of your endpoint. You may also configure additional options such as certificate, keys, supported_protocols, and verification_mode. Refer to the [Elastic SSL Documentation](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-ssl.html#ssl-server-config) for further details.
