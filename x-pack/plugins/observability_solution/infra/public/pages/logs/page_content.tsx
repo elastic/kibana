@@ -17,6 +17,7 @@ import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { isDevMode } from '@kbn/xstate-utils';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -26,7 +27,6 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { isDevMode } from '../../utils/dev_mode';
 import { NotFoundPage } from '../404';
 
 const StateMachinePlayground = dynamic(() =>
