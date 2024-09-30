@@ -143,7 +143,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       setIsLoading(true);
 
       let disabledFeatures: string[] | undefined;
-      if (spaceClone.solution == null || spaceClone.solution === SOLUTION_VIEW_CLASSIC) {
+      if (!spaceClone.solution || spaceClone.solution === SOLUTION_VIEW_CLASSIC) {
         disabledFeatures = spaceClone.disabledFeatures;
       }
 
