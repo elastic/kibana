@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(roleAuthc, ruleId);
+        const match = await alertingApi.findInRules(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be('observability');
       });
