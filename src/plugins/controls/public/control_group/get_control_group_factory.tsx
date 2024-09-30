@@ -199,8 +199,6 @@ export const getControlGroupEmbeddableFactory = () => {
             references,
           };
         },
-        compressed:
-          parentApi && typeof parentApi.compressed === 'boolean' ? parentApi.compressed : true,
         dataViews,
         labelPosition: labelPosition$,
         saveNotification$: apiHasSaveNotification(parentApi)
