@@ -7,21 +7,22 @@
 
 import { lazy } from 'react';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { isEmpty } from 'lodash';
 
+import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
 import {
   APP_INTEGRATIONS_PATH,
-  APP_PATH,
   APP_UI_ID,
   ONBOARDING_PATH,
 } from '../../../../../../common/constants';
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
+  INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT,
   ONBOARDING_APP_ID,
   ONBOARDING_LINK,
 } from './const';
+import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
 
 export const PackageList = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
@@ -46,21 +47,28 @@ export const extractFeaturedCards = (
   }, {});
 };
 
-export const getFilteredCards = (
-  integrationsList: IntegrationCardItem[],
-  customCards?: string[],
-  basePath?: string,
-  installedIntegrationList?: IntegrationCardItem[]
-) => {
+export const getFilteredCards = ({
+  customCardNames,
+  getAppUrl,
+  installedIntegrationList,
+  integrationsList,
+  navigateTo,
+}: {
+  customCardNames?: string[];
+  getAppUrl: GetAppUrl;
+  installedIntegrationList?: IntegrationCardItem[];
+  integrationsList: IntegrationCardItem[];
+  navigateTo: NavigateTo;
+}) => {
   const securityIntegrationsList = integrationsList.map((card) =>
-    addSecuritySpecificProps({ card, basePath, installedIntegrationList })
+    addSecuritySpecificProps({ navigateTo, getAppUrl, card, installedIntegrationList })
   );
-  if (!customCards) {
+  if (!customCardNames) {
     return { featuredCards: {}, integrationCards: securityIntegrationsList };
   }
 
   return {
-    featuredCards: extractFeaturedCards(securityIntegrationsList, customCards),
+    featuredCards: extractFeaturedCards(securityIntegrationsList, customCardNames),
     integrationCards: securityIntegrationsList,
   };
 };
@@ -75,31 +83,40 @@ const addPathParamToUrl = (url: string, onboardingLink: string) => {
   return `${url}?${paramsString}`;
 };
 
-const getOnboardingPath = (basePath?: string): string | null => {
-  const onboardingPath = `${APP_PATH}${ONBOARDING_PATH}`;
-  const path = !isEmpty(basePath) ? `${basePath}/${onboardingPath}` : onboardingPath;
-
-  return path;
-};
-
 const addSecuritySpecificProps = ({
-  basePath,
+  navigateTo,
+  getAppUrl,
   card,
 }: {
-  basePath?: string;
+  navigateTo: NavigateTo;
+  getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
   installedIntegrationList?: IntegrationCardItem[];
 }): IntegrationCardItem => {
-  const onboardingLink = getOnboardingPath(basePath);
+  const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
+  const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
+  const state = {
+    onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+    onCancelUrl: onboardingLink,
+    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+  };
+  const url =
+    card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
+      ? addPathParamToUrl(card.url, onboardingLink)
+      : card.url;
   return {
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
     descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
     maxCardHeight: MAX_CARD_HEIGHT,
     showInstallationStatus: true,
-    url:
-      card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
-        ? addPathParamToUrl(card.url, onboardingLink)
-        : card.url,
+    url,
+    onCardClick: () => {
+      navigateTo({
+        appId: INTEGRATION_APP_ID,
+        path: url.slice(integrationRootUrl.length),
+        state,
+      });
+    },
   };
 };

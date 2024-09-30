@@ -19,6 +19,7 @@ export const CARD_TITLE_LINE_CLAMP = 1; // 1 line of text
 export const CARD_DESCRIPTION_LINE_CLAMP = 3; // 3 lines of text
 export const LOADING_SKELETON_HEIGHT = 10; // 10 lines of text
 export const AGENT_INDEX = `logs-elastic_agent*`;
+export const INTEGRATION_APP_ID = `integrations`;
 export const INTEGRATION_TABS: Tab[] = [
   {
     category: 'security',

@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useNavigation } from '../../../../../common/lib/kibana';
 import { getFilteredCards } from './utils';
 import { INTEGRATION_TABS } from './const';
 
@@ -19,11 +19,10 @@ export const useIntegrationCardList = ({
   integrationsList: IntegrationCardItem[];
   customCardNames?: string[] | undefined;
 }): IntegrationCardItem[] => {
-  const kibana = useKibana();
-  const basePath = kibana.services.http?.basePath.get();
+  const { navigateTo, getAppUrl } = useNavigation();
   const { featuredCards, integrationCards } = useMemo(
-    () => getFilteredCards(integrationsList, customCardNames, basePath),
-    [integrationsList, customCardNames, basePath]
+    () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, customCardNames }),
+    [navigateTo, getAppUrl, integrationsList, customCardNames]
   );
 
   if (customCardNames && customCardNames.length > 0) {
