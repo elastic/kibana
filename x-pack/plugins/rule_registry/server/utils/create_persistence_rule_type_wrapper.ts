@@ -28,19 +28,12 @@ import {
   ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
-// import {
-//   ALERT_GROUP_ID,
-//   ALERT_ORIGINAL_TIME,
-// } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
-// import {
-//   isEqlBuildingBlockAlert,
-//   isEqlShellAlert,
-// } from '@kbn/security-solution-plugin/common/api/detection_engine/model/alerts/8.0.0';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -72,10 +65,6 @@ const augmentAlerts = async <T>({
   currentTimeOverride: Date | undefined;
   intendedTimestamp: Date | undefined;
 }) => {
-  // console.error(
-  //   'DO AUGMENTED ALERTS HAVE INSTANCE IDS',
-  //   alerts.map((alert) => alert._source[ALERT_INSTANCE_ID])
-  // );
   const commonRuleFields = getCommonAlertFields(options);
   const maintenanceWindowIds: string[] =
     alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
@@ -185,11 +174,6 @@ export const suppressAlertsInMemory = <
     (alert) => {
       const instanceId = alert._source[ALERT_INSTANCE_ID];
       const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
-      // console.error('INSIDE SUPPRESSION DOCS COUNT', suppressionDocsCount);
-      // console.error(
-      //   'NOT A BUILDING BLOCK',
-      //   alert._source['kibana.alert.building_block_type'] == null
-      // );
       const suppressionEnd = alert._source[ALERT_SUPPRESSION_END];
 
       if (instanceId && idsMap[instanceId] != null) {
@@ -207,8 +191,6 @@ export const suppressAlertsInMemory = <
     },
     []
   );
-
-  // console.error('WHAT IS IDS MAP', JSON.stringify(idsMap));
 
   const alertCandidates = filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
@@ -404,14 +386,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               maxAlerts,
               getMatchingBuildingBlockAlerts
             ) => {
-              // console.error(
-              //   'ALERT WITH SUPPRESSION INSTANCE IDS',
-              //   alerts.map((doc) => doc._source[ALERT_INSTANCE_ID])
-              // );
-              // console.error(
-              //   'ALERT WITH SUPPRESSION original times',
-              //   alerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
-              // );
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
               });
@@ -619,21 +593,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   intendedTimestamp,
                 });
 
-                /**
-                 * buildingBlockAlerts?.filter((someAlert) => {
-                  // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
-                  // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
-
-                  return (
-                    isEqlBuildingBlockAlert(someAlert?._source) &&
-                    isEqlShellAlert(newAlerts?.[0]?._source) &&
-                    someAlert?._source?.[ALERT_GROUP_ID] === newAlerts[0]?._source[ALERT_GROUP_ID]
-                  );
-                });
-                 */
-
-                // TODO: move all this stuff into a utility function
-                // only create building block alerts for the new eql shell alert
                 const matchingBuildingBlockAlerts =
                   newAlerts?.length > 0 && getMatchingBuildingBlockAlerts != null
                     ? newAlerts.flatMap(

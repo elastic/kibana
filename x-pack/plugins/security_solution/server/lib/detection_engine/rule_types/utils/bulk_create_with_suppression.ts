@@ -15,13 +15,9 @@ import type {
 } from '@kbn/rule-registry-plugin/common/schemas';
 
 import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
-import {
-  isEqlBuildingBlockAlert,
-  isEqlShellAlert,
-} from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { makeFloatString } from './utils';
+import { makeFloatString, isEqlBuildingBlockAlert, isEqlShellAlert } from './utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,

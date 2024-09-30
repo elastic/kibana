@@ -194,7 +194,7 @@ export const eqlExecutor = async ({
           await bulkCreateSuppressedSequencesInMemory({
             sequences,
             toReturn: result,
-            wrapSequences, // TODO: fix type mismatch
+            wrapSequences,
             bulkCreate,
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,

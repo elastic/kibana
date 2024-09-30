@@ -47,8 +47,6 @@ export const getSuppressionAlertFields = ({
       fallbackTimestamp
   );
 
-  // console.error('SUPPRESSION TIME');
-
   const suppressionFields = {
     [ALERT_INSTANCE_ID]: instanceId,
     [ALERT_SUPPRESSION_TERMS]: suppressionTerms,

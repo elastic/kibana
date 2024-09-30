@@ -11,7 +11,12 @@ import moment from 'moment';
 import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import {
+  ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_PARAMETERS,
+  ALERT_BUILDING_BLOCK_TYPE,
+} from '@kbn/rule-data-utils';
 import type {
   ListArray,
   ExceptionListItemSchema,
@@ -67,6 +72,11 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
+import type {
+  EqlBuildingBlockAlert800,
+  EqlShellAlert800,
+} from '../../../../../common/api/detection_engine/model/alerts/8.0.0';
+import { ALERT_GROUP_ID } from '../../../../../common/field_maps/field_names';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -1024,3 +1034,12 @@ export const getDisabledActionsWarningText = ({
     return `${alertsGeneratedText} connector ${actionTypesJoined} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
   }
 };
+
+export const isEqlBuildingBlockAlert = (
+  alertObject: unknown
+): alertObject is EqlBuildingBlockAlert800 =>
+  (alertObject as EqlBuildingBlockAlert800)?.[ALERT_BUILDING_BLOCK_TYPE] != null;
+
+export const isEqlShellAlert = (alertObject: unknown): alertObject is EqlShellAlert800 =>
+  (alertObject as EqlShellAlert800)?.[ALERT_UUID] != null &&
+  (alertObject as EqlShellAlert800)?.[ALERT_GROUP_ID] != null;

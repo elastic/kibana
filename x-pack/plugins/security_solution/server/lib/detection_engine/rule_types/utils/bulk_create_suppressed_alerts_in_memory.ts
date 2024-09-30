@@ -118,11 +118,6 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   let suppressibleEvents = enrichedEvents;
   let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
 
-  // if (suppressibleEvents?.[0]?.events != null) {
-  //   // then we know that we have received sequences
-  //   // so we must augment the wrapHits
-  // }
-
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
@@ -212,16 +207,10 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     suppressibleSequences = sequences;
   }
 
-  // refactor the below into a separate function
   const suppressibleWrappedDocs = wrapSuppressedSequences(
     suppressibleSequences,
     buildReasonMessage
   );
-
-  // once we have wrapped thing similarly to
-  // build alert group from sequence,
-  // we can pass down the suppressibleWrappeDocs (our sequence alerts)
-  // and the building block alerts
 
   // partition sequence alert from building block alerts
   const [sequenceAlerts, buildingBlockAlerts] = partition(
@@ -229,23 +218,6 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
   );
 
-  // console.error(
-  //   'SUPPRESSIBLE WRAPPED values',
-  //   JSON.stringify(sequenceAlerts.map((doc) => doc._source[ALERT_SUPPRESSION_TERMS]))
-  // );
-
-  // console.error(
-  //   'SUPPRESSIBLE WRAPPED original time',
-  //   sequenceAlerts.map((doc) => doc._source[ALERT_ORIGINAL_TIME])
-  // );
-
-  // the code in executeBulkCreateAlerts should
-  // not have to change, and might even allow me to remove
-  // some of my earlier changes where the fields property was not available
-
-  // I think we create a separate bulkCreateSuppressedInMemory function
-  // specifically for eql sequences
-  // since sequences act differently from the other alerts.
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs: sequenceAlerts,
     unsuppressibleWrappedDocs,
