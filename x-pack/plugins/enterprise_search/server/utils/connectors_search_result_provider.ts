@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, takeUntil, switchMap } from 'rxjs';
+import { from, takeUntil, switchMap, of } from 'rxjs';
 
 import type { IStaticAssets } from '@kbn/core-http-browser';
 
@@ -57,7 +57,7 @@ export function getConnectorsSearchResultProvider(
         takeUntil(aborted$),
         switchMap((caps) => {
           if (!caps.catalogue.enterpriseSearch) {
-            return from([]);
+            return of([]);
           }
 
           return from(getConnectorData());

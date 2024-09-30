@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { NEVER, lastValueFrom } from 'rxjs';
+import { NEVER, lastValueFrom, of } from 'rxjs';
 
 import { IScopedClusterClient } from '@kbn/core/server';
+
+import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
@@ -57,6 +59,24 @@ describe('Enterprise Search - connectors search provider', () => {
     },
     asInternalUser: {},
   };
+
+  const getSearchProviderContext = ({
+    enterpriseSearchEnabled,
+  }: {
+    enterpriseSearchEnabled: boolean;
+  }): GlobalSearchProviderContext => ({
+    core: {
+      capabilities: of({
+        catalogue: { enterpriseSearch: enterpriseSearchEnabled },
+        management: {},
+        navLinks: {},
+      }),
+      savedObjects: {} as any,
+      uiSettings: {} as any,
+    },
+  });
+  const mockSearchProviderContext = getSearchProviderContext({ enterpriseSearchEnabled: true });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -74,7 +94,7 @@ describe('Enterprise Search - connectors search provider', () => {
             client,
             preference: '',
           },
-          {} as any
+          mockSearchProviderContext
         )
       );
       expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 100 }]);
@@ -90,7 +110,7 @@ describe('Enterprise Search - connectors search provider', () => {
             maxResults: 100,
             preference: '',
           },
-          {} as any
+          mockSearchProviderContext
         )
       );
       expect(results).toEqual([
@@ -110,7 +130,7 @@ describe('Enterprise Search - connectors search provider', () => {
             maxResults: 100,
             preference: '',
           },
-          {} as any
+          mockSearchProviderContext
         )
       );
       expect(results).toHaveLength(0);
@@ -126,7 +146,7 @@ describe('Enterprise Search - connectors search provider', () => {
             maxResults: 1,
             preference: '',
           },
-          {} as any
+          mockSearchProviderContext
         )
       );
       expect(results).toEqual([{ ...getConnectorSearchData('postgres'), score: 90 }]);
@@ -143,7 +163,7 @@ describe('Enterprise Search - connectors search provider', () => {
               maxResults: 100,
               preference: '',
             },
-            {} as any
+            mockSearchProviderContext
           )
         );
         expect(results).toEqual([]);
@@ -159,7 +179,7 @@ describe('Enterprise Search - connectors search provider', () => {
               maxResults: 100,
               preference: '',
             },
-            {} as any
+            mockSearchProviderContext
           )
         );
         expect(results).toEqual([]);
@@ -175,7 +195,7 @@ describe('Enterprise Search - connectors search provider', () => {
               maxResults: 100,
               preference: '',
             },
-            {} as any
+            mockSearchProviderContext
           )
         );
         expect(results).toEqual([]);
@@ -191,7 +211,23 @@ describe('Enterprise Search - connectors search provider', () => {
               maxResults: 100,
               preference: '',
             },
-            {} as any
+            mockSearchProviderContext
+          )
+        );
+        expect(results).toEqual([]);
+      });
+
+      it('if capabilities.catalogue.enterpriseSearch is false', async () => {
+        const results = await lastValueFrom(
+          connectorsSearchResultProvider.find(
+            { term: 'companyName-postgres-connector-all' },
+            {
+              aborted$: NEVER,
+              client,
+              maxResults: 100,
+              preference: '',
+            },
+            getSearchProviderContext({ enterpriseSearchEnabled: false })
           )
         );
         expect(results).toEqual([]);

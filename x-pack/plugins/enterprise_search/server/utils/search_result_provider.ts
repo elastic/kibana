@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, takeUntil, switchMap } from 'rxjs';
+import { takeUntil, of, map } from 'rxjs';
 
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -84,14 +84,14 @@ export function getSearchResultProvider(
         tags ||
         (types && !(types.includes('integration') || types.includes('enterprise search')))
       ) {
-        return from([[]]);
+        return of([]);
       }
 
       return capabilities.pipe(
         takeUntil(aborted$),
-        switchMap((caps) => {
+        map((caps) => {
           if (!caps.catalogue.enterpriseSearch) {
-            return from([]);
+            return [];
           }
 
           const services: ServiceDefinition[] = [
@@ -154,7 +154,7 @@ export function getSearchResultProvider(
             .filter(({ score }) => score > 0)
             .slice(0, maxResults);
 
-          return from([result]);
+          return result;
         })
       );
     },
