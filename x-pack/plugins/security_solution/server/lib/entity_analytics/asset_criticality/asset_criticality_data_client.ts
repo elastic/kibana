@@ -201,30 +201,20 @@ export class AssetCriticalityDataClient {
     }
   }
 
+  private getImplicitEntityFields = (record: AssetCriticalityUpsert) => {
+    const entityType = record.idField === 'host.name' ? 'host' : 'user';
+    return {
+      [entityType]: {
+        asset: { criticality: record.criticalityLevel },
+        name: record.idValue,
+      },
+    };
+  };
+
   public async upsert(
     record: AssetCriticalityUpsert,
     refresh = 'wait_for' as const
   ): Promise<AssetCriticalityRecord> {
-    const isHost = record.idField === 'host.name';
-
-    const entityProperty = isHost
-      ? {
-          host: {
-            name: record.idField,
-            asset: {
-              criticality: record.criticalityLevel,
-            },
-          },
-        }
-      : {
-          user: {
-            name: record.idField,
-            asset: {
-              criticality: record.criticalityLevel,
-            },
-          },
-        };
-
     const id = createId(record);
     const doc: AssetCriticalityRecord = {
       id_field: record.idField,
@@ -234,7 +224,7 @@ export class AssetCriticalityDataClient {
       asset: {
         criticality: record.criticalityLevel,
       },
-      ...entityProperty,
+      ...this.getImplicitEntityFields(record),
     };
 
     await this.options.esClient.update({
@@ -309,6 +299,10 @@ export class AssetCriticalityDataClient {
             id_field: record.idField,
             id_value: record.idValue,
             criticality_level: record.criticalityLevel,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+            ...this.getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,

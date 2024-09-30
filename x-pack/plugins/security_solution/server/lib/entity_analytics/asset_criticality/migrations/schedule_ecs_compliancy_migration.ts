@@ -103,15 +103,3 @@ export const createMigrationTask =
       },
     };
   };
-
-// Architecture
-// [X] Do the mapping check on plugin start
-// [X] single use kibana task which does the data migration using update by query, (in batches of 1k ?)
-// [X] kibana task only ever runs once
-// [X] Asset criticality APIs should be usable because the mapping is done on startup
-// [x] Entity engine init should check if the migration has completed before allowing init to be called (throw an error if it hasn't finished)
-// [x] make logger append asset-criticality-ecs-migration to the logger context
-// [x] bundle size might get very big because of the client import
-// [wip] write unit tests
-// [ ] update document generator to reproduce the issue
-// [ ] test with lots of data
