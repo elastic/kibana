@@ -136,7 +136,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      apmSynthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
