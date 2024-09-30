@@ -463,6 +463,7 @@ export class SearchInterceptor {
         })
         .then((response) => {
           if ((response as Record<string, unknown>).error) {
+            // eslint-disable-next-line no-throw-literal
             throw { attributes: (response as Record<string, unknown>).error };
           }
           switch (strategy) {
