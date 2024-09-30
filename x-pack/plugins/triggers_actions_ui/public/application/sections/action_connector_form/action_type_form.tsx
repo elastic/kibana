@@ -96,7 +96,7 @@ export type ActionTypeFormProps = {
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   featureId: string;
   producerId: string;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<

@@ -43,7 +43,7 @@ export const AlertsSearchBar = ({
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    ruleTypeIds: [ruleTypeId],
+    ruleTypeIds: ruleTypeId != null ? [ruleTypeId] : [],
     http,
     toasts,
     dataViewsService,

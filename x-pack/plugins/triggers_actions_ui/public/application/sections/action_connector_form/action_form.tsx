@@ -70,7 +70,7 @@ export interface ActionAccordionFormProps {
   ) => void;
   featureId: string;
   producerId: string;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;

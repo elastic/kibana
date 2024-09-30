@@ -24,7 +24,7 @@ export interface RuleActionsAlertsFilterProps {
   action: RuleAction;
   onChange: (update?: AlertsFilter['query']) => void;
   appName: string;
-  ruleTypeId: string;
+  ruleTypeId?: string;
   plugins?: {
     http: RuleFormPlugins['http'];
     notifications: RuleFormPlugins['notifications'];
