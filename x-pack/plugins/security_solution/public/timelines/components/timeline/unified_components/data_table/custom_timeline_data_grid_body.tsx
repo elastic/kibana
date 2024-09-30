@@ -12,9 +12,8 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CSSProperties, FC } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { AutoSizer } from 'react-virtualized';
 import { VariableSizeList } from 'react-window';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
@@ -105,78 +104,87 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       return rowHeights.current[index] ?? 100;
     }, []);
 
-    const innerRowContainer = useMemo(
-      () =>
-        React.forwardRef<HTMLDivElement, PropsWithChildren<{}>>(
-          ({ children, style, ...rest }, ref) => {
-            return (
-              <>
-                {headerRow}
-                <div
-                  className="row-container"
-                  ref={ref}
-                  style={{ ...style, position: 'relative' }}
-                  {...rest}
-                >
-                  {children}
-                </div>
+    const innerRowContainer = useMemo(() => {
+      const InnerComp = React.forwardRef<HTMLDivElement, PropsWithChildren<{}>>(
+        ({ children, style, ...rest }, ref) => {
+          return (
+            <>
+              {headerRow}
+              <div
+                className="row-container"
+                ref={ref}
+                style={{ ...style, position: 'relative' }}
+                {...rest}
+              >
+                {children}
+              </div>
 
-                {footerRow}
-              </>
-            );
-          }
-        ),
-      [headerRow, footerRow]
-    );
+              {footerRow}
+            </>
+          );
+        }
+      );
+
+      InnerComp.displayName = 'InnerRowContainer';
+
+      return InnerComp;
+    }, [headerRow, footerRow]);
+
     return (
-      <AutoSizer className="autosizer" disableWidth>
+      <EuiAutoSizer className="autosizer" disableWidth>
         {({ height }) => {
           return (
             <>
-              {gridWidth !== 0 && (
-                <>
-                  <VariableSizeList
-                    className="variable__list"
-                    width={gridWidth}
-                    height={height}
-                    itemCount={visibleRows.length}
-                    itemSize={getRowHeight}
-                    overscanCount={5}
-                    ref={listRef}
-                    style={SCROLLBAR_STYLE}
-                    innerElementType={innerRowContainer}
-                  >
-                    {({ index, style }) => {
-                      return (
-                        <div
-                          role="row"
-                          style={{
-                            ...style,
-                            width: 'fit-content',
-                          }}
-                          key={`${gridWidth}-${index}`}
-                        >
-                          <CustomDataGridSingleRow
-                            rowData={visibleRows[index]}
-                            rowIndex={index}
-                            visibleColumns={visibleColumns}
-                            Cell={Cell}
-                            enabledRowRenderers={enabledRowRenderers}
-                            refetch={refetch}
-                            setRowHeight={setRowHeight}
-                            rowHeight={rowHeight}
-                            maxWidth={gridWidth}
-                          />
-                        </div>
-                      );
-                    }}
-                  </VariableSizeList>
-                </>
-              )}
+              {
+                /**
+                 * whenever timeline is minimized, Variable is re-rendered which causes delay,
+                 * so below code makes sure that grid is only rendered when gridWidth is not 0
+                 */
+                gridWidth !== 0 && (
+                  <>
+                    <VariableSizeList
+                      className="variable__list"
+                      width={gridWidth}
+                      height={height}
+                      itemCount={visibleRows.length}
+                      itemSize={getRowHeight}
+                      overscanCount={5}
+                      ref={listRef}
+                      style={SCROLLBAR_STYLE}
+                      innerElementType={innerRowContainer}
+                    >
+                      {({ index, style }) => {
+                        return (
+                          <div
+                            role="row"
+                            style={{
+                              ...style,
+                              width: 'fit-content',
+                            }}
+                            key={`${gridWidth}-${index}`}
+                          >
+                            <CustomDataGridSingleRow
+                              rowData={visibleRows[index]}
+                              rowIndex={index}
+                              visibleColumns={visibleColumns}
+                              Cell={Cell}
+                              enabledRowRenderers={enabledRowRenderers}
+                              refetch={refetch}
+                              setRowHeight={setRowHeight}
+                              rowHeight={rowHeight}
+                              maxWidth={gridWidth}
+                            />
+                          </div>
+                        );
+                      }}
+                    </VariableSizeList>
+                  </>
+                )
+              }
             </>
           );
         }}
-      </AutoSizer>
+      </EuiAutoSizer>
     );
   }
 );
@@ -341,6 +349,8 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           rowHeightsOptions={{
             defaultHeight: 'auto',
           }}
+          /* @ts-expect-error because currently CellProps do not allow string width but it is important to be passed for height calculations   */
+          width={'100%'}
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
           visibleRowIndex={rowIndex}
         />
