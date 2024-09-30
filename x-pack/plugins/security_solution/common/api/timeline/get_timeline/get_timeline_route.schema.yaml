@@ -43,3 +43,4 @@ paths:
                           getOneTimeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
                   - type: object
+                    additionalProperties: false

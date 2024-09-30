@@ -35,6 +35,7 @@ paths:
                       data:
                         $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
                   - type: object
+                    additionalProperties: false
 
         '400':
           description: The request is missing parameters
