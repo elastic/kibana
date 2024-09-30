@@ -168,7 +168,7 @@ export const CreateIndexForm = ({
         </EuiFlexGroup>
       </EuiForm>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel color='transparent' paddingSize='s'>
+      <EuiPanel color="transparent" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type="documents" />
@@ -186,9 +186,12 @@ export const CreateIndexForm = ({
                         data-test-subj="uploadFileLink"
                         onClick={onFileUpload}
                       >
-                        {i18n.translate('xpack.searchIndices.startPage.createIndex.fileUpload.link', {
-                          defaultMessage: 'Upload a file',
-                        })}
+                        {i18n.translate(
+                          'xpack.searchIndices.startPage.createIndex.fileUpload.link',
+                          {
+                            defaultMessage: 'Upload a file',
+                          }
+                        )}
                       </EuiLink>
                     ),
                   }}

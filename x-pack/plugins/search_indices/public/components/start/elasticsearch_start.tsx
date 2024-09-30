@@ -111,8 +111,8 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       paddingSize="l"
       style={{ maxWidth: MAX_WIDTH, margin: '0 auto' }}
     >
-      <EuiPanel color='transparent' paddingSize='m'>
-        <EuiFlexGroup alignItems="center" gutterSize='m'>
+      <EuiPanel color="transparent" paddingSize="m">
+        <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoElasticsearch" size="xl" />
           </EuiFlexItem>
@@ -126,7 +126,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size='m' />
+        <EuiSpacer size="m" />
         <EuiTitle size="l">
           <h2>
             {i18n.translate('xpack.searchIndices.startPage.pageDescription', {
@@ -138,7 +138,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
       <EuiSpacer />
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexGroup alignItems='center'>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
