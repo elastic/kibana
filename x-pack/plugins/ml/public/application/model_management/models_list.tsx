@@ -26,6 +26,7 @@ import {
   EuiTitle,
   EuiToolTip,
   type EuiSearchBarProps,
+  EuiText,
 } from '@elastic/eui';
 import { groupBy, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -583,8 +584,7 @@ export const ModelsList: FC<Props> = ({
 
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
-      align: 'left',
-      width: '32px',
+      width: '5%',
       isExpander: true,
       render: (item: ModelItem) => {
         if (!item.stats) {
@@ -610,35 +610,15 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '15%',
+      width: '60%',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
       'data-test-subj': 'mlModelsTableColumnId',
-      render: ({ description, model_id: modelId }: ModelItem) => {
+      render: ({ description, model_id: modelId, recommended, supported, type }: ModelItem) => {
         const isTechPreview = description?.includes('(Tech Preview)');
 
-        return (
-          <EuiFlexGroup gutterSize={'s'} alignItems={'center'} wrap={true}>
-            <EuiFlexItem grow={false}>{modelId}</EuiFlexItem>
-            {isTechPreview ? (
-              <EuiFlexItem grow={false}>
-                <TechnicalPreviewBadge compressed />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        );
-      },
-    },
-    {
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
-        defaultMessage: 'Description',
-      }),
-      truncateText: false,
-      'data-test-subj': 'mlModelsTableColumnDescription',
-      render: ({ description, recommended, tags, supported }: ModelItem) => {
-        if (!description) return null;
-        const descriptionText = description.replace('(Tech Preview)', '');
+        const descriptionText = description?.replace('(Tech Preview)', '');
 
         const tooltipContent =
           supported === false ? (
@@ -653,46 +633,54 @@ export const ModelsList: FC<Props> = ({
             />
           ) : null;
 
-        return tooltipContent ? (
-          <EuiToolTip content={tooltipContent}>
-            <>
-              {descriptionText}&nbsp;
-              <EuiIcon type={'warning'} color="warning" />
-            </>
-          </EuiToolTip>
-        ) : (
-          descriptionText
+        return (
+          <EuiFlexGroup gutterSize={'xs'} direction={'column'}>
+            <EuiFlexGroup gutterSize={'s'} alignItems={'center'} wrap={true}>
+              <EuiFlexItem grow={false}>
+                <strong>{modelId}</strong>
+              </EuiFlexItem>
+              {isTechPreview ? (
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge compressed />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+
+            {descriptionText ? (
+              <EuiText color={'subdued'} size={'xs'}>
+                {tooltipContent ? (
+                  <EuiToolTip content={tooltipContent}>
+                    <>
+                      {descriptionText}&nbsp;
+                      <EuiIcon type={'warning'} color="warning" />
+                    </>
+                  </EuiToolTip>
+                ) : (
+                  descriptionText
+                )}
+              </EuiText>
+            ) : null}
+
+            {Array.isArray(type) && type.length > 0 ? (
+              <EuiFlexGroup gutterSize={'xs'} direction={'row'}>
+                {type.map((t) => (
+                  <EuiFlexItem key={t} grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="mlModelType">
+                      {t}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ) : null}
+          </EuiFlexGroup>
         );
       },
     },
     {
       width: '15%',
-      field: ModelsTableToConfigMapping.type,
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
-        defaultMessage: 'Type',
-      }),
-      sortable: true,
-      truncateText: true,
-      align: 'left',
-      render: (types: string[]) => (
-        <EuiFlexGroup gutterSize={'xs'} wrap>
-          {types.map((type) => (
-            <EuiFlexItem key={type} grow={false}>
-              <EuiBadge color="hollow" data-test-subj="mlModelType">
-                {type}
-              </EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-      'data-test-subj': 'mlModelsTableColumnType',
-    },
-    {
-      width: '10%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
-      align: 'left',
       truncateText: false,
       render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
@@ -732,17 +720,6 @@ export const ModelsList: FC<Props> = ({
         );
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
-    },
-    {
-      width: '20%',
-      field: ModelsTableToConfigMapping.createdAt,
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
-        defaultMessage: 'Created at',
-      }),
-      dataType: 'date',
-      render: (v: number) => dateFormatter(v),
-      sortable: true,
-      'data-test-subj': 'mlModelsTableColumnCreatedAt',
     },
     {
       width: '15%',
