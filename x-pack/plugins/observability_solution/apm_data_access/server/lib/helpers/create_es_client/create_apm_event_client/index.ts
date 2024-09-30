@@ -11,6 +11,7 @@ import type {
   FieldCapsResponse,
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
+  SearchSourceConfig,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -69,13 +70,15 @@ type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
   InferSearchResponseOf<Event, TParams>;
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> = InferSearchResponseOf<
-  TypeOfProcessorEvent<
-    TParams['apm'] extends { events: ProcessorEvent[] }
-      ? ValuesType<TParams['apm']['events']>
-      : TParams['apm'] extends { sources: ApmDataSource[] }
-      ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
-      : never
-  >,
+  TParams['body'] extends { _source: SearchSourceConfig }
+    ? TypeOfProcessorEvent<
+        TParams['apm'] extends { events: ProcessorEvent[] }
+          ? ValuesType<TParams['apm']['events']>
+          : TParams['apm'] extends { sources: ApmDataSource[] }
+          ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
+          : never
+      >
+    : undefined,
   TParams
 >;
 
@@ -175,6 +178,7 @@ export class APMEventClient {
       ...omit(params, 'apm', 'body'),
       index,
       body: {
+        _source: false,
         ...params.body,
         query: {
           bool: {

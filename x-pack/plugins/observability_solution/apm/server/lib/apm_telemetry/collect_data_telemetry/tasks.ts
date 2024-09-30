@@ -197,13 +197,13 @@ export const tasks: TelemetryTask[] = [
             },
           },
         })
-      ).hits.hits[0] as { _source: { '@timestamp': string } };
+      ).hits.hits[0] as { fields: { '@timestamp': string[] } };
 
       if (!lastTransaction) {
         return {};
       }
 
-      const end = new Date(lastTransaction._source['@timestamp']).getTime() - 5 * 60 * 1000;
+      const end = new Date(lastTransaction.fields['@timestamp'][0]).getTime() - 5 * 60 * 1000;
 
       const start = end - 60 * 1000;
 
@@ -514,14 +514,14 @@ export const tasks: TelemetryTask[] = [
                     sort: {
                       '@timestamp': 'asc',
                     },
-                    _source: ['@timestamp'],
+                    _fields: ['@timestamp'],
                   },
                 })
               : null;
 
-          const event = retainmentResponse?.hits.hits[0]?._source as
+          const event = retainmentResponse?.hits.hits[0]?.fields as
             | {
-                '@timestamp': number;
+                '@timestamp': number[];
               }
             | undefined;
 
@@ -535,7 +535,7 @@ export const tasks: TelemetryTask[] = [
               ? {
                   retainment: {
                     [processorEvent]: {
-                      ms: new Date().getTime() - new Date(event['@timestamp']).getTime(),
+                      ms: new Date().getTime() - new Date(event['@timestamp'][0]).getTime(),
                     },
                   },
                 }

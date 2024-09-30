@@ -101,7 +101,7 @@ describe('data telemetry collection tasks', () => {
         // a fixed date range.
         .mockReturnValueOnce({
           hits: {
-            hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            hits: [{ fields: { '@timestamp': [new Date().toISOString()] } }],
           },
           total: {
             value: 1,
@@ -314,7 +314,7 @@ describe('data telemetry collection tasks', () => {
             ? { hits: { total: { value: 1 } } }
             : {
                 hits: {
-                  hits: [{ _source: { '@timestamp': 1 } }],
+                  hits: [{ fields: { '@timestamp': [1] } }],
                 },
               }
         );

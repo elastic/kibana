@@ -9,7 +9,7 @@ import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/t
 import { LABELS, SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
 
 export interface SourceDoc {
-  [key: string]: string | string[] | SourceDoc;
+  [key: string]: unknown;
 }
 
 export function getApmAlertSourceFieldsAgg(topHitsOpts: AggregationsTopHitsAggregation = {}) {
@@ -17,9 +17,7 @@ export function getApmAlertSourceFieldsAgg(topHitsOpts: AggregationsTopHitsAggre
     source_fields: {
       top_hits: {
         size: 1,
-        _source: {
-          includes: SERVICE_GROUP_SUPPORTED_FIELDS,
-        },
+        fields: SERVICE_GROUP_SUPPORTED_FIELDS,
         ...topHitsOpts,
       },
     },
@@ -29,18 +27,17 @@ export function getApmAlertSourceFieldsAgg(topHitsOpts: AggregationsTopHitsAggre
 interface AggResultBucket {
   source_fields: {
     hits: {
-      hits: Array<{ _source: any }>;
+      hits: Array<{ fields: Record<string, unknown[]> }>;
     };
   };
 }
 
-export function getApmAlertSourceFields(bucket?: AggResultBucket) {
+export function getApmAlertSourceFields(bucket?: AggResultBucket): SourceDoc {
   if (!bucket) {
     return {};
   }
 
-  const sourceDoc: SourceDoc = bucket?.source_fields?.hits.hits[0]?._source ?? {};
-  return flattenSourceDoc(sourceDoc);
+  return bucket?.source_fields?.hits.hits[0]?.fields ?? {};
 }
 
 export function flattenSourceDoc(

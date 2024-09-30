@@ -111,7 +111,9 @@ async function getServiceNameFromTraces({
         },
       ],
     },
-    body: params,
+    body: {
+      ...params,
+    },
   });
 
   return res.hits.hits[0]?._source.service.name;
