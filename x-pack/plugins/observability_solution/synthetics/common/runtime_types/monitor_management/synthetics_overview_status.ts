@@ -63,6 +63,7 @@ export const OverviewStatusCodec = t.interface({
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),

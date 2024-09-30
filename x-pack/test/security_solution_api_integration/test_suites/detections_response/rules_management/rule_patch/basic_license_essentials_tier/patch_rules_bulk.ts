@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless patch_rules_bulk', () => {
+  describe('@ess @serverless @skipInServerlessMKI patch_rules_bulk', () => {
     describe('patch rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

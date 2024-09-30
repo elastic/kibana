@@ -58,6 +58,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: 'fluent-bit*', patternName: 'fluentbit' },
   { pattern: '*nginx*', patternName: 'nginx' },
   { pattern: '*apache*', patternName: 'apache' }, // Already in Security (keeping it in here for documentation)
+  { pattern: 'logs-*-*', patternName: 'dsns-logs' },
   { pattern: '*logs*', patternName: 'generic-logs' },
 
   // Security - Elastic
