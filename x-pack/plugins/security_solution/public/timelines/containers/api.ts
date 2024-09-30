@@ -44,7 +44,7 @@ import {
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ToasterError } from '../../common/components/toasters';
-import { parseOrThrowErrorFactory } from '../../../common/utils/zod_errors';
+import { parseOrThrowErrorFactory } from '../../../common/timelines/zod_errors';
 import type {
   ExportDocumentsProps,
   ImportDataProps,

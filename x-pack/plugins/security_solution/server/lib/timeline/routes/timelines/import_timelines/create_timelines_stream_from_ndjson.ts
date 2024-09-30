@@ -16,7 +16,7 @@ import {
 
 import type { ImportTimelineResponse } from './types';
 import { ImportTimelines } from '../../../../../../common/api/timeline';
-import { parseOrThrowErrorFactory } from '../../../../../../common/utils/zod_errors';
+import { parseOrThrowErrorFactory } from '../../../../../../common/timelines/zod_errors';
 
 const createPlainError = (message: string) => new Error(message);
 const parseOrThrow = parseOrThrowErrorFactory(createPlainError);
