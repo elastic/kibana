@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import type { DefaultControlState } from '@kbn/controls-plugin/public/react_controls/controls/types';
+import type { DefaultControlState, ControlGroupRuntimeState } from '@kbn/controls-plugin/common';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const PAGE_FILTER_STORAGE_KEY = 'siem.default.pageFilters';

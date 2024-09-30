@@ -3999,6 +3999,10 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/get_searchable_types.ts"
               },
@@ -4441,10 +4445,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
-              },
-              {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -5324,6 +5324,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
               },
               {
@@ -5356,7 +5364,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_instance_summary.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -5372,7 +5380,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/get_alert_state.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -5401,6 +5413,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/health.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/list_alert_types.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6689,6 +6713,10 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
@@ -7061,10 +7089,6 @@
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
               },
               {
-                "plugin": "inference",
-                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
-              },
-              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/create.ts"
               },
@@ -7223,6 +7247,10 @@
               {
                 "plugin": "searchIndices",
                 "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
               {
                 "plugin": "searchPlayground",
@@ -7766,6 +7794,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
               },
               {
@@ -7775,6 +7811,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/disable.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/enable.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7802,6 +7842,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_all.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/mute_instance.test.ts"
               },
               {
@@ -7826,6 +7874,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_all.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
               },
               {
@@ -7835,6 +7891,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/unmute_instance.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/update_api_key.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8983,6 +9043,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/update_route.test.ts"
               },
@@ -9877,6 +9941,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/delete.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/delete.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14251,6 +14319,10 @@
                 "path": "packages/core/metrics/core-metrics-server-internal/src/routes/elu_history.ts"
               },
               {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/server/routes/elasticsearch_routes.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
@@ -15020,6 +15092,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entities/list.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/list.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
               {
@@ -15241,22 +15325,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -16474,6 +16542,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/init.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/start.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/stop.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -16563,6 +16643,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/stats.ts"
               },
               {
                 "plugin": "controls",
@@ -16947,10 +17031,6 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/delete_route.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
-              },
-              {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -17029,6 +17109,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/delete_knowledge_base.ts"
               },
               {
                 "plugin": "synthetics",

@@ -444,52 +444,6 @@ describe('editor_frame', () => {
         instance.unmount();
       });
 
-      // this test doesn't test anything, it's buggy and should be rewritten when we find a way to user test drag and drop
-      it.skip('should switch to best suggested visualization on field drop', async () => {
-        const suggestionVisState = {};
-
-        visualizationMap = {
-          testVis: {
-            ...mockVisualization,
-            getSuggestions: () => [
-              {
-                score: 0.2,
-                state: {},
-                title: 'Suggestion1',
-                previewIcon: 'empty',
-              },
-              {
-                score: 0.8,
-                state: suggestionVisState,
-                title: 'Suggestion2',
-                previewIcon: 'empty',
-              },
-            ],
-          },
-          testVis2: mockVisualization2,
-        };
-        datasourceMap = {
-          testDatasource: {
-            ...mockDatasource,
-            getDatasourceSuggestionsForField: () => [generateSuggestion()],
-            getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-            getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-          },
-        };
-        renderEditorFrame();
-
-        mockVisualization.getConfiguration.mockClear();
-        act(() => {
-          instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
-        });
-
-        expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
-          expect.objectContaining({
-            state: {},
-          })
-        );
-      });
-
       it('should use the currently selected visualization if possible on field drop', async () => {
         mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
         const suggestionVisState = {};

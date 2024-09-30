@@ -2732,23 +2732,37 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.getIsSideNavCollapsed$",
-            "type": "Function",
+            "id": "def-public.ChromeStart.sideNav",
+            "type": "Object",
             "tags": [],
-            "label": "getIsSideNavCollapsed$",
-            "description": [
-              "\nGet an observable of the current collapsed state of the side nav."
-            ],
+            "label": "sideNav",
+            "description": [],
             "signature": [
-              "() => ",
+              "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>"
+              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; getPanelSelectedNode$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null>; setPanelSelectedNode(node: string | ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-public.PanelSelectedNode",
+                "text": "PanelSelectedNode"
+              },
+              " | null): void; }"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -4005,6 +4019,29 @@
             "text": "NodeDefinition"
           },
           "<LinkId, Id, ChildrenID>[]; }"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.PanelSelectedNode",
+        "type": "Type",
+        "tags": [],
+        "label": "PanelSelectedNode",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-public.ChromeProjectNavigationNode",
+            "text": "ChromeProjectNavigationNode"
+          },
+          ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,

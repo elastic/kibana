@@ -11,13 +11,7 @@ import React, { Component } from 'react';
 
 import { NotificationsSetup } from '@kbn/core/public';
 
-import {
-  EuiIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -115,15 +109,15 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiLink
+      <EuiButtonIcon
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
         aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
-      >
-        <EuiIcon type="boxesVertical" />
-      </EuiLink>
+        iconType="boxesVertical"
+        iconSize="s"
+      />
     );
 
     const items = [
