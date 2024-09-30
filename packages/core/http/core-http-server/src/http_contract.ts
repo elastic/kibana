@@ -359,6 +359,8 @@ export interface HttpServiceSetup<
    * Provides common {@link HttpServerInfo | information} about the running http server.
    */
   getServerInfo: () => HttpServerInfo;
+
+  getDeprecatedRoutes: () => any[];
 }
 
 /** @public */

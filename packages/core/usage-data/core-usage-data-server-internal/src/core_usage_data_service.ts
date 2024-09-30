@@ -88,6 +88,7 @@ export class CoreUsageDataService
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
   private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
+  private incrementDeprecatedApiUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -502,10 +503,23 @@ export class CoreUsageDataService
     const registerUsageCounter = (usageCounter: CoreUsageCounter) => {
       this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
     };
+    const registerDeprecatedApiUsageCounter = (usageCounter: CoreUsageCounter) => {
+      this.incrementDeprecatedApiUsageCounter = (params) => usageCounter.incrementCounter(params);
+    };
 
     const incrementUsageCounter = (params: CoreIncrementCounterParams) => {
       try {
         this.incrementUsageCounter(params);
+      } catch (e) {
+        // Self-defense mechanism since the handler is externally registered
+        this.logger.debug('Failed to increase the usage counter');
+        this.logger.debug(e);
+      }
+    };
+
+    const incrementDeprecatedApiUsageCounter = (params: CoreIncrementCounterParams) => {
+      try {
+        this.incrementDeprecatedApiUsageCounter(params);
       } catch (e) {
         // Self-defense mechanism since the handler is externally registered
         this.logger.debug('Failed to increase the usage counter');
@@ -524,8 +538,12 @@ export class CoreUsageDataService
     const contract: InternalCoreUsageDataSetup = {
       registerType,
       getClient: () => this.coreUsageStatsClient!,
+      // Core usage stats
       registerUsageCounter,
       incrementUsageCounter,
+      // api deprecations
+      registerDeprecatedApiUsageCounter,
+      incrementDeprecatedApiUsageCounter,
     };
 
     return contract;

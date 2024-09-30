@@ -59,6 +59,7 @@ import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
 import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
+import { createRouteDeprecationsHandler } from './route_deprecations';
 
 const coreId = Symbol('core');
 
@@ -100,6 +101,7 @@ export class Server {
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
+  private coreSetup?: InternalCoreSetup;
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
@@ -276,10 +278,6 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = await this.deprecations.setup({
-      http: httpSetup,
-    });
-
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -301,6 +299,11 @@ export class Server {
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
+    });
+
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const savedObjectsSetup = await this.savedObjects.setup({
@@ -378,6 +381,8 @@ export class Server {
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     this.registerCoreContext(coreSetup);
+    this.registerApiRouteDeprecationsLogger(coreSetup);
+
     await this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction.end();
@@ -528,6 +533,15 @@ export class Server {
       (context, req) => {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
+    );
+  }
+  private registerApiRouteDeprecationsLogger(coreSetup: InternalCoreSetup) {
+    coreSetup.http.registerOnPostValidation(
+      createRouteDeprecationsHandler({
+        coreUsageData: coreSetup.coreUsageData,
+        log: this.logger.get('http.route-deprecations'),
+        logRouteApiDeprecations: true,
+      })
     );
   }
 

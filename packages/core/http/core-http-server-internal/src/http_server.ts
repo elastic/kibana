@@ -39,7 +39,7 @@ import type {
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity } from 'lodash';
+import { identity, isObject } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -144,6 +144,8 @@ export interface HttpServerSetup {
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
+
+  getDeprecatedRoutes: HttpServiceSetup['getDeprecatedRoutes'];
 }
 
 /** @internal */
@@ -200,6 +202,26 @@ export class HttpServer {
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
+  }
+
+  private getDeprecatedRoutes() {
+    const deprecatedRoutes: any[] = [];
+
+    for (const router of this.registeredRouters) {
+      for (const route of router.getRoutes()) {
+        if (isObject(route.options.deprecated)) {
+          deprecatedRoutes.push({
+            basePath: router.routerPath,
+            routeVerion: 'v1', // TODO(Bamieh): ADD this to route
+            routePath: route.path,
+            routeOptions: route.options,
+            routeMethod: route.method,
+          });
+        }
+      }
+    }
+
+    return deprecatedRoutes;
   }
 
   private registerRouter(router: IRouter) {
@@ -281,6 +303,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      getDeprecatedRoutes: this.getDeprecatedRoutes.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       staticAssets,
@@ -694,12 +717,13 @@ export class HttpServer {
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { authRequired, tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      deprecated,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

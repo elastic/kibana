@@ -182,6 +182,14 @@ export class HttpService
     this.internalSetup = {
       ...serverContract,
 
+      registerOnPostValidation: (cb) => {
+        Router.on('onPostValidate', cb);
+      },
+
+      getRegisteredDeprecatedApis: () => {
+        return serverContract.getDeprecatedRoutes();
+      },
+
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
@@ -208,7 +216,7 @@ export class HttpService
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
-    return this.internalSetup;
+    return this.internalSetup!;
   }
 
   // this method exists because we need the start contract to create the `CoreStart` used to start

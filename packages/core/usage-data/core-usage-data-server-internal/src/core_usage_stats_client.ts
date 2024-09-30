@@ -215,6 +215,30 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
     return coreUsageStats;
   }
 
+  public async getDeprecatedApisStats(): Promise<any> {
+    this.debugLogger('getDeprecatedApisStats() called');
+    const coreUsageStats: any[] = [];
+    try {
+      const repository = await this.repositoryPromise;
+      this.flush$.next();
+      // const result = await repository.incrementCounter<CoreUsageStats>(
+      //   CORE_USAGE_STATS_TYPE,
+      //   CORE_USAGE_STATS_ID,
+      //   ALL_COUNTER_FIELDS,
+      //   { initialize: true } // set all counter fields to 0 if they don't exist
+      // );
+      coreUsageStats.push({
+        counterName: '[v1][GET] /api/chocolate_love',
+        count: 4,
+        type: 'count',
+        lastUpdated: new Date(),
+      });
+    } catch (err) {
+      // do nothing
+    }
+    return coreUsageStats;
+  }
+
   public async incrementSavedObjectsBulkCreate(options: BaseIncrementOptions) {
     await this.updateUsageStats([], BULK_CREATE_STATS_PREFIX, options);
   }

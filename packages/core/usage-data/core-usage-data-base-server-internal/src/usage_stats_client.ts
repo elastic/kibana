@@ -38,6 +38,8 @@ export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
 export interface ICoreUsageStatsClient {
   getUsageStats(): Promise<CoreUsageStats>;
 
+  getDeprecatedApisStats(): Promise<CoreUsageStats>;
+
   incrementSavedObjectsBulkCreate(options: BaseIncrementOptions): Promise<void>;
 
   incrementSavedObjectsBulkGet(options: BaseIncrementOptions): Promise<void>;

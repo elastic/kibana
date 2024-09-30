@@ -7,17 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID,
-  REPOSITORY_RESOLVE_OUTCOME_STATS,
-} from './src';
-export type {
-  InternalCoreUsageDataSetup,
-  IDeprecationsStatsClient,
-  ICoreUsageStatsClient,
-  BaseIncrementOptions,
-  IncrementSavedObjectsImportOptions,
-  IncrementSavedObjectsResolveImportErrorsOptions,
-  IncrementSavedObjectsExportOptions,
-} from './src';
+export { createRouteDeprecationsHandler } from './route_deprecations';

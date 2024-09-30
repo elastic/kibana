@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
@@ -142,7 +143,13 @@ export interface RouterOptions {
 
 /** @internal */
 export interface InternalRegistrarOptions {
+  /** @default false */
   isVersioned: boolean;
+  /**
+   * Whether this route should emit "route events" like postValidate
+   * @default true
+   */
+  events: boolean;
 }
 
 /** @internal */
@@ -162,12 +169,18 @@ interface InternalGetRoutesOptions {
   excludeVersionedRoutes?: boolean;
 }
 
+/** @internal */
+type RouterEvents =
+  /** Just before registered handlers are called */
+  'onPostValidate';
+
 /**
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
+  private static ee = new EventEmitter();
   public routes: Array<Readonly<InternalRouterRoute>> = [];
   public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
@@ -188,7 +201,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: RouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        internalOptions: { isVersioned: boolean } = { isVersioned: false }
+        internalOptions: InternalRegistrarOptions = {
+          isVersioned: false,
+          events: true,
+        }
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
@@ -200,6 +216,9 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
               request: req,
               responseToolkit,
               handler: this.enhanceWithContext(handler),
+              emit: internalOptions.events
+                ? { onPostValidation: this.emitPostValidate }
+                : undefined,
             }),
           method,
           path: getRouteFullPath(this.routerPath, route.path),
@@ -215,6 +234,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.delete = buildMethod('delete');
     this.put = buildMethod('put');
     this.patch = buildMethod('patch');
+  }
+
+  public static on(event: RouterEvents, cb: (req: CoreKibanaRequest) => void) {
+    Router.ee.on(event, cb);
+  }
+
+  public static off(event: RouterEvents, cb: (req: CoreKibanaRequest) => void) {
+    Router.ee.off(event, cb);
   }
 
   public getRoutes({ excludeVersionedRoutes }: InternalGetRoutesOptions = {}) {
@@ -246,15 +273,25 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     });
   }
 
+  /** Should be private, just exposed for convenience for the versioned router */
+  public emitPostValidate = (request: KibanaRequest) => {
+    const postValidate: RouterEvents = 'onPostValidate';
+    Router.ee.emit(postValidate, request);
+  };
+
   private async handle<P, Q, B>({
     routeSchemas,
     request,
     responseToolkit,
+    emit,
     handler,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    emit?: {
+      onPostValidation: (req: KibanaRequest) => void;
+    };
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
     let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
@@ -265,6 +302,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.logError('400 Bad Request', 400, { request, error });
       return hapiResponseAdapter.toBadRequest(error.message);
     }
+
+    emit?.onPostValidation(kibanaRequest);
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);

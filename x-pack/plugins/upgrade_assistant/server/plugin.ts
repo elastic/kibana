@@ -103,6 +103,14 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       ],
     });
 
+    http.registerOnPreResponse(async (req, res, t) => {
+      if (req.route.options.deprecated) {
+        // console.log('route!')
+      }
+
+      return t.next();
+    });
+
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
     logsShared?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {

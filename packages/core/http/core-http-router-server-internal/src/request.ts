@@ -254,6 +254,8 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.deprecated,
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       timeout: {
