@@ -4,9 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { Chart, Axis, BarSeries, Settings, ScaleType, niceTimeFormatter } from '@elastic/charts';
+import React, { useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiPopover,
+  EuiTitle,
+} from '@elastic/eui';
+import {
+  Chart,
+  Axis,
+  BarSeries,
+  Settings,
+  ScaleType,
+  niceTimeFormatter,
+  LegendActionProps,
+} from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { MetricsResponse } from '../types';
@@ -28,6 +45,11 @@ export const chartKeyToTitleMap: Record<MetricKey, string> = {
 };
 
 export const Charts: React.FC<ChartsProps> = ({ data }) => {
+  const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
+
+  const togglePopover = (streamName: string) => {
+    setPopoverOpen(popoverOpen === streamName ? null : streamName);
+  };
   return (
     <EuiFlexGroup direction="column">
       {data.charts.map((chart, idx) => {
@@ -48,6 +70,47 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                     showLegend={true}
                     legendPosition="right"
                     xDomain={{ min: minTimestamp, max: maxTimestamp }}
+                    legendAction={({ label }: LegendActionProps) => {
+                      const streamName = `${idx}-${label}`;
+                      return (
+                        <EuiFlexGroup gutterSize="s" alignItems="center">
+                          <EuiPopover
+                            button={
+                              <EuiFlexGroup gutterSize="s" alignItems="center">
+                                <EuiFlexItem grow={false}>
+                                  <EuiButtonIcon
+                                    iconType="boxesHorizontal"
+                                    aria-label="Open data stream actions"
+                                    onClick={() => togglePopover(streamName)}
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            }
+                            isOpen={popoverOpen === streamName}
+                            closePopover={() => setPopoverOpen(null)}
+                            anchorPosition="downRight"
+                          >
+                            <EuiListGroup gutterSize="none">
+                              <EuiListGroupItem
+                                href="#"
+                                label="Copy data stream name"
+                                onClick={() => undefined}
+                              />
+                              <EuiListGroupItem
+                                href="#"
+                                label="Manage data stream"
+                                onClick={() => undefined}
+                              />
+                              <EuiListGroupItem
+                                href="#"
+                                label="View data quality"
+                                onClick={() => undefined}
+                              />
+                            </EuiListGroup>
+                          </EuiPopover>
+                        </EuiFlexGroup>
+                      );
+                    }}
                   />
                   {chart.series.map((stream, streamIdx) => (
                     <BarSeries
