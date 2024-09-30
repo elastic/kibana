@@ -310,7 +310,7 @@ export const SelectConnector: React.FC = () => {
             value={searchTerm}
             fullWidth
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="l" />
           <EuiFlexGrid columns={3}>
             {filteredConnectors.map((connector) => (
               <EuiFlexItem key={connector.name} grow>

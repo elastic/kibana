@@ -22,8 +22,9 @@ export const SetupGuideCta: React.FC = () => (
     paddingSize="l"
     className="enterpriseSearchSetupCta"
     data-test-subj="setupGuideLink"
-    hasBorder
-    color="transparent"
+    hasBevel={true}
+    hasShadow={false}
+    color="plain"
   >
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem>
