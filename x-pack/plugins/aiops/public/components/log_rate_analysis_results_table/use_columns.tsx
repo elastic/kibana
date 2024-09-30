@@ -500,7 +500,7 @@ export const useColumns = (
           : ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
               if (logRateChangeNotAvailable) return NOT_AVAILABLE;
               const logRateChange = getLogRateChangeValues(docCount, bgCount);
-              return logRateChange.sortableValue ?? logRateChange.factor;
+              return logRateChange.factor;
             },
         render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
           if (logRateChangeNotAvailable) return NOT_AVAILABLE;
