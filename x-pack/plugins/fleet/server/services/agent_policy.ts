@@ -7,7 +7,7 @@
 
 import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
@@ -759,6 +759,9 @@ class AgentPolicyService {
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
+          'monitoring_pprof_enabled',
+          'monitoring_http',
+          'monitoring_diagnostics',
         ]),
         ...newAgentPolicyProps,
       },
@@ -850,7 +853,11 @@ class AgentPolicyService {
    * @param esClient
    * @param outputId
    */
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
       await appContextService
@@ -903,6 +910,7 @@ class AgentPolicyService {
           );
           return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
+            force: options?.force,
           });
         },
         {
@@ -1427,7 +1435,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');

@@ -20,6 +20,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -106,6 +107,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services = await this.services.generateServices(coreStart, startPlugins, params);
       return { renderApp, subPlugins, store, services };
     };
+
+    // register cloud security ui metrics
+    if (plugins.usageCollection) uiMetricService.setup(plugins.usageCollection);
 
     // Register main Security Solution plugin
     core.application.register({

@@ -70,7 +70,7 @@ export function InvestigationDetails({ user }: Props) {
         ],
       }}
     >
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="row" responsive>
         <EuiFlexItem grow={8}>
           <InvestigationItems />
         </EuiFlexItem>
