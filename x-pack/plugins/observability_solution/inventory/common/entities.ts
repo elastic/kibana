@@ -8,6 +8,12 @@ import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  CONTAINER_ID,
+  HOST_NAME,
+} from '@kbn/observability-shared-plugin/common';
+import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
@@ -75,18 +81,18 @@ interface BaseEntity {
 
 interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
-  'service.name': string;
-  'service.environment'?: string | null;
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]?: string | null;
 }
 
 interface HostEntity extends BaseEntity {
   [ENTITY_TYPE]: 'host';
-  'host.name': string;
+  [HOST_NAME]: string;
 }
 
 interface ContainerEntity extends BaseEntity {
   [ENTITY_TYPE]: 'container';
-  'container.id': string;
+  [CONTAINER_ID]: string;
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
