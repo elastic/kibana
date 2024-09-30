@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { from, map } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -14,9 +12,15 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  AppStatus,
 } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import { from, map } from 'rxjs';
+import { createCallInventoryAPI } from './api';
+import { TelemetryService } from './services/telemetry/telemetry_service';
+import { InventoryServices } from './services/types';
 import type {
   ConfigSchema,
   InventoryPublicSetup,
@@ -24,9 +28,6 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
-import { InventoryServices } from './services/types';
-import { createCallInventoryAPI } from './api';
-import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export class InventoryPlugin
   implements
@@ -49,33 +50,39 @@ export class InventoryPlugin
     pluginsSetup: InventorySetupDependencies
   ): InventoryPublicSetup {
     const inventoryAPIClient = createCallInventoryAPI(coreSetup);
-    this.telemetry.setup({ analytics: coreSetup.analytics });
-
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(coreSetup.getStartServices()).pipe(
-        map(([coreStart, pluginsStart]) => {
-          return [
-            {
-              label: '',
-              sortKey: 101,
-              entries: [
-                {
-                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                    defaultMessage: 'Inventory',
-                  }),
-                  app: INVENTORY_APP_ID,
-                  path: '/',
-                  matchPath(currentPath: string) {
-                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                  },
-                },
-              ],
-            },
-          ];
-        })
-      )
+    const isEntityCentricExperienceSettingEnabled = coreSetup.uiSettings.get<boolean>(
+      'observability:entityCentricExperience',
+      true
     );
 
+    if (isEntityCentricExperienceSettingEnabled) {
+      pluginsSetup.observabilityShared.navigation.registerSections(
+        from(coreSetup.getStartServices()).pipe(
+          map(([coreStart, pluginsStart]) => {
+            return [
+              {
+                label: '',
+                sortKey: 300,
+                entries: [
+                  {
+                    label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                      defaultMessage: 'Inventory',
+                    }),
+                    app: INVENTORY_APP_ID,
+                    path: '/',
+                    matchPath(currentPath: string) {
+                      return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                    },
+                    isTechnicalPreview: true,
+                  },
+                ],
+              },
+            ];
+          })
+        )
+      );
+    }
+    this.telemetry.setup({ analytics: coreSetup.analytics });
     const telemetry = this.telemetry.start();
 
     coreSetup.application.register({
@@ -86,17 +93,11 @@ export class InventoryPlugin
       euiIconType: 'logoObservability',
       appRoute: '/app/observability/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
-      visibleIn: ['sideNav'],
-      order: 8001,
-      deepLinks: [
-        {
-          id: 'inventory',
-          title: i18n.translate('xpack.inventory.inventoryDeepLinkTitle', {
-            defaultMessage: 'Inventory',
-          }),
-          path: '/',
-        },
-      ],
+      visibleIn: ['sideNav', 'globalSearch'],
+      order: 8200,
+      status: isEntityCentricExperienceSettingEnabled
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([

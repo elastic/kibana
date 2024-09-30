@@ -25,10 +25,16 @@ import { useAWSServiceGetStartedList } from './use_aws_service_get_started_list'
 import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 import { HAS_DATA_FETCH_INTERVAL } from './utils';
+import { CreateStackOption } from './types';
 
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
-export function VisualizeData() {
+interface Props {
+  onboardingId: string;
+  selectedCreateStackOption: CreateStackOption;
+}
+
+export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props) {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const [orderedPopulatedAWSLogsIndexList, setOrderedPopulatedAWSLogsIndexList] = useState<
     AWSIndexName[]
@@ -49,7 +55,10 @@ export function VisualizeData() {
     });
   }, []);
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      context: { cloudServiceProvider },
+    },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   useEffect(() => {
@@ -150,11 +159,20 @@ export function VisualizeData() {
               }
             >
               <GetStartedPanel
+                onboardingFlowType="firehose"
+                dataset={indexName}
+                telemetryEventContext={{
+                  firehose: {
+                    selectedCreateStackOption,
+                    cloudServiceProvider,
+                  },
+                }}
                 integration="aws"
                 newTab
                 isLoading={false}
                 actionLinks={actionLinks}
                 previewImage={previewImage}
+                onboardingId={onboardingId}
               />
             </AccordionWithIcon>
           );
