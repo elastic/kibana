@@ -281,12 +281,11 @@ describe('ServiceProvider component', () => {
     } as any;
 
     it('renders the component with endpoint details', () => {
-      render(<EndpointInfo endpoint={mockEndpoint} />);
+      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
 
-      expect(screen.getByText('alibabacloud-ai-search-1')).toBeInTheDocument();
-      expect(screen.getByText('service-123')).toBeInTheDocument();
-      expect(screen.getByText('host-123')).toBeInTheDocument();
-      expect(screen.getByText('default-123')).toBeInTheDocument();
+      expect(screen.getByText('AlibabaCloud AI Search')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-alibabacloud-ai-search');
+      expect(icon).toBeInTheDocument();
     });
   });
 });
