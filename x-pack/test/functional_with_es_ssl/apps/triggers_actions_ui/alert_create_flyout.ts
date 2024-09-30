@@ -25,6 +25,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const esClient = getService('es');
   const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const filterBar = getService('filterBar');
+  const esArchiver = getService('esArchiver');
 
   async function getAlertsByName(name: string) {
     const {
@@ -95,6 +97,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     before(async () => {
+      await esArchiver.load(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
       apmSynthtraceEsClient = await getApmSynthtraceEsClient({
         client: esClient,
@@ -130,7 +135,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return Promise.all([apmSynthtraceEsClient.index(events)]);
     });
 
-    after(() => apmSynthtraceEsClient.clean());
+    after(async () => {
+      apmSynthtraceEsClient.clean();
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
+    });
 
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -450,6 +460,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).to.eql(true);
 
       await deleteConnectorByName('webhook-test');
+    });
+
+    it('should add filter', async () => {
+      const ruleName = generateUniqueKey();
+      await defineAlwaysFiringAlert(ruleName);
+
+      await testSubjects.click('saveRuleButton');
+      await testSubjects.existOrFail('confirmRuleSaveModal');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmRuleSaveModal');
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
+
+      await testSubjects.click('triggersActionsAlerts');
+
+      const filter = `
+      {
+        "bool":{"filter":[{"term":{"kibana.alert.rule.name":"${ruleName}"}}]}
+      }`;
+
+      await filterBar.addDslFilter(filter, true);
+
+      await filterBar.hasFilter('query', filter, true);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(ruleName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
   });
 };
