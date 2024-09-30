@@ -237,7 +237,8 @@ export function getDataMapping({
         fieldMapping.time_series_dimension = true;
       }
     }
-  } else if (removeTSDBFields) {
+  }
+  if (removeTSDBFields) {
     for (const fieldName of Object.keys(timeSeriesMetrics)) {
       delete dataStreamMapping[fieldName];
     }
@@ -335,10 +336,9 @@ export interface ScenarioIndexes {
   index: string;
   create?: boolean;
   downsample?: boolean;
-  tsdb?: boolean;
   removeTSDBFields?: boolean;
   removeLogsDBFields?: boolean;
-  logsdb?: boolean;
+  mode?: 'tsdb' | 'logsdb';
 }
 type GetScenarioFn = (initialIndex: string) => Array<{
   name: string;
@@ -358,7 +358,7 @@ export function setupScenarioRunner(
 
   function runTestsForEachScenario(
     initialIndex: string,
-    mode: 'tsdb' | 'logsdb',
+    scenarioMode: 'tsdb' | 'logsdb',
     testingFn: (indexes: ScenarioIndexes[]) => void
   ): void {
     const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
@@ -367,7 +367,7 @@ export function setupScenarioRunner(
     const dataStreams = getService('dataStreams');
     const elasticChart = getService('elasticChart');
     const indexPatterns = getService('indexPatterns');
-    const createDocs = getDocsGenerator(log, es, mode);
+    const createDocs = getDocsGenerator(log, es, scenarioMode);
 
     for (const { name, indexes } of getScenario(initialIndex)) {
       describe(name, () => {
@@ -379,30 +379,26 @@ export function setupScenarioRunner(
             index,
             create,
             downsample,
-            tsdb,
+            mode,
             removeTSDBFields,
             removeLogsDBFields,
-            logsdb,
           } of indexes) {
             // Validate the scenario config
-            if (logsdb && tsdb) {
-              expect().fail('Cannot create a scenario with both tsdb and logsdb');
-            }
-            if (downsample && !tsdb) {
+            if (downsample && mode !== 'tsdb') {
               expect().fail('Cannot create a scenario with downsampled stream without tsdb');
             }
             // Kick off the creation
-            const isStream = Boolean(tsdb || logsdb);
+            const isStream = mode !== undefined;
             if (create) {
               if (isStream) {
                 await dataStreams.createDataStream(
                   index,
                   getDataMapping({
-                    mode: Boolean(tsdb) ? 'tsdb' : 'logsdb',
-                    removeTSDBFields: Boolean(removeTSDBFields || logsdb),
+                    mode,
+                    removeTSDBFields: Boolean(removeTSDBFields || mode === 'logsdb'),
                     removeLogsDBFields,
                   }),
-                  tsdb ? 'tsdb' : 'logsdb'
+                  mode
                 );
               } else {
                 log.info(`creating a index "${index}" with mapping...`);
@@ -410,7 +406,7 @@ export function setupScenarioRunner(
                   index,
                   mappings: {
                     properties: getDataMapping({
-                      mode: Boolean(tsdb) ? 'tsdb' : 'logsdb',
+                      mode: mode === 'logsdb' ? 'logsdb' : 'tsdb', // use tsdb by default in regular index is specified
                       removeTSDBFields,
                       removeLogsDBFields,
                     }),
@@ -426,7 +422,7 @@ export function setupScenarioRunner(
             }
             if (downsample) {
               downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(index, {
-                isStream: Boolean(tsdb),
+                isStream: mode === 'tsdb',
               });
             }
           }
@@ -454,9 +450,9 @@ export function setupScenarioRunner(
         });
 
         after(async () => {
-          for (const { index, create, tsdb, logsdb } of indexes) {
+          for (const { index, create, mode: indexMode } of indexes) {
             if (create) {
-              if (tsdb || logsdb) {
+              if (indexMode === 'tsdb' || indexMode === 'logsdb') {
                 await dataStreams.deleteDataStream(index);
               } else {
                 log.info(`deleting the index "${index}"...`);

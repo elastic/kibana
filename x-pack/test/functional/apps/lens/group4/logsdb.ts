@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 index: `${initialIndex}_no_host`,
                 removeLogsDBFields: true,
                 create: true,
-                logsdb: true,
+                mode: 'logsdb',
               },
             ],
           },
@@ -165,18 +165,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             name: 'LogsDB stream with an additional LogsDB stream',
             indexes: [
               { index: initialIndex },
-              { index: 'logsdb_index_2', create: true, logsdb: true },
+              { index: 'logsdb_index_2', create: true, mode: 'logsdb' },
             ],
           },
           {
             name: 'LogsDB stream with an additional TSDB stream',
-            indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, tsdb: true }],
+            indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, mode: 'tsdb' }],
           },
           {
             name: 'LogsDB stream with an additional TSDB stream downsampled',
             indexes: [
               { index: initialIndex },
-              { index: 'tsdb_index_downsampled', create: true, tsdb: true, downsample: true },
+              { index: 'tsdb_index_downsampled', create: true, mode: 'tsdb', downsample: true },
             ],
           },
         ];

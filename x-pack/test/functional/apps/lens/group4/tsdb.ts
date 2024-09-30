@@ -335,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           name: 'Dataview with an additional downsampled TSDB stream',
           indexes: [
             { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
@@ -343,12 +343,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           indexes: [
             { index: initialIndex },
             { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
           name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],
+          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, mode: 'tsdb' }],
         },
       ];
 
@@ -512,7 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
                 timeout: 500,
               })
-            ).to.eql(indexes.some(({ tsdb }) => tsdb));
+            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
           });
 
