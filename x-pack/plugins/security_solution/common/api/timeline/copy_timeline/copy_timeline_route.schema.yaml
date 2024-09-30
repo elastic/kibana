@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CopyTimeline
-      summary: Copies timeline or timeline template.
+      summary: Copies timeline or timeline template
       description: |
         Copies and returns a timeline or timeline template.
       tags:
