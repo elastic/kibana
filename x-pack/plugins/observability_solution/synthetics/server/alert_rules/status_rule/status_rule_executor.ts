@@ -20,7 +20,12 @@ import {
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
-import { getFullViewInAppMessage, getRelativeViewInAppUrl, getViewInAppUrl } from '../common';
+import {
+  AND_LABEL,
+  getFullViewInAppMessage,
+  getRelativeViewInAppUrl,
+  getViewInAppUrl,
+} from '../common';
 import {
   DOWN_LABEL,
   getMonitorAlertDocument,
@@ -345,7 +350,9 @@ export class StatusRuleExecutor {
       params: this.params,
     });
     if (statusConfigs.length > 1) {
-      baseSummary.locationNames = statusConfigs.map((c) => c.ping.observer.geo?.name!).join(' | ');
+      baseSummary.locationNames = statusConfigs
+        .map((c) => c.ping.observer.geo?.name!)
+        .join(` ${AND_LABEL} `);
     }
 
     return baseSummary;
