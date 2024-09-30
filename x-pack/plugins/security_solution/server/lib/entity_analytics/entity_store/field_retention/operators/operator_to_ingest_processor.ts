@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldRetentionOperator } from './types';
+import type { FieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
 import { preferNewestValueProcessor } from './prefer_newest_value';
 import { preferOldestValueProcessor } from './prefer_oldest_value';
 import { collectValuesProcessor } from './collect_values';
 
-export const fieldOperatorToIngestProcessor = (
-  fieldOperator: FieldRetentionOperator
-): IngestProcessorContainer => {
+export const fieldOperatorToIngestProcessor: FieldRetentionOperatorBuilder<
+  FieldRetentionOperator
+> = (fieldOperator, options) => {
   switch (fieldOperator.operation) {
     case 'prefer_newest_value':
-      return preferNewestValueProcessor(fieldOperator);
+      return preferNewestValueProcessor(fieldOperator, options);
     case 'prefer_oldest_value':
-      return preferOldestValueProcessor(fieldOperator);
+      return preferOldestValueProcessor(fieldOperator, options);
     case 'collect_values':
-      return collectValuesProcessor(fieldOperator);
+      return collectValuesProcessor(fieldOperator, options);
   }
 };

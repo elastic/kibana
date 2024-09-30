@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const ENRICH_FIELD = 'history';
+export const ENRICH_FIELD = 'historical';
+export const DEBUG_MODE = true; // TODO: do not commit this value

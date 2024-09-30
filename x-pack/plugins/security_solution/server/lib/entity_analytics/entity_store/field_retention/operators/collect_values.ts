@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ENRICH_FIELD } from '../constants';
 import { isFieldMissingOrEmpty } from '../painless_utils';
-import type { BaseFieldRetentionOperator } from './types';
+import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
 
 // A field retention operator that collects up to `maxLength` values of the field. e.g collect up to 10 values of ip_address
 export interface CollectValues extends BaseFieldRetentionOperator {
@@ -16,12 +14,12 @@ export interface CollectValues extends BaseFieldRetentionOperator {
   maxLength: number;
 }
 
-export const collectValuesProcessor = ({
-  field,
-  maxLength,
-}: CollectValues): IngestProcessorContainer => {
+export const collectValuesProcessor: FieldRetentionOperatorBuilder<CollectValues> = (
+  { field, maxLength },
+  { enrichField }
+) => {
   const ctxField = `ctx.${field}`;
-  const enrichField = `ctx.${ENRICH_FIELD}.${field}`;
+  const ctxEnrichField = `ctx.${enrichField}.${field}`;
   return {
     script: {
       lang: 'painless',
@@ -32,9 +30,9 @@ export const collectValuesProcessor = ({
     uniqueVals.addAll(${ctxField});
   }
   
-  if (uniqueVals.size() < params.max_length && !(${isFieldMissingOrEmpty(enrichField)})) {
+  if (uniqueVals.size() < params.max_length && !(${isFieldMissingOrEmpty(ctxEnrichField)})) {
     int remaining = params.max_length - uniqueVals.size();
-    List historicalVals = ${enrichField}.subList(0, (int) Math.min(remaining, ${enrichField}.size()));
+    List historicalVals = ${ctxEnrichField}.subList(0, (int) Math.min(remaining, ${ctxEnrichField}.size()));
     uniqueVals.addAll(historicalVals);
   }
   

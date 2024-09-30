@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { BaseFieldRetentionOperator } from './types';
-import { ENRICH_FIELD } from '../constants';
+import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
 import { isFieldMissingOrEmpty } from '../painless_utils';
 
 export interface PreferOldestValue extends BaseFieldRetentionOperator {
   operation: 'prefer_oldest_value';
 }
 
-export const preferOldestValueProcessor = ({
-  field,
-}: PreferOldestValue): IngestProcessorContainer => {
-  const historicalField = `ctx.${ENRICH_FIELD}.${field}`;
+export const preferOldestValueProcessor: FieldRetentionOperatorBuilder<PreferOldestValue> = (
+  { field },
+  { enrichField }
+) => {
+  const historicalField = `${enrichField}.${field}`;
   return {
     set: {
-      if: `!(${isFieldMissingOrEmpty(historicalField)})`,
+      if: `!(${isFieldMissingOrEmpty(`ctx.${historicalField}`)})`,
       field,
       value: `{{${historicalField}}}`,
     },
