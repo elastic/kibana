@@ -83,7 +83,7 @@ export const sendPutPackagePolicy = (
 };
 
 /**
- * Get a status summary for all Agents that are currently assigned to a given agent policy
+ * Get a status summary for all Agents that are currently assigned to a given agent policies
  *
  * @param http
  * @param policyIds
@@ -91,7 +91,7 @@ export const sendPutPackagePolicy = (
  */
 export const sendGetFleetAgentStatusForPolicy = (
   http: HttpStart,
-  /** the Agent (fleet) policy id */
+  /** the Agent (fleet) policy ids */
   policyIds: string[],
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
