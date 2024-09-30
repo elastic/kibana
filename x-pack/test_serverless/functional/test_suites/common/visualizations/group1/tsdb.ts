@@ -20,7 +20,12 @@ import {
 } from './tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
+  const { common, lens, dashboard, svlCommonPage } = getPageObjects([
+    'common',
+    'lens',
+    'dashboard',
+    'svlCommonPage',
+  ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -41,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
+      await svlCommonPage.loginAsAdmin();
       log.info(`loading ${tsdbIndex} index...`);
       await esArchiver.loadIfNeeded(tsdbEsArchive);
       log.info(`creating a data view for "${tsdbDataView}"...`);
@@ -91,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('for regular metric', () => {
         it('defaults to median for non-rolled up metric', async () => {
           await common.navigateToApp('lens');
+          await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await lens.waitForField('bytes_gauge');
           await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
