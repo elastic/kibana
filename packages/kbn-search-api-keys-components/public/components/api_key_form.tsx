@@ -40,6 +40,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         label={hasTitle ? titleLocale : undefined}
         value={displayedApiKey}
         copyValue={apiKey}
+        dataTestSubj="apiKeyFormAPIKey"
         actions={[
           <EuiButtonIcon
             iconType="eye"
