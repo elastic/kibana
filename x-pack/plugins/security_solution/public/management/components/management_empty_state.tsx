@@ -227,6 +227,7 @@ const EndpointsEmptyState = React.memo<{
                             packagePolicyId: policyItem.id,
                           })[1],
                         })}
+                        data-test-subj="integrationWithoutAgentPolicyListItem"
                       >
                         {policyItem.name}
                       </EuiLink>
