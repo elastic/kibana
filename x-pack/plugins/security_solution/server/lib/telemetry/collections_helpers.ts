@@ -63,3 +63,91 @@ class Chunked<T> {
     return this.chunks.filter((chunk) => chunk.length > 0);
   }
 }
+
+export interface QueryConfig {
+  maxPrefixes: number;
+  maxGroupSize: number;
+}
+
+interface TrieNode {
+  char: string;
+  prefix: string;
+  children: { [key: string]: TrieNode };
+  count: number;
+  isEnd: boolean;
+  id: number;
+}
+
+function newTrieNode(char: string = '', prefix: string = '', id: number = 0): TrieNode {
+  return {
+    char,
+    children: {},
+    count: 0,
+    id,
+    isEnd: false,
+    prefix,
+  };
+}
+
+function* idCounter(): Generator<number, number, number> {
+  let id = 0;
+  while (true) {
+    yield id++;
+  }
+}
+
+export function findCommonPrefixes(
+  indices: string[],
+  config: QueryConfig
+): Array<[string, number]> {
+  const idGen = idCounter();
+
+  const root = newTrieNode('', '', idGen.next().value);
+  for (const index of indices) {
+    let node = root;
+    node.count++;
+    for (const char of index) {
+      if (!node.children[char]) {
+        node.children[char] = newTrieNode(char, node.prefix + char, idGen.next().value);
+      }
+      node = node.children[char];
+      node.count++;
+    }
+    node.isEnd = true;
+  }
+
+  const nodes = [root];
+  const prefixes: Array<[string, number]> = [];
+
+  while (nodes.length > 0) {
+    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+    const node = nodes.pop()!;
+    if (
+      (node.count <= config.maxGroupSize && node.prefix !== '') ||
+      Object.keys(node.children).length === 0
+    ) {
+      prefixes.push([node.prefix, node.count]);
+    } else {
+      for (const child of Object.values(node.children)) {
+        nodes.push(child);
+      }
+    }
+  }
+
+  if (prefixes.length > config.maxPrefixes) {
+    prefixes.sort((a, b) => a[1] - b[1]);
+
+    while (prefixes.length > config.maxPrefixes) {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const [p1, c1] = prefixes.shift()!;
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const [p2, c2] = prefixes.shift()!;
+      const mergedPrefix = `${p1},${p2}`;
+      const mergedCount = c1 + c2;
+      prefixes.push([mergedPrefix, mergedCount]);
+      prefixes.sort((a, b) => a[1] - b[1]);
+    }
+  }
+
+  return prefixes;
+}

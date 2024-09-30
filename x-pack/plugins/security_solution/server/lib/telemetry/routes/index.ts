@@ -23,8 +23,8 @@ export const getTriggerIndicesMetadataTaskRoute = (
       path: '/internal/trigger-indices-metadata-task',
       validate: {
         query: schema.object({
-          pageSize: schema.maybe(schema.number()),
-          dataStreamsLimit: schema.maybe(schema.number()),
+          maxPrefixes: schema.maybe(schema.number()),
+          maxGroupSize: schema.maybe(schema.number()),
         }),
       },
     },
@@ -33,10 +33,10 @@ export const getTriggerIndicesMetadataTaskRoute = (
       const task = createTelemetryIndicesMetadataTaskConfig();
       const timeStart = performance.now();
 
-      const { pageSize, dataStreamsLimit } = request.query;
+      const { maxPrefixes, maxGroupSize } = request.query;
 
       logger.info(
-        `Triggering indices metadata task with pageSize: ${pageSize} and dataStreamsLimit: ${dataStreamsLimit}`
+        `Triggering indices metadata task with pageSize: ${maxPrefixes} and dataStreamsLimit: ${maxGroupSize}`
       );
 
       let msgSuffix = '';
@@ -47,8 +47,8 @@ export const getTriggerIndicesMetadataTaskRoute = (
       }
       const initialMemory = process.memoryUsage().heapUsed;
       const result = await task.runTask('id', logger, receiver, sender, taskMetricsService, {
-        last: `${pageSize || 500}`,
-        current: `${dataStreamsLimit || 500}`,
+        last: `${maxPrefixes || 10}`,
+        current: `${maxGroupSize || 100}`,
       });
       const memoryUsed = process.memoryUsage().heapUsed - initialMemory;
       const elapsedTime = performance.now() - timeStart;

@@ -17,6 +17,7 @@ import {
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
 } from '../event_based/events';
+import type { QueryConfig } from '../collections_helpers';
 
 export function createTelemetryIndicesMetadataTaskConfig() {
   const taskType = 'security:indices-metadata-telemetry';
@@ -40,23 +41,28 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const trace = taskMetricsService.start(taskType);
 
       // TODO: Taken from taskExecutionPeriod, just for testing purposes
-      const pageSize = Number(taskExecutionPeriod.last ?? '500');
-      const dataStreamsLimit = Number(taskExecutionPeriod.current ?? '500');
+      const config: QueryConfig = {
+        maxPrefixes: Number(taskExecutionPeriod.last ?? '10'),
+        maxGroupSize: Number(taskExecutionPeriod.current ?? '100'),
+      };
+      const streamLimit = 100;
+      const indicesLimit = 300;
 
       try {
         // 1. Get all data streams
-        const dataStreams = (await receiver.getDataStreams()).slice(0, dataStreamsLimit + 1);
+        const dataStreams = (await receiver.getDataStreams()).slice(0, streamLimit);
 
         // and calculate index and ilm names
         const dsNames = dataStreams.map((stream) => stream.datastream_name);
-        const indexNames = dataStreams
-          .map((ds) => ds.indices?.map((i) => i.index_name) ?? [])
-          .flat();
         const ilmsNames = dataStreams
           .map((ds) =>
             ds.indices?.filter((i) => i.ilm_policy !== undefined)?.map((i) => i.ilm_policy)
           )
-          .flat() as string[];
+          .flat()
+          .slice(0, indicesLimit) as string[];
+        const indexNames = dataStreams
+          .map((ds) => ds.indices?.map((i) => i.index_name) ?? [])
+          .flat();
 
         log.info(`Got data streams`, {
           datastreams: dsNames.length,
@@ -69,13 +75,13 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         let ilmsCount = 0;
         let dsCount = 0;
 
-        for await (const stat of receiver.getIndicesStats(dsNames, pageSize)) {
+        for await (const stat of receiver.getIndicesStats(dsNames, config)) {
           sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
           indicesCount++;
         }
         log.info(`Sent ${indicesCount} indices stats`, { indicesCount } as LogMeta);
 
-        for await (const stat of receiver.getIlmsStats(indexNames, pageSize)) {
+        for await (const stat of receiver.getIlmsStats(indexNames, config)) {
           sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
           ilmsCount++;
         }
@@ -87,7 +93,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         }
         log.info(`Sent ${dsCount} data streams`, { dsCount } as LogMeta);
 
-        for await (const policy of receiver.getIlmsPolicies(ilmsNames, pageSize)) {
+        for await (const policy of receiver.getIlmsPolicies(ilmsNames, config)) {
           sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, policy);
           policyCount++;
         }

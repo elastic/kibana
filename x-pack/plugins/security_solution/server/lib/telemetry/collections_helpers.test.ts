@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { chunked, chunkedBy } from './collections_helpers';
+import { stagingIndices } from './__mocks__/staging_indices';
+import { type QueryConfig, chunked, chunkedBy, findCommonPrefixes } from './collections_helpers';
 
 describe('telemetry.utils.chunked', () => {
   it('should chunk simple case', async () => {
@@ -77,5 +78,47 @@ describe('telemetry.utils.chunkedBy', () => {
     const input = ['aaaa'];
     const output = chunkedBy(input, 3, (v) => v.length);
     expect(output).toEqual([['aaaa']]);
+  });
+});
+
+describe('telemetry.utils.findCommonPrefixes', () => {
+  it('should find common prefixes in simple case', async () => {
+    const indices = ['aaa', 'b', 'aa'];
+    const config: QueryConfig = {
+      maxPrefixes: 10,
+      maxGroupSize: 10,
+    };
+
+    const output = findCommonPrefixes(indices, config);
+
+    expect(output).toHaveLength(2);
+    expect(output.find((v, _) => v[0] === 'b' && v[1] === 1)).not.toBeFalsy();
+    expect(output.find((v, _) => v[0] === 'a' && v[1] === 2)).not.toBeFalsy();
+  });
+
+  it('should discard extra indices', async () => {
+    const indices = ['aaa', 'aaaaaa', 'aa'];
+    const config: QueryConfig = {
+      maxPrefixes: 1,
+      maxGroupSize: 2,
+    };
+
+    const output = findCommonPrefixes(indices, config);
+
+    expect(output).toHaveLength(1);
+    expect(output.find((v, _) => v[0] === 'aaa' && v[1] === 2)).not.toBeFalsy();
+  });
+
+  it('should group many indices', async () => {
+    const indices = stagingIndices;
+    const config: QueryConfig = {
+      maxPrefixes: 8,
+      maxGroupSize: 100,
+    };
+
+    const output = findCommonPrefixes(indices, config);
+
+    expect(output).toHaveLength(config.maxPrefixes);
+    expect(output.map((v, _) => v[1]).reduce((acc, i) => acc + i, 0)).toBe(indices.length);
   });
 });
