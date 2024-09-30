@@ -71,6 +71,26 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         description: 'This is the second test space',
         disabledFeatures: [],
       },
+      {
+        id: 'space_3',
+        name: 'Space 3',
+        description: 'This is the third test space',
+        solution: 'es',
+        disabledFeatures: [
+          // Disabled features are automatically added to the space when a solution is set
+          'observabilityAIAssistant',
+          'observabilityCases',
+          'slo',
+          'infrastructure',
+          'logs',
+          'uptime',
+          'apm',
+          'siem',
+          'securitySolutionCases',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+        ],
+      },
     ];
     expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
   };
