@@ -29,7 +29,11 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
+import {
+  CaseCustomFieldDateRt,
+  CaseCustomFieldToggleRt,
+  CustomFieldTextTypeRt,
+} from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -49,7 +53,11 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
-const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+const CustomFieldRt = rt.union([
+  CaseCustomFieldTextWithValidationRt,
+  CaseCustomFieldToggleRt,
+  CaseCustomFieldDateRt,
+]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,

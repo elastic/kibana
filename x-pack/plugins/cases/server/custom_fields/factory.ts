@@ -9,10 +9,12 @@ import { CustomFieldTypes } from '../../common/types/domain';
 import type { ICasesCustomField, CasesCustomFieldsMap } from './types';
 import { getCasesTextCustomField } from './text';
 import { getCasesToggleCustomField } from './toggle';
+import { getCasesDateCustomField } from './date';
 
 const mapping: Record<CustomFieldTypes, ICasesCustomField> = {
   [CustomFieldTypes.TEXT]: getCasesTextCustomField(),
   [CustomFieldTypes.TOGGLE]: getCasesToggleCustomField(),
+  [CustomFieldTypes.DATE]: getCasesDateCustomField(),
 };
 
 export const casesCustomFields: CasesCustomFieldsMap = {

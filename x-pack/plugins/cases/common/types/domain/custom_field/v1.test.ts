@@ -42,6 +42,22 @@ describe('CaseCustomFieldRt', () => {
         value: null,
       },
     ],
+    [
+      'type date value date',
+      {
+        key: 'date_custom_field_1',
+        type: 'date',
+        value: '2024-09-30T15:52:57.803Z',
+      },
+    ],
+    [
+      'type date value null',
+      {
+        key: 'date_custom_field_2',
+        type: 'date',
+        value: null,
+      },
+    ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
     const query = CaseCustomFieldRt.decode(customField);
 
@@ -69,5 +85,15 @@ describe('CaseCustomFieldRt', () => {
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');
+  });
+
+  it('fails if date type and value do not match expected attributes in request', () => {
+    const query = CaseCustomFieldRt.decode({
+      key: 'date_custom_field_1',
+      type: 'date',
+      value: true,
+    });
+
+    expect(PathReporter.report(query)[0]).toContain('Invalid value true supplied');
   });
 });

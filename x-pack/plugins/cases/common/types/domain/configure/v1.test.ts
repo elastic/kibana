@@ -13,6 +13,7 @@ import {
   ConfigurationAttributesRt,
   ConfigurationRt,
   CustomFieldConfigurationWithoutTypeRt,
+  DateCustomFieldConfigurationRt,
   TemplateConfigurationRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
@@ -44,6 +45,13 @@ describe('configure', () => {
     key: 'toggle_custom_field',
     label: 'Toggle custom field',
     type: CustomFieldTypes.TOGGLE,
+    required: false,
+  };
+
+  const dateCustomField = {
+    key: 'date_custom_field',
+    label: 'Date custom field',
+    type: CustomFieldTypes.DATE,
     required: false,
   };
 
@@ -98,7 +106,7 @@ describe('configure', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
-      customFields: [textCustomField, toggleCustomField],
+      customFields: [textCustomField, toggleCustomField, dateCustomField],
       templates: [],
       owner: 'cases',
       created_at: '2020-02-19T23:06:33.798Z',
@@ -122,7 +130,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField],
+          customFields: [textCustomField, toggleCustomField, dateCustomField],
         },
       });
     });
@@ -134,7 +142,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField],
+          customFields: [textCustomField, toggleCustomField, dateCustomField],
         },
       });
     });
@@ -142,14 +150,14 @@ describe('configure', () => {
     it('removes foo:bar attributes from custom fields', () => {
       const query = ConfigurationAttributesRt.decode({
         ...defaultRequest,
-        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField],
+        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField, dateCustomField],
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField],
+          customFields: [textCustomField, toggleCustomField, dateCustomField],
         },
       });
     });
@@ -343,6 +351,62 @@ describe('configure', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = ToggleCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+  });
+
+  describe('DateCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_date_custom_field',
+      label: 'Date Custom Field',
+      type: CustomFieldTypes.DATE,
+      required: false,
+    };
+
+    it('has expected attributes in request with required: false', () => {
+      const query = DateCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue and required: true', () => {
+      const query = DateCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        required: true,
+        defaultValue: '2020-02-19T23:06:33.798Z',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          required: true,
+          defaultValue: '2020-02-19T23:06:33.798Z',
+        },
+      });
+    });
+
+    it('defaultValue fails if the type is not string', () => {
+      expect(
+        PathReporter.report(
+          DateCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            required: true,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = DateCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
