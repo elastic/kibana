@@ -175,6 +175,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
+      console.log(`scheduledBackfill ${JSON.stringify(response2.body)}`);
+
       const scheduleResult = response2.body;
 
       expect(scheduleResult.length).to.eql(1);
@@ -304,6 +306,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       );
       expect(alertDocsBackfill1.length).to.eql(3);
 
+      console.log(`alertDocsBackfill1 ${JSON.stringify(alertDocsBackfill1)}`);
+
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill1) {
         const source = alert._source!;
@@ -325,6 +329,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         (alert) => alert._source![ALERT_RULE_EXECUTION_UUID] === executionUuids[1]
       );
       expect(alertDocsBackfill2.length).to.eql(1);
+
+      console.log(`alertDocsBackfill2 ${JSON.stringify(alertDocsBackfill2)}`);
 
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill2) {
