@@ -24,7 +24,8 @@
       "dataViews",
       "lens",
       "fieldsMetadata",
-      "taskManager"
+      "taskManager",
+      "usageCollection"
     ],
     "optionalPlugins": ["telemetry"],
     "requiredBundles": ["unifiedHistogram", "discover"],
