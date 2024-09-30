@@ -225,7 +225,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
         {
-          defaultMessage: '<p>Enables visualizations in the alerts flyout</p>',
+          defaultMessage: '<p>Enable visualizations (analyzer and session viewer) in flyout</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),

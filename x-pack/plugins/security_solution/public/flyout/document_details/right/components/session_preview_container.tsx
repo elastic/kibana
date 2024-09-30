@@ -8,9 +8,7 @@
 import React, { type FC, useCallback } from 'react';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
-import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
@@ -25,6 +23,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
+import { SessionViewNoDataMessage } from '../../left/components/session_view_no_data_message';
 
 const timelineId = 'timeline-1';
 
@@ -86,55 +85,6 @@ export const SessionPreviewContainer: FC = () => {
     scopeId,
   });
 
-  const { euiTheme } = useEuiTheme();
-
-  const noSessionMessage = !isEnterprisePlus ? (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellDescription"
-      defaultMessage="This feature requires an {subscription}"
-      values={{
-        subscription: (
-          <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellLinkText"
-              defaultMessage="Enterprise subscription"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-  ) : !sessionViewConfig ? (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataDescription"
-      defaultMessage="You can only view Linux session details if you’ve enabled the {setting} setting in your Elastic Defend integration policy. Refer to {link} for more information."
-      values={{
-        setting: (
-          <span
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataSettingDescription"
-              defaultMessage="Include session data"
-            />
-          </span>
-        ),
-        link: (
-          <EuiLink
-            href="https://www.elastic.co/guide/en/security/current/session-view.html#enable-session-view"
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataLinkText"
-              defaultMessage="Enable Session View data"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-  ) : null;
-
   return (
     <ExpandablePanel
       header={{
@@ -161,7 +111,15 @@ export const SessionPreviewContainer: FC = () => {
       }}
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >
-      {isEnabled ? <SessionPreview /> : noSessionMessage}
+      {isEnabled ? (
+        <SessionPreview />
+      ) : (
+        <SessionViewNoDataMessage
+          isEnterprisePlus={isEnterprisePlus}
+          hasSessionViewConfig={sessionViewConfig !== null}
+          labelHeader={'xpack.securitySolution.flyout.right.visualizations'}
+        />
+      )}
     </ExpandablePanel>
   );
 };
