@@ -6,11 +6,12 @@
  */
 
 import { DataUsageContext, DataUsageRouter } from '../types';
-import { registerUsageMetricsRoute } from './internal';
+import { registerDataStreamsRoute, registerUsageMetricsRoute } from './internal';
 
 export const registerDataUsageRoutes = (
   router: DataUsageRouter,
   dataUsageContext: DataUsageContext
 ) => {
   registerUsageMetricsRoute(router, dataUsageContext);
+  registerDataStreamsRoute(router, dataUsageContext);
 };

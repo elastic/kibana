@@ -5,5 +5,14 @@
  * 2.0.
  */
 
-export * from './usage_metrics';
-export * from './data_streams';
+import { schema } from '@kbn/config-schema';
+
+export const DataStreamsResponseSchema = {
+  body: () =>
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        storageSizeBytes: schema.number(),
+      })
+    ),
+};
