@@ -6,16 +6,11 @@
  */
 
 import { FetchHistoricalResultsQueryState } from '../../types';
-
-type Action =
-  | { type: 'SET_DATE'; payload: { startDate: string; endDate: string } }
-  | { type: 'SET_OUTCOME'; payload: 'pass' | 'fail' | undefined }
-  | { type: 'SET_FROM'; payload: number }
-  | { type: 'SET_SIZE'; payload: number };
+import { FetchHistoricalResultsQueryAction } from '../types';
 
 export const fetchHistoricalResultsQueryReducer = (
   state: FetchHistoricalResultsQueryState,
-  action: Action
+  action: FetchHistoricalResultsQueryAction
 ) => {
   if (action.type === 'SET_DATE') {
     return {

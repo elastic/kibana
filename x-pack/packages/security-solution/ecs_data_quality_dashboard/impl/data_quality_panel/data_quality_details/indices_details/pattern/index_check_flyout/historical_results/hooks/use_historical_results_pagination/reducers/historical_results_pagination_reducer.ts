@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { PaginationReducerState } from '../types';
+import { PaginationReducerAction, PaginationReducerState } from '../../../types';
 
-type Action =
-  | { type: 'SET_ROW_SIZE'; payload: { rowSize: number; totalResults: number } }
-  | { type: 'SET_ACTIVE_PAGE'; payload: number };
-
-export const paginationReducer = (state: PaginationReducerState, action: Action) => {
+export const historicalResultsPaginationReducer = (
+  state: PaginationReducerState,
+  action: PaginationReducerAction
+) => {
   if (action.type === 'SET_ROW_SIZE') {
     return {
       rowSize: action.payload.rowSize,

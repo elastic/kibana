@@ -30,28 +30,13 @@ export const TOTAL_CHECKS = (count: number, formattedCount: string) =>
     defaultMessage: '{formattedCount} {count, plural, one {check} other {checks}}',
   });
 
-export const COUNTED_INCOMPATIBLE_FIELDS = (count: number) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.incompatibleFieldsWithCount', {
-    values: {
-      count,
-    },
-    defaultMessage: '{count, plural, one {Incompatible field} other {Incompatible fields}}',
-  });
+export const FILTER_RESULTS_BY_OUTCOME = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.filterResultsByOutcome',
+  {
+    defaultMessage: 'Filter results by outcome',
+  }
+);
 
 export const ALL = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.all', {
   defaultMessage: 'All',
 });
-
-export const NO_HISTORICAL_RESULTS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResults',
-  {
-    defaultMessage: 'No historical check results',
-  }
-);
-
-export const NO_HISTORICAL_RESULTS_BODY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsBody',
-  {
-    defaultMessage: 'To run a data quality check, click Check now',
-  }
-);

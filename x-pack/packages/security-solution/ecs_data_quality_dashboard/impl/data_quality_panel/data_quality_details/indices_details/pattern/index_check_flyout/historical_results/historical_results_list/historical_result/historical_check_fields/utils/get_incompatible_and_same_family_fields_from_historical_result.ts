@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EcsFlatTyped } from '../../../../../../../../constants';
-import type {
+import { EcsFlatTyped } from '../../../../../../../../../constants';
+import {
+  HistoricalResult,
   IncompatibleFieldMetadata,
   SameFamilyFieldMetadata,
-  HistoricalResult,
-} from '../../../../../../../../types';
+} from '../../../../../../../../../types';
 
 interface IncompatibleAndSameFamilyFields {
   incompatibleMappingsFields: IncompatibleFieldMetadata[];

@@ -9,13 +9,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBadge, EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { HistoricalResult } from '../../../../../../../types';
-import { getIncompatibleStatBadgeColor } from '../../../../../../../utils/get_incompatible_stat_badge_color';
-import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../translations';
-import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../constants';
+import type { HistoricalResult } from '../../../../../../../../types';
+import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
+import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
+import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleAndSameFamilyFieldsFromHistoricalResult } from './utils/get_incompatible_and_same_family_fields_from_historical_result';
-import { IncompatibleTab } from '../../../incompatible_tab';
-import { SameFamilyTab } from '../../../same_family_tab';
+import { IncompatibleTab } from '../../../../incompatible_tab';
+import { SameFamilyTab } from '../../../../same_family_tab';
 
 const StyledTabFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -152,7 +152,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
   }, []);
 
   return (
-    <div data-test-subj="indexCheckFields">
+    <div data-test-subj="historicalCheckFields">
       <StyledButtonGroup
         legend="Index check field tab toggle"
         options={tabSelections}

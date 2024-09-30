@@ -66,4 +66,58 @@ describe('IndexStatsPanel', () => {
       expect(container).toHaveTextContent('Size789');
     });
   });
+
+  describe('when customFieldsCount is provided', () => {
+    it('renders custom fields count', () => {
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <IndexStatsPanel docsCount={123} sizeInBytes={789} customFieldsCount={456} />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
+
+      const container = screen.getByTestId('indexStatsPanel');
+
+      expect(container).toHaveTextContent('Docs123');
+      expect(container).toHaveTextContent('Size789');
+      expect(container).toHaveTextContent('Custom fields456');
+    });
+  });
+
+  describe('when ecsCompliantFieldsCount is provided', () => {
+    it('renders ecs compliant fields count', () => {
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <IndexStatsPanel docsCount={123} sizeInBytes={789} ecsCompliantFieldsCount={456} />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
+
+      const container = screen.getByTestId('indexStatsPanel');
+
+      expect(container).toHaveTextContent('Docs123');
+      expect(container).toHaveTextContent('Size789');
+      expect(container).toHaveTextContent('ECS compliant fields456');
+    });
+  });
+
+  describe('when allFieldsCount is provided', () => {
+    it('renders all fields count', () => {
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <IndexStatsPanel docsCount={123} sizeInBytes={789} allFieldsCount={456} />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
+
+      const container = screen.getByTestId('indexStatsPanel');
+
+      expect(container).toHaveTextContent('Docs123');
+      expect(container).toHaveTextContent('Size789');
+      expect(container).toHaveTextContent('All fields456');
+    });
+  });
 });

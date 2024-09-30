@@ -6,11 +6,11 @@
  */
 
 import { HistoricalResult } from '../../../../../../types';
-import { FetchHistoricalResultsOpts } from '../../types';
+import { UseHistoricalResultsFetch } from '../../types';
 
 export interface UseHistoricalResultsReturnValue {
   historicalResultsState: FetchHistoricalResultsReducerState;
-  fetchHistoricalResults: (opts: Omit<FetchHistoricalResultsOpts, 'httpFetch'>) => Promise<void>;
+  fetchHistoricalResults: UseHistoricalResultsFetch;
 }
 
 export interface FetchHistoricalResultsReducerState {

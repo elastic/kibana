@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { paginationReducer } from './pagination_reducer';
+import { historicalResultsPaginationReducer } from './historical_results_pagination_reducer';
 
-describe('paginationReducer', () => {
+describe('historicalResultsPaginationReducer', () => {
   describe('on SET_ROW_SIZE', () => {
     it('should set rowSize and pageCount and reset activePage to 0', () => {
       const state = { rowSize: 10, pageCount: 1, activePage: 0 };
       const action = { type: 'SET_ROW_SIZE' as const, payload: { rowSize: 5, totalResults: 11 } };
-      const newState = paginationReducer(state, action);
+      const newState = historicalResultsPaginationReducer(state, action);
       expect(newState).toEqual({ rowSize: 5, pageCount: 3, activePage: 0 });
     });
   });
@@ -21,7 +21,7 @@ describe('paginationReducer', () => {
     it('should set activePage', () => {
       const state = { rowSize: 10, pageCount: 1, activePage: 0 };
       const action = { type: 'SET_ACTIVE_PAGE' as const, payload: 1 };
-      const newState = paginationReducer(state, action);
+      const newState = historicalResultsPaginationReducer(state, action);
       expect(newState).toEqual({ rowSize: 10, pageCount: 1, activePage: 1 });
     });
   });
@@ -31,7 +31,7 @@ describe('paginationReducer', () => {
       const state = { rowSize: 10, pageCount: 1, activePage: 0 };
       const action = { type: 'UNKNOWN_ACTION' };
       // @ts-expect-error
-      const newState = paginationReducer(state, action);
+      const newState = historicalResultsPaginationReducer(state, action);
       expect(newState).toEqual(state);
     });
   });

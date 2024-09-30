@@ -13,6 +13,10 @@ export interface FetchHistoricalResultsOpts extends Partial<FetchHistoricalResul
   abortController: AbortController;
 }
 
+export type UseHistoricalResultsFetchOpts = Omit<FetchHistoricalResultsOpts, 'httpFetch'>;
+
+export type UseHistoricalResultsFetch = (opts: UseHistoricalResultsFetchOpts) => Promise<void>;
+
 export interface FetchHistoricalResultsQueryState {
   from: number;
   size: number;
