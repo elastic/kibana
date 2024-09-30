@@ -17,7 +17,11 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
   let scrollPosition: number | undefined;
 
   function setScrollToPanelId(id: string | undefined) {
-    scrollToPanelId$.next(id);
+    if (scrollToPanelId$.value !== id) scrollToPanelId$.next(id);
+  }
+
+  function setExpandedPanelId(id: string | undefined) {
+    if (expandedPanelId$.value !== id) expandedPanelId$.next(id);
   }
 
   return {
@@ -26,12 +30,12 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const isPanelExpanded = Boolean(expandedPanelId$.value);
 
       if (isPanelExpanded) {
-        expandedPanelId$.next(undefined);
+        setExpandedPanelId(undefined);
         setScrollToPanelId(panelId);
         return;
       }
 
-      expandedPanelId$.next(panelId);
+      setExpandedPanelId(panelId);
       if (window.scrollY > 0) {
         scrollPosition = window.scrollY;
       }
@@ -76,12 +80,14 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
     scrollToTop: () => {
       window.scroll(0, 0);
     },
-    setExpandedPanelId: (id: string | undefined) => expandedPanelId$.next(id),
+    setExpandedPanelId,
     setFocusedPanelId: (id: string | undefined) => {
-      focusedPanelId$.next(id);
+      if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
       setScrollToPanelId(id);
     },
-    setHighlightPanelId: (id: string | undefined) => highlightPanelId$.next(id),
+    setHighlightPanelId: (id: string | undefined) => {
+      if (highlightPanelId$.value !== id) highlightPanelId$.next(id);
+    },
     setScrollToPanelId,
   };
 }
