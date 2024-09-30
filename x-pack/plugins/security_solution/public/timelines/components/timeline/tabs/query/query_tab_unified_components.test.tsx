@@ -100,8 +100,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -383,11 +386,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move left')).toBeEnabled();
@@ -416,11 +415,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Remove column')).toBeVisible();
@@ -449,16 +444,12 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="@timestamp"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Sort Old-New')).toBeVisible();
         });
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
         useTimelineEventsMock.mockClear();
 
@@ -495,11 +486,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="host.name"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
 
         await waitFor(() => {
           expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
@@ -554,11 +541,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();

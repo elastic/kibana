@@ -21,7 +21,10 @@ import {
 } from './data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import {
+  AIAssistantKnowledgeBaseDataClient,
+  GetAIAssistantKnowledgeBaseDataClientParams,
+} from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 
@@ -124,10 +127,12 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient
     ) as unknown as jest.MockInstance<
       Promise<AIAssistantKnowledgeBaseDataClient | null>,
-      [boolean | undefined],
+      [params: GetAIAssistantKnowledgeBaseDataClientParams],
       unknown
     > &
-      ((v2KnowledgeBaseEnabled?: boolean) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
+      ((
+        params: GetAIAssistantKnowledgeBaseDataClientParams
+      ) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),
