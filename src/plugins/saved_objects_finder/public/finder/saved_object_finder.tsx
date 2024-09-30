@@ -231,7 +231,6 @@ export class SavedObjectFinderUi extends React.Component<
             name: i18n.translate('savedObjectsFinder.typeName', {
               defaultMessage: 'Type',
             }),
-            width: '50px',
             align: 'center',
             description: i18n.translate('savedObjectsFinder.typeDescription', {
               defaultMessage: 'Type of the saved object',
