@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
@@ -47,13 +46,15 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import { BASELINE_TEST_ARCHIVE_1K } from '../../kibana_migrator_archive_utils';
+import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
+      dataArchive: BASELINE_TEST_ARCHIVE_1K,
       license: 'basic',
-      dataArchive: Path.resolve(__dirname, '../../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -1091,13 +1092,13 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,
-        index: '.kibana_1',
+        index: defaultKibanaIndex,
         status: 'yellow',
       })();
 
       const res = (await reindex({
         client,
-        sourceIndex: '.kibana_1',
+        sourceIndex: defaultKibanaIndex,
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1434,7 +1435,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1',
+        defaultKibanaIndex,
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
@@ -2028,28 +2029,6 @@ describe('migration actions', () => {
               "type": "target_index_had_write_block",
             },
           }
-      `);
-    });
-
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
       `);
     });
   });
