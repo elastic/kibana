@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
         await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
-        await PageObjects.discover.findFieldByNameInDocViewer(TEST_ANCHOR_FILTER_FIELD);
+        await PageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
         await dataGrid.clickFieldActionInFlyout(
           TEST_ANCHOR_FILTER_FIELD,
           'addFilterForValueButton'

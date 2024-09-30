@@ -33,8 +33,6 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public order = 9;
   public grouping = [DASHBOARD_ACTION_GROUP];
 
-  constructor() {}
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return embeddable.parentApi.expandedPanelId.value
