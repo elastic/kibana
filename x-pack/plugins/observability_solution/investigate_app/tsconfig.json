@@ -61,5 +61,7 @@
     "@kbn/observability-plugin",
     "@kbn/licensing-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/charts-plugin",
+    "@kbn/observability-utils",
   ],
 }
