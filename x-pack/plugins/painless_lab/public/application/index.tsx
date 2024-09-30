@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/public';
 
 import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';

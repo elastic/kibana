@@ -21,7 +21,8 @@
     "@kbn/observability-shared-plugin",
     "@kbn/config-schema",
     "@kbn/core-ui-settings-common",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/react-dom"
   ],
   "exclude": ["target/**/*"]
 }

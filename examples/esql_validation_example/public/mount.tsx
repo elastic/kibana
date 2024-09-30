@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import type { StartDependencies } from './plugin';

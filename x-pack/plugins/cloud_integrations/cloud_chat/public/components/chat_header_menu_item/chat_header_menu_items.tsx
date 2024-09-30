@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import chatIconDark from './chat_icon_dark.svg';

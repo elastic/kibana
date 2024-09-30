@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/react-dom';
 import { keys, EuiText } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 

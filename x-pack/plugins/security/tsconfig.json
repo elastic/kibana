@@ -87,6 +87,7 @@
     "@kbn/security-authorization-core",
     "@kbn/security-role-management-model",
     "@kbn/security-ui-components",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

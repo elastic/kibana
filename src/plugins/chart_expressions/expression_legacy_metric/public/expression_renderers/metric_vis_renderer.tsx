@@ -8,7 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {

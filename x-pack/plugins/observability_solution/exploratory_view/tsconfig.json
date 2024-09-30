@@ -44,7 +44,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-analytics-browser",
     "@kbn/expressions-plugin",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/react-dom"
   ],
   "exclude": ["target/**/*"]
 }

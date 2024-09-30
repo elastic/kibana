@@ -8,7 +8,7 @@
  */
 
 import React, { ReactChild, useState, useLayoutEffect } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';

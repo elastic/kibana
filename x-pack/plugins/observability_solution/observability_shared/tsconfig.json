@@ -44,6 +44,7 @@
     "@kbn/rule-data-utils",
     "@kbn/es-query",
     "@kbn/serverless",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

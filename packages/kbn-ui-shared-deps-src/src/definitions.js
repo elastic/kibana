@@ -48,6 +48,7 @@ const externals = {
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
   react: '__kbnSharedDeps__.React',
   'react-dom': '__kbnSharedDeps__.ReactDom',
+  '@kbn/react-dom': '__kbnSharedDeps__.KbnReactDOM',
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',

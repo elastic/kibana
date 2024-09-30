@@ -30,6 +30,7 @@
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
     "@kbn/analytics",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

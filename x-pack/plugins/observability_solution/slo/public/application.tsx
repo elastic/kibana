@@ -20,7 +20,7 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';

@@ -41,6 +41,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
     "@kbn/std",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/react-dom"
   ]
 }

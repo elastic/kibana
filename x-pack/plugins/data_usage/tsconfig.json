@@ -21,6 +21,7 @@
     "@kbn/share-plugin",
     "@kbn/config-schema",
     "@kbn/logging",
+    "@kbn/react-dom",
   ],
   "exclude": ["target/**/*"]
 }

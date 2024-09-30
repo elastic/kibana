@@ -61,5 +61,6 @@
     "@kbn/observability-plugin",
     "@kbn/licensing-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/react-dom",
   ],
 }

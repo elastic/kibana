@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,

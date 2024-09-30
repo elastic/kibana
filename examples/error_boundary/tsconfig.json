@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/developer-examples-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-page-kibana-template"
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/react-dom"
   ]
 }

@@ -9,7 +9,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';

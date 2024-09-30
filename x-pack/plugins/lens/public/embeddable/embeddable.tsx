@@ -10,7 +10,7 @@ import React from 'react';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {

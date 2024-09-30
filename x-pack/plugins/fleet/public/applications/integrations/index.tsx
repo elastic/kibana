@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 

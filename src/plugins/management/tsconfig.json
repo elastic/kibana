@@ -29,6 +29,7 @@
     "@kbn/deeplinks-management",
     "@kbn/react-kibana-context-render",
     "@kbn/core-chrome-browser",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*"

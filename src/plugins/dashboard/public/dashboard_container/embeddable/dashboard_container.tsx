@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { batch } from 'react-redux';
 import {
   BehaviorSubject,

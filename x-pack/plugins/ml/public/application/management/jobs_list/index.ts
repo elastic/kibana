@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from '@kbn/react-dom';
 import React from 'react';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

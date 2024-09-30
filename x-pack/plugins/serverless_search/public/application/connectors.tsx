@@ -13,7 +13,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Router } from '@kbn/shared-ux-router';

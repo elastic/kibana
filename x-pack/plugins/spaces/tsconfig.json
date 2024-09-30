@@ -52,6 +52,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/logging",
     "@kbn/core-logging-browser-mocks",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

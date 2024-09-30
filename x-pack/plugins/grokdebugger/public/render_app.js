@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';

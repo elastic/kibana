@@ -26,6 +26,7 @@
     "@kbn/ui-theme",
     "@kbn/chart-expressions-common",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

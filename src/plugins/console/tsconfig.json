@@ -34,6 +34,7 @@
     "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
     "@kbn/shared-ux-router",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

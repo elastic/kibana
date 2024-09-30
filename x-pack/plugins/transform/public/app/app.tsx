@@ -6,7 +6,7 @@
  */
 
 import React, { type FC } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';

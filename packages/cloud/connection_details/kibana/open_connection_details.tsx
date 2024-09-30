@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';

@@ -39,7 +39,7 @@ import {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import type {

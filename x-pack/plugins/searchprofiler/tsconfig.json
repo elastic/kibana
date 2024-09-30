@@ -23,6 +23,7 @@
     "@kbn/ace",
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

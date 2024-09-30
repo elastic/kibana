@@ -13,7 +13,7 @@ import { ReactChildren, createElement } from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { shallow } from 'enzyme';
 import { create, act } from 'react-test-renderer';
 

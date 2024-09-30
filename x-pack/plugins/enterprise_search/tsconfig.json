@@ -83,6 +83,7 @@
     "@kbn/search-homepage",
     "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/react-dom"
   ]
 }

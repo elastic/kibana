@@ -22,5 +22,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/ui-theme",
+    "@kbn/react-dom",
   ]
 }

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 

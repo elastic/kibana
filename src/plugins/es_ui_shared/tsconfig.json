@@ -26,6 +26,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-application-common",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

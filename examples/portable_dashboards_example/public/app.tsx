@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import React, { useMemo } from 'react';
 import { useAsync } from 'react-use/lib';
 import { Redirect } from 'react-router-dom';

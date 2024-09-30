@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 import {
   EuiText,

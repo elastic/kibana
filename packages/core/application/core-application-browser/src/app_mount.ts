@@ -64,7 +64,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import ReactDOM from '@kbn/react-dom';
    * import { Router, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -114,7 +114,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import ReactDOM from '@kbn/react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -149,7 +149,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import ReactDOM from '@kbn/react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -187,7 +187,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import ReactDOM from '@kbn/react-dom';
    * import { BrowserRouter, Route } from 'react-router-dom';
    *
    * import { CoreStart, AppMountParameters } from 'src/core/public';
@@ -214,7 +214,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```ts
    * // application.tsx
    * import React from 'react';
-   * import ReactDOM from 'react-dom';
+   * import ReactDOM from '@kbn/react-dom';
    *
    * import { AppMountParameters } from 'src/core/public';
    * import { wrapWithTheme } from 'src/plugins/kibana_react';

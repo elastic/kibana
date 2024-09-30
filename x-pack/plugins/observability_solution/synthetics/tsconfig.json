@@ -100,7 +100,8 @@
     "@kbn/dashboard-plugin",
     "@kbn/slo-plugin",
     "@kbn/ebt-tools",
-    "@kbn/alerting-types"
+    "@kbn/alerting-types",
+    "@kbn/react-dom"
   ],
   "exclude": ["target/**/*"]
 }

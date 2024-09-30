@@ -10,7 +10,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { ObservabilityLogsExplorerMainRoute } from '../routes/main';
 import { NotFoundPage } from '../routes/not_found';
 import {

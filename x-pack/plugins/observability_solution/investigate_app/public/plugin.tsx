@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { once } from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { InvestigateAppServices } from './services/types';
 import type {
   ConfigSchema,

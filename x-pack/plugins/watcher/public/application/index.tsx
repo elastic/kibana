@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { KibanaRenderContextProvider } from './shared_imports';

@@ -22,7 +22,7 @@ import type {
   WrapperComponent,
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { DeepReadonly } from 'utility-types';
 import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';

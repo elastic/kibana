@@ -30,5 +30,6 @@
     "@kbn/unified-field-list",
     "@kbn/core-theme-browser-internal",
     "@kbn/ui-actions-plugin",
+    "@kbn/react-dom",
   ]
 }

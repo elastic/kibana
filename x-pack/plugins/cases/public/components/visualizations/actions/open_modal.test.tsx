@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { unmountComponentAtNode } from 'react-dom';
+import { unmountComponentAtNode } from '@kbn/react-dom';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { PropsWithChildren } from 'react';
 import React from 'react';

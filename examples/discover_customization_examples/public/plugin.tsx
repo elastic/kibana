@@ -24,7 +24,7 @@ import type {
   DiscoverStart,
 } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';

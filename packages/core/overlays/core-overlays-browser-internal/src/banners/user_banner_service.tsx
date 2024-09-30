@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { filter } from 'rxjs';
 import { Subscription } from 'rxjs';
 

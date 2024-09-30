@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
 import { Redirect, useLocation } from 'react-router-dom';

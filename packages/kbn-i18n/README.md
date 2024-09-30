@@ -195,7 +195,7 @@ uses I18n engine under the hood:
 
 ```js
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 
 ReactDOM.render(

@@ -20,5 +20,6 @@
     "@kbn/screenshotting-plugin",
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ]
 }

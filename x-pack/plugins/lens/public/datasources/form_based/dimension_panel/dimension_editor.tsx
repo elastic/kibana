@@ -26,7 +26,7 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';

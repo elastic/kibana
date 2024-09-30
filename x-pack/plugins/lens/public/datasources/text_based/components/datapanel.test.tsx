@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { act } from 'react-dom/test-utils';
 import type { Query } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

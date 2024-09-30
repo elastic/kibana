@@ -16,6 +16,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/react-kibana-context-render",
     "@kbn/config-schema",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

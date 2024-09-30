@@ -19,5 +19,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ]
 }

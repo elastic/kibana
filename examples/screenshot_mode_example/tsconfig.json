@@ -23,5 +23,6 @@
     "@kbn/analytics",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
+    "@kbn/react-dom",
   ]
 }

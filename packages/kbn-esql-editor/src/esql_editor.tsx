@@ -28,7 +28,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal } from '@kbn/react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
@@ -251,7 +251,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  const onMouseDownResize = useCallback(
+  const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
     (
       mouseDownEvent,
       firstPanelHeight,
@@ -270,7 +270,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     []
   );
 
-  const onKeyDownResize = useCallback(
+  const onKeyDownResize = useCallback<typeof onKeyDownResizeHandler>(
     (
       keyDownEvent,
       firstPanelHeight,

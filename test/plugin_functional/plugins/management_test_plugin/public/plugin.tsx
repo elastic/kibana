@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import { Link } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 

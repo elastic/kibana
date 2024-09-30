@@ -16,5 +16,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
     "@kbn/security-plugin-types-server",
+    "@kbn/react-dom",
   ]
 }

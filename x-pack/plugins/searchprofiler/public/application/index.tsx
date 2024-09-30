@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
 import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';

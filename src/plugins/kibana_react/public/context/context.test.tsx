@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';

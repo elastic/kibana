@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 

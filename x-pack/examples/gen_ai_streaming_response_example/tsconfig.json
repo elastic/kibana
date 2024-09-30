@@ -26,5 +26,6 @@
     "@kbn/data-plugin",
     "@kbn/actions-plugin",
     "@kbn/ml-response-stream",
+    "@kbn/react-dom",
   ]
 }

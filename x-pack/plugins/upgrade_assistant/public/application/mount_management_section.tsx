@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { RootComponent } from './app';

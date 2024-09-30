@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
 import { AppRoutes } from './app_routes';

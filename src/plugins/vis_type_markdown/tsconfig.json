@@ -19,6 +19,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/core-lifecycle-browser",
+    "@kbn/react-dom",
   ],
   "exclude": [
     "target/**/*",

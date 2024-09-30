@@ -21,6 +21,7 @@
     "@kbn/features-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/config-schema",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/react-dom"
   ]
 }

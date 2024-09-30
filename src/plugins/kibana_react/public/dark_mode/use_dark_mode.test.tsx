@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as ReactDOM from '@kbn/react-dom';
 import { act } from 'react-dom/test-utils';
 import { useDarkMode } from './use_dark_mode';
 import { createKibanaReactContext } from '../context';

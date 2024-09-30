@@ -15,7 +15,7 @@ import {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';

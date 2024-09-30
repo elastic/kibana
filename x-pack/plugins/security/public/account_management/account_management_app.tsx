@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import React, { FC, PropsWithChildren } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import type {
   ApplicationSetup,

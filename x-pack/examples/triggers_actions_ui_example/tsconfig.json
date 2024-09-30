@@ -32,5 +32,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/data-view-editor-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-dom",
   ]
 }

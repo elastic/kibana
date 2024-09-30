@@ -28,5 +28,6 @@
     "@kbn/shared-ux-router",
     "@kbn/config-schema",
     "@kbn/alerts-as-data-utils",
+    "@kbn/react-dom",
   ]
 }
