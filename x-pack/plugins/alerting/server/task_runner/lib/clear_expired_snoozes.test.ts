@@ -8,15 +8,16 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import { Logger } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleSnooze } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { clearExpiredSnoozes } from './clear_expired_snoozes';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 let clock: sinon.SinonFakeTimers;
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 describe('clearExpiredSnoozes()', () => {
   beforeAll(() => {
@@ -50,31 +51,29 @@ describe('clearExpiredSnoozes()', () => {
       },
     ]);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
     });
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
-      {
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        snoozeSchedule: [
-          {
-            id: '1',
-            duration: 1000,
-            rRule: {
-              tzid: 'UTC',
-              dtstart: moment().add(1, 'd').toISOString(),
-              count: 1,
+    expect(esClient.update).toHaveBeenCalledWith({
+      doc: {
+        alert: {
+          snoozeSchedule: [
+            {
+              duration: 1000,
+              id: '1',
+              rRule: {
+                count: 1,
+                dtstart: '2019-02-13T21:01:22.479Z',
+                tzid: 'UTC',
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-      {
-        refresh: false,
-      }
-    );
+      id: 'alert:1',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    });
   });
 
   test('clears expired scheduled snoozes and leaves unexpired ones', async () => {
@@ -99,31 +98,29 @@ describe('clearExpiredSnoozes()', () => {
       },
     ]);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
     });
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
-      {
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        snoozeSchedule: [
-          {
-            id: '2',
-            duration: 1000,
-            rRule: {
-              tzid: 'UTC',
-              dtstart: moment().add(1, 'd').toISOString(),
-              count: 1,
+    expect(esClient.update).toHaveBeenCalledWith({
+      doc: {
+        alert: {
+          snoozeSchedule: [
+            {
+              id: '2',
+              duration: 1000,
+              rRule: {
+                tzid: 'UTC',
+                dtstart: moment().add(1, 'd').toISOString(),
+                count: 1,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-      {
-        refresh: false,
-      }
-    );
+      id: 'alert:1',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    });
   });
 
   test('passes version if provided', async () => {
@@ -147,83 +144,32 @@ describe('clearExpiredSnoozes()', () => {
       },
     ]);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
-      version: '123',
+      version: 'WzQsMV0=',
     });
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
-      {
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        snoozeSchedule: [
-          {
-            id: '1',
-            duration: 1000,
-            rRule: {
-              tzid: 'UTC',
-              dtstart: moment().add(1, 'd').toISOString(),
-              count: 1,
+    expect(esClient.update).toHaveBeenCalledWith({
+      doc: {
+        alert: {
+          snoozeSchedule: [
+            {
+              id: '1',
+              duration: 1000,
+              rRule: {
+                tzid: 'UTC',
+                dtstart: moment().add(1, 'd').toISOString(),
+                count: 1,
+              },
             },
-          },
-        ],
-      },
-      {
-        refresh: false,
-        version: '123',
-      }
-    );
-  });
-
-  test('passes namespace if provided', async () => {
-    const { attributes, id } = getRule([
-      {
-        duration: 1000,
-        rRule: {
-          tzid: 'UTC',
-          dtstart: moment().subtract(1, 'd').toISOString(),
-          count: 1,
+          ],
         },
       },
-      {
-        id: '1',
-        duration: 1000,
-        rRule: {
-          tzid: 'UTC',
-          dtstart: moment().add(1, 'd').toISOString(),
-          count: 1,
-        },
-      },
-    ]);
-    await clearExpiredSnoozes({
-      logger: mockLogger,
-      rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
-      namespace: 'foo-namespace',
+      id: 'alert:1',
+      if_primary_term: 1,
+      if_seq_no: 4,
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     });
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
-      {
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        snoozeSchedule: [
-          {
-            id: '1',
-            duration: 1000,
-            rRule: {
-              tzid: 'UTC',
-              dtstart: moment().add(1, 'd').toISOString(),
-              count: 1,
-            },
-          },
-        ],
-      },
-      {
-        refresh: false,
-        namespace: 'foo-namespace',
-      }
-    );
   });
 
   test('does nothing when no snoozes are expired', async () => {
@@ -247,31 +193,31 @@ describe('clearExpiredSnoozes()', () => {
       },
     ]);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
     });
-    expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 
   test('does nothing when empty snooze schedule', async () => {
     const { attributes, id } = getRule([]);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
     });
-    expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 
   test('does nothing when undefined snooze schedule', async () => {
     const { attributes, id } = getRule(undefined);
     await clearExpiredSnoozes({
+      esClient,
       logger: mockLogger,
       rule: { ...attributes, id },
-      savedObjectsClient: internalSavedObjectsRepository,
     });
-    expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 });
 
@@ -299,6 +245,6 @@ const getRule = (snoozeSchedule: RuleSnooze | undefined) => ({
     ],
     snoozeSchedule,
   },
-  version: '123',
+  version: 'WzQsMV0=',
   references: [],
 });

@@ -6,19 +6,18 @@
  */
 
 import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isSnoozeExpired } from '../../lib';
-import { partiallyUpdateRule } from '../../saved_objects';
+import { partiallyUpdateRuleWithEs } from '../../saved_objects';
 
 interface ClearExpiredSnoozesOpts {
+  esClient: ElasticsearchClient;
   logger: Logger;
   rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
-  savedObjectsClient: ISavedObjectsRepository;
-  namespace?: string;
   version?: string;
 }
 export async function clearExpiredSnoozes(opts: ClearExpiredSnoozesOpts): Promise<void> {
-  const { logger, namespace, rule, savedObjectsClient, version } = opts;
+  const { esClient, logger, rule, version } = opts;
 
   if (!rule.snoozeSchedule || !rule.snoozeSchedule.length) return;
 
@@ -35,12 +34,9 @@ export async function clearExpiredSnoozes(opts: ClearExpiredSnoozesOpts): Promis
 
   if (snoozeSchedule.length === rule.snoozeSchedule?.length) return;
 
-  const updateAttributes = {
-    snoozeSchedule,
-    updatedAt: new Date().toISOString(),
-  };
+  const updateAttributes = { snoozeSchedule };
 
-  const updateOptions = { namespace, version, refresh: false };
+  const updateOptions = { version, refresh: false };
 
-  await partiallyUpdateRule(savedObjectsClient, rule.id, updateAttributes, updateOptions);
+  await partiallyUpdateRuleWithEs(esClient, rule.id, updateAttributes, updateOptions);
 }

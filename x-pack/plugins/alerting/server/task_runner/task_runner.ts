@@ -529,10 +529,9 @@ export class TaskRunner<
       (async () => {
         try {
           await clearExpiredSnoozes({
+            esClient: this.context.elasticsearch.client.asInternalUser,
             logger: this.logger,
-            namespace,
             rule: runRuleParams.rule,
-            savedObjectsClient: this.internalSavedObjectsRepository,
             version: runRuleParams.version,
           });
         } catch (e) {
