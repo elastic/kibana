@@ -764,7 +764,7 @@ export const serviceInstanceMetadataDetailsMapping = (
   return {
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     agent: {
-      name: normalizeValue<string>(fields[AGENT_NAME]),
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: normalizeValue<string>(fields[AGENT_VERSION]),
       activation_method: normalizeValue<string>(fields[AGENT_ACTIVATION_METHOD]),
     },

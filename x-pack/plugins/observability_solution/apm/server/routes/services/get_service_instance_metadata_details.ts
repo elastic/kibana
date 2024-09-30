@@ -120,7 +120,7 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
             },
           },
-          fields: ['*'],
+          fields: SERVICE_INSTANCE_METADATA_FIELDS,
         },
       }
     );
