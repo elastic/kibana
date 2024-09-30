@@ -48,7 +48,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
-  SPAN_LINKS,
   TIMESTAMP,
   TRACE_ID,
   TRANSACTION_DURATION,
@@ -64,11 +63,10 @@ import {
   ERROR_ID,
   ERROR_LOG_MESSAGE,
   HOST_NAME,
-  Container,
-  Kubernetes,
+  CONTAINER_ID,
+  CONTAINER_IMAGE,
   CLOUD_PROVIDER,
-  CONTAINER,
-  KUBERNETES,
+  CLOUD_INSTANCE_NAME,
   AGENT_ACTIVATION_METHOD,
   HOST_ARCHITECTURE,
   HOST_HOSTNAME,
@@ -88,7 +86,23 @@ import {
   SERVICE_TARGET_TYPE,
   SPAN_REPRESENTATIVE_COUNT,
   SERVICE_LANGUAGE_VERSION,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_INSTANCE_ID,
+  CLOUD_MACHINE_TYPE,
+  CLOUD_PROJECT_ID,
+  CLOUD_PROJECT_NAME,
+  CLOUD_REGION,
+  CLOUD_ACCOUNT_ID,
+  CLOUD_ACCOUNT_NAME,
+  CLOUD_IMAGE_ID,
+  CLOUD_SERVICE_NAME,
 } from '@kbn/apm-types';
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_CONTAINER_ID,
+} from '../../common/es_fields/infra_metrics';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { TransactionRaw } from '../../typings/es_schemas/raw/transaction_raw';
 import {
@@ -100,7 +114,10 @@ import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
-
+type ServiceMetadataDetailsRaw = Pick<
+  TransactionRaw,
+  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
+>;
 const normalizeValue = <T>(field: unknown[] | unknown): T => {
   return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
 };
@@ -275,20 +292,16 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
 export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
   if (!fields) return undefined;
 
-  return {
-    span: {
-      links: [
-        {
-          trace: {
-            id: normalizeValue<string>(fields[SPAN_LINKS_TRACE_ID]),
-          },
-          span: {
-            id: normalizeValue<string>(fields[SPAN_LINKS_SPAN_ID]),
-          },
-        },
-      ],
-    },
-  };
+  return (fields[SPAN_LINKS_TRACE_ID] as string[]).map((v, index) => {
+    return {
+      trace: {
+        id: v,
+      },
+      span: {
+        id: fields[SPAN_LINKS_SPAN_ID]?.[index] ?? '',
+      },
+    };
+  }) as SpanLink[];
 };
 
 export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) => {
@@ -330,7 +343,8 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
       outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
     },
     processor: {
-      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
+      event: normalizeValue<'transaction'>(fields[PROCESSOR_EVENT]),
+      name: normalizeValue<'transaction'>(fields[PROCESSOR_NAME]),
     },
     data_stream: {
       namespace: normalizeValue<string>(fields[DATA_STREAM_NAMESPACE]),
@@ -339,11 +353,13 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
     },
     span: {
       id: normalizeValue<string>(fields[SPAN_ID]),
+      links: linkedParentsOfSpanMapping(fields),
     },
     observer: {
       hostname: normalizeValue<string>(fields[OBSERVER_HOSTNAME]),
       type: normalizeValue<string>(fields[OBSERVER_TYPE]),
       version: normalizeValue<string>(fields[OBSERVER_VERSION]),
+      version_major: normalizeValue<number>(fields[OBSERVER_VERSION_MAJOR]),
     },
     timestamp: {
       us: normalizeValue<number>(fields[TIMESTAMP]),
@@ -404,7 +420,7 @@ export const traceDocMapping = (
         us: normalizeValue<number>(fields[SPAN_DURATION]),
       },
       action: normalizeValue<string>(fields[SPAN_ACTION]),
-      links: normalizeValue<SpanLink[]>(fields[SPAN_LINKS]),
+      links: linkedParentsOfSpanMapping(fields) as SpanLink[],
       composite: {
         count: normalizeValue<number>(fields[SPAN_COMPOSITE_COUNT]),
         sum: {
@@ -532,24 +548,185 @@ export const errorSampleDetailsMapping = (
   };
 };
 
+export const serviceMetadataDetailsMapping = (
+  fields: Partial<Record<string, unknown[]>>
+): ServiceMetadataDetailsRaw | undefined => {
+  if (!fields) return undefined;
+  const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
+  const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
+  const cloudServiceName = normalizeValue<string>(fields[CLOUD_PROVIDER]);
+  const serviceRuntimeName = normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]);
+  return {
+    service: {
+      name: normalizeValue<string>(fields[SERVICE_NAME]),
+      version: normalizeValue<string>(fields[SERVICE_VERSION]),
+      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+      framework: {
+        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+      },
+      node: {
+        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+      },
+      ...(serviceRuntimeName
+        ? {
+            runtime: {
+              name: serviceRuntimeName,
+              version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+            },
+          }
+        : undefined),
+      language: {
+        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+        version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
+      },
+    },
+    agent: {
+      name: normalizeValue<AgentName>(fields[AGENT_NAME]),
+      version: normalizeValue<AgentName>(fields[AGENT_VERSION]),
+    },
+    host: {
+      architecture: normalizeValue<string>(fields[HOST_ARCHITECTURE]),
+      hostname: normalizeValue<string>(fields[HOST_HOSTNAME]),
+      name: normalizeValue<string>(fields[HOST_NAME]),
+      ip: normalizeValue<string>(fields[HOST_IP]),
+      os: {
+        platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
+      },
+    },
+    ...(containerId
+      ? {
+          container: {
+            id: containerId,
+            image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
+          },
+        }
+      : undefined),
+    ...(kubernetesNamespace
+      ? {
+          kubernetes: {
+            pod: {
+              name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+              uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+            },
+            namespace: kubernetesNamespace,
+            replicaset: {
+              name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
+            },
+            deployment: {
+              name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
+            },
+            container: {
+              id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
+              name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
+            },
+          },
+        }
+      : undefined),
+    ...(cloudServiceName
+      ? {
+          cloud: {
+            availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
+            instance: {
+              name: normalizeValue<string>(fields[CLOUD_INSTANCE_NAME]),
+              id: normalizeValue<string>(fields[CLOUD_INSTANCE_ID]),
+            },
+            machine: {
+              type: normalizeValue<string>(fields[CLOUD_MACHINE_TYPE]),
+            },
+            project: {
+              id: normalizeValue<string>(fields[CLOUD_PROJECT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_PROJECT_NAME]),
+            },
+            provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
+            region: normalizeValue<string>(fields[CLOUD_REGION]),
+            account: {
+              id: normalizeValue<string>(fields[CLOUD_ACCOUNT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_ACCOUNT_NAME]),
+            },
+            image: {
+              id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
+            },
+            service: {
+              name: normalizeValue<string>(fields[CLOUD_SERVICE_NAME]),
+            },
+          },
+        }
+      : undefined),
+  };
+};
+
 export const serviceMetadataIconsMapping = (
   fields: Partial<Record<string, unknown[]>>
 ): ServiceMetadataIconsRaw | undefined => {
   if (!fields) return undefined;
-
+  const kubernetesPodName = normalizeValue<string>(fields[KUBERNETES_POD_NAME]);
+  const containerId = normalizeValue<string>(fields[CONTAINER_ID]);
+  const cloudProvider = normalizeValue<string>(fields[CLOUD_PROVIDER]);
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: '',
     },
-    cloud: {
-      provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
-      service: {
-        name: normalizeValue<string>(fields[CLOUD_PROVIDER]),
-      },
-    },
-    container: normalizeValue<Container>(fields[CONTAINER]),
-    kubernetes: normalizeValue<Kubernetes>(fields[KUBERNETES]),
+    ...(cloudProvider
+      ? {
+          cloud: {
+            availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
+            instance: {
+              name: normalizeValue<string>(fields[CLOUD_INSTANCE_NAME]),
+              id: normalizeValue<string>(fields[CLOUD_INSTANCE_ID]),
+            },
+            machine: {
+              type: normalizeValue<string>(fields[CLOUD_MACHINE_TYPE]),
+            },
+            project: {
+              id: normalizeValue<string>(fields[CLOUD_PROJECT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_PROJECT_NAME]),
+            },
+            provider: cloudProvider,
+            region: normalizeValue<string>(fields[CLOUD_REGION]),
+            account: {
+              id: normalizeValue<string>(fields[CLOUD_ACCOUNT_ID]),
+              name: normalizeValue<string>(fields[CLOUD_ACCOUNT_NAME]),
+            },
+            image: {
+              id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
+            },
+            service: {
+              name: normalizeValue<string>(fields[CLOUD_SERVICE_NAME]),
+            },
+          },
+        }
+      : undefined),
+    ...(containerId
+      ? {
+          container: {
+            id: containerId,
+            image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
+          },
+        }
+      : undefined),
+    ...(kubernetesPodName
+      ? {
+          kubernetes: {
+            pod: {
+              name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
+              uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
+            },
+            namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
+            replicaset: {
+              name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
+            },
+            deployment: {
+              name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
+            },
+            container: {
+              id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
+              name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
+            },
+          },
+        }
+      : undefined),
   };
 };
 

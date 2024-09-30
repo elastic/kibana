@@ -7,9 +7,12 @@
 
 // Kubernetes
 export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
+export const KUBERNETES_NODE_NAME = 'kubernetes.node.name';
+export const KUBERNETES_CONTAINER_ID = 'kubernetes.container.id';
 export const KUBERNETES_DEPLOYMENT = 'kubernetes.deployment';
 export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
 export const KUBERNETES_NAMESPACE_NAME = 'kubernetes.namespace.name';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_REPLICASET = 'kubernetes.replicaset';
 export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
+export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
