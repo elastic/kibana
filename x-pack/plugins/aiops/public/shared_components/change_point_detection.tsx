@@ -85,7 +85,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   lastReloadRequestTime,
 }) => {
   const deps = useMemo(() => {
-    const { charts, lens, data, usageCollection, fieldFormats, storage, unifiedSearch } =
+    const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
       pluginStart;
 
     return {
@@ -95,6 +95,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
       usageCollection,
       fieldFormats,
       unifiedSearch,
+      share,
       storage,
       ...coreStart,
     };
