@@ -1558,9 +1558,12 @@ components:
           type: boolean
           example: true
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          type: string
-          example: some.field
+          description: optional group by field or fields to use to generate an SLO per distinct value
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
         tags:
           description: List of tags
           type: array
