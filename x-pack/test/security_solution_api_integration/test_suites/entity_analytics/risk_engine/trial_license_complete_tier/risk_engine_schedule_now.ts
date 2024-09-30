@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
   buildDocument,
-  cleanRiskEngine,
   clearLegacyDashboards,
   clearLegacyTransforms,
   createAndSyncRuleAndAlertsFactory,
@@ -23,9 +22,16 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const log = getService('log');
+
+  const cleanAllResources = async () => {
+    await clearLegacyTransforms({ es, log });
+    await clearLegacyDashboards({ supertest, log });
+    await deleteAllAlerts(supertest, log, es);
+    await deleteAllRules(supertest, log);
+    await riskEngineRoutes.cleanUp();
+  };
 
   describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -36,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     before(async () => {
+      await cleanAllResources();
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
@@ -44,11 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
-      await clearLegacyTransforms({ es, log });
-      await clearLegacyDashboards({ supertest, log });
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
+      await cleanAllResources();
     });
 
     it('should run the risk engine when "scheduleNow" is called', async () => {
