@@ -8,10 +8,10 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-search-api-keys-api'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-api',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/packages/kbn-search-api-keys-api/{server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/packages/kbn-search-api-keys-api/**/*.{ts,tsx}'],
 };

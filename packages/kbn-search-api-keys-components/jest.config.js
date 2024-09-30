@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-search-api-keys-components'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-components',
