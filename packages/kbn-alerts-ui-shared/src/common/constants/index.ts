@@ -10,3 +10,5 @@
 export * from './alerts';
 export * from './i18n_weekdays';
 export * from './routes';
+
+export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';

@@ -19,6 +19,8 @@ import type { PromiseResolvedValue } from '../../../common/endpoint/types/utilit
 import { ensureOnlyEventCollectionIsAllowed } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 
 describe('Turn Off Policy Protections Migration', () => {
   let esClient: ElasticsearchClient;
@@ -58,10 +60,11 @@ describe('Turn Off Policy Protections Migration', () => {
   beforeEach(() => {
     const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
 
-    ({ esClient, logger } = endpointContextStartContract);
-
+    logger = loggingSystemMock.createLogger();
+    ({ esClient } = endpointContextStartContract);
     productFeatureService = endpointContextStartContract.productFeaturesService;
-    fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
+
+    fleetServices = createEndpointFleetServicesFactoryMock().service.asInternalUser();
   });
 
   describe('and both `endpointPolicyProtections` and `endpointProtectionUpdates` is enabled', () => {
@@ -139,7 +142,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
+        fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
         esClient,
         [
           expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
@@ -210,7 +213,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
+        fleetServices.savedObjects.createInternalScopedSoClient({ readonly: false }),
         esClient,
         [
           expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
@@ -317,7 +320,7 @@ describe('Turn Off Policy Protections Migration', () => {
 
       expect(fleetServices.packagePolicy.list as jest.Mock).toHaveBeenCalledTimes(2);
       expect(fleetServices.packagePolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
-        fleetServices.internalSoClient,
+        fleetServices.savedObjects.createInternalUnscopedSoClient(),
         esClient,
         [
           expect.objectContaining({ id: bulkUpdateResponse.updatedPolicies![0].id }),
