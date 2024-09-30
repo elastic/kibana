@@ -192,11 +192,11 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager(
-            coreStart,
-            discoverStartPlugins,
-            ebtManager
-          ),
+          profilesManager: await this.createProfilesManager({
+            core: coreStart,
+            plugins: discoverStartPlugins,
+            ebtManager,
+          }),
           ebtManager,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
