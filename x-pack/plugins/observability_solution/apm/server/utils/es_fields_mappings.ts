@@ -744,7 +744,7 @@ export const serviceVersionMapping = (
   };
 };
 
-// todo: missing `container` and `could` mappings
+// todo: missing `could` mapping
 export const serviceInstanceMetadataDetailsMapping = (
   fields: Partial<Record<string, unknown[]>> = {}
 ) => {
@@ -795,6 +795,9 @@ export const serviceInstanceMetadataDetailsMapping = (
         name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
         uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
       },
+    },
+    container: {
+      id: normalizeValue<string>(fields[CONTAINER_ID]),
     },
   };
 };

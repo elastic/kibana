@@ -245,7 +245,6 @@ export async function getServiceMetadataDetails({
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
   const fields = response.hits.hits[0]?.fields;
-  // todo: missing `fields` property?
   const fieldsNorm = (fields ? serviceMetadataDetailsMapping(fields) : undefined) as
     | ServiceMetadataDetailsRaw
     | undefined;
