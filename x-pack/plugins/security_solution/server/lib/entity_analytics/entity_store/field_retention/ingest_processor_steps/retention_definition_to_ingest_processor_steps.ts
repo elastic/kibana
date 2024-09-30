@@ -8,9 +8,13 @@
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldRetentionDefinition } from '../field_retention_definitions';
 import { fieldOperatorToIngestProcessor } from '../operators';
+import type { FieldRetentionOperatorBuilderOptions } from '../operators/types';
 
 export const retentionDefinitionToIngestProcessorSteps = (
-  fieldRetentionDefinition: FieldRetentionDefinition
+  fieldRetentionDefinition: FieldRetentionDefinition,
+  options: FieldRetentionOperatorBuilderOptions
 ): IngestProcessorContainer[] => {
-  return fieldRetentionDefinition.fields.map((field) => fieldOperatorToIngestProcessor(field));
+  return fieldRetentionDefinition.fields.map((field) =>
+    fieldOperatorToIngestProcessor(field, options)
+  );
 };

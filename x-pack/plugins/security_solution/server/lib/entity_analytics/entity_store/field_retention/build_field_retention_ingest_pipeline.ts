@@ -16,9 +16,7 @@ import {
   removeEntityDefinitionFieldsStep,
   retentionDefinitionToIngestProcessorSteps,
 } from './ingest_processor_steps';
-
-const ENRICH_FIELD = 'historical';
-const DEBUG_MODE = true; // TODO: do not commit this value
+import { DEBUG_MODE, ENRICH_FIELD } from './constants';
 
 export const buildFieldRetentionIngestPipeline = ({
   fieldRetentionDefinition,
@@ -56,7 +54,9 @@ export const buildFieldRetentionIngestPipeline = ({
     field: 'asset.criticality',
   }),
   ...getDotExpanderSteps(allEntityFields),
-  ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition),
+  ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
+    enrichField: ENRICH_FIELD,
+  }),
   ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', 'risk']),
   removeEntityDefinitionFieldsStep(),
   ...(!DEBUG_MODE

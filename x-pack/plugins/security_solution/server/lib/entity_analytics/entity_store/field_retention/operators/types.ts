@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CollectValues } from './collect_values';
 import type { PreferNewestValue } from './prefer_newest_value';
 import type { PreferOldestValue } from './prefer_oldest_value';
@@ -14,4 +15,13 @@ export interface BaseFieldRetentionOperator {
   operation: string;
 }
 
+export interface FieldRetentionOperatorBuilderOptions {
+  enrichField: string;
+}
+
 export type FieldRetentionOperator = PreferNewestValue | PreferOldestValue | CollectValues;
+
+export type FieldRetentionOperatorBuilder<O extends BaseFieldRetentionOperator> = (
+  operator: O,
+  options: FieldRetentionOperatorBuilderOptions
+) => IngestProcessorContainer;
