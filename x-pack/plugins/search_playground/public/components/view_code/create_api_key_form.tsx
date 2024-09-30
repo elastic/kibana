@@ -11,7 +11,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiForm,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
@@ -83,7 +82,7 @@ export const CreateApiKeyForm = () => {
           control={control}
           rules={{ min: 0, required: true }}
           render={({ field }) => (
-            <EuiFormControlLayout
+            <EuiFieldText
               fullWidth
               append={
                 <EuiText size="xs">
@@ -95,20 +94,16 @@ export const CreateApiKeyForm = () => {
                   </strong>
                 </EuiText>
               }
-            >
-              <EuiFieldText
-                fullWidth
-                type="number"
-                placeholder={i18n.translate(
-                  'xpack.searchPlayground.viewCode.apiForm.expire.placeholder',
-                  {
-                    defaultMessage: 'Set expiry in days',
-                  }
-                )}
-                value={field.value || ''}
-                onChange={field.onChange}
-              />
-            </EuiFormControlLayout>
+              type="number"
+              placeholder={i18n.translate(
+                'xpack.searchPlayground.viewCode.apiForm.expire.placeholder',
+                {
+                  defaultMessage: 'Set expiry in days',
+                }
+              )}
+              value={field.value || ''}
+              onChange={field.onChange}
+            />
           )}
         />
       </EuiFormRow>
