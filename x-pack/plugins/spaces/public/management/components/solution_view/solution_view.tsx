@@ -156,11 +156,8 @@ export const SolutionView: FunctionComponent<Props> = ({
             <EuiSuperSelect
               options={getOptions(euiTheme)}
               valueOfSelected={
-                space.solution
-                  ? space.solution
-                  : showClassicDefaultViewCallout
-                  ? SOLUTION_VIEW_CLASSIC
-                  : undefined
+                space.solution ??
+                (showClassicDefaultViewCallout ? SOLUTION_VIEW_CLASSIC : undefined)
               }
               data-test-subj="solutionViewSelect"
               onChange={(solution) => {
