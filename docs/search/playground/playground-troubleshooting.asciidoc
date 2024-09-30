@@ -1,6 +1,6 @@
 [role="xpack"]
 [[playground-troubleshooting]]
-== Troubleshooting
+=== Troubleshooting
 
 preview::[]
 
