@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { GetApiKeyResponse } from '../../types';
+import type { GetApiKeyResponse } from '../types';
 
 export async function getAPIKeyById(
   id: string,

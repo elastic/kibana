@@ -10,8 +10,8 @@
 import { useEffect, useCallback, useReducer } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { APIKeyCreationResponse } from '@kbn/search-api-keys-api/types';
-import { APIRoutes } from '../../types';
+import type { APIKeyCreationResponse } from '@kbn/search-api-keys-api/server/types';
+import { APIRoutes } from '../types';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';
 const API_KEY_MASK = '•'.repeat(60);

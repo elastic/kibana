@@ -46,7 +46,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       <EuiFlexItem grow={0} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <code
           data-test-subj={dataTestSubj}
-          css={{
+          style={{
             color: euiTheme.colors.successText,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
             backgroundColor: euiTheme.colors.lightestShade,

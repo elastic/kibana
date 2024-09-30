@@ -4,9 +4,11 @@
     "outDir": "target/types",
   },
   "include": [
-    "server/**/*",
+    "server/**/*"
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core",
+  ],
   "exclude": [
     "target/**/*",
   ]

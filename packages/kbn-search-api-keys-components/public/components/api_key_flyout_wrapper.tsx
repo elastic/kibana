@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApiKeyFlyout, ApiKeyFlyoutProps } from '@kbn/security-api-key-management';
 import React from 'react';
+import { ApiKeyFlyout, ApiKeyFlyoutProps } from '@kbn/security-api-key-management';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const API_KEY_NAME = 'Unrestricted API Key';
