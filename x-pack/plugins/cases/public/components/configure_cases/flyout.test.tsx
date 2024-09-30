@@ -397,7 +397,7 @@ describe('CommonFlyout ', () => {
             label: 'First custom field',
             required: true,
           },
-        ],
+        ] as CustomFieldConfiguration[],
       };
 
       appMockRender = createAppMockRenderer({ license });
@@ -575,48 +575,40 @@ describe('CommonFlyout ', () => {
 
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
-      await waitFor(() => {
-        expect(props.onSaveField).toBeCalledWith({
-          key: 'random_key',
-          name: 'Template 1',
-          description: 'test description',
-          tags: [],
-          caseFields: {
-            connector: {
-              id: 'none',
-              name: 'none',
-              type: '.none',
-              fields: null,
-            },
-            settings: {
-              syncAlerts: true,
-            },
-            customFields: [
-              {
-                key: 'test_key_1',
-                type: 'text',
-                value: 'this is a sample text!',
-              },
-              {
-                key: 'test_key_2',
-                type: 'toggle',
-                value: true,
-              },
-              {
-                key: 'test_key_3',
-                type: 'text',
-                value: null,
-              },
-              {
-                key: 'test_key_4',
-                type: 'toggle',
-                value: false,
-              },
-            ],
+      // await waitFor(() => {
+      expect(props.onSaveField).toBeCalledWith({
+        key: 'random_key',
+        name: 'Template 1',
+        description: 'test description',
+        tags: [],
+        caseFields: {
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: '.none',
+            fields: null,
           },
-        });
+          settings: {
+            syncAlerts: true,
+          },
+          customFields: [
+            {
+              key: 'test_key_1',
+              type: 'text',
+              value: 'this is a sample text!',
+            },
+            ...customFieldsConfigurationMock
+              .slice(1)
+              .map(({ key, type, defaultValue, required }) => ({
+                key,
+                type,
+                value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
+              })),
+          ],
+        },
       });
     });
+    // });
 
     it('calls onSaveField form with connector fields correctly', async () => {
       useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
@@ -691,7 +683,7 @@ describe('CommonFlyout ', () => {
             label: 'First custom field',
             required: true,
           },
-        ],
+        ] as CustomFieldConfiguration[],
         connector: {
           id: 'servicenow-1',
           name: 'My SN connector',
