@@ -324,12 +324,12 @@ export const DocViewerTable = ({
   }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
+    [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, onFilter: filter }),
-    [rows, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
+    [rows, isEsqlMode, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height

@@ -263,8 +263,11 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *
  * The request format is TSV (tab-separated values) to simplify parsing in bash.
  *
- * The response format is either a YAML file or a tarball containing the Elastic Agent
+ * The response format is either a YAML file or a tar archive containing the Elastic Agent
  * configuration, depending on the `Accept` header.
+ *
+ * Errors during installation are ignore unless all integrations fail to install. When that happens
+ * a 500 Internal Server Error is returned with the first error message.
  *
  * Example request:
  *
@@ -335,10 +338,21 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
 
     let installedIntegrations: InstalledIntegration[] = [];
     try {
-      installedIntegrations = await ensureInstalledIntegrations(
+      const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient
       );
+      installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
+        if (result.status === 'fulfilled') {
+          acc.push(result.value);
+        }
+        return acc;
+      }, []);
+      // Errors during installation are ignore unless all integrations fail to install. When that happens
+      // a 500 Internal Server Error is returned with the first error message.
+      if (!installedIntegrations.length) {
+        throw (settledResults[0] as PromiseRejectedResult).reason;
+      }
     } catch (error) {
       if (error instanceof FleetUnauthorizedError) {
         return response.forbidden({
@@ -401,8 +415,8 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient
-): Promise<InstalledIntegration[]> {
-  return Promise.all(
+): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
+  return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
       const { pkgName, installSource } = integration;
 

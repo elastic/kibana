@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { camelCase, startCase } from 'lodash';
 import React from 'react';
+import { SplitAccordion } from '../../../../../common/components/split_accordion';
 import { DiffView } from '../json_diff/diff_view';
-import { RuleDiffPanelWrapper } from './panel_wrapper';
 import type { FormattedFieldDiff, FieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { fieldToDisplayNameMap } from './translations';
 
@@ -46,14 +46,24 @@ export const FieldGroupDiffComponent = ({
   fieldsGroupName,
 }: FieldDiffComponentProps) => {
   const { fieldDiffs, shouldShowSubtitles } = ruleDiffs;
+
   return (
-    <RuleDiffPanelWrapper fieldName={fieldsGroupName}>
+    <SplitAccordion
+      header={
+        <EuiTitle data-test-subj="ruleUpgradePerFieldDiffLabel" size="xs">
+          <h5>{fieldToDisplayNameMap[fieldsGroupName] ?? startCase(camelCase(fieldsGroupName))}</h5>
+        </EuiTitle>
+      }
+      initialIsOpen={true}
+      data-test-subj="ruleUpgradePerFieldDiff"
+    >
       {fieldDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }, index) => {
-        const shouldShowSeparator = index !== fieldDiffs.length - 1;
+        const isLast = index === fieldDiffs.length - 1;
+
         return (
           <SubFieldComponent
             key={specificFieldName}
-            shouldShowSeparator={shouldShowSeparator}
+            shouldShowSeparator={!isLast}
             shouldShowSubtitles={shouldShowSubtitles}
             currentVersion={currentVersion}
             targetVersion={targetVersion}
@@ -61,6 +71,6 @@ export const FieldGroupDiffComponent = ({
           />
         );
       })}
-    </RuleDiffPanelWrapper>
+    </SplitAccordion>
   );
 };

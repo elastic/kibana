@@ -76,7 +76,6 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import { EndpointMetadataService } from './endpoint/services/metadata';
 import type {
   CreateRuleAdditionalOptions,
   CreateRuleOptions,
@@ -103,7 +102,6 @@ import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
 } from './plugin_contract';
-import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
@@ -238,6 +236,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
+      telemetry: core.analytics,
+      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({
@@ -525,27 +525,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const {
-      authz,
-      agentService,
-      packageService,
-      packagePolicyService,
-      agentPolicyService,
-      createFilesClient,
-      createFleetActionsClient,
-    } =
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      plugins.fleet!;
-    let manifestManager: ManifestManager | undefined;
-    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
-      {
-        agentService,
-        packageService,
-        packagePolicyService,
-        agentPolicyService,
-      },
-      core.savedObjects
-    );
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const fleetStartServices = plugins.fleet!;
+
+    const { packageService } = fleetStartServices;
 
     this.licensing$ = plugins.licensing.license$;
 
@@ -562,26 +545,42 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
 
+    const manifestManager = new ManifestManager({
+      savedObjectsClient,
+      exceptionListClient,
+      artifactClient: new EndpointArtifactClient(
+        fleetStartServices.createArtifactsClient('endpoint')
+      ),
+      packagePolicyService: fleetStartServices.packagePolicyService,
+      logger: this.pluginContext.logger.get('ManifestManager'),
+      experimentalFeatures: config.experimentalFeatures,
+      packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+      esClient: core.elasticsearch.client.asInternalUser,
+      productFeaturesService,
+    });
+
+    this.endpointAppContextService.start({
+      fleetStartServices,
+      security: core.security,
+      alerting: plugins.alerting,
+      config,
+      cases: plugins.cases,
+      manifestManager,
+      licenseService,
+      exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
+      featureUsageService,
+      experimentalFeatures: config.experimentalFeatures,
+      esClient: core.elasticsearch.client.asInternalUser,
+      productFeaturesService,
+      savedObjectsServiceStart: core.savedObjects,
+      connectorActions: plugins.actions,
+    });
+
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const taskManager = plugins.taskManager;
-      const artifactClient = new EndpointArtifactClient(
-        plugins.fleet.createArtifactsClient('endpoint')
-      );
 
-      manifestManager = new ManifestManager({
-        savedObjectsClient,
-        artifactClient,
-        exceptionListClient,
-        packagePolicyService: plugins.fleet.packagePolicyService,
-        logger: this.pluginContext.logger.get('ManifestManager'),
-        experimentalFeatures: config.experimentalFeatures,
-        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
-        esClient: core.elasticsearch.client.asInternalUser,
-        productFeaturesService,
-      });
-
-      // Migrate artifacts to fleet and then start the manifest task after that is done
       plugins.fleet
         .fleetSetupCompleted()
         .then(async () => {
@@ -594,24 +593,24 @@ export class Plugin implements ISecuritySolutionPlugin {
             logger.error(new Error('User artifacts task not available.'));
           }
 
+          const fleetServices = this.endpointAppContextService.getInternalFleetServices();
+
           await turnOffPolicyProtectionsIfNotSupported(
             core.elasticsearch.client.asInternalUser,
-            endpointFleetServicesFactory.asInternalUser(),
+            fleetServices,
             productFeaturesService,
             logger
           );
 
-          await turnOffAgentPolicyFeatures(
-            endpointFleetServicesFactory.asInternalUser(),
-            productFeaturesService,
-            logger
-          );
+          await turnOffAgentPolicyFeatures(fleetServices, productFeaturesService, logger);
         })
         .catch(() => {});
 
       // License related start
       licenseService.start(this.licensing$);
+
       featureUsageService.start(plugins.licensing);
+
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet.packagePolicyService,
         core.savedObjects,
@@ -620,36 +619,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
       this.policyWatcher.start(licenseService);
     }
-
-    this.endpointAppContextService.start({
-      fleetAuthzService: authz,
-      createFleetFilesClient: createFilesClient,
-      endpointMetadataService: new EndpointMetadataService(
-        core.savedObjects,
-        agentPolicyService,
-        packagePolicyService,
-        logger
-      ),
-      endpointFleetServicesFactory,
-      security: core.security,
-      alerting: plugins.alerting,
-      config,
-      cases: plugins.cases,
-      logger,
-      manifestManager,
-      registerIngestCallback,
-      licenseService,
-      exceptionListsClient: exceptionListClient,
-      registerListsServerExtension: this.lists?.registerExtension,
-      featureUsageService,
-      experimentalFeatures: config.experimentalFeatures,
-      messageSigningService: plugins.fleet?.messageSigningService,
-      createFleetActionsClient,
-      esClient: core.elasticsearch.client.asInternalUser,
-      productFeaturesService,
-      savedObjectsClient,
-      connectorActions: plugins.actions,
-    });
 
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask

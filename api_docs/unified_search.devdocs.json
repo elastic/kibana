@@ -722,7 +722,7 @@
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
-              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; timeHistory?: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",

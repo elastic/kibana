@@ -10,9 +10,9 @@
 import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { ALERTING_FEATURE_ID, DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
@@ -40,6 +40,8 @@ export interface CreateRuleFormProps {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
+  canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
   returnUrl: string;
 }
 
@@ -47,16 +49,18 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     ruleTypeId,
     plugins,
-    consumer = ALERTING_FEATURE_ID,
+    consumer = 'alerts',
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
     shouldUseRuleProducer = false,
+    canShowConsumerSelection = true,
+    showMustacheAutocompleteSwitch = false,
     returnUrl,
   } = props;
 
-  const { http, docLinks, notification, ruleTypeRegistry, i18n, theme } = plugins;
-  const { toasts } = notification;
+  const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
+  const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
@@ -79,16 +83,25 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
-    useLoadDependencies({
-      http,
-      toasts: notification.toasts,
-      ruleTypeRegistry,
-      ruleTypeId,
-      consumer,
-      validConsumers,
-      filteredRuleTypes,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    connectors,
+    connectorTypes,
+    aadTemplateFields,
+  } = useLoadDependencies({
+    http,
+    toasts: notifications.toasts,
+    capabilities: plugins.application.capabilities,
+    ruleTypeRegistry,
+    ruleTypeId,
+    consumer,
+    validConsumers,
+    filteredRuleTypes,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -101,8 +114,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           tags: newFormData.tags,
           params: newFormData.params,
           schedule: newFormData.schedule,
-          // TODO: Will add actions in the actions PR
-          actions: [],
+          actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
         },
@@ -151,12 +163,18 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
               ruleType,
               minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
             }),
+            actions: [],
           }),
           plugins,
+          connectors,
+          connectorTypes,
+          aadTemplateFields,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
           validConsumers,
+          canShowConsumerSelection,
+          showMustacheAutocompleteSwitch,
           multiConsumerSelection: getInitialMultiConsumer({
             multiConsumerSelection,
             validConsumers,

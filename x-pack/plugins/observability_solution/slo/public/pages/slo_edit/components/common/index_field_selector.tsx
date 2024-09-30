@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
@@ -53,45 +53,43 @@ export function IndexFieldSelector({
   };
 
   return (
-    <EuiFlexItem>
-      <EuiFormRow label={label} isInvalid={getFieldState(name).invalid} labelAppend={labelAppend}>
-        <Controller
-          defaultValue={[defaultValue].flat()}
-          name={name}
-          control={control}
-          rules={{ required: isRequired && !isDisabled }}
-          render={({ field, fieldState }) => {
-            return (
-              <EuiComboBox<string>
-                {...field}
-                async
-                placeholder={placeholder}
-                aria-label={placeholder}
-                isClearable
-                isDisabled={isLoading || isDisabled}
-                isInvalid={fieldState.invalid}
-                isLoading={isLoading}
-                onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  if (selected.length) {
-                    return field.onChange(selected.map((selection) => selection.value));
-                  }
-
-                  field.onChange(defaultValue);
-                }}
-                options={options}
-                onSearchChange={(searchValue: string) => {
-                  setOptions(
-                    createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
-                  );
-                }}
-                selectedOptions={
-                  !!indexFields && !!field.value ? getSelectedItems(field.value, indexFields) : []
+    <EuiFormRow label={label} isInvalid={getFieldState(name).invalid} labelAppend={labelAppend}>
+      <Controller
+        defaultValue={[defaultValue].flat()}
+        name={name}
+        control={control}
+        rules={{ required: isRequired && !isDisabled }}
+        render={({ field, fieldState }) => {
+          return (
+            <EuiComboBox<string>
+              {...field}
+              async
+              placeholder={placeholder}
+              aria-label={placeholder}
+              isClearable
+              isDisabled={isLoading || isDisabled}
+              isInvalid={fieldState.invalid}
+              isLoading={isLoading}
+              onChange={(selected: EuiComboBoxOptionOption[]) => {
+                if (selected.length) {
+                  return field.onChange(selected.map((selection) => selection.value));
                 }
-              />
-            );
-          }}
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
+
+                field.onChange(defaultValue);
+              }}
+              options={options}
+              onSearchChange={(searchValue: string) => {
+                setOptions(
+                  createOptionsFromFields(indexFields, ({ value }) => value.includes(searchValue))
+                );
+              }}
+              selectedOptions={
+                !!indexFields && !!field.value ? getSelectedItems(field.value, indexFields) : []
+              }
+            />
+          );
+        }}
+      />
+    </EuiFormRow>
   );
 }

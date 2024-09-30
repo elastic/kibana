@@ -11,6 +11,7 @@ import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
+import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
@@ -47,10 +48,7 @@ export const getTopNavBadges = ({
     entries.push({
       data: getTopNavUnsavedChangesBadge({
         onRevert: async () => {
-          const lensEditFlyoutCancelButton = document.getElementById('lnsCancelEditOnFlyFlyout');
-          if (lensEditFlyoutCancelButton) {
-            lensEditFlyoutCancelButton.click?.();
-          }
+          dismissFlyouts([DiscoverFlyouts.lensEdit]);
           await stateContainer.actions.undoSavedSearchChanges();
         },
         onSave:

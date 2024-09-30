@@ -100,8 +100,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,

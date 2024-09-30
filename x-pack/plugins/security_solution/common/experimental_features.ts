@@ -183,6 +183,12 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,

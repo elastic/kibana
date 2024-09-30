@@ -10,14 +10,11 @@
 import { useEffect } from 'react';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { pluginServices } from '../../services/plugin_services';
 import { DashboardApi } from '../..';
 import { getNewDashboardTitle } from '../_dashboard_app_strings';
+import { coreServices } from '../../services/kibana_services';
 
 export const DashboardTabTitleSetter = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
-  const {
-    chrome: { docTitle: chromeDocTitle },
-  } = pluginServices.getServices();
   const [title, lastSavedId] = useBatchedPublishingSubjects(
     dashboardApi.panelTitle,
     dashboardApi.savedObjectId
@@ -27,8 +24,10 @@ export const DashboardTabTitleSetter = ({ dashboardApi }: { dashboardApi: Dashbo
    * Set chrome tab title when dashboard's title changes
    */
   useEffect(() => {
-    chromeDocTitle.change(!lastSavedId ? getNewDashboardTitle() : title ?? lastSavedId);
-  }, [title, chromeDocTitle, lastSavedId]);
+    coreServices.chrome.docTitle.change(
+      !lastSavedId ? getNewDashboardTitle() : title ?? lastSavedId
+    );
+  }, [title, lastSavedId]);
 
   return null;
 };

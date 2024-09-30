@@ -160,6 +160,7 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
+                    onClick={isSplitPanel ? showPanelOnClick : undefined}
                   />
                 );
               })}

@@ -19,9 +19,8 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
     const releaseHostApi = useSendReleaseEndpointRequest();
 
     const actionRequestBody = useMemo(() => {
-      const endpointId = command.commandDefinition?.meta?.endpointId;
+      const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
       const comment = command.args.args?.comment?.[0];
-      const agentType = command.commandDefinition?.meta?.agentType;
 
       return endpointId
         ? {
@@ -30,12 +29,7 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
             comment,
           }
         : undefined;
-    }, [
-      command.args.args?.comment,
-      command.commandDefinition?.meta?.agentType,
-      command.commandDefinition?.meta?.endpointId,
-      isSentinelOneV1Enabled,
-    ]);
+    }, [command.args.args?.comment, command.commandDefinition?.meta, isSentinelOneV1Enabled]);
 
     return useConsoleActionSubmitter({
       ResultComponent,

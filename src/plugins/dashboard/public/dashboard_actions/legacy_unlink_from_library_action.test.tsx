@@ -9,7 +9,7 @@
 
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { pluginServices } from '../services/plugin_services';
+import { coreServices } from '../services/kibana_services';
 import {
   LegacyUnlinkFromLibraryAction,
   LegacyUnlinkPanelFromLibraryActionApi,
@@ -61,7 +61,7 @@ describe('Unlink from library action', () => {
 
   it('shows a toast with a title from the API when successful', async () => {
     await action.execute(context);
-    expect(pluginServices.getServices().notifications.toasts.addSuccess).toHaveBeenCalledWith({
+    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       'data-test-subj': 'unlinkPanelSuccess',
       title: "Panel 'A very compatible API' is no longer connected to the library.",
     });
@@ -70,7 +70,7 @@ describe('Unlink from library action', () => {
   it('shows a danger toast when the link operation is unsuccessful', async () => {
     context.embeddable.unlinkFromLibrary = jest.fn().mockRejectedValue(new Error('Oh dang'));
     await action.execute(context);
-    expect(pluginServices.getServices().notifications.toasts.addDanger).toHaveBeenCalledWith({
+    expect(coreServices.notifications.toasts.addDanger).toHaveBeenCalledWith({
       'data-test-subj': 'unlinkPanelFailure',
       title: "An error occured while unlinking 'A very compatible API' from the library.",
     });

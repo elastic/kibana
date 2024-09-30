@@ -11,26 +11,27 @@ import React from 'react';
 import { getFieldCellActions, getFieldValueCellActions } from './table_cell_actions';
 import { FieldRow } from './field_row';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { render, screen } from '@testing-library/react';
+import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 
 describe('TableActions', () => {
-  const rows: FieldRow[] = [
+  const getRows = (fieldName = 'message', fieldValue: unknown = 'test'): FieldRow[] => [
     new FieldRow({
-      name: 'message',
-      flattenedValue: 'flattenedField',
+      name: fieldName,
+      flattenedValue: fieldValue,
       hit: buildDataTableRecord(
         {
           _ignored: [],
           _index: 'test',
           _id: '1',
           _source: {
-            message: 'test',
+            [fieldName]: fieldValue,
           },
         },
-        dataView
+        dataViewMockWithTimeField
       ),
-      dataView,
+      dataView: dataViewMockWithTimeField,
       fieldFormats: {} as FieldFormatsStart,
       isPinned: false,
       columnsMeta: undefined,
@@ -49,23 +50,32 @@ describe('TableActions', () => {
   describe('getFieldCellActions', () => {
     it('should render correctly for undefined functions', () => {
       expect(
-        getFieldCellActions({ rows, onFilter: undefined, onToggleColumn: jest.fn() }).map((item) =>
-          item(EuiCellParams)
-        )
+        getFieldCellActions({
+          rows: getRows(),
+          isEsqlMode: false,
+          onFilter: undefined,
+          onToggleColumn: jest.fn(),
+        }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
 
       expect(
-        getFieldCellActions({ rows, onFilter: undefined, onToggleColumn: undefined }).map((item) =>
-          item(EuiCellParams)
-        )
+        getFieldCellActions({
+          rows: getRows(),
+          isEsqlMode: false,
+          onFilter: undefined,
+          onToggleColumn: undefined,
+        }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
 
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
-        getFieldCellActions({ rows, onFilter: jest.fn(), onToggleColumn: jest.fn() }).map((item) =>
-          item(EuiCellParams)
-        )
+        getFieldCellActions({
+          rows: getRows(),
+          isEsqlMode: false,
+          onFilter: jest.fn(),
+          onToggleColumn: jest.fn(),
+        }).map((item) => item(EuiCellParams))
       ).toMatchSnapshot();
     });
   });
@@ -73,14 +83,72 @@ describe('TableActions', () => {
   describe('getFieldValueCellActions', () => {
     it('should render correctly for undefined functions', () => {
       expect(
-        getFieldValueCellActions({ rows, onFilter: undefined }).map((item) => item(EuiCellParams))
+        getFieldValueCellActions({ rows: getRows(), isEsqlMode: false, onFilter: undefined }).map(
+          (item) => item(EuiCellParams)
+        )
       ).toMatchSnapshot();
     });
 
     it('should render the panels correctly for defined onFilter function', () => {
       expect(
-        getFieldValueCellActions({ rows, onFilter: jest.fn() }).map((item) => item(EuiCellParams))
+        getFieldValueCellActions({ rows: getRows(), isEsqlMode: false, onFilter: jest.fn() }).map(
+          (item) => item(EuiCellParams)
+        )
       ).toMatchSnapshot();
+    });
+
+    it('should allow filtering in ES|QL mode', () => {
+      const actions = getFieldValueCellActions({
+        rows: getRows('extension'),
+        isEsqlMode: true,
+        onFilter: jest.fn(),
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => (
+            <div data-test-subj={props['data-test-subj']}>{JSON.stringify(props)}</div>
+          )}
+        />
+      ));
+      render(<>{actions}</>);
+      const filterForProps = JSON.parse(
+        screen.getByTestId('addFilterForValueButton-extension').innerHTML
+      );
+      expect(filterForProps.disabled).toBe(false);
+      expect(filterForProps.title).toBe('Filter for value');
+      const filterOutProps = JSON.parse(
+        screen.getByTestId('addFilterOutValueButton-extension').innerHTML
+      );
+      expect(filterOutProps.disabled).toBe(false);
+      expect(filterOutProps.title).toBe('Filter out value');
+    });
+
+    it('should not allow filtering in ES|QL mode for multivalue fields', () => {
+      const actions = getFieldValueCellActions({
+        rows: getRows('extension', ['foo', 'bar']),
+        isEsqlMode: true,
+        onFilter: jest.fn(),
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => (
+            <div data-test-subj={props['data-test-subj']}>{JSON.stringify(props)}</div>
+          )}
+        />
+      ));
+      render(<>{actions}</>);
+      const filterForProps = JSON.parse(
+        screen.getByTestId('addFilterForValueButton-extension').innerHTML
+      );
+      expect(filterForProps.disabled).toBe(true);
+      expect(filterForProps.title).toBe('Multivalue filtering is not supported in ES|QL');
+      const filterOutProps = JSON.parse(
+        screen.getByTestId('addFilterOutValueButton-extension').innerHTML
+      );
+      expect(filterOutProps.disabled).toBe(true);
+      expect(filterOutProps.title).toBe('Multivalue filtering is not supported in ES|QL');
     });
   });
 });

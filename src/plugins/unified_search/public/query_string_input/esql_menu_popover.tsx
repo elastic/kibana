@@ -22,7 +22,13 @@ import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
 
-export const ESQLMenuPopover = () => {
+export interface ESQLMenuPopoverProps {
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+}
+
+export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
+  onESQLDocsFlyoutVisibilityChanged,
+}) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
 
   const { docLinks } = kibana.services;
@@ -33,6 +39,14 @@ export const ESQLMenuPopover = () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
   }, [isLanguageComponentOpen]);
+
+  const onHelpMenuVisibilityChange = useCallback(
+    (status: boolean) => {
+      setIsLanguageComponentOpen(status);
+      onESQLDocsFlyoutVisibilityChanged?.(status);
+    },
+    [setIsLanguageComponentOpen, onESQLDocsFlyoutVisibilityChanged]
+  );
 
   const esqlPanelItems = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -122,7 +136,7 @@ export const ESQLMenuPopover = () => {
         searchInDescription
         linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
         isHelpMenuOpen={isLanguageComponentOpen}
-        onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
+        onHelpMenuVisibilityChange={onHelpMenuVisibilityChange}
       />
     </>
   );

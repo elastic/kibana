@@ -15,6 +15,7 @@ import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_t
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
+import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
 
 const mockGetDefaultControlColumn = jest.fn();
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
@@ -144,7 +145,7 @@ describe('EventsQueryTabBody', () => {
     );
 
     expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
-      'event.action'
+      DEFAULT_EVENTS_STACK_BY_VALUE
     );
   });
 

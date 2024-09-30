@@ -4,12 +4,20 @@ exports[`TableActions getFieldCellActions should render correctly for undefined 
 Array [
   <ToggleColumn
     Component={[Function]}
+    isEsqlMode={false}
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
         "columnsMeta": undefined,
-        "dataViewField": undefined,
-        "flattenedValue": "flattenedField",
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
       }
@@ -24,12 +32,20 @@ exports[`TableActions getFieldCellActions should render the panels correctly for
 Array [
   <FilterExist
     Component={[Function]}
+    isEsqlMode={false}
     onFilter={[MockFunction]}
     row={
       FieldRow {
         "columnsMeta": undefined,
-        "dataViewField": undefined,
-        "flattenedValue": "flattenedField",
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
       }
@@ -37,12 +53,20 @@ Array [
   />,
   <ToggleColumn
     Component={[Function]}
+    isEsqlMode={false}
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
         "columnsMeta": undefined,
-        "dataViewField": undefined,
-        "flattenedValue": "flattenedField",
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
       }
@@ -57,12 +81,20 @@ exports[`TableActions getFieldValueCellActions should render the panels correctl
 Array [
   <FilterIn
     Component={[Function]}
+    isEsqlMode={false}
     onFilter={[MockFunction]}
     row={
       FieldRow {
         "columnsMeta": undefined,
-        "dataViewField": undefined,
-        "flattenedValue": "flattenedField",
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
       }
@@ -70,12 +102,20 @@ Array [
   />,
   <FilterOut
     Component={[Function]}
+    isEsqlMode={false}
     onFilter={[MockFunction]}
     row={
       FieldRow {
         "columnsMeta": undefined,
-        "dataViewField": undefined,
-        "flattenedValue": "flattenedField",
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
       }

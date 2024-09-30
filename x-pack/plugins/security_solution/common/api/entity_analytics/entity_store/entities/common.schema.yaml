@@ -38,6 +38,8 @@ components:
               type: array
               items:
                 type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
           required:
             - name
         entity:
@@ -67,6 +69,8 @@ components:
               format: date-time
             definitionId:
               type: string
+            source:
+              type: string
           required:
             - lastSeenTimestamp
             - schemaVersion
@@ -77,6 +81,14 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+            - source
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
     HostEntity:
       type: object
       properties:
@@ -113,8 +125,11 @@ components:
               type: array
               items:
                 type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
           required:
             - name
+
         entity:
           type: object
           properties:
@@ -142,6 +157,8 @@ components:
               format: date-time
             definitionId:
               type: string
+            source:
+              type: string
           required:
             - lastSeenTimestamp
             - schemaVersion
@@ -152,6 +169,13 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
 
     Entity:
       oneOf:
