@@ -15,7 +15,7 @@ import datemath from '@elastic/datemath';
 
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Router } from '@kbn/shared-ux-router';
-import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import { LogRateAnalysisReduxProvider } from '@kbn/aiops-log-rate-analysis/state';
@@ -97,7 +97,7 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
 
   const aiopsAppContextValue = useMemo<AiopsAppDependencies>(() => {
     return {
-      embeddingOrigin: embeddingOrigin ?? EMBEDDABLE_ORIGIN,
+      embeddingOrigin: embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN,
       ...deps,
     } as unknown as AiopsAppDependencies;
   }, [deps, embeddingOrigin]);
@@ -157,7 +157,7 @@ const LogRateAnalysisWrapper: FC<LogRateAnalysisPropsWithDeps> = ({
                   <DatePickerContextProvider {...datePickerDeps}>
                     <LogRateAnalysisDocumentCountChartData timeRange={timeRangeParsed} />
                     <LogRateAnalysisContent
-                      embeddingOrigin={embeddingOrigin ?? EMBEDDABLE_ORIGIN}
+                      embeddingOrigin={embeddingOrigin ?? AIOPS_EMBEDDABLE_ORIGIN}
                     />
                   </DatePickerContextProvider>
                 </LogRateAnalysisReduxProvider>

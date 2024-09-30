@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * AIOPS_PLUGIN_ID is used as a unique identifier for the aiops plugin
  */
@@ -28,3 +30,14 @@ export const AIOPS_EMBEDDABLE_ORIGIN = {
   DISCOVER: 'discover',
   ML_AIOPS_LABS: 'ml_aiops_labs',
 } as const;
+
+export const AIOPS_EMBEDDABLE_GROUPING = [
+  {
+    id: 'logs-aiops',
+    getDisplayName: () =>
+      i18n.translate('xpack.aiops.embedabble.groupingDisplayName', {
+        defaultMessage: 'Logs AIOps',
+      }),
+    getIconType: () => 'machineLearningApp',
+  },
+];
