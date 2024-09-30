@@ -7,8 +7,7 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
+import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../assistant/prompt/translations';
 
 export interface Props {
   rawData: string;

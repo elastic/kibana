@@ -9,11 +9,11 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { SAME_FAMILY } from '../same_family/translations';
 import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { eventCategory } from '../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EcsBasedFieldMetadata } from '../../../../../../../../../types';
 import { getIncompatibleMappingsTableColumns } from '.';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
 
 describe('getIncompatibleMappingsTableColumns', () => {
   test('it returns the expected column configuration', () => {
@@ -97,7 +97,7 @@ describe('getIncompatibleMappingsTableColumns', () => {
       });
 
       test('it renders the same family badge', () => {
-        expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY);
+        expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY_BADGE_LABEL);
       });
     });
 

@@ -229,7 +229,7 @@ describe('EditableTitle', () => {
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
-    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+    expect(wrapper.find('div.euiFormErrorText').text()).toBe(
       'The length of the title is too long. The maximum length is 160 characters.'
     );
 
@@ -256,7 +256,7 @@ describe('EditableTitle', () => {
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
-    expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
+    expect(wrapper.find('div.euiFormErrorText').text()).toBe('A name is required.');
 
     expect(submitTitle).not.toHaveBeenCalled();
     expect(
@@ -284,7 +284,7 @@ describe('EditableTitle', () => {
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
-    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+    expect(wrapper.find('div.euiFormErrorText').text()).toBe(
       'The length of the title is too long. The maximum length is 160 characters.'
     );
 

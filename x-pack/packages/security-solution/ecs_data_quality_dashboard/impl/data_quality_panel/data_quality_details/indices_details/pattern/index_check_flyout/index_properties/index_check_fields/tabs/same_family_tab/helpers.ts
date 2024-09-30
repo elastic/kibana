@@ -17,9 +17,9 @@ import {
   getIncompatibleMappingsMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
-  getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
-} from '../../../markdown/helpers';
+  getSummaryTableMarkdownComment,
+} from '../../utils/markdown';
 import * as i18n from '../../../translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
 import type {

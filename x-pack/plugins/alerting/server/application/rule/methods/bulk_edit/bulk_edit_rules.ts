@@ -16,7 +16,7 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { RuleAction, RuleSystemAction } from '../../../../../common';
+import { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
@@ -505,7 +505,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     validateScheduleInterval(context, updatedRule.schedule.interval, ruleType.id, rule.id);
 
     const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-      ? await paramsModifier(updatedRule.params)
+      ? // TODO (http-versioning): Remove the cast when all rule types are fixed
+        await paramsModifier(updatedRule as Rule<Params>)
       : {
           modifiedParams: updatedRule.params,
           isParamsUpdateSkipped: true,
@@ -594,6 +595,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.BULK_EDIT,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.attributes?.name },
         error,
       })
     );

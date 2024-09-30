@@ -126,13 +126,10 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
-    if (!error.response?.status) {
-      return 'Unknown API Error';
+    if (error.response?.statusText) {
+      return `API Error: ${error.response?.statusText}`;
     }
-    if (error.response.status === 401) {
-      return 'Unauthorized API Error';
-    }
-    return `API Error: ${error.response?.statusText}`;
+    return error.toString();
   }
 
   public async getStories(

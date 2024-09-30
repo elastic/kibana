@@ -28,15 +28,17 @@ const ShardsPolicyFieldComponent = ({
 }: ShardsPolicyFieldComponent) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
-  const policyFieldValidator = useCallback(
-    (policy: { key: string; label: string }) =>
-      !policy
-        ? i18n.translate('xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage', {
-            defaultMessage: 'Policy is a required field',
-          })
-        : undefined,
+  const missingValueError = i18n.translate(
+    'xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage',
+    {
+      defaultMessage: 'Policy is a required field',
+    }
+  );
 
-    []
+  const policyFieldValidator = useCallback(
+    (policy: { key: string; label: string }) => (!policy ? missingValueError : undefined),
+
+    [missingValueError]
   );
 
   const {
@@ -47,6 +49,7 @@ const ShardsPolicyFieldComponent = ({
     name: `shardsArray.${index}.policy`,
     rules: {
       validate: policyFieldValidator,
+      required: missingValueError,
     },
   });
 

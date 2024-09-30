@@ -44,6 +44,7 @@ import {
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 interface AddTimelineNoteParams {
   id: string;
@@ -841,7 +842,7 @@ const updateProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -875,7 +876,7 @@ const updateAndProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -909,7 +910,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }
 
 export const updateTimelineProviderProperties = ({

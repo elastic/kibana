@@ -6,9 +6,9 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { EcsNodeParams } from './types';
 import { EcsMappingState } from '../../types';
 import { ECS_MISSING_KEYS_PROMPT } from './prompts';
+import { EcsNodeParams } from './types';
 
 export async function handleMissingKeys({
   state,
@@ -16,14 +16,19 @@ export async function handleMissingKeys({
 }: EcsNodeParams): Promise<Partial<EcsMappingState>> {
   const outputParser = new JsonOutputParser();
   const ecsMissingGraph = ECS_MISSING_KEYS_PROMPT.pipe(model).pipe(outputParser);
+  const usesFinalMapping = state?.useFinalMapping;
+  const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
 
-  const currentMapping = await ecsMissingGraph.invoke({
+  const result = await ecsMissingGraph.invoke({
     ecs: state.ecs,
-    current_mapping: JSON.stringify(state.currentMapping, null, 2),
+    current_mapping: JSON.stringify(mapping, null, 2),
     ex_answer: state.exAnswer,
     combined_samples: state.combinedSamples,
     missing_keys: state?.missingKeys,
   });
 
-  return { currentMapping, lastExecutedChain: 'missingKeys' };
+  return {
+    [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,
+    lastExecutedChain: 'missingKeys',
+  };
 }

@@ -15,27 +15,6 @@ export const BODY = i18n.translate(
   }
 );
 
-export const COLD = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptColdLabel',
-  {
-    defaultMessage: 'cold',
-  }
-);
-
-export const FROZEN = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptFrozenLabel',
-  {
-    defaultMessage: 'frozen',
-  }
-);
-
-export const HOT = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptHotLabel',
-  {
-    defaultMessage: 'hot',
-  }
-);
-
 export const ILM_PHASES_THAT_CAN_BE_CHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptIlmPhasesThatCanBeCheckedSubtitle',
   {
@@ -55,20 +34,6 @@ export const THE_FOLLOWING_ILM_PHASES = i18n.translate(
   {
     defaultMessage:
       'The following ILM phases cannot be checked for data quality because they are slower to access',
-  }
-);
-
-export const UNMANAGED = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptUnmanagedLabel',
-  {
-    defaultMessage: 'unmanaged',
-  }
-);
-
-export const WARM = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhasesEmptyPromptWarmLabel',
-  {
-    defaultMessage: 'warm',
   }
 );
 

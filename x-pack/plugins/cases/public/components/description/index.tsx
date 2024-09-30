@@ -21,7 +21,7 @@ import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from '../user_actions/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
-import type { EditableMarkdownRefObject, EuiMarkdownEditorRef } from '../markdown_editor';
+import type { EditableMarkdownRefObject, MarkdownEditorRef } from '../markdown_editor';
 import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
@@ -30,7 +30,7 @@ import { schema } from './schema';
 const DESCRIPTION_ID = 'description';
 
 export interface DescriptionMarkdownRefObject extends EditableMarkdownRefObject {
-  editor: EuiMarkdownEditorRef | null;
+  editor: MarkdownEditorRef | null;
 }
 export interface DescriptionProps {
   caseData: CaseUI;

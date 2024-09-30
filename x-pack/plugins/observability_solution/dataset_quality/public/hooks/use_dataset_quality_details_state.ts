@@ -21,8 +21,14 @@ export const useDatasetQualityDetailsState = () => {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { dataStream, degradedFields, timeRange, breakdownField, isIndexNotFoundError } =
-    useSelector(service, (state) => state.context) ?? {};
+  const {
+    dataStream,
+    degradedFields,
+    timeRange,
+    breakdownField,
+    isIndexNotFoundError,
+    expandedDegradedField,
+  } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
     state.matches('initializing.nonAggregatableDataset.done')
@@ -143,5 +149,6 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
+    expandedDegradedField,
   };
 };

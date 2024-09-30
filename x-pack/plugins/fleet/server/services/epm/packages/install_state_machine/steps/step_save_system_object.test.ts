@@ -91,7 +91,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.2.0',
+          install_format_schema_version: '1.3.0',
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],
@@ -157,7 +157,7 @@ describe('updateLatestExecutedState', () => {
         'epm-packages',
         'test-integration',
         {
-          install_format_schema_version: '1.2.0',
+          install_format_schema_version: '1.3.0',
           install_status: 'installed',
           install_version: '1.0.0',
           latest_install_failed_attempts: [],

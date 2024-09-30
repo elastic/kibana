@@ -491,6 +491,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -498,13 +499,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
-          logger: this.logger,
+          logger,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -769,6 +771,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
@@ -776,6 +779,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,

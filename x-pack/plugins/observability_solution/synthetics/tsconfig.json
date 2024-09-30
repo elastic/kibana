@@ -98,7 +98,9 @@
     "@kbn/presentation-util-plugin",
     "@kbn/core-application-browser",
     "@kbn/dashboard-plugin",
-    "@kbn/slo-plugin"
+    "@kbn/slo-plugin",
+    "@kbn/ebt-tools",
+    "@kbn/alerting-types"
   ],
   "exclude": ["target/**/*"]
 }

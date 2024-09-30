@@ -69,6 +69,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     }
     validator={
       RoleValidator {
+        "buildFlavor": undefined,
         "shouldValidate": undefined,
       }
     }

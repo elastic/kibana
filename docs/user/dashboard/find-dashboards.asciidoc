@@ -1,5 +1,5 @@
 [[find-dashboards]]
-== Search and filter dashboards
+= Browse dashboards
 
 When looking for specific dashboards to open or share, several actions are available to you to help you find them quicker.
 
@@ -25,5 +25,5 @@ image::images/dashboard-filter-by-creator.png[Option to filter the list of dashb
 
 **Sort by name or last update date**
 
-You can sort the dashboard list based on their name or their last update date. 
+By default, your most recently viewed dashboards are displayed first. You can instead sort the dashboard list based on their name or their last update date. 
 

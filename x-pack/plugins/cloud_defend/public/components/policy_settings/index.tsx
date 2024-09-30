@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiHorizontalRule,
+  EuiSwitchProps,
 } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../../common/utils/helpers';
@@ -27,7 +28,7 @@ export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
   const [policyHasErrors, setPolicyHasErrors] = useState(false);
   const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
   const controlEnabled = !!controlInput?.enabled;
-  const onToggleEnabled = useCallback(
+  const onToggleEnabled = useCallback<EuiSwitchProps['onChange']>(
     (e) => {
       if (controlInput) {
         controlInput.enabled = e.target.checked;

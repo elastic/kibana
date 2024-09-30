@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -18,11 +19,12 @@ import type {
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -46,6 +48,8 @@ import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/t
 import { removeMarkerArgFromArgsList } from './context';
 import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
+import { EDITOR_MARKER } from './constants';
+import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -135,12 +139,14 @@ let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionDefinitions,
-        statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        scalarFunctionDefinitions,
+        aggregationFunctionDefinitions,
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -417,8 +423,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -634,6 +640,16 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+/**
+ * Returns the word at the end of the text if there is one.
+ * @param text
+ * @returns
+ */
+export function findFinalWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 1];
+}
+
 export function shouldBeQuotedSource(text: string) {
   // Based on lexer `fragment UNQUOTED_SOURCE_PART`
   return /[:"=|,[\]\/ \t\r\n]/.test(text);
@@ -658,3 +674,73 @@ export const isParam = (x: unknown): x is ESQLParamLiteral =>
  * Compares two strings in a case-insensitive manner
  */
 export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+
+/**
+ * This function count the number of unclosed brackets in order to
+ * locally fix the queryString to generate a valid AST
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
+ * @param bracketType
+ * @param text
+ * @returns
+ */
+export function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
+  const stack = [];
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
+      stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
+    }
+  }
+  return stack.length;
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+export function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
+  const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
+  // if it's a comma by the user or a forced trigger by a function argument suggestion
+  // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
+    isComma(query.trimEnd()[query.trimEnd().length - 1])
+  ) {
+    query += EDITOR_MARKER;
+  }
+
+  // if there are unclosed brackets, close them
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+    for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
+      ['"', unclosedQuotes],
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        query += Array(count).fill(char).join('');
+      }
+    }
+  }
+
+  return query;
+}

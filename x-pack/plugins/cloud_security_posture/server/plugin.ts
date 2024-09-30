@@ -24,6 +24,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  CspBenchmarkRule,
+  CspSettings,
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -47,7 +51,6 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
 
 export class CspPlugin
   implements

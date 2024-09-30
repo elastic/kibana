@@ -7,7 +7,6 @@
 import { omit, orderBy } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
 import {
@@ -25,6 +24,7 @@ export function registerChangesFunction({
     logger,
     context: { core: corePromise },
   },
+  pluginsStart,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
@@ -41,7 +41,11 @@ export function registerChangesFunction({
 
       const core = await corePromise;
 
-      const logsIndexPattern = await core.uiSettings.client.get(aiAssistantLogsIndexPattern);
+      const logSourcesService =
+        await pluginsStart.logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+          core.savedObjects.client
+        );
+      const logsIndexPattern = await logSourcesService.getFlattenedLogSources();
 
       const client = createElasticsearchClient({
         client: core.elasticsearch.client.asCurrentUser,
@@ -145,6 +149,7 @@ export function registerChangesFunction({
           },
         },
       };
-    }
+    },
+    ['observability']
   );
 }

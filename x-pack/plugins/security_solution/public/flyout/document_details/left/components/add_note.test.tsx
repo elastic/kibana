@@ -55,23 +55,23 @@ describe('AddNote', () => {
     expect(getByTestId(ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should create note', () => {
+  it('should create note', async () => {
     const { getByTestId } = renderAddNote();
 
-    userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
     getByTestId(ADD_NOTE_BUTTON_TEST_ID).click();
 
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it('should disable add button markdown editor if invalid', () => {
+  it('should disable add button markdown editor if invalid', async () => {
     const { getByTestId } = renderAddNote();
 
     const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
 
     expect(addButton).toHaveAttribute('disabled');
 
-    userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
 
     expect(addButton).not.toHaveAttribute('disabled');
   });

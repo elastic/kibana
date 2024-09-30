@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { keyBy, merge, values } from 'lodash';
 import {
   DataStreamDetails,
   DataStreamSettings,
@@ -15,8 +14,9 @@ import {
   NonAggregatableDatasets,
   DegradedFieldResponse,
   DatasetUserPrivileges,
+  DegradedFieldValues,
 } from '../../../common/api_types';
-import { rangeRt, typeRt } from '../../types/default_api_types';
+import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { datasetQualityPrivileges } from '../../services';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
@@ -25,12 +25,13 @@ import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { getDegradedFields } from './get_degraded_fields';
+import { getDegradedFieldValues } from './get_degraded_field_values';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         datasetQuery: t.string,
       }),
@@ -45,29 +46,37 @@ const statsRoute = createDatasetQualityServerRoute({
   }> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const { items, datasetUserPrivileges } = await getDataStreams({
+    const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
     });
 
-    const privilegedDataStreams = items.filter((stream) => {
-      return stream.userPrivileges.canMonitor;
+    const privilegedDataStreams = dataStreams.filter((dataStream) => {
+      return dataStream.userPrivileges.canMonitor;
     });
-    const dataStreamsStats = await getDataStreamsStats({
-      esClient,
-      dataStreams: privilegedDataStreams.map((stream) => stream.name),
-      sizeStatsAvailable,
-    });
+
+    const dataStreamsStats = isServerless
+      ? {}
+      : await getDataStreamsStats({
+          esClient,
+          dataStreams: privilegedDataStreams.map((stream) => stream.name),
+        });
 
     return {
       datasetUserPrivileges,
-      dataStreamsStats: values(merge(keyBy(items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
+        dataStream.size = dataStreamsStats[dataStream.name]?.size;
+        dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
+        dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
+
+        return dataStream;
+      }),
     };
   },
 });
@@ -116,11 +125,35 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         dataStream: t.string,
       }),
     ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<NonAggregatableDatasets> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getNonAggregatableDataStreams({
+      esClient,
+      ...params.query,
+    });
+  },
+});
+
+const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    query: t.intersection([rangeRt, typeRt]),
   }),
   options: {
     tags: [],
@@ -136,6 +169,7 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
     return await getNonAggregatableDataStreams({
       esClient,
       ...params.query,
+      types: [params.query.type],
     });
   },
 });
@@ -162,6 +196,33 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
       esClient,
       dataStream,
       ...params.query,
+    });
+  },
+});
+
+const degradedFieldValuesRoute = createDatasetQualityServerRoute({
+  endpoint:
+    'GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+      degradedField: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DegradedFieldValues> {
+    const { context, params } = resources;
+    const { dataStream, degradedField } = params.path;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getDegradedFieldValues({
+      esClient,
+      dataStream,
+      degradedField,
     });
   },
 });
@@ -213,13 +274,13 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
       start,
       end,
-      sizeStatsAvailable,
+      isServerless,
     });
 
     return dataStreamDetails;
@@ -230,7 +291,9 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...nonAggregatableDatasetsRoute,
+  ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,
+  ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
 };

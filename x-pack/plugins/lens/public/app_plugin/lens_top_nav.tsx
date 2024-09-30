@@ -8,9 +8,9 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -803,7 +803,9 @@ export const LensTopNavMenu = ({
     startServices,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
+  const onQuerySubmitWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onQuerySubmit']
+  >(
     (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
@@ -819,7 +821,7 @@ export const LensTopNavMenu = ({
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
-          dispatchSetState({ query: newQuery });
+          dispatchSetState({ query: newQuery as Query });
           // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
@@ -846,14 +848,16 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const onSavedWrapped = useCallback(
+  const onSavedWrapped = useCallback<Required<TopNavMenuProps<AggregateQuery>>['onSaved']>(
     (newSavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
-  const onSavedQueryUpdatedWrapped = useCallback(
+  const onSavedQueryUpdatedWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
+  >(
     (newSavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen

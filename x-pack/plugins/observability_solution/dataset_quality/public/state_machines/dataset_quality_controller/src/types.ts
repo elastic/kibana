@@ -6,18 +6,23 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { QualityIndicators, TableCriteria, TimeRangeConfig } from '../../../../common/types';
 import { DatasetUserPrivileges, NonAggregatableDatasets } from '../../../../common/api_types';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DatasetTableSortField } from '../../../hooks';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
-  DataStreamStatServiceResponse,
   DataStreamStat,
+  DataStreamStatServiceResponse,
   DataStreamStatType,
 } from '../../../../common/data_streams_stats';
+import { Integration } from '../../../../common/data_streams_stats/integration';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
+import {
+  DataStreamType,
+  QualityIndicators,
+  TableCriteria,
+  TimeRangeConfig,
+} from '../../../../common/types';
+import { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -26,6 +31,7 @@ interface FiltersCriteria {
   integrations: string[];
   namespaces: string[];
   qualities: QualityIndicators[];
+  types: string[];
   query?: string;
 }
 
@@ -37,13 +43,15 @@ export interface WithFilters {
   filters: FiltersCriteria;
 }
 
+export type DictionaryType<T> = Record<DataStreamType, T[]>;
+
 export interface WithDataStreamStats {
   datasetUserPrivileges: DatasetUserPrivileges;
   dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
-  degradedDocStats: DegradedDocsStat[];
+  degradedDocStats: DictionaryType<DegradedDocsStat>;
 }
 
 export interface WithNonAggregatableDatasets {
@@ -59,9 +67,9 @@ export interface WithIntegrations {
   integrations: Integration[];
 }
 
-export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
+export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
-  Partial<WithDegradedDocs> &
+  WithDegradedDocs &
   WithDatasets &
   WithFilters &
   WithNonAggregatableDatasets &
@@ -71,19 +79,19 @@ type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'datasets.fetching';
+      value: 'stats.datasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded';
+      value: 'stats.datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.idle';
+      value: 'stats.degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'degradedDocs.fetching';
+      value: 'stats.nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -134,6 +142,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_QUERY';
       query: string;
+    }
+  | {
+      type: 'UPDATE_TYPES';
+      types: DataStreamType[];
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<NonAggregatableDatasets>

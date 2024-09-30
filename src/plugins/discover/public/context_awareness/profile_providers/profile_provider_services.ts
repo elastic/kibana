@@ -1,27 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/**
+ * Dependencies required by profile provider implementations
+ */
 export interface ProfileProviderDeps {
-  // We will probably soon add uiSettings as a dependency
-  // to consume user configured indices
+  logsDataAccessPlugin?: LogsDataAccessPluginStart;
 }
 
+/**
+ * Services provided to profile provider implementations
+ */
 export interface ProfileProviderServices {
+  /**
+   * A service containing methods used for logs profiles
+   */
   logsContextService: LogsContextService;
 }
 
-export const createProfileProviderServices = (
-  _deps: ProfileProviderDeps = {}
-): ProfileProviderServices => {
+/**
+ * Creates the profile provider services
+ * @param _deps Profile provider dependencies
+ * @returns Profile provider services
+ */
+export const createProfileProviderServices = async (
+  deps: ProfileProviderDeps = {}
+): Promise<ProfileProviderServices> => {
   return {
-    logsContextService: createLogsContextService(),
+    logsContextService: await createLogsContextService({
+      logsDataAccessPlugin: deps.logsDataAccessPlugin,
+    }),
   };
 };

@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '@kbn/cloud-security-posture-common';
-import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspRouter } from '../../../types';
 import { getCspBenchmarkRulesStatesHandler } from './v1';
 
@@ -26,9 +26,6 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
         validate: {},
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
         const cspContext = await context.csp;
 
         try {

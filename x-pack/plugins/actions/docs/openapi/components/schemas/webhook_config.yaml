@@ -1,0 +1,31 @@
+title: Connector request properties for a Webhook connector
+description: Defines properties for connectors when type is `.webhook`.
+type: object
+properties:
+  authType:
+    $ref: 'auth_type.yaml'
+  ca:
+    $ref: 'ca.yaml'
+  certType:
+    $ref: 'cert_type.yaml'
+  hasAuth:
+    $ref: 'has_auth.yaml'
+  headers:
+    type: object
+    nullable: true
+    description: A set of key-value pairs sent as headers with the request.
+  method:
+    type: string
+    default: post
+    enum:
+      - post
+      - put
+    description: >
+      The HTTP request method, either `post` or `put`.
+  url:
+    type: string
+    description: >
+      The request URL.
+      If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+  verificationMode:
+    $ref: 'verification_mode.yaml'

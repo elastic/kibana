@@ -47,6 +47,7 @@ properties:
         - enabled
   policy_id:
     type: string
+    nullable: true
     deprecated: true
   policy_ids:
     type: array

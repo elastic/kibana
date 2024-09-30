@@ -141,6 +141,35 @@ describe('GeminiConnector', () => {
 
         expect(response).toEqual(connectorResponse);
       });
+
+      describe('RunApiResponseSchema', () => {
+        it('successfully validates a response that only has known properties', () => {
+          const onlyKnownProperties = {
+            ...defaultResponse.data,
+          };
+
+          expect(RunApiResponseSchema.validate(onlyKnownProperties)).toEqual(onlyKnownProperties);
+        });
+
+        it('fails validation when the response does NOT conform to the schema', () => {
+          const missingRequiredFields = {
+            // missing candidates and usageMetadata
+          };
+
+          expect(() => RunApiResponseSchema.validate(missingRequiredFields)).toThrowError();
+        });
+
+        it('removes unknown properties, but does NOT fail validation when they are present', () => {
+          const hasUnknownProperties = {
+            ...defaultResponse.data,
+            modelVersion: '1.0.0', // <-- an unknown property
+          };
+
+          expect(RunApiResponseSchema.validate(hasUnknownProperties)).toEqual({
+            ...defaultResponse.data,
+          });
+        });
+      });
     });
 
     describe('invokeAI', () => {
@@ -239,6 +268,10 @@ describe('GeminiConnector', () => {
             content: 'What is the capital of France?',
           },
         ],
+        toolConfig: {
+          mode: 'ANY' as const,
+          allowedFunctionNames: ['foo', 'bar'],
+        },
       };
 
       it('the API call is successful with correct request parameters', async () => {
@@ -259,6 +292,12 @@ describe('GeminiConnector', () => {
               generation_config: {
                 temperature: 0,
                 maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
@@ -298,6 +337,12 @@ describe('GeminiConnector', () => {
               generation_config: {
                 temperature: 0,
                 maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },

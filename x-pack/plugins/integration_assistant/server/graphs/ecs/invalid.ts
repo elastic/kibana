@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { EcsNodeParams } from './types';
 import type { EcsMappingState } from '../../types';
 import { ECS_INVALID_PROMPT } from './prompts';
+import type { EcsNodeParams } from './types';
 
 export async function handleInvalidEcs({
   state,
@@ -15,14 +15,19 @@ export async function handleInvalidEcs({
 }: EcsNodeParams): Promise<Partial<EcsMappingState>> {
   const outputParser = new JsonOutputParser();
   const ecsInvalidEcsGraph = ECS_INVALID_PROMPT.pipe(model).pipe(outputParser);
+  const usesFinalMapping = state?.useFinalMapping;
+  const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
 
-  const currentMapping = await ecsInvalidEcsGraph.invoke({
+  const result = await ecsInvalidEcsGraph.invoke({
     ecs: state.ecs,
-    current_mapping: JSON.stringify(state.currentMapping, null, 2),
+    current_mapping: JSON.stringify(mapping, null, 2),
     ex_answer: state.exAnswer,
     combined_samples: state.combinedSamples,
     invalid_ecs_fields: state.invalidEcsFields,
   });
 
-  return { currentMapping, lastExecutedChain: 'invalidEcs' };
+  return {
+    [usesFinalMapping ? 'finalMapping' : 'currentMapping']: result,
+    lastExecutedChain: 'invalidEcs',
+  };
 }
