@@ -13,11 +13,12 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
-export { getDisplayedColumns } from './src/utils/columns';
+export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export { ROWS_HEIGHT_OPTIONS, DataGridDensity } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
+export { SourceDocument } from './src/components/source_document';
 
 export * from './src/types';
 export * as columnActions from './src/components/actions/columns';
@@ -37,3 +38,6 @@ export {
   getRenderCustomToolbarWithElements,
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
+
+export { getDataGridDensity } from './src/hooks/use_data_grid_density';
+export { getRowHeight } from './src/hooks/use_row_height';
