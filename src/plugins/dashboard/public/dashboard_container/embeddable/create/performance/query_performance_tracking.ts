@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, map, pairwise, startWith, switchMap } from 'rxjs';
+import { combineLatest, map, pairwise, startWith, switchMap, skipWhile } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
@@ -82,6 +82,7 @@ export function startQueryPerformanceTracking(
         dashboard.lastLoadStartTime = now;
         return;
       }
+
       if (queryHasFinished) {
         const timeToData = now - (dashboard.lastLoadStartTime ?? now);
         const completeLoadDuration =
@@ -120,6 +121,5 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
   };
-  console.log('kibana_loaded', e);
   reportPerformanceMetricEvent(coreServices.analytics, e);
 }
