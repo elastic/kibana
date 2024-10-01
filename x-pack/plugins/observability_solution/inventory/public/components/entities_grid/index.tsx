@@ -168,11 +168,14 @@ export function EntitiesGrid({
 
       if (!cloudProvider) return null;
 
+      const formattedCloudProvider =
+        typeof cloudProvider === 'string' ? cloudProvider : cloudProvider[0];
+
       return (
         <CloudProviderIcon
-          cloudProvider={cloudProvider}
+          cloudProvider={formattedCloudProvider}
           size="m"
-          title={cloudProvider}
+          title={formattedCloudProvider}
           role="presentation"
         />
       );
