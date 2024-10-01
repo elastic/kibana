@@ -27,14 +27,10 @@
     "@kbn/i18n",
     "@kbn/management-settings-ids",
     "@kbn/security-plugin",
-    "@kbn/ui-theme",
     "@kbn/actions-plugin",
-    "@kbn/user-profile-components",
-    "@kbn/core-http-browser",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/i18n-react",
-    "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/data-views-plugin",
     "@kbn/lens-embeddable-utils",
@@ -80,7 +76,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/inference-plugin",
     "@kbn/logs-data-access-plugin",
-    "@kbn/ai-assistant"
+    "@kbn/ai-assistant",
+    "@kbn/observability-ai-assistant-app-plugin"
   ],
   "exclude": [
     "target/**/*"
