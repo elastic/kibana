@@ -11,6 +11,10 @@ import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api
 import _ from 'lodash';
 import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
+  CRITICALITY_VALUES,
+  CriticalityValues,
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import {
   cleanRiskEngine,
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
@@ -384,9 +388,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('bulk upload', () => {
-      const expectAssetCriticalityDocMatching = async (
-        expectedDoc: AssetCriticalityRecordWithoutTimestamp
-      ) => {
+      const expectAssetCriticalityDocMatching = async (expectedDoc: {
+        id_field: string;
+        id_value: string;
+      }) => {
         const esDoc = await getAssetCriticalityDoc({
           es,
           idField: expectedDoc.id_field,
@@ -489,7 +494,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should correctly delete asset criticality if it exists', async () => {
-        const assetCriticality = {
+        const assetCriticality: CreateAssetCriticalityRecord = {
           id_field: 'host.name',
           id_value: 'delete-me',
           criticality_level: 'high_impact',
@@ -507,9 +512,11 @@ export default ({ getService }: FtrProviderContext) => {
           es,
         });
 
-        const deletedDoc = { ...assetCriticality, criticality_level: 'deleted' };
-
-        expect(_.omit(doc, '@timestamp')).to.eql(deletedDoc);
+        const deletedDoc = {
+          ...assetCriticality,
+          criticality_level: CRITICALITY_VALUES.DELETED,
+        };
+        expect(_.omit(doc, '@timestamp')).to.eql(assetCreateTypeToAssetRecord(deletedDoc));
       });
 
       it('should not return 404 if the asset criticality does not exist', async () => {
@@ -530,21 +537,22 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-type AssetCriticalityRecordWithoutTimestamp = Omit<AssetCriticalityRecord, '@timestamp'>;
+// Update type to allow 'deleted' value
+type CreateAssetCriticalityRecordWithDeleted = {
+  [K in keyof CreateAssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
 
-const assetCreateTypeToAssetRecord = (
-  asset: CreateAssetCriticalityRecord
-): AssetCriticalityRecordWithoutTimestamp => {
-  return {
-    ...asset,
+const assetCreateTypeToAssetRecord = (asset: CreateAssetCriticalityRecordWithDeleted) => ({
+  ...asset,
+  asset: {
+    criticality: asset.criticality_level,
+  },
+  host: {
+    name: asset.id_value,
     asset: {
       criticality: asset.criticality_level,
     },
-    host: {
-      name: asset.id_value,
-      asset: {
-        criticality: asset.criticality_level,
-      },
-    },
-  };
-};
+  },
+});

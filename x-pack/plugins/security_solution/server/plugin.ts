@@ -219,6 +219,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager,
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
+    }).catch((err) => {
+      logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
     const requestContextFactory = new RequestContextFactory({
