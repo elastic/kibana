@@ -184,7 +184,7 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
 export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
   const updatedPolicy = disableProtections(policy);
 
-  set(updatedPolicy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.disabled);
+  set(updatedPolicy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.sync);
   set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
 
   return updatedPolicy;

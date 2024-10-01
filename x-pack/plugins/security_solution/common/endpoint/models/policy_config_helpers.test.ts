@@ -181,7 +181,16 @@ describe('Policy Config helpers', () => {
         enabled: true,
         mode: AntivirusRegistrationModes.enabled,
       };
-      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual(eventsOnlyPolicy());
+      expect(ensureOnlyEventCollectionIsAllowed(policyConfig)).toEqual({
+        ...eventsOnlyPolicy(),
+        windows: {
+          ...eventsOnlyPolicy().windows,
+          antivirus_registration: {
+            ...eventsOnlyPolicy().windows.antivirus_registration,
+            mode: AntivirusRegistrationModes.sync,
+          },
+        },
+      });
     });
   });
 
