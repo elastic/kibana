@@ -65,7 +65,9 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   },
   'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    const vendor = getVendorName(finding?.data_stream?.dataset);
+    if (!finding) return <>{''}</>;
+
+    const vendor = getVendorName(finding);
 
     return <>{vendor || ''}</>;
   },

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 
 export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
