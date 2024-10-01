@@ -67,7 +67,7 @@ jest
   });
 
 describe('useAdditionalCellActions', () => {
-  const initialProps: Parameters<typeof useAdditionalCellActions>[0] = {
+  const initialProps: React.PropsWithChildren<Parameters<typeof useAdditionalCellActions>[0]> = {
     dataSource: createEsqlDataSource(),
     dataView: dataViewWithTimefieldMock,
     query: { esql: `FROM ${dataViewWithTimefieldMock.getIndexPattern()}` },

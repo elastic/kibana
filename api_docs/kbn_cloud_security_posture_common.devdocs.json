@@ -17,7 +17,115 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.UiMetricService",
+        "type": "Class",
+        "tags": [],
+        "label": "UiMetricService",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.UiMetricService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(usageCollection: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.UiMetricService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "usageCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageCollection",
+                    "scope": "public",
+                    "docId": "kibUsageCollectionPluginApi",
+                    "section": "def-public.UsageCollectionSetup",
+                    "text": "UsageCollectionSetup"
+                  }
+                ],
+                "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.UiMetricService.trackUiMetric",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUiMetric",
+            "description": [],
+            "signature": [
+              "(metricType: string, eventName: CloudSecurityUiCounters) => void"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.UiMetricService.trackUiMetric.$1",
+                "type": "string",
+                "tags": [],
+                "label": "metricType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cloud-security-posture-common",
+                "id": "def-common.UiMetricService.trackUiMetric.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "eventName",
+                "description": [],
+                "signature": [
+                  "CloudSecurityUiCounters"
+                ],
+                "path": "x-pack/packages/kbn-cloud-security-posture-common/utils/ui_metrics.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",

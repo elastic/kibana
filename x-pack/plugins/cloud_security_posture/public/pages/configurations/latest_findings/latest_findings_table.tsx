@@ -14,6 +14,12 @@ import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elast
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { getVendorName } from '../../../common/utils/get_vendor_name';
+import {
+  OPEN_FINDINGS_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -49,7 +55,7 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   const finding = row.raw._source;
   if (!finding || !isCspFinding(finding)) return <></>;
-
+  uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
   return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
 };
 
