@@ -726,7 +726,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'selected'
         );
         expect(selectedFields.includes(newField)).to.be(false);
-        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
 
         await PageObjects.unifiedFieldList.clickFieldListItemAdd(newField);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -744,7 +744,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return !(await PageObjects.unifiedFieldList.getAllFieldNames()).includes(newField);
         });
 
-        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
       });
     });
   });
