@@ -11,9 +11,9 @@ import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-pl
 import * as http from 'http';
 import {
   deleteIndex,
-  addIndex,
   createPackagePolicy,
   createCloudDefendPackagePolicy,
+  bulkIndex,
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
@@ -38,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  // FLAKY: https://github.com/elastic/kibana/issues/188660
-  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
+  describe('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
@@ -117,7 +116,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 10,
       });
 
-      await addIndex(
+      await bulkIndex(
         es,
         [...billableFindings, ...notBillableFindings],
         LATEST_FINDINGS_INDEX_DEFAULT_NS
@@ -161,7 +160,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 11,
       });
 
-      await addIndex(
+      await bulkIndex(
         es,
         [...billableFindings, ...notBillableFindings],
         LATEST_FINDINGS_INDEX_DEFAULT_NS
@@ -200,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 2,
       });
 
-      await addIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+      await bulkIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -234,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         isBlockActionEnables: false,
         numberOfHearbeats: 2,
       });
-      await addIndex(
+      await bulkIndex(
         es,
         [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
@@ -316,7 +315,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       await Promise.all([
-        addIndex(
+        bulkIndex(
           es,
           [
             ...billableFindingsCSPM,
@@ -326,8 +325,8 @@ export default function (providerContext: FtrProviderContext) {
           ],
           LATEST_FINDINGS_INDEX_DEFAULT_NS
         ),
-        addIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
-        addIndex(
+        bulkIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
+        bulkIndex(
           es,
           [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
           CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
