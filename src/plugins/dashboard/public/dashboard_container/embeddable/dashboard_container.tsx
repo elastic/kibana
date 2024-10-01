@@ -856,6 +856,59 @@ export class DashboardContainer
     return titles;
   }
 
+  public setScrollToPanelId = (id: string | undefined) => {
+    this.dispatch.setScrollToPanelId(id);
+  };
+
+  public scrollToPanel = async (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.scrollToPanelId;
+    if (!id) return;
+
+    this.untilEmbeddableLoaded(id).then(() => {
+      this.setScrollToPanelId(undefined);
+      if (this.scrollPosition) {
+        panelRef.ontransitionend = () => {
+          // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
+          // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
+          window.scrollTo({ top: this.scrollPosition });
+          this.scrollPosition = undefined;
+          panelRef.ontransitionend = null;
+        };
+        return;
+      }
+
+      return panelRef.scrollIntoView({ block: 'nearest' });
+    });
+  };
+
+  public scrollToTop = () => {
+    window.scroll(0, 0);
+  };
+
+  public setHighlightPanelId = (id: string | undefined) => {
+    this.dispatch.setHighlightPanelId(id);
+  };
+
+  public highlightPanel = (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.highlightPanelId;
+
+    if (id && panelRef) {
+      this.untilEmbeddableLoaded(id).then(() => {
+        panelRef.classList.add('dshDashboardGrid__item--highlighted');
+        // Removes the class after the highlight animation finishes
+        setTimeout(() => {
+          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        }, 5000);
+      });
+    }
+    this.setHighlightPanelId(undefined);
+  };
+
+  public setFocusedPanelId = (id: string | undefined) => {
+    this.dispatch.setFocusedPanelId(id);
+    this.setScrollToPanelId(id);
+  };
+
   public setPanels = (panels: DashboardPanelMap) => {
     this.dispatch.setPanels(panels);
   };

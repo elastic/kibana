@@ -4,6 +4,10 @@
   * .embPanel--editing doesn't get updating without a hard refresh
   */
 
+  .dshDashboardGrid__item {
+    scroll-margin-top: calc(var(--euiFixedHeadersOffset, 100) * 4);
+  }
+
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {
@@ -53,7 +57,7 @@
   z-index: 999 !important;
 }
 
-// allows scrolling up on lens visualiztions in edit mode
-.coreSystemRootDomElement {
-  overflow-y: auto !important;
-}
+// // allows scrolling up on lens visualiztions in edit mode
+// .coreSystemRootDomElement {
+//   overflow-y: auto !important;
+// }
