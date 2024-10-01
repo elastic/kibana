@@ -127,7 +127,6 @@
     "@kbn/serverless",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/router-utils",
-    "@kbn/discover-utils",
     "@kbn/react-hooks",
   ],
   "exclude": ["target/**/*"]
