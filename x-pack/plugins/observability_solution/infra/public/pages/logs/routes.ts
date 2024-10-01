@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import {
+  logsAnomaliesTitle,
+  logCategoriesTitle,
+  settingsTitle,
+  streamTitle,
+} from '../../translations';
 
 export interface LogsRoute {
   id: string;
@@ -24,23 +29,17 @@ export const getLogsAppRoutes = ({ isLogsStreamEnabled }: { isLogsStreamEnabled:
   const routes: LogsAppRoutes = {
     logsAnomalies: {
       id: 'logs-anomalies',
-      title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-        defaultMessage: 'Logs Anomalies',
-      }),
+      title: logsAnomaliesTitle,
       path: '/anomalies',
     },
     logsCategories: {
       id: 'logs-categories',
-      title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-        defaultMessage: 'Logs Categories',
-      }),
+      title: logCategoriesTitle,
       path: '/log-categories',
     },
     settings: {
       id: 'settings',
-      title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-        defaultMessage: 'Settings',
-      }),
+      title: settingsTitle,
       path: '/settings',
     },
   };
@@ -48,9 +47,7 @@ export const getLogsAppRoutes = ({ isLogsStreamEnabled }: { isLogsStreamEnabled:
   if (isLogsStreamEnabled) {
     routes.stream = {
       id: 'stream',
-      title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-        defaultMessage: 'Stream',
-      }),
+      title: streamTitle,
       path: '/stream',
     };
   }
