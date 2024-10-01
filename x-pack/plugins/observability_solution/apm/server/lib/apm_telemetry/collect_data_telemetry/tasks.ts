@@ -515,7 +515,7 @@ export const tasks: TelemetryTask[] = [
                     sort: {
                       '@timestamp': 'asc',
                     },
-                    _fields: ['@timestamp'],
+                    fields: ['@timestamp'],
                   },
                 })
               : null;
