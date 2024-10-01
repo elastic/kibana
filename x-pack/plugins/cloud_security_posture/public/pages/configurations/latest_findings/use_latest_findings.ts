@@ -135,7 +135,6 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
           params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
-
       if (!aggregations) throw new Error('expected aggregations to be an defined');
       if (!Array.isArray(aggregations.count.buckets))
         throw new Error('expected buckets to be an array');
