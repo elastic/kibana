@@ -11,6 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
@@ -87,6 +88,10 @@ const NotesTelemetry = () => (
 );
 
 export const ManagementContainer = memo(() => {
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
   const {
     loading,
     canReadPolicyManagement,
@@ -157,7 +162,9 @@ export const ManagementContainer = memo(() => {
         hasPrivilege={canReadActionsLogManagement}
       />
 
-      <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+      {securitySolutionNotesEnabled && (
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+      )}
 
       {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>
