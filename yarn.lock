@@ -31572,7 +31572,7 @@ vega-expression@^5.0.1:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.1"
 
-vega-expression@^5.1.1, vega-expression@~5.1.0, vega-expression@~5.1.1:
+vega-expression@^5.1.1, vega-expression@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.1.1.tgz#9b2d287a1f34d990577c9798ae68ec88453815ef"
   integrity sha512-zv9L1Hm0KHE9M7mldHyz8sXbGu3KmC0Cdk7qfHkcTNS75Jpsem6jkbu6ZAwx5cNUeW91AxUQOu77r4mygq2wUQ==
@@ -31655,15 +31655,15 @@ vega-label@~1.3.0:
     vega-scenegraph "^4.13.0"
     vega-util "^1.17.2"
 
-vega-lite@^5.19.0:
-  version "5.20.1"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.20.1.tgz#b30a621c1e4d377d8ac061c0465876851a54236e"
-  integrity sha512-rpw6aT3NXR4bIdctPpK/V+FZAt1VNHMEnfF/TxaZDc4PDOzfYXiYOFf0zOMURUq/EyzFCkhBvtkf1MzmqlAz9g==
+vega-lite@^5.21.0:
+  version "5.21.0"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.21.0.tgz#21ce8b905a02ba364b7b1d7ef471497ba3e12e93"
+  integrity sha512-hNxM9nuMqpI1vkUOhEx6ewEf23WWLmJxSFJ4TA86AW43ixJyqcLV+iSCO0NipuVTE0rlDcc2e8joSewWyOlEwA==
   dependencies:
     json-stringify-pretty-compact "~3.0.0"
     tslib "~2.6.3"
     vega-event-selector "~3.0.1"
-    vega-expression "~5.1.0"
+    vega-expression "~5.1.1"
     vega-util "~1.17.2"
     yargs "~17.7.2"
 

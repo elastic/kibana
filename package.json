@@ -1269,7 +1269,7 @@
     "uuid": "9.0.0",
     "vega": "^5.30.0",
     "vega-interpreter": "^1.0.4",
-    "vega-lite": "^5.19.0",
+    "vega-lite": "^5.21.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
     "vega-tooltip": "^0.34.0",
