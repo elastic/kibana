@@ -27,6 +27,7 @@ import {
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
+  selectDocumentNotesBySavedObjectId,
   selectNotesPagination,
   selectNotesTablePendingDeleteIds,
   selectNotesTableSearch,
@@ -606,6 +607,21 @@ describe('notesSlice', () => {
 
     it('should return no notes if document id does not exist', () => {
       expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
+    });
+
+    it('should return no notes if no notes is found with specified document id and saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'wrong-savedObjectId',
+        })
+      ).toHaveLength(0);
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: 'wrong-document-id',
+          savedObjectId: 'some-timeline-id',
+        })
+      ).toHaveLength(0);
     });
 
     it('should return all notes sorted for an existing document id', () => {

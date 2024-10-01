@@ -20,6 +20,9 @@ import { useKibana } from '../../common/lib/kibana';
 import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { State } from '../../common/store';
+import { timelineSelectors } from '../../timelines/store';
+import { TimelineId } from '../../../common/types';
+import { pinEvent } from '../../timelines/store/actions';
 import {
   createNote,
   ReqStatus,
@@ -77,6 +80,9 @@ export const AddNote = memo(
 
     const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
     const createError = useSelector((state: State) => selectCreateNoteError(state));
+    const activeTimeline = useSelector((state: State) =>
+      timelineSelectors.selectTimelineById(state, TimelineId.active)
+    );
 
     const addNote = useCallback(() => {
       dispatch(
@@ -88,11 +94,22 @@ export const AddNote = memo(
           },
         })
       );
+
+      // Automatically pin an associated event if it's attached to a timeline and it's not pinned yet
+      const isEventPinned = eventId ? activeTimeline.pinnedEventIds[eventId] === true : false;
+      if (!isEventPinned && eventId && timelineId) {
+        dispatch(
+          pinEvent({
+            id: TimelineId.active,
+            eventId,
+          })
+        );
+      }
       telemetry.reportAddNoteFromExpandableFlyoutClicked({
         isRelatedToATimeline: timelineId != null,
       });
       setEditorValue('');
-    }, [dispatch, editorValue, eventId, telemetry, timelineId]);
+    }, [dispatch, editorValue, eventId, telemetry, timelineId, activeTimeline.pinnedEventIds]);
 
     // show a toast if the create note call fails
     useEffect(() => {

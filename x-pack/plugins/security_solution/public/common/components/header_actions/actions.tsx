@@ -11,7 +11,10 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { selectNotesByDocumentId } from '../../../notes/store/notes.slice';
+import {
+  selectNotesByDocumentId,
+  selectDocumentNotesBySavedObjectId,
+} from '../../../notes/store/notes.slice';
 import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
@@ -70,7 +73,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { timelineType } = useShallowEqualSelector((state) =>
+  const { timelineType, savedObjectId } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
 
@@ -222,6 +225,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+  const documentBasedNotesInTimeline = useSelector((state: State) =>
+    selectDocumentNotesBySavedObjectId(state, {
+      documentId: eventId,
+      savedObjectId: savedObjectId ?? '',
+    })
+  );
 
   /* only applicable notes before event based notes */
   const timelineNoteIds = useMemo(
@@ -234,11 +243,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
   );
 
-  const noteIds = useMemo(() => {
-    return securitySolutionNotesEnabled
-      ? documentBasedNotes.map((note) => note.noteId)
-      : timelineNoteIds;
-  }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]);
+  /* note ids specific to the current timeline, it is used to enable/disable pinning */
+  const noteIdsInTimeline = useMemo(() => {
+    if (securitySolutionNotesEnabled) {
+      // if timeline is unsaved, there is no notes associated to timeline yet
+      return savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [];
+    }
+    return timelineNoteIds;
+  }, [documentBasedNotesInTimeline, timelineNoteIds, securitySolutionNotesEnabled, savedObjectId]);
 
   return (
     <ActionsContainer data-test-subj="actions-container">
@@ -291,7 +303,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             isAlert={isAlert(eventType)}
             key="pin-event"
             onPinClicked={handlePinClicked}
-            noteIds={noteIds}
+            noteIds={noteIdsInTimeline}
             eventIsPinned={isEventPinned}
             timelineType={timelineType}
           />
