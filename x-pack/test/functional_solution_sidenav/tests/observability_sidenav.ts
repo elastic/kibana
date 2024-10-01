@@ -69,7 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(true);
         }
         await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inventory' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Infrastructure Inventory',
+        });
 
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
