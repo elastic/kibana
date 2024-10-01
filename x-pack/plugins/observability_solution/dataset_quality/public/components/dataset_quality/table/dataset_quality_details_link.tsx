@@ -30,7 +30,7 @@ export const DatasetQualityDetailsLink = React.memo(
     const locator = urlService.locators.get<DataQualityDetailsLocatorParams>(
       DATA_QUALITY_DETAILS_LOCATOR_ID
     );
-    const datasetQualityUrl = locator?.getRedirectUrl({ dataStream });
+    const datasetQualityUrl = locator?.getRedirectUrl({ dataStream, timeRange });
     const navigateToDatasetQuality = () => {
       locator?.navigate({ dataStream, timeRange });
     };
