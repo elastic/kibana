@@ -48,17 +48,17 @@ export const useStoredExpandedCardId = (spaceId: string) =>
   );
 
 /**
- * Stores either the video card has been visited or not, per space
+ * Stores the selected integration tab ID per space
  */
-export const useStoredHasVideoVisited = (spaceId: string) =>
-  useDefinedLocalStorage<boolean>(`${LocalStorageKey.videoVisited}.${spaceId}`, false);
-
 export const useStoredIntegrationTabId = (spaceId: string, defaultSelectedTabId: string) =>
   useDefinedLocalStorage<string>(
     `${LocalStorageKey.selectedIntegrationTabId}.${spaceId}`,
     defaultSelectedTabId
   );
 
+/**
+ * Stores the integration search term per space
+ */
 export const useStoredIntegrationSearchTerm = (spaceId: string) =>
   useDefinedLocalStorage<string | null>(
     `${LocalStorageKey.IntegrationSearchTerm}.${spaceId}`,
