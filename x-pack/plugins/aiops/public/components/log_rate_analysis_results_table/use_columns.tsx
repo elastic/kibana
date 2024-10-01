@@ -397,13 +397,14 @@ export const useColumns = (
       ['Impact']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
         width: '8%',
+        field: 'pValue',
         name: isGroupsTable ? GroupImpactColumnName : ImpactColumnName, // content={isGroupsTable ? groupImpactMessage : impactMessage}
-        render: ({ pValue }: SignificantItem) => {
+        render: (_, { pValue }: SignificantItem) => {
           if (typeof pValue !== 'number') return NOT_AVAILABLE;
           const label = getFailedTransactionsCorrelationImpactLabel(pValue);
           return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
         },
-        sortable: ({ pValue }) => pValue,
+        sortable: true,
         valign: 'middle',
       },
       ['Baseline rate']: {
@@ -494,15 +495,10 @@ export const useColumns = (
       },
       ['Log rate change']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnLogRateChange',
+        field: 'logRateChangeSort',
         name: LogRateColumnName,
-        sortable: isGroupsTable
-          ? undefined
-          : ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
-              if (logRateChangeNotAvailable) return NOT_AVAILABLE;
-              const logRateChange = getLogRateChangeValues(docCount, bgCount);
-              return logRateChange.factor;
-            },
-        render: ({ doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
+        sortable: isGroupsTable ? false : true,
+        render: (_, { doc_count: docCount, bg_count: bgCount }: SignificantItem) => {
           if (logRateChangeNotAvailable) return NOT_AVAILABLE;
           const logRateChange = getLogRateChangeValues(docCount, bgCount);
 
