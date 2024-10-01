@@ -7,6 +7,7 @@
 
 import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isLensBrushEvent,
   isLensEditEvent,
@@ -50,9 +51,13 @@ export const prepareEventHandler =
       eventHandler = callbacks.onTableRowClick;
     }
     const currentState = getState();
-    const esqlQuery = isTextBasedLanguage(currentState)
-      ? currentState.attributes.state.query
-      : undefined;
+    // if the embeddable is located in an app where there is the Unified search bar with the ES|QL editor, then use this query
+    // otherwise use the query from the saved object
+    let esqlQuery: AggregateQuery | Query | undefined;
+    if (isTextBasedLanguage(currentState)) {
+      const query = data.query.queryString.getQuery();
+      esqlQuery = isOfAggregateQueryType(query) ? query : currentState.attributes.state.query;
+    }
 
     eventHandler?.({
       ...event.data,

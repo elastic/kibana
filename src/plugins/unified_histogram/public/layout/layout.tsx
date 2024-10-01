@@ -373,6 +373,7 @@ export const UnifiedHistogramLayout = ({
           lensAdapters={lensAdapters}
           dataLoading$={dataLoading$}
           withDefaultActions={withDefaultActions}
+          columns={columns}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>
