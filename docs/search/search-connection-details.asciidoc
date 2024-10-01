@@ -10,7 +10,7 @@ deployment type you use. For secure connections, it’s recommended to use an AP
 
 * Learn how to <<find-cloud-id-cloud-self-managed, find your Cloud ID>> for Elastic Cloud or self-hosted deployments.
 * Learn how to <<create-an-api-key-cloud-self-managed, create an API key>> for Elastic Cloud or self-hosted deployments.  
-* Learn how to <<find-cloud-id-serverless, obtain your {es} endpoint or Cloud ID>> for a serverless deployment.  
+* Learn how to <<find-cloud-id-serverless, find your {es} endpoint or Cloud ID>> for a serverless deployment.  
 * Learn how to <<create-an-api-key-serverless, create an API key>> for a serverless deployment.
 
 [float]
