@@ -254,10 +254,21 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    handler: RequestHandlerEnhanced<
+      P,
+      Q,
+      B,
+      // request.method's type contains way more verbs than we currently support
+      typeof request.method extends RouteMethod ? typeof request.method : any
+    >;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
+    let kibanaRequest: KibanaRequest<
+      P,
+      Q,
+      B,
+      typeof request.method extends RouteMethod ? typeof request.method : any
+    >;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
