@@ -6,3 +6,4 @@
  */
 
 export * from './risk_engine_configuration_type';
+export * from './routes/configure';
