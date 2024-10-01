@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const searchSessions = getService('searchSessions');
 
-  describe('save a search sessions with relative time', () => {
+  describe.only('save a search sessions with relative time', () => {
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,

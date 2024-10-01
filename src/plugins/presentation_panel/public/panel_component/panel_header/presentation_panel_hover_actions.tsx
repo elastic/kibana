@@ -253,7 +253,9 @@ export const PresentationPanelHoverActions = ({
       );
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if ((ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)) {
+        if (
+          (ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)
+        ) {
           subscriptions.add(
             frequentlyChangingNotification.subscribeToCompatibilityChanges(
               apiContext,
@@ -307,8 +309,12 @@ export const PresentationPanelHoverActions = ({
         ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
       );
 
-      setContextMenuActions(compatibleActions.filter(({ id }) => !quickActionIds.includes(id)));
-      setQuickActions(compatibleActions.filter(({ id }) => quickActionIds.includes(id)));
+      setContextMenuActions(
+        compatibleActions.filter(({ id }) => !(quickActionIds as readonly string[]).includes(id))
+      );
+      setQuickActions(
+        compatibleActions.filter(({ id }) => (quickActionIds as readonly string[]).includes(id))
+      );
     })();
 
     return () => {
