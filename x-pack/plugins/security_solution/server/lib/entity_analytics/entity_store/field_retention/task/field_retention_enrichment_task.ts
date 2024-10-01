@@ -213,26 +213,6 @@ export const runTask = async ({
     throw e;
   }
 };
-export const scheduleNow = async ({
-  logger,
-  namespace,
-  taskManager,
-}: {
-  logger: Logger;
-  namespace: string;
-  taskManager: TaskManagerStartContract;
-}) => {
-  const taskId = getTaskId(namespace);
-  const log = logFactory(logger, taskId);
-
-  log('attempting to schedule task to run now');
-  try {
-    await taskManager.runSoon(taskId);
-  } catch (e) {
-    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
-    throw e;
-  }
-};
 
 const createTaskRunnerFactory =
   ({

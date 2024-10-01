@@ -17,7 +17,14 @@ export interface FieldRetentionDefinition {
 
 const DEFAULT_FIELD_RETENTION_COUNT = 10;
 
-const getBaseFields = (entityType: EntityType): FieldRetentionDefinition['fields'] => [
+const collectValuesForFields = (fields: string[]): FieldRetentionOperator[] =>
+  fields.map((field) => ({
+    field,
+    operation: 'collect_values',
+    maxLength: DEFAULT_FIELD_RETENTION_COUNT,
+  }));
+
+const getBaseFields = (entityType: EntityType): FieldRetentionOperator[] => [
   {
     field: 'entity.source',
     operation: 'collect_values',
@@ -47,7 +54,7 @@ const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
   matchField: 'host.name',
   fields: [
     ...getBaseFields('host'),
-    ...[
+    ...collectValuesForFields([
       'host.domain',
       'host.hostname',
       'host.id',
@@ -55,11 +62,7 @@ const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
       'host.mac',
       'host.type',
       'host.architecture',
-    ].map((field) => ({
-      field,
-      operation: 'collect_values',
-      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
-    })),
+    ]),
   ],
 };
 
@@ -69,7 +72,7 @@ const USER_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
   matchField: 'user.name',
   fields: [
     ...getBaseFields('user'),
-    ...[
+    ...collectValuesForFields([
       'user.domain',
       'user.email',
       'user.full_name',
@@ -77,11 +80,7 @@ const USER_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
       'user.id',
       'user.name',
       'user.roles',
-    ].map((field) => ({
-      field,
-      operation: 'collect_values',
-      maxLength: DEFAULT_FIELD_RETENTION_COUNT,
-    })),
+    ]),
   ],
 };
 

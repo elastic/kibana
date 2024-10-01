@@ -22,7 +22,7 @@ export const registerEntityStoreRoutes = ({
   initEntityEngineRoute(router, logger, getStartServices);
   startEntityEngineRoute(router, logger);
   stopEntityEngineRoute(router, logger);
-  deleteEntityEngineRoute(router, logger);
+  deleteEntityEngineRoute(router, logger, getStartServices);
   getEntityEngineRoute(router, logger);
   listEntityEnginesRoute(router, logger);
   listEntitiesRoute(router, logger);

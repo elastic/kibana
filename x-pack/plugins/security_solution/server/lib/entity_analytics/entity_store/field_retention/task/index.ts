@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './field_retention_enrich_policy';
-export * from './task';
+export * from './field_retention_enrichment_task';
