@@ -23,7 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
 import { convertPanelMapToSavedPanels } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
+import { dataService } from '../../services/kibana_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -70,17 +70,6 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const {
-    data: {
-      query: {
-        queryString,
-        filterManager,
-        timefilter: { timefilter },
-      },
-      search: { session },
-    },
-  } = pluginServices.getServices();
-
-  const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
   } = container.getState();
@@ -89,11 +78,15 @@ function getLocatorParams({
     viewMode,
     useHash: false,
     preserveSavedFilters: false,
-    filters: filterManager.getFilters(),
-    query: queryString.formatQuery(query) as Query,
+    filters: dataService.query.filterManager.getFilters(),
+    query: dataService.query.queryString.formatQuery(query) as Query,
     dashboardId: container.getDashboardSavedObjectId(),
-    searchSessionId: shouldRestoreSearchSession ? session.getSessionId() : undefined,
-    timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
+    searchSessionId: shouldRestoreSearchSession
+      ? dataService.search.session.getSessionId()
+      : undefined,
+    timeRange: shouldRestoreSearchSession
+      ? dataService.query.timefilter.timefilter.getAbsoluteTime()
+      : dataService.query.timefilter.timefilter.getTime(),
     refreshInterval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session

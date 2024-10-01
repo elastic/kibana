@@ -49,6 +49,12 @@ describe('write_lines_to_bulk_list_items', () => {
     test('It imports a set of items to a write buffer by calling "getListItemByValues" with a single value given', async () => {
       const options = getImportListItemsToStreamOptionsMock();
       const promise = importListItemsToStream(options);
+      options.stream.push('--boundary\n');
+      options.stream.push('Content-type: text/plain\n');
+      options.stream.push(
+        'Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n'
+      );
+      options.stream.push('\n');
       options.stream.push('127.0.0.1\n');
       options.stream.push(null);
       await promise;
@@ -58,6 +64,12 @@ describe('write_lines_to_bulk_list_items', () => {
     test('It imports a set of items to a write buffer by calling "getListItemByValues" with two values given', async () => {
       const options = getImportListItemsToStreamOptionsMock();
       const promise = importListItemsToStream(options);
+      options.stream.push('--boundary\n');
+      options.stream.push('Content-type: text/plain\n');
+      options.stream.push(
+        'Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n'
+      );
+      options.stream.push('\n');
       options.stream.push('127.0.0.1\n');
       options.stream.push('127.0.0.2\n');
       options.stream.push(null);
