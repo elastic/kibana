@@ -1,12 +1,15 @@
 .visTooltip,
 .visTooltip__sizingClone {
-  @include euiToolTipStyle('s');
+  z-index: $euiZLevel9;
   visibility: hidden;
   pointer-events: none;
   position: fixed;
   max-width: $euiSizeXL * 10;
   overflow: hidden;
   padding: 0;
+  color: $euiColorGhost;
+  background-color: $euiColorFullShade;
+  border-radius: $euiBorderRadius;
 
   > :last-child {
     margin-bottom: $euiSizeS;
