@@ -28,7 +28,11 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function createTestSuiteFactory(
+  esArchiver: any,
+  supertest: SuperTest<any>,
+  license: 'basic' | 'trial' = 'basic'
+) {
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -65,9 +69,9 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
-    const expectedDisabledFeatures = resp.body.disabledFeatures.sort();
+    const disabledFeatures = resp.body.disabledFeatures.sort();
 
-    expect({ ...resp.body, disabledFeatures: expectedDisabledFeatures }).to.eql({
+    const expected = {
       id: 'solution',
       name: 'space with solution',
       description: 'a description',
@@ -87,7 +91,15 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         'uptime',
       ],
       solution: 'es',
-    });
+    };
+
+    if (license === 'trial') {
+      // In trial, "inventory" is also disabled
+      expected.disabledFeatures.push('inventory');
+      expected.disabledFeatures.sort();
+    }
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expected);
   };
 
   const makeCreateTest =

@@ -28,7 +28,11 @@ interface GetTestDefinition {
 
 const nonExistantSpaceId = 'not-a-space';
 
-export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
+export function getTestSuiteFactory(
+  esArchiver: any,
+  supertest: SuperAgent<any>,
+  license: 'basic' | 'trial' = 'basic'
+) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -50,6 +54,27 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
   };
 
   const createExpectResults = (spaceId: string) => (resp: { [key: string]: any }) => {
+    const space3 = {
+      id: 'space_3',
+      name: 'Space 3',
+      description: 'This is the third test space',
+      solution: 'es',
+      disabledFeatures: [
+        // Disabled features are automatically added to the space when a solution is set
+        'apm',
+        'infrastructure',
+        'logs',
+        'observabilityAIAssistant',
+        'observabilityCases',
+        'securitySolutionAssistant',
+        'securitySolutionAttackDiscovery',
+        'securitySolutionCases',
+        'siem',
+        'slo',
+        'uptime',
+      ],
+    };
+
     const allSpaces = [
       {
         id: 'default',
@@ -71,28 +96,23 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         description: 'This is the second test space',
         disabledFeatures: [],
       },
-      {
-        id: 'space_3',
-        name: 'Space 3',
-        description: 'This is the third test space',
-        solution: 'es',
-        disabledFeatures: [
-          // Disabled features are automatically added to the space when a solution is set
-          'observabilityAIAssistant',
-          'observabilityCases',
-          'slo',
-          'infrastructure',
-          'logs',
-          'uptime',
-          'apm',
-          'siem',
-          'securitySolutionCases',
-          'securitySolutionAssistant',
-          'securitySolutionAttackDiscovery',
-        ],
-      },
+      space3,
     ];
-    expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
+
+    if (license === 'trial') {
+      // In trial, "inventory" is also disabled
+      space3.disabledFeatures.push('inventory');
+      space3.disabledFeatures.sort();
+    }
+
+    const disabledFeatures = (resp.body.disabledFeatures ?? []).sort();
+
+    const expectedSpace = allSpaces.find((space) => space.id === spaceId);
+    if (expectedSpace) {
+      expectedSpace.disabledFeatures.sort();
+    }
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expectedSpace);
   };
 
   const makeGetTest =

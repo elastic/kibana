@@ -15,9 +15,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function getAllSpacesTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const config = getService('config');
+  const license: 'basic' | 'trial' = config.get('esTestCluster.license');
 
   const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
-    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
+    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>, license);
 
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {
@@ -119,15 +121,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -135,7 +137,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -147,15 +150,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -163,7 +166,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -175,15 +179,15 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
@@ -191,7 +195,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedAll,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -226,7 +231,7 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -242,7 +247,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedRead,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
@@ -254,7 +260,7 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 403,
@@ -270,7 +276,8 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
               authorizedRead,
               'default',
               'space_1',
-              'space_2'
+              'space_2',
+              'space_3'
             ),
           },
         },
