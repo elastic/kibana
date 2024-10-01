@@ -1444,12 +1444,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
-    if (agentlessAgentPolicies.length > 0) {
-      for (const agentPolicyId of agentlessAgentPolicies) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
-      }
-    }
-
     if (!options?.skipUnassignFromAgentPolicies) {
       let uniquePolicyIdsR = [
         ...new Set(
@@ -2087,7 +2081,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
       await appContextService
@@ -2153,7 +2151,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             soClient,
             esClient,
             packagePolicy.id,
-            getPackagePolicyUpdate(packagePolicy)
+            getPackagePolicyUpdate(packagePolicy),
+            {
+              force: options?.force,
+            }
           );
         },
         {
@@ -3014,8 +3015,7 @@ async function validateIsNotHostedPolicy(
     throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
-  const isManagedPolicyWithoutServerlessSupport =
-    agentPolicy.is_managed && !agentPolicy.supports_agentless && !force;
+  const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(

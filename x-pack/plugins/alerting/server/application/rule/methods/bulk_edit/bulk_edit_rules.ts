@@ -595,6 +595,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.BULK_EDIT,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.attributes?.name },
         error,
       })
     );
