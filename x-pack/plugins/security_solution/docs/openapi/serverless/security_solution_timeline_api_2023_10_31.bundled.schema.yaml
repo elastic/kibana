@@ -263,18 +263,20 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
-                        $ref: '#/components/schemas/TimelineResponse'
-                        nullable: true
+                      data:
+                        type: object
+                        properties:
+                          getOneTimeline:
+                            $ref: '#/components/schemas/TimelineResponse'
+                        required:
+                          - getOneTimeline
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - additionalProperties: false
+                    type: object
           description: Indicates that the (template) timeline was found and returned.
       summary: >-
         Get an existing saved timeline or timeline template. This API is used to
@@ -313,22 +315,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: >-
             Indicates that the draft timeline was successfully created. In the
             event the user already has a draft timeline, the existing draft
@@ -389,20 +376,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates the timeline was successfully created.
         '405':
           content:
@@ -416,6 +390,36 @@ paths:
                     type: number
           description: Indicates that there was an error in the timeline creation.
       summary: Creates a new timeline.
+      tags:
+        - Security Timeline API
+        - 'access:securitySolution'
+  /api/timeline/_copy:
+    get:
+      description: |
+        Copies and returns a timeline or timeline template.
+      operationId: CopyTimeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/SavedTimeline'
+                timelineIdToCopy:
+                  type: string
+              required:
+                - timeline
+                - timelineIdToCopy
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistTimelineResponse'
+          description: Indicates that the timeline has been successfully copied.
+      summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
         - 'access:securitySolution'
@@ -433,22 +437,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the draft timeline was successfully retrieved.
         '403':
           content:
@@ -508,22 +497,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: '#/components/schemas/TimelineResponse'
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: >-
             Indicates that the draft timeline was successfully created. In the
             event the user already has a draft timeline, the existing draft
@@ -675,28 +649,14 @@ paths:
             schema:
               type: object
               properties:
-                file:
-                  allOf:
-                    - $ref: '#/components/schemas/Readable'
-                    - type: object
-                      properties:
-                        hapi:
-                          type: object
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              enum:
-                                - 'true'
-                                - 'false'
-                              type: string
-                          required:
-                            - filename
-                            - headers
-                      required:
-                        - hapi
+                file: {}
+                isImmutable:
+                  enum:
+                    - 'true'
+                    - 'false'
+                  type: string
+              required:
+                - file
         description: The timelines to import as a readable stream.
         required: true
       responses:
@@ -704,12 +664,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ImportTimelineResult'
-                required:
-                  - data
+                $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates the import of timelines was successful.
         '400':
           content:
@@ -767,7 +722,8 @@ paths:
               properties:
                 prepackagedTimelines:
                   items:
-                    $ref: '#/components/schemas/SavedTimeline'
+                    $ref: '#/components/schemas/TimelineSavedToReturnObject'
+                    nullable: true
                   type: array
                 timelinesToInstall:
                   items:
@@ -790,12 +746,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/ImportTimelineResult'
-                required:
-                  - data
+                $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates the installation of prepackaged timelines was successful.
         '500':
           content:
@@ -833,18 +784,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
-                        $ref: '#/components/schemas/TimelineResponse'
-                        nullable: true
+                      data:
+                        $ref: '#/components/schemas/ResolvedTimeline'
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - additionalProperties: false
+                    type: object
           description: The (template) timeline has been found
         '400':
           description: The request is missing parameters
@@ -912,35 +860,25 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      customTemplateTimelineCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      timelines:
-                        items:
-                          $ref: '#/components/schemas/TimelineResponse'
-                        type: array
-                      totalCount:
-                        type: number
-                    required:
-                      - timelines
-                      - totalCount
-                      - defaultTimelineCount
-                      - templateTimelineCount
-                      - favoriteCount
-                      - elasticTemplateTimelineCount
-                      - customTemplateTimelineCount
+                  customTemplateTimelineCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  timeline:
+                    items:
+                      $ref: '#/components/schemas/TimelineResponse'
+                    type: array
+                  totalCount:
+                    type: number
                 required:
-                  - data
+                  - timeline
+                  - totalCount
           description: Indicates that the (template) timelines were found and returned.
         '400':
           content:
@@ -1012,30 +950,39 @@ components:
       type: object
       properties:
         aggregatable:
+          nullable: true
           type: boolean
         category:
+          nullable: true
           type: string
         columnHeaderType:
+          nullable: true
           type: string
         description:
+          nullable: true
           type: string
         example:
-          oneOf:
-            - type: string
-            - type: number
+          nullable: true
+          type: string
         id:
+          nullable: true
           type: string
         indexes:
           items:
             type: string
+          nullable: true
           type: array
         name:
+          nullable: true
           type: string
         placeholder:
+          nullable: true
           type: string
         searchable:
+          nullable: true
           type: boolean
         type:
+          nullable: true
           type: string
     DataProviderQueryMatch:
       type: object
@@ -1057,6 +1004,10 @@ components:
           type: string
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
     DataProviderResult:
       type: object
       properties:
@@ -1144,41 +1095,59 @@ components:
       type: object
       properties:
         exists:
-          type: boolean
+          nullable: true
+          type: string
         match_all:
+          nullable: true
           type: string
         meta:
+          nullable: true
           type: object
           properties:
             alias:
+              nullable: true
               type: string
             controlledBy:
+              nullable: true
               type: string
             disabled:
+              nullable: true
               type: boolean
             field:
+              nullable: true
               type: string
             formattedValue:
+              nullable: true
               type: string
             index:
+              nullable: true
               type: string
             key:
+              nullable: true
               type: string
             negate:
+              nullable: true
               type: boolean
             params:
+              nullable: true
               type: string
             type:
+              nullable: true
               type: string
             value:
+              nullable: true
               type: string
         missing:
+          nullable: true
           type: string
         query:
+          nullable: true
           type: string
         range:
+          nullable: true
           type: string
         script:
+          nullable: true
           type: string
     GetNotesResult:
       type: object
@@ -1243,6 +1212,12 @@ components:
             version:
               nullable: true
               type: string
+          required:
+            - savedObjectId
+            - version
+            - pinnedEventIds
+            - eventNotes
+            - globalNotes
     Note:
       allOf:
         - $ref: '#/components/schemas/BareNote'
@@ -1262,6 +1237,23 @@ components:
             - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
         - nullable: true
           type: object
+    PersistTimelineResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            persistTimeline:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/TimelineResponse'
+              required:
+                - timeline
+          required:
+            - persistTimeline
+      required:
+        - data
     PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/BarePinnedEvent'
@@ -1299,34 +1291,27 @@ components:
           nullable: true
           type: string
         value:
-          nullable: true
-          type: string
-    Readable:
+          oneOf:
+            - nullable: true
+              type: string
+            - items:
+                type: string
+              nullable: true
+              type: array
+    ResolvedTimeline:
       type: object
       properties:
-        _data:
-          additionalProperties: true
-          type: object
-        _encoding:
+        alias_purpose:
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+        alias_target_id:
           type: string
-        _events:
-          additionalProperties: true
-          type: object
-        _eventsCount:
-          type: number
-        _maxListeners:
-          additionalProperties: true
-          type: object
-        _position:
-          type: number
-        _read:
-          additionalProperties: true
-          type: object
-        _readableState:
-          additionalProperties: true
-          type: object
-        readable:
-          type: boolean
+        outcome:
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
+        timeline:
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
+      required:
+        - timeline
+        - outcome
     ResponseNote:
       type: object
       properties:
@@ -1361,6 +1346,17 @@ components:
         - threat_match
         - zeek
       type: string
+    SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+      type: string
     SavedTimeline:
       type: object
       properties:
@@ -1389,12 +1385,16 @@ components:
           properties:
             end:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
             start:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
         description:
           nullable: true
           type: string
@@ -1483,6 +1483,18 @@ components:
         updatedBy:
           nullable: true
           type: string
+    SavedTimelineWithSavedObjectId:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
     SerializedFilterQueryResult:
       type: object
       properties:
@@ -1532,27 +1544,63 @@ components:
     TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
         - type: object
           properties:
             eventIdToNoteIds:
               items:
                 $ref: '#/components/schemas/Note'
+              nullable: true
               type: array
             noteIds:
               items:
                 type: string
+              nullable: true
               type: array
             notes:
               items:
                 $ref: '#/components/schemas/Note'
+              nullable: true
               type: array
             pinnedEventIds:
               items:
                 type: string
+              nullable: true
               type: array
             pinnedEventsSaveObject:
               items:
                 $ref: '#/components/schemas/PinnedEvent'
+              nullable: true
+              type: array
+    TimelineSavedToReturnObject:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            noteIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            notes:
+              items:
+                $ref: '#/components/schemas/Note'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            pinnedEventsSaveObject:
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
+              nullable: true
               type: array
             savedObjectId:
               type: string
