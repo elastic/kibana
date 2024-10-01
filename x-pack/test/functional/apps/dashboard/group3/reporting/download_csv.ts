@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
-      it.skip('Downloads a filtered CSV export of a saved search panel', async function () {
+      it('Downloads a filtered CSV export of a saved search panel', async function () {
         await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
