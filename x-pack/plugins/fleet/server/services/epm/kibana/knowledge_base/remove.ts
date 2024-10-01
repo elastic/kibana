@@ -42,22 +42,18 @@ export const removeKnowledgeBaseEntries = async ({
     };
   });
 
-  await Promise.all(
-    indicesToDelete.map((index) => {
-      return esClient.indices.delete(
-        {
-          index,
-        },
-        { ignore: [404] }
-      );
-    })
+  await esClient.indices.delete(
+    {
+      index: indicesToDelete,
+    },
+    { ignore: [404] }
   );
 
   savedObjectsToDelete.forEach((asset) => {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: asset.id,
-      savedObjectType: asset.type,
+      savedObjectType: knowledgeBaseEntrySavedObjectType,
     });
   });
 
