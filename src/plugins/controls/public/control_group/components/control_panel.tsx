@@ -189,7 +189,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 )}
               </>
             }
-            compressed={api?.parentApi.parentApi.compressed ?? true}
+            compressed={api?.parentApi?.parentApi?.compressed ?? true}
           >
             <>
               {blockingError && (

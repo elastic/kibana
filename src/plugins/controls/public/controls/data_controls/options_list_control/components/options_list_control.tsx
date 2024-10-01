@@ -67,8 +67,8 @@ export const OptionsListControl = ({
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 
   const isCompressed =
-    api.parentApi.parentApi && api.parentApi.parentApi.compressed
-      ? api.parentApi.parentApi.compressed
+    api.parentApi?.parentApi && api.parentApi?.parentApi?.compressed
+      ? api.parentApi?.parentApi?.compressed
       : true;
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
