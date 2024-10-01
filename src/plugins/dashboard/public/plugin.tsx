@@ -63,7 +63,6 @@ import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
   DashboardAppLocatorDefinition,
-  type DashboardAppLocator,
 } from './dashboard_app/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
@@ -123,12 +122,9 @@ export interface DashboardStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export interface DashboardSetup {
-  locator?: DashboardAppLocator;
-}
+export interface DashboardSetup {}
 
 export interface DashboardStart {
-  locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
@@ -150,7 +146,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -165,7 +160,7 @@ export class DashboardPlugin
     });
 
     if (share) {
-      this.locator = share.url.locators.create(
+      share.url.locators.create(
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
@@ -324,9 +319,7 @@ export class DashboardPlugin
       name: dashboardAppTitle,
     });
 
-    return {
-      locator: this.locator,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
@@ -342,7 +335,6 @@ export class DashboardPlugin
     );
 
     return {
-      locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
