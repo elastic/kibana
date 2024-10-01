@@ -111,14 +111,16 @@
 
     .embPanel__hoverActionsWrapper {
       top: -$euiSizeXL;
-    }
 
-    .embPanel__hoverActionsLeft {
-      opacity: 1 !important;
-    }
+      .embPanel__hoverActionsLeft {
+        // ensure the drag icon stays visible as you drag
+        opacity: 1 !important;
+      }
 
-    .embPanel__hoverActionsRight {
-      opacity: 0 !important;
+      .embPanel__hoverActionsRight {
+        // hide all other actions while you drag
+        opacity: 0 !important;
+      }
     }
   }
 

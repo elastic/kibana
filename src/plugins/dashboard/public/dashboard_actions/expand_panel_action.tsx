@@ -58,7 +58,7 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
   ) {
     if (!isApiCompatible(embeddable)) return;
-    return embeddable.parentApi.expandedPanelId.subscribe(() => {
+    return embeddable.parentApi.expandedPanelId.pipe(skip(1)).subscribe(() => {
       onChange(isApiCompatible(embeddable), this);
     });
   }
