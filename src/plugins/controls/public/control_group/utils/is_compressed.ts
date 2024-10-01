@@ -9,11 +9,11 @@
 
 import { apiHasParentApi } from '@kbn/presentation-publishing';
 
-export interface HasCompressed {
+interface HasCompressed {
   compressed: boolean;
 }
 
-export const apiHasCompressed = (unknownApi: unknown): unknownApi is HasCompressed => {
+const apiHasCompressed = (unknownApi: unknown): unknownApi is HasCompressed => {
   return Boolean(unknownApi) && typeof (unknownApi as HasCompressed).compressed === 'boolean';
 };
 
