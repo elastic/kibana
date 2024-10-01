@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const searchSessions = getService('searchSessions');
 
-  describe.only('save a search sessions with relative time', () => {
+  describe('save a search sessions with relative time', () => {
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
