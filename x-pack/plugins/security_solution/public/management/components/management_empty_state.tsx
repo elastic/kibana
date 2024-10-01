@@ -192,7 +192,7 @@ const EndpointsEmptyState = React.memo<{
 
     const policiesNotAddedToAgentPolicyCallout = useMemo(
       () =>
-        policyItemsWithoutAgentPolicy.length && (
+        !!policyItemsWithoutAgentPolicy.length && (
           <>
             <EuiSpacer size="xl" />
             <EuiCallOut
