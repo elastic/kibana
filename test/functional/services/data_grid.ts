@@ -9,7 +9,7 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -34,12 +34,10 @@ export class DataGridService extends FtrService {
     const table = await this.find.byCssSelector('.euiDataGrid');
     const $ = await table.parseDomContent();
 
-    const columns = $('.euiDataGridHeaderCell')
-      .toArray()
-      .map((cell) => $(cell).text());
+    const columns = this.getHeaderText($);
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
-      .map((cell) => $(cell).text());
+      .map((cell) => $(cell).find('.euiDataGridRowCell__content').text());
 
     const rows = chunk(cells, columns.length);
 
@@ -76,12 +74,25 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of data grid headers names
    */
-  public async getHeaders() {
-    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
-    const $ = await header.parseDomContent();
+  public getHeaderText(parsedDomContent: CustomCheerioStatic) {
+    const $ = parsedDomContent;
     return $('.euiDataGridHeaderCell')
       .toArray()
-      .map((cell) => $(cell).text());
+      .map((cell) => {
+        const content = $(cell).find('.euiDataGridHeaderCell__content');
+        if (content.length) {
+          return content.text();
+        } else {
+          // Control columns will need hidden text manually stripped
+          $(cell).find('[hidden], [data-tabular-copy-marker]').remove();
+          return $(cell).text();
+        }
+      });
+  }
+
+  public async getHeaders() {
+    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
+    return this.getHeaderText(await header.parseDomContent());
   }
 
   public getHeaderElement(field: string) {
@@ -357,7 +368,7 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string } = {
+    { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
       rowIndex: 0,
     }
@@ -389,7 +400,9 @@ export class DataGridService extends FtrService {
       throw new Error('Unable to find row toggle element');
     }
 
-    await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    if (defaultTabId !== false) {
+      await this.clickDocViewerTab(defaultTabId ?? 'doc_view_table');
+    }
   }
 
   public async isShowingDocViewer() {
