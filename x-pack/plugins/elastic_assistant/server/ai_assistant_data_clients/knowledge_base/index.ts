@@ -35,10 +35,7 @@ import {
 } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import {
-  ESQL_DOCS_LOADED_QUERY,
-  SECURITY_LABS_RESOURCE,
-} from '../../routes/knowledge_base/constants';
+import { ESQL_RESOURCE, SECURITY_LABS_RESOURCE } from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -207,9 +204,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public setupKnowledgeBase = async ({
     soClient,
     installEsqlDocs = true,
+    installSecurityLabsDocs = true,
   }: {
     soClient: SavedObjectsClientContract;
     installEsqlDocs?: boolean;
+    installSecurityLabsDocs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -260,7 +259,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         } else {
           this.options.logger.debug(`Knowledge Base docs already loaded!`);
         }
+      }
 
+      if (installSecurityLabsDocs) {
         const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
         if (!labsDocsLoaded) {
           this.options.logger.debug(`Loading Security Labs KB docs...`);
@@ -357,8 +358,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public isESQLDocsLoaded = async (): Promise<boolean> => {
     const esqlDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: ESQL_DOCS_LOADED_QUERY,
-      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
+      query: '',
+      kbResource: ESQL_RESOURCE,
       required: true,
     });
     return esqlDocs.length > 0;
@@ -369,8 +370,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
     const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
-      query: SECURITY_LABS_RESOURCE,
-      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
+      query: '',
+      kbResource: SECURITY_LABS_RESOURCE,
       required: false,
     });
     return securityLabsDocs.length > 0;

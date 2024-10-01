@@ -34,7 +34,7 @@ import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -681,7 +681,8 @@ export const getIsKnowledgeBaseEnabled = async (
         esqlExists =
           (
             await kbDataClient.getKnowledgeBaseDocumentEntries({
-              query: ESQL_DOCS_LOADED_QUERY,
+              query: '',
+              kbResource: ESQL_RESOURCE,
               required: true,
             })
           ).length > 0;
