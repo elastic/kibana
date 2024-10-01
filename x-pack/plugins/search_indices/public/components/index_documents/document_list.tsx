@@ -21,6 +21,7 @@ export interface DocumentListProps {
 }
 
 export const DocumentList = ({ indexName, docs, mappingProperties }: DocumentListProps) => {
+  const mapping = mappingProperties ? { [indexName]: mappingProperties } : undefined;
   return (
     <>
       <RecentDocsActionMessage indexName={indexName} />
@@ -28,7 +29,11 @@ export const DocumentList = ({ indexName, docs, mappingProperties }: DocumentLis
       {docs.map((doc) => {
         return (
           <React.Fragment key={doc._id}>
-            <Result fields={resultToField(doc, mappingProperties)} metaData={resultMetaData(doc)} />
+            <Result
+              fields={resultToField(doc, mapping)}
+              metaData={resultMetaData(doc)}
+              compactCard={false}
+            />
             <EuiSpacer size="s" />
           </React.Fragment>
         );
