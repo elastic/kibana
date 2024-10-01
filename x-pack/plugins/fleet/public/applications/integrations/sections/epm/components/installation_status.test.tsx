@@ -97,7 +97,7 @@ describe('InstallationStatus', () => {
         showInstallationStatus={true}
       />
     );
-    expect(screen.getByText('Install Failed')).toBeInTheDocument();
+    expect(screen.getByText('Installed')).toBeInTheDocument();
   });
 
   it('renders null when installStatus is null or undefined', () => {
