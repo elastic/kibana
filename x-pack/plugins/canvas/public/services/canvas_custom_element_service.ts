@@ -14,36 +14,48 @@ export interface CustomElementFindResponse {
   customElements: CustomElement[];
 }
 
-export interface CanvasCustomElementService {
-  create: (customElement: CustomElement) => Promise<void>;
-  get: (customElementId: string) => Promise<CustomElement>;
-  update: (id: string, element: Partial<CustomElement>) => Promise<void>;
-  remove: (id: string) => Promise<void>;
-  find: (searchTerm: string) => Promise<CustomElementFindResponse>;
+class CanvasCustomElementService {
+  private apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
+  private http;
+
+  constructor() {
+    ({ http: this.http } = coreServices);
+  }
+
+  public async create(customElement: CustomElement) {
+    this.http.post(this.apiPath, { body: JSON.stringify(customElement), version: '1' });
+  }
+
+  public async get(customElementId: string): Promise<CustomElement> {
+    return this.http
+      .get<{ data: CustomElement }>(`${this.apiPath}/${customElementId}`, { version: '1' })
+      .then(({ data: element }) => element);
+  }
+
+  public async update(id: string, element: Partial<CustomElement>) {
+    this.http.put(`${this.apiPath}/${id}`, { body: JSON.stringify(element), version: '1' });
+  }
+
+  public async remove(id: string) {
+    this.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+  }
+
+  public async find(searchTerm: string): Promise<CustomElementFindResponse> {
+    return this.http.get(`${this.apiPath}/find`, {
+      query: {
+        name: searchTerm,
+        perPage: 10000,
+      },
+      version: '1',
+    });
+  }
 }
 
-export const getCustomElementService: () => CanvasCustomElementService = () => {
-  const { http } = coreServices;
-  const apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
+let canvasCustomElementService: CanvasCustomElementService;
 
-  return {
-    create: (customElement) =>
-      http.post(apiPath, { body: JSON.stringify(customElement), version: '1' }),
-    get: (customElementId) =>
-      http
-        .get<{ data: CustomElement }>(`${apiPath}/${customElementId}`, { version: '1' })
-        .then(({ data: element }) => element),
-    update: (id, element) =>
-      http.put(`${apiPath}/${id}`, { body: JSON.stringify(element), version: '1' }),
-    remove: (id) => http.delete(`${apiPath}/${id}`, { version: '1' }),
-    find: async (name) => {
-      return http.get(`${apiPath}/find`, {
-        query: {
-          name,
-          perPage: 10000,
-        },
-        version: '1',
-      });
-    },
-  };
+export const getCustomElementService = () => {
+  if (!canvasCustomElementService) {
+    canvasCustomElementService = new CanvasCustomElementService();
+  }
+  return canvasCustomElementService;
 };

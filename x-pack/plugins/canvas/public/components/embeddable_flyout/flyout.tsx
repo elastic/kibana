@@ -15,7 +15,7 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { State } from '../../../types';
-import { useLabsService } from '../../services';
+import { presentationUtilService } from '../../services/kibana_services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -67,7 +67,7 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   availableEmbeddables,
   ...restProps
 }) => {
-  const labsService = useLabsService();
+  const labsService = useMemo(() => presentationUtilService.labsService, []);
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
 
   const dispatch = useDispatch();
