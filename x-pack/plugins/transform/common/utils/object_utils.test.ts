@@ -74,6 +74,6 @@ describe('object_utils', () => {
 
     const test13 = setNestedProperty(testObj, 'the.prototype', 'update');
     expect(test13.the).toBe('update');
-    expect(test13.the.prototype.update).toBe(undefined);
+    expect(test13.the.prototype?.update).toBe(undefined);
   });
 });
