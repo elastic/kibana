@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -36,7 +37,6 @@ import { getRelatedAlertKuery } from '../../../../../common/utils/alerting/get_r
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
@@ -49,7 +49,6 @@ import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and
 interface AppSectionProps {
   alert: CustomThresholdAlert;
   rule: CustomThresholdRule;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
   setRelatedAlertsKuery: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
@@ -57,7 +56,6 @@ interface AppSectionProps {
 export default function AlertDetailsAppSection({
   alert,
   rule,
-  setAlertSummaryFields,
   setRelatedAlertsKuery,
 }: AppSectionProps) {
   const services = useKibana().services;
@@ -73,7 +71,6 @@ export default function AlertDetailsAppSection({
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
-  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
@@ -124,48 +121,6 @@ export default function AlertDetailsAppSection({
   }, [alertStart, alertEnd]);
 
   useEffect(() => {
-    const appUrl = getViewInAppUrl({
-      dataViewId: dataView?.id,
-      groups,
-      logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
-      metrics: ruleParams.criteria[0]?.metrics,
-      searchConfiguration:
-        ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
-      startedAt: alertStart,
-      endedAt: alertEnd,
-    });
-
-    setViewInAppUrl(appUrl);
-  }, [dataView, alertStart, alertEnd, groups, ruleParams, locators]);
-
-  useEffect(() => {
-    const alertSummaryFields = [];
-
-    alertSummaryFields.push({
-      label: i18n.translate(
-        'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.relatedLogs',
-        {
-          defaultMessage: 'Related logs',
-        }
-      ),
-      value: (
-        <span>
-          <EuiLink
-            data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
-            href={viewInAppUrl}
-          >
-            {i18n.translate('xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel', {
-              defaultMessage: 'View related logs',
-            })}
-          </EuiLink>
-        </span>
-      ),
-    });
-
-    setAlertSummaryFields(alertSummaryFields);
-  }, [viewInAppUrl, setAlertSummaryFields]);
-
-  useEffect(() => {
     const initDataView = async () => {
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
       try {
@@ -186,57 +141,88 @@ export default function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
-      {ruleParams.criteria.map((criterion, index) => (
-        <EuiFlexItem key={`criterion-${index}`}>
-          <EuiPanel hasBorder hasShadow={false}>
-            <EuiToolTip content={chartTitleAndTooltip[index].tooltip}>
-              <EuiTitle size="xs">
-                <h4 data-test-subj={`chartTitle-${index}`}>{chartTitleAndTooltip[index].title}</h4>
-              </EuiTitle>
-            </EuiToolTip>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
-                <Threshold
-                  chartProps={chartProps}
-                  id={`threshold-${index}`}
-                  threshold={criterion.threshold}
-                  value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
-                  valueFormatter={(d) =>
-                    metricValueFormatter(
-                      d,
-                      criterion.metrics[0] ? criterion.metrics[0].name : undefined
-                    )
-                  }
-                  title={i18n.translate(
-                    'xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle',
-                    {
-                      defaultMessage: 'Threshold breached',
+      {ruleParams.criteria.map((criterion, index) => {
+        const appUrl = getViewInAppUrl({
+          dataViewId: dataView?.id,
+          groups,
+          logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
+          metrics: criterion?.metrics,
+          searchConfiguration:
+            ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
+          startedAt: alertStart,
+          endedAt: alertEnd,
+        });
+
+        return (
+          <EuiFlexItem key={`criterion-${index}`}>
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={chartTitleAndTooltip[index].tooltip}>
+                    <EuiTitle size="xs">
+                      <h4 data-test-subj={`chartTitle-${index}`}>
+                        {chartTitleAndTooltip[index].title}
+                      </h4>
+                    </EuiTitle>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiLink data-test-subj={`viewLogs-${index}`} href={appUrl} color="text">
+                    <EuiIcon type="sortRight" />
+                    &nbsp;
+                    {i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel',
+                      {
+                        defaultMessage: 'Open in Discover',
+                      }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                  <Threshold
+                    chartProps={chartProps}
+                    id={`threshold-${index}`}
+                    threshold={criterion.threshold}
+                    value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
+                    valueFormatter={(d) =>
+                      metricValueFormatter(
+                        d,
+                        criterion.metrics[0] ? criterion.metrics[0].name : undefined
+                      )
                     }
-                  )}
-                  comparator={criterion.comparator}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={5}>
-                <RuleConditionChart
-                  additionalFilters={getGroupFilters(groups)}
-                  annotations={annotations}
-                  chartOptions={{
-                    // For alert details page, the series type needs to be changed to 'bar_stacked'
-                    // due to https://github.com/elastic/elastic-charts/issues/2323
-                    seriesType: 'bar_stacked',
-                  }}
-                  dataView={dataView}
-                  groupBy={ruleParams.groupBy}
-                  metricExpression={criterion}
-                  searchConfiguration={ruleParams.searchConfiguration}
-                  timeRange={timeRange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
+                    title={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle',
+                      {
+                        defaultMessage: 'Threshold breached',
+                      }
+                    )}
+                    comparator={criterion.comparator}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={5}>
+                  <RuleConditionChart
+                    additionalFilters={getGroupFilters(groups)}
+                    annotations={annotations}
+                    chartOptions={{
+                      // For alert details page, the series type needs to be changed to 'bar_stacked'
+                      // due to https://github.com/elastic/elastic-charts/issues/2323
+                      seriesType: 'bar_stacked',
+                    }}
+                    dataView={dataView}
+                    groupBy={ruleParams.groupBy}
+                    metricExpression={criterion}
+                    searchConfiguration={ruleParams.searchConfiguration}
+                    timeRange={timeRange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        );
+      })}
       {hasLogRateAnalysisLicense && (
         <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
       )}

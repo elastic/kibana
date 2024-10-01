@@ -6,10 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
@@ -21,12 +21,13 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
+import type { CleanDraftTimelinesResponse } from '../../../../../../common/api/timeline';
 import {
   CleanDraftTimelinesRequestBody,
   TimelineTypeEnum,
 } from '../../../../../../common/api/timeline';
 
-export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_DRAFT_URL,
@@ -42,7 +43,7 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CleanDraftTimelinesResponse>> => {
         const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 
