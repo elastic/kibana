@@ -280,7 +280,7 @@ export function jobSavedObjectServiceFactory(
       if (id.match('\\*') === null) {
         return jobIds.includes(id);
       }
-      const regex = new RegExp(id.replace('*', '.*'));
+      const regex = new RegExp(id.replaceAll('*', '.*'));
       return jobIds.some((jId) => typeof jId === 'string' && regex.exec(jId));
     });
   }
