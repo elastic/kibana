@@ -66,10 +66,9 @@ describe('useFetch', () => {
       result.current.fetch(parameters);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     expect(result.current.data).toEqual(response);
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.error).toEqual(undefined);
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
   });
@@ -83,10 +82,9 @@ describe('useFetch', () => {
 
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
 
-    await waitFor(() => null);
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     expect(result.current.data).toEqual(response);
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.error).toEqual(undefined);
   });
 
@@ -100,9 +98,7 @@ describe('useFetch', () => {
       result.current.refetch();
     });
 
-    await waitFor(() => null);
-
-    expect(mockFetchFn).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockFetchFn).toHaveBeenCalledTimes(1));
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
   });
 
@@ -121,10 +117,10 @@ describe('useFetch', () => {
     await act(async () => {
       result.current.fetch(parameters);
     });
-    await waitFor(() => null);
+
+    await waitFor(() => expect(result.current.isLoading).toEqual(true));
 
     expect(result.current.data).toEqual(undefined);
-    expect(result.current.isLoading).toEqual(true);
     expect(result.current.error).toEqual(undefined);
     expect(mockFetchFn).not.toHaveBeenCalled();
   });
@@ -200,7 +196,7 @@ describe('useFetch', () => {
       result.current.fetch(parameters);
     });
 
-    await waitFor(() => null);
+    await waitFor(() => expect(firstAbortCtrl.signal.aborted).toEqual(true));
 
     expect(firstAbortCtrl.signal.aborted).toEqual(true);
 
@@ -215,9 +211,8 @@ describe('useFetch', () => {
         result.current.fetch(parameters);
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(mockStartTracking).toHaveBeenCalledTimes(1));
 
-      expect(mockStartTracking).toHaveBeenCalledTimes(1);
       expect(mockStartTracking).toHaveBeenCalledWith({ name: requestName });
     });
 
@@ -237,9 +232,8 @@ describe('useFetch', () => {
         result.current.fetch(parameters);
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(mockFetchFn).toHaveBeenCalledTimes(2));
 
-      expect(mockFetchFn).toHaveBeenCalledTimes(2);
       expect(mockStartTracking).toHaveBeenCalledTimes(2);
       expect(mockEndTracking).toHaveBeenCalledTimes(2);
     });

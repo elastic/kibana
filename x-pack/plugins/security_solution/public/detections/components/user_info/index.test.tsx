@@ -79,9 +79,9 @@ describe('useUserInfo', () => {
     );
 
     renderHook(() => useUserInfo(), { wrapper });
-    await waitFor(() => null);
-
-    expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
-    expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
+      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
+    });
   });
 });
