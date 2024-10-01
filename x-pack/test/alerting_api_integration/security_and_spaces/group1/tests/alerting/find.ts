@@ -10,7 +10,12 @@ import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import {
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
+import { SuperuserAtSpace1, UserAtSpaceScenarios, StackAlertsOnly } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -663,5 +668,94 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
+
+    describe('stack alerts', () => {
+      const ruleTypes = [
+        [
+          ES_QUERY_ID,
+          {
+            searchType: 'esQuery',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            threshold: [1000],
+            thresholdComparator: '>',
+            size: 100,
+            esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
+            aggType: 'count',
+            groupBy: 'all',
+            termSize: 5,
+            excludeHitsFromPreviousRun: false,
+            sourceFields: [],
+            index: ['.kibana'],
+            timeField: 'created_at',
+          },
+        ],
+        [
+          OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          {
+            criteria: [
+              {
+                comparator: '>',
+                metrics: [
+                  {
+                    name: 'A',
+                    aggType: 'count',
+                  },
+                ],
+                threshold: [100],
+                timeSize: 1,
+                timeUnit: 'm',
+              },
+            ],
+            alertOnNoData: false,
+            alertOnGroupDisappear: false,
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: 'kibana-event-log-data-view',
+            },
+          },
+        ],
+        [
+          ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+          {
+            severity: 75,
+            resultType: 'bucket',
+            includeInterim: false,
+            jobSelection: {
+              jobIds: ['low_request_rate'],
+            },
+          },
+        ],
+      ];
+
+      const createRule = async (rule = {}) => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ ...rule, consumer: 'stackAlerts' }))
+          .expect(200);
+
+        objectRemover.add('space1', createdAlert.id, 'rule', 'alerting');
+      };
+
+      for (const [ruleTypeId, params] of ruleTypes) {
+        it(`should get rules of ${ruleTypeId} rule type ID and stackAlerts consumer`, async () => {
+          await createRule();
+          await createRule({ rule_type_id: ruleTypeId, params });
+
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix('space1')}/api/alerting/rules/_find`)
+            .auth(StackAlertsOnly.username, StackAlertsOnly.password);
+
+          expect(response.statusCode).to.eql(200);
+          expect(response.body.total).to.equal(1);
+          expect(response.body.data[0].rule_type_id).to.equal(ruleTypeId);
+          expect(response.body.data[0].consumer).to.equal('stackAlerts');
+        });
+      }
+    });
   });
 }
