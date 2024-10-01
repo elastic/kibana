@@ -338,7 +338,14 @@ export class AssetCriticalityDataClient {
         index: this.getIndex(),
         refresh: refresh ?? false,
         doc: {
-          criticality_level: 'deleted',
+          criticality_level: CRITICALITY_VALUES.DELETED,
+          asset: {
+            criticality: CRITICALITY_VALUES.DELETED,
+          },
+          ...getImplicitEntityFields({
+            ...idParts,
+            criticalityLevel: CRITICALITY_VALUES.DELETED,
+          }),
         },
       });
     } catch (err) {

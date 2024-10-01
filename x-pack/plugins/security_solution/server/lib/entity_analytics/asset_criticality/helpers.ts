@@ -11,6 +11,7 @@ import type {
   CriticalityLevel,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
+import type { CriticalityValues } from './constants';
 
 /**
  * Retrieves the criticality modifier for a given criticality level.
@@ -69,7 +70,13 @@ export const bayesianUpdate = ({
   return (max * newProbability) / (1 + newProbability);
 };
 
-export const getImplicitEntityFields = (record: AssetCriticalityUpsert) => {
+type AssetCriticalityUpsertWithDeleted = {
+  [K in keyof AssetCriticalityUpsert]: K extends 'criticalityLevel'
+    ? CriticalityValues
+    : AssetCriticalityUpsert[K];
+};
+
+export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
   const entityType = record.idField === 'host.name' ? 'host' : 'user';
   return {
     [entityType]: {

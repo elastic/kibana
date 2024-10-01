@@ -505,7 +505,10 @@ export default ({ getService }: FtrProviderContext) => {
         const res = await assetCriticalityRoutes.delete('host.name', 'delete-me');
 
         expect(res.body.deleted).to.eql(true);
-        expect(_.omit(res.body.record, '@timestamp')).to.eql(assetCriticality);
+        expect(_.omit(res.body.record, '@timestamp')).to.eql(
+          assetCreateTypeToAssetRecord(assetCriticality)
+        );
+
         const doc = await getAssetCriticalityDoc({
           idField: 'host.name',
           idValue: 'delete-me',
