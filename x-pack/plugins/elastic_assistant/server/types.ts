@@ -24,7 +24,6 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -52,7 +51,6 @@ import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
-import { ElasticsearchStore } from './lib/langchain/elasticsearch_store/elasticsearch_store';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -240,9 +238,7 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
-  esStore?: ElasticsearchStore;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;

@@ -9,13 +9,8 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { ElasticsearchStore } from '@kbn/elastic-assistant-plugin/server/lib/langchain/elasticsearch_store/elasticsearch_store';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { APP_UI_ID } from '../../../../common';
-
-export interface SecurityLabsKnowledgeBaseToolParams extends AssistantToolParams {
-  esStore: ElasticsearchStore;
-}
 
 const toolDetails = {
   description:
@@ -26,15 +21,15 @@ const toolDetails = {
 export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is SecurityLabsKnowledgeBaseToolParams => {
-    const { esStore, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && esStore != null;
+  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+    const { kbDataClient, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { esStore } = params as SecurityLabsKnowledgeBaseToolParams;
-    if (esStore == null) return null;
+    const { kbDataClient } = params as AssistantToolParams;
+    if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
@@ -47,8 +42,10 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           ),
       }),
       func: async (input, _, cbManager) => {
-        esStore.setKbResource(SECURITY_LABS_RESOURCE);
-        const docs = await esStore.similaritySearch(input.question, 2, undefined, undefined, false);
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          kbResource: SECURITY_LABS_RESOURCE,
+          query: input.question,
+        });
         // TODO: Token pruning
         return JSON.stringify(docs).substring(0, 20000);
       },

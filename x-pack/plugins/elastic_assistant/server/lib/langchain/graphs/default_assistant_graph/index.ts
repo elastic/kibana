@@ -6,7 +6,6 @@
  */
 
 import { StructuredTool } from '@langchain/core/tools';
-import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
   createOpenAIFunctionsAgent,
@@ -37,7 +36,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   conversationId,
   dataClients,
   esClient,
-  esStore,
   inference,
   langChainMessages,
   llmType,
@@ -95,9 +93,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const latestMessage = langChainMessages.slice(-1); // the last message
 
-  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
-
   // Check if KB is available
   const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
 
@@ -105,10 +100,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
     anonymizationFields,
-    chain,
     connectorId,
     esClient,
-    esStore,
     inference,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,

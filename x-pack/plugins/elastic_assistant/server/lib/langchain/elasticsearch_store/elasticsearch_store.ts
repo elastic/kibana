@@ -296,28 +296,6 @@ export class ElasticsearchStore extends VectorStore {
     }
   };
 
-  /**
-   * Checks if a kbResource document exists in the Knowledge Base
-   *
-   * @param kbResource
-   */
-  kbResourceExists = async (kbResource: string): Promise<boolean> => {
-    try {
-      const response = await this.esClient.count({
-        index: this.index,
-        query: {
-          term: {
-            'metadata.kbResource': kbResource,
-          },
-        },
-      });
-      return response.count > 0;
-    } catch (e) {
-      this.logger.error(`Error checking if kbResource exists: ${e}`);
-      return false;
-    }
-  };
-
   // ElasticsearchStore explicit utility functions
 
   /**

@@ -63,7 +63,8 @@ export const useChatSend = ({
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
     kbStatus?.pipeline_exists &&
-    kbStatus?.esql_exists;
+    kbStatus?.esql_exists &&
+    kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(

@@ -49,27 +49,14 @@ export const loadESQL = async (
       true
     );
 
-    const rawDocs = (await docsLoader.load()) as Array<Document<Metadata>>;
-    const rawLanguageDocs = (await languageLoader.load()) as Array<Document<Metadata>>;
+    const docs = (await docsLoader.load()) as Array<Document<Metadata>>;
+    const languageDocs = (await languageLoader.load()) as Array<Document<Metadata>>;
     const rawExampleQueries = await exampleQueriesLoader.load();
-
-    // Add additional metadata to set kbResource as esql
-    const docs = addRequiredKbResourceMetadata({
-      docs: rawDocs,
-      kbResource: ESQL_RESOURCE,
-      required: false,
-    });
-    const languageDocs = addRequiredKbResourceMetadata({
-      docs: rawLanguageDocs,
-      kbResource: ESQL_RESOURCE,
-      required: false,
-    });
 
     // Add additional metadata to the example queries that indicates they are required KB documents:
     const requiredExampleQueries = addRequiredKbResourceMetadata({
       docs: rawExampleQueries,
       kbResource: ESQL_RESOURCE,
-      required: true,
     }) as Array<Document<Metadata>>;
 
     // And make sure remaining docs have `kbResource:esql`

@@ -8,9 +8,8 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { ESQL_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { APP_UI_ID } from '../../../../common';
-
-export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 const toolDetails = {
   description:
@@ -21,15 +20,15 @@ const toolDetails = {
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
-    const { chain, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && chain != null;
+  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+    const { kbDataClient, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { chain } = params as EsqlKnowledgeBaseToolParams;
-    if (chain == null) return null;
+    const { kbDataClient } = params as AssistantToolParams;
+    if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
@@ -37,14 +36,13 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
-      func: async (input, _, cbManager) => {
-        const result = await chain.invoke(
-          {
-            query: input.question,
-          },
-          cbManager
-        );
-        return result.text;
+      func: async (input) => {
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          kbResource: ESQL_RESOURCE,
+          query: input.question,
+        });
+
+        return JSON.stringify(docs).substring(0, 20000);
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
