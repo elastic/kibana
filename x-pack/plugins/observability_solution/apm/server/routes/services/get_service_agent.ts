@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -16,23 +17,8 @@ import {
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData, ServerlessType } from '../../../common/serverless';
-
-interface ServiceAgent {
-  agent?: {
-    name: string;
-  };
-  service?: {
-    runtime?: {
-      name?: string;
-    };
-  };
-  cloud?: {
-    provider?: string;
-    service?: {
-      name?: string;
-    };
-  };
-}
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { maybe } from '../../../common/utils/maybe';
 
 export interface ServiceAgentResponse {
   agentName?: string;
@@ -59,7 +45,12 @@ export async function getServiceAgent({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+      fields: asMutableArray([
+        AGENT_NAME,
+        SERVICE_RUNTIME_NAME,
+        CLOUD_PROVIDER,
+        CLOUD_SERVICE_NAME,
+      ] as const),
       query: {
         bool: {
           filter: [
@@ -97,11 +88,15 @@ export async function getServiceAgent({
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
-  if (response.hits.total.value === 0) {
+
+  const hit = maybe(response.hits.hits[0]);
+  if (!hit) {
     return {};
   }
 
-  const { agent, service, cloud } = response.hits.hits[0]._source as ServiceAgent;
+  const event = unflattenKnownApmEventFields(hit.fields);
+
+  const { agent, service, cloud } = event;
   const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {

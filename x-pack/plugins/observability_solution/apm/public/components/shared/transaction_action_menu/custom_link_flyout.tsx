@@ -17,7 +17,7 @@ export function CustomLinkFlyout({
   isOpen,
   onClose,
 }: {
-  transaction?: {
+  transaction: {
     service: {
       name: string;
       environment?: string;
@@ -26,7 +26,7 @@ export function CustomLinkFlyout({
       name: string;
       type: string;
     };
-  };
+  } | null;
   isOpen: boolean;
   onClose: () => void;
 }) {

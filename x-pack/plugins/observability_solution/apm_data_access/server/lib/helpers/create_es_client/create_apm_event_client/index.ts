@@ -20,7 +20,7 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
-import { Assign, ValuesType } from 'utility-types';
+import { ValuesType, Overwrite } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
@@ -82,8 +82,10 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> =
 type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
   InferSearchResponseOf<Event, TParams>;
 
-type AssertSourceIsDefined<TSearchRequest extends APMEventESSearchRequest> =
-  TSearchRequest extends { _source: false }
+type IsSourceEnabled<TSearchRequest extends APMEventESSearchRequest> =
+  TSearchRequest['body'] extends {
+    _source: false;
+  }
     ? false
     : TSearchRequest['body'] extends { _source: false }
     ? false
@@ -101,14 +103,17 @@ type TypedSearchResponse<TSearchRequest extends APMEventESSearchRequest> = Infer
       ? ProcessorEventOfDocumentType<ValuesType<TSearchRequest['apm']['sources']>['documentType']>
       : never
   >,
-  AssertSourceIsDefined<TSearchRequest> extends false
-    ? Omit<TSearchRequest['body'], '_source'> &
-        Assign<
-          TSearchRequest,
-          { body: Omit<TSearchRequest['body'], '_source'> & { _source: false } }
-        >
-    : TSearchRequest
->;
+  Overwrite<
+    TSearchRequest,
+    {
+      body: Omit<TSearchRequest['body'], '_source'> & {
+        _source: IsSourceEnabled<TSearchRequest>;
+      };
+    }
+  >
+> & {
+  _source: IsSourceEnabled<TSearchRequest>;
+};
 
 interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {
   responses: Array<TypedSearchResponse<TParams>>;

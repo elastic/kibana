@@ -9,11 +9,11 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CustomLinkMenuSection } from '.';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import { noop } from 'lodash';
+import { flattenObject } from '@kbn/observability-utils/object/flatten_object';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -32,7 +32,9 @@ const transaction = {
     name: 'tx name',
     type: 'tx type',
   },
-} as unknown as Transaction;
+};
+
+const fields = flattenObject(transaction);
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
@@ -43,7 +45,11 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        fields={fields}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
 
@@ -61,7 +67,11 @@ describe('Custom links', () => {
     });
 
     const { getByTestId } = render(
-      <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        fields={fields}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
@@ -84,7 +94,11 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        fields={fields}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
@@ -108,7 +122,11 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        fields={fields}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
 
@@ -132,7 +150,11 @@ describe('Custom links', () => {
       });
 
       const component = render(
-        <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+        <CustomLinkMenuSection
+          transaction={transaction}
+          fields={fields}
+          openCreateCustomLinkFlyout={noop}
+        />,
         { wrapper: Wrapper }
       );
 
@@ -157,7 +179,11 @@ describe('Custom links', () => {
       });
 
       const component = render(
-        <CustomLinkMenuSection transaction={transaction} openCreateCustomLinkFlyout={noop} />,
+        <CustomLinkMenuSection
+          transaction={transaction}
+          fields={fields}
+          openCreateCustomLinkFlyout={noop}
+        />,
         { wrapper: Wrapper }
       );
       expectTextsInDocument(component, ['Create']);

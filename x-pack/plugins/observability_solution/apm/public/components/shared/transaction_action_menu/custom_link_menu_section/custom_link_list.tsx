@@ -17,7 +17,7 @@ export function CustomLinkList({
   transactionFields,
 }: {
   customLinks: CustomLink[];
-  transactionFields?: FlattenedTransaction;
+  transactionFields: FlattenedTransaction | undefined;
 }) {
   return (
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>

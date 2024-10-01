@@ -39,17 +39,19 @@ export function CustomLinkMenuSection({
   fields,
   openCreateCustomLinkFlyout,
 }: {
-  transaction?: {
-    service: {
-      name: string;
-      environment?: string;
-    };
-    transaction: {
-      name: string;
-      type: string;
-    };
-  };
-  fields?: FlattenedTransaction;
+  transaction:
+    | {
+        service: {
+          name: string;
+          environment?: string;
+        };
+        transaction: {
+          name: string;
+          type: string;
+        };
+      }
+    | undefined;
+  fields: FlattenedTransaction | undefined;
   openCreateCustomLinkFlyout: () => void;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);

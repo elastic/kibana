@@ -49,7 +49,7 @@ export const getSections = ({
   dataViewId,
   assetDetailsLocator,
 }: {
-  transaction?: TransactionForActionMenu;
+  transaction: TransactionForActionMenu | undefined;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;

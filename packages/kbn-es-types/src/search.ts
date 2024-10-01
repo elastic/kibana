@@ -97,14 +97,14 @@ type IsAny<T> = 0 extends 1 & T ? true : false;
 type MaybeWithSource<TDocument, TOptions extends SearchOptions | undefined> = TOptions extends {
   _source: false;
 }
-  ? IsAny<TOptions> extends false
-    ? {}
-    : { _source: TDocument }
+  ? IsAny<TOptions> extends true
+    ? { _source: TDocument }
+    : {}
   : { _source: TDocument };
 
 type HitOfOptions<TDocument = unknown, TOptions extends SearchOptions | undefined = {}> = Omit<
   estypes.SearchHit<TDocument>,
-  'fields'
+  'fields' | '_source'
 > &
   MaybeWithSource<TDocument, TOptions> &
   (TOptions extends { fields: Fields }

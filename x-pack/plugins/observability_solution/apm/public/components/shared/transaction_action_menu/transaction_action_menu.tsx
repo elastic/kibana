@@ -77,8 +77,8 @@ export interface TransactionForActionMenu {
 }
 
 interface Props {
-  transaction?: TransactionForActionMenu;
-  fields?: FlattenedTransaction;
+  transaction: TransactionForActionMenu | undefined;
+  fields: FlattenedTransaction | undefined;
   isLoading: boolean;
 }
 
@@ -117,7 +117,7 @@ export function TransactionActionMenu({ transaction, fields, isLoading }: Props)
     <>
       {hasGoldLicense && (
         <CustomLinkFlyout
-          transaction={transaction}
+          transaction={transaction ?? null}
           isOpen={isCreateEditFlyoutOpen}
           onClose={() => setIsCreateEditFlyoutOpen(false)}
         />
@@ -154,7 +154,7 @@ function ActionMenuSections({
   transaction,
   profilingLocators,
 }: {
-  transaction?: TransactionForActionMenu;
+  transaction: TransactionForActionMenu | undefined;
   profilingLocators?: ProfilingLocators;
 }) {
   const { core, uiActions, share } = useApmPluginContext();
