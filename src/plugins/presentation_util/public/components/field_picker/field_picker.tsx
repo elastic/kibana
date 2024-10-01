@@ -53,7 +53,9 @@ export const FieldPicker = ({
     () =>
       sortBy(
         (dataView?.fields ?? [])
-          .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
+          .filter(
+            (f) => typesFilter.length === 0 || typesFilter.includes(getFieldIconType(f) as string)
+          )
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
       ).sort((f) => (f.name === initialSelection.current ? -1 : 1)),
