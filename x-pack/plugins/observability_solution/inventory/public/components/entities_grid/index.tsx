@@ -226,6 +226,37 @@ export function EntitiesGrid({
     [assetDetailsLocator, serviceOverviewLocator]
   );
 
+  const renderNameCellValue = useCallback(
+    (entity) => {
+      const icon = getEntityIcon(entity);
+      const redirectUrl = getEntityRedirectUrl(entity);
+
+      if (!icon)
+        return (
+          <EuiLink
+            data-test-subj="inventoryCellValueLink"
+            className="eui-textTruncate"
+            href={redirectUrl}
+            style={{ paddingLeft: '32px' }}
+          >
+            {entity[ENTITY_DISPLAY_NAME]}
+          </EuiLink>
+        );
+
+      return (
+        <EuiLink data-test-subj="inventoryCellValueLink" href={redirectUrl}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={0}>{icon}</EuiFlexItem>
+            <EuiFlexItem className="eui-textTruncate">
+              <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
+      );
+    },
+    [getEntityIcon, getEntityRedirectUrl]
+  );
+
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
       const entity = entities[rowIndex];
@@ -272,21 +303,12 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl(entity)}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={0}>{getEntityIcon(entity)}</EuiFlexItem>
-                <EuiFlexItem className="eui-textTruncate">
-                  <span className="eui-textTruncate">{entity[columnEntityTableId]}</span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiLink>
-          );
+          return renderNameCellValue(entity);
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType, getEntityRedirectUrl, getEntityIcon]
+    [entities, onFilterByType, renderNameCellValue]
   );
 
   if (loading) {
