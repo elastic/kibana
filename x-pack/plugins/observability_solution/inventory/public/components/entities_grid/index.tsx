@@ -10,6 +10,8 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridSorting,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -20,13 +22,16 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
+  AGENT_NAME,
   ASSET_DETAILS_LOCATOR_ID,
+  CLOUD_PROVIDER,
   type AssetDetailsLocatorParams,
   type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
+import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
@@ -155,6 +160,31 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
+  const getEntityIcon = useCallback((entity: LatestEntity) => {
+    const entityType = entity[ENTITY_TYPE];
+
+    if (entityType === 'host' || entityType === 'container') {
+      const cloudProvider = entity[CLOUD_PROVIDER] as CloudProvider;
+
+      if (!cloudProvider) return null;
+
+      return (
+        <CloudProviderIcon
+          cloudProvider={cloudProvider}
+          size="m"
+          title={cloudProvider}
+          role="presentation"
+        />
+      );
+    }
+
+    if (entityType === 'service') {
+      const agentName = entity[AGENT_NAME];
+      if (!agentName) return null;
+      return <AgentIcon agentName={agentName} size="l" role="presentation" />;
+    }
+  }, []);
+
   const getEntityRedirectUrl = useCallback(
     (entity: LatestEntity) => {
       const type = entity[ENTITY_TYPE] as EntityType;
@@ -232,14 +262,17 @@ export function EntitiesGrid({
               className="eui-textTruncate"
               href={getEntityRedirectUrl(entity)}
             >
-              {entity[columnEntityTableId]}
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={0}>{getEntityIcon(entity)}</EuiFlexItem>
+                <EuiFlexItem> {entity[columnEntityTableId]}</EuiFlexItem>
+              </EuiFlexGroup>
             </EuiLink>
           );
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities, onFilterByType, getEntityRedirectUrl]
+    [entities, onFilterByType, getEntityRedirectUrl, getEntityIcon]
   );
 
   if (loading) {
