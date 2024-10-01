@@ -8,9 +8,12 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigureRiskEngineResponse } from '../../../../../../common/api/entity_analytics/risk_engine';
+import { ConfigureRiskEngineSavedObjectRequestBody } from '../../../../../../common/api/entity_analytics/risk_engine';
 import { RISK_ENGINE_SAVED_OBJECT_CONFIG_URL, APP_ID } from '../constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 export const riskEngineSOConfigurationRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
   router.versioned
@@ -22,17 +25,24 @@ export const riskEngineSOConfigurationRoute = (router: EntityAnalyticsRoutesDeps
       },
     })
     .addVersion(
-      { version: '2023-10-31', validate: {} },
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(ConfigureRiskEngineSavedObjectRequestBody),
+          },
+        },
+      },
       async (context, request, response): Promise<IKibanaResponse<ConfigureRiskEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        const attributes: {} = request.body || {};
+        const attributes = request.body;
 
         const securitySolution = await context.securitySolution;
         const riskEngineClient = securitySolution.getRiskEngineDataClient();
 
         try {
-          const result = riskEngineClient.updateSavedObjectConfiguration({ attributes });
+          const result = await riskEngineClient.updateSavedObjectConfiguration({ attributes });
           if (!result) {
             throw new Error('Unable to update risk engine configuration');
           }
