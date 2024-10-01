@@ -14,24 +14,19 @@
       "licensing",
       "uiActions",
       "embeddable",
-      "presentationUtil",
       "dashboard",
       "fieldFormats",
       "unifiedSearch",
       "share"
     ],
-    "optionalPlugins": [
-      "cases",
-      "observabilityAIAssistant",
-      "usageCollection"
-    ],
+    "optionalPlugins": ["cases", "observabilityAIAssistant", "usageCollection"],
     "requiredBundles": [
       "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
-      "cases",
+      "cases"
     ]
   }
 }

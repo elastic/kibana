@@ -55,9 +55,6 @@ const Application = (props: SyntheticsAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
-  const PresentationContextProvider =
-    startPlugins.presentationUtil?.ContextProvider ?? React.Fragment;
-
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
@@ -70,21 +67,19 @@ const Application = (props: SyntheticsAppProps) => {
         }}
       >
         <SyntheticsSharedContext {...props}>
-          <PresentationContextProvider>
-            <Router history={appMountParameters.history}>
-              <SyntheticsSettingsContextProvider {...props}>
-                <PerformanceContextProvider>
-                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                    <InspectorContextProvider>
-                      <PageRouter />
-                      <ActionMenu appMountParameters={appMountParameters} />
-                      <TestNowModeFlyoutContainer />
-                    </InspectorContextProvider>
-                  </div>
-                </PerformanceContextProvider>
-              </SyntheticsSettingsContextProvider>
-            </Router>
-          </PresentationContextProvider>
+          <Router history={appMountParameters.history}>
+            <SyntheticsSettingsContextProvider {...props}>
+              <PerformanceContextProvider>
+                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                  <InspectorContextProvider>
+                    <PageRouter />
+                    <ActionMenu appMountParameters={appMountParameters} />
+                    <TestNowModeFlyoutContainer />
+                  </InspectorContextProvider>
+                </div>
+              </PerformanceContextProvider>
+            </SyntheticsSettingsContextProvider>
+          </Router>
         </SyntheticsSharedContext>
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>
