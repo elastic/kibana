@@ -2399,6 +2399,32 @@
     "dynamic": false,
     "properties": {}
   },
+  "knowledge_base_entry": {
+    "dynamic": false,
+    "properties": {
+      "installed_by": {
+        "dynamic": false,
+        "properties": {
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "source": {
+        "dynamic": false,
+        "properties": {
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
   "kql-telemetry": {
     "dynamic": false,
     "properties": {}

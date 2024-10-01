@@ -726,6 +726,13 @@
     "use_space_awareness_migration_status"
   ],
   "inventory-view": [],
+  "knowledge_base_entry": [
+    "installed_by",
+    "installed_by.type",
+    "name",
+    "source",
+    "source.type"
+  ],
   "kql-telemetry": [],
   "legacy-url-alias": [
     "disabled",
