@@ -9,5 +9,4 @@ export { debugDeepCopyContextStep } from './debug_deep_copy_context_step';
 export { getDotExpanderSteps } from './get_dot_expander_steps';
 export { getRemoveEmptyFieldSteps } from './get_remove_empty_field_steps';
 export { removeEntityDefinitionFieldsStep } from './remove_entity_definition_fields_step';
-export { takeFirstValueStep as arrayToSingleValueStep } from './array_to_single_value_step';
 export { retentionDefinitionToIngestProcessorSteps } from './retention_definition_to_ingest_processor_steps';
