@@ -16,7 +16,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { setKibanaServices } from './kibana_services';
 
 const setDefaultPresentationUtilCapabilities = (core: CoreStart) => {
-  (core.application.capabilities as any).dashboard.show = true;
   core.application.capabilities = {
     ...core.application.capabilities,
     dashboard: {
