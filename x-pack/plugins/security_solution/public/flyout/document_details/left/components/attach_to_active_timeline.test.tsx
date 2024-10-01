@@ -51,7 +51,6 @@ describe('AttachToActiveTimeline', () => {
     ).toBeInTheDocument();
 
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toHaveClass('euiCallOut--warning');
   });
 
   it('should render the saved timeline texts in the callout', () => {
@@ -84,7 +83,6 @@ describe('AttachToActiveTimeline', () => {
       getByText('You can associate the newly created note to the active timeline.')
     ).toBeInTheDocument();
     expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ATTACH_TO_TIMELINE_CALLOUT_TEST_ID)).toHaveClass('euiCallOut--primary');
   });
 
   it('should call the callback when user click on the checkbox', () => {

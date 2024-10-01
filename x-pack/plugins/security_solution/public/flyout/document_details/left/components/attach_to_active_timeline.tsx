@@ -93,7 +93,7 @@ export const AttachToActiveTimeline = memo(
     return (
       <EuiCallOut
         title={ATTACH_TO_TIMELINE_CALLOUT_TITLE}
-        color={isTimelineSaved ? 'primary' : 'warning'}
+        color={'primary'}
         iconType="iInCircle"
         data-test-subj={ATTACH_TO_TIMELINE_CALLOUT_TEST_ID}
         css={css`
