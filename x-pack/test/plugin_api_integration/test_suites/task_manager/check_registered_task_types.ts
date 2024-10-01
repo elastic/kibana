@@ -155,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         'risk_engine:risk_scoring',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
+        'security:indices-metadata-telemetry',
         'security:telemetry-configuration',
         'security:telemetry-detection-rules',
         'security:telemetry-diagnostic-timelines',
