@@ -172,12 +172,23 @@ export function EntitiesGrid({
         typeof cloudProvider === 'string' ? cloudProvider : cloudProvider[0];
 
       return (
-        <CloudProviderIcon
-          cloudProvider={formattedCloudProvider}
-          size="m"
-          title={formattedCloudProvider}
-          role="presentation"
-        />
+        <EuiFlexGroup
+          style={{
+            width: '24px',
+            height: '24px',
+          }}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <EuiFlexItem grow={false}>
+            <CloudProviderIcon
+              cloudProvider={formattedCloudProvider}
+              size="m"
+              title={formattedCloudProvider}
+              role="presentation"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
