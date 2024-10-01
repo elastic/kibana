@@ -23,7 +23,7 @@ import { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { AlertDetails } from './alert_details';
+import { AlertDetails, getPageTitle } from './alert_details';
 import { alertDetail, alertWithNoData } from './mock/alert';
 
 jest.mock('react-router-dom', () => ({
@@ -127,6 +127,34 @@ describe('Alert details', () => {
       </IntlProvider>,
       config
     );
+
+  describe('getPageTitle', () => {
+    const renderPageTitle = (ruleCategory: string) =>
+      render(
+        <IntlProvider locale="en">
+          <span data-test-subj="title">{getPageTitle(ruleCategory)}</span>
+        </IntlProvider>,
+        config
+      );
+
+    it('should display Log threshold title', () => {
+      const { getByTestId } = renderPageTitle('Log threshold');
+
+      expect(getByTestId('title').textContent).toContain('Log threshold breached');
+    });
+
+    it('should display Anomaly title', () => {
+      const { getByTestId } = renderPageTitle('Anomaly');
+
+      expect(getByTestId('title').textContent).toContain('Anomaly detected');
+    });
+
+    it('should display Inventory title', () => {
+      const { getByTestId } = renderPageTitle('Inventory');
+
+      expect(getByTestId('title').textContent).toContain('Inventory threshold breached');
+    });
+  });
 
   it('should show the alert detail page with all necessary components', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
