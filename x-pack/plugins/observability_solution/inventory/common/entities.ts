@@ -7,6 +7,19 @@
 import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { isRight } from 'fp-ts/lib/Either';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  CONTAINER_ID,
+  HOST_NAME,
+} from '@kbn/observability-shared-plugin/common';
+import {
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from './es_fields/entities';
 
 export const entityTypeRt = t.union([
   t.literal('service'),
@@ -22,6 +35,18 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: '*',
   dataset: ENTITY_LATEST,
 });
+
+const BUILTIN_SERVICES_FROM_ECS_DATA = 'builtin_services_from_ecs_data';
+const BUILTIN_HOSTS_FROM_ECS_DATA = 'builtin_hosts_from_ecs_data';
+const BUILTIN_CONTAINERS_FROM_ECS_DATA = 'builtin_containers_from_ecs_data';
+
+export const defaultEntityDefinitions = [
+  BUILTIN_SERVICES_FROM_ECS_DATA,
+  BUILTIN_HOSTS_FROM_ECS_DATA,
+  BUILTIN_CONTAINERS_FROM_ECS_DATA,
+];
+
+export const defaultEntityTypes: EntityType[] = ['service', 'host', 'container'];
 
 const entityArrayRt = t.array(entityTypeRt);
 export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
@@ -45,3 +70,32 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   },
   (arr) => arr.join()
 );
+
+interface BaseEntity {
+  [ENTITY_LAST_SEEN]: string;
+  [ENTITY_ID]: string;
+  [ENTITY_TYPE]: EntityType;
+  [ENTITY_DISPLAY_NAME]: string;
+  [ENTITY_DEFINITION_ID]: string;
+}
+
+/**
+ * These types are based on service, host and container from the built in definition.
+ */
+interface ServiceEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'service';
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]?: string | null;
+}
+
+interface HostEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'host';
+  [HOST_NAME]: string;
+}
+
+interface ContainerEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'container';
+  [CONTAINER_ID]: string;
+}
+
+export type Entity = ServiceEntity | HostEntity | ContainerEntity;

@@ -118,7 +118,8 @@ export const SelectConnector: React.FC = () => {
         description: i18n.translate(
           'xpack.enterpriseSearch.content.indices.selectConnector.description',
           {
-            defaultMessage: "Choose which third-party data source you'd like to sync to Elastic.",
+            defaultMessage:
+              "Select which third-party data source you'd like to sync to Elastic. All data sources are supported by self-managed connectors. Check the availability for Elastic managed connectors by using the filters.",
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
@@ -161,7 +162,7 @@ export const SelectConnector: React.FC = () => {
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       {
-                        defaultMessage: 'Native connectors',
+                        defaultMessage: 'Elastic managed',
                       }
                     )}
                   </EuiFacetButton>
@@ -177,7 +178,7 @@ export const SelectConnector: React.FC = () => {
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.selectConnector.connectorClients',
                     {
-                      defaultMessage: 'Connector clients',
+                      defaultMessage: 'Self-managed',
                     }
                   )}
                 </EuiFacetButton>
@@ -193,7 +194,7 @@ export const SelectConnector: React.FC = () => {
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       {
-                        defaultMessage: 'Native connectors',
+                        defaultMessage: 'Elastic managed',
                       }
                     )}
                   </EuiFacetButton>
@@ -234,7 +235,7 @@ export const SelectConnector: React.FC = () => {
                       <h4>
                         {i18n.translate(
                           'xpack.enterpriseSearch.selectConnector.nativeConnectorsTitleLabel',
-                          { defaultMessage: 'Native connectors' }
+                          { defaultMessage: 'Elastic managed connectors' }
                         )}
                       </h4>
                     </EuiTitle>
@@ -249,7 +250,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.areAvailableDirectlyWithinLabel',
                       {
                         defaultMessage:
-                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert native connectors to self-hosted connector clients.',
+                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert Elastic managed connectors to self-managed connectors.',
                       }
                     )}
                   </p>
@@ -268,7 +269,7 @@ export const SelectConnector: React.FC = () => {
                       <h4>
                         {i18n.translate(
                           'xpack.enterpriseSearch.selectConnector.h4.connectorClientsLabel',
-                          { defaultMessage: 'Connector clients' }
+                          { defaultMessage: 'Self-managed connectors' }
                         )}
                       </h4>
                     </EuiTitle>
@@ -283,7 +284,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.deployConnectorsOnYourLabel',
                       {
                         defaultMessage:
-                          'Deploy connectors on your own infrastructure. You can also customize existing connector clients, or build your own using our connector framework.',
+                          'Deploy connectors on your own infrastructure. You can also customize existing self-managed connectors, or build your own using our connector framework.',
                       }
                     )}
                   </p>
@@ -363,7 +364,7 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.description"
-                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
+                    defaultMessage="Elastic managed connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
                   />
                 </p>
                 <EuiButton

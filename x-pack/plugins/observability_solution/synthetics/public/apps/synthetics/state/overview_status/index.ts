@@ -7,13 +7,7 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { enableMonitorAlertAction } from '../monitor_list/actions';
-import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
-import {
-  ConfigKey,
-  OverviewStatusMetaData,
-  OverviewStatusState,
-} from '../../../../../common/runtime_types';
+import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
 import {
   clearOverviewStatusErrorAction,
@@ -27,7 +21,6 @@ export interface OverviewStatusStateReducer {
   status: OverviewStatusState | null;
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
-  sortedByStatus?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
 }
 
@@ -53,6 +46,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         ...action.payload.upConfigs,
         ...action.payload.downConfigs,
         ...action.payload.pendingConfigs,
+        ...action.payload.disabledConfigs,
       });
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
@@ -61,24 +55,6 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
-    })
-    .addCase(enableMonitorAlertAction.success, (state, action) => {
-      const monitorObject = action.payload;
-      if (!('errors' in monitorObject)) {
-        const isStatusAlertEnabled = isStatusEnabled(monitorObject[ConfigKey.ALERT_CONFIG]);
-        state.allConfigs = state.allConfigs?.map((monitor) => {
-          if (
-            monitor.configId === monitorObject[ConfigKey.CONFIG_ID] ||
-            monitor.monitorQueryId === monitorObject[ConfigKey.MONITOR_QUERY_ID]
-          ) {
-            return {
-              ...monitor,
-              isStatusAlertEnabled,
-            };
-          }
-          return monitor;
-        });
-      }
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
