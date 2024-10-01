@@ -13,6 +13,7 @@ import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useProfileAccessor } from '../../../context_awareness';
+import { useDiscoverEBTPerformanceContext } from '../../../services/telemetry';
 
 interface SingleDocViewerProps {
   record: DataTableRecord;
@@ -32,12 +33,15 @@ export const SingleDocViewer: React.FC<SingleDocViewerProps> = ({ record, dataVi
     return getDocViewer({ record });
   }, [getDocViewerAccessor, record]);
 
+  const { onTrackPluginRenderTime } = useDiscoverEBTPerformanceContext();
+
   return (
     <UnifiedDocViewer
       hit={record}
       dataView={dataView}
       hideActionsColumn
       docViewsRegistry={docViewer.docViewsRegistry}
+      onInitialRenderComplete={onTrackPluginRenderTime}
     />
   );
 };

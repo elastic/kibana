@@ -19,6 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
+import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -26,6 +27,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
+  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const { timefilter, core, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
@@ -52,6 +54,12 @@ export const SingleDocRoute = () => {
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
+
+  useEffect(() => {
+    if (error || !id) {
+      onSkipPluginRenderTime();
+    }
+  }, [onSkipPluginRenderTime, id, error]);
 
   if (error) {
     return (

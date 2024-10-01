@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -19,6 +19,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { TableHeader } from './components/table_header/table_header';
 import { TableRow } from './components/table_row';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
 
 export interface DocTableProps {
   /**
@@ -133,6 +134,7 @@ export const DocTableWrapper = forwardRef(
     }: DocTableWrapperProps,
     ref
   ) => {
+    const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
     const { uiSettings } = useDiscoverServices();
     const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS, false), [uiSettings]);
 
@@ -206,6 +208,10 @@ export const DocTableWrapper = forwardRef(
         rows,
       ]
     );
+
+    useEffect(() => {
+      onSkipPluginRenderTime();
+    }, [onSkipPluginRenderTime]);
 
     return (
       <div

@@ -406,6 +406,21 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const currentSampleSizeState = useMemo(
+    () => getAllowedSampleSize(sampleSizeState, services.uiSettings),
+    [sampleSizeState, services.uiSettings]
+  );
+
+  const onInitialRenderComplete = useCallback(() => {
+    onTrackPluginRenderTime({
+      hits: {
+        sampleSize: currentSampleSizeState,
+        fetchedHits: rows.length,
+        totalHits: isEsqlMode ? undefined : totalHits,
+      },
+    });
+  }, [totalHits, currentSampleSizeState, rows.length, isEsqlMode, onTrackPluginRenderTime]);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -500,7 +515,7 @@ function DiscoverDocumentsComponent({
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+                sampleSizeState={currentSampleSizeState}
                 onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
                 configRowHeight={configRowHeight}
@@ -521,7 +536,7 @@ function DiscoverDocumentsComponent({
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
-                onInitialRenderComplete={onTrackPluginRenderTime}
+                onInitialRenderComplete={onInitialRenderComplete}
               />
             </CellActionsProvider>
           </div>

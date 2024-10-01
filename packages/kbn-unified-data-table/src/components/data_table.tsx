@@ -715,7 +715,6 @@ export const UnifiedDataTable = ({
               if (!isInitialRenderCompleteRef.current) {
                 isInitialRenderCompleteRef.current = true;
                 onInitialRenderComplete?.();
-                // console.log('report onPageReady');
               }
             }
           : undefined,

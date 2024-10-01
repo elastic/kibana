@@ -11,7 +11,9 @@ import React, { createContext, useMemo, useContext } from 'react';
 import { PerformanceContextProvider, usePerformanceContext } from '@kbn/ebt-tools';
 
 interface DiscoverEBTPerformanceContextProps {
-  onTrackPluginRenderTime: () => void; // track when the main plugin content is rendered (data grid or single doc view)
+  onTrackPluginRenderTime: (props?: {
+    hits?: { totalHits: number | undefined; fetchedHits: number; sampleSize: number };
+  }) => void; // track when the main plugin content is rendered (data grid or single doc view)
   onSkipPluginRenderTime: () => void; // ignore and skip tracking the main plugin content render time if the initial render had secondary content (error, empty, etc)
 }
 
@@ -30,17 +32,37 @@ const DiscoverPluginRenderTimeProvider: React.FC<{ children?: React.ReactNode }>
   const { onPageReady } = usePerformanceContext();
   const shouldTrackPluginRenderTimeRef = React.useRef<boolean>(true);
 
-  const onTrackPluginRenderTime = React.useCallback(() => {
-    if (!shouldTrackPluginRenderTimeRef.current) {
-      return;
-    }
-    shouldTrackPluginRenderTimeRef.current = false; // only once
-    onPageReady();
-  }, [onPageReady]);
+  const onTrackPluginRenderTime: DiscoverEBTPerformanceContextProps['onTrackPluginRenderTime'] =
+    React.useCallback(
+      ({ hits } = {}) => {
+        if (!shouldTrackPluginRenderTimeRef.current) {
+          return;
+        }
+        shouldTrackPluginRenderTimeRef.current = false; // only once
+        onPageReady(
+          hits
+            ? {
+                key1: 'sampleSize',
+                value1: hits.sampleSize,
+                key2: 'fetchedHits',
+                value2: hits.fetchedHits,
+                ...(hits.totalHits
+                  ? {
+                      key3: 'totalHits',
+                      value3: hits.totalHits,
+                    }
+                  : {}),
+              }
+            : undefined
+        );
+      },
+      [onPageReady]
+    );
 
-  const onSkipPluginRenderTime = React.useCallback(() => {
-    shouldTrackPluginRenderTimeRef.current = false;
-  }, []);
+  const onSkipPluginRenderTime: DiscoverEBTPerformanceContextProps['onSkipPluginRenderTime'] =
+    React.useCallback(() => {
+      shouldTrackPluginRenderTimeRef.current = false;
+    }, []);
 
   const value = useMemo(
     () => ({ onTrackPluginRenderTime, onSkipPluginRenderTime }),

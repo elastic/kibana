@@ -369,8 +369,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   useEffect(() => {
     if (
-      resultState === resultStatuses.NO_RESULTS ||
-      resultState === resultStatuses.UNINITIALIZED ||
+      ![resultStatuses.LOADING, resultStatuses.READY].includes(resultState) ||
       viewMode !== VIEW_MODE.DOCUMENT_LEVEL
     ) {
       onSkipPluginRenderTime();
