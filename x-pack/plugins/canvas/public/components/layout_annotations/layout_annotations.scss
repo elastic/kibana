@@ -72,7 +72,6 @@
 }
 
 .tooltipAnnotation {
-  @include euiToolTipStyle($size: 's');
   position: absolute;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
