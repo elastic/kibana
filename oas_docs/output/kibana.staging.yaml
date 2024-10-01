@@ -18237,6 +18237,10 @@ paths:
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_DocumentIds'
         - in: query
+          name: savedObjectIds
+          schema:
+            $ref: '#/components/schemas/Security_Timeline_API_SavedObjectIds'
+        - in: query
           name: page
           schema:
             nullable: true
@@ -39552,6 +39556,12 @@ components:
         - threat_match
         - zeek
       type: string
+    Security_Timeline_API_SavedObjectIds:
+      oneOf:
+        - items:
+            type: string
+          type: array
+        - type: string
     Security_Timeline_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
