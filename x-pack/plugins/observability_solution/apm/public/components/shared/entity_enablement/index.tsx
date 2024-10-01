@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { EntityManagerUnauthorizedError } from '@kbn/entityManager-plugin/public';
+import { EntityManagerUnauthorizedError } from '@kbn/logsAiEntityManager-plugin/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';

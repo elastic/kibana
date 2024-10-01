@@ -5555,6 +5555,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logsAiEntityManager-plugin@link:x-pack/plugins/logsai/entity_manager":
+  version "0.0.0"
+  uid ""
+
+"@kbn/logsai-entity-manager-ui-plugin@link:x-pack/plugins/logsai/entity_manager_ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
   version "0.0.0"
   uid ""

@@ -1,0 +1,167 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { Logger } from '@kbn/core/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { EntityDefinition } from '@kbn/entities-schema';
+import moment, { Moment } from 'moment';
+import { EntityManagerServer } from '../../../types';
+import { getClientsFromAPIKey } from '../../utils';
+import { readEntityDiscoveryAPIKey } from '../../auth';
+import { EntityDiscoveryAPIKey } from '../../auth/api_key/api_key';
+import { ENTITY_DISCOVERY_API_KEY_SO_ID } from '../../auth/api_key/saved_object';
+import { scrollEntities } from './lib/scroll_entities';
+import { generateInstanceIndexName } from '../helpers/generate_component_id';
+
+export const TASK_TYPE = 'EEM:ENTITY-MERGE-TASK';
+const TASK_NAME = 'EntityMergeTask';
+
+interface EntityMergeTaskState {
+  lastRunAt?: string;
+}
+
+interface EntityMergeTaskInstance extends ConcreteTaskInstance {
+  state: EntityMergeTaskState;
+}
+
+export class EntityMergeTask {
+  private abortController = new AbortController();
+  private logger: Logger;
+  private taskManager?: TaskManagerStartContract;
+  private server: EntityManagerServer;
+
+  constructor(taskManager: TaskManagerSetupContract, server: EntityManagerServer) {
+    this.logger = server.logger;
+    this.server = server;
+
+    taskManager.registerTaskDefinitions({
+      [TASK_TYPE]: {
+        title: TASK_NAME,
+        timeout: '1m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance }: { taskInstance: EntityMergeTaskInstance }) => {
+          return {
+            run: async () => {
+              return this.runTask(taskInstance);
+            },
+
+            cancel: async () => {
+              this.abortController.abort('[SLO] Definitions clean up Task timed out');
+            },
+          };
+        },
+      },
+    });
+  }
+
+  private async runTask(taskInstance: EntityMergeTaskInstance) {
+    let latestEventIngested: Moment | undefined;
+    const { targetIndex, apiKeyId, definitionId } = taskInstance.params;
+    const { lastRunAt } = taskInstance.state;
+    const apiKey = await readEntityDiscoveryAPIKey(this.server, apiKeyId);
+
+    if (!apiKey) {
+      throw new Error(`Unable to read ApiKey for ${apiKeyId}`);
+    }
+
+    const { esClient } = this.getScopedClients(apiKey);
+    this.logger.info(`Starting indexing`);
+    const start = Date.now();
+    let entitiesProcessed = 0;
+    for await (const hits of scrollEntities(esClient.asCurrentUser, definitionId, lastRunAt)) {
+      const now = moment();
+      const body = hits.reduce((acc, { _source: entityDoc }) => {
+        if (entityDoc) {
+          const eventIngested = entityDoc.event.ingested;
+          acc.push({ update: { _index: targetIndex, _id: entityDoc.entity.id } });
+          acc.push({
+            doc: {
+              ...(entityDoc as object),
+              event: { ...entityDoc.event, ingested: now.toISOString() },
+            },
+            doc_as_upsert: true,
+          });
+
+          if (!latestEventIngested || latestEventIngested.isBefore(eventIngested)) {
+            latestEventIngested = moment(eventIngested);
+          }
+        }
+
+        return acc;
+      }, [] as any[]);
+      await esClient?.asCurrentUser.bulk({ body, refresh: false });
+      entitiesProcessed += hits.length;
+    }
+    const end = Date.now();
+    this.logger.info(
+      `Finished in ${
+        end - start
+      }ms – Processed ${entitiesProcessed} entities, last event ingested at ${latestEventIngested?.toISOString()}`
+    );
+
+    return {
+      state: {
+        lastRunAt: latestEventIngested?.toISOString(),
+      },
+    };
+  }
+
+  private getScopedClients(apiKey: EntityDiscoveryAPIKey) {
+    return getClientsFromAPIKey({ apiKey, server: this.server });
+  }
+
+  private createTaskId(definition: EntityDefinition) {
+    return `${TASK_TYPE}:${definition.id}`;
+  }
+
+  public async stop(definition: EntityDefinition) {
+    await this.taskManager?.removeIfExists(this.createTaskId(definition));
+    this.logger.info(`Deleting ${TASK_NAME} for ${definition.name} (${definition.id})`);
+  }
+
+  public async start(
+    definition: EntityDefinition,
+    server: EntityManagerServer,
+    isRetry = false
+  ): Promise<string> {
+    if (!server.taskManager) {
+      throw new Error('Missing required service during startup, skipping task.');
+    }
+
+    try {
+      this.taskManager = server.taskManager;
+      const taskId = this.createTaskId(definition);
+      const apiKeyId = definition.apiKeyId || ENTITY_DISCOVERY_API_KEY_SO_ID;
+      this.logger.info(`Scheduling ${TASK_NAME} for ${definition.name} (${definition.id})`);
+      await this.taskManager.schedule({
+        id: taskId,
+        taskType: TASK_TYPE,
+        schedule: {
+          interval: '1m',
+        },
+        scope: ['observability', 'entityManager'],
+        state: {},
+        params: {
+          apiKeyId,
+          definitionId: definition.id,
+          targetIndex: generateInstanceIndexName(definition),
+        },
+      });
+      return taskId;
+    } catch (e) {
+      if (e.meta.statusCode === 409 && isRetry === false) {
+        await this.taskManager?.removeIfExists(this.createTaskId(definition));
+        return await this.start(definition, server);
+      }
+      this.logger.info(`[EEM] ${e.message}`);
+      throw e;
+    }
+  }
+}

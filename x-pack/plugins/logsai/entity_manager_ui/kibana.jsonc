@@ -1,0 +1,37 @@
+{
+  "type": "plugin",
+  "id": "@kbn/logsai-entity-manager-ui-plugin",
+  "owner": "@elastic/obs-entities",
+  "description": "Entity manager UI plugin",
+  "plugin": {
+    "id": "logsAiEntityManagerUI",
+    "configPath": ["xpack", "logsAiEntityManagerUI"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "security",
+      "encryptedSavedObjects",
+      "lens",
+      "observabilityShared",
+      "embeddable",
+      "presentationUtil",
+      "usageCollection",
+      "licensing",
+      "transform",
+      "taskManager",
+      "logsAiEntityManager"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

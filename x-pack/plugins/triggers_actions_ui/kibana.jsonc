@@ -28,7 +28,7 @@
       "lens",
       "controls",
       "embeddable",
-      "entityManager"
+      "logsAiEntityManager"
     ],
     "optionalPlugins": [
       "cloud",

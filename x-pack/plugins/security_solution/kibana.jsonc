@@ -54,7 +54,7 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager"
+      "logsAiEntityManager"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
