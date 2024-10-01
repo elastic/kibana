@@ -10,6 +10,7 @@
     "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/es-types",
