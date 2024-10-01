@@ -16,6 +16,7 @@ import type {
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { validRouteSecurity } from '../security_route_config_validator';
 
 export function isCustomValidation(
   v: VersionedRouteCustomResponseBodyValidation | VersionedResponseBodyValidation
@@ -70,17 +71,18 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
 export function prepareVersionedRouteValidation(
   options: AddVersionOpts<unknown, unknown, unknown>
 ): AddVersionOpts<unknown, unknown, unknown> {
-  if (typeof options.validate === 'function') {
-    const validate = options.validate;
-    return {
-      ...options,
-      validate: once(() => prepareValidation(validate())),
-    };
-  } else if (typeof options.validate === 'object' && options.validate !== null) {
-    return {
-      ...options,
-      validate: prepareValidation(options.validate),
-    };
+  const { validate: originalValidate, security, ...rest } = options;
+  let validate = originalValidate;
+
+  if (typeof originalValidate === 'function') {
+    validate = once(() => prepareValidation(originalValidate()));
+  } else if (typeof validate === 'object' && validate !== null) {
+    validate = prepareValidation(validate);
   }
-  return options;
+
+  return {
+    security: validRouteSecurity(security),
+    validate,
+    ...rest,
+  };
 }
