@@ -59,7 +59,7 @@ import {
   generateRunnerResult,
   RULE_ACTIONS,
   generateEnqueueFunctionInput,
-  generateSavedObjectParams,
+  generateRuleUpdateParams,
   mockTaskInstance,
   GENERIC_ERROR_MESSAGE,
   generateAlertInstance,
@@ -341,8 +341,8 @@ describe('Task Runner', () => {
 
     testAlertingEventLogCalls({ status: 'ok' });
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({})
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({})
     );
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -2686,8 +2686,8 @@ describe('Task Runner', () => {
       status: 'ok',
     });
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({})
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({})
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -2799,10 +2799,8 @@ describe('Task Runner', () => {
     });
 
     await taskRunner.run();
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({
-        nextRun: '1970-01-01T00:00:10.000Z',
-      })
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({ nextRun: '1970-01-01T00:00:10.000Z' })
     );
   });
 
@@ -2835,21 +2833,14 @@ describe('Task Runner', () => {
     );
     await taskRunner.run();
     ruleType.executor.mockClear();
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({
-        error: {
-          message: GENERIC_ERROR_MESSAGE,
-          reason: 'execute',
-        },
+
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({
+        error: { message: GENERIC_ERROR_MESSAGE, reason: 'execute' },
         outcome: 'failed',
         status: 'error',
         successRatio: 0,
-        history: [
-          {
-            success: false,
-            timestamp: 0,
-          },
-        ],
+        history: [{ success: false, timestamp: 0 }],
       })
     );
   });
@@ -2962,15 +2953,12 @@ describe('Task Runner', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({
         status: 'warning',
         outcome: 'warning',
         warning,
-        alertsCount: {
-          active: 1,
-          new: 1,
-        },
+        alertsCount: { active: 1, new: 1 },
       })
     );
 
@@ -3137,15 +3125,12 @@ describe('Task Runner', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      ...generateSavedObjectParams({
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      ...generateRuleUpdateParams({
         status: 'warning',
         outcome: 'warning',
         warning,
-        alertsCount: {
-          active: 2,
-          new: 2,
-        },
+        alertsCount: { active: 2, new: 2 },
       })
     );
 

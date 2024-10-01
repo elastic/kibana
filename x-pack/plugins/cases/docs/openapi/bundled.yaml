@@ -112,7 +112,7 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/assignees'
+        - $ref: '#/components/parameters/assignees_filter'
         - $ref: '#/components/parameters/category'
         - $ref: '#/components/parameters/defaultSearchOperator'
         - $ref: '#/components/parameters/from'
@@ -1230,7 +1230,7 @@ components:
           minItems: 1
           maxItems: 100
       example: d4e7abb0-b462-11ec-9a8d-698504725a43
-    assignees:
+    assignees_filter:
       in: query
       name: assignees
       description: |

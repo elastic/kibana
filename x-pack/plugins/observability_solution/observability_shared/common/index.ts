@@ -98,6 +98,7 @@ export {
   LABEL_NAME,
   HOST,
   HOST_HOSTNAME,
+  HOST_NAME,
   HOST_OS_PLATFORM,
   CONTAINER_ID,
   KUBERNETES,
@@ -178,6 +179,7 @@ export type {
   ServiceEntityLocatorParams,
   TransactionDetailsByTraceIdLocator,
   TransactionDetailsByTraceIdLocatorParams,
+  EntitiesInventoryLocator,
 } from './locators';
 
 export {
@@ -201,6 +203,8 @@ export {
   SERVICE_ENTITY_LOCATOR,
   TransactionDetailsByTraceIdLocatorDefinition,
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  EntitiesInventoryLocatorDefinition,
+  ENTITIES_INVENTORY_LOCATOR_ID,
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
