@@ -7,7 +7,6 @@
 
 import {
   EuiPageSection,
-  EuiSpacer,
   EuiButton,
   EuiPageTemplate,
   EuiFlexItem,
@@ -19,8 +18,10 @@ import {
   EuiText,
   EuiIcon,
   EuiButtonEmpty,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,20 +31,74 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { IndexDocuments } from '../index_documents/index_documents';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
+import { SearchIndexDetailsTabs } from '../../routes';
+import { SearchIndexDetailsMappings } from './details_page_mappings';
+import { SearchIndexDetailsSettings } from './details_page_settings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, docLinks, application } = useKibana().services;
+  const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const { console: consolePlugin, docLinks, application, history } = useKibana().services;
+  const {
+    data: index,
+    refetch,
+    isError: isIndexError,
+    isInitialLoading,
+    error: indexLoadingError,
+  } = useIndex(indexName);
   const {
     data: mappings,
     isError: isMappingsError,
     isInitialLoading: isMappingsInitialLoading,
+    error: mappingsError,
   } = useIndexMapping(indexName);
 
+  const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
+    return [
+      {
+        id: SearchIndexDetailsTabs.DATA,
+        name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
+          defaultMessage: 'Data',
+        }),
+        content: <IndexDocuments indexName={indexName} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
+      },
+      {
+        id: SearchIndexDetailsTabs.MAPPINGS,
+        name: i18n.translate('xpack.searchIndices.mappingsTabLabel', {
+          defaultMessage: 'Mappings',
+        }),
+        content: <SearchIndexDetailsMappings index={index} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.MAPPINGS}Tab`,
+      },
+      {
+        id: SearchIndexDetailsTabs.SETTINGS,
+        name: i18n.translate('xpack.searchIndices.settingsTabLabel', {
+          defaultMessage: 'Settings',
+        }),
+        content: <SearchIndexDetailsSettings indexName={indexName} />,
+        'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
+      },
+    ];
+  }, [index, indexName]);
+  const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
+
+  useEffect(() => {
+    const newTab = detailsPageTabs.find((tab) => tab.id === tabId);
+    if (newTab) setSelectedTab(newTab);
+  }, [detailsPageTabs, tabId]);
+
+  const handleTabClick = useCallback(
+    (tab: EuiTabbedContentTab) => {
+      history.push(`index_details/${indexName}/${tab.id}`);
+    },
+
+    [history, indexName]
+  );
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -55,6 +110,19 @@ export const SearchIndexDetailsPage = () => {
   const refetchIndex = useCallback(() => {
     refetch();
   }, [refetch]);
+  const indexError = useMemo(
+    () =>
+      isIndexError
+        ? {
+            title: indexLoadingError ? indexLoadingError.body?.error : '',
+            message: indexLoadingError ? indexLoadingError.body?.message : '',
+          }
+        : {
+            title: mappingsError ? mappingsError.body?.error : '',
+            message: mappingsError ? mappingsError.body?.message : '',
+          },
+    [isIndexError, indexLoadingError, mappingsError]
+  );
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
   const moreOptionsPopover = (
@@ -117,7 +185,7 @@ export const SearchIndexDetailsPage = () => {
     >
       {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
-          indexName={indexName}
+          error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
           reloadFunction={refetchIndex}
         />
@@ -157,30 +225,40 @@ export const SearchIndexDetailsPage = () => {
               </EuiFlexGroup>,
             ]}
           />
-          <EuiSpacer size="l" />
-
-          {isShowingDeleteModal && (
-            <DeleteIndexModal
-              onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
-              indexName={indexName}
-              navigateToIndexListPage={navigateToIndexListPage}
-            />
-          )}
           <EuiPageTemplate.Section grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <ConnectionDetails />
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <ConnectionDetails />
+                  </EuiFlexItem>
+                  <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="l" />
-
-            <EuiFlexGroup>
-              <QuickStats index={index} mappings={mappings} />
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <QuickStats index={index} mappings={mappings} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTabbedContent
+                    tabs={detailsPageTabs}
+                    onTabClick={handleTabClick}
+                    selectedTab={selectedTab}
+                  />
+                </EuiFlexItem>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageTemplate.Section>
         </>
+      )}
+      {isShowingDeleteModal && (
+        <DeleteIndexModal
+          onCancel={() => setShowDeleteIndexModal(!isShowingDeleteModal)}
+          indexName={indexName}
+          navigateToIndexListPage={navigateToIndexListPage}
+        />
       )}
       {embeddableConsole}
     </EuiPageTemplate>

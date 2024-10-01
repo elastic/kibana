@@ -5,43 +5,138 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
+  EuiButtonGroup,
+  EuiLink,
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
-  EuiSteps,
   EuiStepStatus,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
-import useEvent from 'react-use/lib/useEvent';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CreateStackCommandSnippet } from './create_stack_command_snippet';
+import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
+import { CreateStackOption } from './types';
+import { useFirehoseFlow } from './use_firehose_flow';
 import { VisualizeData } from './visualize_data';
+import { ObservabilityOnboardingAppServices } from '../../..';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+
+const OPTIONS = [
+  {
+    id: CreateStackOption.AWS_CONSOLE_UI,
+    label: i18n.translate(
+      'xpack.observability_onboarding.firehosePanel.createStackAWSConsoleOptionLabel',
+      {
+        defaultMessage: 'Via AWS Console',
+      }
+    ),
+  },
+  {
+    id: CreateStackOption.AWS_CLI,
+    label: i18n.translate(
+      'xpack.observability_onboarding.firehosePanel.createStackAWSCLIOptionLabel',
+      { defaultMessage: 'Via AWS CLI' }
+    ),
+  },
+];
 
 export function FirehosePanel() {
-  const [windowLostFocus, setWindowLostFocus] = useState(false);
-  const { data, status, error, refetch } = useFetcher(
-    (callApi) => {
-      return callApi('POST /internal/observability_onboarding/firehose/flow');
+  const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
+    CreateStackOption.AWS_CONSOLE_UI
+  );
+  const {
+    services: {
+      context: { cloudServiceProvider },
     },
-    [],
-    { showToastOnError: false }
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const { data, status, error, refetch } = useFirehoseFlow();
+
+  const telemetryEventContext: OnboardingFlowEventContext = useMemo(
+    () => ({
+      firehose: {
+        cloudServiceProvider,
+        selectedCreateStackOption: selectedOptionId,
+      },
+    }),
+    [cloudServiceProvider, selectedOptionId]
   );
 
-  useEvent('blur', () => setWindowLostFocus(true), window);
+  const isMonitoringData = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS,
+    onboardingFlowType: 'firehose',
+    onboardingId: data?.onboardingId,
+    telemetryEventContext,
+  });
+
+  const onOptionChange = useCallback((id: string) => {
+    setSelectedOptionId(id as CreateStackOption);
+  }, []);
 
   if (error !== undefined) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt
+        onboardingFlowType="firehose"
+        error={error}
+        telemetryEventContext={{
+          firehose: { cloudServiceProvider },
+        }}
+        onRetryClick={refetch}
+      />
+    );
   }
-
-  const isVisualizeStepActive =
-    status === FETCH_STATUS.SUCCESS && data !== undefined && windowLostFocus;
 
   const steps = [
     {
-      title: 'Create a Firehose delivery stream and ingest CloudWatch logs',
+      title: i18n.translate('xpack.observability_onboarding.firehosePanel.prerequisitesTitle', {
+        defaultMessage: 'Prerequisites',
+      }),
+      children: (
+        <>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.observability_onboarding.firehosePanel.prerequisitesDescription"
+                defaultMessage="You must have an active AWS account and the necessary permissions to create delivery streams."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.observability_onboarding.firehosePanel.prerequisitesDocumentation"
+                defaultMessage="{documentationLink} for more info."
+                values={{
+                  documentationLink: (
+                    <EuiLink
+                      data-test-subj="observabilityOnboardingFirehosePanelCheckTheDocumentationLink"
+                      href="https://www.elastic.co/docs/current/integrations/awsfirehose"
+                      external
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.observability_onboarding.firehosePanel.documentationLinkLabel',
+                        { defaultMessage: 'Check the documentation' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      title: 'Create a Firehose delivery stream to ingest CloudWatch logs and metrics',
       children: (
         <>
           {status !== FETCH_STATUS.SUCCESS && (
@@ -52,27 +147,61 @@ export function FirehosePanel() {
             </>
           )}
           {status === FETCH_STATUS.SUCCESS && data !== undefined && (
-            <CreateStackCommandSnippet
-              templateUrl={data.templateUrl}
-              encodedApiKey={data.apiKeyEncoded}
-              onboardingId={data.onboardingId}
-              elasticsearchUrl={data.elasticsearchUrl}
-              isCopyPrimaryAction={!isVisualizeStepActive}
-            />
+            <>
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.observability_onboarding.firehosePanel.createStackOptionsLegend',
+                  {
+                    defaultMessage: 'Select a preferred option to create a CloudFormation stack',
+                  }
+                )}
+                type="single"
+                buttonSize="m"
+                idSelected={selectedOptionId}
+                onChange={onOptionChange}
+                options={OPTIONS}
+              />
+
+              <EuiSpacer size="l" />
+
+              {selectedOptionId === CreateStackOption.AWS_CONSOLE_UI && (
+                <CreateStackInAWSConsole
+                  templateUrl={data.templateUrl}
+                  encodedApiKey={data.apiKeyEncoded}
+                  elasticsearchUrl={data.elasticsearchUrl}
+                  isPrimaryAction={!isMonitoringData}
+                />
+              )}
+
+              {selectedOptionId === CreateStackOption.AWS_CLI && (
+                <CreateStackCommandSnippet
+                  templateUrl={data.templateUrl}
+                  encodedApiKey={data.apiKeyEncoded}
+                  elasticsearchUrl={data.elasticsearchUrl}
+                  isCopyPrimaryAction={!isMonitoringData}
+                />
+              )}
+            </>
           )}
         </>
       ),
     },
     {
       title: 'Visualize your data',
-      status: (isVisualizeStepActive ? 'current' : 'incomplete') as EuiStepStatus,
-      children: isVisualizeStepActive && <VisualizeData />,
+      status: (isMonitoringData ? 'current' : 'incomplete') as EuiStepStatus,
+      children: isMonitoringData && data !== undefined && (
+        <VisualizeData
+          selectedCreateStackOption={selectedOptionId}
+          onboardingId={data.onboardingId}
+        />
+      ),
     },
   ];
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiSteps steps={steps} />
+      <FeedbackButtons flow="firehose" />
     </EuiPanel>
   );
 }

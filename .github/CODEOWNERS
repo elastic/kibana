@@ -183,6 +183,12 @@ packages/core/execution-context/core-execution-context-server-mocks @elastic/kib
 packages/core/fatal-errors/core-fatal-errors-browser @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-internal @elastic/kibana-core
 packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-browser-mocks @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-internal @elastic/kibana-core
+packages/core/feature-flags/core-feature-flags-server-mocks @elastic/kibana-core
 test/plugin_functional/plugins/core_history_block @elastic/kibana-core
 packages/core/http/core-http-browser @elastic/kibana-core
 packages/core/http/core-http-browser-internal @elastic/kibana-core
@@ -348,6 +354,7 @@ x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
+x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -422,6 +429,7 @@ src/plugins/esql @elastic/kibana-esql
 packages/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
 src/plugins/esql_datagrid @elastic/kibana-esql
+packages/kbn-esql-editor @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
@@ -453,6 +461,7 @@ examples/expressions_explorer @elastic/kibana-visualizations
 src/plugins/expressions @elastic/kibana-visualizations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 examples/feature_control_examples @elastic/kibana-security
+examples/feature_flags_example @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/plugins/features @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
@@ -467,7 +476,7 @@ src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 x-pack/plugins/fleet @elastic/fleet
-packages/kbn-flot-charts @elastic/kibana-operations
+packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 packages/kbn-formatters @elastic/obs-ux-logs-team
 src/plugins/ftr_apis @elastic/kibana-core
@@ -545,7 +554,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-langchain @elastic/security-generative-ai
-packages/kbn-language-documentation-popover @elastic/kibana-esql
+packages/kbn-language-documentation @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -601,6 +610,7 @@ x-pack/packages/ml/data_view_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/date_utils @elastic/ml-ui
 x-pack/packages/ml/error_utils @elastic/ml-ui
+x-pack/packages/ml/field_stats_flyout @elastic/ml-ui
 x-pack/packages/ml/in_memory_table @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
@@ -608,6 +618,7 @@ x-pack/packages/ml/kibana_theme @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/number_utils @elastic/ml-ui
+x-pack/packages/ml/parse_interval @elastic/ml-ui
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
@@ -619,6 +630,7 @@ x-pack/packages/ml/time_buckets @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/ui_actions @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/packages/ml/validators @elastic/ml-ui
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
@@ -911,7 +923,6 @@ test
 x-pack/test 
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
-packages/kbn-text-based-editor @elastic/kibana-esql
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -1098,6 +1109,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability AI Assistant
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
+x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -1228,6 +1240,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/functional/apps/canvas/ @elastic/kibana-presentation
 /x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
+/x-pack/test/functional/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
@@ -1354,6 +1367,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 # Kibana Platform Security
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
+/.github/workflows/codeql-stats.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -1409,6 +1423,15 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/common/alerting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/action_task_params @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/alerts_legacy @elastic/response-ops
+/x-pack/test/functional/es_archives/observability/alerts @elastic/response-ops
+/x-pack/test/functional/es_archives/actions @elastic/response-ops
+/x-pack/test/functional/es_archives/rules_scheduled_task_id  @elastic/response-ops
+/x-pack/test/functional/es_archives/alerting/8_2_0  @elastic/response-ops
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
@@ -1510,6 +1533,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
 
+/x-pack/plugins/security_solution/common/timelines @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
@@ -1669,6 +1693,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
+/x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
@@ -1759,7 +1784,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
-/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/search-design
 
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { expect, journey, step } from '@elastic/synthetics';
+import { before, expect, journey, step } from '@elastic/synthetics';
+import { cleanTestMonitors } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('TestMonitorDetailFlyout', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const monitorName = 'test-flyout-http-monitor';
   const locationId = 'us_central';
+
+  before(async () => {
+    await cleanTestMonitors(params);
+  });
 
   step('Go to monitor-management', async () => {
     await syntheticsApp.navigateToAddMonitor();

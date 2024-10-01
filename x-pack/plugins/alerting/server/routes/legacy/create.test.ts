@@ -110,6 +110,8 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
+    expect(config.options?.access).toBe('public');
+
     rulesClient.create.mockResolvedValueOnce(createResult);
 
     const [context, req, res] = mockHandlerArguments(
@@ -162,6 +164,28 @@ describe('createAlertRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: createResult,
     });
+  });
+
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+      isServerless: true,
+    });
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
+
+    expect(config.options?.access).toBe('internal');
   });
 
   it('allows providing a custom id when space is undefined', async () => {
