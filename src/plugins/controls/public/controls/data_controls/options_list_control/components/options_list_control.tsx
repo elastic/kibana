@@ -25,6 +25,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -65,11 +66,6 @@ export const OptionsListControl = ({
   const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
-
-  const isCompressed =
-    api.parentApi?.parentApi && api.parentApi?.parentApi?.compressed
-      ? api.parentApi?.parentApi?.compressed
-      : true;
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
@@ -179,7 +175,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed={isCompressed} className={controlPanelClassName}>
+    <EuiFilterGroup fullWidth compressed={isCompressed(api)} className={controlPanelClassName}>
       <EuiInputPopover
         id={popoverId}
         ownFocus

@@ -13,6 +13,7 @@ import type { ControlGroupApi } from '../..';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
   reload: () => void;
+
   /**
    * @deprecated
    * Calling `updateInput` will cause the entire control group to be re-initialized.

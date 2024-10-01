@@ -34,6 +34,7 @@ import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 
 import './control_panel.scss';
+import { isCompressed } from '../utils/is_compressed';
 
 const DragHandle = ({
   isEditable,
@@ -189,7 +190,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 )}
               </>
             }
-            compressed={api?.parentApi?.parentApi?.compressed ?? true}
+            compressed={isCompressed(api)}
           >
             <>
               {blockingError && (
