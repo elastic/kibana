@@ -18,6 +18,7 @@ const createAlertingEventLoggerMock = () => {
       logTimeout: jest.fn(),
       logAlert: jest.fn(),
       logAction: jest.fn(),
+      logShutdown: jest.fn(),
       done: jest.fn(),
     };
   });

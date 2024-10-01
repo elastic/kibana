@@ -65,6 +65,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -203,7 +204,7 @@ describe('Task Runner Cancel', () => {
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
   });
 
-  test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
+  test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution due to timeout', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
@@ -215,7 +216,7 @@ describe('Task Runner Cancel', () => {
 
     const promise = taskRunner.run();
     await Promise.resolve();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
     await promise;
 
     expect(logger.debug).toHaveBeenNthCalledWith(
@@ -224,7 +225,7 @@ describe('Task Runner Cancel', () => {
       { tags: ['1', 'test'] }
     );
 
-    testAlertingEventLogCalls({ status: 'ok' });
+    testAlertingEventLogCalls({ status: 'ok', reason: TaskCancellationReason.Timeout });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
@@ -235,7 +236,7 @@ describe('Task Runner Cancel', () => {
           alert: {
             executionStatus: {
               error: {
-                message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
+                message: `test:1: execution exceeded rule type timeout of 5m`,
                 reason: 'timeout',
               },
               lastDuration: 0,
@@ -246,11 +247,89 @@ describe('Task Runner Cancel', () => {
             lastRun: {
               alertsCount: {},
               outcome: 'failed',
-              outcomeMsg: [
-                'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
-              ],
+              outcomeMsg: ['test:1: execution exceeded rule type timeout of 5m'],
               outcomeOrder: 20,
               warning: 'timeout',
+            },
+            monitoring: {
+              run: {
+                calculated_metrics: {
+                  success_ratio: 0,
+                },
+                history: [],
+                last_run: {
+                  metrics: {
+                    duration: 0,
+                    gap_duration_s: null,
+                    total_alerts_created: null,
+                    total_alerts_detected: null,
+                    total_indexing_duration_ms: null,
+                    total_search_duration_ms: null,
+                  },
+                  timestamp: '1970-01-01T00:00:00.000Z',
+                },
+              },
+            },
+            nextRun: '1970-01-01T00:00:10.000Z',
+            running: false,
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'alertsSkippedDueToRuleExecutionTimeout_test',
+      incrementBy: 1,
+    });
+  });
+
+  test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution due to shutdown', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    const promise = taskRunner.run();
+    await Promise.resolve();
+    await taskRunner.cancel(TaskCancellationReason.Shutdown);
+    await promise;
+
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      3,
+      `Aborting any in-progress ES searches for rule type test with id 1`,
+      { tags: ['1', 'test'] }
+    );
+
+    testAlertingEventLogCalls({ status: 'ok', reason: TaskCancellationReason.Shutdown });
+
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      {
+        id: `alert:1`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        doc: {
+          alert: {
+            executionStatus: {
+              error: {
+                message: `test:1: system shutdown`,
+                reason: 'shutdown',
+              },
+              lastDuration: 0,
+              lastExecutionDate: '1970-01-01T00:00:00.000Z',
+              status: 'error',
+              warning: null,
+            },
+            lastRun: {
+              alertsCount: {},
+              outcome: 'failed',
+              outcomeMsg: ['test:1: system shutdown'],
+              outcomeOrder: 20,
+              warning: 'shutdown',
             },
             monitoring: {
               run: {
@@ -316,7 +395,7 @@ describe('Task Runner Cancel', () => {
 
     const promise = taskRunner.run();
     await Promise.resolve();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
     await promise;
 
     testLogger();
@@ -383,7 +462,7 @@ describe('Task Runner Cancel', () => {
 
     const promise = taskRunner.run();
     await Promise.resolve();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
     await promise;
 
     testLogger();
@@ -446,7 +525,7 @@ describe('Task Runner Cancel', () => {
 
     const promise = taskRunner.run();
     await Promise.resolve();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
     await promise;
 
     testAlertingEventLogCalls({
@@ -477,7 +556,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `Updating rule task for test rule with id 1 - execution error due to timeout`,
+      `Updating rule task for test rule with id 1 - execution exceeded rule type timeout of 5m`,
       { tags: ['1', 'test'] }
     );
     expect(logger.debug).nthCalledWith(
@@ -508,6 +587,7 @@ describe('Task Runner Cancel', () => {
     status,
     logAlert = 0,
     logAction = 0,
+    reason,
     hasReachedAlertLimit = false,
     hasReachedQueuedActionsLimit = false,
   }: {
@@ -522,6 +602,7 @@ describe('Task Runner Cancel', () => {
     setRuleName?: boolean;
     logAlert?: number;
     logAction?: number;
+    reason?: TaskCancellationReason;
     hasReachedAlertLimit?: boolean;
     hasReachedQueuedActionsLimit?: boolean;
   }) {
@@ -588,6 +669,11 @@ describe('Task Runner Cancel', () => {
     } else {
       expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
     }
-    expect(alertingEventLogger.logTimeout).toHaveBeenCalled();
+
+    if (reason === TaskCancellationReason.Timeout) {
+      expect(alertingEventLogger.logTimeout).toHaveBeenCalled();
+    } else if (reason === TaskCancellationReason.Shutdown) {
+      expect(alertingEventLogger.logShutdown).toHaveBeenCalled();
+    }
   }
 });

@@ -18,6 +18,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import {
   RuleRunnerErrorStackTraceLog,
@@ -744,7 +745,7 @@ export class TaskRunner<
     };
   }
 
-  async cancel(): Promise<void> {
+  async cancel(reason?: TaskCancellationReason): Promise<void> {
     if (this.cancelled) {
       return;
     }
@@ -763,8 +764,24 @@ export class TaskRunner<
       this.ruleConsumer = consumer;
     }
 
+    let cancelMessage = '';
+    let ruleExecutionErrorReason: RuleExecutionStatusErrorReasons;
+    if (reason === TaskCancellationReason.Timeout) {
+      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
+      ruleExecutionErrorReason = RuleExecutionStatusErrorReasons.Timeout;
+      cancelMessage = `execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
+      this.alertingEventLogger.logTimeout();
+    } else if (reason === TaskCancellationReason.Shutdown) {
+      ruleExecutionErrorReason = RuleExecutionStatusErrorReasons.Shutdown;
+      cancelMessage = `system shutdown`;
+      this.alertingEventLogger.logShutdown();
+    } else {
+      ruleExecutionErrorReason = RuleExecutionStatusErrorReasons.Unknown;
+      cancelMessage = `unknown reason`;
+    }
+
     this.logger.debug(
-      `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
+      `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - ${cancelMessage}`
     );
 
     this.logger.debug(
@@ -772,30 +789,24 @@ export class TaskRunner<
     );
     this.searchAbortController.abort();
 
-    this.alertingEventLogger.logTimeout();
-
-    this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
-
     let nextRun: string | null = null;
     if (taskSchedule) {
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 
-    const outcomeMsg = [
-      `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
-    ];
+    const outcomeMsg = [`${this.ruleType.id}:${ruleId}: ${cancelMessage}`];
     const date = new Date();
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
       lastExecutionDate: date,
       status: 'error',
       error: {
-        reason: RuleExecutionStatusErrorReasons.Timeout,
+        reason: ruleExecutionErrorReason,
         message: outcomeMsg.join(' '),
       },
     };
     this.logger.debug(
-      `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
+      `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${cancelMessage}`
     );
     const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, {
@@ -803,7 +814,7 @@ export class TaskRunner<
       lastRun: {
         outcome,
         outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
-        warning: RuleExecutionStatusErrorReasons.Timeout,
+        warning: ruleExecutionErrorReason,
         outcomeMsg,
         alertsCount: {},
       },

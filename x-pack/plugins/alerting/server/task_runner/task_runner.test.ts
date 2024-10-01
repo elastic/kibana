@@ -97,6 +97,7 @@ import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3211,7 +3212,7 @@ describe('Task Runner', () => {
       }
     );
     await taskRunner.run();
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
 
     expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(6);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
