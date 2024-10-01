@@ -7,11 +7,11 @@
 
 import objectHash from 'object-hash';
 
-import { ALERT_BUILDING_BLOCK_TYPE, ALERT_URL, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { EqlHitsSequence } from '@elastic/elasticsearch/lib/api/types';
 
-import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
+import type { SignalSource, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -27,14 +27,9 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 import { generateId } from './utils';
-import { generateBuildingBlockIds } from '../factories/utils/generate_building_block_ids';
 
 import type { BuildReasonMessage } from './reason_formatters';
-import { buildAlertRoot } from '../eql/build_alert_group_from_sequence';
-import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
-import { ALERT_GROUP_ID, ALERT_GROUP_INDEX } from '../../../../../common/field_maps/field_names';
-import { buildAncestors } from '../factories/utils/build_alert';
+import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 
 type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
@@ -148,8 +143,6 @@ export const wrapSuppressedSequenceAlerts = ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  // objective here is to replicate what is happening
-  // in x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
   return sequences.reduce(
     (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
       const fields = sequence.events?.reduce(
@@ -160,100 +153,30 @@ export const wrapSuppressedSequenceAlerts = ({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
         fields,
       });
-      const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
-      if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
-        return [];
-      }
-
-      // The "building block" alerts start out as regular BaseFields.
-      // We'll add the group ID and index fields
-      // after creating the shell alert later on
-      // since that's when the group ID is determined.
-      const baseAlerts = sequence.events.map((event) =>
-        transformHitToAlert({
-          spaceId,
-          completeRule,
-          doc: event,
-          mergeStrategy,
-          ignoreFields: {},
-          ignoreFieldsRegexes: [],
-          applyOverrides: true,
-          buildReasonMessage,
-          indicesToQuery,
-          alertTimestampOverride,
-          ruleExecutionLogger,
-          alertUuid: 'placeholder-alert-uuid', // This is overriden below,
-          publicBaseUrl,
-        })
-      );
-
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      // The ID of each building block alert depends on all of the other building blocks as well,
-      // so we generate the IDs after making all the BaseFields
-      const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-      const wrappedBaseFields: Array<WrappedFieldsLatest<BaseFieldsLatest>> = baseAlerts.map(
-        (block, i): WrappedFieldsLatest<BaseFieldsLatest> => ({
-          _id: buildingBlockIds[i],
-          _index: '',
-          _source: {
-            ...block,
-            [ALERT_UUID]: buildingBlockIds[i],
-          },
-        })
-      );
-
-      // Now that we have an array of building blocks for the events in the sequence,
-      // we can build the signal that links the building blocks together
-      // and also insert the group id (which is also the "shell" signal _id) in each building block
-      const shellAlert = buildAlertRoot(
-        wrappedBaseFields,
+      const alertGroupFromSequence = buildAlertGroupFromSequence(
+        ruleExecutionLogger,
+        sequence,
         completeRule,
+        mergeStrategy,
         spaceId,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
+        true,
+        getSuppressionAlertFields({
+          primaryTimestamp,
+          secondaryTimestamp,
+          fields,
+          suppressionTerms,
+          fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
+          instanceId,
+        }),
         publicBaseUrl
       );
-      const sequenceAlert = {
-        _id: shellAlert[ALERT_UUID],
-        _index: '',
-        _source: {
-          ...shellAlert,
-          ...getSuppressionAlertFields({
-            primaryTimestamp,
-            secondaryTimestamp,
-            fields,
-            suppressionTerms,
-            fallbackTimestamp: baseAlerts?.[0][TIMESTAMP],
-            instanceId,
-          }),
-        },
-      };
 
-      // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
-      const wrappedBuildingBlocks = wrappedBaseFields.map((block, i) => {
-        const alertUrl = getAlertDetailsUrl({
-          alertId: block._id,
-          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-          timestamp: block._source['@timestamp'],
-          basePath: publicBaseUrl,
-          spaceId,
-        });
-
-        return {
-          ...block,
-          _source: {
-            ...block._source,
-            [ALERT_BUILDING_BLOCK_TYPE]: 'default',
-            [ALERT_GROUP_ID]: shellAlert[ALERT_GROUP_ID],
-            [ALERT_GROUP_INDEX]: i,
-            [ALERT_URL]: alertUrl,
-          },
-        };
-      });
-
-      return [...acc, ...wrappedBuildingBlocks, sequenceAlert] as Array<
+      return [...acc, ...alertGroupFromSequence] as Array<
         WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>
       >;
     },

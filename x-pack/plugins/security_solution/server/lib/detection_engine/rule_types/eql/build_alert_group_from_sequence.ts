@@ -47,6 +47,8 @@ export const buildAlertGroupFromSequence = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
+  applyOverrides = false,
+  extraFieldsForShellAlert = {},
   publicBaseUrl?: string
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
@@ -68,7 +70,7 @@ export const buildAlertGroupFromSequence = (
         mergeStrategy,
         ignoreFields: {},
         ignoreFieldsRegexes: [],
-        applyOverrides: false,
+        applyOverrides,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
@@ -111,7 +113,10 @@ export const buildAlertGroupFromSequence = (
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
-    _source: shellAlert,
+    _source: {
+      ...shellAlert,
+      ...extraFieldsForShellAlert,
+    },
   };
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
