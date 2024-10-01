@@ -37,6 +37,7 @@ import {
   roundUpToNextStepSizeFactor,
 } from './time_utils';
 import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
@@ -306,6 +307,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
                 ticks={timeRangeMeta.ticks}
                 timeRangeMin={timeRangeMeta.timeRangeMin}
                 timeRangeMax={timeRangeMeta.timeRangeMax}
+                compressed={isCompressed(api)}
               />
             </EuiInputPopover>
           );
