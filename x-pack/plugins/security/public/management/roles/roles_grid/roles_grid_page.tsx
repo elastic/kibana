@@ -183,7 +183,7 @@ export const RolesGridPage: FC<Props> = ({
   const handleDelete = () => {
     setSelection([]);
     setShowDeleteConfirmation(false);
-    loadRoles();
+    queryRoles(tableState);
   };
 
   const deleteOneRole = (roleToDelete: Role) => {

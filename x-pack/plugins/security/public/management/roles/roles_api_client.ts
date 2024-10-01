@@ -20,7 +20,7 @@ export interface QueryRoleParams {
   filters?: {
     showReserved?: boolean;
   };
-  sort: Required<Criteria<Role>>['sort'];
+  sort: Criteria<Role>['sort'];
 }
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}

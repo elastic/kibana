@@ -87,15 +87,6 @@ export function defineQueryRolesRoutes({
           },
         });
 
-        console.log(
-          JSON.stringify({
-            query: queryPayload,
-            from,
-            size,
-            sort: transformedSort,
-          })
-        );
-
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
         return response.ok({
           // @ts-expect-error
