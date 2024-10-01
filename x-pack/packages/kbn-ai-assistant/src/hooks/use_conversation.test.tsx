@@ -66,18 +66,14 @@ const useKibanaMockServices = {
   uiSettings: {
     get: jest.fn(),
   },
-  plugins: {
-    start: {
-      observabilityAIAssistant: {
-        useChat: createUseChat({
-          notifications: {
-            toasts: {
-              addError: addErrorMock,
-            },
-          } as unknown as NotificationsStart,
-        }),
-      },
-    },
+  observabilityAIAssistant: {
+    useChat: createUseChat({
+      notifications: {
+        toasts: {
+          addError: addErrorMock,
+        },
+      } as unknown as NotificationsStart,
+    }),
   },
 };
 

@@ -19,8 +19,8 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { elasticAiAssistantImage } from '@kbn/observability-ai-assistant-plugin/public';
 import { UPGRADE_LICENSE_TITLE } from '../i18n';
-import ctaImage from '../assets/elastic_ai_assistant.png';
 import { useLicenseManagementLocator } from '../hooks/use_license_management_locator';
 
 const incorrectLicenseContainer = css`
@@ -39,7 +39,7 @@ export function IncorrectLicensePanel() {
         justifyContent="center"
         className={incorrectLicenseContainer}
       >
-        <EuiImage src={ctaImage} alt="Elastic AI Assistant" size="m" />
+        <EuiImage src={elasticAiAssistantImage} alt="Elastic AI Assistant" size="m" />
         <EuiTitle>
           <h2>{UPGRADE_LICENSE_TITLE}</h2>
         </EuiTitle>

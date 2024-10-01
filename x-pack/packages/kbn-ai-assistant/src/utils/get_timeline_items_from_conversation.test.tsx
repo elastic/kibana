@@ -23,12 +23,8 @@ function Providers({ children }: { children: React.ReactElement }) {
     <IntlProvider locale="en" messages={{}}>
       <KibanaContextProvider
         services={{
-          plugins: {
-            start: {
-              observabilityAIAssistant: {
-                useObservabilityAIAssistantChatService: () => mockChatService,
-              },
-            },
+          observabilityAIAssistant: {
+            useObservabilityAIAssistantChatService: () => mockChatService,
           },
         }}
       >
