@@ -14,7 +14,6 @@ import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { useCustomMargin } from '../shared/use_custom_margin';
 import { CustomCard } from './types';
 
 interface Props {
@@ -62,7 +61,6 @@ const PackageListGridWrapper = ({
   excludePackageIdList = [],
   onLoaded,
 }: WrapperProps) => {
-  const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
@@ -89,7 +87,7 @@ const PackageListGridWrapper = ({
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin} ref={packageListRef}>
+      <div ref={packageListRef}>
         {showSearchBar && (
           <div
             css={css`
@@ -123,7 +121,7 @@ const PackageListGridWrapper = ({
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
-            showCardLabels={false}
+            showCardLabels={true}
           />
         )}
       </div>

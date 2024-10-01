@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
-  EuiAvatar,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,12 +20,12 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
   EuiBadge,
+  EuiFlexGrid,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnboardingFlowPackageList } from '../packages_list';
-import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 import { useVirtualSearchResults } from './use_virtual_search_results';
@@ -44,51 +43,63 @@ interface UseCaseOption {
 export const OnboardingFlowForm: FunctionComponent = () => {
   const options: UseCaseOption[] = [
     {
-      id: 'logs',
+      id: 'host',
       label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.collectAndAnalyzeMyLabel',
-        { defaultMessage: 'Collect and analyze logs' }
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
+        { defaultMessage: 'Host' }
       ),
       description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
+        'xpack.observability_onboarding.onboardingFlowForm.hostDescription',
         {
           defaultMessage:
-            'Detect patterns, gain insights from logs, get alerted when surpassing error thresholds',
+            'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
         }
       ),
-      logos: ['azure', 'aws', 'nginx', 'gcp'],
-      showIntegrationsBadge: true,
+      logos: ['kubernetes', 'opentelemetry', 'apache', 'mysql'],
     },
     {
-      id: 'apm',
+      id: 'kubernetes',
       label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyApplicationPerformanceLabel',
-        { defaultMessage: 'Monitor my application performance' }
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
+        { defaultMessage: 'Kubernetes' }
       ),
       description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
+        'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
         {
           defaultMessage:
-            'Catch application problems, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
+            'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
+        }
+      ),
+      logos: ['kubernetes', 'opentelemetry'],
+    },
+    {
+      id: 'application',
+      label: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
+        { defaultMessage: 'Application' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
+        {
+          defaultMessage:
+            'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
         }
       ),
       logos: ['opentelemetry', 'java', 'javascript', 'dotnet'],
     },
     {
-      id: 'infra',
+      id: 'cloud',
       label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyInfrastructureLabel',
-        { defaultMessage: 'Monitor infrastructure' }
+        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.cloudLabel',
+        { defaultMessage: 'Cloud' }
       ),
       description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
+        'xpack.observability_onboarding.onboardingFlowForm.cloudDescription',
         {
-          defaultMessage:
-            'Check my system’s health, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
+          defaultMessage: 'Ingest telemetry data from the Cloud for your applications and services',
         }
       ),
-      logos: ['kubernetes', 'prometheus', 'docker', 'opentelemetry'],
-      showIntegrationsBadge: true,
+      logos: ['azure', 'aws', 'gcp'],
     },
   ];
 
@@ -97,7 +108,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       context: { isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();
@@ -152,24 +162,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
-      <TitleWithIcon
-        id={categorySelectorTitleId}
-        iconType="createSingleMetricJob"
-        title={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
-          {
-            defaultMessage: 'What do you want to monitor?',
-          }
-        )}
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup
-        css={{ ...customMargin, maxWidth: '560px' }}
-        gutterSize="l"
-        direction="column"
-        role="group"
-        aria-labelledby={categorySelectorTitleId}
-      >
+      <EuiTitle size="s" id={categorySelectorTitleId}>
+        <strong>
+          {i18n.translate(
+            'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
+            {
+              defaultMessage: 'What do you want to monitor?',
+            }
+          )}
+        </strong>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFlexGrid columns={2} role="group" aria-labelledby={categorySelectorTitleId}>
         {options.map((option) => (
           <EuiFlexItem
             key={option.id}
@@ -204,6 +208,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   );
                 }
               }}
+              css={{ height: '100%' }}
             >
               <EuiText color="subdued" size="s">
                 {option.description}
@@ -214,7 +219,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   <EuiFlexGroup gutterSize="s" responsive={false}>
                     {option.logos?.map((logo) => (
                       <EuiFlexItem key={logo} grow={false}>
-                        <LogoIcon logo={logo} />
+                        <LogoIcon logo={logo} size="l" />
                       </EuiFlexItem>
                     ))}
                     {option.showIntegrationsBadge && (
@@ -232,26 +237,47 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             </EuiCheckableCard>
           </EuiFlexItem>
         ))}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
       {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
       <div
         hidden={!searchParams.get('category') || !customCards}
         role="group"
         aria-labelledby={packageListTitleId}
       >
-        <EuiSpacer />
+        <EuiSpacer size="xxl" />
         <div ref={suggestedPackagesRef}>
-          <TitleWithIcon
-            id={packageListTitleId}
-            iconType="savedObjectsApp"
-            title={i18n.translate(
-              'xpack.observability_onboarding.experimentalOnboardingFlow.whatTypeOfResourceLabel',
-              {
-                defaultMessage: 'What type of resource are you monitoring?',
-              }
-            )}
-          />
-          <EuiSpacer size="s" />
+          <EuiTitle size="s" id={packageListTitleId}>
+            <strong>
+              {searchParams.get('category') === 'kubernetes'
+                ? i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetesPackagesTitle',
+                    {
+                      defaultMessage: 'Monitor your Kubernetes cluster using:',
+                    }
+                  )
+                : searchParams.get('category') === 'application'
+                ? i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
+                    {
+                      defaultMessage: 'Monitor your Application using:',
+                    }
+                  )
+                : searchParams.get('category') === 'cloud'
+                ? i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
+                    {
+                      defaultMessage: 'Select your Cloud provider:',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
+                    {
+                      defaultMessage: 'Monitor your Host using:',
+                    }
+                  )}
+            </strong>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <OnboardingFlowPackageList
             customCards={customCards}
             flowSearch={integrationSearch}
@@ -259,12 +285,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
         </div>
         <div ref={searchResultsRef}>
-          <EuiText css={customMargin} size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
-              defaultMessage="Not seeing yours? Search through our 130 ways of ingesting data:"
-            />
+          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued">
+            <strong>
+              <FormattedMessage
+                id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
+                defaultMessage="Search through other ways of ingesting data:"
+              />
+            </strong>
           </EuiText>
+          <EuiSpacer size="m" />
           <OnboardingFlowPackageList
             showSearchBar={true}
             searchQuery={integrationSearch}
@@ -285,25 +315,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     </EuiPanel>
   );
 };
-
-interface TitleWithIconProps {
-  title: string;
-  iconType: string;
-  id?: string;
-}
-
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType, id }) => (
-  <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiAvatar size="l" name={title} iconType={iconType} iconSize="l" color="subdued" />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiTitle size="s" id={id}>
-        <strong>{title}</strong>
-      </EuiTitle>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
   // Fixed header in Kibana is different height between serverless and stateful so need to calculate dynamically.

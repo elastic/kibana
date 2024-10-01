@@ -32,7 +32,9 @@ export type SupportedLogo =
   | 'kafka'
   | 'mongodb'
   | 'apache_tomcat'
-  | 'firehose';
+  | 'firehose'
+  | 'linux'
+  | 'apple';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [
@@ -57,6 +59,8 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'kafka',
     'mongodb',
     'apache_tomcat',
+    'linux',
+    'apple',
   ].includes(logo);
 }
 
