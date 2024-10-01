@@ -14,7 +14,9 @@
 
   &:not(.globalFilterItem-isDisabled) {
     @include euiFormControlDefaultShadow;
-    box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
+    & { // stylelint-disable-line no-duplicate-selectors
+      box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
+    }
   }
 }
 
