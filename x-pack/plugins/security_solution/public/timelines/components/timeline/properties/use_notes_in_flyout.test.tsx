@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import type { UseNotesInFlyoutArgs } from './use_notes_in_flyout';
 import { useNotesInFlyout } from './use_notes_in_flyout';

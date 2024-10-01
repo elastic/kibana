@@ -78,7 +78,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData({
           dataView: {
@@ -108,7 +108,7 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
