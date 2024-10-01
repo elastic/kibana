@@ -61,9 +61,7 @@ import type {
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import {
-  DashboardAppLocatorDefinition,
-} from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
@@ -122,6 +120,7 @@ export interface DashboardStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardSetup {}
 
 export interface DashboardStart {
