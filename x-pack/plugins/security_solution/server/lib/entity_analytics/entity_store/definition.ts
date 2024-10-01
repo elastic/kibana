@@ -12,29 +12,25 @@ import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/as
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
 import { buildEntityDefinitionId } from './utils/utils';
 
+const RISK_FIELDS = ['calculated_level', 'calculated_score', 'calculated_score_norm'];
+
+const newestValue = (source: string) => ({
+  source,
+  aggregation: {
+    type: 'top_value',
+    sort: {
+      '@timestamp': 'desc',
+    },
+  },
+});
+
 const getSharedMetadataFields = (entityType: EntityType) => [
   {
     source: '_index',
     destination: 'entity.source',
   },
-  {
-    source: 'asset.criticality',
-    aggregation: {
-      type: 'top_value',
-      sort: {
-        '@timestamp': 'desc',
-      },
-    },
-  },
-  {
-    source: `${entityType}.risk.calculated_level`,
-    aggregation: {
-      type: 'top_value',
-      sort: {
-        '@timestamp': 'desc',
-      },
-    },
-  },
+  newestValue('asset.criticality'),
+  ...RISK_FIELDS.map((field) => newestValue(`${entityType}.risk.${field}`)),
 ];
 
 export const buildHostEntityDefinition = (namespace: string): EntityDefinition =>
