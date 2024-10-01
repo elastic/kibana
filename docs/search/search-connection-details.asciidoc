@@ -5,12 +5,12 @@
 <titleabbrev>Connection details</titleabbrev>
 ++++
 
-To connect to your Elasticsearch deployment, you need either a Cloud ID or an Elasticsearch endpoint, depending on the
+To connect to your {es} deployment, you need either a Cloud ID or an {es} endpoint, depending on the
 deployment type you use. For secure connections, it’s recommended to use an API key for authentication.
 
 * Learn how to <<find-cloud-id-cloud-self-managed, obtain your Cloud ID>> for Elastic Cloud or self-hosted deployments.
 * Learn how to <<create-an-api-key-cloud-self-managed, create an API key>> for Elastic Cloud or self-hosted deployments.  
-* Learn how to <<find-cloud-id-serverless, obtain your Elasticsearch endpoint or Cloud ID>> for a serverless deployment.  
+* Learn how to <<find-cloud-id-serverless, obtain your {es} endpoint or Cloud ID>> for a serverless deployment.  
 * Learn how to <<create-an-api-key-serverless, create an API key>> for a serverless deployment.
 
 [float]
@@ -34,15 +34,10 @@ image::cloud-id.png[width=750]
 [[create-an-api-key-cloud-self-managed]]
 ==== Create an API key
 
-. Navigate to the Elastic Cloud home page.
-. In the main menu, under the *Management* section, click *Stack Management*.
+. To navigate to *API keys*, use the <<kibana-navigation-search,*global search bar*>>.
 +
 [.screenshot]
-image::click-stack-management.png[width=750]
-. In the left-side menu, under the *Security* section, click *API keys*.
-+
-[.screenshot]
-image::click-api-keys.png[width=750]
+image::api-keys-search-bar.png[width=750]
 . Click *Create API key*.
 +
 [.screenshot]
@@ -58,7 +53,7 @@ image::click-create-api-key.png[width=750]
 ==== Find your Elasticsearch endpoint
 
 . Navigate to the serverless project's home page.
-. Locate the *Copy your connection details* section, and copy the *Elasticsearch endpoint*.
+. Scroll down to the *Copy your connection details* section, and copy the *Elasticsearch endpoint*.
 
 [.screenshot]
 image::serverless-connection-details.png[width=750]
@@ -73,7 +68,7 @@ The *Cloud ID* is also displayed in the Copy your connection details section, wh
 ==== Create an API key
 
 . Navigate to the serverless project's home page.
-. Locate the *Add an API Key* section, and click *New*.
+. Scroll down to the *Add an API Key* section, and click *New*.
 +
 [.screenshot]
 image::serverless-create-an-api-key.png[width=750]
