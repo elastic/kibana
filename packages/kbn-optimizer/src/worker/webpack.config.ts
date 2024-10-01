@@ -260,6 +260,18 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /node_modules\/vega.*\/.*\.(js|tsx?)$/,
+          exclude: /node_modules\/vega.*\/.*build-es5.*\.(js|tsx?)$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET],
+            },
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
