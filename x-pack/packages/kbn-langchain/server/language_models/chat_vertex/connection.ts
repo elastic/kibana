@@ -41,7 +41,20 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
     this.temperature = fields.temperature ?? 0;
   }
 
-  async _request(data: { contents: unknown; tools: unknown[] }, options: { signal?: AbortSignal }) {
+  async _request(
+    // TODO better types here
+    data: {
+      contents: unknown;
+      tools: unknown[];
+      systemInstruction?: { parts: [{ text: string }] };
+    },
+    options: { signal?: AbortSignal },
+    requestHeaders = {}
+  ) {
+    console.log('whatisdata?', JSON.stringify(data, null, 2));
+    const systemInstruction = data?.systemInstruction?.parts?.[0]?.text.length
+      ? { systemInstruction: data?.systemInstruction?.parts?.[0]?.text }
+      : {};
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
       try {
         const requestBody = {
@@ -53,6 +66,7 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
               messages: data?.contents,
               tools: data?.tools,
               temperature: this.temperature,
+              ...systemInstruction,
             },
           },
         };

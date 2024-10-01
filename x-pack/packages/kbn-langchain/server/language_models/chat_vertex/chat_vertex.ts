@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Content, EnhancedGenerateContentResponse } from '@google/generative-ai';
+import { EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
@@ -17,8 +17,8 @@ import { Readable } from 'stream';
 import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiPartText } from '@langchain/google-common/dist/types';
 import {
-  convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
 } from '../../utils/gemini';
@@ -75,36 +75,38 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
-    const prompt = convertBaseMessagesToContent(messages, false);
     const parameters = this.invocationParams(options);
-    const request = {
-      ...parameters,
-      contents: prompt,
-    };
-
+    const data = await this.connection.formatData(messages, parameters);
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
+      console.log(
+        'INVOKE STREAM???',
+        JSON.stringify(
+          {
+            messages,
+            options,
+            parameters,
+          },
+          null,
+          2
+        )
+      );
+
+      console.log('data STREAM????', JSON.stringify(data, null, 2));
+      const systemPart: GeminiPartText | undefined = data?.systemInstruction
+        ?.parts?.[0] as unknown as GeminiPartText;
+      const systemInstruction = systemPart?.text.length
+        ? { systemInstruction: systemPart?.text }
+        : {};
       const requestBody = {
         actionId: this.#connectorId,
         params: {
           subAction: 'invokeStream',
           subActionParams: {
             model: this.#model,
-            messages: request.contents.reduce((acc: Content[], item) => {
-              if (!acc?.length) {
-                acc.push(item);
-                return acc;
-              }
-
-              if (acc[acc.length - 1].role === item.role) {
-                acc[acc.length - 1].parts = acc[acc.length - 1].parts.concat(item.parts);
-                return acc;
-              }
-
-              acc.push(item);
-              return acc;
-            }, []),
+            messages: data?.contents,
+            tools: data?.tools,
             temperature: this.temperature,
-            tools: request.tools,
+            ...systemInstruction,
           },
         },
       };
