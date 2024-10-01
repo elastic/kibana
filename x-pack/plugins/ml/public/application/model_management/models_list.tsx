@@ -698,35 +698,37 @@ export const ModelsList: FC<Props> = ({
         const config = getModelStateColor(state);
         if (!config) return null;
 
-        const isDownloadInProgress = state === MODEL_STATE.DOWNLOADING && downloadState;
+        const isProgressbarVisible =
+          (state === MODEL_STATE.DOWNLOADING && downloadState) || state === MODEL_STATE.DOWNLOADED;
 
-        const label = (
-          <EuiHealth textSize={'xs'} color={config.color}>
-            {config.name}
-          </EuiHealth>
-        );
+        const label = <EuiBadge color={'hollow'}>{config.name}</EuiBadge>;
 
         return (
           <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>
-            {isDownloadInProgress ? (
+            {isProgressbarVisible ? (
               <EuiFlexItem>
                 <EuiProgress
-                  label={label}
+                  label={config.name}
                   valueText={
                     <>
-                      {((downloadState.downloaded_parts / downloadState.total_parts) * 100).toFixed(
-                        0
-                      ) + '%'}
+                      {downloadState
+                        ? (
+                            (downloadState.downloaded_parts / downloadState.total_parts) *
+                            100
+                          ).toFixed(0) + '%'
+                        : '100%'}
                     </>
                   }
-                  value={downloadState?.downloaded_parts}
-                  max={downloadState?.total_parts}
+                  value={downloadState?.downloaded_parts ?? 1}
+                  max={downloadState?.total_parts ?? 1}
                   size="xs"
                   color={config.color}
                 />
               </EuiFlexItem>
             ) : (
-              <EuiFlexItem>{label}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span>{config.component ?? label}</span>
+              </EuiFlexItem>
             )}
           </EuiFlexGroup>
         );

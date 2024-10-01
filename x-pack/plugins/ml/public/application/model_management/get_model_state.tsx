@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { DEPLOYMENT_STATE, MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
-import type { EuiHealthProps } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiHealth,
+  EuiLoadingSpinner,
+  type EuiHealthProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ModelItem } from './models_list';
 
@@ -33,35 +41,56 @@ export const getModelDeploymentState = (model: ModelItem): ModelState | undefine
 
 export const getModelStateColor = (
   state: ModelState | undefined
-): { color: EuiHealthProps['color']; name: string } | null => {
+): { color: EuiHealthProps['color']; name: string; component?: React.ReactNode } | null => {
   switch (state) {
     case MODEL_STATE.DOWNLOADED:
       return {
-        color: 'subdued',
+        color: 'success',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadedName', {
-          defaultMessage: 'Ready to deploy',
+          defaultMessage: 'Downloaded. Ready to deploy.',
         }),
       };
     case MODEL_STATE.DOWNLOADING:
       return {
         color: 'primary',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
-          defaultMessage: 'Downloading...',
+          defaultMessage: 'Downloading',
         }),
       };
     case MODEL_STATE.STARTED:
       return {
-        color: 'success',
+        color: '#E6F9F7',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startedName', {
           defaultMessage: 'Deployed',
         }),
+        get component() {
+          return (
+            <EuiBadge color={this.color}>
+              <EuiHealth color={'success'} textSize="xs" css={{ display: 'inline' }}>
+                {this.name}
+              </EuiHealth>
+            </EuiBadge>
+          );
+        },
       };
     case MODEL_STATE.STARTING:
       return {
         color: 'success',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.startingName', {
-          defaultMessage: 'Starting deployment...',
+          defaultMessage: 'Deploying',
         }),
+        get component() {
+          return (
+            <EuiBadge color={'hollow'}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{this.name}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          );
+        },
       };
     case MODEL_STATE.STOPPING:
       return {
