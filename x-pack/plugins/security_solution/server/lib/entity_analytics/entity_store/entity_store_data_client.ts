@@ -95,16 +95,24 @@ export class EntityStoreDataClient {
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
-    await entityClient.createEntityDefinition({
-      definition: {
-        ...definition,
-        filter,
-        indexPatterns: indexPattern
-          ? [...definition.indexPatterns, ...indexPattern.split(',')]
-          : definition.indexPatterns,
-      },
-      installOnly: true,
-    });
+    await entityClient
+      .createEntityDefinition({
+        definition: {
+          ...definition,
+          filter,
+          indexPatterns: indexPattern
+            ? [...definition.indexPatterns, ...indexPattern.split(',')]
+            : definition.indexPatterns,
+        },
+        installOnly: true,
+      })
+      .catch((err) => {
+        this.options.logger.error(
+          `Error initializing entity store for ${entityType}: ${err.message}`
+        );
+
+        this.engineClient.update(definition.id, ENGINE_STATUS.ERROR);
+      });
     debugLog(`Created entity definition`);
 
     // the index must be in place with the correct mapping before the enrich policy is created

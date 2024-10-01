@@ -23,7 +23,7 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
       type: 'keyword', // EntityType: user | host
     },
     status: {
-      type: 'keyword', // EngineStatus: installing | started | stopped
+      type: 'keyword', // EngineStatus: installing | started | stopped | error
     },
     fieldHistoryLength: {
       type: 'integer',
