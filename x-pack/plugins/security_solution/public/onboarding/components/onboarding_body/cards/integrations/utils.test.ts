@@ -145,4 +145,23 @@ describe('getFilteredCards', () => {
       },
     });
   });
+
+  it('should handle links do not start with integration path', () => {
+    const result = getFilteredCards({
+      integrationsList: [{ ...mockIntegrationCardItem, url: '/app/home' }],
+      getAppUrl: mockGetAppUrl,
+      navigateTo: mockNavigateTo,
+    });
+
+    result.integrationCards[0].onCardClick?.();
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({
+      url: '/app/home',
+      state: {
+        onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+        onCancelUrl: '/app/security/get_started',
+        onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
+      },
+    });
+  });
 });

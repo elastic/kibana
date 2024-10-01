@@ -112,11 +112,17 @@ const addSecuritySpecificProps = ({
     showInstallationStatus: true,
     url,
     onCardClick: () => {
-      navigateTo({
-        appId: INTEGRATION_APP_ID,
-        path: url.slice(integrationRootUrl.length),
-        state,
-      });
+      if (url.startsWith(APP_INTEGRATIONS_PATH)) {
+        navigateTo({
+          appId: INTEGRATION_APP_ID,
+          path: url.slice(integrationRootUrl.length),
+          state,
+        });
+      } else if (url.startsWith('http') || url.startsWith('https')) {
+        window.open(url, '_blank');
+      } else {
+        navigateTo({ url, state });
+      }
     },
   };
 };

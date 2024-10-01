@@ -8,11 +8,10 @@
 import type React from 'react';
 import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
-import type { HttpSetup, NavigateToAppOptions } from '@kbn/core/public';
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
+import type { StartServices } from '../types';
 
 export interface CheckCompleteResult {
   /**
@@ -65,13 +64,9 @@ export type OnboardingCardComponent = React.ComponentType<{
   checkCompleteMetadata?: Record<string, unknown>;
 }>;
 
-export type OnboardingCardCheckComplete = ({
-  http,
-  data,
-}: {
-  http: HttpSetup;
-  data: DataPublicPluginStart;
-}) => Promise<CheckCompleteResponse>;
+export type OnboardingCardCheckComplete = (
+  services: StartServices
+) => Promise<CheckCompleteResponse>;
 
 export interface OnboardingCardConfig {
   id: OnboardingCardId;

@@ -7,26 +7,21 @@
 
 import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
 import { EPM_PACKAGES_MANY, installationStatuses } from '@kbn/fleet-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import { AGENT_INDEX } from './const';
+import type { StartServices } from '../../../../../types';
 
-export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async ({
-  data,
-  http,
-}: {
-  data: DataPublicPluginStart;
-  http: HttpSetup;
-}) => {
-  const packageData = await http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
+export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async (
+  services: StartServices
+) => {
+  const packageData = await services.http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
     version: '2023-10-31',
   });
 
   const agentsData = await lastValueFrom(
-    data.search.search({
+    services.data.search.search({
       params: { index: AGENT_INDEX, body: { size: 1 } },
     })
   );
