@@ -53,17 +53,33 @@ interface Props {
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
 
-const isRetentionBiggerThan = (valueA: string, valueB: string) => {
-  const { size: sizeA, unit: unitA } = splitSizeAndUnits(valueA);
-  const { size: sizeB, unit: unitB } = splitSizeAndUnits(valueB);
+const convertToMinutes = (value: string) => {
+  const { size, unit } = splitSizeAndUnits(value);
+  const sizeNum = parseInt(size, 10);
 
-  // If the unit for A is bigger than B, then A is always bigger
-  if (unitA === 'd' && unitB !== 'd') {
-    return true;
+  switch (unit) {
+    case 'd':
+      // days to minutes
+      return sizeNum * 24 * 60;
+    case 'h':
+      // hours to minutes
+      return sizeNum * 60;
+    case 'm':
+      // minutes to minutes
+      return sizeNum;
+    case 's':
+      // seconds to minutes
+      return sizeNum / 60;
+    default:
+      throw new Error(`Unknown unit: ${unit}`);
   }
+};
 
-  // Otherwise when the units are the same, we can compare the values directly
-  return parseInt(sizeA, 10) > parseInt(sizeB, 10);
+const isRetentionBiggerThan = (valueA: string, valueB: string) => {
+  const minutesA = convertToMinutes(valueA);
+  const minutesB = convertToMinutes(valueB);
+
+  return minutesA > minutesB;
 };
 
 const configurationFormSchema: FormSchema = {
@@ -245,6 +261,9 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const [formData] = useFormData({ form });
   const isDirty = useFormIsModified({ form });
 
+  const formHasErrors = form.getErrors().length > 0;
+  const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
+
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
 
@@ -423,7 +442,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             fill
             type="submit"
             isLoading={false}
-            disabled={(form.isSubmitted && form.isValid === false) || !isDirty}
+            disabled={disableSubmit}
             data-test-subj="saveButton"
             onClick={onSubmitForm}
           >
