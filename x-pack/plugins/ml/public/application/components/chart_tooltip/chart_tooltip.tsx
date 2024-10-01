@@ -9,7 +9,9 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
+// @ts-ignore Kibana does not have types for eui/lib
+import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
 import type { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
@@ -30,10 +32,13 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
  * Pure component for rendering the tooltip content with a custom layout across the ML plugin.
  */
 export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData }) => {
+  const styles = useEuiMemoizedStyles(euiToolTipStyles);
   return (
-    <div className="mlChartTooltip">
+    <div className="mlChartTooltip" css={styles.euiToolTip}>
       {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
-        <div className="mlChartTooltip__header">{renderHeader(tooltipData[0])}</div>
+        <div className="mlChartTooltip__header" css={styles.euiToolTip__title}>
+          {renderHeader(tooltipData[0])}
+        </div>
       )}
       {tooltipData.length > 1 && (
         <div className="mlChartTooltip__list">

@@ -1,5 +1,4 @@
 .mlChartTooltip {
-  @include euiToolTipStyle('s');
   @include euiFontSizeXS;
   padding: 0;
   transition: opacity $euiAnimSpeedNormal;
@@ -13,7 +12,6 @@
   }
 
   &__header {
-    @include euiToolTipTitle;
     padding: $euiSizeXS ($euiSizeXS * 2);
   }
 
