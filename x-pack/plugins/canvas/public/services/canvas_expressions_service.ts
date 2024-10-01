@@ -13,12 +13,22 @@ import { fromExpression, getType } from '@kbn/interpreter';
 import { pluck } from 'rxjs';
 import { buildEmbeddableFilters } from '../../common/lib/build_embeddable_filters';
 import { expressionsService } from './kibana_services';
+import { getCanvasNotifyService } from './canvas_notify_service';
+import { getCanvasFiltersService } from './canvas_filters_service';
 
 interface Options {
   castToRender?: boolean;
 }
 
 class ExpressionsService {
+  private notifyService;
+  private filtersService;
+
+  constructor() {
+    this.notifyService = getCanvasNotifyService();
+    this.filtersService = getCanvasFiltersService();
+  }
+
   async interpretAst(
     ast: ExpressionAstExpression,
     variables: Record<string, any>,
@@ -77,7 +87,7 @@ class ExpressionsService {
 
       throw new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
     } catch (err) {
-      this.notify.error(err);
+      this.notifyService.error(err);
       throw err;
     }
   }
@@ -91,8 +101,8 @@ class ExpressionsService {
   }
 
   private async getFilters() {
-    const filtersList = this.filters.getFilters();
-    const context = this.filters.getFiltersContext();
+    const filtersList = this.filtersService.getFilters();
+    const context = this.filtersService.getFiltersContext();
     const filterExpression = filtersList.join(' | ');
     const filterAST = fromExpression(filterExpression);
     return await this.interpretAstWithContext(filterAST, null, context);

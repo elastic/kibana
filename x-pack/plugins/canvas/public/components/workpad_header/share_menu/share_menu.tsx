@@ -33,22 +33,23 @@ export const ShareMenu = () => {
     pageCount: getPages(state).length,
   }));
 
-  const ReportingPanelPDFComponent = reportingService?.getReportingPanelPDFComponent();
-
   const sharingData = {
     workpad,
     pageCount,
   };
 
-  const ReportingComponent = ReportingPanelPDFComponent
-    ? ({ onClose }: { onClose: () => void }) => (
-        <ReportingPanelPDFComponent
-          getJobParams={() => getPdfJobParams(sharingData, kibanaVersion)}
-          layoutOption="canvas"
-          onClose={onClose}
-          objectId={workpad.id}
-        />
-      )
+  const ReportingComponent = reportingService
+    ? ({ onClose }: { onClose: () => void }) => {
+        const ReportingPanelPDFV2 = reportingService!.components.ReportingPanelPDFV2;
+        return (
+          <ReportingPanelPDFV2
+            getJobParams={() => getPdfJobParams(sharingData, kibanaVersion)}
+            layoutOption="canvas"
+            onClose={onClose}
+            objectId={workpad.id}
+          />
+        );
+      }
     : null;
 
   const onExport = useCallback(

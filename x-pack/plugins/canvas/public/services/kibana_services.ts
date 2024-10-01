@@ -48,8 +48,8 @@ const servicesReady$ = new BehaviorSubject(false);
 export const setKibanaServices = (
   kibanaCore: CoreStart,
   deps: CanvasStartDeps,
-  initContext: PluginInitializerContext,
-  appUpdater?: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>,
+  initContext: PluginInitializerContext
 ) => {
   kibanaVersion = initContext.env.packageInfo.version;
 
@@ -69,7 +69,7 @@ export const setKibanaServices = (
 
   navLinksService = {
     updatePath: (path: string) => {
-      appUpdater?.next(() => ({
+      appUpdater.next(() => ({
         defaultPath: `${path}`,
       }));
 

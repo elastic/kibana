@@ -82,7 +82,7 @@ const sanitizeWorkpad = function (workpad: CanvasWorkpad) {
   return workpad;
 };
 
-export const workpadServiceFactory: () => CanvasWorkpadService = () => {
+export const getCanvasWorkpadService: () => CanvasWorkpadService = () => {
   const getApiPath = function () {
     return `${API_ROUTE_WORKPAD}`;
   };

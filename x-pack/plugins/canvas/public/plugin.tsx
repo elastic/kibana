@@ -38,6 +38,7 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
+import { setKibanaServices } from './services/kibana_services';
 
 export type { CoreStart, CoreSetup };
 
@@ -125,17 +126,7 @@ export class CanvasPlugin
 
         srcPlugin.start(coreStart, startPlugins);
 
-        const { pluginServices } = await import('./services');
-        const { pluginServiceRegistry } = await import('./services/kibana');
-
-        pluginServices.setRegistry(
-          pluginServiceRegistry.start({
-            coreStart,
-            startPlugins,
-            appUpdater: this.appUpdater,
-            initContext: this.initContext,
-          })
-        );
+        setKibanaServices(coreStart, startPlugins, this.appUpdater, this.initContext);
 
         const { expressions, presentationUtil } = startPlugins;
         await presentationUtil.registerExpressionsLanguage(
@@ -154,7 +145,7 @@ export class CanvasPlugin
           this.appUpdater
         );
 
-        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
+        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore });
 
         return () => {
           unmount();

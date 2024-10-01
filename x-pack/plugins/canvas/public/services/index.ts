@@ -12,6 +12,7 @@ import { getCustomElementService } from './canvas_custom_element_service';
 import { getCanvasExpressionService } from './canvas_expressions_service';
 import { getCanvasFiltersService } from './canvas_filters_service';
 import { getCanvasNotifyService } from './canvas_notify_service';
+import { getCanvasWorkpadService } from './canvas_workpad_service';
 
 export const useCustomElementService = () => {
   const canvasCustomElementService = useMemo(() => getCustomElementService(), []);
@@ -29,5 +30,7 @@ export const useNotifyService = () => {
   const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
   return canvasNotifyService;
 };
-
-export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();
+export const useWorkpadService = () => {
+  const canvasWorkpadService = useMemo(() => getCanvasWorkpadService(), []);
+  return canvasWorkpadService;
+};
