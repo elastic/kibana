@@ -68,12 +68,14 @@ describe('object_utils', () => {
     expect(typeof test11).toBe('number');
     expect(test11).toBe(0);
 
-    const test12 = setNestedProperty(testObj, 'the.__proto__', 'update');
-    expect(test12.the).toBe('update');
-    expect(test12.the.__proto__.update).toBe(undefined);
-
-    const test13 = setNestedProperty(testObj, 'the.prototype', 'update');
-    expect(test13.the).toBe('update');
-    expect(test13.the.prototype?.update).toBe(undefined);
+    expect(() => {
+      setNestedProperty(testObj, 'the.__proto__', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(testObj, 'the.prototype', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(testObj, 'the.constructor', 'update');
+    }).toThrow('Invalid accessor');
   });
 });
