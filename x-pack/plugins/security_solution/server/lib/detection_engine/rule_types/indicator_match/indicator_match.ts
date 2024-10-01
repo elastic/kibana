@@ -15,7 +15,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { RuleRangeTuple, BulkCreate, WrapHits, WrapSuppressedHits, RunOpts } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
@@ -43,7 +43,6 @@ export const indicatorMatchExecutor = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   wrapSuppressedHits,
   runOpts,
   licensing,
@@ -65,7 +64,6 @@ export const indicatorMatchExecutor = async ({
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   wrapSuppressedHits: WrapSuppressedHits;
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
@@ -106,7 +104,6 @@ export const indicatorMatchExecutor = async ({
       secondaryTimestamp,
       exceptionFilter,
       unprocessedExceptions,
-      inputIndexFields,
       runOpts,
       licensing,
       experimentalFeatures,
