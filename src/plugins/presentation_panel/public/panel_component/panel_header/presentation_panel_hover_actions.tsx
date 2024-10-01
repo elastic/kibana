@@ -22,15 +22,14 @@ import {
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiContextMenu,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPopover,
   EuiSkeletonRectangle,
-  EuiSkeletonText,
   EuiToolTip,
   IconType,
 } from '@elastic/eui';
@@ -118,7 +117,7 @@ export const PresentationPanelHoverActions = ({
   viewMode?: ViewMode;
   showNotifications?: boolean;
 }) => {
-  const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
+  const [menuPanelsLoading, setMenuPanelsLoading] = useState(true);
   const [contextMenuActions, setContextMenuActions] = useState<AnyApiAction[]>([]);
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
@@ -500,11 +499,14 @@ export const PresentationPanelHoverActions = ({
             `}
           >
             {menuPanelsLoading ? (
-              <>
-                <EuiSkeletonRectangle width="16px" height="16px" />
-                <EuiSkeletonRectangle width="16px" height="16px" />
-                <EuiSkeletonRectangle width="16px" height="16px" />
-              </>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiSkeletonRectangle width="24px" height="24px" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSkeletonRectangle width="24px" height="24px" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : (
               <>
                 {viewMode === 'edit' && combineHoverActions && dragHandle}
@@ -555,24 +557,11 @@ export const PresentationPanelHoverActions = ({
                       },
                     }}
                   >
-                    {menuPanelsLoading ? (
-                      <EuiContextMenuPanel
-                        className="embPanel__optionsMenuPopover-loading"
-                        title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
-                          defaultMessage: 'Options',
-                        })}
-                      >
-                        <EuiContextMenuItem>
-                          <EuiSkeletonText />
-                        </EuiContextMenuItem>
-                      </EuiContextMenuPanel>
-                    ) : (
-                      <EuiContextMenu
-                        data-test-subj="presentationPanelContextMenuItems"
-                        initialPanelId={'mainMenu'}
-                        panels={contextMenuPanels}
-                      />
-                    )}
+                    <EuiContextMenu
+                      data-test-subj="presentationPanelContextMenuItems"
+                      initialPanelId={'mainMenu'}
+                      panels={contextMenuPanels}
+                    />
                   </EuiPopover>
                 ) : null}
               </>
