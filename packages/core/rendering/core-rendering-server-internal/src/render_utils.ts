@@ -8,7 +8,6 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IConfigService } from '@kbn/config';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
@@ -57,28 +56,15 @@ export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => 
 
 export const getThemeStylesheetPaths = ({
   darkMode,
-  themeVersion,
   baseHref,
 }: {
   darkMode: boolean;
-  themeVersion: UiSharedDepsNpm.ThemeVersion;
   baseHref: string;
 }) => {
-  const bundlesHref = getBundlesHref(baseHref);
   return [
     ...(darkMode
-      ? [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
-            themeVersion
-          )}`,
-          `${baseHref}/ui/legacy_dark_theme.min.css`,
-        ]
-      : [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
-            themeVersion
-          )}`,
-          `${baseHref}/ui/legacy_light_theme.min.css`,
-        ]),
+      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
+      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
   ];
 };
 

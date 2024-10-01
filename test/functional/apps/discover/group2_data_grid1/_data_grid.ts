@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const getTitles = async () =>
         (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
 
-      expect(await getTitles()).to.be('@timestamp Document');
+      expect(await getTitles()).to.be('@timestamp Summary');
 
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await getTitles()).to.be('@timestamp bytes');
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getTitles()).to.be('@timestamp agent');
 
       await unifiedFieldList.clickFieldListItemRemove('agent');
-      expect(await getTitles()).to.be('@timestamp Document');
+      expect(await getTitles()).to.be('@timestamp Summary');
     });
 
     const isVisible = async (selector: string) => {
