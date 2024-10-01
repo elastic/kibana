@@ -54,18 +54,8 @@ export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => 
   ];
 };
 
-export const getThemeStylesheetPaths = ({
-  darkMode,
-  baseHref,
-}: {
-  darkMode: boolean;
-  baseHref: string;
-}) => {
-  return [
-    ...(darkMode
-      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
-      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
-  ];
+export const getThemeStylesheetPaths = ({}: { darkMode: boolean; baseHref: string }) => {
+  return [];
 };
 
 export const getBrowserLoggingConfig = async (
