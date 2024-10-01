@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
-import { i18n } from '@kbn/i18n';
-import { EuiIconTip } from '@elastic/eui';
-import React from 'react';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { QuerySchema } from '@kbn/slo-schema';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { OptionalText } from './optional_text';
 import { CreateSLOForm } from '../../types';
-import { IndexFieldSelector } from './index_field_selector';
 import { GroupByCardinality } from './group_by_cardinality';
+import { GroupByFieldSelector } from './group_by_field_selector';
 
 export function GroupByField({
   dataView,
@@ -32,27 +29,8 @@ export function GroupByField({
 
   return (
     <>
-      <IndexFieldSelector
+      <GroupByFieldSelector
         indexFields={groupByFields}
-        name="groupBy"
-        defaultValue={ALL_VALUE}
-        label={
-          <span>
-            {i18n.translate('xpack.slo.sloEdit.groupBy.label', {
-              defaultMessage: 'Group by',
-            })}{' '}
-            <EuiIconTip
-              content={i18n.translate('xpack.slo.sloEdit.groupBy.tooltip', {
-                defaultMessage: 'Create individual SLOs for each value of the selected field.',
-              })}
-              position="top"
-            />
-          </span>
-        }
-        labelAppend={<OptionalText />}
-        placeholder={i18n.translate('xpack.slo.sloEdit.groupBy.placeholder', {
-          defaultMessage: 'Select an optional field to group by',
-        })}
         isLoading={!!index && isLoading}
         isDisabled={!index}
       />
