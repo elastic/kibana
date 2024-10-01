@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { ILicenseState } from '../../../lib';
+import { BASE_ACTION_API_PATH } from '../../../../common';
+import { ActionsRequestHandlerContext } from '../../../types';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import {
+  deleteConnectorRequestParamsSchemaV1,
+  DeleteConnectorRequestParamsV1,
+} from '../../../../common/routes/connector/apis/delete';
 
-const paramSchema = schema.object({
-  id: schema.string({
-    meta: { description: 'An identifier for the connector.' },
-  }),
-});
-
-export const deleteActionRoute = (
+export const deleteConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -33,7 +30,7 @@ export const deleteActionRoute = (
       },
       validate: {
         request: {
-          params: paramSchema,
+          params: deleteConnectorRequestParamsSchemaV1,
         },
         response: {
           204: {
@@ -45,7 +42,7 @@ export const deleteActionRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const { id } = req.params;
+        const { id }: DeleteConnectorRequestParamsV1 = req.params;
         await actionsClient.delete({ id });
         return res.noContent();
       })
