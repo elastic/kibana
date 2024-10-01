@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBadge, EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { HistoricalResult } from '../../../../../../../../types';
+import type { NonLegacyHistoricalResult } from '../../../../../../../../types';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
 import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
@@ -44,7 +44,7 @@ const StyledBadge = styled(EuiBadge)`
 
 export interface Props {
   indexName: string;
-  historicalResult: HistoricalResult;
+  historicalResult: NonLegacyHistoricalResult;
 }
 
 const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historicalResult }) => {

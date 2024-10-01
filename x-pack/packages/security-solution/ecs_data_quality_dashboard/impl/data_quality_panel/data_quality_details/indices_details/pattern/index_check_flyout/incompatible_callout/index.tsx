@@ -13,15 +13,33 @@ import React from 'react';
 import {
   DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
   INCOMPATIBLE_CALLOUT,
+  INCOMPATIBLE_CALLOUT_TITLE,
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
 } from '../../../../../translations';
 import { CalloutItem } from '../styles';
 
-const IncompatibleCalloutComponent: React.FC = () => {
+export interface Props {
+  incompatibleFieldCount?: number;
+  ecsVersion?: string;
+}
+
+const IncompatibleCalloutComponent: React.FC<Props> = ({
+  ecsVersion = EcsVersion,
+  incompatibleFieldCount,
+}) => {
   return (
-    <EuiCallOut color="danger" data-test-subj="incompatibleCallout" size="s">
-      <div data-test-subj="fieldsAreIncompatible">{INCOMPATIBLE_CALLOUT(EcsVersion)}</div>
+    <EuiCallOut
+      color="danger"
+      data-test-subj="incompatibleCallout"
+      size="s"
+      title={
+        incompatibleFieldCount != null
+          ? INCOMPATIBLE_CALLOUT_TITLE(incompatibleFieldCount)
+          : undefined
+      }
+    >
+      <div data-test-subj="fieldsAreIncompatible">{INCOMPATIBLE_CALLOUT(ecsVersion)}</div>
       <EuiSpacer size="xs" />
       <CalloutItem data-test-subj="rulesMayNotMatch">
         {DETECTION_ENGINE_RULES_MAY_NOT_MATCH}

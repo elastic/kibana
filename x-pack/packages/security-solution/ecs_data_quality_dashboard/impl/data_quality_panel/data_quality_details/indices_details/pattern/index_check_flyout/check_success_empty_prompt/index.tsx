@@ -17,7 +17,14 @@ const CheckSuccessEmptyPromptComponent = () => {
   const title = useMemo(() => <EmptyPromptTitle title={INCOMPATIBLE_EMPTY_TITLE} />, []);
 
   return (
-    <EuiEmptyPrompt body={body} iconType="check" iconColor="success" title={title} titleSize="s" />
+    <EuiEmptyPrompt
+      data-test-subj="checkSuccessEmptyPrompt"
+      body={body}
+      iconType="check"
+      iconColor="success"
+      title={title}
+      titleSize="s"
+    />
   );
 };
 
