@@ -46,6 +46,12 @@ export const useKnowledgeBaseTable = () => {
       onEntryNameClicked,
       onDeleteActionClicked,
       onEditActionClicked,
+    }: {
+      isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      onEntryNameClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {

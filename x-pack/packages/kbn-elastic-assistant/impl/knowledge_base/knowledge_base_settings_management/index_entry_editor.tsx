@@ -29,13 +29,14 @@ interface Props {
 export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry, setEntry }) => {
   // Name
   const setName = useCallback(
-    (e) => setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
     [setEntry]
   );
 
   // Sharing
   const setSharingOptions = useCallback(
-    (value) =>
+    (value: string) =>
       setEntry((prevEntry) => ({
         ...prevEntry,
         users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
@@ -103,19 +104,22 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
 
   // Field
   const setField = useCallback(
-    (e) => setEntry((prevEntry) => ({ ...prevEntry, field: e.target.value })),
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, field: e.target.value })),
     [setEntry]
   );
 
   // Description
   const setDescription = useCallback(
-    (e) => setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, description: e.target.value })),
     [setEntry]
   );
 
   // Query Description
   const setQueryDescription = useCallback(
-    (e) => setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setEntry((prevEntry) => ({ ...prevEntry, queryDescription: e.target.value })),
     [setEntry]
   );
 

@@ -56,6 +56,7 @@ import {
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
+import { KnowledgeBaseConfig } from '../../assistant/types';
 import {
   isKnowledgeBaseSetup,
   useKnowledgeBaseStatus,
@@ -84,7 +85,9 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       false // Knowledge Base settings do not require prompts
     );
 
-  const handleUpdateKnowledgeBaseSettings = useCallback(
+  const handleUpdateKnowledgeBaseSettings = useCallback<
+    React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>
+  >(
     (updatedKnowledgeBase) => {
       setHasPendingChanges(true);
       setUpdatedKnowledgeBaseSettings(updatedKnowledgeBase);
