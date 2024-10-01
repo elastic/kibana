@@ -8,6 +8,9 @@
  */
 
 import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
+import { useEuiMemoizedStyles } from '@elastic/eui';
+// @ts-ignore Kibana does not have types for eui/lib
+import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
@@ -49,6 +52,8 @@ export const Tooltip: FC<Props> = ({
   xDomain,
   layers,
 }) => {
+  const styles = useEuiMemoizedStyles(euiToolTipStyles);
+
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
   if (!pickedValue) {
@@ -126,7 +131,7 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div className="detailedTooltip">
+    <div className="detailedTooltip" css={styles.euiToolTip}>
       {renderEndzoneTooltip && (
         <div className="detailedTooltip__header">
           <EndzoneTooltipHeader />

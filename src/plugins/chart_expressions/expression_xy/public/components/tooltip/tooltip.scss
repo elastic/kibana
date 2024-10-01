@@ -1,6 +1,5 @@
 .detailedTooltip {
   pointer-events: none;
-  @include euiToolTipStyle('s');
   & { // stylelint-disable-line no-duplicate-selectors
     max-width: $euiSizeXL * 10;
     overflow: hidden;
