@@ -24,13 +24,12 @@ export const getFormattedEmailOptions = (
 ): Array<{ label: string }> => {
   if (!searchValue.trim()) return previousOptions;
   const previousEmails: string[] = previousOptions.map((option) => option.label);
-  const newEmails: string[] = searchValue.split(',').reduce((result, email) => {
-    const trimmedEmail: string = email.trim();
-    if (trimmedEmail) result.push(trimmedEmail);
-    return result;
-  }, [] as string[]);
-  const allUniqueEmails: string[] = Array.from(new Set([...previousEmails, ...newEmails]));
-  const formattedOptions = allUniqueEmails.map((email) => ({ label: email }));
+  const allUniqueEmails: Set<string> = new Set(previousEmails);
+  searchValue.split(',').forEach((email) => {
+    const trimmedEmail = email.trim();
+    if (trimmedEmail) allUniqueEmails.add(trimmedEmail);
+  });
+  const formattedOptions = Array.from(allUniqueEmails).map((email) => ({ label: email }));
   return formattedOptions;
 };
 

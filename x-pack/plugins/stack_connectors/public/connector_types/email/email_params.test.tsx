@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -28,6 +28,24 @@ const mockKibana = () => {
     },
   });
 };
+
+const emailTestCases = [
+  {
+    field: 'to',
+    fieldValue: 'new1@test.com, new2@test.com , new1@test.com, ',
+    expected: ['test@test.com', 'new1@test.com', 'new2@test.com'],
+  },
+  {
+    field: 'cc',
+    fieldValue: 'newcc1@test.com, newcc2@test.com , newcc1@test.com, ',
+    expected: ['cc@test.com', 'newcc1@test.com', 'newcc2@test.com'],
+  },
+  {
+    field: 'bcc',
+    fieldValue: 'newbcc1@test.com, newbcc2@test.com , newbcc1@test.com, ',
+    expected: ['bcc@test.com', 'newbcc1@test.com', 'newbcc2@test.com'],
+  },
+];
 
 describe('EmailParamsFields renders', () => {
   beforeEach(() => {
@@ -63,24 +81,6 @@ describe('EmailParamsFields renders', () => {
     expect(await screen.findByTestId('messageTextArea')).toBeVisible();
   });
 
-  const emailTestCases = [
-    {
-      field: 'to',
-      fieldValue: 'new1@test.com, new2@test.com , new1@test.com, ',
-      expected: ['test@test.com', 'new1@test.com', 'new2@test.com'],
-    },
-    {
-      field: 'cc',
-      fieldValue: 'newcc1@test.com, newcc2@test.com , newcc1@test.com, ',
-      expected: ['cc@test.com', 'newcc1@test.com', 'newcc2@test.com'],
-    },
-    {
-      field: 'bcc',
-      fieldValue: 'newbcc1@test.com, newbcc2@test.com , newbcc1@test.com, ',
-      expected: ['bcc@test.com', 'newbcc1@test.com', 'newbcc2@test.com'],
-    },
-  ];
-
   emailTestCases.forEach(({ field, fieldValue, expected }) => {
     test(`"${field}" field value updates correctly when comma-separated emails are pasted`, async () => {
       const actionParams = {
@@ -105,9 +105,10 @@ describe('EmailParamsFields renders', () => {
         </IntlProvider>
       );
 
-      const input = screen.getByTestId(`${field}EmailAddressInput`).querySelector('input')!;
+      const euiComboBox = screen.getByTestId(`${field}EmailAddressInput`);
+      const input = within(euiComboBox).getByTestId('comboBoxSearchInput');
       fireEvent.change(input, { target: { value: fieldValue } });
-      expect(input.value).toStrictEqual(fieldValue);
+      expect(input).toHaveValue(fieldValue);
 
       fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
       expect(editAction).toHaveBeenCalledWith(field, expected, 0);
