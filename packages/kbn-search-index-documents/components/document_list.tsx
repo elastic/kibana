@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { resultMetaData, resultToField } from './result/result_metadata';
+import { resultMetaData, resultToFieldFromMappingResponse } from './result/result_metadata';
 
 import { Result } from '..';
 import { type ResultProps } from './result/result';
@@ -106,7 +106,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         return (
           <React.Fragment key={doc._id}>
             <Result
-              fields={resultToField(doc, mappings)}
+              fields={resultToFieldFromMappingResponse(doc, mappings)}
               metaData={resultMetaData(doc)}
               onDocumentClick={onDocumentClick ? () => onDocumentClick(doc) : undefined}
               {...resultProps}

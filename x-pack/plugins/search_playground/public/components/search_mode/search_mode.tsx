@@ -92,7 +92,6 @@ export const SearchMode: React.FC = () => {
                     mappings={mappingData}
                     pagination={pagination}
                     onPaginationChange={onPagination}
-                    searchQuery={searchQuery.query}
                   />
                 ) : (
                   <EuiEmptyPrompt
