@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-/**
- * Interface describing the raw attributes of the KB Entry SO type.
- * Contains more fields than the mappings, which only list
- * indexed fields.
- */
-export interface KnowledgeBaseEntryAttributes {
-  name: string;
-  description?: string;
-  source: KnowledgeBaseEntrySource;
-  created_by: KnowledgeBaseEntryCreatedBy;
-}
-
-interface KnowledgeBaseEntryIndexSource {
+export interface KnowledgeBaseEntryIndexSource {
   type: 'index';
   index_name: string;
   syntactic_fields: string[];
   semantic_fields: string[];
 }
 
-type KnowledgeBaseEntrySource = KnowledgeBaseEntryIndexSource;
+export type KnowledgeBaseEntrySource = KnowledgeBaseEntryIndexSource;
 
-interface KnowledgeBaseEntryCreatedByPackage {
+interface KnowledgeBaseEntryInstalledByPackage {
   type: 'package';
   packageName: string;
   version: string;
 }
 
-type KnowledgeBaseEntryCreatedBy = KnowledgeBaseEntryCreatedByPackage;
+export type KnowledgeBaseEntryInstalledBy = KnowledgeBaseEntryInstalledByPackage;

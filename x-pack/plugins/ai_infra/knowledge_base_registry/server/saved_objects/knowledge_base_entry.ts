@@ -7,7 +7,22 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { knowledgeBaseEntryTypeName } from '../../common/consts';
-import type { KnowledgeBaseEntryAttributes } from '../../common/saved_objects';
+import type {
+  KnowledgeBaseEntrySource,
+  KnowledgeBaseEntryInstalledBy,
+} from '../../common/saved_objects';
+
+/**
+ * Interface describing the raw attributes of the KB Entry SO type.
+ * Contains more fields than the mappings, which only list
+ * indexed fields.
+ */
+export interface KnowledgeBaseEntryAttributes {
+  name: string;
+  description?: string;
+  source: KnowledgeBaseEntrySource;
+  installed_by: KnowledgeBaseEntryInstalledBy;
+}
 
 export const knowledgeBaseEntrySavedObjectType: SavedObjectsType<KnowledgeBaseEntryAttributes> = {
   name: knowledgeBaseEntryTypeName,
@@ -24,7 +39,7 @@ export const knowledgeBaseEntrySavedObjectType: SavedObjectsType<KnowledgeBaseEn
           type: { type: 'keyword' },
         },
       },
-      created_by: {
+      installed_by: {
         type: 'object',
         dynamic: false,
         properties: {
