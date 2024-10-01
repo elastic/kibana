@@ -12,13 +12,15 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { z } from '@kbn/zod';
 
-export const isEsqlSystemEntry = (
+export const isSystemEntry = (
   entry: KnowledgeBaseEntryResponse
 ): entry is KnowledgeBaseEntryResponse & {
   type: DocumentEntryType;
-  kbResource: 'esql';
+  kbResource: 'esql' | 'security_labs';
 } => {
-  return entry.type === DocumentEntryType.value && entry.kbResource === 'esql';
+  return (
+    entry.type === DocumentEntryType.value && ['esql', 'security_labs'].includes(entry.kbResource)
+  );
 };
 
 export const isKnowledgeBaseEntryCreateProps = (

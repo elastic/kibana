@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { find } from 'lodash';
 
 import {
   API_VERSIONS,
@@ -17,6 +18,7 @@ import {
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { estypes } from '@elastic/elasticsearch';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
@@ -24,7 +26,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { ESQL_RESOURCE } from '../constants';
+import { ESQL_RESOURCE, SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -72,7 +74,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           });
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
-          const systemFilter = ` AND NOT kb_resource:"${ESQL_RESOURCE}"`;
+          const systemFilter = ` AND NOT kb_resource:"${ESQL_RESOURCE}" AND NOT kb_resource:"${SECURITY_LABS_RESOURCE}"`;
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
 
           // TODO: Either plumb through new `findDocuments` that takes query DSL so you can do agg + pagination to collapse
@@ -84,35 +86,97 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             sortOrder: query.sort_order,
             filter: `${userFilter}${systemFilter}${additionalFilter}`,
             fields: query.fields,
+            aggs: {
+              global_aggs: {
+                global: {},
+                aggs: {
+                  kb_resource_aggregation: {
+                    terms: {
+                      field: 'kb_resource',
+                      size: 10,
+                      exclude: ['user'],
+                    },
+                    aggs: {
+                      top_documents: {
+                        top_hits: {
+                          size: 1,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           });
 
-          const systemResult = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
-            perPage: 1000,
-            page: 1,
-            filter: `kb_resource:"${ESQL_RESOURCE}"`,
-          });
+          const esqlBucket = find(
+            (
+              (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
+                ?.kb_resource_aggregation as {
+                buckets: estypes.AggregationsBuckets;
+              }
+            )?.buckets,
+            ['key', ESQL_RESOURCE]
+          ) as {
+            doc_count: number;
+            top_documents: estypes.AggregationsTopHitsAggregate;
+          };
 
           // Group system entries
-          const systemEntry = systemResult?.data.hits.hits?.[0]?._source;
-          const systemEntryCount = systemResult?.data.hits.hits?.length ?? 1;
-          const systemEntries: DocumentEntry[] =
-            systemEntry == null
+          const esqlEntry = esqlBucket?.top_documents.hits.hits[0]?._source;
+          const esqlEntryCount = esqlBucket?.doc_count;
+          const esqlEntries: DocumentEntry[] =
+            esqlEntry == null
               ? []
               : [
                   {
                     id: 'someID',
-                    createdAt: systemEntry.created_at,
-                    createdBy: systemEntry.created_by,
-                    updatedAt: systemEntry.updated_at,
-                    updatedBy: systemEntry.updated_by,
+                    createdAt: esqlEntry.created_at,
+                    createdBy: esqlEntry.created_by,
+                    updatedAt: esqlEntry.updated_at,
+                    updatedBy: esqlEntry.updated_by,
                     users: [],
                     name: 'ES|QL documents',
-                    namespace: systemEntry.namespace,
+                    namespace: esqlEntry.namespace,
                     type: DocumentEntryType.value,
                     kbResource: ESQL_RESOURCE,
                     source: '',
                     required: true,
-                    text: `${systemEntryCount}`,
+                    text: `${esqlEntryCount}`,
+                  },
+                ];
+
+          const securityLabsBucket = find(
+            (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
+              ?.kb_resource_aggregation as {
+              buckets: estypes.AggregationsBuckets;
+            },
+            ['key', SECURITY_LABS_RESOURCE]
+          ) as {
+            doc_count: number;
+            top_documents: estypes.AggregationsTopHitsAggregate;
+          };
+
+          const securityLabsEntry = securityLabsBucket?.top_documents.hits.hits[0]?._source;
+          const securityLabsEntryCount = securityLabsBucket?.doc_count;
+          const securityLabsEntries: DocumentEntry[] =
+            securityLabsEntry == null
+              ? []
+              : [
+                  {
+                    id: 'securityLabs',
+                    createdAt: securityLabsEntry.created_at,
+                    createdBy: securityLabsEntry.created_by,
+                    updatedAt: securityLabsEntry.updated_at,
+                    updatedBy: securityLabsEntry.updated_by,
+                    users: [],
+                    name: 'Security Labs',
+                    namespace: securityLabsEntry.namespace,
+                    type: DocumentEntryType.value,
+                    kbResource: SECURITY_LABS_RESOURCE,
+                    source: '',
+                    required: false,
+                    text: `${securityLabsEntryCount}`,
                   },
                 ];
 
@@ -122,7 +186,11 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: [...transformESSearchToKnowledgeBaseEntry(result.data), ...systemEntries],
+                data: [
+                  ...transformESSearchToKnowledgeBaseEntry(result.data),
+                  ...esqlEntries,
+                  ...securityLabsEntries,
+                ],
               },
             });
           }

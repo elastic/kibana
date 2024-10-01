@@ -371,7 +371,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
       query: SECURITY_LABS_RESOURCE,
       // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
-      required: true,
+      required: false,
     });
     return securityLabsDocs.length > 0;
   };
