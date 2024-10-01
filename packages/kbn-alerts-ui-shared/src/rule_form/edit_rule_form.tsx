@@ -57,13 +57,20 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
-    useLoadDependencies({
-      http,
-      toasts: notification.toasts,
-      ruleTypeRegistry,
-      id,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    fetchedFormData,
+    flappingSettings,
+  } = useLoadDependencies({
+    http,
+    toasts: notification.toasts,
+    ruleTypeRegistry,
+    id,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -78,6 +85,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: [],
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
         },
       });
     },
@@ -126,6 +134,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
+          flappingSettings,
         }}
       >
         <RulePage isEdit={true} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />

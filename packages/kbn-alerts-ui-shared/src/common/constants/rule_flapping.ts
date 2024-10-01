@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_LOOK_BACK_WINDOW = 2;
-export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 2;
-export const MAX_STATUS_CHANGE_THRESHOLD = 20;
+// Feature flag for frontend rule specific flapping in rule flyout
+export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = false;

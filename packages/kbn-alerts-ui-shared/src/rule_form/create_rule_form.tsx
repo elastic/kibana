@@ -79,16 +79,22 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
-    useLoadDependencies({
-      http,
-      toasts: notification.toasts,
-      ruleTypeRegistry,
-      ruleTypeId,
-      consumer,
-      validConsumers,
-      filteredRuleTypes,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    flappingSettings,
+  } = useLoadDependencies({
+    http,
+    toasts: notification.toasts,
+    ruleTypeRegistry,
+    ruleTypeId,
+    consumer,
+    validConsumers,
+    filteredRuleTypes,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -105,6 +111,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: [],
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
         },
       });
     },
@@ -157,6 +164,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
           validConsumers,
+          flappingSettings,
           multiConsumerSelection: getInitialMultiConsumer({
             multiConsumerSelection,
             validConsumers,

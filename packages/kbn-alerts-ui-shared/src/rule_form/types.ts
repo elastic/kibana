@@ -18,6 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { RulesSettingsFlapping } from '@kbn/alerting-types';
 import {
   MinimumScheduleInterval,
   Rule,
@@ -38,6 +39,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   alertDelay?: Rule<Params>['alertDelay'];
   notifyWhen?: Rule<Params>['notifyWhen'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
+  flapping?: Rule<Params>['flapping'];
 }
 
 export interface RuleFormPlugins {
@@ -67,6 +69,7 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
   validConsumers?: RuleCreationValidConsumer[];
+  flappingSettings?: RulesSettingsFlapping;
 }
 
 export type InitialRule = Partial<Rule> &

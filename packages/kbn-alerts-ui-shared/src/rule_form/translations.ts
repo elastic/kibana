@@ -85,6 +85,21 @@ export const ALERT_DELAY_TITLE_PREFIX = i18n.translate(
   }
 );
 
+export const ALERT_FLAPPING_DETECTION_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDefinition.alertFlappingDetectionTitle',
+  {
+    defaultMessage: 'Alert flapping detection',
+  }
+);
+
+export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDefinition.alertFlappingDetectionDescription',
+  {
+    defaultMessage:
+      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts',
+  }
+);
+
 export const SCHEDULE_TITLE_PREFIX = i18n.translate(
   'alertsUIShared.ruleForm.ruleSchedule.scheduleTitlePrefix',
   {

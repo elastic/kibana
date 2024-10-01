@@ -19,6 +19,8 @@ import {
 } from '../../common/hooks';
 import { getAvailableRuleTypes } from '../utils';
 import { RuleTypeRegistryContract } from '../../common';
+import { useFetchFlappingSettings } from '../../common/hooks/use_fetch_flapping_settings';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../common/constants/rule_flapping';
 
 export interface UseLoadDependencies {
   http: HttpStart;
@@ -73,6 +75,15 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     filteredRuleTypes,
   });
 
+  const {
+    data: flappingSettings,
+    isLoading: isLoadingFlappingSettings,
+    isInitialLoading: isInitialLoadingFlappingSettings,
+  } = useFetchFlappingSettings({
+    http,
+    enabled: IS_RULE_SPECIFIC_FLAPPING_ENABLED,
+  });
+
   const computedRuleTypeId = useMemo(() => {
     return fetchedFormData?.ruleTypeId || ruleTypeId;
   }, [fetchedFormData, ruleTypeId]);
@@ -100,20 +111,41 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
 
   const isLoading = useMemo(() => {
     if (id === undefined) {
-      return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRuleTypes;
+      return (
+        isLoadingUiConfig || isLoadingHealthCheck || isLoadingRuleTypes || isLoadingFlappingSettings
+      );
     }
-    return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRule || isLoadingRuleTypes;
-  }, [id, isLoadingUiConfig, isLoadingHealthCheck, isLoadingRule, isLoadingRuleTypes]);
+    return (
+      isLoadingUiConfig ||
+      isLoadingHealthCheck ||
+      isLoadingRule ||
+      isLoadingRuleTypes ||
+      isLoadingFlappingSettings
+    );
+  }, [
+    id,
+    isLoadingUiConfig,
+    isLoadingHealthCheck,
+    isLoadingRule,
+    isLoadingRuleTypes,
+    isLoadingFlappingSettings,
+  ]);
 
   const isInitialLoading = useMemo(() => {
     if (id === undefined) {
-      return isInitialLoadingUiConfig || isInitialLoadingHealthCheck || isInitialLoadingRuleTypes;
+      return (
+        isInitialLoadingUiConfig ||
+        isInitialLoadingHealthCheck ||
+        isInitialLoadingRuleTypes ||
+        isInitialLoadingFlappingSettings
+      );
     }
     return (
       isInitialLoadingUiConfig ||
       isInitialLoadingHealthCheck ||
       isInitialLoadingRule ||
-      isInitialLoadingRuleTypes
+      isInitialLoadingRuleTypes ||
+      isInitialLoadingFlappingSettings
     );
   }, [
     id,
@@ -121,6 +153,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoadingHealthCheck,
     isInitialLoadingRule,
     isInitialLoadingRuleTypes,
+    isInitialLoadingFlappingSettings,
   ]);
 
   return {
@@ -131,5 +164,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     uiConfig,
     healthCheckError,
     fetchedFormData,
+    flappingSettings,
   };
 };

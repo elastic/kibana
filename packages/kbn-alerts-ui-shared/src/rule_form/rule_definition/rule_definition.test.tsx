@@ -73,6 +73,13 @@ const plugins = {
   dataViews: {} as DataViewsPublicPluginStart,
   unifiedSearch: {} as UnifiedSearchPublicPluginStart,
   docLinks: {} as DocLinksStart,
+  application: {
+    capabilities: {
+      rulesSettings: {
+        writeFlappingSettingsUI: true,
+      },
+    },
+  },
 };
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
