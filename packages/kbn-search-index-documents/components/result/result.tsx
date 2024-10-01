@@ -9,76 +9,147 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { ResultFields } from './results_fields';
 
-import { ResultHeader } from './result_header';
 import './result.scss';
 import { MetaDataProps, ResultFieldProps } from './result_types';
+import { RichResultHeader } from './rich_result_header';
+import { ResultHeader } from './result_header';
 
-interface ResultProps {
+export const DEFAULT_VISIBLE_FIELDS = 3;
+
+export interface ResultProps {
   fields: ResultFieldProps[];
   metaData: MetaDataProps;
+  defaultVisibleFields?: number;
+  showScore?: boolean;
+  compactCard?: boolean;
+  onDocumentClick?: () => void;
 }
 
-export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
+export const Result: React.FC<ResultProps> = ({
+  metaData,
+  fields,
+  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,
+  compactCard = true,
+  showScore = false,
+  onDocumentClick,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipText =
-    fields.length <= 3
+    fields.length <= defaultVisibleFields
       ? i18n.translate('searchIndexDocuments.result.expandTooltip.allVisible', {
           defaultMessage: 'All fields are visible',
         })
       : isExpanded
       ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
           defaultMessage: 'Show {amount} fewer fields',
-          values: { amount: fields.length - 3 },
+          values: { amount: fields.length - defaultVisibleFields },
         })
       : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
           defaultMessage: 'Show {amount} more fields',
-          values: { amount: fields.length - 3 },
+          values: { amount: fields.length - defaultVisibleFields },
         });
   const toolTipContent = <>{tooltipText}</>;
 
   return (
-    <EuiPanel hasBorder paddingSize="s" data-test-subj="search-index-documents-result">
+    <EuiPanel
+      hasBorder
+      data-test-subj="search-index-documents-result"
+      paddingSize={compactCard ? 's' : 'l'}
+    >
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            justifyContent="spaceAround"
+          >
             <EuiFlexItem grow={false}>
-              <ResultHeader
-                title={
-                  metaData.title ??
-                  i18n.translate('searchIndexDocuments.result.title.id', {
-                    defaultMessage: 'Document id: {id}',
-                    values: { id: metaData.id },
-                  })
-                }
-                metaData={metaData}
-              />
+              {compactCard && (
+                <ResultHeader
+                  title={
+                    metaData.title ??
+                    i18n.translate('searchIndexDocuments.result.title.id', {
+                      defaultMessage: 'Document id: {id}',
+                      values: { id: metaData.id },
+                    })
+                  }
+                  metaData={metaData}
+                />
+              )}
+              {!compactCard && (
+                <RichResultHeader
+                  showScore={showScore}
+                  title={
+                    metaData.title ??
+                    i18n.translate('searchIndexDocuments.result.title.id', {
+                      defaultMessage: 'Document id: {id}',
+                      values: { id: metaData.id },
+                    })
+                  }
+                  onTitleClick={onDocumentClick}
+                  metaData={metaData}
+                  rightSideActions={
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip position="left" content={toolTipContent}>
+                        <EuiButtonIcon
+                          iconType={isExpanded ? 'fold' : 'unfold'}
+                          color={isExpanded ? 'danger' : 'primary'}
+                          onClick={(e: React.MouseEvent<HTMLElement>) => {
+                            e.stopPropagation();
+                            setIsExpanded(!isExpanded);
+                          }}
+                          aria-label={tooltipText}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  }
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
+              {!compactCard &&
+                ((isExpanded && fields.length > 0) ||
+                  (!isExpanded && fields.slice(0, defaultVisibleFields).length > 0)) && (
+                  <EuiSpacer size="l" />
+                )}
               <ResultFields
                 isExpanded={isExpanded}
-                fields={isExpanded ? fields : fields.slice(0, 3)}
+                fields={isExpanded ? fields : fields.slice(0, defaultVisibleFields)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <div className="resultExpandColumn">
-            <EuiToolTip position="left" content={toolTipContent}>
-              <EuiButtonIcon
-                iconType={isExpanded ? 'fold' : 'unfold'}
-                color="text"
-                onClick={() => setIsExpanded(!isExpanded)}
-                aria-label={tooltipText}
-              />
-            </EuiToolTip>
-          </div>
-        </EuiFlexItem>
+        {compactCard && (
+          <EuiFlexItem grow={false}>
+            <div className="resultExpandColumn">
+              <EuiToolTip position="left" content={toolTipContent}>
+                <EuiButtonIcon
+                  iconType={isExpanded ? 'fold' : 'unfold'}
+                  color="text"
+                  onClick={(e: React.MouseEvent<HTMLElement>) => {
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
+                  aria-label={tooltipText}
+                />
+              </EuiToolTip>
+            </div>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
