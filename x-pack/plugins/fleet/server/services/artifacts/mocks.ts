@@ -12,6 +12,8 @@ import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type {
   Artifact,
   ArtifactElasticsearchProperties,
@@ -20,7 +22,7 @@ import type {
 } from './types';
 import { newArtifactToElasticsearchProperties } from './mappings';
 
-export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
+export const createArtifactsClientMock = (): DeeplyMockedKeys<ArtifactsClientInterface> => {
   return {
     getArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
     createArtifact: jest.fn().mockResolvedValue(generateArtifactMock()),
