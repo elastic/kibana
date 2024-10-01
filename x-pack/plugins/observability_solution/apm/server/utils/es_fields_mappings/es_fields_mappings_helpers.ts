@@ -12,5 +12,5 @@ export const normalizeValue = <T>(field: unknown[] | unknown): T => {
 
 export const isOptionalFieldDefined = (fields: Fields, fieldToCheck: string): boolean =>
   Object.keys(fields)
-    .filter((field) => field.includes(fieldToCheck))
+    .filter((field) => field.startsWith(fieldToCheck))
     .some((fieldName) => normalizeValue(fields[fieldName]) !== undefined);
