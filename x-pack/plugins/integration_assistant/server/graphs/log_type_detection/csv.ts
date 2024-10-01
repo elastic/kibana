@@ -23,10 +23,10 @@ export function generateColumnNames(count: number): string[] {
 }
 
 // Converts a column name into a safe one to use in the `if ctx...` clause.
-// This is similar to getNameFromTitle in data_stream_step.tsx.
+// Result must pass rules at https://www.elastic.co/guide/en/elasticsearch/painless/8.15/painless-identifiers.html
 export function toSafeColumnName(columnName: unknown): string | undefined {
   if (typeof columnName === 'number') {
-    return String(columnName);
+    return `Column${columnName}`;
   }
   if (typeof columnName !== 'string') {
     return undefined;
@@ -34,7 +34,8 @@ export function toSafeColumnName(columnName: unknown): string | undefined {
   if (columnName.length === 0) {
     return undefined;
   }
-  return columnName.replace(/[^a-zA-Z0-9_]/g, '_');
+  const safeName = columnName.replace(/[^a-zA-Z0-9_]/g, '_');
+  return /^[0-9]/.test(safeName) ? `Column${safeName}` : safeName;
 }
 
 // Returns the column list from a header row. We skip values that are not strings.

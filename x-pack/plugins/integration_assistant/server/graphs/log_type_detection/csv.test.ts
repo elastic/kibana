@@ -153,10 +153,6 @@ describe('totalColumnCount', () => {
   });
 
   describe('toSafeColumnName', () => {
-    it('should convert a number to a string', () => {
-      expect(toSafeColumnName(123)).toBe('123');
-    });
-
     it('should return undefined for non-string and non-number inputs', () => {
       expect(toSafeColumnName(null)).toBeUndefined();
       expect(toSafeColumnName(undefined)).toBeUndefined();
@@ -176,6 +172,11 @@ describe('totalColumnCount', () => {
 
     it('should handle empty strings', () => {
       expect(toSafeColumnName('')).toBeUndefined();
+    });
+
+    it('should handle strings starting from a digit or numbers', () => {
+      expect(toSafeColumnName('1ABC')).toBe('Column1ABC');
+      expect(toSafeColumnName(123)).toBe('Column123');
     });
   });
 });
