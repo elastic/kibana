@@ -460,8 +460,11 @@ export class SearchInterceptor {
             ...request,
             ...searchOptions,
           }),
+          asResponse: true,
         })
-        .then((response) => {
+        .then((rawResponse) => {
+          const response = rawResponse.body;
+          const warning = rawResponse.response?.headers.get('warning');
           if ((response as Record<string, unknown>).error) {
             // eslint-disable-next-line no-throw-literal
             throw { attributes: (response as Record<string, unknown>).error };
@@ -476,6 +479,7 @@ export class SearchInterceptor {
                 isPartial: typedResponse.is_partial,
                 isRunning: typedResponse.is_running,
                 rawResponse: shimmedResponse,
+                warning,
                 ...getTotalLoaded(shimmedResponse),
               };
             case ESQL_ASYNC_SEARCH_STRATEGY:
@@ -485,6 +489,7 @@ export class SearchInterceptor {
                 rawResponse: response,
                 isPartial: esqlResponse.is_partial,
                 isRunning: esqlResponse.is_running,
+                warning,
               };
             default:
               return response;
