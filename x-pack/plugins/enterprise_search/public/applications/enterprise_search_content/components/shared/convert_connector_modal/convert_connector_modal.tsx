@@ -46,7 +46,7 @@ export const ConvertConnectorModal: React.FC = () => {
             'xpack.enterpriseSearch.searchApplications.searchApplication.indices.convertIndexConfirm.description',
             {
               defaultMessage:
-                "Once you convert a native connector to a self-managed connector client this can't be undone.",
+                "Converting an Elastic managed connector to a self-managed connector can't be undone.",
             }
           )}
         </p>

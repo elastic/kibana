@@ -382,7 +382,7 @@ export class Plugin
                         defaultMessage: 'SLOs',
                       }),
                       app: 'slo',
-                      path: '/',
+                      path: '',
                     },
                   ]
                 : [];
