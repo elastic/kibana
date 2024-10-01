@@ -587,8 +587,8 @@ export const ModelsList: FC<Props> = ({
 
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
-      width: '5%',
       isExpander: true,
+      align: 'center',
       render: (item: ModelItem) => {
         if (!item.stats) {
           return null;
@@ -613,7 +613,6 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '60%',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -691,7 +690,6 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      width: '15%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
@@ -736,7 +734,6 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
     {
-      width: '15%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
@@ -912,6 +909,7 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
+          tableLayout={'auto'}
           responsiveBreakpoint={'xl'}
           allowNeutralSort={false}
           columns={columns}
