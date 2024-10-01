@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { State } from '../../../../types';
-import { useReportingService, usePlatformService } from '../../../services';
+import { useReportingService } from '../../../services';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { useDownloadWorkpad } from '../../hooks';
 import { ShareMenu as ShareMenuComponent } from './share_menu.component';
@@ -29,7 +29,6 @@ const strings = {
 export const ShareMenu = () => {
   const downloadWorkpad = useDownloadWorkpad();
   const reportingService = useReportingService();
-  const platformService = usePlatformService();
 
   const { workpad, pageCount } = useSelector((state: State) => ({
     workpad: getWorkpad(state),

@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWorkpadService, usePlatformService } from '../../../services';
+import { useWorkpadService } from '../../../services';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error
@@ -35,7 +35,6 @@ export const useWorkpad = (
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
   const workpadResolve = workpadService.resolve;
-  const platformService = usePlatformService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
@@ -85,7 +84,7 @@ export const useWorkpad = (
         });
       }
     })();
-  }, [workpadId, resolveInfo, getRedirectPath, platformService]);
+  }, [workpadId, resolveInfo, getRedirectPath]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

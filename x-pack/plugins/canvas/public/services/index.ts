@@ -12,7 +12,7 @@ import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { CanvasCustomElementService } from './custom_element';
 import { CanvasDataViewsService } from './data_views';
 import { CanvasEmbeddablesService } from './embeddables';
-import { CanvasExpressionsService } from './canvas_expressions_service';
+import { CanvasExpressionsService, getCanvasExpressionService } from './canvas_expressions_service';
 import { CanvasFiltersService } from './filters';
 import { CanvasLabsService } from './labs';
 import { CanvasNavLinkService } from './nav_link';
@@ -24,6 +24,7 @@ import { CanvasWorkpadService } from './workpad';
 import { CanvasUiActionsService } from './ui_actions';
 import { useMemo } from 'react';
 import { getCanvasNotifyService } from './canvas_notify_service';
+import { getCanvasFiltersService } from './canvas_filters_service';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
@@ -45,20 +46,19 @@ export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const useCustomElementService = () =>
   (() => pluginServices.getHooks().customElement.useService())();
-export const useEmbeddablesService = () =>
-  (() => pluginServices.getHooks().embeddables.useService())();
-export const useExpressionsService = () =>
-  (() => pluginServices.getHooks().expressions.useService())();
-export const useFiltersService = () => (() => pluginServices.getHooks().filters.useService())();
-export const useLabsService = () => (() => pluginServices.getHooks().labs.useService())();
-export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
+
+export const useExpressionsService = () => {
+  const canvasExpressionService = useMemo(() => getCanvasExpressionService(), []);
+  return canvasExpressionService;
+};
+export const useFiltersService = () => {
+  const canvasFiltersService = useMemo(() => getCanvasFiltersService(), []);
+  return canvasFiltersService;
+};
 export const useNotifyService = () => {
-  const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
+  const canvasNotifyService: CanvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
   return canvasNotifyService;
 };
-export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
+
 export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
-export const useVisualizationsService = () =>
-  (() => pluginServices.getHooks().visualizations.useService())();
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();
-export const useUiActionsService = () => (() => pluginServices.getHooks().uiActions.useService())();

@@ -23,7 +23,7 @@ import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { subMultitree } from '../../lib/aeroelastic/functional';
-import { pluginServices } from '../../services';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
@@ -102,7 +102,7 @@ const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = fa
 
   const variables = getWorkpadVariablesAsObject(getState());
 
-  const { expressions } = pluginServices.getServices();
+  const expressions = getCanvasExpressionService();
   const elementWithNewAst = set(element, pathToTarget, astChain);
 
   // get context data from a partial AST
@@ -130,7 +130,7 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-  const { expressions } = pluginServices.getServices();
+  const expressions = getCanvasExpressionService();
   const notify = getCanvasNotifyService();
 
   return expressions
@@ -179,7 +179,8 @@ export const fetchAllRenderables = createThunk(
         const argumentPath = [element.id, 'expressionRenderable'];
 
         const variables = getWorkpadVariablesAsObject(getState());
-        const { expressions, notify } = pluginServices.getServices();
+        const expressions = getCanvasExpressionService();
+        const notify = getCanvasNotifyService();
 
         return expressions
           .runInterpreter(ast, null, variables, { castToRender: true })
@@ -304,7 +305,7 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
     const expression = toExpression(ast);
     dispatch(setExpression(expression, element.id, pageId, doRender));
   } catch (err) {
-    const notifyService = pluginServices.getServices().notify;
+    const notifyService = getCanvasNotifyService();
     notifyService.error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?

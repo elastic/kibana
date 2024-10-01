@@ -12,7 +12,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
-import { pluginServices } from '../services';
+import { getCanvasFiltersService } from '../services/canvas_filters_service';
 import { clearValue } from '../state/actions/resolved_args';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
@@ -80,7 +80,7 @@ export const createDispatchedHandlerFactory = (
       oldElement = element;
     }
 
-    const { filters } = pluginServices.getServices();
+    const filters = getCanvasFiltersService();
 
     const handlers: RendererHandlers & {
       event: IInterpreterRenderHandlers['event'];

@@ -9,11 +9,14 @@ import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { coreServices } from '@kbn/controls-plugin/public/services/kibana_services';
 import { EmbeddableFactory, ReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
 import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
-import { contentManagementService, embeddableService } from '../../services/kibana_services';
+import {
+  contentManagementService,
+  coreServices,
+  embeddableService,
+} from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>

@@ -146,7 +146,7 @@ export const clipboardHandlerCreators = {
   cutNodes:
     ({ pageId, removeNodes, selectedNodes }: Props) =>
     (): void => {
-      const notifyService = pluginServices.getServices().notify;
+      const notifyService = getCanvasNotifyService();
 
       if (selectedNodes.length) {
         setClipboardData({ selectedNodes });
@@ -157,7 +157,7 @@ export const clipboardHandlerCreators = {
   copyNodes:
     ({ selectedNodes }: Props) =>
     (): void => {
-      const notifyService = pluginServices.getServices().notify;
+      const notifyService = getCanvasNotifyService();
 
       if (selectedNodes.length) {
         setClipboardData({ selectedNodes });
