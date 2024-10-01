@@ -117,6 +117,7 @@ import {
 import { EventOutcome } from '../../common/event_outcome';
 import { Exception } from '../../typings/es_schemas/raw/error_raw';
 
+type Fields = Partial<Record<string, unknown[]>>;
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
@@ -126,7 +127,12 @@ const normalizeValue = <T>(field: unknown[] | unknown): T => {
   return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
 };
 
-export const metadataForDependencyMapping = (fields: Partial<Record<string, unknown[]>>) => {
+const isOptionalFieldDefined = (fields: Fields, fieldToCheck: string): boolean =>
+  Object.keys(fields)
+    .filter((field) => field.includes(fieldToCheck))
+    .some((fieldName) => normalizeValue(fields[fieldName]) !== undefined);
+
+export const metadataForDependencyMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -137,9 +143,7 @@ export const metadataForDependencyMapping = (fields: Partial<Record<string, unkn
   };
 };
 
-export const transactionsForDependencySpansMapping = (
-  fields: Partial<Record<string, unknown[]>>
-) => {
+export const transactionsForDependencySpansMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -151,7 +155,7 @@ export const transactionsForDependencySpansMapping = (
   };
 };
 
-export const topDependencySpansMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const topDependencySpansMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -182,7 +186,7 @@ export const topDependencySpansMapping = (fields: Partial<Record<string, unknown
   };
 };
 
-export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const spanMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -256,7 +260,7 @@ export const spanMapping = (fields: Partial<Record<string, unknown[]>>) => {
   };
 };
 
-export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const spanLinksDetailsMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -293,7 +297,7 @@ export const spanLinksDetailsMapping = (fields: Partial<Record<string, unknown[]
 };
 
 // todo: pending #192337
-export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const linkedParentsOfSpanMapping = (fields: Fields) => {
   if (!fields ?? !fields[SPAN_LINKS_TRACE_ID]) return [];
 
   return (fields[SPAN_LINKS_TRACE_ID] as string[])?.map((v, index) => {
@@ -308,7 +312,7 @@ export const linkedParentsOfSpanMapping = (fields: Partial<Record<string, unknow
   }) as SpanLink[];
 };
 
-export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const transactionMapping = (fields: Fields) => {
   if (!fields) return { transaction: undefined };
 
   return {
@@ -370,20 +374,24 @@ export const transactionMapping = (fields: Partial<Record<string, unknown[]>>) =
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
     // todo check for labels before mapping
-    labels: {
-      name: normalizeValue<string | undefined>(fields[LABEL_NAME]),
-      gc: normalizeValue<string | undefined>(fields[LABEL_GC]),
-      type: normalizeValue<string | undefined>(fields[LABEL_TYPE]),
-      telemetry_auto_version: normalizeValue<string | undefined>(
-        fields[LABEL_TELEMETRY_AUTO_VERSION]
-      ),
-      lifecycle_state: normalizeValue<string | undefined>(fields[LABEL_LIFECYCLE_STATE]),
-    },
+    ...(isOptionalFieldDefined(fields, 'labels.')
+      ? {
+          labels: {
+            name: normalizeValue<string | undefined>(fields[LABEL_NAME]),
+            gc: normalizeValue<string | undefined>(fields[LABEL_GC]),
+            type: normalizeValue<string | undefined>(fields[LABEL_TYPE]),
+            telemetry_auto_version: normalizeValue<string | undefined>(
+              fields[LABEL_TELEMETRY_AUTO_VERSION]
+            ),
+            lifecycle_state: normalizeValue<string | undefined>(fields[LABEL_LIFECYCLE_STATE]),
+          },
+        }
+      : undefined),
   };
 };
 
 export const traceDocMapping = (
-  fields: Partial<Record<string, unknown[]>>
+  fields: Fields
 ): WaterfallTransaction | WaterfallSpan | undefined => {
   if (!fields) return undefined;
 
@@ -447,9 +455,7 @@ export const traceDocMapping = (
   };
 };
 
-export const errorDocsMapping = (
-  fields: Partial<Record<string, unknown[]>>
-): WaterfallError | undefined => {
+export const errorDocsMapping = (fields: Fields): WaterfallError | undefined => {
   if (!fields) return undefined;
 
   return {
@@ -479,7 +485,7 @@ export const errorDocsMapping = (
   };
 };
 
-export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const errorGroupMainStatisticsMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
@@ -505,9 +511,7 @@ export const errorGroupMainStatisticsMapping = (fields: Partial<Record<string, u
   };
 };
 
-export const errorSampleDetailsMapping = (
-  fields: Partial<Record<string, unknown[]>>
-): APMError | undefined => {
+export const errorSampleDetailsMapping = (fields: Fields): APMError | undefined => {
   if (!fields) return undefined;
 
   return {
@@ -560,7 +564,7 @@ export const errorSampleDetailsMapping = (
 };
 
 export const serviceMetadataDetailsMapping = (
-  fields: Partial<Record<string, unknown[]>>
+  fields: Fields
 ): ServiceMetadataDetailsRaw | undefined => {
   if (!fields) return undefined;
   const kubernetesNamespace = normalizeValue<string>(fields[KUBERNETES_NAMESPACE]);
@@ -605,7 +609,7 @@ export const serviceMetadataDetailsMapping = (
         platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
       },
     },
-    ...(containerId
+    ...(isOptionalFieldDefined(fields, 'container.')
       ? {
           container: {
             id: containerId,
@@ -613,7 +617,7 @@ export const serviceMetadataDetailsMapping = (
           },
         }
       : undefined),
-    ...(kubernetesNamespace
+    ...(isOptionalFieldDefined(fields, 'kubernetes.')
       ? {
           kubernetes: {
             pod: {
@@ -634,7 +638,7 @@ export const serviceMetadataDetailsMapping = (
           },
         }
       : undefined),
-    ...(cloudServiceName
+    ...(isOptionalFieldDefined(fields, 'cloud.')
       ? {
           cloud: {
             availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
@@ -668,7 +672,7 @@ export const serviceMetadataDetailsMapping = (
 };
 
 export const serviceMetadataIconsMapping = (
-  fields: Partial<Record<string, unknown[]>>
+  fields: Fields
 ): ServiceMetadataIconsRaw | undefined => {
   if (!fields) return undefined;
   const kubernetesPodName = normalizeValue<string>(fields[KUBERNETES_POD_NAME]);
@@ -679,7 +683,7 @@ export const serviceMetadataIconsMapping = (
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: '',
     },
-    ...(cloudProvider
+    ...(isOptionalFieldDefined(fields, 'cloud.')
       ? {
           cloud: {
             availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
@@ -743,7 +747,7 @@ export const serviceMetadataIconsMapping = (
 
 // todo: check https://github.com/jennypavlova/kibana/pull/6#discussion_r1771611817
 export const serviceVersionMapping = (
-  fields: Partial<Record<string, unknown[]>>
+  fields: Fields
 ): Pick<Transaction | Span | APMError, 'observer'> | undefined => {
   if (!fields) return undefined;
 
@@ -756,9 +760,7 @@ export const serviceVersionMapping = (
 };
 
 // todo: missing `could` mapping
-export const serviceInstanceMetadataDetailsMapping = (
-  fields: Partial<Record<string, unknown[]>> = {}
-) => {
+export const serviceInstanceMetadataDetailsMapping = (fields: Fields = {}) => {
   if (!fields) return undefined;
 
   return {
@@ -814,7 +816,7 @@ export const serviceInstanceMetadataDetailsMapping = (
 };
 
 // todo: missing `cloud` and `service` properties
-export const serviceAgentNameMapping = (fields: Partial<Record<string, unknown[]>>) => {
+export const serviceAgentNameMapping = (fields: Fields) => {
   if (!fields) return undefined;
 
   return {
