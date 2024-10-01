@@ -8,11 +8,7 @@
 import { SavedObjectAttributes } from '@kbn/core/server';
 import { ActionsClientContext } from '../../../../../actions_client';
 
-interface Connector extends ConnectorUpdate {
-  actionTypeId: string;
-}
-
-interface ConnectorUpdate {
+export interface ConnectorUpdate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ConnectorUpdateParams } from './types';
+export type { ConnectorUpdateParams } from './types';

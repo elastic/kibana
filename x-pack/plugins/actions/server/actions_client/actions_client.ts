@@ -93,6 +93,11 @@ import {
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
 import { ListTypesParams } from '../application/connector/methods/list_types/types';
 import { ConnectorUpdateParams } from '../application/connector/methods/update/types';
+import { ConnectorUpdate } from '../application/connector/methods/update/types/types';
+
+interface Action extends ConnectorUpdate {
+  actionTypeId: string;
+}
 
 export interface CreateOptions {
   action: Action;
