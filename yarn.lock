@@ -1741,10 +1741,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.11.0":
-  version "95.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.11.0.tgz#40e8124ac54c625ba7160cb84a378507abdeaf40"
-  integrity sha512-O688EbhrgSrV9j54mnK4xLyhv+imkBv5ti7isqLxJtd0L7Fe2A1d6EaA11Qv5plOwwC+cGsrkrDnlSqi1MtNoQ==
+"@elastic/eui@95.12.0-backport.0":
+  version "95.12.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.12.0-backport.0.tgz#de862ded9f23053b24e1f1939de1ff8f8109be60"
+  integrity sha512-hqhqWdAGw5tQwWTP/hn2VoM8YQE2k9IdMmGh0RdkG+JcD1GZySvSDWdTQgr9iA4/XaulJp9R3OenwDjkLLmjPw==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -14254,10 +14254,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^128.0.1:
-  version "128.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-128.0.1.tgz#971fb267cc6893a712808cea6c977473ba167145"
-  integrity sha512-UmWqZXXAyuRa37pE+lnU46vJcCM/y0ddF015LHxycEOYfuqsK7k9ZxJuXCQNWbws9e7FAMQj/GJZT92WPgis0g==
+chromedriver@^128.0.3:
+  version "128.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-128.0.3.tgz#7c2cd2d160f269e78f40840ee7a043dac3687148"
+  integrity sha512-Xn/bknOpGlY9tKinwS/hVWeNblSeZvbbJbF8XZ73X1jeWfAFPRXx3fMLdNNz8DqruDbx3cKEJ5wR3mnst6G3iw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -28412,10 +28412,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.24.0:
-  version "4.24.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.24.0.tgz#bf7563f9e0b1ef29d55f215a8fb187b21e4de26e"
-  integrity sha512-qrqoHhHPZuKLiz5VAQUxrn3ILs7/cYqn2/x96r35g5JjkLUjOS1lX+F+tEJKhRMlQ/MGJ+N1016JF5g2xZUFzw==
+selenium-webdriver@^4.24.1:
+  version "4.25.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.25.0.tgz#3562b49668817974bb1d13d25a50e8bc0264fcf3"
+  integrity sha512-zl9IX93caOT8wbcCpZzAkEtYa+hNgJ4C5GUN8uhpzggqRLvsg1asfKi0p1uNZC8buYVvsBZbx8S+9MjVAjs4oA==
   dependencies:
     "@bazel/runfiles" "^5.8.1"
     jszip "^3.10.1"

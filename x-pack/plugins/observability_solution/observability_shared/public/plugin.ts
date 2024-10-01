@@ -45,6 +45,8 @@ import {
   type MetricsExplorerLocator,
   type ServiceEntityLocator,
   type TransactionDetailsByTraceIdLocator,
+  type EntitiesInventoryLocator,
+  EntitiesInventoryLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
@@ -82,6 +84,7 @@ interface ObservabilitySharedLocators {
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
     serviceEntity: ServiceEntityLocator;
   };
+  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
@@ -159,6 +162,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
+      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }
