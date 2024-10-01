@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import type { DownloadSource, FleetProxy } from '../../../types';
 
 function getfleetServerHostsEnrollArgs(
@@ -24,9 +25,8 @@ function getfleetServerHostsEnrollArgs(
 }
 
 export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
-  return downloadSource?.host.endsWith('/')
-    ? downloadSource.host.substring(0, downloadSource.host.length - 1)
-    : 'https://artifacts.elastic.co/downloads';
+  const source = downloadSource?.host || DEFAULT_DOWNLOAD_SOURCE_URI;
+  return source.endsWith('/') ? source.substring(0, source.length - 1) : source;
 };
 
 export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
