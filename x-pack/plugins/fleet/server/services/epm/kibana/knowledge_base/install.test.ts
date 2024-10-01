@@ -8,8 +8,10 @@
 import { times } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { Installation, KibanaMiscAssetTypes } from '../../../../types';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Installation } from '../../../../types';
+import { KibanaMiscAssetTypes } from '../../../../types';
 import type { PackageInstallContext } from '../../../../../common/types';
 import { auditLoggingService } from '../../../audit_logging';
 import { installKibanaKnowledgeBaseEntries } from './install';
