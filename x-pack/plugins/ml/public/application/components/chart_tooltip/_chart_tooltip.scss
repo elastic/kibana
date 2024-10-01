@@ -4,7 +4,8 @@
   transition: opacity $euiAnimSpeedNormal;
   pointer-events: none;
   user-select: none;
-  max-width: 512px;
+  max-width: max(512px, 90vw);
+  width: max-content;
 
   &__list {
     margin: $euiSizeXS;

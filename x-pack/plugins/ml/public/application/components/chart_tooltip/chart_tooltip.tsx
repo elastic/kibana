@@ -62,7 +62,7 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
                     borderLeftColor: color,
                   }}
                 >
-                  <EuiFlexGroup>
+                  <EuiFlexGroup responsive={false}>
                     <EuiFlexItem className="eui-textBreakWord mlChartTooltip__label" grow={false}>
                       {label}
                     </EuiFlexItem>
