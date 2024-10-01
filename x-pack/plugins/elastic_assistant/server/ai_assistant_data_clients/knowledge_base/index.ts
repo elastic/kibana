@@ -35,7 +35,10 @@ import {
 } from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import { ESQL_DOCS_LOADED_QUERY, SECURITY_LABS_RESOURCE } from '../../routes/knowledge_base/constants';
+import {
+  ESQL_DOCS_LOADED_QUERY,
+  SECURITY_LABS_RESOURCE,
+} from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -258,13 +261,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           this.options.logger.debug(`Knowledge Base docs already loaded!`);
         }
 
-        const labsDocsLoaded = await this.kbResourceExists(SECURITY_LABS_RESOURCE);
-      if (!labsDocsLoaded) {
-        this.options.logger.debug(`Loading Security Labs KB docs...`);
-        await loadSecurityLabs(this, this.options.logger);
-      } else {
-        this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
-      }}
+        const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
+        if (!labsDocsLoaded) {
+          this.options.logger.debug(`Loading Security Labs KB docs...`);
+          await loadSecurityLabs(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+        }
+      }
     } catch (e) {
       this.options.setIsKBSetupInProgress(false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
@@ -360,17 +364,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     return esqlDocs.length > 0;
   };
 
-    /**
+  /**
    * Returns if Security Labs KB docs have been loaded
    */
-    public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
-      const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
-        query: SECURITY_LABS_RESOURCE,
-        // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
-        required: true,
-      });
-      return securityLabsDocs.length > 0;
-    };
+  public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
+    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: SECURITY_LABS_RESOURCE,
+      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
+      required: true,
+    });
+    return securityLabsDocs.length > 0;
+  };
 
   /**
    * Performs similarity search to retrieve LangChain Documents from the knowledge base
