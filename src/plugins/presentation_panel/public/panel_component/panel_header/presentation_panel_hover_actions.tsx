@@ -253,7 +253,9 @@ export const PresentationPanelHoverActions = ({
       );
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if ((ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)) {
+        if (
+          (ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)
+        ) {
           subscriptions.add(
             frequentlyChangingNotification.subscribeToCompatibilityChanges(
               apiContext,
