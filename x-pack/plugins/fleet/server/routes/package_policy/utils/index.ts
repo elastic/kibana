@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { isAgentlessApiEnabled } from '../../../services/utils/agentless';
 
-import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
+import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_helper';
 
 import type {
   CreatePackagePolicyRequestSchema,

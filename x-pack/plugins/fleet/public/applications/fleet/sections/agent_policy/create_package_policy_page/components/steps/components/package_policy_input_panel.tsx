@@ -31,7 +31,7 @@ import type {
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
-import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { useAgentless } from '../../../../../../hooks';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';

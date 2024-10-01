@@ -27,6 +27,7 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
+  useAgentless,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -48,8 +49,6 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
-
-import { useAgentless } from './setup_technology';
 
 export async function createAgentPolicy({
   packagePolicy,

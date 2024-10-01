@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import type { PackageInfo } from '../types';
+
+export const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+  if (
+    packageInfo?.policy_templates &&
+    packageInfo?.policy_templates.length > 0 &&
+    !!packageInfo?.policy_templates.find(
+      (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
+    )
+  ) {
+    return true;
+  }
+  return false;
+};
+
 export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyName: string) => {
   return `Agentless policy for ${packagePolicyName}`;
 };
