@@ -20,6 +20,11 @@ export const KV_HEADER_EXAMPLE_ANSWER = {
   grok_pattern: '%{WORD:key1}:%{WORD:value1};%{WORD:key2}:%{WORD:value2}:%{GREEDYDATA:message}',
 };
 
+export const KV_HEADER_ERROR_EXAMPLE_ANSWER = {
+  grok_pattern:
+    '%{TIMESTAMP:timestamp}:%{WORD:value1};%{WORD:key2}:%{WORD:value2}:%{GREEDYDATA:message}',
+};
+
 export const onFailure = {
   append: {
     field: 'error.message',

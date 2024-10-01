@@ -164,6 +164,7 @@ Object {
                     "deprecated": true,
                     "description": "deprecated foo",
                     "type": "string",
+                    "x-discontinued": "route discontinued version or date",
                   },
                   "foo": Object {
                     "type": "string",
@@ -224,6 +225,7 @@ OK response oas-test-version-2",
         "tags": Array [
           "versioned",
         ],
+        "x-discontinued": "route discontinued version or date",
       },
     },
     "/foo/{id}/{path*}": Object {
@@ -596,6 +598,7 @@ OK response oas-test-version-2",
                     "deprecated": true,
                     "description": "deprecated foo",
                     "type": "string",
+                    "x-discontinued": "route discontinued version or date",
                   },
                   "foo": Object {
                     "type": "string",

@@ -1,8 +1,18 @@
-## MV_SUM
+# MV_SUM
 
-The `MV_SUM` function converts a multivalued field into a single valued field containing the sum of all of the values.
+The MV_SUM function converts a multivalued field into a single valued field containing the sum of all the values.
 
-### Examples
+## Syntax
+
+`MV_SUM(number)`
+
+### Parameters
+
+#### number
+
+This is a multivalue expression.
+
+## Examples
 
 ```esql
 ROW a=[3, 5, 6]

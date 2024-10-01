@@ -11,7 +11,7 @@ import { FtrService } from '../ftr_provider_context';
 import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
-interface TryWithRetriesOptions {
+export interface TryWithRetriesOptions {
   retryCount: number;
   retryDelay?: number;
   timeout?: number;

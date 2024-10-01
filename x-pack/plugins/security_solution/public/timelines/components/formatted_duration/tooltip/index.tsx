@@ -31,7 +31,7 @@ export const FormattedDurationTooltipContent = React.memo<{
         defaultMessage="raw"
       />
       {': '}
-      {maybeDurationNanoseconds}
+      {maybeDurationNanoseconds as React.ReactNode}
     </P>
   </>
 ));

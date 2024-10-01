@@ -43,6 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should support index creation flow with UI', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
         await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
         await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
@@ -64,6 +65,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await es.indices.create({ index: 'test-my-index' });
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
       });
+
+      it('should redirect to index list when multiple indices are created via API', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await es.indices.create({ index: 'test-my-index-001' });
+        await es.indices.create({ index: 'test-my-index-002' });
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+
+      it('should support switching between UI and Code Views', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+      });
+
+      it('should have file upload link', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
+      });
+
+      it('should have o11y links', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+      });
     });
     describe('viewer', function () {
       before(async () => {
@@ -77,9 +106,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
+      it('should default to code view when lacking create index permissions', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
+        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
+      });
+
       it('should redirect to index details when index is created via API', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
         await es.indices.create({ index: 'test-my-api-index' });
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
       });

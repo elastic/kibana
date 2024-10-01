@@ -13,35 +13,46 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { isValidIndexName, generateRandomIndexName } from '../../utils/indices';
+import { isValidIndexName } from '../../utils/indices';
 
 import { useCreateIndex } from './hooks/use_create_index';
 
-interface CreateIndexFormState {
-  indexName: string;
-}
+import { CreateIndexFormState } from './types';
+import { useKibana } from '../../hooks/use_kibana';
 
-function initCreateIndexState(): CreateIndexFormState {
-  return {
-    indexName: generateRandomIndexName(),
-  };
-}
+const CREATE_INDEX_CONTENT = i18n.translate(
+  'xpack.searchIndices.startPage.createIndex.action.text',
+  {
+    defaultMessage: 'Create my index',
+  }
+);
 
 export interface CreateIndexFormProps {
+  formState: CreateIndexFormState;
+  setFormState: React.Dispatch<React.SetStateAction<CreateIndexFormState>>;
   userPrivileges?: UserStartPrivilegesResponse;
 }
 
-export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState());
+export const CreateIndexForm = ({
+  userPrivileges,
+  formState,
+  setFormState,
+}: CreateIndexFormProps) => {
+  const { application } = useKibana().services;
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
   const { createIndex, isLoading } = useCreateIndex();
@@ -60,32 +71,14 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
       setIndexNameHasError(invalidIndexName);
     }
   };
+  const onFileUpload = useCallback(() => {
+    usageTracker.click(AnalyticsEvents.startFileUploadClick);
+    application.navigateToApp('ml', { path: 'filedatavisualizer' });
+  }, [usageTracker, application]);
 
   return (
-    <EuiForm component="form" fullWidth>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('xpack.searchIndices.startPage.createIndex.title', {
-                  defaultMessage: 'Create your first index',
-                })}
-              </h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <></>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText color="subdued">
-          <p>
-            {i18n.translate('xpack.searchIndices.startPage.createIndex.description', {
-              defaultMessage:
-                'An index stores your data and defines the schema, or field mappings, for your searches',
-            })}
-          </p>
-        </EuiText>
+    <>
+      <EuiForm data-test-subj="createIndexUIView" fullWidth component="form">
         <EuiFormRow
           label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
             defaultMessage: 'Name your index',
@@ -98,11 +91,13 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
           isInvalid={indexNameHasError}
         >
           <EuiFieldText
+            autoFocus
             fullWidth
             data-test-subj="indexNameField"
             name="indexName"
             value={formState.indexName}
             isInvalid={indexNameHasError}
+            disabled={userPrivileges?.privileges?.canCreateIndex === false}
             onChange={onIndexNameChange}
             placeholder={i18n.translate(
               'xpack.searchIndices.startPage.createIndex.name.placeholder',
@@ -112,31 +107,51 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
             )}
           />
         </EuiFormRow>
+        <EuiSpacer />
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              iconSide="left"
-              iconType="sparkles"
-              data-test-subj="createIndexBtn"
-              fill
-              disabled={
-                indexNameHasError ||
-                isLoading ||
-                userPrivileges?.privileges?.canCreateIndex === false
-              }
-              isLoading={isLoading}
-              onClick={onCreateIndex}
-            >
-              {i18n.translate('xpack.searchIndices.startPage.createIndex.action.text', {
-                defaultMessage: 'Create my index',
-              })}
-            </EuiButton>
+            {userPrivileges?.privileges?.canCreateIndex === false ? (
+              <EuiToolTip
+                content={
+                  <p>
+                    {i18n.translate('xpack.searchIndices.startPage.createIndex.permissionTooltip', {
+                      defaultMessage: 'You do not have permission to create an index.',
+                    })}
+                  </p>
+                }
+              >
+                <EuiButton
+                  fill
+                  color="primary"
+                  iconSide="left"
+                  iconType="sparkles"
+                  data-test-subj="createIndexBtn"
+                  disabled={true}
+                >
+                  {CREATE_INDEX_CONTENT}
+                </EuiButton>
+              </EuiToolTip>
+            ) : (
+              <EuiButton
+                fill
+                color="primary"
+                iconSide="left"
+                iconType="sparkles"
+                data-telemetry-id="searchIndices-start-createIndexBtn"
+                data-test-subj="createIndexBtn"
+                disabled={indexNameHasError || isLoading}
+                isLoading={isLoading}
+                onClick={onCreateIndex}
+                type="submit"
+              >
+                {CREATE_INDEX_CONTENT}
+              </EuiButton>
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             {userPrivileges?.privileges?.canCreateApiKeys && (
               <EuiFlexGroup gutterSize="s">
-                <EuiIcon size="l" type="key" color="subdued" />
+                <EuiIcon size="m" type="key" color="subdued" />
                 <EuiText size="s" data-test-subj="apiKeyLabel">
                   <p>
                     {i18n.translate(
@@ -151,7 +166,41 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiForm>
+      </EuiForm>
+      <EuiHorizontalRule margin="none" />
+      <EuiPanel color="transparent" paddingSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="documents" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.searchIndices.startPage.createIndex.fileUpload.text"
+                  defaultMessage="Already have some data? {link}"
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-telemetry-id="searchIndices-start-uploadFile"
+                        data-test-subj="uploadFileLink"
+                        onClick={onFileUpload}
+                      >
+                        {i18n.translate(
+                          'xpack.searchIndices.startPage.createIndex.fileUpload.link',
+                          {
+                            defaultMessage: 'Upload a file',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 };

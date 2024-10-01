@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { omit } from 'lodash';
 import {
@@ -47,6 +48,7 @@ import {
   ObjectRemover,
   TaskManagerDoc,
 } from '../../../../../common/lib';
+import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
@@ -87,6 +89,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
 
       it(`should write alert docs during rule execution with flapping.enabled: ${enableFlapping}`, async () => {
         await setFlappingSettings(enableFlapping);
+        // wait so cache expires
+        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 
         const pattern = {
           alertA: [true, true, true], // stays active across executions

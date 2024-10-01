@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { DeprecationsGetResponse } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('no scripted fields deprecations', async () => {
-      const { body } = await supertest.get('/api/deprecations/');
+      const { body } = await supertest
+        .get('/api/deprecations/')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
       const { deprecations } = body as DeprecationsGetResponse;
       const dataPluginDeprecations = deprecations.filter(
@@ -40,27 +43,32 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('scripted field deprecation', async () => {
       const title = `basic_index`;
-      await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-          fields: {
-            foo: {
-              name: 'foo',
-              type: 'string',
-              scripted: true,
-              script: "doc['field_name'].value",
-            },
-            bar: {
-              name: 'bar',
-              type: 'number',
-              scripted: true,
-              script: "doc['field_name'].value",
+      await supertest
+        .post('/api/index_patterns/index_pattern')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({
+          index_pattern: {
+            title,
+            fields: {
+              foo: {
+                name: 'foo',
+                type: 'string',
+                scripted: true,
+                script: "doc['field_name'].value",
+              },
+              bar: {
+                name: 'bar',
+                type: 'number',
+                scripted: true,
+                script: "doc['field_name'].value",
+              },
             },
           },
-        },
-      });
+        });
 
-      const { body } = await supertest.get('/api/deprecations/');
+      const { body } = await supertest
+        .get('/api/deprecations/')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
       const { deprecations } = body as DeprecationsGetResponse;
       const dataPluginDeprecations = deprecations.filter(
         ({ domainId }) => domainId === 'dataViews'

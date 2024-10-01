@@ -8,7 +8,9 @@
 import React, { useCallback, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { PromptResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { Replacements } from '@kbn/elastic-assistant-common';
+import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
+import { ESQL_RESOURCE } from '../../knowledge_base/setup_knowledge_base_button';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { ClientMessage } from '../../assistant_context/types';
@@ -20,9 +22,7 @@ import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 
 export interface UseChatSendProps {
-  allSystemPrompts: PromptResponse[];
   currentConversation?: Conversation;
-  currentSystemPromptId: string | undefined;
   http: HttpSetup;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   selectedPromptContexts: Record<string, SelectedPromptContext>;
@@ -46,9 +46,7 @@ export interface UseChatSend {
  * Handles sending user messages to the API and updating the conversation state.
  */
 export const useChatSend = ({
-  allSystemPrompts,
   currentConversation,
-  currentSystemPromptId,
   http,
   refetchCurrentUserConversations,
   selectedPromptContexts,
@@ -60,6 +58,12 @@ export const useChatSend = ({
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const isSetupComplete =
+    kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    kbStatus?.esql_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -75,14 +79,11 @@ export const useChatSend = ({
         );
         return;
       }
-      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === currentSystemPromptId);
 
       const userMessage = getCombinedMessage({
-        isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt: systemPrompt,
       });
 
       const baseReplacements: Replacements =
@@ -123,6 +124,7 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
@@ -138,14 +140,14 @@ export const useChatSend = ({
         actionTypeId: currentConversation.apiConfig.actionTypeId,
         model: currentConversation.apiConfig.model,
         provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
     },
     [
-      allSystemPrompts,
       assistantTelemetry,
       currentConversation,
-      currentSystemPromptId,
       http,
+      isSetupComplete,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,

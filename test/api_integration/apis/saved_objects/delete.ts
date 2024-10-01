@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 when deleting a doc', async () =>
       await supertest
         .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({});
@@ -37,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return generic 404 when deleting an unknown doc', async () =>
       await supertest
         .delete(`/api/saved_objects/dashboard/not-a-real-id`)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(404)
         .then((resp) => {
           expect(resp.body).to.eql({

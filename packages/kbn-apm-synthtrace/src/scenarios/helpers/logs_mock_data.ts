@@ -8,6 +8,7 @@
  */
 
 import { generateShortId } from '@kbn/apm-synthtrace-client';
+import { ELASTIC_AGENT_NAMES } from '@kbn/elastic-agent-utils';
 import { faker } from '@faker-js/faker';
 import { randomInt } from 'crypto';
 import moment from 'moment';
@@ -65,6 +66,8 @@ export const getGeoCoordinate = (index?: number) => getAtIndexOrRandom(GEO_COORD
 export const getCloudProvider = (index?: number) => getAtIndexOrRandom(CLOUD_PROVIDERS, index);
 export const getCloudRegion = (index?: number) => getAtIndexOrRandom(CLOUD_REGION, index);
 export const getServiceName = (index?: number) => getAtIndexOrRandom(SERVICE_NAMES, index);
+export const getAgentName = (index?: number) => getAtIndexOrRandom(ELASTIC_AGENT_NAMES, index);
+
 export const getJavaLog = () =>
   `${moment().format('YYYY-MM-DD HH:mm:ss,SSS')} ${getAtIndexOrRandom(
     LOG_LEVELS

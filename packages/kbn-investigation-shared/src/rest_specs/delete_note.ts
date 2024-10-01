@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const deleteInvestigationNoteParamsSchema = t.type({
-  path: t.type({
-    investigationId: t.string,
-    noteId: t.string,
+const deleteInvestigationNoteParamsSchema = z.object({
+  path: z.object({
+    investigationId: z.string(),
+    noteId: z.string(),
   }),
 });
 
-type DeleteInvestigationNoteParams = t.TypeOf<
-  typeof deleteInvestigationNoteParamsSchema.props.path
->;
+type DeleteInvestigationNoteParams = z.infer<typeof deleteInvestigationNoteParamsSchema.shape.path>;
 
 export { deleteInvestigationNoteParamsSchema };
 export type { DeleteInvestigationNoteParams };

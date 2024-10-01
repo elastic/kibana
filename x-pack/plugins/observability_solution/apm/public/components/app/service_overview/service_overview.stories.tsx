@@ -42,6 +42,7 @@ const stories: Meta<{}> = {
         transactionType,
         transactionTypeStatus,
         serviceEntitySummary,
+        transactionTypes: ['type'],
       } as unknown as APMServiceContextValue;
 
       return (
