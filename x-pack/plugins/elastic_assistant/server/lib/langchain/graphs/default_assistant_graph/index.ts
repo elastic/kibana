@@ -23,9 +23,6 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 
-/**
- * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
- */
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
