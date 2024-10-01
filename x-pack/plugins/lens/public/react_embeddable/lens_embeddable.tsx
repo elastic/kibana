@@ -233,13 +233,21 @@ export const createLensEmbeddableFactory = (
             );
           }
 
+          // Publish the data attributes only if avaialble/visible
+          const title = !api.hidePanelTitle?.getValue()
+            ? { 'data-title': api.panelTitle?.getValue() }
+            : undefined;
+          const description = api.panelDescription?.getValue()
+            ? { 'data-description': api.panelDescription?.getValue() }
+            : undefined;
+
           return (
             <div
               style={{ width: '100%', height: '100%' }}
               data-rendering-count={renderCount}
               data-render-complete={hasRendered}
-              data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
-              data-description={api.panelDescription?.getValue() ?? ''}
+              {...title}
+              {...description}
               data-shared-item
             >
               <ExpressionWrapper {...expressionParams} />
