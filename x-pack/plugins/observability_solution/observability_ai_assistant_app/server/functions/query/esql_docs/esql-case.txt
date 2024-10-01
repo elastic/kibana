@@ -33,7 +33,6 @@ FROM sample_data
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
-| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS error_rate = AVG(error) BY hour
+| STATS error_rate = AVG(error) BY BUCKET(@timestamp, 1 hour)
 | SORT hour
 ```

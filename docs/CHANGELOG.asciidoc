@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.14.3>>
+* <<release-notes-8.14.2>>
 * <<release-notes-8.14.1>>
 * <<release-notes-8.14.0>>
 * <<release-notes-8.13.4>>
@@ -67,10 +69,102 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.14.3]]
+== {kib} 8.14.3
+
+The 8.14.3 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
+
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
+
+=== Known issues
+
+[discrete]
+[[known-178114]]
+.Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
+[%collapsible]
+====
+*Details* +
+In 8.15.1, We fixed a bug when processing YAML configuration keys that contain dotted notation in objects in arrays.
+This can manifest as a validation error causing Kibana to not start.
+
+For more information, refer to {kibana-pull}190590[#190590].
+====
+
+[discrete]
+[[known-185691]]
+.When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
+[%collapsible]
+====
+*Details* +
+In 8.14.3, if you are using the Observability AI Assistant with the OpenAI connector, function calling will result in an error.
+The error message will look similar to this:
+
+[source]
+----
+Error: an error occurred while running the action - Status code: 400. Message: API Error: model_error - Missing required parameter: 'messages[4].function_call.arguments'.
+----
+
+A fix will be available in 8.15. Users on 8.14.3 can get around this error by turning on synthetic function calling in _AI Assistant Settings_:
+
+. In {kib}, go to *Stack Management* → *AI Assistant* → *Observability*
+. Toggle the _Simulate function calling_ option to *On*.
+
+For more information, refer to {kibana-pull}185691[#185691].
+====
+
+[float]
+[[fixes-v8.14.3]]
+=== Bug Fixes
+Dashboard::
+* Fixes controls getting overwritten on navigation ({kibana-pull}187509[#187509]).
+Elastic Security::
+For the Elastic Security 8.14.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[[release-notes-8.14.2]]
+== {kib} 8.14.2
+
+The 8.14.2 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
+
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
+
+[float]
+[[fixes-v8.14.2]]
+=== Bug Fixes
+
+Alerting::
+* Rule runs recovered actions without ever running active actions ({kibana-pull}183646[#183646]).
+Fleet::
+* Updates health_check endpoint to accept hosts ids ({kibana-pull}185014[#185014]).
+Machine Learning::
+* AIOps Log Rate Analysis: Fixes text field selection ({kibana-pull}186176[#186176]).
+Presentation::
+* Fixes PresentationPanelError component throwing when error.message is empty string ({kibana-pull}186098[#186098]).
+
 [[release-notes-8.14.1]]
 == {kib} 8.14.1
 
-The 8.14.1 release includes the following bug fixes.
+The 8.14.1 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
+
+include::CHANGELOG.asciidoc[tag=known-issue-189394]
 
 [float]
 [[fixes-v8.14.1]]
@@ -92,6 +186,51 @@ Observability::
 For information about the {kib} 8.14.0 release, review the following information.
 
 [float]
+[[known-issues-8.14.0]]
+=== Known issues
+
+// tag::known-issue-186969[]
+.Creating or editing APM, {observability} and {stack-monitor-app} rules fails
+[%collapsible]
+====
+*Details* +
+When you attempt to create or edit some rule types in **{stack-manage-app}** > **{rules-ui}**, the request will fail with errors similar to `Cannot read properties of undefined (reading 'eui')` or `e.theme.eui is undefined`.
+Refer to https://github.com/elastic/kibana/issues/186969[#186969]
+
+*Impact* +
+This known issue impacts only {observability}, {stack-monitor-app}, and APM and {user-experience} rules.
+
+*Workaround* +
+To work around this issue for {observability} and APM and {user-experience} rules, create them from the {observability} *Alerts* page.
+Refer to <<apm-alerts>> and {observability-guide}/create-alerts-rules.html[Create and manage {observability} rules].
+
+*Resolved* +
+This issue is resolved in 8.15.0.
+====
+// end::known-issue-186969[]
+
+// tag::known-issue-189394[]
+.{webhook-cm} connector fails to send HTTP headers
+[%collapsible]
+====
+*Details* +
+If you configured the {webhook-cm} connector to send key-value pairs as headers, that information is not sent unles you have also enabled the basic authentication option for the connector.
+Refer to https://github.com/elastic/kibana/issues/189394[#189394].
+
+*Impact* +
+The impact of this issue will vary depending on the purpose of your headers.
+For example, if you added an `ApiKey` authorization header, you might receive a `401` authorization error since it's no longer sent by the connector.
+
+*Workaround* +
+To work around this issue, enable the *Require authentication for this webhook* option, which is the `hasAuth` property in the API.
+You must then provide a username and password for authentication.
+
+*Resolved* +
+This issue is resolved in 8.15.0.
+====
+// end::known-issue-189394[]
+
+[float]
 [[breaking-changes-8.14.0]]
 === Breaking changes
 
@@ -106,7 +245,7 @@ Before you upgrade to 8.14.0, review the breaking changes, then mitigate the imp
 *Details* +
 The advanced setting which hides {esql} from the UI has been renamed from `discover:enableESQL` to `enableESQL`. It is enabled by default and must be switched off to disable {esql} features from your {kib} applications. For more information, refer to ({kibana-pull}182074[#182074]).
 ====
-      
+
 [discrete]
 [[breaking-178879]]
 .The unified search filter builder is Generally Available.
@@ -115,7 +254,7 @@ The advanced setting which hides {esql} from the UI has been renamed from `disco
 *Details* +
 The unified search filter builder (OR / AND) is out of technical preview. For more information, refer to ({kibana-pull}178879[#178879]).
 ====
-      
+
 [discrete]
 [[breaking-178860]]
 .{esql} is Generally Available.
@@ -124,7 +263,7 @@ The unified search filter builder (OR / AND) is out of technical preview. For mo
 *Details* +
 {esql} comes out of technical preview and is generally available. For more information, refer to ({kibana-pull}178860[#178860]).
 ====
-      
+
 [discrete]
 [[breaking-177549]]
 .The region map visualization type is Generally Available in Lens.
@@ -133,7 +272,7 @@ The unified search filter builder (OR / AND) is out of technical preview. For mo
 *Details* +
 The visualization type, region map, comes out of technical preview and is generally available. For more information, refer to ({kibana-pull}177549[#177549]).
 ====
-      
+
 [discrete]
 [[breaking-177089]]
 .UI enhancements to managed tags.
@@ -142,7 +281,19 @@ The visualization type, region map, comes out of technical preview and is genera
 *Details* +
 UI improvements for managed tags. For more information, refer to ({kibana-pull}177089[#177089]).
 ====
-      
+
+[discrete]
+[[breaking-178159]]
+.Downloading a CSV file from a saved search panel in a dashboard has become deprecated in favor of generating a CSV report.
+[%collapsible]
+====
+*Details* +
+The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
+without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
+unchanged. For more information, refer to {kibana-pull}178159[#178159].
+====
+
 [float]
 [[features-8.14.0]]
 === Features
@@ -545,23 +696,23 @@ Before you upgrade to 8.13.0, review the breaking changes, then mitigate the imp
 *Details* +
 The Kafka output no longer supports conditional topics. For more information, refer to ({kibana-pull}176879[#176879]).
 ====
-      
+
 [discrete]
 [[breaking-176443]]
-.Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI 
+.Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI
 [%collapsible]
 ====
 *Details* +
 
 Integration content installed by {fleet} is no longer editable. This content is tagged with *Managed* in the {kib} UI, and is Elastic managed. This content cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned. The clones can be customized.
 
-When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies. 
+When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies.
 
 Managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
 
 For more information, refer to ({kibana-pull}172393[#172393]).
 ====
-  
+
 [discrete]
 [[breaking-174674]]
 .Removes `is_nan`, `is_finite`, and `is_infinite` functions from {esql}
@@ -570,7 +721,7 @@ For more information, refer to ({kibana-pull}172393[#172393]).
 *Details* +
 These functions have been removed from {esql} queries as they are not supported. Errors would be thrown when trying to use them. For more information, refer to ({kibana-pull}174674[#174674]).
 ====
-      
+
 [float]
 [[features-8.13.0]]
 === Features
@@ -878,7 +1029,7 @@ The 8.12.1 release includes the following enhancements and bug fixes.
 === Enhancements
 
 Elastic Security::
-For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_]. 
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Observability::
 * Adds `defer_validation: true` to transforms on creation to stop errors when the destination index doesn't exist yet ({kibana-pull}174463[#174463]).
 
@@ -961,7 +1112,7 @@ The previous summary transforms summarizing every SLOs won't be used anymore and
 
 Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new `slo-summary-{slo_id}-{slo_revision}` transforms. For more information, refer to ({kibana-pull}172224[#172224]).
 ====
-      
+
 [discrete]
 [[breaking-170635]]
 .A new sub-feature privilege to control user access to the cases settings
@@ -970,7 +1121,7 @@ Be aware that when installing a new SLO (or after resetting an SLO), we install 
 *Details* +
 Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. For more information, refer to ({kibana-pull}170635[#170635]).
 ====
-      
+
 [float]
 [[features-8.12.0]]
 === Features
@@ -999,11 +1150,11 @@ Machine Learning::
 * Adds E5 model configurations ({kibana-pull}172053[#172053]).
 * Adds the ability to create a categorization anomaly detection job from pattern analysis ({kibana-pull}170567[#170567]).
 * Adds and displays alerts data in the Anomaly Explorer ({kibana-pull}167998[#167998]).
-Observability:: 
+Observability::
 * Adds logic to update flyout highlights ({kibana-pull}172193[#172193]).
 * Adds logic to display highlights in the flyout ({kibana-pull}170650[#170650]).
 * Changes the Custom threshold title to Beta ({kibana-pull}172360[#172360]).
-Security:: 
+Security::
 * Disables the connector parameters field ({kibana-pull}173610[#173610]).
 * Adds a risk engine missing privileges callout ({kibana-pull}171250[#171250]).
 * Asset criticality privileges API ({kibana-pull}172441[#172441]).
@@ -1706,7 +1857,7 @@ If some SLOs have been installed in a prior version at 8.10, they won't work aft
 
 *Removing SLOs before migrating to 8.10*
 
-Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1. 
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1.
 
 *Removing SLOs after migrating to 8.10*
 
@@ -1806,6 +1957,16 @@ For the full list, refer to {kib-issue}146945[#146945].
 ====
 *Details* +
 The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+====
+
+[discrete]
+[[breaking-162288]]
+.The Download CSV endpoint has changed.
+[%collapsible]
+====
+*Details* +
+The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
 ====
 
 [float]
@@ -3704,7 +3865,7 @@ Review the following information about the {kib} 8.6.0 release.
 When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
 
 *Impact* +
-This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
+This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {observability-guide}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
 
 [float]
@@ -5294,7 +5455,7 @@ you make the necessary updates after you upgrade to 8.3.0.
 Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
 
 *Impact* +
-In the link:https://www.elastic.co/guide/en/kibana/8.3/xpack-apm.html[APM documentation], the `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
+The `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
 ====
 
 [discrete]
@@ -6247,7 +6408,7 @@ Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impa
 The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
 
 *Impact* +
-If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatatically generate CSV reports.
+If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatically generate CSV reports.
 ====
 
 [discrete]

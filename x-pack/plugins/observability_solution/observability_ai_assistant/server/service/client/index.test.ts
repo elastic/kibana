@@ -1225,7 +1225,6 @@ describe('Observability AI Assistant client', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -1449,7 +1448,6 @@ describe('Observability AI Assistant client', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },

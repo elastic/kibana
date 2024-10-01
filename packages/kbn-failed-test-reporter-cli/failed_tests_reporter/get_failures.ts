@@ -16,6 +16,7 @@ export type TestFailure = FailedTestCase['$'] & {
   'system-out'?: string;
   githubIssue?: string;
   failureCount?: number;
+  commandLine?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -71,19 +72,35 @@ const isLikelyIrrelevant = (name: string, failure: string) => {
 export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
+  const commandLine = getCommandLineFromReport(report);
+
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
 
-    failures.push({
+    const failureObj = {
       // unwrap xml weirdness
       ...testCase.$,
       // Strip ANSI color characters
       failure,
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
-    });
+      commandLine,
+    };
+
+    // cleaning up duplicates
+    delete failureObj['command-line'];
+
+    failures.push(failureObj);
   }
 
   return failures;
+}
+
+function getCommandLineFromReport(report: TestReport) {
+  if ('testsuites' in report) {
+    return report.testsuites?.testsuite?.[0]?.$['command-line'] || '';
+  } else {
+    return report.testsuite?.$['command-line'] || '';
+  }
 }

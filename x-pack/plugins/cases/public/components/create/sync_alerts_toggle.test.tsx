@@ -15,7 +15,8 @@ import { SyncAlertsToggle } from './sync_alerts_toggle';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 
-describe('SyncAlertsToggle', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/178274
+describe.skip('SyncAlertsToggle', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {

@@ -7,6 +7,8 @@
  */
 
 import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 const getKibanaDir = (() => {
   let kibanaDir: string | undefined;
@@ -21,4 +23,42 @@ const getKibanaDir = (() => {
   };
 })();
 
-export { getKibanaDir };
+export interface Version {
+  branch: string;
+  version: string;
+}
+export interface VersionsFile {
+  versions: Array<
+    {
+      previousMajor?: boolean;
+      previousMinor?: boolean;
+      currentMajor?: boolean;
+      currentMinor?: boolean;
+    } & Version
+  >;
+}
+const getVersionsFile = (() => {
+  let versions: VersionsFile & {
+    prevMinors: Version[];
+    prevMajors: Version[];
+    current: Version;
+  };
+  const versionsFileName = 'versions.json';
+  try {
+    const versionsJSON = JSON.parse(
+      fs.readFileSync(path.join(getKibanaDir(), versionsFileName)).toString()
+    );
+    versions = {
+      versions: versionsJSON.versions,
+      prevMinors: versionsJSON.versions.filter((v: any) => v.previousMinor),
+      prevMajors: versionsJSON.versions.filter((v: any) => v.previousMajor),
+      current: versionsJSON.versions.find((v: any) => v.currentMajor && v.currentMinor),
+    };
+  } catch (error) {
+    throw new Error(`Failed to read ${versionsFileName}: ${error}`);
+  }
+
+  return () => versions;
+})();
+
+export { getKibanaDir, getVersionsFile };

@@ -172,3 +172,9 @@ npm_install_global() {
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
+
+print_if_dry_run() {
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    echo "DRY_RUN is enabled."
+  fi
+}
