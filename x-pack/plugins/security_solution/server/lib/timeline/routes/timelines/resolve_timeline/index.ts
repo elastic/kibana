@@ -6,24 +6,24 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_RESOLVE_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../..';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
-import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
-import type {
-  SavedTimeline,
-  ResolvedTimelineWithOutcomeSavedObject,
+import {
+  ResolveTimelineRequestQuery,
+  type ResolveTimelineResponse,
 } from '../../../../../../common/api/timeline';
+import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
+import type { SavedTimeline, ResolvedTimeline } from '../../../../../../common/api/timeline';
 
-export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_RESOLVE_URL,
@@ -36,16 +36,16 @@ export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter, _: Co
       {
         version: '2023-10-31',
         validate: {
-          request: { query: buildRouteValidationWithExcess(getTimelineQuerySchema) },
+          request: { query: buildRouteValidationWithZod(ResolveTimelineRequestQuery) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<ResolveTimelineResponse>> => {
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObject | null = null;
+          let res: SavedTimeline | ResolvedTimeline | null = null;
 
           if (templateTimelineId != null && id == null) {
             // Template timelineId is not a SO id, so it does not need to be updated to use resolve

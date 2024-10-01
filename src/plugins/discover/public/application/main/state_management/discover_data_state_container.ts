@@ -275,25 +275,33 @@ export function getDataStateContainer({
               const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-
-              if (dataView) {
-                const stateUpdate = getDefaultProfileState({
-                  profilesManager,
-                  resetDefaultProfileState,
-                  defaultColumns,
-                  dataView,
-                  esqlQueryColumns,
+              const clearResetProfileState = () => {
+                internalStateContainer.transitions.setResetDefaultProfileState({
+                  columns: false,
+                  rowHeight: false,
                 });
+              };
 
-                if (stateUpdate) {
-                  await appStateContainer.replaceUrlState(stateUpdate);
-                }
+              if (!dataView) {
+                clearResetProfileState();
+                return;
               }
 
-              internalStateContainer.transitions.setResetDefaultProfileState({
-                columns: false,
-                rowHeight: false,
+              const stateUpdate = getDefaultProfileState({
+                profilesManager,
+                resetDefaultProfileState,
+                defaultColumns,
+                dataView,
+                esqlQueryColumns,
               });
+
+              if (!stateUpdate) {
+                clearResetProfileState();
+                return;
+              }
+
+              await appStateContainer.replaceUrlState(stateUpdate);
+              clearResetProfileState();
             }
           );
 

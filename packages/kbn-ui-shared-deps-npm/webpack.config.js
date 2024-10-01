@@ -101,8 +101,6 @@ module.exports = (_, argv) => {
         'tslib',
         'uuid',
       ],
-      'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
-      'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],
     },
     context: __dirname,
     devtool: 'cheap-source-map',

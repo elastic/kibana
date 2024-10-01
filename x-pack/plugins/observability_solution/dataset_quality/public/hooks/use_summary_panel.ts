@@ -14,13 +14,8 @@ import { filterInactiveDatasets } from '../utils';
 
 const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
-  const {
-    filteredItems,
-    isSizeStatsAvailable,
-    canUserMonitorDataset,
-    canUserMonitorAnyDataStream,
-    loading,
-  } = useDatasetQualityTable();
+  const { filteredItems, canUserMonitorDataset, canUserMonitorAnyDataStream, loading } =
+    useDatasetQualityTable();
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
@@ -84,7 +79,6 @@ const useSummaryPanel = () => {
 
     isEstimatedDataLoading,
     estimatedData,
-    isEstimatedDataDisabled: !isSizeStatsAvailable,
 
     isDatasetsActivityLoading,
     datasetsActivity,

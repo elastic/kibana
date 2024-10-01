@@ -651,6 +651,14 @@
                 "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
               },
               {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
+              },
+              {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/plugins/integration_assistant/public/services/telemetry/service.ts"
               },
@@ -1145,6 +1153,30 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1782,7 +1814,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_context_manager.ts"
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.ts"
               },
               {
                 "plugin": "telemetry",
@@ -1854,7 +1886,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/services/discover_ebt_context_manager.test.ts"
+                "path": "src/plugins/discover/public/services/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core-application-browser-internal",

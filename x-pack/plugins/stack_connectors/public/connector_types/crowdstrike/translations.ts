@@ -19,14 +19,14 @@ export const URL_LABEL = i18n.translate(
 export const CLIENT_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.security.crowdstrike.config.clientIdTextFieldLabel',
   {
-    defaultMessage: 'Crowdstrike client ID',
+    defaultMessage: 'Crowdstrike Client ID',
   }
 );
 
 export const CLIENT_SECRET_LABEL = i18n.translate(
   'xpack.stackConnectors.security.crowdstrike.config.clientSecretTextFieldLabel',
   {
-    defaultMessage: 'Client secret',
+    defaultMessage: 'Client Secret',
   }
 );
 

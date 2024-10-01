@@ -476,7 +476,7 @@
         "label": "replaceAnonymizedValuesWithOriginalValues",
         "description": [],
         "signature": [
-          "({ messageContent, replacements, }: { messageContent: string; replacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">; }) => string"
+          "({ messageContent, replacements, }: { messageContent: string; replacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | null | undefined; }) => string"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
         "deprecated": false,
@@ -512,7 +512,7 @@
                 "label": "replacements",
                 "description": [],
                 "signature": [
-                  "{} & { [k: string]: string; }"
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | null | undefined"
                 ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
                 "deprecated": false,

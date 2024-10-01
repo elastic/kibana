@@ -60,7 +60,6 @@ export interface WithNonAggregatableDatasets {
 
 export interface WithDatasets {
   datasets: DataStreamStat[];
-  isSizeStatsAvailable: boolean;
 }
 
 export interface WithIntegrations {

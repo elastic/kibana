@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
-  TimelineResult,
+  TimelineResponse,
   TimelineTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
@@ -419,8 +419,8 @@ export default function ({ getService }: FtrProviderContext) {
   });
 }
 
-const omitTypename = (key: string, value: keyof TimelineResult) =>
+const omitTypename = (key: string, value: keyof TimelineResponse) =>
   key === '__typename' ? undefined : value;
 
-const omitTypenameInTimeline = (timeline: TimelineResult) =>
+const omitTypenameInTimeline = (timeline: TimelineResponse) =>
   JSON.parse(JSON.stringify(timeline), omitTypename);

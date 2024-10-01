@@ -123,8 +123,11 @@ export function AlertActions(props: AlertActionsProps) {
           </EuiContextMenuItem>,
         ]
       : []),
-    DefaultAlertActions,
   ];
+
+  if (DefaultAlertActions) {
+    actionsMenuItems.push(DefaultAlertActions);
+  }
 
   const actionsToolTip =
     actionsMenuItems.length <= 0

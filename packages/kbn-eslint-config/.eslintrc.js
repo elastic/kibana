@@ -171,6 +171,13 @@ module.exports = {
           from: 'rison-node',
           to: '@kbn/rison',
         },
+        {
+          from: 'react-dom/client',
+          to: 'react-dom',
+          exact: true,
+          disallowedMessage:
+            'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
+        },
       ],
     ],
 
@@ -314,6 +321,7 @@ module.exports = {
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
+    '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',

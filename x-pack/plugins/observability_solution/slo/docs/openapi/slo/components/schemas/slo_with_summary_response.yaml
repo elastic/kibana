@@ -67,9 +67,7 @@ properties:
     type: boolean
     example: true
   groupBy:
-    description: optional group by field to use to generate an SLO per distinct value
-    type: string
-    example: "some.field"
+    $ref: "group_by.yaml"
   instanceId:
     description: the value derived from the groupBy field, if present, otherwise '*'
     type: string

@@ -58,8 +58,14 @@ describe('DocumentList', () => {
         },
       ],
       mappings: {
-        AvgTicketPrice: {
-          type: 'float' as const,
+        kibana_sample_data_flights: {
+          mappings: {
+            properties: {
+              AvgTicketPrice: {
+                type: 'float' as const,
+              },
+            },
+          },
         },
       },
     };
