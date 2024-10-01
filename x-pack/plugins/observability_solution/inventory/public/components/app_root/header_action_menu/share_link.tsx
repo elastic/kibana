@@ -30,17 +30,17 @@ function useShortUrlService() {
     services: { share, notifications },
   } = useKibana();
 
-  const [isLoading, setLoadingState] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const copyShortUrl = useCallback(async () => {
-    setLoadingState(true);
+    setIsLoading(true);
 
     try {
       const shortUrls = share.url.shortUrls.get(null);
 
       const { url } = await shortUrls.createFromLongUrl(window.location.toString());
 
-      setLoadingState(false);
+      setIsLoading(false);
 
       if (copy(url)) {
         notifications.toasts.addSuccess({
@@ -51,8 +51,12 @@ function useShortUrlService() {
         throw new Error('Clipboard copy error');
       }
     } catch (e) {
-      // Should we log the error?
-      notifications.toasts.addDanger({ title: SHARE_TOAST_FAILURE_LABEL, iconType: 'error' });
+      const err = e as Error;
+      notifications.toasts.addDanger({
+        title: SHARE_TOAST_FAILURE_LABEL,
+        iconType: 'error',
+        text: err.message,
+      });
     }
   }, [share, notifications.toasts]);
 
