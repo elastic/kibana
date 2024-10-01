@@ -6,7 +6,6 @@
  */
 
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   FetchSLOHealthParams,
   FetchSLOHealthResponse,
@@ -14,6 +13,7 @@ import {
 } from '@kbn/slo-schema';
 import { Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
+import { SloRouteContext } from '../types';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -21,22 +21,17 @@ import {
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { HealthStatus, State } from '../domain/models/health';
-import { SLORepository } from './slo_repository';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 
 export class GetSLOHealth {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository
-  ) {}
+  constructor(private context: SloRouteContext) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     const sloIds = params.list.map(({ sloId }) => sloId);
-    const sloList = await this.repository.findAllByIds(sloIds);
+    const sloList = await this.context.repository.findAllByIds(sloIds);
     const sloById = keyBy(sloList, 'id');
 
     const filteredList = params.list
@@ -69,7 +64,7 @@ export class GetSLOHealth {
   private async getSummaryDocsById(
     filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
   ) {
-    const summaryDocs = await this.esClient.search<EsSummaryDocument>({
+    const summaryDocs = await this.context.esClient.search<EsSummaryDocument>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
@@ -96,7 +91,7 @@ export class GetSLOHealth {
     sloList: SLODefinition[]
   ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
     const transformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+      await this.context.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
           transform_id: sloList
             .map((slo: SLODefinition) => [

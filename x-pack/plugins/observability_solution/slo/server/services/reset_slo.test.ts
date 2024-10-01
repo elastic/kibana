@@ -5,54 +5,30 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-  ScopedClusterClientMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
 import {
-  createSLORepositoryMock,
+  createSloContextMock,
   createSummaryTransformManagerMock,
   createTransformManagerMock,
+  SLOContextMock,
 } from './mocks';
 import { ResetSLO } from './reset_slo';
-import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
 describe('ResetSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockScopedClusterClient: ScopedClusterClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    loggerMock = loggingSystemMock.createLogger();
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
     mockTransformManager = createTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
-    resetSLO = new ResetSLO(
-      mockEsClient,
-      mockScopedClusterClient,
-      mockRepository,
-      mockTransformManager,
-      mockSummaryTransformManager,
-      loggerMock,
-      'some-space',
-      httpServiceMock.createStartContract().basePath
-    );
+    resetSLO = new ResetSLO(contextMock, mockTransformManager, mockSummaryTransformManager);
     jest.useFakeTimers().setSystemTime(TEST_DATE);
   });
 
@@ -62,8 +38,8 @@ describe('ResetSLO', () => {
 
   it('resets all associated resources', async () => {
     const slo = createSLO({ id: 'irrelevant', version: 1 });
-    mockRepository.findById.mockResolvedValueOnce(slo);
-    mockRepository.update.mockImplementation((v) => Promise.resolve(v));
+    contextMock.repository.findById.mockResolvedValueOnce(slo);
+    contextMock.repository.update.mockImplementation((v) => Promise.resolve(v));
 
     await resetSLO.execute(slo.id);
 
@@ -74,20 +50,22 @@ describe('ResetSLO', () => {
     expect(mockTransformManager.stop).toMatchSnapshot();
     expect(mockTransformManager.uninstall).toMatchSnapshot();
 
-    expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    expect(contextMock.esClient.deleteByQuery).toMatchSnapshot();
 
     // install resources
     expect(mockSummaryTransformManager.install).toMatchSnapshot();
     expect(mockSummaryTransformManager.start).toMatchSnapshot();
 
-    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toMatchSnapshot();
+    expect(
+      contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline
+    ).toMatchSnapshot();
 
     expect(mockTransformManager.install).toMatchSnapshot();
     expect(mockTransformManager.start).toMatchSnapshot();
 
-    expect(mockEsClient.index).toMatchSnapshot();
+    expect(contextMock.esClient.index).toMatchSnapshot();
 
-    expect(mockRepository.update).toHaveBeenCalledWith({
+    expect(contextMock.repository.update).toHaveBeenCalledWith({
       ...slo,
       version: SLO_MODEL_VERSION,
       updatedAt: expect.anything(),

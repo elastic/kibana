@@ -5,53 +5,30 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-  ScopedClusterClientMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
 import {
-  createSLORepositoryMock,
+  createSloContextMock,
   createSummaryTransformManagerMock,
   createTransformManagerMock,
+  SLOContextMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
-  let mockEsClient: ElasticsearchClientMock;
-  let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockLogger: jest.Mocked<MockedLogger>;
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockLogger = loggingSystemMock.createLogger();
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
-    createSLO = new CreateSLO(
-      mockEsClient,
-      mockScopedClusterClient,
-      mockRepository,
-      mockTransformManager,
-      mockSummaryTransformManager,
-      mockLogger,
-      'some-space',
-      httpServiceMock.createStartContract().basePath
-    );
+    createSLO = new CreateSLO(contextMock, mockTransformManager, mockSummaryTransformManager);
   });
 
   describe('happy path', () => {
@@ -65,7 +42,7 @@ describe('CreateSLO', () => {
 
       const response = await createSLO.execute(sloParams);
 
-      expect(mockRepository.create).toHaveBeenCalledWith(
+      expect(contextMock.repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: 'unique-id',
@@ -85,10 +62,10 @@ describe('CreateSLO', () => {
 
       expect(mockTransformManager.install).toHaveBeenCalled();
       expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
       ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
-      expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
+      expect(contextMock.esClient.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
     });
@@ -105,7 +82,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.create).toHaveBeenCalledWith(
+      expect(contextMock.repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -137,7 +114,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.create).toHaveBeenCalledWith(
+      expect(contextMock.repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -165,9 +142,9 @@ describe('CreateSLO', () => {
         'Rollup transform install error'
       );
 
-      expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(contextMock.repository.deleteById).toHaveBeenCalled();
       expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
 
       expect(mockSummaryTransformManager.stop).toHaveBeenCalledTimes(0);
@@ -186,11 +163,11 @@ describe('CreateSLO', () => {
         'Summary transform install error'
       );
 
-      expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(contextMock.repository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
 
@@ -198,18 +175,18 @@ describe('CreateSLO', () => {
     });
 
     it('rollbacks completed operations when create temporary document fails', async () => {
-      mockEsClient.index.mockRejectedValue(new Error('temporary document index failed'));
+      contextMock.esClient.index.mockRejectedValue(new Error('temporary document index failed'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError(
         'temporary document index failed'
       );
 
-      expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(contextMock.repository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+        contextMock.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();

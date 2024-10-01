@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesResponse } from '@kbn/slo-schema';
+import { SloRouteContext } from '../types';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SLORepository } from './slo_repository';
 
 export class GetSLOInstances {
-  constructor(private repository: SLORepository, private esClient: ElasticsearchClient) {}
+  constructor(private context: SloRouteContext) {}
 
   public async execute(sloId: string): Promise<GetSLOInstancesResponse> {
-    const slo = await this.repository.findById(sloId);
+    const slo = await this.context.repository.findById(sloId);
 
     if ([slo.groupBy].flat().includes(ALL_VALUE)) {
       return { groupBy: ALL_VALUE, instances: [] };
     }
 
-    const result = await this.esClient.search({
+    const result = await this.context.esClient.search({
       index: SLO_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {

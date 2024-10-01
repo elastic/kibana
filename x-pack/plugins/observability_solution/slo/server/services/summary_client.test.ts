@@ -12,8 +12,8 @@ import { Duration, DurationUnit } from '../domain/models';
 import { BurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
-import { createBurnRatesClientMock } from './mocks';
 import { DefaultSummaryClient } from './summary_client';
+import { createBurnRatesClientMock } from './mocks';
 
 const createEsResponse = (good: number = 90, total: number = 100) => ({
   took: 100,

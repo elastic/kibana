@@ -6,7 +6,6 @@
  */
 
 import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   BudgetingMethod,
@@ -22,6 +21,8 @@ import {
 import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SloRouteContext } from '../types';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import {
   DateRange,
@@ -60,7 +61,10 @@ export interface HistoricalSummaryClient {
 }
 
 export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  private esClient: ElasticsearchClient;
+  constructor(private context: SloRouteContext) {
+    this.esClient = this.context.esClient;
+  }
 
   async fetch(params: FetchHistoricalSummaryParams): Promise<HistoricalSummaryResponse> {
     const dateRangeBySlo = params.list.reduce<

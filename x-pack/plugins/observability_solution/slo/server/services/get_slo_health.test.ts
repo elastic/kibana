@@ -5,8 +5,6 @@
  * 2.0.
  */
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
@@ -16,26 +14,21 @@ import {
   aSummaryDocument,
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
-import { createSLORepositoryMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import { createSloContextMock, SLOContextMock } from './mocks';
 
 describe('GetSLOHealth', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    mockRepository = createSLORepositoryMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    getSLOHealth = new GetSLOHealth(mockEsClient, mockScopedClusterClient, mockRepository);
+    contextMock = createSloContextMock();
+    getSLOHealth = new GetSLOHealth(contextMock);
   });
 
   it('returns the health and state', async () => {
     const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-    mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-    mockEsClient.search.mockResolvedValue({
+    contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+    contextMock.esClient.search.mockResolvedValue({
       took: 0,
       timed_out: false,
       _shards: {
@@ -78,9 +71,9 @@ describe('GetSLOHealth', () => {
     `);
   });
 
-  it('handles inexistant sloId', async () => {
-    mockRepository.findAllByIds.mockResolvedValueOnce([]);
-    mockEsClient.search.mockResolvedValue({
+  it('handles in-existent sloId', async () => {
+    contextMock.repository.findAllByIds.mockResolvedValueOnce([]);
+    contextMock.esClient.search.mockResolvedValue({
       took: 0,
       timed_out: false,
       _shards: {
@@ -109,8 +102,8 @@ describe('GetSLOHealth', () => {
   describe('computes health', () => {
     it('returns healthy when both transforms are healthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+      contextMock.esClient.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -129,19 +122,21 @@ describe('GetSLOHealth', () => {
         },
       });
 
-      // @ts-ignore
-      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      });
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue(
+        {
+          count: 0,
+          transforms: [
+            {
+              id: getSLOTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+            {
+              id: getSLOSummaryTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+          ],
+        }
+      );
 
       const result = await getSLOHealth.execute({
         list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
@@ -166,8 +161,8 @@ describe('GetSLOHealth', () => {
 
     it('returns unhealthy whenever one of the transform is unhealthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+      contextMock.esClient.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -186,19 +181,21 @@ describe('GetSLOHealth', () => {
         },
       });
 
-      // @ts-ignore
-      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'yellow' },
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      });
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue(
+        {
+          count: 0,
+          transforms: [
+            {
+              id: getSLOTransformId(slo.id, slo.revision),
+              health: { status: 'yellow' },
+            } as TransformGetTransformStatsTransformStats,
+            {
+              id: getSLOSummaryTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+          ],
+        }
+      );
 
       const result = await getSLOHealth.execute({
         list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
@@ -225,8 +222,8 @@ describe('GetSLOHealth', () => {
   describe('computes state', () => {
     it('returns stale when summaryUpdatedAt is 2 days old', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+      contextMock.esClient.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -253,19 +250,21 @@ describe('GetSLOHealth', () => {
         },
       });
 
-      // @ts-ignore
-      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      });
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue(
+        {
+          count: 0,
+          transforms: [
+            {
+              id: getSLOTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+            {
+              id: getSLOSummaryTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+          ],
+        }
+      );
 
       const result = await getSLOHealth.execute({
         list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
@@ -277,8 +276,8 @@ describe('GetSLOHealth', () => {
     it("returns 'indexing' when diff(summaryUpdatedAt - latestSliTimestamp) >= 10min", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+      contextMock.esClient.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -305,19 +304,21 @@ describe('GetSLOHealth', () => {
         },
       });
 
-      // @ts-ignore
-      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      });
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue(
+        {
+          count: 0,
+          transforms: [
+            {
+              id: getSLOTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+            {
+              id: getSLOSummaryTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+          ],
+        }
+      );
 
       const result = await getSLOHealth.execute({
         list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
@@ -329,8 +330,8 @@ describe('GetSLOHealth', () => {
     it("returns 'running' when diff(summaryUpdatedAt - latestSliTimestamp) < 10min", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      contextMock.repository.findAllByIds.mockResolvedValueOnce([slo]);
+      contextMock.esClient.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -357,19 +358,21 @@ describe('GetSLOHealth', () => {
         },
       });
 
-      // @ts-ignore
-      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
-        transforms: [
-          {
-            id: getSLOTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-          {
-            id: getSLOSummaryTransformId(slo.id, slo.revision),
-            health: { status: 'green' },
-          } as TransformGetTransformStatsTransformStats,
-        ],
-      });
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue(
+        {
+          count: 0,
+          transforms: [
+            {
+              id: getSLOTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+            {
+              id: getSLOSummaryTransformId(slo.id, slo.revision),
+              health: { status: 'green' },
+            } as TransformGetTransformStatsTransformStats,
+          ],
+        }
+      );
 
       const result = await getSLOHealth.execute({
         list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],

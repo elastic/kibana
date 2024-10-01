@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { SloRouteContext } from '../types';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -20,14 +20,17 @@ import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 export class DeleteSLO {
+  private esClient: ElasticsearchClient;
+  private repository: SLORepository;
+
   constructor(
-    private repository: SLORepository,
+    private context: SloRouteContext,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
-    private scopedClusterClient: IScopedClusterClient,
-    private rulesClient: RulesClientApi
-  ) {}
+    private summaryTransformManager: TransformManager
+  ) {
+    this.esClient = this.context.esClient;
+    this.repository = this.context.repository;
+  }
 
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
@@ -41,14 +44,14 @@ export class DeleteSLO {
     await this.transformManager.uninstall(rollupTransformId);
 
     await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+      this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       )
     );
 
     await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+      this.context.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       )
@@ -85,7 +88,7 @@ export class DeleteSLO {
   }
   private async deleteAssociatedRules(sloId: string): Promise<void> {
     try {
-      await this.rulesClient.bulkDeleteRules({
+      await this.context.rulesClient.bulkDeleteRules({
         filter: `alert.attributes.params.sloId:${sloId}`,
       });
     } catch (err) {

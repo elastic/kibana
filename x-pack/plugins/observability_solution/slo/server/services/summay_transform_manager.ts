@@ -6,7 +6,8 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { SloRouteContext } from '../types';
 import { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -16,17 +17,19 @@ import { TransformManager } from './transform_manager';
 type TransformId = string;
 
 export class DefaultSummaryTransformManager implements TransformManager {
-  constructor(
-    private generator: SummaryTransformGenerator,
-    private scopedClusterClient: IScopedClusterClient,
-    private logger: Logger
-  ) {}
+  private logger: Logger;
+  constructor(private generator: SummaryTransformGenerator, private context: SloRouteContext) {
+    this.logger = this.context.logger;
+  }
 
   async install(slo: SLODefinition): Promise<TransformId> {
     const transformParams = await this.generator.generate(slo);
     try {
       await retryTransientEsErrors(
-        () => this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams),
+        () =>
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(
+            transformParams
+          ),
         {
           logger: this.logger,
         }
@@ -51,7 +54,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
             transform_id: transformId,
           }),
         { logger: this.logger }
@@ -66,7 +69,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
             { ignore: [409] }
           ),
@@ -84,7 +87,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
             { transform_id: transformId, wait_for_completion: true, force: true },
             { ignore: [404] }
           ),
@@ -100,7 +103,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
+          this.context.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
             { ignore: [404] }
           ),

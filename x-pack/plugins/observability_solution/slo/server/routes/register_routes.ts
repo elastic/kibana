@@ -28,6 +28,8 @@ import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { SloRequestHandlerContext } from '../types';
 import { AbstractSloServerRouteRepository } from './types';
+import { KibanaSavedObjectsSLORepository } from '../services/slo_repository';
+import { DefaultBurnRatesClient } from '../services/burn_rates_client';
 
 interface RegisterRoutes {
   config: SloConfig;
@@ -53,6 +55,44 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
+
+  core.http.registerRouteHandlerContext<SloRequestHandlerContext, 'slo'>(
+    'slo',
+    async (context, request) => {
+      const routeCore = await context.core;
+      const esClient = routeCore.elasticsearch.client.asCurrentUser;
+      const soClient = routeCore.savedObjects.client;
+
+      const scopedClusterClient = routeCore.elasticsearch.client;
+
+      const spaces = await dependencies.getSpacesStart();
+      const dataViews = await dependencies.getDataViewsStart();
+
+      const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+
+      const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+      const rulesClient = await dependencies.getRulesClientWithRequest(request);
+
+      const basePath = dependencies.pluginsSetup.core.http.basePath;
+
+      const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+      const burnRatesClient = new DefaultBurnRatesClient(esClient);
+
+      return {
+        logger,
+        soClient,
+        esClient,
+        spaceId,
+        basePath,
+        rulesClient,
+        dataViewsService,
+        burnRatesClient,
+        scopedClusterClient,
+        repository: sloRepository,
+      };
+    }
+  );
 
   routes.forEach((route) => {
     const { endpoint, options, handler, params } = route;

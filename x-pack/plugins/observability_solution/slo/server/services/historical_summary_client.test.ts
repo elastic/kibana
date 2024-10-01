@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import { DateRange, SLODefinition } from '../domain/models';
@@ -15,6 +14,7 @@ import {
   DefaultHistoricalSummaryClient,
   getFixedIntervalAndBucketsPerDay,
 } from './historical_summary_client';
+import { createSloContextMock, SLOContextMock } from './mocks';
 
 const commonEsResponse = {
   took: 100,
@@ -149,11 +149,11 @@ const generateEsResponseForMonthlyCalendarAlignedSLO = (good: number = 97, total
 };
 
 describe('FetchHistoricalSummary', () => {
-  let esClientMock: ElasticsearchClientMock;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2023-01-18T15:00:00.000Z'));
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    contextMock = createSloContextMock();
   });
 
   afterAll(() => {
@@ -167,8 +167,8 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95 },
         groupBy: ALL_VALUE,
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -200,8 +200,10 @@ describe('FetchHistoricalSummary', () => {
         to: new Date('2023-01-13T15:00:00.000Z'),
       };
 
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(
+        generateEsResponseForRollingSLO(slo, range)
+      );
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -232,8 +234,8 @@ describe('FetchHistoricalSummary', () => {
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
         groupBy: ALL_VALUE,
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -266,8 +268,10 @@ describe('FetchHistoricalSummary', () => {
         from: new Date('2023-01-09T15:00:00.000Z'),
         to: new Date('2023-01-13T15:00:00.000Z'),
       };
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo, range));
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(
+        generateEsResponseForRollingSLO(slo, range)
+      );
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -300,8 +304,10 @@ describe('FetchHistoricalSummary', () => {
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(
+        generateEsResponseForMonthlyCalendarAlignedSLO()
+      );
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -334,8 +340,10 @@ describe('FetchHistoricalSummary', () => {
         budgetingMethod: 'occurrences',
         objective: { target: 0.95 },
       });
-      esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForMonthlyCalendarAlignedSLO());
-      const client = new DefaultHistoricalSummaryClient(esClientMock);
+      contextMock.esClient.msearch.mockResolvedValueOnce(
+        generateEsResponseForMonthlyCalendarAlignedSLO()
+      );
+      const client = new DefaultHistoricalSummaryClient(contextMock);
 
       const results = await client.fetch({
         list: [
@@ -365,8 +373,8 @@ describe('FetchHistoricalSummary', () => {
       objective: { target: 0.95 },
       groupBy: 'host',
     });
-    esClientMock.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
-    const client = new DefaultHistoricalSummaryClient(esClientMock);
+    contextMock.esClient.msearch.mockResolvedValueOnce(generateEsResponseForRollingSLO(slo));
+    const client = new DefaultHistoricalSummaryClient(contextMock);
 
     const results = await client.fetch({
       list: [
@@ -384,7 +392,7 @@ describe('FetchHistoricalSummary', () => {
 
     expect(
       // @ts-ignore
-      esClientMock.msearch.mock.calls[0][0].searches[1].query.bool.filter[3]
+      contextMock.esClient.msearch.mock.calls[0][0].searches[1].query.bool.filter[3]
     ).toEqual({ term: { 'slo.instanceId': 'host-abc' } });
 
     results[0].data.forEach((dailyResult) =>

@@ -6,12 +6,6 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import {
-  ScopedClusterClientMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
@@ -26,17 +20,14 @@ import {
   createAPMTransactionErrorRateIndicator,
   createSLO,
 } from './fixtures/slo';
-import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { createSloContextMock, SLOContextMock } from './mocks';
 
 describe('TransformManager', () => {
-  let scopedClusterClientMock: ScopedClusterClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
-  const spaceId = 'default';
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
-    loggerMock = loggingSystemMock.createLogger();
+    contextMock = createSloContextMock();
   });
 
   describe('Install', () => {
@@ -46,13 +37,7 @@ describe('TransformManager', () => {
         const generators: Record<IndicatorTypes, TransformGenerator> = {
           'sli.apm.transactionDuration': new DummyTransformGenerator(),
         };
-        const service = new DefaultTransformManager(
-          generators,
-          scopedClusterClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService
-        );
+        const service = new DefaultTransformManager(contextMock, generators);
 
         await expect(
           service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
@@ -64,13 +49,7 @@ describe('TransformManager', () => {
         const generators: Record<IndicatorTypes, TransformGenerator> = {
           'sli.apm.transactionDuration': new FailTransformGenerator(),
         };
-        const transformManager = new DefaultTransformManager(
-          generators,
-          scopedClusterClientMock,
-          loggerMock,
-          spaceId,
-          dataViewsService
-        );
+        const transformManager = new DefaultTransformManager(contextMock, generators);
 
         await expect(
           transformManager.install(
@@ -85,19 +64,13 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
       const transformId = await transformManager.install(slo);
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(1);
       expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
     });
@@ -109,18 +82,12 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
 
       await transformManager.preview('slo-transform-id');
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.previewTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -131,18 +98,12 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
 
       await transformManager.start('slo-transform-id');
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.startTransform
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -153,18 +114,12 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
 
       await transformManager.stop('slo-transform-id');
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.stopTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -175,41 +130,29 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
 
       await transformManager.uninstall('slo-transform-id');
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform
       ).toHaveBeenCalledTimes(1);
     });
 
     it('retries on transient error', async () => {
-      scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform.mockRejectedValueOnce(
+      contextMock.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform.mockRejectedValueOnce(
         new EsErrors.ConnectionError('irrelevant')
       );
       // @ts-ignore defining only a subset of the possible SLI
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
       };
-      const transformManager = new DefaultTransformManager(
-        generators,
-        scopedClusterClientMock,
-        loggerMock,
-        spaceId,
-        dataViewsService
-      );
+      const transformManager = new DefaultTransformManager(contextMock, generators);
 
       await transformManager.uninstall('slo-transform-id');
 
       expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+        contextMock.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform
       ).toHaveBeenCalledTimes(2);
     });
   });

@@ -5,39 +5,28 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClientMock,
-  elasticsearchServiceMock,
-  httpServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { createSLO } from './fixtures/slo';
-import { createSLORepositoryMock } from './mocks';
+import { createSloContextMock, SLOContextMock } from './mocks';
 import { SloDefinitionClient } from './slo_definition_client';
-import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 describe('SLODefinitionClient', () => {
-  let esClientMock: ElasticsearchClientMock;
-  let loggerMock: jest.Mocked<MockedLogger>;
-  let mockRepository: jest.Mocked<SLORepository>;
   let sloDefinitionClient: SloDefinitionClient;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    loggerMock = loggingSystemMock.createLogger();
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
 
-    sloDefinitionClient = new SloDefinitionClient(mockRepository, esClientMock, loggerMock);
+    sloDefinitionClient = new SloDefinitionClient(contextMock);
   });
 
   describe('happy path', () => {
     it('fetches the SLO Definition from the SLO repository when no remoteName is specified', async () => {
       const slo = createSLO({ id: 'fixed-id' });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
 
       const response = await sloDefinitionClient.execute('fixed-id', 'default');
 
@@ -51,7 +40,7 @@ describe('SLODefinitionClient', () => {
         'default',
         httpServiceMock.createStartContract().basePath
       );
-      esClientMock.search.mockResolvedValueOnce({
+      contextMock.esClient.search.mockResolvedValueOnce({
         took: 100,
         timed_out: false,
         _shards: {
@@ -68,7 +57,7 @@ describe('SLODefinitionClient', () => {
       const response = await sloDefinitionClient.execute('fixed-id', 'default', 'remote_cluster');
 
       expect(response).toMatchSnapshot();
-      expect(esClientMock.search.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(contextMock.esClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "index": "remote_cluster:.slo-observability.summary-v3*",
           "query": Object {

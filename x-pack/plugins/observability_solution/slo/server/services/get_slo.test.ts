@@ -9,34 +9,27 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
-import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import { createSummaryClientMock, SLOContextMock, createSloContextMock } from './mocks';
 import { SummaryClient } from './summary_client';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { SloDefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
-  let defintionClient: SloDefinitionClient;
+  let definitionClient: SloDefinitionClient;
+  let contextMock: jest.Mocked<SLOContextMock>;
 
   beforeEach(() => {
-    mockRepository = createSLORepositoryMock();
+    contextMock = createSloContextMock();
     mockSummaryClient = createSummaryClientMock();
-    defintionClient = new SloDefinitionClient(
-      mockRepository,
-      elasticsearchServiceMock.createElasticsearchClient(),
-      loggerMock.create()
-    );
-    getSLO = new GetSLO(defintionClient, mockSummaryClient);
+    definitionClient = new SloDefinitionClient(contextMock);
+    getSLO = new GetSLO(definitionClient, mockSummaryClient);
   });
 
   describe('happy path', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      contextMock.repository.findById.mockResolvedValueOnce(slo);
       mockSummaryClient.computeSummary.mockResolvedValueOnce({
         groupings: {},
         meta: {},
@@ -57,7 +50,7 @@ describe('GetSLO', () => {
 
       const result = await getSLO.execute(slo.id, 'default');
 
-      expect(mockRepository.findById).toHaveBeenCalledWith(slo.id);
+      expect(contextMock.repository.findById).toHaveBeenCalledWith(slo.id);
       expect(result).toEqual({
         id: slo.id,
         name: 'irrelevant',

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SloRouteContext } from '../types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
-import { SLORepository } from './slo_repository';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 
@@ -21,11 +20,7 @@ interface SLODefinitionResult {
 }
 
 export class SloDefinitionClient {
-  constructor(
-    private repository: SLORepository,
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
+  constructor(private context: SloRouteContext) {}
 
   public async execute(
     sloId: string,
@@ -33,7 +28,7 @@ export class SloDefinitionClient {
     remoteName?: string
   ): Promise<SLODefinitionResult> {
     if (remoteName) {
-      const summarySearch = await this.esClient.search<EsSummaryDocument>({
+      const summarySearch = await this.context.esClient.search<EsSummaryDocument>({
         index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
         query: {
           bool: {
@@ -49,7 +44,10 @@ export class SloDefinitionClient {
       }
 
       const doc = summarySearch.hits.hits[0]._source!;
-      const remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(doc, this.logger);
+      const remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(
+        doc,
+        this.context.logger
+      );
       if (!remoteSloDefinition) {
         throw new Error(
           `Remote SLO [id=${sloId}, spaceId=${spaceId}, remoteName=${remoteName}] is invalid`
@@ -59,7 +57,7 @@ export class SloDefinitionClient {
       return { slo: remoteSloDefinition, remote: { kibanaUrl: doc.kibanaUrl ?? '', remoteName } };
     }
 
-    const localSloDefinition = await this.repository.findById(sloId);
+    const localSloDefinition = await this.context.repository.findById(sloId);
     return { slo: localSloDefinition };
   }
 }
