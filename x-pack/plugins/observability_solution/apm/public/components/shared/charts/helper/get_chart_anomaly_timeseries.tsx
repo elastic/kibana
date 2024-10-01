@@ -78,7 +78,7 @@ export function getChartAnomalyTimeseries({
         fill: color,
       },
       point: {
-        visible: 'never',
+        visible: 'always',
         opacity: 0.75,
         radius: 3,
         strokeWidth: 1,
