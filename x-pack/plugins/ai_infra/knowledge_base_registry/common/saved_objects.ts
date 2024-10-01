@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/**
+ * Represents the source of the KB entry, where the data it resolved from
+ *
+ * Only possible subtype for now is `index`
+ */
+export type KnowledgeBaseEntrySource = KnowledgeBaseEntryIndexSource;
+
 export interface KnowledgeBaseEntryIndexSource {
   type: 'index';
   index_name: string;
@@ -12,12 +19,15 @@ export interface KnowledgeBaseEntryIndexSource {
   semantic_fields: string[];
 }
 
-export type KnowledgeBaseEntrySource = KnowledgeBaseEntryIndexSource;
+/**
+ * Represents how the package was installed
+ *
+ * Only possible subtype for now is `package`
+ */
+export type KnowledgeBaseEntryInstalledBy = KnowledgeBaseEntryInstalledByPackage;
 
 interface KnowledgeBaseEntryInstalledByPackage {
   type: 'package';
   packageName: string;
   version: string;
 }
-
-export type KnowledgeBaseEntryInstalledBy = KnowledgeBaseEntryInstalledByPackage;

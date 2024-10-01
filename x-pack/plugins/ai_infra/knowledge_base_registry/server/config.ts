@@ -7,8 +7,6 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-export const config = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
+export const config = schema.object({});
 
 export type KnowledgeBaseRegistryConfig = TypeOf<typeof config>;
