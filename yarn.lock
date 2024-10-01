@@ -1741,10 +1741,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.12.0-backport.0":
-  version "95.12.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.12.0-backport.0.tgz#de862ded9f23053b24e1f1939de1ff8f8109be60"
-  integrity sha512-hqhqWdAGw5tQwWTP/hn2VoM8YQE2k9IdMmGh0RdkG+JcD1GZySvSDWdTQgr9iA4/XaulJp9R3OenwDjkLLmjPw==
+"@elastic/eui@96.1.0":
+  version "96.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-96.1.0.tgz#cd75f2a7a2ca07df6fb8f9af985dff3f05172fb6"
+  integrity sha512-LmB92xr704Dfth9UnxCOm4b63lghb/7svXsnd0zcbSQA/BPqktUm1evZjWYIWFIek5D4JI4dmM+ygXLWdKSM+Q==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
