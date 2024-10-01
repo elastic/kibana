@@ -9,7 +9,6 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import type { FieldRetentionDefinition } from './field_retention_definitions';
 import { getIdentityFieldForEntityType } from '../utils/utils';
 import {
-  arrayToSingleValueStep,
   debugDeepCopyContextStep,
   getDotExpanderSteps,
   getRemoveEmptyFieldSteps,
@@ -59,8 +58,6 @@ export const buildFieldRetentionIngestPipeline = ({
         value: `{{${getIdentityFieldForEntityType(entityType)}}}`,
       },
     },
-    arrayToSingleValueStep(`${entityType}.risk.calculated_level`),
-    arrayToSingleValueStep('asset.criticality'),
     ...getDotExpanderSteps(allEntityFields),
     ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
       enrichField: ENRICH_FIELD,
