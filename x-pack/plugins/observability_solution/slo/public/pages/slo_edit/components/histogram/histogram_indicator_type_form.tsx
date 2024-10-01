@@ -37,7 +37,7 @@ export function HistogramIndicatorTypeForm() {
   });
 
   const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');
-  const timestampFields = dataView?.fields.filter((field) => field.type === 'date') ?? []
+  const timestampFields = dataView?.fields.filter((field) => field.type === 'date') ?? [];
 
   return (
     <>
