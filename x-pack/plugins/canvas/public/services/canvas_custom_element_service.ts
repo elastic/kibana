@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib';
+import { CustomElement } from '../../types';
+import { coreServices } from './kibana_services';
 
-import { API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
-import { CustomElement } from '../../../types';
-import { CanvasStartDeps } from '../../plugin';
-import { CanvasCustomElementService } from '../custom_element';
+export interface CustomElementFindResponse {
+  total: number;
+  customElements: CustomElement[];
+}
 
-export type CanvasCustomElementServiceFactory = KibanaPluginServiceFactory<
-  CanvasCustomElementService,
-  CanvasStartDeps
->;
+export interface CanvasCustomElementService {
+  create: (customElement: CustomElement) => Promise<void>;
+  get: (customElementId: string) => Promise<CustomElement>;
+  update: (id: string, element: Partial<CustomElement>) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  find: (searchTerm: string) => Promise<CustomElementFindResponse>;
+}
 
-export const customElementServiceFactory: CanvasCustomElementServiceFactory = ({ coreStart }) => {
-  const { http } = coreStart;
+export const getCustomElementService: () => CanvasCustomElementService = () => {
+  const { http } = coreServices;
   const apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
 
   return {

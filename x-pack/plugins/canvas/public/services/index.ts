@@ -8,27 +8,15 @@
 export * from './legacy';
 import { useMemo } from 'react';
 
-import { PluginServices } from '@kbn/presentation-util-plugin/public';
-
-import { CanvasCustomElementService } from './custom_element';
+import { getCustomElementService } from './canvas_custom_element_service';
 import { getCanvasExpressionService } from './canvas_expressions_service';
-import { CanvasFiltersService } from './filters';
-import { CanvasNotifyService } from './notify';
-import { getCanvasNotifyService } from './canvas_notify_service';
 import { getCanvasFiltersService } from './canvas_filters_service';
+import { getCanvasNotifyService } from './canvas_notify_service';
 
-export interface CanvasPluginServices {
-  customElement: CanvasCustomElementService;
-  filters: CanvasFiltersService;
-  notify: CanvasNotifyService;
-  reporting: CanvasReportingService;
-}
-
-export const pluginServices = new PluginServices<CanvasPluginServices>();
-
-export const useCustomElementService = () =>
-  (() => pluginServices.getHooks().customElement.useService())();
-
+export const useCustomElementService = () => {
+  const canvasCustomElementService = useMemo(() => getCustomElementService(), []);
+  return canvasCustomElementService;
+};
 export const useExpressionsService = () => {
   const canvasExpressionService = useMemo(() => getCanvasExpressionService(), []);
   return canvasExpressionService;
@@ -38,7 +26,7 @@ export const useFiltersService = () => {
   return canvasFiltersService;
 };
 export const useNotifyService = () => {
-  const canvasNotifyService: CanvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
+  const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
   return canvasNotifyService;
 };
 
