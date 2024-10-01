@@ -88,8 +88,8 @@ describe('AddComment ', () => {
     });
 
     fireEvent.click(screen.getByTestId('submit-comment'));
+    await waitFor(() => expect(screen.getByTestId('loading-spinner')).toBeInTheDocument());
 
-    expect(await screen.findByTestId('loading-spinner')).toBeInTheDocument();
     expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
   });
 

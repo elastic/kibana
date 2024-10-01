@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useDeleteKnowledgeBase, UseDeleteKnowledgeBaseParams } from './use_delete_knowledge_base';
 import { deleteKnowledgeBase as _deleteKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
@@ -51,10 +51,8 @@ describe('useDeleteKnowledgeBase', () => {
     jest.clearAllMocks();
   });
   it('should call api to delete knowledge base', async () => {
-    await act(async () => {
-      renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitFor(() => null);
-
+    renderHook(() => useDeleteKnowledgeBase(defaultProps));
+    await waitFor(() => {
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
         {
@@ -75,10 +73,9 @@ describe('useDeleteKnowledgeBase', () => {
         opts.onError(e);
       }
     });
-    await act(async () => {
-      renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitFor(() => null);
 
+    renderHook(() => useDeleteKnowledgeBase(defaultProps));
+    await waitFor(() =>
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
         {
@@ -86,26 +83,20 @@ describe('useDeleteKnowledgeBase', () => {
           signal: undefined,
           version: '1',
         }
-      );
-    });
+      )
+    );
   });
 
   it('should return delete response', async () => {
-    await act(async () => {
-      renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitFor(() => null);
+    const { result } = renderHook(() => useDeleteKnowledgeBase(defaultProps));
+    await waitFor(() => null);
 
-      await expect(result.current).resolves.toStrictEqual(statusResponse);
-    });
+    await expect(result.current).resolves.toStrictEqual(statusResponse);
   });
 
   it('should display error toast when api throws error', async () => {
     deleteKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
-    await act(async () => {
-      renderHook(() => useDeleteKnowledgeBase(defaultProps));
-      await waitFor(() => null);
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    renderHook(() => useDeleteKnowledgeBase(defaultProps));
+    await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

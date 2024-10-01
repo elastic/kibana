@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
 import { act, waitFor } from '@testing-library/react';
 
@@ -24,7 +24,7 @@ import { fromQuery } from '../../shared/links/url_helpers';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import type { APIEndpoint } from '../../../../server';
 
-function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
+function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
       await delay(100);
