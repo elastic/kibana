@@ -4,7 +4,8 @@
     "outDir": "target/types",
   },
   "include": [
-    "public/**/*",
+    "src/**/*",
+    "index.ts",
   ],
   "kbn_references": [
     "@kbn/i18n",
@@ -12,7 +13,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/security-api-key-management",
     "@kbn/search-shared-ui",
-    "@kbn/search-api-keys-api"
+    "@kbn/search-api-keys-server"
   ],
   "exclude": [
     "target/**/*",

@@ -34,7 +34,7 @@
     "@kbn/cloud-plugin",
     "@kbn/search-index-documents",
     "@kbn/es-types",
-    "@kbn/search-api-keys-api",
+    "@kbn/search-api-keys-server",
     "@kbn/search-api-keys-components",
     "@kbn/search-shared-ui"
   ],

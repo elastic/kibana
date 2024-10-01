@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './components/api_key_flyout_wrapper';
-export * from './components/api_key_form';
-export * from './hooks/use_search_api_key';
-export * from './providers/search_api_key_provider';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-search-api-keys-server'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-server',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/packages/kbn-search-api-keys-server/**/*.{ts,tsx}'],
+};

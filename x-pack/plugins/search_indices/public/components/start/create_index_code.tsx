@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { ApiKeyForm, useSearchApiKey } from '@kbn/search-api-keys-components/public';
+import { ApiKeyForm, useSearchApiKey } from '@kbn/search-api-keys-components';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
@@ -48,16 +48,18 @@ export const CreateIndexCodeView = ({
     [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
-  const { displayedApiKey, apiKeyIsVisible } = useSearchApiKey();
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
@@ -128,7 +130,6 @@ export const CreateIndexCodeView = ({
           defaultMessage: 'Connect and create an index',
         })}
         language={Languages[selectedLanguage].codeBlockLanguage}
-        apiKey={apiKeyIsVisible ? displayedApiKey : null}
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {
           usageTracker.click([

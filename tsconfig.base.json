@@ -1498,10 +1498,10 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
       "@kbn/screenshotting-server": ["packages/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["packages/kbn-screenshotting-server/*"],
-      "@kbn/search-api-keys-api": ["packages/kbn-search-api-keys-api"],
-      "@kbn/search-api-keys-api/*": ["packages/kbn-search-api-keys-api/*"],
       "@kbn/search-api-keys-components": ["packages/kbn-search-api-keys-components"],
       "@kbn/search-api-keys-components/*": ["packages/kbn-search-api-keys-components/*"],
+      "@kbn/search-api-keys-server": ["packages/kbn-search-api-keys-server"],
+      "@kbn/search-api-keys-server/*": ["packages/kbn-search-api-keys-server/*"],
       "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-assistant": ["x-pack/plugins/search_assistant"],
@@ -2000,7 +2000,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

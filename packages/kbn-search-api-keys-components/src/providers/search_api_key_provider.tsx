@@ -10,7 +10,7 @@
 import React, { useCallback, useReducer, createContext, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { APIKeyCreationResponse } from '@kbn/search-api-keys-api/server/types';
+import type { APIKeyCreationResponse } from '@kbn/search-api-keys-server/types';
 import { APIRoutes } from '../types';
 import { Status } from '../constants';
 

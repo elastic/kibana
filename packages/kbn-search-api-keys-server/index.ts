@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-search-api-keys-api'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-search-api-keys-api',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/packages/kbn-search-api-keys-api/**/*.{ts,tsx}'],
-};
+export * from './src/routes/routes';
