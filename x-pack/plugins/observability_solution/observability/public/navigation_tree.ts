@@ -68,13 +68,14 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'slo',
           },
           {
-            link: 'inventory',
-          },
-          {
             link: 'observabilityAIAssistant',
             title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
+          },
+          {
+            link: 'inventory',
+            spaceBefore: 'm',
           },
           {
             id: 'apm',

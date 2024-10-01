@@ -13,8 +13,11 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-  validate: {
-    query: QuerySchema,
+  validate: {},
+  validation: {
+    request: {
+      query: QuerySchema,
+    },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
