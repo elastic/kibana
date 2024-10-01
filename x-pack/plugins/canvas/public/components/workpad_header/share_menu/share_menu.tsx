@@ -9,12 +9,11 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { State } from '../../../../types';
-import { useReportingService } from '../../../services';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { useDownloadWorkpad } from '../../hooks';
 import { ShareMenu as ShareMenuComponent } from './share_menu.component';
 import { getPdfJobParams } from './utils';
-import { kibanaVersion } from '../../../services/kibana_services';
+import { kibanaVersion, reportingService } from '../../../services/kibana_services';
 
 const strings = {
   getUnknownExportErrorMessage: (type: string) =>
@@ -28,31 +27,29 @@ const strings = {
 
 export const ShareMenu = () => {
   const downloadWorkpad = useDownloadWorkpad();
-  const reportingService = useReportingService();
 
   const { workpad, pageCount } = useSelector((state: State) => ({
     workpad: getWorkpad(state),
     pageCount: getPages(state).length,
   }));
 
-  const ReportingPanelPDFComponent = reportingService.getReportingPanelPDFComponent();
+  const ReportingPanelPDFComponent = reportingService?.getReportingPanelPDFComponent();
 
   const sharingData = {
     workpad,
     pageCount,
   };
 
-  const ReportingComponent =
-    ReportingPanelPDFComponent !== null
-      ? ({ onClose }: { onClose: () => void }) => (
-          <ReportingPanelPDFComponent
-            getJobParams={() => getPdfJobParams(sharingData, kibanaVersion)}
-            layoutOption="canvas"
-            onClose={onClose}
-            objectId={workpad.id}
-          />
-        )
-      : null;
+  const ReportingComponent = ReportingPanelPDFComponent
+    ? ({ onClose }: { onClose: () => void }) => (
+        <ReportingPanelPDFComponent
+          getJobParams={() => getPdfJobParams(sharingData, kibanaVersion)}
+          layoutOption="canvas"
+          onClose={onClose}
+          objectId={workpad.id}
+        />
+      )
+    : null;
 
   const onExport = useCallback(
     (type: string) => {

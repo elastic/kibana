@@ -6,40 +6,22 @@
  */
 
 export * from './legacy';
+import { useMemo } from 'react';
 
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasCustomElementService } from './custom_element';
-import { CanvasDataViewsService } from './data_views';
-import { CanvasEmbeddablesService } from './embeddables';
-import { CanvasExpressionsService, getCanvasExpressionService } from './canvas_expressions_service';
+import { getCanvasExpressionService } from './canvas_expressions_service';
 import { CanvasFiltersService } from './filters';
-import { CanvasLabsService } from './labs';
-import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
-import { CanvasPlatformService } from './platform';
-import { CanvasReportingService } from './reporting';
-import { CanvasVisualizationsService } from './visualizations';
-import { CanvasWorkpadService } from './workpad';
-import { CanvasUiActionsService } from './ui_actions';
-import { useMemo } from 'react';
 import { getCanvasNotifyService } from './canvas_notify_service';
 import { getCanvasFiltersService } from './canvas_filters_service';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
-  dataViews: CanvasDataViewsService;
-  embeddables: CanvasEmbeddablesService;
-  expressions: CanvasExpressionsService;
   filters: CanvasFiltersService;
-  labs: CanvasLabsService;
-  navLink: CanvasNavLinkService;
   notify: CanvasNotifyService;
-  platform: CanvasPlatformService;
   reporting: CanvasReportingService;
-  visualizations: CanvasVisualizationsService;
-  workpad: CanvasWorkpadService;
-  uiActions: CanvasUiActionsService;
 }
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();
@@ -60,5 +42,4 @@ export const useNotifyService = () => {
   return canvasNotifyService;
 };
 
-export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();

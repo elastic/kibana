@@ -36,7 +36,7 @@ export let expressionsService: ExpressionsStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtilService: PresentationUtilPluginStart;
-// export let reportingService: ReportingStart | undefined;
+export let reportingService: ReportingStart | undefined;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let visualizationsService: VisualizationsStart;
@@ -60,9 +60,9 @@ export const setKibanaServices = (
   dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
   presentationUtilService = deps.presentationUtil;
-  // reportingService = kibanaCore.application.capabilities.canvas?.generatePdf
-  //   ? deps.reporting
-  //   : undefined;
+  reportingService = kibanaCore.application.capabilities.canvas?.generatePdf
+    ? deps.reporting
+    : undefined;
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
   visualizationsService = deps.visualizations;
