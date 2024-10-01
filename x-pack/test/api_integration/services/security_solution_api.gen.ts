@@ -125,6 +125,7 @@ import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import { SplunkRuleMigrationMatchPrebuiltRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/siem_migrations/splunk/rules/match_prebuilt_rule.gen';
 import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
@@ -1266,6 +1267,22 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Perform Elastic prebuilt rule matching from Splunk Security rule
+     */
+    splunkRuleMigrationMatchPrebuiltRule(
+      props: SplunkRuleMigrationMatchPrebuiltRuleProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          routeWithNamespace('/internal/migrations/splunk/rules/match_prebuilt_rule', kibanaSpace)
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
         .post(
@@ -1573,6 +1590,9 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SplunkRuleMigrationMatchPrebuiltRuleProps {
+  body: SplunkRuleMigrationMatchPrebuiltRuleRequestBodyInput;
 }
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
