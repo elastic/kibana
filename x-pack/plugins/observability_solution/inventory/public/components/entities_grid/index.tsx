@@ -22,16 +22,13 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  AGENT_NAME,
   ASSET_DETAILS_LOCATOR_ID,
-  CLOUD_PROVIDER,
   type AssetDetailsLocatorParams,
   type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
@@ -42,6 +39,7 @@ import { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
+import { EntityIcon } from '../entity_icon';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
@@ -160,47 +158,6 @@ export function EntitiesGrid({
     [onChangeSort]
   );
 
-  const getEntityIcon = useCallback((entity: LatestEntity) => {
-    const entityType = entity[ENTITY_TYPE];
-
-    if (entityType === 'host' || entityType === 'container') {
-      const cloudProvider = entity[CLOUD_PROVIDER] as CloudProvider;
-
-      if (!cloudProvider) return null;
-
-      const formattedCloudProvider =
-        typeof cloudProvider === 'string' ? cloudProvider : cloudProvider[0];
-
-      return (
-        <EuiFlexGroup
-          style={{
-            width: '24px',
-            height: '24px',
-          }}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <EuiFlexItem grow={false}>
-            <CloudProviderIcon
-              cloudProvider={formattedCloudProvider}
-              size="m"
-              title={formattedCloudProvider}
-              role="presentation"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    if (entityType === 'service') {
-      const agentName = entity[AGENT_NAME];
-      if (!agentName) return null;
-      return <AgentIcon agentName={agentName} size="l" role="presentation" />;
-    }
-
-    return null;
-  }, []);
-
   const getEntityRedirectUrl = useCallback(
     (entity: LatestEntity) => {
       const type = entity[ENTITY_TYPE] as EntityType;
@@ -228,25 +185,12 @@ export function EntitiesGrid({
 
   const renderNameCellValue = useCallback(
     (entity) => {
-      const icon = getEntityIcon(entity);
-      const redirectUrl = getEntityRedirectUrl(entity);
-
-      if (!icon)
-        return (
-          <EuiLink
-            data-test-subj="inventoryCellValueLink"
-            className="eui-textTruncate"
-            href={redirectUrl}
-            style={{ paddingLeft: '32px' }}
-          >
-            {entity[ENTITY_DISPLAY_NAME]}
-          </EuiLink>
-        );
-
       return (
-        <EuiLink data-test-subj="inventoryCellValueLink" href={redirectUrl}>
+        <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl(entity)}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={0}>{icon}</EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EntityIcon entity={entity} />
+            </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
             </EuiFlexItem>
@@ -254,7 +198,7 @@ export function EntitiesGrid({
         </EuiLink>
       );
     },
-    [getEntityIcon, getEntityRedirectUrl]
+    [getEntityRedirectUrl]
   );
 
   const renderCellValue = useCallback(
