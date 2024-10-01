@@ -6,32 +6,19 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { noop } from 'lodash/fp';
+import { BehaviorSubject } from 'rxjs';
 import type { UseTimelineLastEventTimeArgs } from '.';
 import { useTimelineLastEventTime } from '.';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../lib/kibana';
 
 const mockSearchStrategy = jest.fn();
+
 const mockUseKibana = {
   services: {
     data: {
       search: {
-        search: mockSearchStrategy.mockReturnValue({
-          unsubscribe: jest.fn(),
-          subscribe: jest.fn(({ next, error }) => {
-            const mockData = {
-              lastSeen: '1 minute ago',
-            };
-            try {
-              next(mockData);
-              /* eslint-disable no-empty */
-            } catch (e) {}
-            return {
-              unsubscribe: jest.fn(),
-            };
-          }),
-        }),
+        search: mockSearchStrategy,
       },
     },
     notifications: {
@@ -53,9 +40,21 @@ jest.mock('../../../lib/kibana', () => ({
 }));
 
 describe('useTimelineLastEventTime', () => {
+  let searchStrategy$: BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    searchStrategy$ = new BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>({
+      lastSeen: null,
+    });
+
+    mockSearchStrategy.mockReturnValue(searchStrategy$.asObservable());
+
     (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should init', async () => {
@@ -66,9 +65,10 @@ describe('useTimelineLastEventTime', () => {
         indexNames: [],
       })
     );
+
     expect(result.current).toEqual([
       false,
-      { errorMessage: undefined, lastSeen: null, refetch: noop },
+      { errorMessage: undefined, lastSeen: null, refetch: expect.any(Function) },
     ]);
   });
 
@@ -92,6 +92,10 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should set response', async () => {
+    searchStrategy$.next({
+      lastSeen: '1 minute ago',
+    });
+
     const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
       useTimelineLastEventTime({
         indexKey: LastEventIndexKey.hostDetails,

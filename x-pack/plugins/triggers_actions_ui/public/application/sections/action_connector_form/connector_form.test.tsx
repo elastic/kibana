@@ -51,7 +51,7 @@ describe('ConnectorForm', () => {
       isSubmitting: false,
       isValid: undefined,
       preSubmitValidator: null,
-      submit: expect.anything(),
+      submit: expect.any(Function),
     });
     expect(onFormModifiedChange).toHaveBeenCalledWith(false);
   });
@@ -112,13 +112,15 @@ describe('ConnectorForm', () => {
 
     await waitFor(() => expect(onChange).toHaveBeenCalled());
 
-    expect(onChange).toHaveBeenCalledWith({
-      isSubmitted: false,
-      isSubmitting: false,
-      isValid: false,
-      preSubmitValidator: expect.anything(),
-      submit: expect.anything(),
-    });
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({
+        isSubmitted: true,
+        isSubmitting: false,
+        isValid: false,
+        preSubmitValidator: expect.any(Function),
+        submit: expect.any(Function),
+      })
+    );
   });
 
   it('registers the pre submit validator correctly', async () => {
@@ -141,8 +143,8 @@ describe('ConnectorForm', () => {
         isSubmitted: false,
         isSubmitting: false,
         isValid: undefined,
-        preSubmitValidator: expect.anything(),
-        submit: expect.anything(),
+        preSubmitValidator: expect.any(Function),
+        submit: expect.any(Function),
       });
     });
   });

@@ -72,15 +72,16 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', async () => {
+    const user = userEvent.setup();
+
     appMockRender.render(<AddComment {...{ ...addCommentProps, showLoading: true }} />);
 
-    fireEvent.change(screen.getByLabelText('caseComment'), {
-      target: { value: sampleData.comment },
-    });
+    await user.type(screen.getByLabelText('caseComment'), sampleData.comment);
 
-    fireEvent.click(screen.getByTestId('submit-comment'));
+    await user.click(screen.getByTestId('submit-comment'));
 
-    expect(await screen.findByTestId('loading-spinner')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('loading-spinner')).toBeInTheDocument());
+
     expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
 
@@ -23,7 +23,7 @@ import { fromQuery } from '../../shared/links/url_helpers';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import type { APIEndpoint } from '../../../../server';
 
-function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
+function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
       await delay(100);
@@ -216,10 +216,14 @@ describe('useLatencyCorrelations', () => {
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {
@@ -234,10 +238,14 @@ describe('useLatencyCorrelations', () => {
 
     it('should still be running after 50ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper: () =>
-          React.createElement(wrapper, {
-            error: true,
-          }),
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {
@@ -255,10 +263,14 @@ describe('useLatencyCorrelations', () => {
 
     it('should stop and return an error after more than 100ms', async () => {
       const { result, unmount } = renderHook(() => useLatencyCorrelations(), {
-        wrapper: () =>
-          React.createElement(wrapper, {
-            error: true,
-          }),
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {

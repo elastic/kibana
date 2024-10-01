@@ -43,6 +43,8 @@ describe('when simulating race condition', () => {
       wrapper,
     });
 
+    await waitFor(() => expect(renderSpy).toHaveBeenCalled());
+
     rerender(<MyComponent name="Peter" ms={100} renderFn={renderSpy} />);
   });
 
@@ -57,46 +59,46 @@ describe('when simulating race condition', () => {
   it('should render "Hello from Peter" after 200ms', async () => {
     jest.advanceTimersByTime(200);
 
-    await waitFor(() => {});
-
-    expect(renderSpy).lastCalledWith({
-      data: 'Hello from Peter',
-      error: undefined,
-      status: 'success',
-    });
+    await waitFor(() =>
+      expect(renderSpy).lastCalledWith({
+        data: 'Hello from Peter',
+        error: undefined,
+        status: 'success',
+      })
+    );
   });
 
   it('should render "Hello from Peter" after 600ms', async () => {
     jest.advanceTimersByTime(600);
-    await waitFor(() => {});
-
-    expect(renderSpy).lastCalledWith({
-      data: 'Hello from Peter',
-      error: undefined,
-      status: 'success',
-    });
+    await waitFor(() =>
+      expect(renderSpy).lastCalledWith({
+        data: 'Hello from Peter',
+        error: undefined,
+        status: 'success',
+      })
+    );
   });
 
   it('should should NOT have rendered "Hello from John" at any point', async () => {
     jest.advanceTimersByTime(600);
-    await waitFor(() => {});
-
-    expect(renderSpy).not.toHaveBeenCalledWith({
-      data: 'Hello from John',
-      error: undefined,
-      status: 'success',
-    });
+    await waitFor(() =>
+      expect(renderSpy).not.toHaveBeenCalledWith({
+        data: 'Hello from John',
+        error: undefined,
+        status: 'success',
+      })
+    );
   });
 
   it('should send and receive calls in the right order', async () => {
     jest.advanceTimersByTime(600);
-    await waitFor(() => {});
-
-    expect(requestCallOrder).toEqual([
-      ['request', 'John', 500],
-      ['request', 'Peter', 100],
-      ['response', 'Peter', 100],
-      ['response', 'John', 500],
-    ]);
+    await waitFor(() =>
+      expect(requestCallOrder).toEqual([
+        ['request', 'John', 500],
+        ['request', 'Peter', 100],
+        ['response', 'Peter', 100],
+        ['response', 'John', 500],
+      ])
+    );
   });
 });

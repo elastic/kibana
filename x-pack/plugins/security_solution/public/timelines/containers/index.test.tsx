@@ -142,8 +142,6 @@ describe('useTimelineEvents', () => {
       }
     );
 
-    await waitFor(() => null);
-
     expect(result.current).toEqual([
       DataLoadingState.loaded,
       {

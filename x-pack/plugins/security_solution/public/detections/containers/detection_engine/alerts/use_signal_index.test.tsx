@@ -34,13 +34,15 @@ describe('useSignalIndex', () => {
       wrapper: TestProvidersWithPrivileges,
     });
 
-    expect(result.current).toEqual({
-      createDeSignalIndex: null,
-      loading: true,
-      signalIndexExists: null,
-      signalIndexName: null,
-      signalIndexMappingOutdated: null,
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        createDeSignalIndex: null,
+        loading: true,
+        signalIndexExists: null,
+        signalIndexName: null,
+        signalIndexMappingOutdated: null,
+      })
+    );
   });
 
   test('fetch alerts info', async () => {

@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const mockAssistantAvailability = jest.fn(() => ({
   hasAssistantPrivilege: true,
 }));
+
 jest.mock('@kbn/elastic-assistant', () => ({
   AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
   useAssistantContext: () => ({
@@ -22,7 +23,14 @@ jest.mock('@kbn/elastic-assistant', () => ({
 jest.mock('../common/hooks/use_experimental_features');
 
 describe('AssistantOverlay', () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        cacheTime: Infinity,
+        retry: false,
+      },
+    },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,7 +46,7 @@ describe('AssistantOverlay', () => {
   });
 
   it('should not render the header link if not authorized', async () => {
-    mockAssistantAvailability.mockReturnValueOnce({ hasAssistantPrivilege: false });
+    mockAssistantAvailability.mockReturnValue({ hasAssistantPrivilege: false });
 
     const { queryByTestId } = render(
       <QueryClientProvider client={queryClient}>
@@ -46,8 +54,6 @@ describe('AssistantOverlay', () => {
       </QueryClientProvider>
     );
 
-    await waitFor(() => null);
-
-    expect(queryByTestId('assistantOverlay')).not.toBeInTheDocument();
+    await waitFor(() => expect(queryByTestId('assistantOverlay')).not.toBeInTheDocument());
   });
 });

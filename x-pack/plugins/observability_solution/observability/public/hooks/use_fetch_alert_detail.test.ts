@@ -173,11 +173,21 @@ describe('useFetchAlertDetail', () => {
   it('does not populate the results when the request is canceled', async () => {
     // FIXME: this test case doesn't do what the suite claims it does
 
+    mockUseKibanaReturnValue.services.http.get.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(getResult);
+          }, 10000);
+        })
+    );
+
     const { result, unmount } = renderHook<[boolean, AlertData | null], string>(() =>
       useFetchAlertDetail('123')
     );
 
     act(() => {
+      // unmount the component before the request is resolved
       unmount();
     });
 
