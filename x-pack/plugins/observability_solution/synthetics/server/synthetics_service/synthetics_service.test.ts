@@ -379,6 +379,33 @@ describe('SyntheticsService', () => {
       `);
     });
 
+    it('does not push a zip if inline content is missing', async () => {
+      const { service, locations } = getMockedService();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        monitors: [
+          {
+            attributes: {
+              ...getFakePayload([locations[0]]),
+              [ConfigKey.MONITOR_TYPE]: 'browser',
+              [ConfigKey.SOURCE_INLINE]: undefined,
+            },
+          },
+        ],
+      });
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const mockArg = (axios as jest.MockedFunction<typeof axios>).mock.calls[0][0];
+      const projectContent = (mockArg as AxiosRequestConfig).data.monitors[0].streams[0][
+        ConfigKey.SOURCE_PROJECT_CONTENT
+      ];
+      expect(projectContent).toBeUndefined();
+    });
+
     it.each([
       [true, 'Cannot sync monitors with the Synthetics service. License is expired.'],
       [
