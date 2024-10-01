@@ -16,7 +16,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
