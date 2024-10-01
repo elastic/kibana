@@ -13,6 +13,7 @@ import { registerRelatedRoutes } from './related_routes';
 import { registerPipelineRoutes } from './pipeline_routes';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
+import { registerCelInputRoutes } from './cel_routes';
 
 export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   registerAnalyzeLogsRoutes(router);
@@ -20,5 +21,6 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
   registerIntegrationBuilderRoutes(router);
   registerCategorizationRoutes(router);
   registerRelatedRoutes(router);
+  registerCelInputRoutes(router);
   registerPipelineRoutes(router);
 }

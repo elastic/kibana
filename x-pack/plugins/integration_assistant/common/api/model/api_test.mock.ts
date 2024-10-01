@@ -8,6 +8,7 @@
 import type { AnalyzeLogsRequestBody } from '../analyze_logs/analyze_logs_route.gen';
 import type { BuildIntegrationRequestBody } from '../build_integration/build_integration.gen';
 import type { CategorizationRequestBody } from '../categorization/categorization_route.gen';
+import type { CelInputRequestBody } from '../cel/cel_input_route.gen';
 import type { EcsMappingRequestBody } from '../ecs/ecs_route.gen';
 import type { RelatedRequestBody } from '../related/related_route.gen';
 import type { DataStream, Integration, Pipeline } from './common_attributes.gen';
@@ -63,6 +64,12 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
   packageName: 'test-package-name',
   rawSamples,
   samplesFormat: { name: 'ndjson' },
+});
+
+export const getCelRequestMock = (): CelInputRequestBody => ({
+  dataStreamName: 'test-data-stream-name',
+  apiDefinition: 'test-api-definition',
+  connectorId: 'test-connector-id',
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({

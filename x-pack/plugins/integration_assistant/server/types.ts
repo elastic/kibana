@@ -64,6 +64,20 @@ export interface CategorizationState {
   samplesFormat: SamplesFormat;
 }
 
+export interface CelInputState {
+  dataStreamName: string;
+  apiDefinition: string;
+  lastExecutedChain: string;
+  finalized: boolean;
+  apiQuerySummary: string;
+  exampleCelPrograms: string[];
+  currentProgram: string;
+  stateVarNames: string[];
+  stateSettings: object;
+  redactVars: string[];
+  results: object;
+}
+
 export interface EcsMappingState {
   ecs: string;
   chunkSize: number;

@@ -16,12 +16,14 @@ import { useTelemetry } from '../../../telemetry';
 interface PipelineGenerationProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
+  celInputResult: State['celInputResult'];
   connector: State['connector'];
 }
 
 export const useDeployIntegration = ({
   integrationSettings,
   result,
+  celInputResult,
   connector,
 }: PipelineGenerationProps) => {
   const telemetry = useTelemetry();
@@ -39,6 +41,7 @@ export const useDeployIntegration = ({
       notifications?.toasts == null ||
       result?.pipeline == null ||
       result?.samplesFormat == null
+      // (integrationSettings.apiDefinition && celInputResult == null)
     ) {
       return;
     }
@@ -63,6 +66,7 @@ export const useDeployIntegration = ({
                 docs: result.docs ?? [],
                 samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,
+                celInput: celInputResult,
               },
             ],
           },
@@ -119,6 +123,7 @@ export const useDeployIntegration = ({
     result?.docs,
     result?.pipeline,
     result?.samplesFormat,
+    celInputResult,
     telemetry,
   ]);
 

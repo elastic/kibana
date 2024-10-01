@@ -25,34 +25,20 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type { ESProcessorItem } from '../../../../../../common';
-import {
-  type AnalyzeLogsRequestBody,
-  type CategorizationRequestBody,
-  type EcsMappingRequestBody,
-  type RelatedRequestBody,
-} from '../../../../../../common';
-import {
-  runCategorizationGraph,
-  runEcsGraph,
-  runRelatedGraph,
-  runAnalyzeLogsGraph,
-} from '../../../../../common/lib/api';
+import { type CelInputRequestBody } from '../../../../../../common';
+import { runCelGraph } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
 
-export type OnComplete = (result: State['result']) => void;
+export type OnComplete = (result: State['celInputResult']) => void;
 
 const ProgressOrder = ['ecs', 'categorization', 'related'];
 type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
-  analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
-  ecs: i18n.PROGRESS_ECS_MAPPING,
-  categorization: i18n.PROGRESS_CATEGORIZATION,
-  related: i18n.PROGRESS_RELATED_GRAPH,
+  cel: i18n.PROGRESS_CEL_INPUT_GRAPH,
 };
 
 interface UseGenerationProps {
@@ -85,75 +71,21 @@ export const useGeneration = ({
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
 
-    // eslint-disable-next-line complexity
     (async () => {
       try {
-        let additionalProcessors: ESProcessorItem[] | undefined;
-
-        // logSamples may be modified to JSON format if they are in different formats
-        // Keeping originalLogSamples for running pipeline and generating docs
-        const originalLogSamples = integrationSettings.logSamples;
-        let logSamples = integrationSettings.logSamples;
-        let samplesFormat = integrationSettings.samplesFormat;
-
-        if (integrationSettings.samplesFormat === undefined) {
-          const analyzeLogsRequest: AnalyzeLogsRequestBody = {
-            packageName: integrationSettings.name ?? '',
-            dataStreamName: integrationSettings.dataStreamName ?? '',
-            logSamples: integrationSettings.logSamples ?? [],
-            connectorId: connector.id,
-            langSmithOptions: getLangSmithOptions(),
-          };
-
-          setProgress('analyzeLogs');
-          const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
-          if (abortController.signal.aborted) return;
-          if (isEmpty(analyzeLogsResult?.results)) {
-            setError('No results from Analyze Logs Graph');
-            return;
-          }
-          logSamples = analyzeLogsResult.results.parsedSamples;
-          samplesFormat = analyzeLogsResult.results.samplesFormat;
-          additionalProcessors = analyzeLogsResult.additionalProcessors;
-        }
-
-        const ecsRequest: EcsMappingRequestBody = {
-          packageName: integrationSettings.name ?? '',
+        const apiDefinition = integrationSettings.apiDefinition;
+        setProgress('cel');
+        const celRequest: CelInputRequestBody = {
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: logSamples ?? [],
-          samplesFormat: samplesFormat ?? { name: 'json' },
-          additionalProcessors: additionalProcessors ?? [],
+          apiDefinition: apiDefinition ?? '',
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
+        const celGraphResult = await runCelGraph(celRequest, deps);
 
-        setProgress('ecs');
-        const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
-        if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.results)) {
-          setError('No results from ECS graph');
-          return;
-        }
-        const categorizationRequest: CategorizationRequestBody = {
-          ...ecsRequest,
-          rawSamples: originalLogSamples ?? [],
-          samplesFormat: samplesFormat ?? { name: 'json' },
-          currentPipeline: ecsGraphResult.results.pipeline,
-        };
-
-        setProgress('categorization');
-        const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
-        if (abortController.signal.aborted) return;
-        const relatedRequest: RelatedRequestBody = {
-          ...categorizationRequest,
-          currentPipeline: categorizationResult.results.pipeline,
-        };
-
-        setProgress('related');
-        const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
         if (abortController.signal.aborted) return;
 
-        if (isEmpty(relatedGraphResult?.results)) {
+        if (isEmpty(celGraphResult?.results)) {
           throw new Error('Results not found in response');
         }
 
@@ -164,9 +96,9 @@ export const useGeneration = ({
         });
 
         const result = {
-          pipeline: relatedGraphResult.results.pipeline,
-          docs: relatedGraphResult.results.docs,
-          samplesFormat,
+          program: celGraphResult.results.program,
+          stateSettings: celGraphResult.results.stateSettings,
+          redactVars: celGraphResult.results.redactVars,
         };
 
         onComplete(result);

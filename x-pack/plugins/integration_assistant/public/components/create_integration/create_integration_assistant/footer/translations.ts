@@ -11,6 +11,10 @@ export const ANALYZE_LOGS = i18n.translate('xpack.integrationAssistant.bottomBar
   defaultMessage: 'Analyze logs',
 });
 
+export const ANALYZE_CEL = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeCel', {
+  defaultMessage: 'Generate CEL input configuration',
+});
+
 export const LOADING = i18n.translate('xpack.integrationAssistant.bottomBar.loading', {
   defaultMessage: 'Loading',
 });

@@ -17,6 +17,7 @@ export const defaultInitialState: State = {
   integrationSettings: undefined,
   isGenerating: false,
   result: undefined,
+  hasCelInput: false,
 };
 const mockInitialState = jest.fn((): State => defaultInitialState);
 jest.mock('./state', () => ({

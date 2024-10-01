@@ -13,9 +13,12 @@ import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
+import { ReviewCelStep, isCelReviewStepReady } from './steps/review_cel_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
+import { isCelInputStepReady } from './steps/cel_input_step/is_step_ready';
+import { CelInputStep } from './steps/cel_input_step/cel_input_step';
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -39,8 +42,14 @@ export const CreateIntegrationAssistant = React.memo(() => {
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
+      setHasCelInput: (payload) => {
+        dispatch({ type: 'SET_HAS_CEL_INPUT', payload });
+      },
       setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
+      },
+      setCelInputResult: (payload) => {
+        dispatch({ type: 'SET_CEL_INPUT_RESULT', payload });
       },
     }),
     []
@@ -55,6 +64,10 @@ export const CreateIntegrationAssistant = React.memo(() => {
       return isDataStreamStepReady(state);
     } else if (state.step === 4) {
       return isReviewStepReady(state);
+    } else if (state.hasCelInput && state.step === 5) {
+      return isCelInputStepReady(state);
+    } else if (state.hasCelInput && state.step === 6) {
+      return isCelReviewStepReady(state);
     }
     return false;
   }, [state]);
@@ -80,10 +93,40 @@ export const CreateIntegrationAssistant = React.memo(() => {
               result={state.result}
             />
           )}
-          {state.step === 5 && (
+          {/* {state.step === 5 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
+              connector={state.connector}
+            />
+          )} */}
+          {!state.hasCelInput && state.step === 5 && (
+            <DeployStep
+              integrationSettings={state.integrationSettings}
+              result={state.result}
+              connector={state.connector}
+            />
+          )}
+
+          {state.hasCelInput && state.step === 5 && (
+            <CelInputStep
+              integrationSettings={state.integrationSettings}
+              connector={state.connector}
+              isGenerating={state.isGenerating}
+            />
+          )}
+          {state.hasCelInput && state.celInputResult && state.step === 6 && (
+            <ReviewCelStep
+              integrationSettings={state.integrationSettings}
+              isGenerating={state.isGenerating}
+              celInputResult={state.celInputResult}
+            />
+          )}
+          {state.hasCelInput && state.step === 7 && (
+            <DeployStep
+              integrationSettings={state.integrationSettings}
+              result={state.result}
+              celInputResult={state.celInputResult}
               connector={state.connector}
             />
           )}
@@ -91,6 +134,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <Footer
           currentStep={state.step}
           isGenerating={state.isGenerating}
+          hasCelInput={state.hasCelInput}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate>

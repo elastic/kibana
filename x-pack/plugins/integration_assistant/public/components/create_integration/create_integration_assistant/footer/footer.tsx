@@ -27,14 +27,29 @@ const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating 
 });
 AnalyzeButtonText.displayName = 'AnalyzeButtonText';
 
+// Generation button for Step 5
+const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
+  if (!isGenerating) {
+    return <>{i18n.ANALYZE_CEL}</>;
+  }
+  return (
+    <>
+      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
+      {i18n.LOADING}
+    </>
+  );
+});
+AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
+
 interface FooterProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
+  hasCelInput: State['hasCelInput'];
   isNextStepEnabled?: boolean;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ currentStep, isGenerating, isNextStepEnabled = false }) => {
+  ({ currentStep, isGenerating, hasCelInput, isNextStepEnabled = false }) => {
     const telemetry = useTelemetry();
     const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
@@ -49,7 +64,7 @@ export const Footer = React.memo<FooterProps>(
 
     const onNext = useCallback(() => {
       telemetry.reportAssistantStepComplete({ step: currentStep });
-      if (currentStep === 3) {
+      if (currentStep === 3 || currentStep === 5) {
         setIsGenerating(true);
       } else {
         setStep(currentStep + 1);
@@ -60,12 +75,18 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 3) {
         return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 4) {
+      if (currentStep === 4 && !hasCelInput) {
         return i18n.ADD_TO_ELASTIC;
       }
-    }, [currentStep, isGenerating]);
+      if (currentStep === 5 && hasCelInput) {
+        return <AnalyzeCelButtonText isGenerating={isGenerating} />;
+      }
+      if (currentStep === 6 && hasCelInput) {
+        return i18n.ADD_TO_ELASTIC;
+      }
+    }, [currentStep, isGenerating, hasCelInput]);
 
-    if (currentStep === 5) {
+    if (currentStep === 7 || (currentStep === 5 && !hasCelInput)) {
       return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (
