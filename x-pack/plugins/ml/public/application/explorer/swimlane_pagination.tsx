@@ -51,25 +51,33 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
 
   const pageCount = Math.ceil(cardinality / perPage);
 
-  const items = [5, 10, 20, 50, 100].map((v) => {
-    return (
-      <EuiContextMenuItem
-        key={`${v}_rows`}
-        icon={v === perPage ? 'check' : 'empty'}
-        onClick={() => {
-          closePopover();
-          setPerPage(v);
-        }}
-        data-test-subj={`${v} rows`}
-      >
-        <FormattedMessage
-          id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
-          defaultMessage="{rowsCount} rows"
-          values={{ rowsCount: v }}
-        />
-      </EuiContextMenuItem>
-    );
-  });
+  const rowOptions = [5, 10, 20, 50, 100];
+  const items = rowOptions.reduce((acc, v) => {
+    if (v <= cardinality) {
+      acc.push(v);
+    } else if (acc.length === 0 || acc[acc.length - 1] < cardinality) {
+      acc.push(v);
+    }
+    return acc;
+  }, [] as number[]);
+
+  const menuItems = items.map((v) => (
+    <EuiContextMenuItem
+      key={`${v}_rows`}
+      icon={v === perPage ? 'check' : 'empty'}
+      onClick={() => {
+        closePopover();
+        setPerPage(v);
+      }}
+      data-test-subj={`${v} rows`}
+    >
+      <FormattedMessage
+        id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
+        defaultMessage="{rowsCount} rows"
+        values={{ rowsCount: v }}
+      />
+    </EuiContextMenuItem>
+  ));
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -97,7 +105,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           closePopover={closePopover}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={items} data-test-subj="mlSwimLanePageSizePanel" />
+          <EuiContextMenuPanel items={menuItems} data-test-subj="mlSwimLanePageSizePanel" />
         </EuiPopover>
       </EuiFlexItem>
 
