@@ -89,7 +89,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 description: i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
                   {
-                    defaultMessage: 'Browse content syncs',
+                    defaultMessage: 'Browse content sync history',
                   }
                 ),
                 error: errorOnContentSync,
@@ -105,7 +105,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 description: i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
                   {
-                    defaultMessage: 'Browse document level security syncs',
+                    defaultMessage: 'Browse access control sync history',
                   }
                 ),
                 error: errorOnAccessSync,
