@@ -7,19 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiHasCompressed,
-  apiHasParentApi,
-  type HasCompressed,
-  type HasParentApi,
-} from '@kbn/presentation-publishing';
-import type { DefaultControlApi } from '../../controls/types';
+import { apiHasParentApi } from '@kbn/presentation-publishing';
+import { apiHasCompressed } from './has_compressed';
 
-export const isCompressed = (
-  api: DefaultControlApi | HasParentApi | HasCompressed | null | unknown
-): boolean => {
+export function isCompressed(api: unknown): boolean {
   if (api === null) return true;
   if (apiHasCompressed(api)) return api.compressed;
-  else if (apiHasParentApi(api)) return isCompressed(api.parentApi);
-  return true;
-};
+  return apiHasParentApi(api) ? isCompressed(api.parentApi) : true;
+}

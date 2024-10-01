@@ -84,7 +84,6 @@ export {
   type HasTypeDisplayName,
 } from './interfaces/has_type';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
-export { apiHasCompressed, type HasCompressed } from './interfaces/has_compressed';
 export {
   apiPublishesBlockingError,
   hasBlockingError,
