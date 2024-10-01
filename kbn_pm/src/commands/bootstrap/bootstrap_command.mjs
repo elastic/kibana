@@ -8,13 +8,15 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import * as Bazel from '../../lib/bazel.mjs';
 import External from '../../lib/external_packages.js';
 
-import { yarnInstallDeps, buildWebpackBundles } from './replacements.mjs';
+import { buildWebpackBundles } from './webpack.mjs';
 
-import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
-import { setupRemoteCache } from './setup_remote_cache.mjs';
+import {
+  haveNodeModulesBeenManuallyDeleted,
+  removeYarnIntegrityFileIfExists,
+  yarnInstallDeps,
+} from './yarn.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -65,20 +67,7 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
-    const [{ packageManifestPaths, tsConfigRepoRels }] = await Promise.all([
-      // discover the location of packages, plugins, etc
-      await time('discovery', discovery),
-
-      (async () => {
-        await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
-
-        // Install bazel machinery tools if needed
-        await Bazel.ensureInstalled(log);
-
-        // Setup remote cache settings in .bazelrc.cache if needed
-        await setupRemoteCache(log);
-      })(),
-    ]);
+    const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
     // generate the package map and package.json file, if necessary
     const [packages] = await Promise.all([
@@ -99,24 +88,14 @@ export const command = {
       }),
     ]);
 
-    // Bootstrap process for Bazel packages
-    // Bazel is now managing dependencies so yarn install
-    // will happen as part of this
-    //
-    // NOTE: Bazel projects will be introduced incrementally
-    // And should begin from the ones with none dependencies forward.
-    // That way non bazel projects could depend on bazel projects but not the other way around
-    // That is only intended during the migration process while non Bazel projects are not removed at all.
     if (forceInstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists();
-        await Bazel.expungeCache(log, { quiet });
         await yarnInstallDeps(log, { offline, quiet });
       });
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      // await Bazel.buildWebpackBundles(log, { offline, quiet });
       await buildWebpackBundles(log, { offline, quiet });
     });
 

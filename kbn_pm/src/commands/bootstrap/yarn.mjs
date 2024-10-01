@@ -12,6 +12,7 @@ import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
+import { run } from '../../lib/spawn.mjs';
 
 // yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists() {
@@ -43,4 +44,16 @@ async function haveBazelFoldersBeenCreatedBefore() {
 
 export async function haveNodeModulesBeenManuallyDeleted() {
   return !(await areNodeModulesPresent()) && (await haveBazelFoldersBeenCreatedBefore());
+}
+
+export async function yarnInstallDeps(log, { offline, quiet }) {
+  log.info('installing node dependencies with yarn');
+  const args = ['install', '--non-interactive'];
+  if (offline) args.push('--offline');
+  if (quiet) args.push('--silent');
+  await run('yarn', args, { cwd: process.cwd(), pipe: true });
+
+  await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
+
+  log.success('Playwright browsers installed');
 }
