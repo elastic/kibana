@@ -110,13 +110,13 @@ export function createEntitiesESClient({
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
-      allSearches: TSearchRequest[]
+      allSearches: Array<TSearchRequest & { index: LatestAlias | HistoryAlias }>
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
       const searches = allSearches
         .map((params) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [SERVICE_ENTITIES_LATEST_ALIAS],
+              index: [params.index],
               ignore_unavailable: true,
             },
             {
