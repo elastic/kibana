@@ -6,13 +6,16 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
-import { verifyAccessAndContext } from './verify_access_and_context';
-import { deleteConnectorRequestParamsSchemaV1 } from '../../common/routes/connector/apis/delete';
+import { ILicenseState } from '../../../lib';
+import { BASE_ACTION_API_PATH } from '../../../../common';
+import { ActionsRequestHandlerContext } from '../../../types';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import {
+  deleteConnectorRequestParamsSchemaV1,
+  DeleteConnectorRequestParamsV1,
+} from '../../../../common/routes/connector/apis/delete';
 
-export const deleteActionRoute = (
+export const deleteConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -39,7 +42,7 @@ export const deleteActionRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const { id } = req.params;
+        const { id }: DeleteConnectorRequestParamsV1 = req.params;
         await actionsClient.delete({ id });
         return res.noContent();
       })
