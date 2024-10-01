@@ -31,7 +31,6 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerUbuntu: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
   createDockerServerless: boolean;
