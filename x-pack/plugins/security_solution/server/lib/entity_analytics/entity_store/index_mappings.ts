@@ -58,6 +58,12 @@ const HOST_ES_MAPPING: MappingTypeMapping['properties'] = {
   'host.risk.calculated_level': {
     type: 'keyword',
   },
+  'host.risk.calculated_score': {
+    type: 'float',
+  },
+  'host.risk.calculated_score_norm': {
+    type: 'float',
+  },
 };
 
 const USER_ES_MAPPING: MappingTypeMapping['properties'] = {
@@ -87,6 +93,12 @@ const USER_ES_MAPPING: MappingTypeMapping['properties'] = {
   },
   'user.risk.calculated_level': {
     type: 'keyword',
+  },
+  'user.risk.calculated_score': {
+    type: 'float',
+  },
+  'user.risk.calculated_score_norm': {
+    type: 'float',
   },
 };
 
