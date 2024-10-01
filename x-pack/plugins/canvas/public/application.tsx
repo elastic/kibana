@@ -64,7 +64,6 @@ export const renderApp = ({
   canvasStore: Store;
   pluginServices: PluginServices<CanvasPluginServices>;
 }) => {
-  const { presentationUtil } = startPlugins;
   const { element } = params;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
@@ -75,11 +74,9 @@ export const renderApp = ({
       <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
         <ServicesContextProvider>
           <LegacyServicesProvider providers={services}>
-            <presentationUtil.ContextProvider>
-              <Provider store={canvasStore}>
-                <App history={params.history} />
-              </Provider>
-            </presentationUtil.ContextProvider>
+            <Provider store={canvasStore}>
+              <App history={params.history} />
+            </Provider>
           </LegacyServicesProvider>
         </ServicesContextProvider>
       </KibanaContextProvider>
