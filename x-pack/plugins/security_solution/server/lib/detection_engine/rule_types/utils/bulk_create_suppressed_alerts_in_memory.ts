@@ -62,7 +62,6 @@ export interface BulkCreateSuppressedAlertsParams
   experimentalFeatures: ExperimentalFeatures;
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
-  skipWrapping?: boolean;
 }
 
 export interface BulkCreateSuppressedSequencesParams
@@ -85,7 +84,6 @@ export interface BulkCreateSuppressedSequencesParams
   experimentalFeatures: ExperimentalFeatures;
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
-  skipWrapping?: boolean;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -95,7 +93,6 @@ export interface BulkCreateSuppressedSequencesParams
 export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
   buildingBlockAlerts,
-  skipWrapping = false,
   toReturn,
   wrapHits,
   bulkCreate,
@@ -130,12 +127,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     suppressibleEvents = partitionedEvents[0];
   }
 
-  // refactor the below into a separate function
   const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
 
-  // I think we create a separate bulkCreateSuppressedInMemory function
-  // specifically for eql sequences
-  // since sequences act differently from the other alerts.
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs,
     unsuppressibleWrappedDocs,

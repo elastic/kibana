@@ -552,9 +552,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     },
                     {
                       doc: {
-                        // see if this is where the original time
-                        // is not being set correctly
-                        // when suppressing on per rule exec.
                         ...getUpdatedSuppressionBoundaries(
                           existingAlert,
                           alert,
@@ -648,6 +645,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       bulkResponse.body.items[idx + duplicateAlerts.length].create?.status === 201
                   )
                   // Security solution's EQL rule consists of building block alerts which should be filtered out.
+                  // Building block alerts have additional "kibana.alert.group.index" attribute which is absent for the root alert.
                   .filter((alert) => !Object.keys(alert).includes(ALERT_GROUP_INDEX));
 
                 createdAlerts.forEach((alert) =>

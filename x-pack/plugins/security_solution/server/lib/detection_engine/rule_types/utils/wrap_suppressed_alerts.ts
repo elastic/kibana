@@ -150,7 +150,6 @@ export const wrapSuppressedSequenceAlerts = ({
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   // objective here is to replicate what is happening
   // in x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/build_alert_group_from_sequence.ts
-  //
   return sequences.reduce(
     (acc: Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>, sequence) => {
       const fields = sequence.events?.reduce(

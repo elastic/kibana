@@ -100,14 +100,11 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
-  let myfunc;
+  let getMatchingBuildingBlockAlerts;
 
   if (buildingBlockAlerts != null && buildingBlockAlerts.length > 0)
-    myfunc = (newAlertSource: unknown) => {
+    getMatchingBuildingBlockAlerts = (newAlertSource: unknown) => {
       return buildingBlockAlerts?.filter((someAlert) => {
-        // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
-        // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
-
         return (
           isEqlBuildingBlockAlert(someAlert?._source) &&
           isEqlShellAlert(newAlertSource) &&
@@ -123,13 +120,12 @@ export const bulkCreateWithSuppression = async <
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
       })),
-      // add building block alerts here when you get back
       suppressionWindow,
       enrichAlertsWrapper,
       alertTimestampOverride,
       isSuppressionPerRuleExecution,
       maxAlerts,
-      myfunc // do the same map as wrappedDocs
+      getMatchingBuildingBlockAlerts
     );
 
   const end = performance.now();
