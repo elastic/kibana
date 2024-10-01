@@ -18,9 +18,8 @@ import type { DefaultControlApi } from '../../controls/types';
 export const isCompressed = (
   api: DefaultControlApi | HasParentApi | HasCompressed | null | unknown
 ): boolean => {
-  if (apiHasCompressed(api)) {
-    if (api?.compressed) return api.compressed;
-    else if (apiHasParentApi(api)) return isCompressed(api.parentApi);
-  }
+  if (api === null) return true;
+  if (apiHasCompressed(api)) return api.compressed;
+  else if (apiHasParentApi(api)) return isCompressed(api.parentApi);
   return true;
 };

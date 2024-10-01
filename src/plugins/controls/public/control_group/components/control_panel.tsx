@@ -123,7 +123,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const isEditable = viewMode === ViewMode.EDIT;
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
-
   return (
     <EuiFlexItem
       ref={setNodeRef}
