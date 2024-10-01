@@ -26,6 +26,7 @@ import { StepContentWrapper } from '../step_content_wrapper';
 import { PackageCardPreview } from './package_card_preview';
 import { useActions } from '../../state';
 import * as i18n from './translations';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 const MaxLogoSize = 1024 * 1024; // One megabyte
 
@@ -53,6 +54,10 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
   const styles = useLayoutStyles();
   const { setIntegrationSettings } = useActions();
   const [logoError, setLogoError] = React.useState<string>();
+
+  const { testFeature: isTestFeatureEnabled } = ExperimentalFeaturesService.get();
+  console.log('TEST');
+  console.log(isTestFeatureEnabled);
 
   const setIntegrationValues = useCallback(
     (settings: Partial<IntegrationSettings>) =>

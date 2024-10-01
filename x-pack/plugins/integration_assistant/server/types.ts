@@ -12,10 +12,11 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ESProcessorItem, SamplesFormat } from '../common';
+import { ExperimentalFeatures, ESProcessorItem, SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
+  experimentalFeatures: ExperimentalFeatures;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}

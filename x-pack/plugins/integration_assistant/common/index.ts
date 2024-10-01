@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { type IntegrationAssistantConfigType } from './types';
+export {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from './experimental_features';
 export { BuildIntegrationRequestBody } from './api/build_integration/build_integration.gen';
 export {
   CategorizationRequestBody,
