@@ -6,14 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import {
   getDraftTimeline,
   resetTimeline,
@@ -21,9 +21,13 @@ import {
   persistTimeline,
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { cleanDraftTimelineSchema, TimelineTypeEnum } from '../../../../../../common/api/timeline';
+import type { CleanDraftTimelinesResponse } from '../../../../../../common/api/timeline';
+import {
+  CleanDraftTimelinesRequestBody,
+  TimelineTypeEnum,
+} from '../../../../../../common/api/timeline';
 
-export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_DRAFT_URL,
@@ -35,11 +39,11 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(cleanDraftTimelineSchema) },
+          request: { body: buildRouteValidationWithZod(CleanDraftTimelinesRequestBody) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CleanDraftTimelinesResponse>> => {
         const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 

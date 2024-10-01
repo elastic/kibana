@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useState, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useMemo, useEffect, ComponentProps } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiScrollBarStyles, EuiSpacer } from '@elastic/eui';
 import { getFilteredGroups } from '../../utils/get_filtered_groups';
@@ -15,12 +15,11 @@ import type { LanguageDocumentationSections } from '../../types';
 import { getESQLDocsSections } from '../../sections';
 
 interface DocumentationInlineProps {
+  height: number;
   searchInDescription?: boolean;
 }
 
-const MAX_HEIGHT = 250;
-
-function DocumentationInline({ searchInDescription }: DocumentationInlineProps) {
+function DocumentationInline({ searchInDescription, height }: DocumentationInlineProps) {
   const theme = useEuiTheme();
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -44,7 +43,9 @@ function DocumentationInline({ searchInDescription }: DocumentationInlineProps) 
     return getFilteredGroups(searchText, searchInDescription, documentationSections, 1);
   }, [documentationSections, searchText, searchInDescription]);
 
-  const onNavigationChange = useCallback((selectedOptions) => {
+  const onNavigationChange = useCallback<
+    NonNullable<ComponentProps<typeof DocumentationNavigation>>['onNavigationChange']
+  >((selectedOptions) => {
     setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
     if (selectedOptions.length) {
       const scrollToElement = scrollTargets.current[selectedOptions[0].label];
@@ -56,7 +57,7 @@ function DocumentationInline({ searchInDescription }: DocumentationInlineProps) 
     <div
       css={css`
         padding: ${theme.euiTheme.size.base};
-        max-height: ${MAX_HEIGHT}px;
+        max-height: ${height}px;
         overflow-y: auto;
         ${scrollBarStyles}
       `}

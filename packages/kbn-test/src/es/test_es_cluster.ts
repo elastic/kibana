@@ -191,7 +191,10 @@ export function createTestEsCluster<
     `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
-      ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
+      ? [
+          'discovery.type=multi-node',
+          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+        ]
       : ['discovery.type=single-node']),
   ];
 

@@ -107,6 +107,7 @@ const buildFindRulesRoute = ({
     router.post(
       {
         path,
+        options: { access: 'internal' },
         validate: {
           body: findRulesRequestQuerySchemaV1,
         },

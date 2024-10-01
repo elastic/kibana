@@ -27,7 +27,7 @@ export interface QueryHistoryItem {
 const MAX_QUERIES_NUMBER = 20;
 
 const getKey = (queryString: string) => {
-  return queryString.replaceAll('\n', '').trim();
+  return queryString.replaceAll('\n', '').trim().replace(/\s\s+/g, ' ');
 };
 
 const getMomentTimeZone = (timeZone?: string) => {
@@ -60,6 +60,9 @@ export const addQueriesToCache = (
   item: QueryHistoryItem,
   maxQueriesAllowed = MAX_QUERIES_NUMBER
 ) => {
+  // if the user is working on multiple tabs
+  // the cachedQueries Map might not contain all
+  // the localStorage queries
   const queries = getHistoryItems('desc');
   queries.forEach((queryItem) => {
     const trimmedQueryString = getKey(queryItem.queryString);
@@ -77,15 +80,7 @@ export const addQueriesToCache = (
     });
   }
 
-  const queriesToStore = getCachedQueries();
-  const localStorageQueries = getHistoryItems('desc');
-  // if the user is working on multiple tabs
-  // the cachedQueries Map might not contain all
-  // the localStorage queries
-  const newQueries = localStorageQueries.filter(
-    (ls) => !queriesToStore.find((cachedQuery) => cachedQuery.queryString === ls.queryString)
-  );
-  let allQueries = [...queriesToStore, ...newQueries];
+  let allQueries = [...getCachedQueries()];
 
   if (allQueries.length >= maxQueriesAllowed + 1) {
     const sortedByDate = allQueries.sort((a, b) =>
