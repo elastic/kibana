@@ -16,7 +16,7 @@ export interface CheckCompleteResult {
   /**
    * Optional custom badge text replacement for the card complete badge in the card header.
    */
-  completeBadgeText?: string;
+  completeBadgeText?: string | React.ReactNode;
   /**
    * Optional badges to prepend to the card complete badge in the card header, regardless of completion status.
    */

@@ -17,7 +17,8 @@ interface Props {
 export function BackLink({ queryParams, href: integrationsHref }: Props) {
   const { onboardingLink } = useMemo(() => {
     return {
-      onboardingLink: queryParams.get('observabilityOnboardingLink'),
+      onboardingLink:
+        queryParams.get('observabilityOnboardingLink') || queryParams.get('onboardingLink'),
     };
   }, [queryParams]);
   const href = onboardingLink ?? integrationsHref;

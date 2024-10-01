@@ -33,6 +33,7 @@ export {
   AGENT_POLICY_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
+  EPM_PACKAGES_MANY,
 } from '../../common/constants';
 
 export * from './page_paths';

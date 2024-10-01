@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-
-export const getDummyAdditionalBadge = () => {
-  return <EuiBadge color="warning">{'Dummy badge'}</EuiBadge>;
-};
+export interface Tab {
+  category: string;
+  customCardNames?: string[]; // custom card name e.g.: 1password
+  iconType?: string;
+  id: string;
+  label: string;
+  overflow?: 'hidden' | 'scroll';
+  showSearchTools?: boolean;
+  subCategory?: string;
+}

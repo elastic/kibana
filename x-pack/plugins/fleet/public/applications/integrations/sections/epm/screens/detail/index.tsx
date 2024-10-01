@@ -85,6 +85,7 @@ import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
 import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
+import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 
 import './index.scss';
 
@@ -135,6 +136,8 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
+  const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
+  const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
 
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
@@ -388,7 +391,7 @@ export function Detail() {
         hash,
       });
 
-      const navigateOptions = getInstallPkgRouteOptions({
+      const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
@@ -398,6 +401,22 @@ export function Detail() {
         isGuidedOnboardingActive,
         pkgkey,
       });
+
+      const navigateOptions: InstallPkgRouteOptions =
+        onboardingAppId && onboardingLink
+          ? [
+              defaultNavigateOptions[0],
+              {
+                ...defaultNavigateOptions[1],
+                state: {
+                  ...(defaultNavigateOptions[1]?.state ?? {}),
+                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelUrl: onboardingLink,
+                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                },
+              },
+            ]
+          : defaultNavigateOptions;
 
       services.application.navigateToApp(...navigateOptions);
     },
@@ -410,6 +429,8 @@ export function Detail() {
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
+      onboardingAppId,
+      onboardingLink,
       pathname,
       pkgkey,
       search,

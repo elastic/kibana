@@ -51,6 +51,7 @@ const StickySidebar = styled(EuiFlexItem)`
 export interface PackageListGridProps {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
+  emptyStateStyles?: Record<string, string>;
   list: IntegrationCardItem[];
   searchTerm: string;
   setSearchTerm: (search: string) => void;
@@ -69,11 +70,14 @@ export interface PackageListGridProps {
   showMissingIntegrationMessage?: boolean;
   showControls?: boolean;
   showSearchTools?: boolean;
+  spacer?: boolean;
+  scrollElementId?: string;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   isLoading,
   controls,
+  emptyStateStyles,
   title,
   list,
   searchTerm,
@@ -91,6 +95,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   showCardLabels = true,
   showControls = true,
   showSearchTools = true,
+  spacer = true,
+  scrollElementId,
 }) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
@@ -267,13 +273,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        <EuiSpacer size="s" />
+        {spacer && <EuiSpacer size="s" />}
         <EuiFlexItem>
           <GridColumn
+            emptyStateStyles={emptyStateStyles}
             isLoading={!!isLoading}
             list={filteredPromotedList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
+            scrollElementId={scrollElementId}
           />
         </EuiFlexItem>
         {showMissingIntegrationMessage && (
