@@ -129,6 +129,7 @@
     "@kbn/apm-data-view",
     "@kbn/profiling-data-access-plugin",
     "@kbn/actions-plugin",
+    "@kbn/observability-utils",
   ],
   "exclude": ["target/**/*"]
 }
