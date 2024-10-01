@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-      await panelActions.clickEdit();
+      await panelActions.convertToLens();
 
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
