@@ -6,18 +6,17 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { EuiExpression, EuiPopover, EuiExpressionProps } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
 import { allOptionText } from './fields';
 import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
-type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
   title?: ReactNode;
   value?: string[];
   children?: ReactNode;
-  color?: ExpressionColor;
+  color?: EuiExpressionProps['color'];
   selectedField?: string;
   fieldName: string;
   setSelectedField: (value?: string) => void;
