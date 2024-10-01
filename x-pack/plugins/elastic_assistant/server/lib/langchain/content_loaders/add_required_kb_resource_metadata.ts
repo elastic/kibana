@@ -29,11 +29,14 @@ export const addRequiredKbResourceMetadata = ({
   kbResource: string;
   required?: boolean;
 }): Array<Document<Metadata>> =>
-  docs.map((doc) => ({
-    ...doc,
-    metadata: {
-      ...doc.metadata,
-      kbResource,
-      required, // indicates that the document is required for searches on the kbResource topic
-    },
-  }  as unknown as Document<Metadata>));
+  docs.map(
+    (doc) =>
+      ({
+        ...doc,
+        metadata: {
+          ...doc.metadata,
+          kbResource,
+          required, // indicates that the document is required for searches on the kbResource topic
+        },
+      } as unknown as Document<Metadata>)
+  );
