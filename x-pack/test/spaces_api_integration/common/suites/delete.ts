@@ -62,14 +62,14 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 9,
+        doc_count: 10,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
+            { key: 'space', doc_count: 3 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
             { key: 'visualization', doc_count: 3 },
             { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
-            { key: 'space', doc_count: 2 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
             { key: 'dashboard', doc_count: 1 },
             { key: 'index-pattern', doc_count: 1 },
           ],
@@ -182,7 +182,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
           describe(`when the space doesn't exist`, () => {
             it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
               return supertest
-                .delete(`${urlPrefix}/api/spaces/space/space_3`)
+                .delete(`${urlPrefix}/api/spaces/space/space_7`)
                 .auth(user.username, user.password)
                 .expect(tests.doesntExist.statusCode)
                 .then(tests.doesntExist.response);
