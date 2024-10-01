@@ -86,7 +86,7 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
-    const isLogsStreamEnabled = core.uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM);
+    const isLogsStreamEnabled = core.uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
 
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
@@ -349,7 +349,7 @@ export class Plugin implements InfraClientPluginClass {
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
     const { http, uiSettings } = core;
-    const isLogsStreamEnabled = uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM);
+    const isLogsStreamEnabled = uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();

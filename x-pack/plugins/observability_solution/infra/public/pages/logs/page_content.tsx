@@ -46,7 +46,7 @@ const StateMachinePlayground = dynamic(() =>
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
 
-  const isLogsStreamEnabled: boolean = useUiSetting(OBSERVABILITY_ENABLE_LOGS_STREAM);
+  const isLogsStreamEnabled: boolean = useUiSetting(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
 
   const uiCapabilities = application?.capabilities;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
