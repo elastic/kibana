@@ -12,7 +12,10 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOST_NAME,
+  AGENT_NAME,
+  CLOUD_PROVIDER,
 } from '@kbn/observability-shared-plugin/common';
+import { AgentName } from '@kbn/elastic-agent-utils';
 import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
@@ -86,16 +89,19 @@ interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]?: string | null;
+  [AGENT_NAME]: AgentName | null;
 }
 
 interface HostEntity extends BaseEntity {
   [ENTITY_TYPE]: 'host';
   [HOST_NAME]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
 }
 
 interface ContainerEntity extends BaseEntity {
   [ENTITY_TYPE]: 'container';
   [CONTAINER_ID]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
