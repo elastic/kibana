@@ -43,7 +43,6 @@ export async function getDownstreamServiceResource({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
-      _source: ['span.destination.service'],
       query: {
         fields: [SPAN_DESTINATION_SERVICE_RESOURCE],
         bool: {

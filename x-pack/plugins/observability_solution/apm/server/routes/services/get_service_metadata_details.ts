@@ -5,39 +5,29 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import {
-  AGENT,
-  CONTAINER,
-  CLOUD,
   CLOUD_AVAILABILITY_ZONE,
-  CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
+  CLOUD_REGION,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  HOST,
-  KUBERNETES,
-  SERVICE,
+  FAAS_ID,
+  FAAS_TRIGGER_TYPE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
-  FAAS_ID,
-  FAAS_TRIGGER_TYPE,
-  LABEL_TELEMETRY_AUTO_VERSION,
 } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
+import { hasOpenTelemetryPrefix, isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { maybe } from '../../../common/utils/maybe';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
-
-type ServiceMetadataDetailsRaw = Pick<
-  TransactionRaw,
-  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
->;
 
 export interface ServiceMetadataDetails {
   service?: {
@@ -112,7 +102,7 @@ export async function getServiceMetadataDetails({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
+      fields: ['*'],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -171,8 +161,11 @@ export async function getServiceMetadataDetails({
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
-  const hit = response.hits.hits[0]?._source as ServiceMetadataDetailsRaw | undefined;
-  if (!hit) {
+  const hit = maybe(response.hits.hits[0]);
+
+  const event = unflattenKnownApmEventFields(hit?.fields as undefined | FlattenedApmEvent);
+
+  if (!event) {
     return {
       service: undefined,
       container: undefined,
@@ -180,7 +173,7 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } = hit;
+  const { service, agent, host, kubernetes, container, cloud, labels } = event;
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),

@@ -80,15 +80,37 @@ export type ChangePointType =
   | 'trend_change';
 
 export type SearchHit<
-  TSource extends any = unknown,
+  TSource = unknown,
   TFields extends Fields | undefined = undefined,
   TDocValueFields extends DocValueFields | undefined = undefined
-> = Omit<estypes.SearchHit, '_source' | 'fields'> &
-  (TSource extends false ? {} : { _source: TSource }) &
-  (TFields extends Fields
+> = Omit<HitOfOptions<TSource, { fields: TFields; docvalue_fields: TDocValueFields }>, '_source'> &
+  (TSource extends false ? {} : { _source: TSource });
+
+interface SearchOptions {
+  _source?: Source;
+  fields?: Fields;
+  docvalue_fields?: DocValueFields;
+}
+
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+type MaybeWithSource<TDocument, TOptions extends SearchOptions | undefined> = TOptions extends {
+  _source: false;
+}
+  ? IsAny<TOptions> extends false
+    ? {}
+    : { _source: TDocument }
+  : { _source: TDocument };
+
+type HitOfOptions<TDocument = unknown, TOptions extends SearchOptions | undefined = {}> = Omit<
+  estypes.SearchHit<TDocument>,
+  'fields'
+> &
+  MaybeWithSource<TDocument, TOptions> &
+  (TOptions extends { fields: Fields }
     ? {
         fields: {
-          [key in ValueTypeOfField<TFields>]?: unknown[];
+          [key in ValueTypeOfField<TOptions['fields']>]?: unknown[];
         };
       }
     : {
@@ -96,23 +118,14 @@ export type SearchHit<
           [key: string]: unknown[];
         }>;
       }) &
-  (TDocValueFields extends DocValueFields
+  (TOptions extends { docvalue_fields: DocValueFields }
     ? {
-        fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
+        fields: Partial<Record<ValueTypeOfField<TOptions['docvalue_fields']>, unknown[]>>;
       }
     : {});
 
-type HitsOf<
-  TOptions extends
-    | { _source?: Source; fields?: Fields; docvalue_fields?: DocValueFields }
-    | undefined,
-  TDocument extends unknown
-> = Array<
-  SearchHit<
-    TOptions extends { _source: false } ? undefined : TDocument,
-    TOptions extends { fields: Fields } ? TOptions['fields'] : undefined,
-    TOptions extends { docvalue_fields: DocValueFields } ? TOptions['docvalue_fields'] : undefined
-  >
+type HitsOf<TOptions extends SearchOptions | undefined, TDocument> = Array<
+  HitOfOptions<TDocument, TOptions>
 >;
 
 type AggregationMap = Partial<Record<string, AggregationsAggregationContainer>>;

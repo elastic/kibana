@@ -7,12 +7,18 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { merge, omit } from 'lodash';
 import { SPAN_ID, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../get_transaction';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { maybe } from '../../../../common/utils/maybe';
+
+export type SpanWithoutSpanLinks = Omit<Span, 'span'> & { span: Omit<Span['span'], 'links'> };
 
 export async function getSpan({
   spanId,
@@ -28,7 +34,7 @@ export async function getSpan({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}): Promise<{ span?: Span; parentTransaction?: Transaction }> {
+}): Promise<{ span?: SpanWithoutSpanLinks; parentTransaction?: Transaction }> {
   const [spanResp, parentTransaction] = await Promise.all([
     apmEventClient.search('get_span', {
       apm: {
@@ -38,6 +44,7 @@ export async function getSpan({
         track_total_hits: false,
         size: 1,
         terminate_after: 1,
+        fields: ['*'],
         query: {
           bool: {
             filter: asMutableArray([
@@ -60,5 +67,16 @@ export async function getSpan({
       : undefined,
   ]);
 
-  return { span: spanResp.hits.hits[0]?._source, parentTransaction };
+  const hit = maybe(spanResp.hits.hits[0]);
+
+  const event = unflattenKnownApmEventFields(hit?.fields as undefined | FlattenedApmEvent);
+
+  return {
+    span: event
+      ? merge({}, omit(event, 'span.links'), {
+          processor: { event: 'span' as const, name: 'transaction' as const },
+        })
+      : undefined,
+    parentTransaction,
+  };
 }

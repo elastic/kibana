@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { unflattenKnownApmEventFields, type APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -29,6 +29,7 @@ import {
   METRICSET_INTERVAL,
   METRICSET_NAME,
   OBSERVER_HOSTNAME,
+  OBSERVER_VERSION,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -54,10 +55,7 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   APMDataTelemetry,
   APMPerService,
@@ -74,6 +72,7 @@ import {
   APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
   SavedApmCustomDashboard,
 } from '../../../../common/custom_dashboards';
+import { maybe } from '../../../../common/utils/maybe';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -692,16 +691,19 @@ export const tasks: TelemetryTask[] = [
           sort: {
             '@timestamp': 'desc',
           },
+          fields: asMutableArray([OBSERVER_VERSION] as const),
         },
       });
 
-      const hit = response.hits.hits[0]?._source as Pick<Transaction | Span | APMError, 'observer'>;
+      const hit = maybe(response.hits.hits[0]);
 
-      if (!hit || !hit.observer?.version) {
+      const event = unflattenKnownApmEventFields(hit?.fields);
+
+      if (!event || !event.observer?.version) {
         return {};
       }
 
-      const [major, minor, patch] = hit.observer.version.split('.').map((part) => Number(part));
+      const [major, minor, patch] = event.observer.version.split('.').map((part) => Number(part));
 
       return {
         version: {

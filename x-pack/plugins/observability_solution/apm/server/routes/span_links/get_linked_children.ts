@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  isElasticApmSource,
+  unflattenKnownApmEventFields,
+} from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { isEmpty } from 'lodash';
-import { isOtelSource } from '@kbn/apm-data-access-plugin/server';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
-  SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
-import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getBufferedTimerange } from './utils';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { Span } from '../../../typings/es_schemas/ui/span';
+import { getBufferedTimerange } from './utils';
 
 async function fetchLinkedChildrenOfSpan({
   traceId,
@@ -45,9 +46,10 @@ async function fetchLinkedChildrenOfSpan({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
     body: {
       track_total_hits: false,
+      fields: asMutableArray([TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID] as const),
+      _source: [SPAN_LINKS],
       size: 1000,
       query: {
         bool: {
@@ -62,11 +64,22 @@ async function fetchLinkedChildrenOfSpan({
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
   return response.hits.hits
-    .map((hit) => hit._source)
-    .filter((source): source is Span => {
-      if (isOtelSource(source)) {
-        return false;
-      }
+    .map((hit) => {
+      const source = isElasticApmSource(hit._source) ? hit._source : undefined;
+      const event = unflattenKnownApmEventFields(
+        hit.fields,
+        asMutableArray([TRACE_ID, PROCESSOR_EVENT, TRANSACTION_ID] as const)
+      );
+
+      return {
+        ...event,
+        span: {
+          ...event.span,
+          links: source?.span?.links ?? [],
+        },
+      };
+    })
+    .filter((source) => {
       const spanLinks = source.span?.links?.filter((spanLink) => {
         return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
       });
@@ -74,10 +87,8 @@ async function fetchLinkedChildrenOfSpan({
     });
 }
 
-function getSpanId(source: TransactionRaw | SpanRaw) {
-  return source.processor.event === ProcessorEvent.span
-    ? (source as SpanRaw).span.id
-    : (source as TransactionRaw).transaction?.id;
+function getSpanId(source: { span?: { id?: string }; transaction: { id: string } }) {
+  return source.span?.id ?? source.transaction.id;
 }
 
 export async function getSpanLinksCountById({

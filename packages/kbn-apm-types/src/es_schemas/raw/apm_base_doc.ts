@@ -14,7 +14,7 @@ export interface APMBaseDoc {
   '@timestamp': string;
   agent: {
     name: string;
-    version: string;
+    version?: string;
   };
   parent?: { id?: string }; // parent ID is not available on root transactions
   trace?: { id?: string };

@@ -20,7 +20,7 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
-import { ValuesType } from 'utility-types';
+import { Assign, ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
@@ -83,25 +83,31 @@ type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
   InferSearchResponseOf<Event, TParams>;
 
 type AssertSourceIsDefined<TSearchRequest extends APMEventESSearchRequest> =
-  TSearchRequest extends { _source: SearchSourceConfig }
+  TSearchRequest extends { _source: false }
+    ? false
+    : TSearchRequest['body'] extends { _source: false }
+    ? false
+    : TSearchRequest extends { _source: SearchSourceConfig }
     ? true
     : TSearchRequest['body'] extends { _source: SearchSourceConfig }
     ? true
     : false;
 
 type TypedSearchResponse<TSearchRequest extends APMEventESSearchRequest> = InferSearchResponseOf<
-  AssertSourceIsDefined<TSearchRequest> extends true
-    ? TypeOfProcessorEvent<
-        TSearchRequest['apm'] extends { events: ProcessorEvent[] }
-          ? ValuesType<TSearchRequest['apm']['events']>
-          : TSearchRequest['apm'] extends { sources: ApmDataSource[] }
-          ? ProcessorEventOfDocumentType<
-              ValuesType<TSearchRequest['apm']['sources']>['documentType']
-            >
-          : never
-      >
-    : undefined,
-  TSearchRequest
+  TypeOfProcessorEvent<
+    TSearchRequest['apm'] extends { events: ProcessorEvent[] }
+      ? ValuesType<TSearchRequest['apm']['events']>
+      : TSearchRequest['apm'] extends { sources: ApmDataSource[] }
+      ? ProcessorEventOfDocumentType<ValuesType<TSearchRequest['apm']['sources']>['documentType']>
+      : never
+  >,
+  AssertSourceIsDefined<TSearchRequest> extends false
+    ? Omit<TSearchRequest['body'], '_source'> &
+        Assign<
+          TSearchRequest,
+          { body: Omit<TSearchRequest['body'], '_source'> & { _source: false } }
+        >
+    : TSearchRequest
 >;
 
 interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {
