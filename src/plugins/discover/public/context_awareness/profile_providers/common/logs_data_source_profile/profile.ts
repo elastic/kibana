@@ -21,8 +21,8 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
-    getRowIndicatorProvider,
     getCellRenderers,
+    getRowIndicatorProvider,
     getRowAdditionalLeadingControls,
   },
   resolve: (params) => {
