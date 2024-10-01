@@ -150,17 +150,18 @@ export class Plugin implements InfraClientPluginClass {
             ],
             isInfrastructureHostsViewEnabled,
           ]) => {
+            const { infrastructure, logs, discover, fleet } = capabilities;
             return [
-              ...(capabilities.logs.show
+              ...(logs.show
                 ? [
                     {
                       label: logsTitle,
                       sortKey: 200,
-                      entries: getLogsNavigationEntries({ routes: logRoutes, config: this.config }),
+                      entries: getLogsNavigationEntries({ routes: logRoutes, capabilities, config: this.config }),
                     },
                   ]
                 : []),
-              ...(capabilities.infrastructure.show
+              ...(infrastructure.show
                 ? [
                     {
                       label: metricsTitle,
@@ -403,22 +404,26 @@ export class Plugin implements InfraClientPluginClass {
 }
 
 const getLogsNavigationEntries = ({
-  routes,
+  capabilities,
   config,
+  routes,
 }: {
-  routes: LogsAppRoutes;
+  capabilities: Capabilities;
   config: InfraPublicConfig;
+  routes: LogsAppRoutes;
 }) => {
   if (!config.featureFlags.logsUIEnabled) return [];
 
-  const entries: NavigationEntry[] = [
-    {
+  const entries: NavigationEntry[] = [];
+  
+  if (capabilities.discover?.show && capabilities.fleet?.read) {
+    entries.push({
       label: 'Explorer',
       app: 'observability-logs-explorer',
       path: '/',
       isBetaFeature: true,
-    },
-  ];
+    })
+  }
 
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
