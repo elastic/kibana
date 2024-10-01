@@ -2,13 +2,11 @@
   pointer-events: none;
   & { // stylelint-disable-line no-duplicate-selectors
     max-width: $euiSizeXL * 10;
+    width: max-content;
     overflow: hidden;
     padding: $euiSizeS;
   }
   table {
-    table-layout: fixed;
-    width: 100%;
-
     td,
     th {
       text-align: left;
