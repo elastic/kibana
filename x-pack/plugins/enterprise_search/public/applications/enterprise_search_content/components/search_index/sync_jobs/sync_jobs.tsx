@@ -7,9 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { Connector, SyncJobsTable } from '@kbn/search-connectors';
@@ -76,49 +77,75 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
       setSelectedSyncJobCategory('access_control');
     }
   }, [selectedIndexType]);
-
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {shouldShowAccessSyncs && (
         <>
-          <AccessControlIndexSelector
-            onChange={setSelectedIndexType}
-            valueOfSelected={selectedIndexType}
-            indexSelectorOptions={[
-              {
-                description: i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
-                  {
-                    defaultMessage: 'Browse content sync history',
-                  }
-                ),
-                error: errorOnContentSync,
-                title: i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
-                  {
-                    defaultMessage: 'Content syncs',
-                  }
-                ),
-                value: 'content-index',
-              },
-              {
-                description: i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
-                  {
-                    defaultMessage: 'Browse access control sync history',
-                  }
-                ),
-                error: errorOnAccessSync,
-                title: i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
-                  {
-                    defaultMessage: 'Access control syncs',
-                  }
-                ),
-                value: 'access-control-index',
-              },
-            ]}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: ${euiTheme.base * 18}px;
+              `}
+            >
+              <EuiToolTip
+                position="top"
+                content={
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel',
+                      {
+                        defaultMessage:
+                          'Access control syncs keep permissions information up to date for document level security (DLS)',
+                      }
+                    )}
+                  </p>
+                }
+              >
+                <AccessControlIndexSelector
+                  fullWidth
+                  onChange={setSelectedIndexType}
+                  valueOfSelected={selectedIndexType}
+                  indexSelectorOptions={[
+                    {
+                      description: i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
+                        {
+                          defaultMessage: 'Browse content sync history',
+                        }
+                      ),
+                      error: errorOnContentSync,
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
+                        {
+                          defaultMessage: 'Content syncs',
+                        }
+                      ),
+                      value: 'content-index',
+                    },
+                    {
+                      description: i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
+                        {
+                          defaultMessage: 'Browse access control sync history',
+                        }
+                      ),
+                      error: errorOnAccessSync,
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
+                        {
+                          defaultMessage: 'Access control syncs',
+                        }
+                      ),
+                      value: 'access-control-index',
+                    },
+                  ]}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           <EuiSpacer size="m" />
         </>
       )}
