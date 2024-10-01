@@ -94,7 +94,7 @@ export async function convertCSVSamples({
 
   if (tempErrors.length > 0) {
     throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered)`
+      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered, such as ${tempErrors[0]})`
     );
   }
 
@@ -111,7 +111,7 @@ export async function convertCSVSamples({
   const csvProcessor = createCSVProcessor('message', prefixedColumns);
   const csvHandlingProcessors = [csvProcessor];
 
-  if (headerColumns) {
+  if (headerColumns.length > 0) {
     const dropValues = columns.reduce((acc, column, index) => {
       if (headerColumns[index] !== undefined) {
         acc[column] = String(headerColumns[index]);
@@ -135,7 +135,7 @@ export async function convertCSVSamples({
 
   if (finalErrors.length > 0) {
     throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered)`
+      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered, such as ${finalErrors[0]})`
     );
   }
 
