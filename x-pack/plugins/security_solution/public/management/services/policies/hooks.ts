@@ -101,6 +101,6 @@ export function useBulkGetAgentPolicies({
       return (await sendBulkGetAgentPolicies({ http, requestBody: { ids: policyIds } }))?.items;
     },
 
-    { enabled: isEnabled, refetchOnWindowFocus: false }
+    { enabled: isEnabled, refetchOnWindowFocus: false, retry: 1 }
   );
 }
