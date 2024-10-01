@@ -111,7 +111,7 @@ export const enhancedEsSearchStrategyProvider = (
       asStream: options.stream,
     });
 
-    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }
 
   function asyncSearch(
