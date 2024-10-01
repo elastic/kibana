@@ -14,6 +14,6 @@ export interface HasCompressed {
 export const apiHasCompressed = (unknownApi: unknown): unknownApi is HasCompressed => {
   return (
     (unknownApi as HasCompressed).compressed !== undefined &&
-    typeof (unknownApi as HasCompressed).compressed === 'function'
+    typeof (unknownApi as HasCompressed).compressed === 'boolean'
   );
 };
