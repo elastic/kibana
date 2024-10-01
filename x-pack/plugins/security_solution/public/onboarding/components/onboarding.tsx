@@ -40,7 +40,7 @@ export const OnboardingPage = React.memo(() => {
           restrictWidth={PAGE_CONTENT_WIDTH}
           paddingSize="xl"
           bottomBorder="extended"
-          style={{ backgroundColor: euiTheme.colors.lightestShade }}
+          style={{ backgroundColor: euiTheme.colors.body }}
         >
           <OnboardingHeader />
           <OnboardingBody />
