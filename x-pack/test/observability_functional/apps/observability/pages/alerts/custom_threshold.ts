@@ -209,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('saved the rule correctly', async () => {
-      const { body: rules } = await supertest.post('/internal/alerting/rules/_find');
+      const { body: rules } = await supertest.post('/internal/alerting/rules/_find').send({});
 
       expect(rules.data.length).toEqual(1);
       expect(rules.data[0]).toEqual(
