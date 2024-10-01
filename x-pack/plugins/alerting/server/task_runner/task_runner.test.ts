@@ -83,12 +83,10 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
@@ -97,6 +95,8 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -107,7 +107,6 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 }));
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
-
 jest.mock('../monitoring/rule_result_service');
 
 jest.spyOn(getExecutorServicesModule, 'getExecutorServices');
@@ -120,6 +119,7 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
 const ruleResultService = ruleResultServiceMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -157,7 +157,6 @@ describe('Task Runner', () => {
     getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
-  const maintenanceWindowClient = maintenanceWindowClientMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
   const rulesSettingsService = rulesSettingsServiceMock.create();
 
@@ -181,12 +180,10 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
-    getMaintenanceWindowClientWithRequest: jest
-      .fn()
-      .mockReturnValue(maintenanceWindowClientMock.create()),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger,
+    maintenanceWindowsService,
     maxAlerts: 1000,
     maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry,
@@ -235,7 +232,6 @@ describe('Task Runner', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue([]);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -247,12 +243,13 @@ describe('Task Runner', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
+    });
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
-    );
-    taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
-      maintenanceWindowClient
     );
     mockedRuleTypeSavedObject.monitoring!.run.history = [];
     mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
@@ -646,6 +643,21 @@ describe('Task Runner', () => {
   );
 
   test('skips alert notification if there are active maintenance windows', async () => {
+    const mw = [
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-2',
+      } as MaintenanceWindow,
+    ];
+    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: mw,
+      maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -672,29 +684,16 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-      {
-        ...getMockMaintenanceWindow(),
-        id: 'test-id-2',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
-
-    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',
       logAlert: 2,
-      maintenanceWindowIds,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
       1,
@@ -719,6 +718,18 @@ describe('Task Runner', () => {
   });
 
   test('skips alert notification if active maintenance window contains the rule type category', async () => {
+    const mw = [
+      {
+        ...getMockMaintenanceWindow(),
+        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+    ];
+    const maintenanceWindowIds = ['test-id-1'];
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: mw,
+      maintenanceWindowsWithoutScopedQueryIds: maintenanceWindowIds,
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -745,26 +756,16 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
-
-    const maintenanceWindowIds = ['test-id-1'];
 
     testAlertingEventLogCalls({
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',
       logAlert: 2,
-      maintenanceWindowIds,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
       1,
@@ -788,6 +789,10 @@ describe('Task Runner', () => {
   });
 
   test('allows alert notification if active maintenance window does not contain the rule type category', async () => {
+    maintenanceWindowsService.getMaintenanceWindows.mockResolvedValue({
+      maintenanceWindows: [],
+      maintenanceWindowsWithoutScopedQueryIds: [],
+    });
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(
@@ -814,13 +819,6 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['something-else'] as unknown as MaintenanceWindow['categoryIds'],
-        id: 'test-id-1',
-      } as MaintenanceWindow,
-    ]);
 
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
@@ -853,67 +851,6 @@ describe('Task Runner', () => {
       })
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('should update alerts with maintenance window if scoped query matches said alerts', async () => {
-    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-
-    ruleType.executor.mockImplementation(async () => {
-      return { state: {} };
-    });
-
-    const mockMaintenanceWindows = [
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
-        id: 'test-id-1',
-      } as unknown as MaintenanceWindow,
-      {
-        ...getMockMaintenanceWindow(),
-        categoryIds: ['test'] as unknown as MaintenanceWindow['categoryIds'],
-        scopedQuery: {
-          kql: "kibana.alert.rule.name: 'test123'",
-          filters: [],
-          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
-        },
-        id: 'test-id-2',
-      } as unknown as MaintenanceWindow,
-    ];
-
-    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(
-      mockMaintenanceWindows
-    );
-
-    alertsClient.persistAlerts.mockResolvedValue({
-      alertIds: [],
-      maintenanceWindowIds: ['test-id-1', 'test-id-2'],
-    });
-
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
-
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    await taskRunner.run();
-    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
-
-    expect(alertsClient.persistAlerts).toHaveBeenLastCalledWith(mockMaintenanceWindows);
-
-    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['test-id-1']);
-    expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith([
-      'test-id-1',
-      'test-id-2',
-    ]);
   });
 
   test.each(ephemeralTestParams)(

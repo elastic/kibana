@@ -2081,7 +2081,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
       await appContextService
@@ -2147,7 +2151,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             soClient,
             esClient,
             packagePolicy.id,
-            getPackagePolicyUpdate(packagePolicy)
+            getPackagePolicyUpdate(packagePolicy),
+            {
+              force: options?.force,
+            }
           );
         },
         {

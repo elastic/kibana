@@ -867,7 +867,11 @@ class AgentPolicyService {
    * @param esClient
    * @param outputId
    */
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
       await appContextService
@@ -920,6 +924,7 @@ class AgentPolicyService {
           );
           return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
+            force: options?.force,
           });
         },
         {
