@@ -13,13 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
-import { getVendorName } from '../../../common/utils/get_vendor_name';
 import {
   OPEN_FINDINGS_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
