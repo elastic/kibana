@@ -60,7 +60,7 @@ describe('PackagePolicyAgentsCell', () => {
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
     });
 
-    test('it should display add agent if count is 0', async () => {
+    test('it should display add agent button if count is 0', async () => {
       const utils = renderCell({
         agentPolicies: [
           {
@@ -108,20 +108,6 @@ describe('PackagePolicyAgentsCell', () => {
       });
     });
 
-    test('it should not display add agent if policy is managed', async () => {
-      const utils = renderCell({
-        agentPolicies: [
-          {
-            name: 'test Policy 1',
-            is_managed: true,
-          } as AgentPolicy,
-        ],
-      });
-      await act(async () => {
-        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
-      });
-    });
-
     test('it should display help popover if count = 0 and hasHelpPopover=true', async () => {
       const utils = renderCell({
         hasHelpPopover: true,
@@ -139,23 +125,48 @@ describe('PackagePolicyAgentsCell', () => {
         ).toBeInTheDocument();
       });
     });
-  });
-  describe('when multiple agent policies is enabled', () => {
-    beforeEach(() => {
-      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+
+    test('it should not display add agent button if policy is managed', async () => {
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+            agents: 999,
+            is_managed: true,
+          } as AgentPolicy,
+        ],
+      });
+      utils.debug();
+      await act(async () => {
+        expect(utils.queryByText('Add agent')).not.toBeInTheDocument();
+        expect(utils.queryByTestId('LinkedAgentCountLink')).toBeInTheDocument();
+        expect(utils.queryByText('999')).toBeInTheDocument();
+      });
     });
 
-    test('it should be disabled if canAddAgents is false', async () => {
+    test('Add agent button should be disabled if canAddAgents is false', async () => {
       jest.mocked(useAuthz).mockReturnValue({
         fleet: {
           addAgents: false,
         },
       } as any);
 
-      const utils = renderCell({});
+      const utils = renderCell({
+        agentPolicies: [
+          {
+            name: 'test Policy 1',
+          } as AgentPolicy,
+        ],
+      });
       await act(async () => {
         expect(utils.container.querySelector('[data-test-subj="addAgentButton"]')).toBeDisabled();
       });
+    });
+  });
+
+  describe('when multiple agent policies is enabled', () => {
+    beforeEach(() => {
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
     });
 
     test('it should display agent count sum and popover if agent count > 0', async () => {
