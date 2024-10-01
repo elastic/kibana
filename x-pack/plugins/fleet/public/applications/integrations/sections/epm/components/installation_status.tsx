@@ -14,6 +14,10 @@ import { css } from '@emotion/react';
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
 
+const installedLabel = i18n.translate('xpack.fleet.packageCard.installedLabel', {
+  defaultMessage: 'Installed',
+});
+
 const installStatusMapToColor: Record<
   string,
   { color: 'success' | 'warning'; iconType: string; title: string }
@@ -21,16 +25,12 @@ const installStatusMapToColor: Record<
   installed: {
     color: 'success',
     iconType: 'check',
-    title: i18n.translate('xpack.fleet.packageCard.installedLabel', {
-      defaultMessage: 'Installed',
-    }),
+    title: installedLabel,
   },
   install_failed: {
     color: 'warning',
     iconType: 'warning',
-    title: i18n.translate('xpack.fleet.packageCard.installFailedLabel', {
-      defaultMessage: 'Install Failed',
-    }),
+    title: installedLabel,
   },
 };
 
