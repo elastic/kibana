@@ -131,7 +131,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             children: [
               {
                 children: [
-                  { link: 'metrics:inventory' },
+                  {
+                    link: 'metrics:inventory',
+                    title: i18n.translate('xpack.observability.infrastructure.inventory', {
+                      defaultMessage: 'Infrastructure inventory',
+                    }),
+                  },
                   { link: 'metrics:hosts' },
                   {
                     link: 'metrics:metrics-explorer',
