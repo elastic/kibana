@@ -55,6 +55,7 @@ export interface UsageStats {
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
   'observability:logSources': string[];
+  'observability:enableLogsStream': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
