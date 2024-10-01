@@ -147,10 +147,12 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                 ];
 
           const securityLabsBucket = find(
-            (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
-              ?.kb_resource_aggregation as {
-              buckets: estypes.AggregationsBuckets;
-            },
+            (
+              (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
+                ?.kb_resource_aggregation as {
+                buckets: estypes.AggregationsBuckets;
+              }
+            )?.buckets,
             ['key', SECURITY_LABS_RESOURCE]
           ) as {
             doc_count: number;
