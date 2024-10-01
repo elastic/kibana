@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { act } from "react-dom/test-utils";
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
