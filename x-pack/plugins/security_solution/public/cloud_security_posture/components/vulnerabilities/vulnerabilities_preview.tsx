@@ -51,7 +51,7 @@ const getVulnerabilityStats = (
         }
       ),
       count: unknown,
-      color: euiThemeVars.euiColorSuccess,
+      color: '#aaa',
     });
   if (low > 0)
     vulnPropsArray.push({
