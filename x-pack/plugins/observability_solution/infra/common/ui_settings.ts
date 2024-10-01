@@ -22,7 +22,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: false,
     description: i18n.translate('xpack.infra.enableLogsStreamDescription', {
       defaultMessage:
-        'Enables the legacy Logs Stream application. When enabled, the dashboard panel for legacy logs streams is also available. ',
+          'Enables the legacy Logs Stream application and dashboard panel. ',
     }),
     type: 'boolean',
     schema: schema.boolean(),
