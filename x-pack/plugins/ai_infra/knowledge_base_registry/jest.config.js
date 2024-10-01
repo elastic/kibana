@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../..',
   roots: [
     '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/public',
     '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/server',
