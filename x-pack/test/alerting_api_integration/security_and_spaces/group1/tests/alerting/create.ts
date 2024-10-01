@@ -40,6 +40,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
       const { user, space } = scenario;
+
       describe(scenario.id, () => {
         it('should handle create alert request appropriately', async () => {
           const { body: createdAction } = await supertest
@@ -139,6 +140,224 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+              expect(JSON.parse(taskRecord.task.params)).to.eql({
+                alertId: response.body.id,
+                spaceId: space.id,
+                consumer: 'alertsFixture',
+              });
+              expect(taskRecord.task.enabled).to.eql(true);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: RULE_SAVED_OBJECT_TYPE,
+                id: response.body.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request with conditional action with composed filter', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.always-firing-alert-as-data',
+                throttle: null,
+                notify_when: undefined,
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'test',
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                    frequency: {
+                      summary: false,
+                      notify_when: 'onActionGroupChange',
+                      throttle: null,
+                    },
+                    alerts_filter: {
+                      query: {
+                        filters: [
+                          {
+                            meta: {
+                              alias: null,
+                              disabled: false,
+                              negate: false,
+                              params: [
+                                {
+                                  meta: {
+                                    field: 'kibana.alert.action_group',
+                                    key: 'kibana.alert.action_group',
+                                    negate: false,
+                                    type: 'exists',
+                                    value: 'exists',
+                                  },
+                                  query: { exists: { field: 'kibana.alert.action_group' } },
+                                },
+                                {
+                                  meta: {
+                                    field: 'kibana.alert.case_ids',
+                                    key: 'kibana.alert.case_ids',
+                                    negate: false,
+                                    type: 'exists',
+                                    value: 'exists',
+                                  },
+                                  query: { exists: { field: 'kibana.alert.case_ids' } },
+                                },
+                              ],
+                              relation: 'AND',
+                              type: 'combined',
+                            },
+                          },
+                        ],
+                        kql: '',
+                      },
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing-alert-as-data',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
+              expect(response.body).to.eql({
+                id: response.body.id,
+                name: 'abc',
+                tags: ['foo'],
+                actions: [
+                  {
+                    id: createdAction.id,
+                    connector_type_id: createdAction.connector_type_id,
+                    group: 'default',
+                    params: {},
+                    uuid: response.body.actions[0].uuid,
+                    frequency: {
+                      summary: false,
+                      notify_when: 'onActionGroupChange',
+                      throttle: null,
+                    },
+                    alerts_filter: {
+                      query: {
+                        filters: [
+                          {
+                            meta: {
+                              alias: null,
+                              disabled: false,
+                              negate: false,
+                              params: [
+                                {
+                                  meta: {
+                                    field: 'kibana.alert.action_group',
+                                    key: 'kibana.alert.action_group',
+                                    negate: false,
+                                    type: 'exists',
+                                    value: 'exists',
+                                  },
+                                  query: { exists: { field: 'kibana.alert.action_group' } },
+                                },
+                                {
+                                  meta: {
+                                    field: 'kibana.alert.case_ids',
+                                    key: 'kibana.alert.case_ids',
+                                    negate: false,
+                                    type: 'exists',
+                                    value: 'exists',
+                                  },
+                                  query: { exists: { field: 'kibana.alert.case_ids' } },
+                                },
+                              ],
+                              relation: 'AND',
+                              type: 'combined',
+                            },
+                          },
+                        ],
+                        kql: '',
+                      },
+                    },
+                  },
+                ],
+                enabled: true,
+                rule_type_id: 'test.always-firing-alert-as-data',
+                running: false,
+                consumer: 'alertsFixture',
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference: 'test',
+                },
+                created_by: user.username,
+                schedule: { interval: '1m' },
+                scheduled_task_id: response.body.scheduled_task_id,
+                created_at: response.body.created_at,
+                updated_at: response.body.updated_at,
+                throttle: null,
+                notify_when: null,
+                updated_by: user.username,
+                api_key_owner: user.username,
+                api_key_created_by_user: false,
+                mute_all: false,
+                muted_alert_ids: [],
+                execution_status: response.body.execution_status,
+                revision: 0,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+              });
+              expect(typeof response.body.scheduled_task_id).to.be('string');
+              expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
+
+              const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
+              expect(taskRecord.type).to.eql('task');
+              expect(taskRecord.task.taskType).to.eql('alerting:test.always-firing-alert-as-data');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: response.body.id,
                 spaceId: space.id,
