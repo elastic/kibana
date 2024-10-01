@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardPanelStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const successBackgroundColor = useEuiBackgroundColor('success');
+  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
   return css`
     .onboardingCardHeader {
@@ -22,7 +23,7 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${euiTheme.colors.lightestShade};
+      background-color: ${isDarkMode ? euiTheme.colors.body : euiTheme.colors.lightestShade};
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
