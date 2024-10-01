@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldNumber,
@@ -87,12 +87,6 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   } = useKibana().services;
 
   const [isFlappingTitlePopoverOpen, setIsFlappingTitlePopoverOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    return () => {
-      setIsFlappingTitlePopoverOpen(false);
-    };
-  }, []);
 
   const { data: spaceFlappingSettings, isInitialLoading } = useFetchFlappingSettings({
     http,
