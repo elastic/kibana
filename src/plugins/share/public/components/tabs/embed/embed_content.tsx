@@ -30,7 +30,6 @@ type EmbedProps = Pick<
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'isEmbedded'
   | 'embedUrlParamExtensions'
   | 'objectType'
 > & {
@@ -52,7 +51,6 @@ export const EmbedContent = ({
   embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
-  isEmbedded,
   objectType,
   setIsNotSaved,
 }: EmbedProps) => {
@@ -101,11 +99,11 @@ export const EmbedContent = ({
 
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
-      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
+      tempUrl = makeUrlEmbeddable(tempUrl);
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       return tempUrl;
     },
-    [makeUrlEmbeddable, getUrlParamExtensions, urlParams, isEmbedded]
+    [makeUrlEmbeddable, getUrlParamExtensions, urlParams]
   );
 
   const getSnapshotUrl = useCallback(
@@ -192,16 +190,14 @@ export const EmbedContent = ({
       tempUrl = addUrlAnonymousAccessParameters(tempUrl!);
     }
 
-    if (isEmbedded) {
-      tempUrl = makeIframeTag(tempUrl!);
-    }
+    tempUrl = makeIframeTag(tempUrl!);
+
     setUrl(tempUrl!);
   }, [
     addUrlAnonymousAccessParameters,
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
-    isEmbedded,
     shortUrlCache,
     useShortUrl,
   ]);
