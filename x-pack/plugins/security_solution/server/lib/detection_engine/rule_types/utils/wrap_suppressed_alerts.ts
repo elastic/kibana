@@ -155,7 +155,7 @@ export const wrapSuppressedSequenceAlerts = ({
       });
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      const alertGroupFromSequence = buildAlertGroupFromSequence(
+      const alertGroupFromSequence = buildAlertGroupFromSequence({
         ruleExecutionLogger,
         sequence,
         completeRule,
@@ -164,8 +164,8 @@ export const wrapSuppressedSequenceAlerts = ({
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
-        true,
-        getSuppressionAlertFields({
+        applyOverrides: true,
+        extraFieldsForShellAlert: getSuppressionAlertFields({
           primaryTimestamp,
           secondaryTimestamp,
           fields,
@@ -173,8 +173,8 @@ export const wrapSuppressedSequenceAlerts = ({
           fallbackTimestamp: alertTimestampOverride?.toISOString() ?? new Date().toISOString(),
           instanceId,
         }),
-        publicBaseUrl
-      );
+        publicBaseUrl,
+      });
 
       return [...acc, ...alertGroupFromSequence] as Array<
         WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>
