@@ -7,8 +7,8 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { mockHistoricalResult } from '../../../../../../mock/historical_results/mock_historical_results_response';
-import { TestDataQualityProviders } from '../../../../../../mock/test_providers/test_providers';
+import { mockHistoricalResult } from '../../../../../mock/historical_results/mock_historical_results_response';
+import { TestDataQualityProviders } from '../../../../../mock/test_providers/test_providers';
 import * as fetchHistoricalResults from './utils/fetch_historical_results';
 import { useHistoricalResults } from '.';
 

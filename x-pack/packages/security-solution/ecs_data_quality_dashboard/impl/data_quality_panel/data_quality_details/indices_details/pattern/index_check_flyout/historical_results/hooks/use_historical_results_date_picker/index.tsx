@@ -12,7 +12,7 @@ import { useAbortControllerRef } from '../../../../../../../hooks/use_abort_cont
 import { useIsMountedRef } from '../../../../../../../hooks/use_is_mounted_ref';
 import { FetchHistoricalResultsQueryState } from '../../../types';
 import { FetchHistoricalResultsQueryAction } from '../../types';
-import { useHistoricalResultsContext } from '../../../contexts/historical_results_context';
+import { useHistoricalResultsContext } from '../../../../contexts/historical_results_context';
 
 export interface UseHistoricalResultsDatePickerOpts {
   indexName: string;

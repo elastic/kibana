@@ -7,14 +7,14 @@
 
 import { HttpFetchQuery } from '@kbn/core-http-browser';
 
-import { HistoricalResult } from '../../../../../../../types';
-import { INTERNAL_API_VERSION } from '../../../../../../../constants';
+import { HistoricalResult } from '../../../../../../types';
+import { INTERNAL_API_VERSION } from '../../../../../../constants';
 import { GET_INDEX_RESULTS } from '../constants';
 import {
   DEFAULT_HISTORICAL_RESULTS_START_DATE,
   DEFAULT_HISTORICAL_RESULTS_END_DATE,
-} from '../../../constants';
-import { FetchHistoricalResultsOpts } from '../../../types';
+} from '../../../index_check_flyout/constants';
+import { FetchHistoricalResultsOpts } from '../../../index_check_flyout/types';
 
 export interface FetchHistoricalResultsResponse {
   data: HistoricalResult[];

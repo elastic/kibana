@@ -17,7 +17,7 @@ import {
 import React, { FC, useMemo, useReducer } from 'react';
 
 import { useDataQualityContext } from '../../../../../data_quality_context';
-import { useHistoricalResultsContext } from '../contexts/historical_results_context';
+import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
 import {
   DEFAULT_HISTORICAL_RESULTS_END_DATE,
   DEFAULT_HISTORICAL_RESULTS_START_DATE,
@@ -54,9 +54,10 @@ const itemsPerPageOptions = [10, 25, 50];
 
 export interface Props {
   indexName: string;
+  latestCheckExists: boolean;
 }
 
-export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
+export const HistoricalResultsComponent: FC<Props> = ({ indexName, latestCheckExists }) => {
   const { formatNumber, isILMAvailable } = useDataQualityContext();
 
   // Manages state for the fetch historical results query object
@@ -164,7 +165,7 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
         {totalChecksText}
       </StyledText>
       <div id={historicalResultsListId}>
-        <HistoricalResultsList indexName={indexName} />
+        <HistoricalResultsList indexName={indexName} latestCheckExists={latestCheckExists} />
       </div>
       {paginationState.pageCount > 1 ? (
         <div data-test-subj="historicalResultsPagination">

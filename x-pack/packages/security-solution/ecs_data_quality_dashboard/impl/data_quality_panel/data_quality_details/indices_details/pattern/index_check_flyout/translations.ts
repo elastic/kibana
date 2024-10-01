@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CHECK_NOW: string = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.checkNowButton',
-  {
-    defaultMessage: 'Check now',
-  }
-);
-
 export const HISTORY = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.historyTab',
   {

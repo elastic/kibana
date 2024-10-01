@@ -21,7 +21,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { useAbortControllerRef } from '../../../../hooks/use_abort_controller_ref';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
@@ -30,12 +30,13 @@ import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
-import { CHECK_NOW, HISTORY, LATEST_CHECK } from './translations';
+import { HISTORY, LATEST_CHECK } from './translations';
 import { LatestResults } from './latest_results';
 import { HistoricalResults } from './historical_results';
-import { HistoricalResultsContext } from './contexts/historical_results_context';
-import { useHistoricalResults } from './hooks/use_historical_results';
+import { useHistoricalResultsContext } from '../contexts/historical_results_context';
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
+import { CHECK_NOW } from '../translations';
+import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -44,28 +45,33 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
+  initialSelectedTabId: typeof HISTORY_TAB_ID | typeof LATEST_CHECK_TAB_ID;
 }
+
+type TabId = typeof HISTORY_TAB_ID | typeof LATEST_CHECK_TAB_ID;
 
 const tabs = [
   {
-    id: LATEST_CHECK,
+    id: LATEST_CHECK_TAB_ID,
     name: LATEST_CHECK,
   },
   {
-    id: HISTORY,
+    id: HISTORY_TAB_ID,
     name: HISTORY,
   },
-];
+] as const;
 
 export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   ilmExplain,
   indexName,
+  initialSelectedTabId,
   pattern,
   patternRollup,
   stats,
   onClose,
 }) => {
-  const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
+  const didSwitchToLatestTabOnceRef = useRef(false);
+  const { fetchHistoricalResults } = useHistoricalResultsContext();
   const currentWindowWidth = useCurrentWindowWidth();
   const isLargeScreen = currentWindowWidth > 1720;
   const isMediumScreen = currentWindowWidth > 1200;
@@ -78,25 +84,64 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   const indexCheckFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'indexCheckFlyoutTitle',
   });
-  const [selectedTabId, setSelectedTabId] = useState(LATEST_CHECK);
-  const checkIndexAbortControllerRef = useAbortControllerRef();
+  const [selectedTabId, setSelectedTabId] = useState(initialSelectedTabId);
+  const checkNowButtonAbortControllerRef = useAbortControllerRef();
+  const checkLatestTabAbortControllerRef = useAbortControllerRef();
   const fetchHistoricalResultsAbortControllerRef = useAbortControllerRef();
+
+  const handleTabClick = useCallback(
+    (tabId: TabId) => {
+      if (tabId === HISTORY_TAB_ID) {
+        fetchHistoricalResults({
+          abortController: fetchHistoricalResultsAbortControllerRef.current,
+          indexName,
+        });
+        setSelectedTabId(tabId);
+      }
+
+      if (tabId === LATEST_CHECK_TAB_ID) {
+        if (!didSwitchToLatestTabOnceRef.current) {
+          didSwitchToLatestTabOnceRef.current = true;
+          checkIndex({
+            abortController: checkLatestTabAbortControllerRef.current,
+            indexName,
+            pattern,
+            httpFetch,
+            formatBytes,
+            formatNumber,
+          });
+        }
+        setSelectedTabId(tabId);
+      }
+    },
+    [
+      checkIndex,
+      checkLatestTabAbortControllerRef,
+      fetchHistoricalResults,
+      fetchHistoricalResultsAbortControllerRef,
+      formatBytes,
+      formatNumber,
+      httpFetch,
+      indexName,
+      pattern,
+    ]
+  );
 
   const handleCheckNow = useCallback(() => {
     checkIndex({
-      abortController: checkIndexAbortControllerRef.current,
+      abortController: checkNowButtonAbortControllerRef.current,
       indexName,
       pattern,
       httpFetch,
       formatBytes,
       formatNumber,
     });
-    if (selectedTabId === HISTORY) {
-      setSelectedTabId(LATEST_CHECK);
+    if (selectedTabId === HISTORY_TAB_ID) {
+      setSelectedTabId(LATEST_CHECK_TAB_ID);
     }
   }, [
     checkIndex,
-    checkIndexAbortControllerRef,
+    checkNowButtonAbortControllerRef,
     formatBytes,
     formatNumber,
     httpFetch,
@@ -107,22 +152,18 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
 
   const renderTabs = useMemo(
     () =>
-      tabs.map((tab, index) => (
-        <EuiTab
-          onClick={() => {
-            fetchHistoricalResults({
-              abortController: fetchHistoricalResultsAbortControllerRef.current,
-              indexName,
-            });
-            setSelectedTabId(tab.id);
-          }}
-          isSelected={tab.id === selectedTabId}
-          key={index}
-        >
-          {tab.name}
-        </EuiTab>
-      )),
-    [fetchHistoricalResults, fetchHistoricalResultsAbortControllerRef, indexName, selectedTabId]
+      tabs.map((tab, index) => {
+        return (
+          <EuiTab
+            onClick={() => handleTabClick(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+          >
+            {tab.name}
+          </EuiTab>
+        );
+      }),
+    [handleTabClick, selectedTabId]
   );
 
   return (
@@ -154,23 +195,16 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
           <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <HistoricalResultsContext.Provider
-            value={{
-              fetchHistoricalResults,
-              historicalResultsState,
-            }}
-          >
-            {selectedTabId === LATEST_CHECK ? (
-              <LatestResults
-                indexName={indexName}
-                stats={stats}
-                ilmExplain={ilmExplain}
-                patternRollup={patternRollup}
-              />
-            ) : (
-              <HistoricalResults indexName={indexName} />
-            )}
-          </HistoricalResultsContext.Provider>
+          {selectedTabId === LATEST_CHECK_TAB_ID ? (
+            <LatestResults
+              indexName={indexName}
+              stats={stats}
+              ilmExplain={ilmExplain}
+              patternRollup={patternRollup}
+            />
+          ) : (
+            <HistoricalResults indexName={indexName} latestCheckExists={Boolean(indexResult)} />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">

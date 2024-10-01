@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { INTERNAL_API_VERSION } from '../../../../../../../constants';
+import { INTERNAL_API_VERSION } from '../../../../../../constants';
 import {
   DEFAULT_HISTORICAL_RESULTS_END_DATE,
   DEFAULT_HISTORICAL_RESULTS_START_DATE,
-} from '../../../constants';
+} from '../../../index_check_flyout/constants';
 import { fetchHistoricalResults } from './fetch_historical_results';
 
 const indexName = 'test-index';

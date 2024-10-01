@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HistoricalResult } from '../../../../../../../types';
+import { HistoricalResult } from '../../../../../../types';
 import { FetchHistoricalResultsReducerState } from '../types';
 
 type Action =

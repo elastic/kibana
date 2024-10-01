@@ -61,3 +61,10 @@ export const CHECK_INDEX = i18n.translate(
     defaultMessage: 'Check index',
   }
 );
+
+export const VIEW_CHECK_HISTORY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.viewCheckHistory',
+  {
+    defaultMessage: 'View check history',
+  }
+);
