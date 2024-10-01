@@ -59,7 +59,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     // side nav related actions
     sidenav: {
       async expectLinkExists(
-        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+        by:
+          | { deepLinkId: AppDeepLinkId }
+          | { navId: string }
+          | { text: string }
+          | { panelNavLinkId: string }
       ) {
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
@@ -67,6 +71,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         } else if ('navId' in by) {
           await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
+        } else if ('panelNavLinkId' in by) {
+          await testSubjects.existOrFail(`~panelNavItem-id-${by.panelNavLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }

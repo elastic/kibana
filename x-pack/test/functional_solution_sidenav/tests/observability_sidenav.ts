@@ -82,6 +82,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
+        // check Other Tools section
+        await solutionNavigation.sidenav.openPanel('otherTools', { button: 'link' });
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('otherTools');
+          expect(isOpen).to.be(true);
+        }
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'logs:anomalies',
+        });
+
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'logs:log-categories',
+        });
+
+        await solutionNavigation.sidenav.clickPanelLink('visualize');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Visualize library',
+        });
+
+        // check Machine Learning section
+        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
+        {
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
+          expect(isOpen).to.be(true);
+        }
+
+        await solutionNavigation.sidenav.clickPanelLink('ml:suppliedConfigurations');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Supplied configurations',
+        });
+
         // navigate to a different section
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');
         await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
