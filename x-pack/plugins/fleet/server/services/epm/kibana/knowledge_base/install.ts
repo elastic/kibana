@@ -114,7 +114,7 @@ async function installKibanaKnowledgeBaseEntry(
     knowledgeBaseEntrySavedObjectType,
     {
       // TODO: update the props to the full set once the KB PR has been merged
-      name: entry.manifest.name,
+      name: entry.manifest.title,
       type: 'index',
       description: entry.manifest.description,
     },

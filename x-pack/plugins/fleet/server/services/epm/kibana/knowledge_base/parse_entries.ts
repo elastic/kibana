@@ -25,7 +25,7 @@ export const parseKnowledgeBaseEntries = (
 };
 
 interface KnowledgeBaseEntryManifest {
-  name: string;
+  title: string;
   description: string;
   index: {
     system: boolean;
