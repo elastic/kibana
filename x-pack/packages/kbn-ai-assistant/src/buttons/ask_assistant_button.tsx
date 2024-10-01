@@ -39,10 +39,6 @@ export type AskAssistantButtonProps = (
   onClick: () => void;
 };
 
-const AI_ASSISTANT_LABEL = i18n.translate('xpack.aiAssistant.aiAssistantLabel', {
-  defaultMessage: 'AI Assistant',
-});
-
 export function AskAssistantButton({
   fill,
   flush,
@@ -52,6 +48,10 @@ export function AskAssistantButton({
 }: AskAssistantButtonProps) {
   const buttonLabel = i18n.translate('xpack.aiAssistant.askAssistantButton.buttonLabel', {
     defaultMessage: 'Ask Assistant',
+  });
+
+  const aiAssistantLabel = i18n.translate('xpack.aiAssistant.aiAssistantLabel', {
+    defaultMessage: 'AI Assistant',
   });
 
   switch (variant) {
@@ -85,13 +85,13 @@ export function AskAssistantButton({
       return (
         <EuiToolTip
           position="top"
-          title={AI_ASSISTANT_LABEL}
+          title={aiAssistantLabel}
           content={i18n.translate('xpack.aiAssistant.askAssistantButton.popoverContent', {
             defaultMessage: 'Get insights into your data with the Elastic Assistant',
           })}
         >
           <EuiButtonIcon
-            aria-label={AI_ASSISTANT_LABEL}
+            aria-label={aiAssistantLabel}
             data-test-subj="observabilityAiAssistantAskAssistantButtonButtonIcon"
             display={fill ? 'fill' : 'base'}
             iconType="sparkles"
