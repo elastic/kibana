@@ -144,8 +144,7 @@ describe('Discover documents layout', () => {
       const discoverGridComponent = component.find(DiscoverGrid);
       expect(discoverGridComponent.exists()).toBeTruthy();
       expect(Object.keys(discoverGridComponent.prop('externalCustomRenderers')!)).toEqual([
-        'content',
-        'resource',
+        '_source',
         'rootProfile',
       ]);
     });
