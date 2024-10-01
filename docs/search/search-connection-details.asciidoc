@@ -54,7 +54,7 @@ image::click-create-api-key.png[width=750]
 
 . Navigate to the serverless project's home page.
 . Scroll down to the *Copy your connection details* section, and copy the *Elasticsearch endpoint*.
-
++
 [.screenshot]
 image::serverless-connection-details.png[width=750]
 
