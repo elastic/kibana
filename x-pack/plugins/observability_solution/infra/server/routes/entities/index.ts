@@ -6,8 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { METRICS_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
+import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getLatestEntity } from './get_latest_entity';
 
@@ -31,6 +32,8 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
     async (requestContext, request, response) => {
       const { entityId, entityType } = request.params;
       const coreContext = await requestContext.core;
+      const infraContext = await requestContext.infra;
+      const entityManager = await infraContext.entityManager.getScopedClient({ request });
 
       const client = createObservabilityEsClient({
         client: coreContext.elasticsearch.client.asCurrentUser,
@@ -39,11 +42,27 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
       });
 
       try {
-        const entity = await getLatestEntity({ inventoryEsClient: client, entityId, entityType });
+        // Only fetch built in definitions
+        const { definitions } = await entityManager.getEntityDefinitions({
+          builtIn: true,
+          type: entityType,
+        });
+        if (definitions.length === 0) {
+          return response.ok({
+            body: { sourceDataStreams: [], entityId, entityType },
+          });
+        }
+
+        const entity = await getLatestEntity({
+          inventoryEsClient: client,
+          entityId,
+          entityType,
+          entityDefinitions: definitions,
+        });
 
         return response.ok({
           body: {
-            sourceDataStreams: [entity?.['source_data_stream.type'] || []].flat() as string[],
+            sourceDataStreams: [entity?.[SOURCE_DATA_STREAM_TYPE] || []].flat() as string[],
             entityId,
             entityType,
           },

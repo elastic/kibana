@@ -6,8 +6,12 @@
  */
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  ENTITY,
+  ENTITY_TYPE,
+  SOURCE_DATA_STREAM_TYPE,
+} from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
-import { ENTITY, ENTITY_TYPE, SOURCE_DATA_STREAM_TYPE } from '../../../common/es_fields/entities';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { entitiesRangeQuery } from './get_entities';

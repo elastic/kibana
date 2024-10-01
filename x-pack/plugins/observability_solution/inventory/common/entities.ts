@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
-import { isRight } from 'fp-ts/lib/Either';
 import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
   CONTAINER_ID,
-  HOST_NAME,
-} from '@kbn/observability-shared-plugin/common';
-import {
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from './es_fields/entities';
+  HOST_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '@kbn/observability-shared-plugin/common';
+import { isRight } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 
 export const entityTypeRt = t.union([
   t.literal('service'),

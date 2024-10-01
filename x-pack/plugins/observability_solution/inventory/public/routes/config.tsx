@@ -8,7 +8,7 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { ENTITY_LAST_SEEN } from '../../common/es_fields/entities';
+import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
 import { InventoryPage } from '../pages/inventory_page';
 import { entityTypesRt } from '../../common/entities';

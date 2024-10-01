@@ -296,6 +296,7 @@ export class InfraServerPlugin
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
         const uiSettingsClient = coreContext.uiSettings.client;
+        const entityManager = await this.libs.plugins.entityManager.start();
 
         const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
@@ -317,6 +318,7 @@ export class InfraServerPlugin
           savedObjectsClient,
           uiSettingsClient,
           getMetricsIndices,
+          entityManager,
         };
       }
     );
