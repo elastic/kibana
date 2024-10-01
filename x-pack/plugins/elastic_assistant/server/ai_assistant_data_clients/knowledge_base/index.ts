@@ -15,6 +15,7 @@ import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   DocumentEntryType,
+  DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
@@ -429,6 +430,47 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
+   * Returns all global and current user's private `required` document entries.
+   */
+  public getRequiredKnowledgeBaseDocumentEntries = async (): Promise<DocumentEntry[]> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    try {
+      const userFilter = getKBUserFilter(user);
+      const results = await this.findDocuments<EsIndexEntry>({
+        // Note: This is a magic number to set some upward bound as to not blow the context with too
+        // many historical KB entries. Ideally we'd query for all and token trim.
+        perPage: 100,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        filter: `${userFilter} AND type:document AND kb_resource:user AND required:true`,
+      });
+      this.options.logger.debug(
+        `kbDataClient.getRequiredKnowledgeBaseDocumentEntries() - results:\n${JSON.stringify(
+          results
+        )}`
+      );
+
+      if (results) {
+        return transformESSearchToKnowledgeBaseEntry(results.data) as DocumentEntry[];
+      }
+    } catch (e) {
+      this.options.logger.error(
+        `kbDataClient.getRequiredKnowledgeBaseDocumentEntries() - Failed to fetch DocumentEntries`
+      );
+      return [];
+    }
+
+    return [];
+  };
+
+  /**
    * Creates a new Knowledge Base Entry.
    *
    * @param knowledgeBaseEntry
@@ -466,7 +508,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base
+   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base.
+   *
+   * Note: Accepts esClient so retrieval can be scoped to the current user as esClient on kbDataClient
+   * is scoped to system user.
    */
   public getAssistantTools = async ({
     assistantToolParams,
@@ -494,7 +539,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         page: 1,
         sortField: 'created_at',
         sortOrder: 'asc',
-        filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
+        filter: `${userFilter} AND type:index`,
       });
       this.options.logger.debug(
         `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`

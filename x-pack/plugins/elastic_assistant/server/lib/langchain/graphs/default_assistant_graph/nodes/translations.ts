@@ -8,8 +8,10 @@
 const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT =
   'You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security.';
 const IF_YOU_DONT_KNOW_THE_ANSWER = 'Do not answer questions unrelated to Elastic Security.';
+export const KNOWLEDGE_HISTORY =
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
 
-export const DEFAULT_SYSTEM_PROMPT = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}`;
+export const DEFAULT_SYSTEM_PROMPT = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER} ${KNOWLEDGE_HISTORY}`;
 
 export const GEMINI_SYSTEM_PROMPT =
   `ALWAYS use the provided tools, as they have access to the latest data and syntax.` +

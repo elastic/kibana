@@ -26,13 +26,10 @@ export const useKnowledgeBaseTable = () => {
 
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
-      if (entry.kbResource === 'user') {
-        return 'userAvatar';
-      }
       if (entry.kbResource === 'esql') {
         return 'logoElastic';
       }
-      return 'visText';
+      return 'document';
     } else if (entry.type === IndexEntryType.value) {
       return 'index';
     }

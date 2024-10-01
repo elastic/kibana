@@ -10,11 +10,13 @@ import {
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
+  KNOWLEDGE_HISTORY,
 } from './nodes/translations';
 
 export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
     ['placeholder', '{agent_scratchpad}'],
@@ -24,7 +26,7 @@ export const systemPrompts = {
   openai: DEFAULT_SYSTEM_PROMPT,
   bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
   gemini: `${DEFAULT_SYSTEM_PROMPT} ${GEMINI_SYSTEM_PROMPT}`,
-  structuredChat: `Respond to the human as helpfully and accurately as possible. You have access to the following tools:
+  structuredChat: `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} You have access to the following tools:
 
 {tools}
 
@@ -90,6 +92,7 @@ export const geminiToolCallingAgentPrompt = formatPrompt(systemPrompts.gemini);
 export const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
     ['placeholder', '{chat_history}'],
     [
       'human',
