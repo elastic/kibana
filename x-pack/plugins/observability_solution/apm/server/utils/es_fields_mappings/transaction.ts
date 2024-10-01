@@ -106,7 +106,6 @@ export const transactionMapping = (fields: Fields) => {
       us: normalizeValue<number>(fields[TIMESTAMP]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
-    // todo check for labels before mapping
     ...(isOptionalFieldDefined(fields, 'labels.')
       ? {
           labels: {
