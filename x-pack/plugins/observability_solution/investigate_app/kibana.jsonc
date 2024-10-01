@@ -28,7 +28,7 @@
       "kibanaReact",
       "kibanaUtils",
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }

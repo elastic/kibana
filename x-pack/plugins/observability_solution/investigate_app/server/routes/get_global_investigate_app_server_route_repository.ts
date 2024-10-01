@@ -46,7 +46,7 @@ import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
-import { getEntitiesWithSampledDocuments } from '../services/get_entities';
+import { getEntitiesWithSource } from '../services/get_entities';
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
@@ -366,7 +366,7 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
       'host.name': hostName,
     } = params?.query ?? {};
 
-    const { entities } = await getEntitiesWithSampledDocuments({
+    const { entities } = await getEntitiesWithSource({
       context,
       serviceName,
       serviceEnvironment,

@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { entityWithSampleDocumentsSchema } from './entity';
+import { entityWithSourceSchema } from './entity';
 
 const getEntitiesParamsSchema = z
   .object({
@@ -24,7 +24,7 @@ const getEntitiesParamsSchema = z
   .partial();
 
 const getEntitiesResponseSchema = z.object({
-  entities: z.array(entityWithSampleDocumentsSchema),
+  entities: z.array(entityWithSourceSchema),
 });
 
 type GetEntitiesParams = z.infer<typeof getEntitiesParamsSchema.shape.query>;

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -51,6 +52,7 @@ export interface InvestigateAppSetupDependencies {
 export interface InvestigateAppStartDependencies {
   investigate: InvestigatePublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;

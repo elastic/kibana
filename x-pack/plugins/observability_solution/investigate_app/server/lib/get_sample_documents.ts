@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import pLimit from 'p-limit';
 import { estypes } from '@elastic/elasticsearch';
 import { castArray, sortBy, uniq, partition, shuffle } from 'lodash';
 import { truncateList } from '@kbn/inference-plugin/common/util/truncate_list';
@@ -235,4 +236,41 @@ export function sortAndTruncateAnalyzedFields(analysis: DocumentAnalysis) {
       500
     ).sort(),
   };
+}
+
+export async function confirmConstantsInDataset({
+  esClient,
+  constants,
+  indexPatterns,
+}: {
+  esClient: ElasticsearchClient;
+  constants: Array<{ field: string }>;
+  indexPatterns: string[];
+}): Promise<Array<{ field: string; constant: boolean; value?: string | number | boolean | null }>> {
+  const limiter = pLimit(5);
+
+  return Promise.all(
+    constants.map((constant) => {
+      return limiter(async () => {
+        return esClient
+          .termsEnum({
+            index: indexPatterns.join(','),
+            field: constant.field,
+            index_filter: {
+              bool: {
+                filter: [...excludeFrozenQuery()],
+              },
+            },
+          })
+          .then((response) => {
+            const isConstant = response.terms.length === 1;
+            return {
+              field: constant.field,
+              constant: isConstant,
+              value: isConstant ? response.terms[0] : undefined,
+            };
+          });
+      });
+    })
+  );
 }

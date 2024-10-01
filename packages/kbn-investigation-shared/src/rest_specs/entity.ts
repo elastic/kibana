@@ -9,8 +9,6 @@
 
 import { z } from '@kbn/zod';
 
-const sourceSchema = z.record(z.string(), z.any());
-
 const metricsSchema = z.object({
   failedTransactionRate: z.number().optional(),
   latency: z.number().optional(),
@@ -32,27 +30,19 @@ const entitySchema = z.object({
   metrics: metricsSchema,
 });
 
-const entityDocumentAnalysisSchema = z.object({
-  total: z.number(),
-  sampled: z.number(),
-  fields: z.array(z.string()),
-});
-
-const entitySourcesSchema = z.object({
-  index: z.string(),
-  aliases: sourceSchema.optional(),
+const entitySourceSchema = z.object({
   dataStream: z.string().optional(),
-  documentAnalysis: entityDocumentAnalysisSchema,
 });
 
-const entityWithSampleDocumentsSchema = z.intersection(
+const entityWithSourceSchema = z.intersection(
   entitySchema,
   z.object({
-    sources: z.array(entitySourcesSchema),
+    sources: z.array(entitySourceSchema),
   })
 );
 
-type EntityWithSampledDocuments = z.output<typeof entityWithSampleDocumentsSchema>;
+type EntityWithSource = z.output<typeof entityWithSourceSchema>;
+type EntitySource = z.output<typeof entitySourceSchema>;
 
-export { entityWithSampleDocumentsSchema };
-export type { EntityWithSampledDocuments };
+export { entitySchema, entityWithSourceSchema };
+export type { EntityWithSource, EntitySource };

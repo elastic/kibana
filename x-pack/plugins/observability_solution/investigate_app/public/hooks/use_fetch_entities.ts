@@ -34,7 +34,7 @@ export function useFetchEntities({
   serviceEnvironment,
   hostName,
   containerId,
-}: EntityParams): any {
+}: EntityParams) {
   const {
     core: { http },
   } = useKibana();
