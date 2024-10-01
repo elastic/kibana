@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNestedProperty } from './object_utils';
+import { getNestedProperty, setNestedProperty } from './object_utils';
 
 describe('object_utils', () => {
   test('getNestedProperty()', () => {
@@ -67,5 +67,9 @@ describe('object_utils', () => {
     const test11 = getNestedProperty(falseyObj, 'the.other_nested.value');
     expect(typeof test11).toBe('number');
     expect(test11).toBe(0);
+
+    const test12 = setNestedProperty(testObj, 'the.__proto__', 'update');
+    expect(test12.the).toBe('update');
+    expect(test12.the.__proto__.update).toBe(undefined);
   });
 });
