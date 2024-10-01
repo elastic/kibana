@@ -1,11 +1,11 @@
 {
-  "name": "EQL sequence rule",
+  "name": "EQL sequence no duration",
   "description": "Rule with an eql query",
   "false_positives": ["https://www.example.com/some-article-about-a-false-positive"],
   "rule_id": "rule-id-eql-2",
   "enabled": true,
   "index": ["auditbeat*", "packetbeat*"],
-  "interval": "2m",
+  "interval": "30s",
   "query": "sequence with maxspan=10m [any where agent.type == \"auditbeat\"] [any where event.category == \"network_traffic\"]",
   "meta": {
     "anything_you_want_ui_related_or_otherwise": {
@@ -16,7 +16,7 @@
   },
   "risk_score": 99,
   "to": "now",
-  "from": "now-5m",
+  "from": "now-120s",
   "severity": "high",
   "type": "eql",
   "language": "eql",

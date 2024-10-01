@@ -1,5 +1,5 @@
 {
-  "name": "EQL sequence rule",
+  "name": "EQL sequence duration",
   "description": "Rule with an eql query",
   "false_positives": ["https://www.example.com/some-article-about-a-false-positive"],
   "rule_id": "rule-id-eql-1",
@@ -16,7 +16,7 @@
   },
   "risk_score": 99,
   "to": "now",
-  "from": "now-70s",
+  "from": "now-120s",
   "severity": "high",
   "type": "eql",
   "language": "eql",
@@ -55,7 +55,7 @@
   "references": ["http://www.example.com/some-article-about-attack"],
   "alert_suppression": {
     "group_by": ["agent.name"],
-    "duration": { "value": 5, "unit": "m" },
+    "duration": { "value": 5, "unit": "h" },
     "missing_fields_strategy": "suppress"
   },
   "version": 1
