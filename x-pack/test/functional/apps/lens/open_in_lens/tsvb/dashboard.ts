@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
-      await panelActions.clickEdit();
+      await panelActions.convertToLens();
 
       await visualize.navigateToLensFromAnotherVisualization();
 

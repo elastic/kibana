@@ -231,7 +231,7 @@ export const PresentationPanelHoverActions = ({
       );
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
-        if (quickActionIds.includes(frequentlyChangingAction.id)) {
+        if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
           subscriptions.add(
             frequentlyChangingAction.subscribeToCompatibilityChanges(
               apiContext,
@@ -253,7 +253,7 @@ export const PresentationPanelHoverActions = ({
       );
 
       for (const frequentlyChangingNotification of frequentlyChangingNotifications) {
-        if (ALLOWED_NOTIFICATIONS.includes(frequentlyChangingNotification.id)) {
+        if ((ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)) {
           subscriptions.add(
             frequentlyChangingNotification.subscribeToCompatibilityChanges(
               apiContext,
