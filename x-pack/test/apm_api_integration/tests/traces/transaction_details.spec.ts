@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         transactionDetails = response.body;
       });
       it('returns transaction details', () => {
-        expect(transactionDetails.transaction.name).to.eql('GET /apple 🍏');
+        expect(transactionDetails.transaction?.transaction?.name).to.eql('GET /apple 🍏');
       });
     });
   });

@@ -9,7 +9,8 @@ import type { DedotObject } from '@kbn/utility-types';
 import * as APM_EVENT_FIELDS_MAP from '@kbn/apm-types/es_fields';
 import type { ValuesType } from 'utility-types';
 import { unflattenObject } from '@kbn/observability-utils/object/unflatten_object';
-import { castArray } from 'lodash';
+import { mergePlainObjects } from '@kbn/observability-utils/object/merge_plain_objects';
+import { castArray, isArray } from 'lodash';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { EventOutcome } from '@kbn/apm-types/src/es_schemas/raw/fields';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -118,25 +119,35 @@ export function unflattenKnownApmEventFields(fields?: Record<string, any>, requi
   }
   const missingRequiredFields =
     required?.filter((key) => {
-      return fields?.[key] === undefined;
+      const value = fields?.[key];
+      return value === null || value === undefined || (isArray(value) && value.length === 0);
     }) ?? [];
 
   if (missingRequiredFields.length > 0) {
     throw new Error(`Missing required fields ${missingRequiredFields.join(', ')} in event`);
   }
 
-  const copy: Record<string, any> = {
+  const copy: Record<string, any> = mapToSingleOrMultiValue({
     ...fields,
-  };
-
-  KNOWN_SINGLE_VALUED_FIELDS.forEach((field) => {
-    const value = copy[field];
-    if (value !== null && value !== undefined) {
-      copy[field] = castArray(value)[0];
-    }
   });
 
-  const unflattened = unflattenObject(fields);
+  const [knownFields, unknownFields] = Object.entries(copy).reduce(
+    (prev, [key, value]) => {
+      if (ALL_FIELDS.includes(key as KnownField)) {
+        prev[0][key as KnownField] = value;
+      } else {
+        prev[1][key] = value;
+      }
+      return prev;
+    },
+    [{} as Record<KnownField, any>, {} as Record<string, any>]
+  );
+
+  const unflattened = mergePlainObjects(
+    {},
+    unflattenObject(unknownFields),
+    unflattenObject(knownFields)
+  );
 
   return unflattened;
 }

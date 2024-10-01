@@ -7,7 +7,15 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
+import {
+  AGENT_NAME,
+  AT_TIMESTAMP,
+  METRICSET_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+} from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -20,6 +28,13 @@ import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Host } from '../../../typings/es_schemas/raw/fields/host';
 import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import {
+  SERVICE_METADATA_CLOUD_KEYS,
+  SERVICE_METADATA_CONTAINER_KEYS,
+  SERVICE_METADATA_INFRA_METRICS_KEYS,
+  SERVICE_METADATA_SERVICE_KEYS,
+} from '../../../common/service_metadata';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;
@@ -50,6 +65,18 @@ export async function getServiceInstanceMetadataDetails({
     ...rangeQuery(start, end),
   ];
 
+  const requiredKeys = asMutableArray([AT_TIMESTAMP, SERVICE_NAME, AGENT_NAME] as const);
+
+  const optionalKeys = asMutableArray([
+    SERVICE_ENVIRONMENT,
+    ...SERVICE_METADATA_SERVICE_KEYS,
+    ...SERVICE_METADATA_CLOUD_KEYS,
+    ...SERVICE_METADATA_CONTAINER_KEYS,
+    ...SERVICE_METADATA_INFRA_METRICS_KEYS,
+  ] as const);
+
+  const fields = [...requiredKeys, ...optionalKeys];
+
   async function getApplicationMetricSample() {
     const response = await apmEventClient.search(
       'get_service_instance_metadata_details_application_metric',
@@ -66,11 +93,14 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
             },
           },
+          fields,
         },
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    const hit = maybe(response.hits.hits[0]);
+
+    return unflattenKnownApmEventFields(hit?.fields, requiredKeys);
   }
 
   async function getTransactionEventSample() {
@@ -89,7 +119,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    const hit = maybe(response.hits.hits[0]);
+
+    return unflattenKnownApmEventFields(hit?.fields, requiredKeys);
   }
 
   async function getTransactionMetricSample() {
@@ -108,10 +140,13 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
             },
           },
+          fields,
         },
       }
     );
-    return maybe(response.hits.hits[0]?._source);
+    const hit = maybe(response.hits.hits[0]);
+
+    return unflattenKnownApmEventFields(hit?.fields, requiredKeys);
   }
 
   // we can expect the most detail of application metrics,

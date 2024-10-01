@@ -11,9 +11,7 @@ import {
   unflattenKnownApmEventFields,
 } from '@kbn/apm-data-access-plugin/server';
 import {
-  AGENT_EPHEMERAL_ID,
   AGENT_NAME,
-  AGENT_VERSION,
   AT_TIMESTAMP,
   PROCESSOR_EVENT,
   PROCESSOR_NAME,
@@ -84,8 +82,6 @@ export async function getTransaction({
       AT_TIMESTAMP,
       TIMESTAMP,
       SERVICE_NAME,
-      AGENT_VERSION,
-      AGENT_EPHEMERAL_ID,
       TRANSACTION_DURATION,
       TRANSACTION_NAME,
       TRANSACTION_SAMPLED,
@@ -97,7 +93,7 @@ export async function getTransaction({
 
     const source = isElasticApmSource(hit._source)
       ? (hit._source as {
-          transaction: Pick<Transaction['transaction'], 'marks'>;
+          transaction?: Pick<Transaction['transaction'], 'marks'>;
           span?: Pick<Required<Transaction>['span'], 'links'>;
         })
       : undefined;
@@ -106,7 +102,7 @@ export async function getTransaction({
       ...event,
       transaction: {
         ...event.transaction,
-        marks: source?.transaction.marks,
+        marks: source?.transaction?.marks,
       },
       processor: {
         name: 'transaction',

@@ -8,7 +8,6 @@
 import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { AT_TIMESTAMP, SERVICE_NAME, SERVICE_VERSION } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -96,7 +95,7 @@ export async function getDerivedServiceAnnotations({
       );
 
       const timestamp = event?.['@timestamp'];
-      if (!isFiniteNumber(timestamp)) {
+      if (!timestamp) {
         throw new Error('First seen for version was unexpectedly undefined or null.');
       }
 
