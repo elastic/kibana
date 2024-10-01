@@ -7,25 +7,17 @@
 
 import React, { useCallback } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
 import { FinalReadOnly } from '../final_readonly/final_readonly';
-import type { SetRuleFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { FinalEdit } from '../final_edit/final_edit';
 
 interface FinalSideProps {
   fieldName: string;
-  finalDiffableRule: DiffableRule;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
-export function FinalSide({
-  fieldName,
-  finalDiffableRule,
-  setRuleFieldResolvedValue,
-}: FinalSideProps): JSX.Element {
+export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
   const [mode, setMode] = React.useState<'readonly' | 'edit'>('readonly'); // This is temporary, will be replaced with state from the context
   const setReadOnlyMode = useCallback(() => setMode('readonly'), []);
   const setEditMode = useCallback(() => setMode('edit'), []);
@@ -41,18 +33,9 @@ export function FinalSide({
         </EuiTitle>
       </SideHeader>
       {mode === 'edit' ? (
-        <FinalEdit
-          fieldName={fieldName}
-          finalDiffableRule={finalDiffableRule}
-          setReadOnlyMode={setReadOnlyMode}
-          setRuleFieldResolvedValue={setRuleFieldResolvedValue}
-        />
+        <FinalEdit fieldName={fieldName} setReadOnlyMode={setReadOnlyMode} />
       ) : (
-        <FinalReadOnly
-          fieldName={fieldName}
-          finalDiffableRule={finalDiffableRule}
-          setEditMode={setEditMode}
-        />
+        <FinalReadOnly fieldName={fieldName} setEditMode={setEditMode} />
       )}
     </>
   );

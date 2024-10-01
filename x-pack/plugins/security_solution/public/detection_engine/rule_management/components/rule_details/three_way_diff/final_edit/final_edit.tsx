@@ -6,33 +6,23 @@
  */
 
 import React, { useMemo } from 'react';
-import type { SetRuleFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
-import type {
-  DiffableRule,
-  DiffableRuleTypes,
-} from '../../../../../../../common/api/detection_engine';
+import type { DiffableRuleTypes } from '../../../../../../../common/api/detection_engine';
 import { FinalEditContextProvider } from './final_edit_context';
 import { CommonRuleFieldEdit } from './common_rule_field_edit';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FinalEditProps {
   fieldName: string;
-  finalDiffableRule: DiffableRule;
   setReadOnlyMode: () => void;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
-export function FinalEdit({
-  fieldName,
-  finalDiffableRule,
-  setReadOnlyMode,
-  setRuleFieldResolvedValue,
-}: FinalEditProps) {
+export function FinalEdit({ fieldName, setReadOnlyMode }: FinalEditProps) {
+  const { finalDiffableRule } = useDiffableRuleContext();
+
   return (
-    <FinalEditContextProvider
-      value={{ fieldName, finalDiffableRule, setReadOnlyMode, setRuleFieldResolvedValue }}
-    >
+    <FinalEditContextProvider value={{ fieldName, setReadOnlyMode }}>
       <FieldEdit fieldName={fieldName} ruleType={finalDiffableRule.type} />
     </FinalEditContextProvider>
   );

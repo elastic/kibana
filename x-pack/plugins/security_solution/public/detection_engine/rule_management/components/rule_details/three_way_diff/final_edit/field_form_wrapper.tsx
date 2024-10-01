@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { useForm, type FormSchema, Form } from '../../../../../../shared_imports';
 import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
 import { useFinalEditContext } from './final_edit_context';
+import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FieldFormWrapperProps {
   component: React.ComponentType;
@@ -20,12 +21,15 @@ export function FieldFormWrapper({
   component: FieldComponent,
   fieldFormSchema,
 }: FieldFormWrapperProps) {
-  const { fieldName, finalDiffableRule, setReadOnlyMode, setRuleFieldResolvedValue } =
-    useFinalEditContext();
+  const { fieldName, setReadOnlyMode } = useFinalEditContext();
+
+  const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
 
   const { form } = useForm({
     schema: fieldFormSchema,
-    defaultValue: { [fieldName]: finalDiffableRule[fieldName] },
+    defaultValue: {
+      [fieldName]: finalDiffableRule[fieldName],
+    },
     serializer: (value) => value,
     onSubmit: async (formData) => {
       setRuleFieldResolvedValue({

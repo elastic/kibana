@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
-import type {
-  RuleUpgradeState,
-  SetRuleFieldResolvedValueFn,
-} from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import type { RuleUpgradeState } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 
 interface RuleUpgradeConflictsResolverProps {
   ruleUpgradeState: RuleUpgradeState;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolver({
   ruleUpgradeState,
-  setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverProps): JSX.Element {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as Array<
     [
@@ -32,8 +27,6 @@ export function RuleUpgradeConflictsResolver({
       key={fieldName}
       fieldName={fieldName}
       fieldThreeWayDiff={fieldDiff}
-      finalDiffableRule={ruleUpgradeState.finalRule}
-      setRuleFieldResolvedValue={setRuleFieldResolvedValue}
     />
   ));
 

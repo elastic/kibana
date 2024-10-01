@@ -254,7 +254,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             content: (
               <TabContentPadding>
                 <RuleUpgradeConflictsResolverTab
-                  ruleId={rule.rule_id}
                   ruleUpgradeState={ruleUpgradeState}
                   setRuleFieldResolvedValue={setRuleFieldResolvedValue}
                 />

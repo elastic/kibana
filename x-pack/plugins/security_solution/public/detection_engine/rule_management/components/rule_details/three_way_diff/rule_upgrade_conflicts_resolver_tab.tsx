@@ -13,31 +13,26 @@ import type {
 } from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
+import { DiffableRuleContextProvider } from './diffable_rule_context';
 
 interface RuleUpgradeConflictsResolverTabProps {
-  ruleId: RuleSignatureId;
   ruleUpgradeState: RuleUpgradeState;
-  setRuleFieldResolvedValue: (ruleId: RuleSignatureId) => SetRuleFieldResolvedValueFn;
+  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function RuleUpgradeConflictsResolverTab({
-  ruleId,
   ruleUpgradeState,
   setRuleFieldResolvedValue,
 }: RuleUpgradeConflictsResolverTabProps): JSX.Element {
-  // TODO: Find a better name for this function to avoid confusion with the one that is not ruleId-specific
-  const setFieldResolvedValueForRule = setRuleFieldResolvedValue(ruleId);
-
   return (
-    <>
+    <DiffableRuleContextProvider
+      finalDiffableRule={ruleUpgradeState.finalRule}
+      setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+    >
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
-      <RuleUpgradeConflictsResolver
-        ruleUpgradeState={ruleUpgradeState}
-        setRuleFieldResolvedValue={setFieldResolvedValueForRule}
-      />
-    </>
+      <RuleUpgradeConflictsResolver ruleUpgradeState={ruleUpgradeState} />
+    </DiffableRuleContextProvider>
   );
 }

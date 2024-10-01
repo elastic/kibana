@@ -11,7 +11,6 @@ import { css } from '@emotion/css';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
 import type {
   DiffableAllFields,
-  DiffableRule,
   RuleFieldsDiff,
   ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
@@ -19,23 +18,21 @@ import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_
 import { ComparisonSide } from '../comparison_side/comparison_side';
 import { FinalSide } from '../final_side/final_side';
 import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
-import { type SetRuleFieldResolvedValueFn } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+import { useDiffableRuleContext } from '../diffable_rule_context';
 
 interface FieldUpgradeConflictsResolverProps<FieldName extends keyof RuleFieldsDiff> {
   fieldName: FieldName;
   fieldThreeWayDiff: RuleFieldsDiff[FieldName];
-  finalDiffableRule: DiffableRule;
-  setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
 export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFieldsDiff>({
   fieldName,
   fieldThreeWayDiff,
-  finalDiffableRule,
-  setRuleFieldResolvedValue,
 }: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
+
+  const { finalDiffableRule } = useDiffableRuleContext();
 
   return (
     <>
@@ -60,11 +57,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends keyof RuleFields
             `}
           />
           <EuiFlexItem grow={1}>
-            <FinalSide
-              fieldName={fieldName}
-              finalDiffableRule={finalDiffableRule}
-              setRuleFieldResolvedValue={setRuleFieldResolvedValue}
-            />
+            <FinalSide fieldName={fieldName} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SplitAccordion>
