@@ -47,7 +47,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
       >
         <EuiFlexItem grow={false}>
           <CloudProviderIcon
-            cloudProvider="unknownProvider"
+            cloudProvider={formattedCloudProvider}
             size="m"
             title={formattedCloudProvider}
             role="presentation"
