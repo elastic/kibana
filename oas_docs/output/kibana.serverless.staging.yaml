@@ -29758,6 +29758,8 @@ components:
       allOf:
         - $ref: >-
             #/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord
+        - $ref: >-
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts
         - type: object
           properties:
             '@timestamp':
@@ -29767,6 +29769,49 @@ components:
               type: string
           required:
             - '@timestamp'
+    Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     Security_Entity_Analytics_API_AssetCriticalityRecordIdParts:
       type: object
       properties:
