@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useWorkpadService } from '../../../services';
+import { getCanvasNotifyService } from '../../../services/canvas_notify_service';
 
 export const useDeleteWorkpads = () => {
   const workpadService = useWorkpadService();
-  const notifyService = useNotifyService();
 
   return useCallback(
     async (workpadIds: string[]) => {
@@ -42,7 +42,7 @@ export const useDeleteWorkpads = () => {
         const removedIds = workpadIds.filter((id) => passes.includes(id));
 
         if (errored.length > 0) {
-          notifyService.error(errors.getDeleteFailureErrorMessage());
+          getCanvasNotifyService().error(errors.getDeleteFailureErrorMessage());
         }
 
         return {
@@ -51,7 +51,7 @@ export const useDeleteWorkpads = () => {
         };
       });
     },
-    [workpadService, notifyService]
+    [workpadService]
   );
 };
 

@@ -24,6 +24,7 @@ import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { pluginServices } from '../../services';
+import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
 
@@ -129,7 +130,8 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-  const { expressions, notify } = pluginServices.getServices();
+  const { expressions } = pluginServices.getServices();
+  const notify = getCanvasNotifyService();
 
   return expressions
     .runInterpreter(ast, context, variables, { castToRender: true })

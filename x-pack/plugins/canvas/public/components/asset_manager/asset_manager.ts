@@ -31,7 +31,7 @@ export const AssetManager = connect(
     onAddAsset: (workpad: CanvasWorkpad, type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
       const asset = createAsset(type, content);
-      const { notify, workpad: workpadService } = pluginServices.getServices();
+      const { workpad: workpadService } = pluginServices.getServices();
 
       return workpadService
         .updateAssets(workpad.id, { ...workpad.assets, [asset.id]: asset })
@@ -40,7 +40,7 @@ export const AssetManager = connect(
           // then return the id, so the caller knows the id that will be created
           return asset.id;
         })
-        .catch((error) => notifyError(error, notify.error));
+        .catch((error) => notifyError(error));
     },
   }),
   (stateProps, dispatchProps, ownProps) => {

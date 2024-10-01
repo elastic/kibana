@@ -34,7 +34,7 @@ import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
 import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
-import { useNotifyService, useWorkpadService } from '../../services';
+import { useWorkpadService } from '../../services';
 import { createAsset, notifyError } from '../../lib/assets';
 
 interface FunctionFormProps {
@@ -55,7 +55,6 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
   const { expressionIndex, ...restProps } = props;
   const { nextArgType, path, parentPath, argType } = restProps;
   const service = useWorkpadService();
-  const notifyService = useNotifyService();
 
   const dispatch = useDispatch();
   const context = useSelector<State, ExpressionContext>(
@@ -120,9 +119,9 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
           // then return the id, so the caller knows the id that will be created
           return asset.id;
         })
-        .catch((error) => notifyError(error, notifyService.error));
+        .catch((error) => notifyError(error));
     },
-    [dispatch, notifyService, service, workpad.assets, workpad.id]
+    [dispatch, service, workpad.assets, workpad.id]
   );
 
   const onAssetAdd = useCallback(

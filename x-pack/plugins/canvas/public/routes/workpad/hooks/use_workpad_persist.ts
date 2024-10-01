@@ -10,12 +10,11 @@ import { useSelector } from 'react-redux';
 import { CanvasWorkpad, State } from '../../../../types';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { canUserWrite } from '../../../state/selectors/app';
-import { useWorkpadService, useNotifyService } from '../../../services';
+import { useWorkpadService } from '../../../services';
 import { notifyError } from '../../../lib/assets';
 
 export const useWorkpadPersist = () => {
   const service = useWorkpadService();
-  const notifyService = useNotifyService();
 
   // Watch for workpad state and then persist those changes
   const [workpad, canWrite]: [CanvasWorkpad, boolean] = useSelector((state: State) => [
@@ -31,9 +30,9 @@ export const useWorkpadPersist = () => {
     if (canWrite) {
       if (workpadChanged) {
         service.updateWorkpad(workpad.id, workpad).catch((err) => {
-          notifyError(err, notifyService.error);
+          notifyError(err);
         });
       }
     }
-  }, [service, workpad, workpadChanged, canWrite, notifyService.error]);
+  }, [service, workpad, workpadChanged, canWrite]);
 };

@@ -12,7 +12,7 @@ import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { CanvasCustomElementService } from './custom_element';
 import { CanvasDataViewsService } from './data_views';
 import { CanvasEmbeddablesService } from './embeddables';
-import { CanvasExpressionsService } from './expressions';
+import { CanvasExpressionsService } from './canvas_expressions_service';
 import { CanvasFiltersService } from './filters';
 import { CanvasLabsService } from './labs';
 import { CanvasNavLinkService } from './nav_link';
@@ -22,6 +22,8 @@ import { CanvasReportingService } from './reporting';
 import { CanvasVisualizationsService } from './visualizations';
 import { CanvasWorkpadService } from './workpad';
 import { CanvasUiActionsService } from './ui_actions';
+import { useMemo } from 'react';
+import { getCanvasNotifyService } from './canvas_notify_service';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
@@ -43,7 +45,6 @@ export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const useCustomElementService = () =>
   (() => pluginServices.getHooks().customElement.useService())();
-export const useDataViewsService = () => (() => pluginServices.getHooks().dataViews.useService())();
 export const useEmbeddablesService = () =>
   (() => pluginServices.getHooks().embeddables.useService())();
 export const useExpressionsService = () =>
@@ -51,7 +52,10 @@ export const useExpressionsService = () =>
 export const useFiltersService = () => (() => pluginServices.getHooks().filters.useService())();
 export const useLabsService = () => (() => pluginServices.getHooks().labs.useService())();
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
-export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
+export const useNotifyService = () => {
+  const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
+  return canvasNotifyService;
+};
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
 export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
 export const useVisualizationsService = () =>

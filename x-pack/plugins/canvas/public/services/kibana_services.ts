@@ -10,13 +10,14 @@ import { BehaviorSubject } from 'rxjs';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { AppUpdater, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-// import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-// import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+// import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import { SESSIONSTORAGE_LASTPATH } from '../../common/lib';
 import { getSessionStorage } from '../lib/storage';
@@ -31,7 +32,8 @@ export let kibanaVersion: string;
 export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
-// export let dataViewsService: DataViewsPublicPluginStart;
+export let expressionsService: ExpressionsStart;
+export let dataViewsService: DataViewsPublicPluginStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtilService: PresentationUtilPluginStart;
 // export let reportingService: ReportingStart | undefined;
@@ -54,7 +56,8 @@ export const setKibanaServices = (
   coreServices = kibanaCore;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
-  // dataViewsService = deps.dataViews;
+  expressionsService = deps.expressions;
+  dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
   presentationUtilService = deps.presentationUtil;
   // reportingService = kibanaCore.application.capabilities.canvas?.generatePdf

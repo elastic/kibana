@@ -4,36 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fromExpression, getType } from '@kbn/interpreter';
 import {
   ExpressionAstExpression,
   ExpressionExecutionParams,
   ExpressionValue,
 } from '@kbn/expressions-plugin/common';
+import { fromExpression, getType } from '@kbn/interpreter';
 import { pluck } from 'rxjs';
-import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
-import { CanvasStartDeps } from '../../plugin';
-import { CanvasFiltersService } from './filters';
-import { CanvasNotifyService } from '../notify';
+import { buildEmbeddableFilters } from '../../common/lib/build_embeddable_filters';
+import { expressionsService } from './kibana_services';
 
 interface Options {
   castToRender?: boolean;
 }
 
-export class ExpressionsService {
-  private filters: CanvasFiltersService;
-  private notify: CanvasNotifyService;
-
-  constructor(
-    private readonly expressions: ExpressionsServiceStart,
-    { filters, notify }: CanvasExpressionsServiceRequiredServices
-  ) {
-    this.filters = filters;
-    this.notify = notify;
-  }
-
+class ExpressionsService {
   async interpretAst(
     ast: ExpressionAstExpression,
     variables: Record<string, any>,
@@ -51,7 +36,7 @@ export class ExpressionsService {
     input: ExpressionValue = null,
     context?: ExpressionExecutionParams
   ): Promise<ExpressionValue> {
-    return await this.expressions
+    return await expressionsService
       .execute(ast, input, { ...context, namespace: 'canvas' })
       .getData()
       .pipe(pluck('result'))
@@ -98,11 +83,11 @@ export class ExpressionsService {
   }
 
   getRenderer(name: string) {
-    return this.expressions.getRenderer(name);
+    return expressionsService.getRenderer(name);
   }
 
   getFunctions() {
-    return this.expressions.getFunctions();
+    return expressionsService.getFunctions();
   }
 
   private async getFilters() {
@@ -122,19 +107,11 @@ export class ExpressionsService {
   }
 }
 
-export type CanvasExpressionsService = ExpressionsService;
-export interface CanvasExpressionsServiceRequiredServices {
-  notify: CanvasNotifyService;
-  filters: CanvasFiltersService;
-}
+let canvasExpressionsService: ExpressionsService;
 
-export type CanvasExpressionsServiceFactory = KibanaPluginServiceFactory<
-  CanvasExpressionsService,
-  CanvasStartDeps,
-  CanvasExpressionsServiceRequiredServices
->;
-
-export const expressionsServiceFactory: CanvasExpressionsServiceFactory = (
-  { startPlugins },
-  requiredServices
-) => new ExpressionsService(startPlugins.expressions, requiredServices);
+export const getCanvasExpressionService = () => {
+  if (!canvasExpressionsService) {
+    canvasExpressionsService = new ExpressionsService();
+  }
+  return canvasExpressionsService;
+};
