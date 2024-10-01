@@ -46,6 +46,12 @@ export const useKnowledgeBaseTable = () => {
       onEntryNameClicked,
       onDeleteActionClicked,
       onEditActionClicked,
+    }: {
+      isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
+      onEntryNameClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {
@@ -55,8 +61,8 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: ({ id, name }: KnowledgeBaseEntryResponse) => (
-            <EuiLink onClick={() => onEntryNameClicked({ id })}>{name}</EuiLink>
+          render: (entry: KnowledgeBaseEntryResponse) => (
+            <EuiLink onClick={() => onEntryNameClicked(entry)}>{entry.name}</EuiLink>
           ),
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
