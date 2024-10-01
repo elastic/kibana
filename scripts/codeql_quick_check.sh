@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Example usage:
+# Runs the specified CodeQL query on the specified file/folder
+# bash scripts/codeql_quick_check.sh -f /path/to/file -q /path/to/query.ql
+# bash scripts/codeql_quick_check.sh -f x-pack/plugins/security_solution/public/common/components/ml/conditional_links/replace_kql_commas_with_or.ts -q javascript/ql/src/Performance/ReDoS.ql
+# Runs the default security suit on the specified file/folder
+# bash scripts/codeql_quick_check.sh -f /path/to/file
+
 LANGUAGE="javascript"
 CODEQL_DIR=".codeql"
 DATABASE_PATH="$CODEQL_DIR/database"
@@ -55,6 +62,25 @@ install_codeql() {
             ;;
     esac
 }
+
+while getopts ":f:q:" opt; do
+  case $opt in
+    f)
+      FILE_TO_ANALYZE="$OPTARG"
+      ;;
+    q)
+      SINGLE_QUERY="$OPTARG"
+      ;;
+    \?)
+      echo "${red}${bold}Invalid option -$OPTARG${reset}" >&2
+      exit 1
+      ;;
+    :)
+      echo "${red}${bold}Option -$OPTARG requires an argument.${reset}" >&2
+      exit 1
+      ;;
+  esac
+done
 
 # Prompt for FILE_TO_ANALYZE if not set
 if [ -z "$FILE_TO_ANALYZE" ]; then
@@ -122,7 +148,12 @@ echo "${green}${bold}Analysis complete. Results saved to $QUERY_OUTPUT.${reset}"
 # 6. Print summary of SARIF results
 if command -v jq &> /dev/null; then
     echo "${yellow}${bold}Summary of SARIF results:${reset}"
-    jq -r '.runs[].results[] | "Rule: \(.ruleId)\nMessage: \(.message.text)\nFile: \(.locations[].physicalLocation.artifactLocation.uri)\nLine: \(.locations[].physicalLocation.region.startLine)\n"' "$QUERY_OUTPUT" |
+    jq -r '
+      .runs[] |
+      .results[] as $result |
+      .tool.driver.rules[] as $rule |
+      select($rule.id == $result.ruleId) |
+      "Rule: \($result.ruleId)\nMessage: \($result.message.text)\nFile: \($result.locations[].physicalLocation.artifactLocation.uri)\nLine: \($result.locations[].physicalLocation.region.startLine)\nSecurity Severity: \($rule.properties."security-severity")\n"' "$QUERY_OUTPUT" |
     while IFS= read -r line; do
         case "$line" in
             Rule:*)
@@ -135,6 +166,9 @@ if command -v jq &> /dev/null; then
                 echo "${blue}$line${reset}"
                 ;;
             Line:*)
+                echo "${yellow}$line${reset}"
+                ;;
+            Security\ Severity:*)
                 echo "${yellow}$line${reset}"
                 ;;
             *)
