@@ -101,5 +101,6 @@ const formatEntityMetrics = (entity: EntityWithSource): string => {
   const entityMetrics = Object.entries(entity.metrics)
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ');
-  return `Entity name: ${entity.displayName}; Entity type: ${entity.type}; Entity metrics: ${entityMetrics}`;
+  const entitySources = entity.sources.map((source) => source.dataStream).join(', ');
+  return `Entity name: ${entity.displayName}; Entity type: ${entity.type}; Entity metrics: ${entityMetrics}; Entity data streams: ${entitySources}`;
 };
