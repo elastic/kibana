@@ -93,8 +93,9 @@ export async function convertCSVSamples({
   );
 
   if (tempErrors.length > 0) {
+    const exampleError = JSON.stringify(tempErrors[0]);
     throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered, such as ${tempErrors[0]})`
+      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered, such as ${exampleError})`
     );
   }
 
@@ -134,8 +135,9 @@ export async function convertCSVSamples({
   );
 
   if (finalErrors.length > 0) {
+    const exampleError = JSON.stringify(finalErrors[0]);
     throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered, such as ${finalErrors[0]})`
+      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered, such as ${exampleError})`
     );
   }
 
