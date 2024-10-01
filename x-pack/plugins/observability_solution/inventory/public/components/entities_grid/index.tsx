@@ -183,6 +183,8 @@ export function EntitiesGrid({
       if (!agentName) return null;
       return <AgentIcon agentName={agentName} size="l" role="presentation" />;
     }
+
+    return null;
   }, []);
 
   const getEntityRedirectUrl = useCallback(
