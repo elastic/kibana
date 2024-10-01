@@ -1,8 +1,6 @@
 [[dashboard-links]]
 === Link panels
 
-preview::["This functionality is in technical preview, and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
-
 You can use *Links* panels to create links to other dashboards or external websites. When creating links to other dashboards, you have the option to carry the time range and query and filters to apply to the linked dashboard. Links to external websites follow the <<external-URL-policy,`externalUrl.policy`>> settings. *Links* panels support vertical and horizontal layouts and may be saved to the *Library* for use on other dashboards.
 
 [role="screenshot"]

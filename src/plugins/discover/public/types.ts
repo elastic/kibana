@@ -154,8 +154,10 @@ export interface DiscoverStartPlugins {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPublicPluginStart;
   lens: LensPublicStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
   navigation: NavigationStart;
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -170,6 +172,4 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
-  fieldsMetadata: FieldsMetadataPublicStart;
-  logsDataAccess?: LogsDataAccessPluginStart;
 }

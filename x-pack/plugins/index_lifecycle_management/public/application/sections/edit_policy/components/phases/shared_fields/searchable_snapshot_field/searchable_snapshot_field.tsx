@@ -19,6 +19,7 @@ import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provi
 import { RepositoryComboBoxField } from './repository_combobox_field';
 
 import './_searchable_snapshot_field.scss';
+import { i18nTexts as i18nTextsEdit } from '../../../../i18n_texts';
 
 export interface Props {
   phase: 'hot' | 'cold' | 'frozen';
@@ -35,12 +36,7 @@ const geti18nTexts = (
     case 'hot':
     case 'cold':
       return {
-        title: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.title',
-          {
-            defaultMessage: 'Searchable snapshot',
-          }
-        ),
+        title: i18nTextsEdit.editPolicy.searchableSnapshotLabel,
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
@@ -323,6 +319,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
       fieldNotices={renderInfoCallout()}
       fullWidth
     >
+      {/* @ts-expect-error Type '() => React.JSX.Element' is not assignable to type 'string'. */}
       {isDisabledDueToLicense ? <div /> : renderField}
     </DescribedFormRow>
   );

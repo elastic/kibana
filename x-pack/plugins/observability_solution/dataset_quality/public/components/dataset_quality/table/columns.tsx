@@ -161,7 +161,6 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
-  isSizeStatsAvailable,
   isActiveDataset,
   timeRange,
   urlService,
@@ -172,7 +171,6 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
-  isSizeStatsAvailable: boolean;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
@@ -226,7 +224,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (
