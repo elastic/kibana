@@ -39,7 +39,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   jobsWithTimeRange,
 }) => {
   const {
-    services: { cases, presentationUtil, uiSettings, mlServices },
+    services: { cases, uiSettings, mlServices },
   } = useMlKibana();
   const { mlApi } = mlServices;
 
