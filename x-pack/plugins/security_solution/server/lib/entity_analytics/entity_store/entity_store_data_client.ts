@@ -27,9 +27,11 @@ import {
   createFieldRetentionEnrichPolicy,
   executeFieldRetentionEnrichPolicy,
   getFieldRetentionPipelineSteps,
+  deleteFieldRetentionEnrichPolicy,
+  startEntityStoreFieldRetentionEnrichTask,
+  removeEntityStoreFieldRetentionEnrichTask,
 } from './field_retention';
 import { getEntityIndexMapping } from './index_mappings';
-import { startEntityStoreFieldRetentionEnrichTask } from './field_retention/task/field_retention_enrichment_task';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -140,8 +142,16 @@ export class EntityStoreDataClient {
     });
   }
 
-  public async createFieldRetentionEnrichPolicy(entityType: EntityType) {
+  private async createFieldRetentionEnrichPolicy(entityType: EntityType) {
     return createFieldRetentionEnrichPolicy({
+      namespace: this.options.namespace,
+      esClient: this.options.esClient,
+      entityType,
+    });
+  }
+
+  private async deleteFieldRetentionEnrichPolicy(entityType: EntityType) {
+    return deleteFieldRetentionEnrichPolicy({
       namespace: this.options.namespace,
       esClient: this.options.esClient,
       entityType,
@@ -180,10 +190,24 @@ export class EntityStoreDataClient {
     await this.options.esClient.ingest.putPipeline(pipeline);
   }
 
+  private async deletePlatformPipeline(entityType: EntityType) {
+    const pipelineId = `${
+      getDefinitionForEntityType(entityType, this.options.namespace).id
+    }-latest@platform`;
+    this.options.logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
+    await this.options.esClient.ingest.deletePipeline({ id: pipelineId });
+  }
+
   private async createEntityIndex(entityType: EntityType) {
     await this.options.esClient.indices.create({
       index: getEntitiesIndexName(entityType, this.options.namespace),
       body: {},
+    });
+  }
+
+  private async deleteEntityIndex(entityType: EntityType) {
+    await this.options.esClient.indices.delete({
+      index: getEntitiesIndexName(entityType, this.options.namespace),
     });
   }
 
@@ -198,6 +222,13 @@ export class EntityStoreDataClient {
         },
       },
     });
+  }
+
+  private async deleteEntityIndexComponentTemplate(entityType: EntityType) {
+    const templateName = `${
+      getDefinitionForEntityType(entityType, this.options.namespace).id
+    }-latest@platform`;
+    await this.options.esClient.cluster.deleteComponentTemplate({ name: templateName });
   }
 
   public async start(entityType: EntityType, options?: { force: boolean }) {
@@ -242,15 +273,41 @@ export class EntityStoreDataClient {
     return this.engineClient.list();
   }
 
-  public async delete(entityType: EntityType, deleteData: boolean) {
+  public async delete(
+    entityType: EntityType,
+    taskManager: TaskManagerStartContract,
+    deleteData: boolean
+  ) {
     const { id } = getDefinitionForEntityType(entityType, this.options.namespace);
 
     this.options.logger.info(`Deleting entity store for ${entityType}`);
+    try {
+      await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
+      await this.deleteEntityIndexComponentTemplate(entityType);
+      await this.deletePlatformPipeline(entityType);
+      await this.deleteFieldRetentionEnrichPolicy(entityType);
 
-    await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
-    await this.engineClient.delete(id);
+      if (deleteData) {
+        await this.deleteEntityIndex(entityType);
+      }
+      // if the last engine then stop the task
+      const { engines } = await this.engineClient.list();
+      if (engines.length === 0) {
+        await removeEntityStoreFieldRetentionEnrichTask({
+          namespace: this.options.namespace,
+          logger: this.options.logger,
+          taskManager,
+        });
+      }
 
-    return { deleted: true };
+      await this.engineClient.delete(id);
+
+      return { deleted: true };
+    } catch (e) {
+      this.options.logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
+      // TODO: should we set the engine status to error?
+      throw e;
+    }
   }
 
   public async searchEntities(params: SearchEntitiesParams): Promise<{
