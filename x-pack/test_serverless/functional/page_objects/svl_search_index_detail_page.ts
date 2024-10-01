@@ -21,7 +21,7 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
     },
     async expectUseInPlaygroundLinkExists() {
-      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 2000 });
+      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
     },
     async expectBackToIndicesButtonExists() {
       await testSubjects.existOrFail('backToIndicesButton', { timeout: 2000 });

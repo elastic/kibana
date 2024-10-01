@@ -59,18 +59,12 @@ export const SearchIndexDetailsPage = () => {
       pageIndex: 0,
     });
 
-  const [playgroundUrl, setPlaygroundUrl] = useState<string | undefined>(undefined);
-  const getPlaygroundUrl = useCallback(async () => {
+  const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
     if (playgroundLocator && index) {
-      const url = await playgroundLocator.getUrl({ 'default-index': index.name });
-      setPlaygroundUrl(url);
+      await playgroundLocator.navigate({ 'default-index': index.name });
     }
   }, [share, index]);
-
-  useEffect(() => {
-    getPlaygroundUrl();
-  }, [getPlaygroundUrl]);
 
   const [isDocumentsExists, setDocumentsExists] = useState<boolean>(false);
   const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
@@ -202,30 +196,43 @@ export const SearchIndexDetailsPage = () => {
             rightSideItems={[
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
-                  <EuiButtonEmpty
-                    href={!isDocumentsExists ? docLinks.links.apiReference : playgroundUrl}
-                    target={!isDocumentsExists ? '_blank' : undefined}
-                    isLoading={isDocumentsLoading}
-                    iconType={!isDocumentsExists ? 'documentation' : 'launch'}
-                    data-test-subj={!isDocumentsExists ? 'ApiReferenceDoc' : 'useInPlaygroundLink'}
-                  >
-                    <FormattedMessage
-                      id="xpack.searchIndices.indexAction.buttonLabel"
-                      defaultMessage="{buttonLabel}"
-                      values={{
-                        buttonLabel: isDocumentsLoading
-                          ? 'Loading'
-                          : !isDocumentsExists
-                          ? 'API Reference'
-                          : 'Use in Playground',
-                      }}
-                    />
-                  </EuiButtonEmpty>
+                  {!isDocumentsExists ? (
+                    <EuiButtonEmpty
+                      href={docLinks.links.apiReference}
+                      target="_blank"
+                      isLoading={isDocumentsLoading}
+                      iconType="documentation"
+                      data-test-subj="ApiReferenceDoc"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchIndices.indexAction.ApiReferenceButtonLabel"
+                        defaultMessage="{buttonLabel}"
+                        values={{
+                          buttonLabel: isDocumentsLoading ? 'Loading' : 'API Reference',
+                        }}
+                      />
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiButtonEmpty
+                      isLoading={isDocumentsLoading}
+                      iconType="launch"
+                      data-test-subj="useInPlaygroundLink"
+                      onClick={navigateToPlayground}
+                    >
+                      <FormattedMessage
+                        id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
+                        defaultMessage="{buttonLabel}"
+                        values={{
+                          buttonLabel: isDocumentsLoading ? 'Loading' : 'Use in Playground',
+                        }}
+                      />
+                    </EuiButtonEmpty>
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <SearchIndexDetailsPageMenuItemPopover
                     handleDeleteIndexModal={handleDeleteIndexModal}
-                    playgroundUrl={playgroundUrl}
+                    navigateToPlayground={navigateToPlayground}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,

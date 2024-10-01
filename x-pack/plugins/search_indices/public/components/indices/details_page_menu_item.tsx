@@ -76,19 +76,19 @@ const SearchIndexDetailsPageMenuItemPopoverItems = [
 ];
 interface SearchIndexDetailsPageMenuItemPopoverProps {
   handleDeleteIndexModal: () => void;
-  playgroundUrl: string | undefined;
+  navigateToPlayground: () => void;
 }
 
 export const SearchIndexDetailsPageMenuItemPopover = ({
   handleDeleteIndexModal,
-  playgroundUrl = '',
+  navigateToPlayground,
 }: SearchIndexDetailsPageMenuItemPopoverProps) => {
   const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
   const { docLinks } = useKibana().services;
   const contextMenuItemsActions: Record<MenuItems, MenuItemsAction> = {
     playground: {
-      href: playgroundUrl,
-      onClick: undefined,
+      href: undefined,
+      onClick: navigateToPlayground,
     },
     apiReference: { href: docLinks.links.apiReference, onClick: undefined },
     deleteIndex: { href: undefined, onClick: handleDeleteIndexModal },
