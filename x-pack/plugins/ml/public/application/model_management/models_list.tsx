@@ -677,9 +677,11 @@ export const ModelsList: FC<Props> = ({
               <EuiFlexGroup gutterSize={'xs'} direction={'row'}>
                 {type.map((t) => (
                   <EuiFlexItem key={t} grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="mlModelType">
-                      {t}
-                    </EuiBadge>
+                    <span>
+                      <EuiBadge color="hollow" data-test-subj="mlModelType">
+                        {t}
+                      </EuiBadge>
+                    </span>
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
