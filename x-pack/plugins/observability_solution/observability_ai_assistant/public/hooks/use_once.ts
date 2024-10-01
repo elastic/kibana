@@ -9,6 +9,9 @@ import { useRef } from 'react';
 
 export function useOnce<T>(variable: T): T {
   const ref = useRef(variable);
+  if (!ref.current && variable) {
+    ref.current = variable;
+  }
 
   if (ref.current !== variable) {
     // eslint-disable-next-line no-console

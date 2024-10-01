@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseKnowledgeBaseResult } from '../use_knowledge_base';
+import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {

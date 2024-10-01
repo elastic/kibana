@@ -10,7 +10,13 @@
     "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "../../../packages/kbn-ai-assistant/src/utils/get_role_translation.ts",
+    "../../../packages/kbn-ai-assistant/src/utils/get_timeline_items_from_conversation.tsx",
+    "../../../packages/kbn-ai-assistant/src/utils/get_timeline_items_from_conversation.test.tsx",
+    "../../../packages/kbn-ai-assistant/src/render_function.tsx",
+    "../../../packages/kbn-ai-assistant/src/hooks/use_json_editor_model.ts",
+    "../../../packages/kbn-ai-assistant/src/utils/storybook_decorator.stories.tsx",
   ],
   "kbn_references": [
     "@kbn/es-types",
@@ -73,7 +79,10 @@
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",
     "@kbn/inference-plugin",
-    "@kbn/logs-data-access-plugin"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/ai-assistant"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

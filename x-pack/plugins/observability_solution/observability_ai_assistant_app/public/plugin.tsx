@@ -17,13 +17,13 @@ import {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
+import { createAppService, AIAssistantAppService } from '@kbn/ai-assistant';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
-import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { getObsAIAssistantConnectorType } from './rule_connector';
 import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 
@@ -40,7 +40,7 @@ export class ObservabilityAIAssistantAppPlugin
     >
 {
   logger: Logger;
-  appService: ObservabilityAIAssistantAppService | undefined;
+  appService: AIAssistantAppService | undefined;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();

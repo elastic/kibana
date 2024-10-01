@@ -3307,6 +3307,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-assistant@link:x-pack/packages/kbn-ai-assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-change-point-detection@link:x-pack/packages/ml/aiops_change_point_detection":
   version "0.0.0"
   uid ""
