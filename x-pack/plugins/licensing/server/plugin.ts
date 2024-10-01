@@ -18,7 +18,6 @@ import {
   ReplaySubject,
   timer,
   firstValueFrom,
-  take,
 } from 'rxjs';
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -161,7 +160,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
     return {
       refresh: this.refresh,
-      getLicense: async () => await firstValueFrom(this.license$!.pipe(take(1))),
+      getLicense: async () => await firstValueFrom(this.license$!),
       license$: this.license$,
       featureUsage: this.featureUsage.start(),
       createLicensePoller: this.createLicensePoller.bind(this),
