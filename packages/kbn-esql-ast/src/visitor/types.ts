@@ -12,10 +12,9 @@ import type * as ast from '../types';
 import type * as contexts from './contexts';
 
 /**
- * We don't have a dedicated "query" AST node, so - for now - we use the root
- * array of commands as the "query" node.
+ * @deprecated Use `ESQLAstQueryExpression` directly.
  */
-export type ESQLAstQueryNode = ast.ESQLAst;
+export type ESQLAstQueryNode = ast.ESQLAstQueryExpression;
 
 /**
  * Represents an "expression" node in the AST.
@@ -26,7 +25,7 @@ export type ESQLAstExpressionNode = ast.ESQLSingleAstItem;
 /**
  * All possible AST nodes supported by the visitor.
  */
-export type VisitorAstNode = ESQLAstQueryNode | ast.ESQLAstNode;
+export type VisitorAstNode = ast.ESQLAstQueryExpression | ast.ESQLAstNode;
 
 export type Visitor<Ctx extends contexts.VisitorContext, Input = unknown, Output = unknown> = (
   ctx: Ctx,

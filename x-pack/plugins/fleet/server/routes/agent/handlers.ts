@@ -323,13 +323,22 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
     const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = fleetContext.internalSoClient;
+
+    const parsePolicyIds = (policyIds: string | string[] | undefined): string[] | undefined => {
+      if (!policyIds || !policyIds.length) {
+        return undefined;
+      }
+
+      return Array.isArray(policyIds) ? policyIds : [policyIds];
+    };
+
     const results = await getAgentStatusForAgentPolicy(
       esClient,
       soClient,
       request.query.policyId,
       request.query.kuery,
       coreContext.savedObjects.client.getCurrentNamespace(),
-      request.query.policyIds
+      parsePolicyIds(request.query.policyIds)
     );
 
     const body: GetAgentStatusResponse = { results };

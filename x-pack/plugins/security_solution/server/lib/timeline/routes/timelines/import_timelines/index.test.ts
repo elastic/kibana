@@ -39,7 +39,6 @@ import {
 
 describe('import timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;
@@ -452,48 +451,6 @@ describe('import timelines', () => {
       });
     });
   });
-
-  describe('request validation', () => {
-    beforeEach(() => {
-      jest.doMock('../../../saved_object/timelines', () => {
-        return {
-          getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
-          persistTimeline: mockPersistTimeline.mockReturnValue({
-            timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
-          }),
-        };
-      });
-
-      jest.doMock('../../../saved_object/pinned_events', () => {
-        return {
-          savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
-            new Error('Test error')
-          ),
-        };
-      });
-
-      jest.doMock('../../../saved_object/notes/saved_object', () => {
-        return {
-          persistNote: mockPersistNote,
-        };
-      });
-    });
-    test('disallows invalid query', async () => {
-      request = requestMock.create({
-        method: 'post',
-        path: TIMELINE_EXPORT_URL,
-        body: { id: 'someId' },
-      });
-      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
-
-      importTimelinesRoute(server.router, createMockConfig(), securitySetup);
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value {"id":"someId"}, excess properties: ["id"]'
-      );
-    });
-  });
 });
 
 describe('import timeline templates', () => {
@@ -904,7 +861,7 @@ describe('import timeline templates', () => {
       request = requestMock.create({
         method: 'post',
         path: TIMELINE_EXPORT_URL,
-        body: { id: 'someId' },
+        body: { isImmutable: 1 },
       });
       const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
@@ -912,7 +869,7 @@ describe('import timeline templates', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value {"id":"someId"}, excess properties: ["id"]'
+        "isImmutable: Expected 'true' | 'false', received number"
       );
     });
   });

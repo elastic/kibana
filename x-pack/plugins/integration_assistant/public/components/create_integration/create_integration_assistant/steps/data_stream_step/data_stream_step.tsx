@@ -20,7 +20,7 @@ import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import type { OnComplete } from './generation_modal';
+import type { OnComplete } from './use_generation';
 import { GenerationModal } from './generation_modal';
 import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';

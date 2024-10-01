@@ -13,7 +13,7 @@ import type { Note } from '../../../../../common/api/timeline';
 export const persistNotes = async (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
-  existingNoteIds?: string[],
+  existingNoteIds?: string[] | null,
   newNotes?: Note[],
   overrideOwner: boolean = true
 ) => {

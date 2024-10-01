@@ -50,4 +50,23 @@ export class ESQLService extends FtrService {
     const toggle = await row.findByTestSubject('ESQLEditor-queryHistory-runQuery-button');
     await toggle.click();
   }
+
+  public async openHelpMenu() {
+    await this.testSubjects.click('esql-menu-button');
+    await this.retry.waitFor('popover to appear', async () => {
+      return await this.testSubjects.exists('esql-quick-reference');
+    });
+  }
+
+  public async isOpenQuickReferenceFlyout() {
+    return await this.testSubjects.exists('esqlInlineDocumentationFlyout');
+  }
+
+  public async openQuickReferenceFlyout() {
+    await this.openHelpMenu();
+    await this.testSubjects.click('esql-quick-reference');
+    await this.retry.waitFor('quick reference to appear', async () => {
+      return await this.isOpenQuickReferenceFlyout();
+    });
+  }
 }

@@ -34,6 +34,9 @@ export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as con
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
+export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
+export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesAddNoteIconButton` as const;
 export const NOTES_COUNT_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesCount` as const;
 export const NOTES_LOADING_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesLoading` as const;
 

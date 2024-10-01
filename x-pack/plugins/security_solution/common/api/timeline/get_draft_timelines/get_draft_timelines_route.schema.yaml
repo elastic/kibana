@@ -2,13 +2,6 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Get Draft Timelines API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline/_draft:
     get:
@@ -31,19 +24,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistTimeline]
-                    properties:
-                      persistTimeline:
-                        type: object
-                        required: [timeline]
-                        properties:
-                          timeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
         '403':
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
           content:

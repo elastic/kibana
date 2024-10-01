@@ -40,7 +40,7 @@ export const Example: Story<{}> = () => {
   );
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         {`Entity filter: ${selectedEntityType || 'N/A'}`}
         <EuiLink

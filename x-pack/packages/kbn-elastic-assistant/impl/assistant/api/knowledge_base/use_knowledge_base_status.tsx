@@ -78,3 +78,20 @@ export const useInvalidateKnowledgeBaseStatus = () => {
     });
   }, [queryClient]);
 };
+
+/**
+ * Helper for determining if Knowledge Base setup is complete.
+ *
+ * Note: Consider moving to API
+ *
+ * @param kbStatus ReadKnowledgeBaseResponse
+ */
+export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean => {
+  return (
+    (kbStatus?.elser_exists &&
+      kbStatus?.esql_exists &&
+      kbStatus?.index_exists &&
+      kbStatus?.pipeline_exists) ??
+    false
+  );
+};

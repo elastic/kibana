@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,31 +41,34 @@ import {
 } from '../../../../notes/store/notes.slice';
 import { MarkdownEditor } from '../../../../common/components/markdown_editor';
 
-const timelineCheckBoxId = 'xpack.securitySolution.notes.attachToTimelineCheckboxId';
+const timelineCheckBoxId = 'xpack.securitySolution.flyout.left.notes.attachToTimelineCheckboxId';
 
 export const MARKDOWN_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.notes.markdownAriaLabel',
+  'xpack.securitySolution.flyout.left.notes.markdownAriaLabel',
   {
     defaultMessage: 'Note',
   }
 );
-export const ADD_NOTE_BUTTON = i18n.translate('xpack.securitySolution.notes.addNoteBtnLabel', {
-  defaultMessage: 'Add note',
-});
+export const ADD_NOTE_BUTTON = i18n.translate(
+  'xpack.securitySolution.flyout.left.notes.addNoteBtnLabel',
+  {
+    defaultMessage: 'Add note',
+  }
+);
 export const CREATE_NOTE_ERROR = i18n.translate(
-  'xpack.securitySolution.notes.createNoteErrorLabel',
+  'xpack.securitySolution.flyout.left.notes.createNoteErrorLabel',
   {
     defaultMessage: 'Error create note',
   }
 );
 export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
-  'xpack.securitySolution.notes.attachToTimelineCheckboxLabel',
+  'xpack.securitySolution.flyout.left.notes.attachToTimelineCheckboxLabel',
   {
     defaultMessage: 'Attach to active timeline',
   }
 );
 export const ATTACH_TO_TIMELINE_INFO = i18n.translate(
-  'xpack.securitySolution.notes.attachToTimelineInfoLabel',
+  'xpack.securitySolution.flyout.left.notes.attachToTimelineInfoLabel',
   {
     defaultMessage: 'The active timeline must be saved before a note can be associated with it',
   }
@@ -83,6 +87,7 @@ export interface AddNewNoteProps {
  */
 export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   const { telemetry } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
   const [editorValue, setEditorValue] = useState('');
@@ -171,7 +176,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
                     <EuiIcon
                       type="iInCircle"
                       css={css`
-                        margin-left: 4px;
+                        margin-left: ${euiTheme.size.s};
                       `}
                     />
                   </EuiToolTip>

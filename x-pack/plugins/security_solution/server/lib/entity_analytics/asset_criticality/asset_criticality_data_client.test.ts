@@ -88,6 +88,7 @@ describe('AssetCriticalityDataClient', () => {
       );
     });
 
+    // QUESTION: This test seems useless?
     it('requires a query parameter', async () => {
       await subject.search({ query: { match_all: {} } });
 

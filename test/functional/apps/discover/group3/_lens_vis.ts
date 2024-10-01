@@ -174,10 +174,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
         changeTimestampField: `--- I don't want to use the time filter ---`,
       });
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await checkNoVis(defaultTotalCount);
 
       await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForDataView');
     });

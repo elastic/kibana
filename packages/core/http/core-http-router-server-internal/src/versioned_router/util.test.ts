@@ -57,6 +57,99 @@ describe('prepareVersionedRouteValidation', () => {
       },
     });
   });
+
+  describe('validates security config', () => {
+    it('throws error if requiredPrivileges are not provided with enabled authz', () => {
+      expect(() =>
+        prepareVersionedRouteValidation({
+          version: '1',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: [],
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    it('throws error if reason is not provided with disabled authz', () => {
+      expect(() =>
+        prepareVersionedRouteValidation({
+          version: '1',
+          validate: false,
+          security: {
+            // @ts-expect-error
+            authz: {
+              enabled: false,
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.reason]: expected value of type [string] but got [undefined]"`
+      );
+    });
+
+    it('passes through valid security configuration with enabled authz', () => {
+      expect(
+        prepareVersionedRouteValidation({
+          version: '1',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: ['privilege-1', { anyRequired: ['privilege-2', 'privilege-3'] }],
+            },
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "security": Object {
+            "authz": Object {
+              "requiredPrivileges": Array [
+                "privilege-1",
+                Object {
+                  "anyRequired": Array [
+                    "privilege-2",
+                    "privilege-3",
+                  ],
+                },
+              ],
+            },
+          },
+          "validate": false,
+          "version": "1",
+        }
+      `);
+    });
+
+    it('passes through valid security configuration with disabled authz', () => {
+      expect(
+        prepareVersionedRouteValidation({
+          version: '1',
+          validate: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Authorization is disabled',
+            },
+          },
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "security": Object {
+            "authz": Object {
+              "enabled": false,
+              "reason": "Authorization is disabled",
+            },
+          },
+          "validate": false,
+          "version": "1",
+        }
+      `);
+    });
+  });
 });
 
 test('unwrapVersionedResponseBodyValidation', () => {

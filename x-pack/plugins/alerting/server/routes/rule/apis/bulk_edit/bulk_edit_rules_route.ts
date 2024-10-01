@@ -33,6 +33,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
       },

@@ -13,7 +13,7 @@ jest.mock('uuid', () => ({
 
 import { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
-import type { FakeRawRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 import {
@@ -349,6 +349,153 @@ describe('CoreKibanaRequest', () => {
         expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
           `"unexpected authentication options: {} for route: /"`
         );
+      });
+    });
+
+    describe('route.options.security property', () => {
+      it('handles required authc: undefined', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: undefined },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(true);
+      });
+
+      it('handles required authc: { enabled: undefined }', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: { enabled: undefined } },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(true);
+      });
+
+      it('handles required authc: { enabled: true }', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: { enabled: true } },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(true);
+      });
+      it('handles required authc: { enabled: false }', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: { enabled: false } },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(false);
+      });
+
+      it(`handles required authc: { enabled: 'optional' }`, () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: { enabled: 'optional' } },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe('optional');
+      });
+
+      it('handles required authz simple config', () => {
+        const security: RouteSecurity = {
+          authz: {
+            requiredPrivileges: ['privilege1'],
+          },
+        };
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.security).toEqual(security);
+      });
+
+      it('handles required authz complex config', () => {
+        const security: RouteSecurity = {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: ['privilege1'],
+                anyRequired: ['privilege2', 'privilege3'],
+              },
+            ],
+          },
+        };
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.security).toEqual(security);
+      });
+
+      it('handles required authz config for the route with RouteSecurityGetter', () => {
+        const security: RouteSecurity = {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: ['privilege1'],
+                anyRequired: ['privilege2', 'privilege3'],
+              },
+            ],
+          },
+        };
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                // security is a getter function only for the versioned routes
+                security: () => security,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.security).toEqual(security);
       });
     });
 

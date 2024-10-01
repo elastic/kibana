@@ -461,7 +461,9 @@ export default ({ getService }: FtrProviderContext) => {
           es,
         });
 
-        expect(doc).to.eql(undefined);
+        const deletedDoc = { ...assetCriticality, criticality_level: 'deleted' };
+
+        expect(_.omit(doc, '@timestamp')).to.eql(deletedDoc);
       });
 
       it('should not return 404 if the asset criticality does not exist', async () => {

@@ -3949,6 +3949,76 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.EntitiesInventoryLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "EntitiesInventoryLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.EntitiesInventoryLocatorDefinition",
+            "text": "EntitiesInventoryLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.EntitiesInventoryLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ENTITY_INVENTORY_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.EntitiesInventoryLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "() => Promise<{ app: string; path: string; state: {}; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.FlamegraphLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -4514,7 +4584,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, serviceName, }: ",
+              "({ rangeFrom, rangeTo, serviceName, environment, }: ",
               {
                 "pluginId": "observabilityShared",
                 "scope": "common",
@@ -4533,7 +4603,7 @@
                 "id": "def-common.ServiceOverviewLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n    environment,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -5868,6 +5938,20 @@
           },
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceOverviewParams.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_overview_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-common.ServiceOverviewParams.rangeFrom",
             "type": "string",
             "tags": [],
@@ -6589,6 +6673,51 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITIES_INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITIES_INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ENTITY_INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EntitiesInventoryLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "EntitiesInventoryLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ERROR_CULPRIT",
         "type": "string",
         "tags": [],
@@ -6806,6 +6935,21 @@
         "description": [],
         "signature": [
           "\"host.hostname\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HOST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_NAME",
+        "description": [],
+        "signature": [
+          "\"host.name\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,

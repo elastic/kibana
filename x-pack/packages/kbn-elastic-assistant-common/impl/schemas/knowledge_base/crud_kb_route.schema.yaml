@@ -18,6 +18,12 @@ paths:
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
+        - name: modelId
+          in: query
+          description: Optional ELSER modelId to use when setting up the Knowledge Base
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: Indicates a successful call.

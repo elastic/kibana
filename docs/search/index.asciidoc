@@ -1,0 +1,73 @@
+[role="xpack"]
+[[search-space]]
+= Search
+
+The *Search* space in {kib} comprises the following features:
+
+* https://www.elastic.co/guide/en/enterprise-search/current/connectors.html[Connectors]
+* https://www.elastic.co/guide/en/enterprise-search/current/crawler.html[Web crawler]
+* <<playground,Playground>>
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/search-application-overview.html[Search Applications]
+* https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html[Behavioral Analytics]
+* Inference Endpoints UI
+* AI Assistant for Search
+* Persistent Dev Tools <<console-kibana, Console>>
+
+[float]
+[[search-release-notes]]
+== Docs and release notes
+
+The Search solution and use case is made up of many tools and features across the {stack}.
+As a result, the release notes for your features of interest might live in different Elastic docs.
+// Use the following table to find links to the appropriate documentation, API references (if applicable), and release notes.
+
+// [options="header"]
+// |===
+// | Name               | API reference           | Documentation         | Release notes
+
+// | Connectors
+// | link:https://example.com/connectors/api[API reference]
+// | link:https://example.com/connectors/docs[Documentation]
+// | link:https://example.com/connectors/notes[Release notes]
+
+// | Web crawler
+// | link:https://example.com/web_crawlers/api[API reference]
+// | link:https://example.com/web_crawlers/docs[Documentation]
+// | link:https://example.com/web_crawlers/notes[Release notes]
+
+// | Playground
+// | link:https://example.com/playground/api[API reference]
+// | link:https://example.com/playground/docs[Documentation]
+// | link:https://example.com/playground/notes[Release notes]
+
+// | Search Applications
+// | link:https://example.com/search_apps/api[API reference]
+// | link:https://example.com/search_apps/docs[Documentation]
+// | link:https://example.com/search_apps/notes[Release notes]
+
+// | Behavioral Analytics
+// | link:https://example.com/behavioral_analytics/api[API reference]
+// | link:https://example.com/behavioral_analytics/docs[Documentation]
+// | link:https://example.com/behavioral_analytics/notes[Release notes]
+
+// | Inference Endpoints
+// | link:https://example.com/inference_endpoints/api[API reference]
+// | link:https://example.com/inference_endpoints/docs[Documentation]
+// | link:https://example.com/inference_endpoints/notes[Release notes]
+
+// | Console
+// | link:https://example.com/console/api[API reference]
+// | link:https://example.com/console/docs[Documentation]
+// | link:https://example.com/console/notes[Release notes]
+
+// | Search UI
+// | link:https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
+// | link:https://www.elastic.co/docs/current/search-ui/overview[Documentation]
+// | link:https://example.com/search_ui/notes[Release notes]
+
+// |===
+
+include::search-connection-details.asciidoc[]
+include::playground/index.asciidoc[]
+include::search-ai-assistant/index.asciidoc[]
+include::inference-endpoints/index.asciidoc[]

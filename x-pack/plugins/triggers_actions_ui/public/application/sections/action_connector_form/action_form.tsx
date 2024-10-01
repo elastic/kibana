@@ -29,6 +29,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/rule_form/utils/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -45,7 +46,6 @@ import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorAddModal } from '.';
@@ -552,7 +552,6 @@ export const ActionForm = ({
               hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
-              defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
               featureId={featureId}
               producerId={producerId}
               ruleTypeId={ruleTypeId}

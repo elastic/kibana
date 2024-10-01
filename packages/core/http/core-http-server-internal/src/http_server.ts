@@ -700,6 +700,7 @@ export class HttpServer {
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      security: route.security,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

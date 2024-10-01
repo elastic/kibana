@@ -196,9 +196,12 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
             data: chunks[i],
             settings: {},
             mappings: {},
-            ingestPipeline: {
-              id: pipelineId,
-            },
+            ingestPipeline:
+              pipelineId !== undefined
+                ? {
+                    id: pipelineId,
+                  }
+                : undefined,
           });
 
           if (!this._isActive) {

@@ -31,7 +31,7 @@ import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plug
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DefaultEmbeddableApi, ErrorEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
 
 export type DashboardApi = CanExpandPanels &

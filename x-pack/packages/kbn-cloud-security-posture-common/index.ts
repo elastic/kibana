@@ -27,3 +27,4 @@ export {
   buildEntityFlyoutPreviewQuery,
 } from './utils/helpers';
 export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
+export { UiMetricService } from './utils/ui_metrics';

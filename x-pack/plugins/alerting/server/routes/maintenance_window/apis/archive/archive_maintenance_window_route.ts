@@ -35,6 +35,7 @@ export const archiveMaintenanceWindowRoute = (
         body: archiveBodySchemaV1,
       },
       options: {
+        access: 'internal',
         tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },

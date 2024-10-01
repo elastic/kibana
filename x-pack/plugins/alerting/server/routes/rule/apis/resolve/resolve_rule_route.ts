@@ -27,6 +27,7 @@ export const resolveRuleRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_resolve`,
+      options: { access: 'internal' },
       validate: {
         params: resolveParamsSchemaV1,
       },

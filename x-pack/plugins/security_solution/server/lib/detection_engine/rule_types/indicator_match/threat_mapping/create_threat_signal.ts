@@ -81,6 +81,7 @@ export const createThreatSignal = async ({
       index: inputIndex,
       exceptionFilter,
       fields: inputIndexFields,
+      loadFields: true,
     });
 
     ruleExecutionLogger.debug(

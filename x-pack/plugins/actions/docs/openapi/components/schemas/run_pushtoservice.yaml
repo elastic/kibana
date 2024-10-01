@@ -30,6 +30,13 @@ properties:
         type: object
         description: Information necessary to create or update a Jira, ServiceNow ITSM, ServiveNow SecOps, Swimlane, or TheHive incident.
         properties:
+          additional_fields:
+            type: string
+            nullable: true
+            maxLength: 20
+            description: >
+              Additional fields for ServiceNow ITSM and ServiveNow SecOps connectors.
+              The fields must exist in the Elastic ServiceNow application and must be specified in JSON format.
           alertId:
             type: string
             description: The alert identifier for Swimlane connectors.

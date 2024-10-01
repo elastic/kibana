@@ -11789,14 +11789,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/types.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/data/data_service.ts"
-            },
-            {
               "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
             },
@@ -12689,22 +12681,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -12757,6 +12733,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -14191,13 +14175,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -14245,13 +14223,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -19240,22 +19212,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -19308,6 +19264,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -21672,13 +21636,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -21726,13 +21684,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -24344,13 +24296,7 @@
                 "text": "RuntimeFieldSpec"
               },
               "> | undefined; fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
@@ -25358,13 +25304,7 @@
             "text": "FieldSpec"
           },
           "[], fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined) => ",
           {
             "pluginId": "dataViews",
@@ -25591,13 +25531,7 @@
             "text": "RuntimeFieldSpec"
           },
           "> | undefined; fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -25630,7 +25564,7 @@
           "\nSet of field attributes"
         ],
         "signature": [
-          "{ [key: string]: ",
+          "Map<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25638,7 +25572,7 @@
             "section": "def-common.FieldAttrSet",
             "text": "FieldAttrSet"
           },
-          "; }"
+          ">"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

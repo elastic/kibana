@@ -12,21 +12,9 @@ import {
   ENTITIES_LATEST_ALIAS,
   MAX_NUMBER_OF_ENTITIES,
   type EntityType,
+  Entity,
 } from '../../../common/entities';
-import {
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
 import { getEntityDefinitionIdWhereClause, getEntityTypesWhereClause } from './query_helper';
-
-export interface LatestEntity {
-  [ENTITY_LAST_SEEN]: string;
-  [ENTITY_TYPE]: string;
-  [ENTITY_DISPLAY_NAME]: string;
-  [ENTITY_ID]: string;
-}
 
 export async function getLatestEntities({
   inventoryEsClient,
@@ -47,8 +35,7 @@ export async function getLatestEntities({
      | ${getEntityDefinitionIdWhereClause()}
      | SORT ${sortField} ${sortDirection}
      | LIMIT ${MAX_NUMBER_OF_ENTITIES}
-     | KEEP ${ENTITY_LAST_SEEN}, ${ENTITY_TYPE}, ${ENTITY_DISPLAY_NAME}, ${ENTITY_ID}
-    `,
+     `,
     filter: {
       bool: {
         filter: [...kqlQuery(kuery)],
@@ -56,5 +43,5 @@ export async function getLatestEntities({
     },
   });
 
-  return esqlResultToPlainObjects<LatestEntity>(latestEntitiesEsqlResponse);
+  return esqlResultToPlainObjects<Entity>(latestEntitiesEsqlResponse);
 }

@@ -74,7 +74,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
         // The response is null or empty in case we unpinned an event.
         // In that case we want to remove the locally pinned event.
-        if (!response || !('code' in response)) {
+        if (!response || !('eventId' in response)) {
           return store.dispatch(
             updateTimeline({
               id: action.payload.id,

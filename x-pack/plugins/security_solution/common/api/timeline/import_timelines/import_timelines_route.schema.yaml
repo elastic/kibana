@@ -5,13 +5,6 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline/_import:
     post:
@@ -29,37 +22,21 @@ paths:
           application/json:
             schema:
               type: object
+              required: [file]
               properties:
-                file:
-                  allOf:
-                    - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
-                    - type: object
-                      required: [hapi]
-                      properties:
-                        hapi:
-                          type: object
-                          required: [filename, headers]
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              type: string
-                              enum:
-                                - 'true'
-                                - 'false'
+                isImmutable:
+                  type: string
+                  enum:
+                    - 'true'
+                    - 'false'
+                file: {}
       responses:
         '200':
           description: Indicates the import of Timelines was successful.
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+                $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
 
         '400':
           description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.

@@ -5,13 +5,6 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-get.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timelines:
     get:
@@ -75,37 +68,27 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [data]
+                required: [
+                  timeline,
+                  totalCount,
+                ]
                 properties:
-                  data:
-                    type: object
-                    required:
-                      [
-                        timelines,
-                        totalCount,
-                        defaultTimelineCount,
-                        templateTimelineCount,
-                        favoriteCount,
-                        elasticTemplateTimelineCount,
-                        customTemplateTimelineCount,
-                      ]
-                    properties:
-                      timelines:
-                        type: array
-                        items:
-                          $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                      totalCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      customTemplateTimelineCount:
-                        type: number
+                  timeline:
+                    type: array
+                    items:
+                      $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                  totalCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  customTemplateTimelineCount:
+                    type: number
         '400':
           description: Bad request. The user supplied invalid data.
           content:

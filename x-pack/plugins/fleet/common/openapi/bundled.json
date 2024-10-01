@@ -4728,14 +4728,10 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/package_policy"
-                    },
-                    "sucess": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
-                    "item",
-                    "sucess"
+                    "item"
                   ]
                 }
               }
@@ -7816,6 +7812,23 @@
           "force": {
             "type": "boolean",
             "description": "Force agent policy creation even if packages are not verified."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [

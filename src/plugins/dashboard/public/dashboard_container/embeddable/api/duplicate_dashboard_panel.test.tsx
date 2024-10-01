@@ -15,11 +15,11 @@ import {
   ReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import {
+  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
@@ -34,7 +34,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, lastValueFrom, Subject } from 'rxjs';
 import { buildMockDashboard, getSampleDashboardPanel } from '../../../mocks';
-import { pluginServices } from '../../../services/plugin_services';
+import { embeddableService } from '../../../services/kibana_services';
 import { DashboardContainer } from '../dashboard_container';
 import { duplicateDashboardPanel, incrementPanelTitle } from './duplicate_dashboard_panel';
 
@@ -54,9 +54,7 @@ describe('Legacy embeddables', () => {
 
     const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-      .fn()
-      .mockReturnValue(mockEmbeddableFactory);
+    embeddableService.getEmbeddableFactory = jest.fn().mockReturnValue(mockEmbeddableFactory);
     container = buildMockDashboard({
       overrides: {
         panels: {

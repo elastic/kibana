@@ -117,7 +117,7 @@ type ScheduledIntervals = ScheduleDensityResult['histogram']['buckets'][0];
 // Set an upper bound just in case a customer sets a really high refresh rate
 const MAX_SCHEDULE_DENSITY_BUCKETS = 50;
 
-interface CreateWorkloadAggregatorOpts {
+export interface CreateWorkloadAggregatorOpts {
   taskStore: TaskStore;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   refreshInterval: number;
