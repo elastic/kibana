@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiImage,
   useEuiTheme,
+  useEuiShadow,
   makeHighContrastColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,17 +41,20 @@ const description = i18n.translate(
  * A presentational component that renders a button designed to exit "full screen" mode.
  */
 export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const { colors, size, border } = euiTheme;
+  const euiThemeContext = useEuiTheme();
+  const { colors, size, border } = euiThemeContext.euiTheme;
 
-  const buttonCSS = css`
-    padding: ${size.xs} ${size.s};
-    background: ${colors.fullShade};
-    border-radius: ${border.radius.small};
-    height: ${size.xl};
-    color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
-    outline-color: ${colors.emptyShade};
-  `;
+  const buttonCSS = [
+    css`
+      padding: ${size.xs} ${size.s};
+      background: ${colors.fullShade};
+      border-radius: ${border.radius.small};
+      height: ${size.xl};
+      color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
+      outline-color: ${colors.emptyShade};
+    `,
+    useEuiShadow('l'),
+  ];
 
   return (
     <div>
