@@ -797,7 +797,6 @@
     "sass-loader": "^10.5.1",
     "sass-resources-loader": "^2.0.1",
     "selenium-webdriver": "^4.25.0",
-    "sharp": "0.32.6",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
     "sort-package-json": "^1.53.1",
