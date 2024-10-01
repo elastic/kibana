@@ -33,8 +33,11 @@ export interface BreakdownFieldSelectorProps {
 
 const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
-    return esqlColumns.map(
-      (column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
+    return (
+      esqlColumns
+        .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
+        // filter out unsupported field types
+        .filter((field) => field.type !== 'unknown')
     );
   }
 
