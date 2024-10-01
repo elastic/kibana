@@ -11,6 +11,16 @@ Object {
     ],
   },
   "body": Object {
+    "_source": Array [
+      "transaction.agent.marks",
+      "span.links",
+    ],
+    "fields": Array [
+      Object {
+        "field": "*",
+        "include_unmapped": true,
+      },
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -300,17 +310,17 @@ Object {
 
 exports[`transaction queries fetches transaction trace samples 1`] = `
 Object {
-  "_source": Array [
-    "transaction.id",
-    "trace.id",
-    "@timestamp",
-  ],
   "apm": Object {
     "events": Array [
       "transaction",
     ],
   },
   "body": Object {
+    "fields": Array [
+      "transaction.id",
+      "trace.id",
+      "@timestamp",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [

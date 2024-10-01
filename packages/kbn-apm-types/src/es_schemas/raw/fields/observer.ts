@@ -13,6 +13,6 @@ export interface Observer {
   id?: string;
   name?: string;
   type?: string;
-  version: string;
-  version_major: number;
+  version?: string;
+  version_major?: number;
 }

@@ -7,6 +7,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
+import { isOtelSource } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -29,6 +30,8 @@ import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { Span } from '../../../typings/es_schemas/ui/span';
 
 async function fetchSpanLinksDetails({
   apmEventClient,
@@ -106,16 +109,23 @@ async function fetchSpanLinksDetails({
 
   const spanIdsMap = keyBy(spanLinks, 'span.id');
 
-  return response.hits.hits.filter(({ _source: source }) => {
-    // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
-    // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
-    if (source.processor.event === ProcessorEvent.span) {
-      const span = source as SpanRaw;
-      const hasSpanId = spanIdsMap[span.span.id] || false;
-      return hasSpanId;
-    }
-    return true;
-  });
+  return response.hits.hits
+    .map(({ _source: source }) => {
+      return source;
+    })
+    .filter(function isSpanWithLinksOrApmTransaction(source): source is Span | Transaction {
+      // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
+      // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
+      if (isOtelSource(source)) {
+        return false;
+      }
+      if (source.processor.event === ProcessorEvent.span) {
+        const span = source as SpanRaw;
+        const hasSpanId = Boolean(spanIdsMap[span.span.id] || false);
+        return hasSpanId;
+      }
+      return true;
+    });
 }
 
 export async function getSpanLinksDetails({
@@ -152,47 +162,44 @@ export async function getSpanLinksDetails({
   const linkedSpans = chunkedResponses.flat();
 
   // Creates a map for all span links details found
-  const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>(
-    (acc, { _source: source }) => {
-      const commonDetails = {
-        serviceName: source.service.name,
-        agentName: source.agent.name,
-        environment: source.service.environment as Environment,
-        transactionId: source.transaction?.id,
+  const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>((acc, source) => {
+    const commonDetails = {
+      serviceName: source.service.name,
+      agentName: source.agent.name,
+      environment: source.service.environment as Environment,
+      transactionId: source.transaction?.id,
+    };
+
+    if (source.processor.event === ProcessorEvent.transaction) {
+      const transaction = source as TransactionRaw;
+      const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+      acc[key] = {
+        traceId: source.trace.id,
+        spanId: transaction.transaction.id,
+        details: {
+          ...commonDetails,
+          spanName: transaction.transaction.name,
+          duration: transaction.transaction.duration.us,
+        },
       };
+    } else {
+      const span = source as SpanRaw;
+      const key = `${span.trace.id}:${span.span.id}`;
+      acc[key] = {
+        traceId: source.trace.id,
+        spanId: span.span.id,
+        details: {
+          ...commonDetails,
+          spanName: span.span.name,
+          duration: span.span.duration.us,
+          spanSubtype: span.span.subtype,
+          spanType: span.span.type,
+        },
+      };
+    }
 
-      if (source.processor.event === ProcessorEvent.transaction) {
-        const transaction = source as TransactionRaw;
-        const key = `${transaction.trace.id}:${transaction.transaction.id}`;
-        acc[key] = {
-          traceId: source.trace.id,
-          spanId: transaction.transaction.id,
-          details: {
-            ...commonDetails,
-            spanName: transaction.transaction.name,
-            duration: transaction.transaction.duration.us,
-          },
-        };
-      } else {
-        const span = source as SpanRaw;
-        const key = `${span.trace.id}:${span.span.id}`;
-        acc[key] = {
-          traceId: source.trace.id,
-          spanId: span.span.id,
-          details: {
-            ...commonDetails,
-            spanName: span.span.name,
-            duration: span.span.duration.us,
-            spanSubtype: span.span.subtype,
-            spanType: span.span.type,
-          },
-        };
-      }
-
-      return acc;
-    },
-    {}
-  );
+    return acc;
+  }, {});
 
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.

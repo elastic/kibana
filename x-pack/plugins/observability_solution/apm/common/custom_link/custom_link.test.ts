@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { extractTemplateVariableNames, getEncodedCustomLinkUrl } from '.';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
 describe('Custom link', () => {
   describe('extractTemplateVariableNames', () => {
@@ -50,11 +49,9 @@ describe('Custom link', () => {
       const url =
         'https://kibana.com/app/apm/{{service.name}}/overview?transactionName={{transaction.name}}';
       const transaction = {
-        service: { name: 'opbeans java' },
-        transaction: {
-          name: '#myhandler/foo',
-        } as unknown as Transaction['transaction'],
-      } as Transaction;
+        'service.name': ['opbeans java'],
+        'transaction.name': ['#myhandler/foo'],
+      };
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe(
         'https://kibana.com/app/apm/opbeans%20java/overview?transactionName=%23myhandler%2Ffoo'
@@ -63,14 +60,18 @@ describe('Custom link', () => {
 
     it('handles missing variable in URL', () => {
       const url = 'https://kibana.com/app/apm/';
-      const transaction = { service: { name: 'opbeans java' } } as Transaction;
+      const transaction = {
+        'service.name': ['opbeans java'],
+      };
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe(url);
     });
 
     it('handles empty URL', () => {
       const url = '';
-      const transaction = { service: { name: 'opbeans java' } } as Transaction;
+      const transaction = {
+        'service.name': ['opbeans java'],
+      };
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe(url);
     });
@@ -83,11 +84,11 @@ describe('Custom link', () => {
 
     it('handles non-string variable values', () => {
       const url =
-        'https://kibana.com/app/apm/{{service.name}}/overview?duration={{transaction.duration}}';
+        'https://kibana.com/app/apm/{{service.name}}/overview?duration={{transaction.duration.us}}';
       const transaction = {
-        service: { name: 'foo' },
-        transaction: { duration: 1 } as unknown as Transaction['transaction'],
-      } as Transaction;
+        'service.name': ['foo'],
+        'transaction.duration.us': [1],
+      };
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe('https://kibana.com/app/apm/foo/overview?duration=1');
     });
@@ -95,8 +96,8 @@ describe('Custom link', () => {
     it('handles non-URL-safe characters in variable values', () => {
       const url = 'https://kibana.com/app/apm/{{service.name}}/overview';
       const transaction = {
-        service: { name: 'foo & bar' },
-      } as Transaction;
+        'service.name': ['foo & bar'],
+      };
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe('https://kibana.com/app/apm/foo%20%26%20bar/overview');
     });

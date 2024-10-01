@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DotObject } from '@kbn/utility-types';
+
 type PlainObject = Record<string, any>;
 
 /**
@@ -15,11 +17,11 @@ type PlainObject = Record<string, any>;
  * @param result
  * @returns
  */
-export function flattenObject(
-  obj: PlainObject,
+export function flattenObject<T extends PlainObject>(
+  obj: T,
   prefix: string = '',
   result: PlainObject = {}
-): PlainObject {
+): DotObject<T> {
   for (const key in obj) {
     if (Object.hasOwn(obj, key)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
@@ -33,5 +35,5 @@ export function flattenObject(
       }
     }
   }
-  return result;
+  return result as DotObject<T>;
 }

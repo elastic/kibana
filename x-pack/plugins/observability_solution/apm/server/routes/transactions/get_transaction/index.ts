@@ -6,11 +6,32 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
+import {
+  isElasticApmSource,
+  unflattenKnownApmEventFields,
+} from '@kbn/apm-data-access-plugin/server';
+import {
+  AGENT_EPHEMERAL_ID,
+  AGENT_NAME,
+  AGENT_VERSION,
+  AT_TIMESTAMP,
+  PROCESSOR_EVENT,
+  PROCESSOR_NAME,
+  SERVICE_NAME,
+  TIMESTAMP,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_SAMPLED,
+  TRANSACTION_TYPE,
+} from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { maybe } from '../../../../common/utils/maybe';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
 export async function getTransaction({
   transactionId,
@@ -24,7 +45,7 @@ export async function getTransaction({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<Transaction | undefined> {
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [
@@ -47,8 +68,54 @@ export async function getTransaction({
           ]),
         },
       },
+      fields: [{ field: '*', include_unmapped: true }],
+      _source: ['transaction.agent.marks', 'span.links'],
     },
   });
 
-  return resp.hits.hits[0]?._source;
+  const hit = maybe(resp.hits.hits[0]);
+
+  if (hit) {
+    const requiredFields = asMutableArray([
+      TRACE_ID,
+      TRANSACTION_ID,
+      AGENT_NAME,
+      PROCESSOR_EVENT,
+      AT_TIMESTAMP,
+      TIMESTAMP,
+      SERVICE_NAME,
+      AGENT_VERSION,
+      AGENT_EPHEMERAL_ID,
+      TRANSACTION_DURATION,
+      TRANSACTION_NAME,
+      TRANSACTION_SAMPLED,
+      TRANSACTION_TYPE,
+      PROCESSOR_NAME,
+    ] as const);
+
+    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+
+    const source = isElasticApmSource(hit._source)
+      ? (hit._source as {
+          transaction: Pick<Transaction['transaction'], 'marks'>;
+          span?: Pick<Required<Transaction>['span'], 'links'>;
+        })
+      : undefined;
+
+    const tx: Transaction = {
+      ...event,
+      transaction: {
+        ...event.transaction,
+        marks: source?.transaction.marks,
+      },
+      processor: {
+        name: 'transaction',
+        event: 'transaction',
+      },
+      span: source?.span,
+    };
+
+    return tx;
+  }
+  return undefined;
 }

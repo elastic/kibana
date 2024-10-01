@@ -24,21 +24,32 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { CustomLink, Filter } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { convertFiltersToQuery } from '../../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
 import { LoadingStatePrompt } from '../../loading_state_prompt';
 import { CustomLinkToolbar } from './custom_link_toolbar';
 import { CustomLinkList } from './custom_link_list';
+import type { FlattenedTransaction } from '../../../../../server/routes/settings/custom_link/get_transaction';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
 export function CustomLinkMenuSection({
   transaction,
+  fields,
   openCreateCustomLinkFlyout,
 }: {
-  transaction?: Transaction;
+  transaction?: {
+    service: {
+      name: string;
+      environment?: string;
+    };
+    transaction: {
+      name: string;
+      type: string;
+    };
+  };
+  fields?: FlattenedTransaction;
   openCreateCustomLinkFlyout: () => void;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
@@ -93,7 +104,7 @@ export function CustomLinkMenuSection({
         </SectionSubtitle>
         <CustomLinkList
           customLinks={showAllLinks ? customLinks : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)}
-          transaction={transaction}
+          transactionFields={fields}
         />
         <EuiSpacer size="s" />
         <BottomSection

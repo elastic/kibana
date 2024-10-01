@@ -7,24 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeepPartial, ValuesType } from 'utility-types';
+import { ValuesType } from 'utility-types';
 import { UnionToIntersection } from '..';
+
+type MaybePartial<T extends Record<string, any>, TPartial extends boolean> = TPartial extends true
+  ? Partial<T>
+  : T;
 
 type DedotKey<
   TObject extends Record<string, any>,
   TKey extends keyof TObject,
-  TValue
-> = TKey extends `${infer THead}.${infer TTail}`
-  ? {
-      [key in THead]: DedotKey<TObject, TTail, TValue>;
-    }
-  : { [key in TKey]: TValue };
+  TValue,
+  TMakePartial extends boolean = false
+> = MaybePartial<
+  TKey extends `${infer THead}.${infer TTail}`
+    ? {
+        [key in THead]: DedotKey<TObject, TTail, TValue, TMakePartial>;
+      }
+    : { [key in TKey]: TValue },
+  TMakePartial
+>;
 
 export type DedotObject<TObject extends Record<string, any>> = UnionToIntersection<
   Exclude<
     ValuesType<{
       [TKey in keyof TObject]: {} extends Pick<TObject, TKey>
-        ? DeepPartial<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>>
+        ? DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>, true>
         : DedotKey<TObject, TKey, TObject[TKey]>;
     }>,
     undefined

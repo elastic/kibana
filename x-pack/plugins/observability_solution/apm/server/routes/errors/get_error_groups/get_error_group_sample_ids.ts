@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
@@ -66,7 +67,7 @@ export async function getErrorGroupSampleIds({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
-      _source: [ERROR_ID, 'transaction'],
+      fields: asMutableArray([ERROR_ID] as const),
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
@@ -74,8 +75,8 @@ export async function getErrorGroupSampleIds({
     },
   });
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const source = item._source;
-    return source.error.id;
+    const event = unflattenKnownApmEventFields(item.fields, asMutableArray([ERROR_ID] as const));
+    return event.error.id;
   });
 
   return {

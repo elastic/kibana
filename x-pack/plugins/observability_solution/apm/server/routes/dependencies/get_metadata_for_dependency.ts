@@ -59,7 +59,9 @@ export async function getMetadataForDependency({
     },
   });
 
-  const sample = unflattenKnownApmEventFields(maybe(sampleResponse.hits.hits[0])?.fields ?? {});
+  const hit = maybe(sampleResponse.hits.hits[0]);
+
+  const sample = unflattenKnownApmEventFields(hit?.fields);
 
   return {
     spanType: sample?.span?.type,

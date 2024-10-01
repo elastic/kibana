@@ -9,5 +9,5 @@
 
 // only for RUM agent: shared by error and transaction
 export interface Page {
-  url: string;
+  url?: string;
 }

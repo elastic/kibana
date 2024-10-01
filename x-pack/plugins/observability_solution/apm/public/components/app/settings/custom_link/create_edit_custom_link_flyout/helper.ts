@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get, isEmpty } from 'lodash';
 import Mustache from 'mustache';
-import { isEmpty, get } from 'lodash';
+import { getEncodedCustomLinkUrl } from '../../../../../../common/custom_link';
 import { FILTER_OPTIONS } from '../../../../../../common/custom_link/custom_link_filter_options';
 import { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
-import { getEncodedCustomLinkUrl } from '../../../../../../common/custom_link';
+import type { FlattenedTransaction } from '../../../../../../server/routes/settings/custom_link/get_transaction';
 
 interface FilterSelectOption {
   value: 'DEFAULT' | FilterKey;
@@ -47,14 +47,14 @@ export const getSelectOptions = (filters: Filter[], selectedKey: Filter['key']) 
   );
 };
 
-const getInvalidTemplateVariables = (template: string, transaction: Transaction) => {
+const getInvalidTemplateVariables = (template: string, transaction: FlattenedTransaction) => {
   return (Mustache.parse(template) as Array<[string, string]>)
     .filter(([type]) => type === 'name')
     .map(([, value]) => value)
-    .filter((templateVar) => get(transaction, templateVar) == null);
+    .filter((templateVar) => isEmpty(get(transaction, templateVar)));
 };
 
-const validateUrl = (url: string, transaction?: Transaction) => {
+const validateUrl = (url: string, transaction?: FlattenedTransaction) => {
   if (!transaction || isEmpty(transaction)) {
     return i18n.translate('xpack.apm.settings.customLink.preview.transaction.notFound', {
       defaultMessage:
@@ -80,7 +80,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
   }
 };
 
-export const replaceTemplateVariables = (url: string, transaction?: Transaction) => ({
+export const replaceTemplateVariables = (url: string, transaction?: FlattenedTransaction) => ({
   formattedUrl: getEncodedCustomLinkUrl(url, transaction),
   error: validateUrl(url, transaction),
 });

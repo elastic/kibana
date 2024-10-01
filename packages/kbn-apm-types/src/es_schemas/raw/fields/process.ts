@@ -9,7 +9,7 @@
 
 export interface Process {
   args?: string[];
-  pid: number;
+  pid?: number;
   ppid?: number;
   title?: string;
 }

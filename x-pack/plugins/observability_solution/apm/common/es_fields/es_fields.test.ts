@@ -20,7 +20,7 @@ const fieldnames = {
 
 describe('Transaction', () => {
   const transaction: AllowUnknownProperties<Transaction> = {
-    '@timestamp': new Date().toString(),
+    '@timestamp': `2024-10-01T10:13:58.595Z`,
     '@metadata': 'whatever',
     observer: {
       name: 'an observer',
@@ -78,7 +78,7 @@ describe('Transaction', () => {
 
 describe('Span', () => {
   const span: AllowUnknownProperties<Span> = {
-    '@timestamp': new Date().toString(),
+    '@timestamp': `2024-10-01T10:13:58.595Z`,
     '@metadata': 'whatever',
     observer: {
       name: 'an observer',
@@ -161,7 +161,7 @@ describe('Error', () => {
       id: 'error id',
       grouping_key: 'grouping key',
     },
-    '@timestamp': new Date().toString(),
+    '@timestamp': `2024-10-01T10:13:58.595Z`,
     host: {
       hostname: 'my hostname',
     },

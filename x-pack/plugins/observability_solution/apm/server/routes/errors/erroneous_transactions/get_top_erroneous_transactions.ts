@@ -14,6 +14,7 @@
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
@@ -26,6 +27,8 @@ import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { maybe } from '../../../../common/utils/maybe';
 
 async function getTopErroneousTransactions({
   environment,
@@ -93,7 +96,7 @@ async function getTopErroneousTransactions({
             sample: {
               top_hits: {
                 size: 1,
-                _source: [TRANSACTION_TYPE],
+                fields: asMutableArray([TRANSACTION_TYPE] as const),
               },
             },
             timeseries: {
@@ -115,9 +118,10 @@ async function getTopErroneousTransactions({
   return (
     res.aggregations?.top_five_transactions.buckets.map(
       ({ key, doc_count: docCount, sample, timeseries }) => {
+        const event = unflattenKnownApmEventFields(maybe(sample.hits.hits[0])?.fields);
         return {
           transactionName: key as string,
-          transactionType: sample.hits.hits[0]._source.transaction?.type,
+          transactionType: event?.transaction?.type,
           occurrences: docCount,
           timeseries: timeseries.buckets.map((timeseriesBucket) => {
             return {

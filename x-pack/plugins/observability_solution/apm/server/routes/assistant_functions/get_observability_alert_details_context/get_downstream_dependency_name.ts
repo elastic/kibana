@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { termQuery } from '../../../../common/utils/term_query';
 import {
@@ -15,6 +16,8 @@ import {
 } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RollupInterval } from '../../../../common/rollup';
+import { maybe } from '../../../../common/utils/maybe';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
 export async function getDownstreamServiceResource({
   traceId,
@@ -26,8 +29,8 @@ export async function getDownstreamServiceResource({
   start: number;
   end: number;
   apmEventClient: APMEventClient;
-}) {
-  const response = await apmEventClient.search('get_error_group_main_statistics', {
+}): Promise<string | undefined> {
+  const response = await apmEventClient.search('get_downstream_service_resource', {
     apm: {
       sources: [
         {
@@ -39,8 +42,10 @@ export async function getDownstreamServiceResource({
     body: {
       track_total_hits: false,
       size: 1,
+      terminate_after: 1,
       _source: ['span.destination.service'],
       query: {
+        fields: [SPAN_DESTINATION_SERVICE_RESOURCE],
         bool: {
           filter: [
             ...termQuery(TRACE_ID, traceId),
@@ -53,6 +58,11 @@ export async function getDownstreamServiceResource({
     },
   });
 
-  const hit = response.hits.hits[0];
-  return hit?._source?.span.destination?.service.resource;
+  const hit = maybe(response.hits.hits[0]);
+  const event = unflattenKnownApmEventFields(
+    hit?.fields,
+    asMutableArray([SPAN_DESTINATION_SERVICE_RESOURCE] as const)
+  );
+
+  return event?.span.destination.service.resource;
 }

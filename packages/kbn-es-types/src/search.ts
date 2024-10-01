@@ -87,9 +87,15 @@ export type SearchHit<
   (TSource extends false ? {} : { _source: TSource }) &
   (TFields extends Fields
     ? {
-        fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
+        fields: {
+          [key in ValueTypeOfField<TFields>]?: unknown[];
+        };
       }
-    : { fields?: Record<string, unknown[]> }) &
+    : {
+        fields?: Partial<{
+          [key: string]: unknown[];
+        }>;
+      }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;

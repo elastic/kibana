@@ -8,9 +8,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import { CustomLinkList } from './custom_link_list';
+import { FlattenedTransaction } from '../../../../../server/routes/settings/custom_link/get_transaction';
 
 describe('CustomLinkList', () => {
   const customLinks = [
@@ -21,18 +21,20 @@ describe('CustomLinkList', () => {
       url: 'http://elastic.co?service.name={{service.name}}',
     },
   ] as CustomLink[];
-  const transaction = {
-    service: { name: 'foo.bar' },
-  } as unknown as Transaction;
+  const transactionFields: FlattenedTransaction = {
+    'service.name': ['foo, bar'],
+  };
   it('shows links', () => {
     const component = render(
-      <CustomLinkList customLinks={customLinks} transaction={transaction} />
+      <CustomLinkList customLinks={customLinks} transactionFields={transactionFields} />
     );
     expectTextsInDocument(component, ['foo', 'bar']);
   });
 
   it('doesnt show any links', () => {
-    const component = render(<CustomLinkList customLinks={[]} transaction={transaction} />);
+    const component = render(
+      <CustomLinkList customLinks={[]} transactionFields={transactionFields} />
+    );
     expectTextsNotInDocument(component, ['foo', 'bar']);
   });
 });

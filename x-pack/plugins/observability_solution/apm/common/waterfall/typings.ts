@@ -71,9 +71,10 @@ export interface WaterfallSpan {
 
 export interface WaterfallError {
   timestamp: TimestampUs;
-  trace?: { id: string };
-  transaction?: { id: string };
-  parent?: { id: string };
+  trace?: { id?: string };
+  transaction?: { id?: string };
+  parent?: { id?: string };
+  span?: { id?: string };
   error: {
     id: string;
     log?: {

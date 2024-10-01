@@ -18,7 +18,7 @@ export default {
 export function Example({ filters, label, url }: ComponentProps<typeof LinkPreview>) {
   const coreMock = {
     http: {
-      get: async () => ({ transaction: { id: '0' } }),
+      get: async () => ({ transaction: { 'transaction.id': '0' } }),
     },
     uiSettings: { get: () => false },
   } as unknown as CoreStart;

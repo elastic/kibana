@@ -29,7 +29,7 @@ import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import { AT_TIMESTAMP, ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -348,14 +348,22 @@ export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {
-  error: APMError;
+  error: {
+    service: {
+      language?: {
+        name?: string;
+      };
+    };
+    [AT_TIMESTAMP]: string;
+    error: Pick<APMError['error'], 'id' | 'log' | 'stack_trace' | 'exception'>;
+  };
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error?.service.language?.name;
-  const exceptions = error?.error.exception || [];
-  const logStackframes = error?.error.log?.stacktrace;
+  const codeLanguage = error.service.language?.name;
+  const exceptions = error.error.exception || [];
+  const logStackframes = error.error.log?.stacktrace;
   const isPlaintextException =
-    !!error?.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+    !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
       return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;

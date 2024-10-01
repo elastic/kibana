@@ -8,6 +8,8 @@
  */
 
 export interface Container {
-  id?: string | null;
-  image?: string | null;
+  id?: string;
+  image?: {
+    name?: string;
+  };
 }

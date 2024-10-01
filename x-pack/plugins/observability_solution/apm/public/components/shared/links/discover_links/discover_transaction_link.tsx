@@ -10,7 +10,10 @@ import { PROCESSOR_EVENT, TRACE_ID, TRANSACTION_ID } from '../../../../../common
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './discover_link';
 
-export function getDiscoverQuery(transaction: Transaction) {
+export function getDiscoverQuery(transaction: {
+  transaction: { id: string };
+  trace: { id: string };
+}) {
   const transactionId = transaction.transaction.id;
   const traceId = transaction.trace.id;
 

@@ -11,6 +11,9 @@ Object {
     ],
   },
   "body": Object {
+    "fields": Array [
+      "*",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -63,6 +66,9 @@ Object {
     ],
   },
   "body": Object {
+    "fields": Array [
+      "*",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [],

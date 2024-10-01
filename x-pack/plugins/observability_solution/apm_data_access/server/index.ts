@@ -98,4 +98,9 @@ export type {
 
 export { APMEventClient } from './lib/helpers';
 
-export { unflattenKnownApmEventFields } from './utils/unflatten_known_fields';
+export {
+  unflattenKnownApmEventFields,
+  mapToSingleOrMultiValue,
+} from './utils/unflatten_known_fields';
+export { isElasticApmSource } from './utils/is_elastic_apm_source';
+export { isOtelSource } from './utils/is_otel_source';

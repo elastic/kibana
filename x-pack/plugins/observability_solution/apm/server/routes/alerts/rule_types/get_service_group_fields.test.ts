@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { flattenObject } from '@kbn/observability-utils/object/flatten_object';
 import {
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,
   flattenSourceDoc,
 } from './get_apm_alert_source_fields';
+import { castArray, mapValues } from 'lodash';
 
 const mockSourceObj = {
   service: {
@@ -34,10 +36,12 @@ const mockSourceObj = {
   },
 };
 
+const mockFieldsObject = mapValues(flattenObject(mockSourceObj), (value) => castArray(value));
+
 const mockBucket = {
   source_fields: {
     hits: {
-      hits: [{ _source: mockSourceObj }],
+      hits: [{ fields: mockFieldsObject }],
     },
   },
 };
@@ -50,13 +54,13 @@ describe('getSourceFields', () => {
         "agent.name": "nodejs",
         "container.id": "my-container",
         "host.name": "my-host",
-        "labels": Object {
-          "event": Array [
-            "event-0",
-            "event-1",
-          ],
-          "team": "test",
-        },
+        "labels.event": Array [
+          "event-0",
+          "event-1",
+        ],
+        "labels.team": Array [
+          "test",
+        ],
         "service.environment": "testing",
         "service.language.name": "typescript",
         "service.name": "testbeans",
@@ -72,15 +76,13 @@ describe('getSourceFieldsAgg', () => {
       Object {
         "source_fields": Object {
           "top_hits": Object {
-            "_source": Object {
-              "includes": Array [
-                "agent.name",
-                "service.name",
-                "service.environment",
-                "service.language.name",
-                "labels",
-              ],
-            },
+            "fields": Array [
+              "agent.name",
+              "service.name",
+              "service.environment",
+              "service.language.name",
+              "labels",
+            ],
             "size": 1,
           },
         },
@@ -96,15 +98,13 @@ describe('getSourceFieldsAgg', () => {
       Object {
         "source_fields": Object {
           "top_hits": Object {
-            "_source": Object {
-              "includes": Array [
-                "agent.name",
-                "service.name",
-                "service.environment",
-                "service.language.name",
-                "labels",
-              ],
-            },
+            "fields": Array [
+              "agent.name",
+              "service.name",
+              "service.environment",
+              "service.language.name",
+              "labels",
+            ],
             "size": 1,
             "sort": Array [
               Object {

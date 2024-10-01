@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { convertFiltersToQuery } from '../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
@@ -18,7 +17,16 @@ export function CustomLinkFlyout({
   isOpen,
   onClose,
 }: {
-  transaction?: Transaction;
+  transaction?: {
+    service: {
+      name: string;
+      environment?: string;
+    };
+    transaction: {
+      name: string;
+      type: string;
+    };
+  };
   isOpen: boolean;
   onClose: () => void;
 }) {

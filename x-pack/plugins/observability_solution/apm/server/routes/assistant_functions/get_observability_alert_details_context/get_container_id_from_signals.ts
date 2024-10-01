@@ -13,12 +13,16 @@ import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
 import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RollupInterval } from '../../../../common/rollup';
+import { CONTAINER_ID } from '../../../../common/es_fields/apm';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { maybe } from '../../../../common/utils/maybe';
 
 export async function getContainerIdFromSignals({
   query,
@@ -44,7 +48,6 @@ export async function getContainerIdFromSignals({
   const end = moment(query.alert_started_at).valueOf();
 
   const params: APMEventESSearchRequest['body'] = {
-    _source: ['container.id'],
     terminate_after: 1,
     size: 1,
     track_total_hits: false,
@@ -80,12 +83,17 @@ async function getContainerIdFromLogs({
   logSourcesService: LogSourcesService;
 }) {
   const index = await logSourcesService.getFlattenedLogSources();
-  const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
+  const res = await typedSearch(esClient, {
     index,
     ...params,
+    fields: asMutableArray([CONTAINER_ID] as const),
   });
 
-  return res.hits.hits[0]?._source?.container?.id;
+  const hit = maybe(res.hits.hits[0]);
+
+  const event = unflattenKnownApmEventFields(hit?.fields, asMutableArray([CONTAINER_ID] as const));
+
+  return event?.container.id;
 }
 
 async function getContainerIdFromTraces({
@@ -104,8 +112,15 @@ async function getContainerIdFromTraces({
         },
       ],
     },
-    body: params,
+    body: {
+      ...params,
+      fields: asMutableArray([CONTAINER_ID] as const),
+    },
   });
 
-  return res.hits.hits[0]?._source.container?.id;
+  const hit = maybe(res.hits.hits[0]);
+
+  const event = unflattenKnownApmEventFields(hit?.fields, asMutableArray([CONTAINER_ID] as const));
+
+  return event?.container.id;
 }

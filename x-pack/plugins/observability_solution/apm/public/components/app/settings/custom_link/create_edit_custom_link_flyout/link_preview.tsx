@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiToolTip,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { Filter } from '../../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import type { FlattenedTransaction } from '../../../../../../server/routes/settings/custom_link/get_transaction';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
-import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
+import { convertFiltersToQuery, replaceTemplateVariables } from './helper';
 
 export interface LinkPreviewProps {
   label: string;
@@ -31,11 +31,14 @@ export interface LinkPreviewProps {
 }
 
 const fetchTransaction = debounce(
-  async (filters: Filter[], callback: (transaction: Transaction) => void) => {
-    const transaction = await callApmApi('GET /internal/apm/settings/custom_links/transaction', {
-      signal: null,
-      params: { query: convertFiltersToQuery(filters) },
-    });
+  async (filters: Filter[], callback: (transaction: FlattenedTransaction | undefined) => void) => {
+    const { transaction } = await callApmApi(
+      'GET /internal/apm/settings/custom_links/transaction',
+      {
+        signal: null,
+        params: { query: convertFiltersToQuery(filters) },
+      }
+    );
     callback(transaction);
   },
   1000
@@ -44,7 +47,7 @@ const fetchTransaction = debounce(
 const getTextColor = (value?: string) => (value ? 'default' : 'subdued');
 
 export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
-  const [transaction, setTransaction] = useState<Transaction | undefined>();
+  const [transaction, setTransaction] = useState<FlattenedTransaction | undefined>();
 
   useEffect(() => {
     /*
@@ -53,7 +56,7 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
       To avoid such case, sets the isUnmounted to true when component unmount and check its value before update the transaction.
     */
     let isUnmounted = false;
-    fetchTransaction(filters, (_transaction: Transaction) => {
+    fetchTransaction(filters, (_transaction: FlattenedTransaction | undefined) => {
       if (!isUnmounted) {
         setTransaction(_transaction);
       }

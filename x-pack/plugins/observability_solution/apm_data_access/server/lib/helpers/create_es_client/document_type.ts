@@ -94,7 +94,7 @@ export function getConfigForDocumentType<TApmDocumentType extends ApmDocumentTyp
 }
 
 export type ProcessorEventOfDocumentType<TApmDocumentType extends ApmDocumentType> =
-  DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
+  | DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
 
 export function getProcessorEventForDocumentType<TApmDocumentType extends ApmDocumentType>(
   documentType: TApmDocumentType

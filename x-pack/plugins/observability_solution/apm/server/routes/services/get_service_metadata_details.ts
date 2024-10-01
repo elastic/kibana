@@ -43,8 +43,8 @@ export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
-      name: string;
-      version: string;
+      name?: string;
+      version?: string;
     };
     framework?: string;
     agent: {

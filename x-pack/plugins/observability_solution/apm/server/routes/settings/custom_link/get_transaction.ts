@@ -7,11 +7,17 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
+import { mapToSingleOrMultiValue } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { maybe } from '../../../../common/utils/maybe';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type FlattenedTransaction = Partial<{
+  [key: string]: unknown;
+}>;
 
 export async function getTransaction({
   apmEventClient,
@@ -19,7 +25,7 @@ export async function getTransaction({
 }: {
   apmEventClient: APMEventClient;
   filters?: t.TypeOf<typeof filterOptionsRt>;
-}) {
+}): Promise<FlattenedTransaction | undefined> {
   const esFilters = compact(
     Object.entries(filters)
       // loops through the filters splitting the value by comma and removing white spaces
@@ -48,7 +54,10 @@ export async function getTransaction({
           filter: esFilters,
         },
       },
+      fields: ['*'],
     },
   });
-  return resp.hits.hits[0]?._source;
+
+  const event = maybe(resp.hits.hits[0])?.fields;
+  return event ? mapToSingleOrMultiValue(event) : undefined;
 }

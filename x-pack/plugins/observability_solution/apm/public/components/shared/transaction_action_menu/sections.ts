@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
-import { isEmpty, pickBy } from 'lodash';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { Location } from 'history';
+import { isEmpty, pickBy } from 'lodash';
+import moment from 'moment';
 import { Environment } from '../../../../common/environment_rt';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { getDiscoverHref } from '../links/discover_links/discover_link';
-import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
-import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
+import { getDiscoverHref } from '../links/discover_links/discover_link';
+import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
+import { Action, SectionRecord, getNonEmptySections } from './sections_helper';
+import { TransactionForActionMenu } from './transaction_action_menu';
 
-function getInfraMetricsQuery(transaction: Transaction) {
+function getInfraMetricsQuery(transaction: { '@timestamp': string }) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
   const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
@@ -49,7 +49,7 @@ export const getSections = ({
   dataViewId,
   assetDetailsLocator,
 }: {
-  transaction?: Transaction;
+  transaction?: TransactionForActionMenu;
   basePath: IBasePath;
   location: Location;
   apmRouter: ApmRouter;
@@ -65,8 +65,8 @@ export const getSections = ({
 }) => {
   if (!transaction) return [];
 
-  const hostName = transaction.host?.hostname;
-  const podId = transaction.kubernetes?.pod?.uid;
+  const hostName = transaction.host?.name ?? transaction.host?.hostname;
+  const podId = transaction.kubernetes?.pod?.uid as string | undefined;
   const containerId = transaction.container?.id;
 
   const time = Math.round(transaction.timestamp.us / 1000);

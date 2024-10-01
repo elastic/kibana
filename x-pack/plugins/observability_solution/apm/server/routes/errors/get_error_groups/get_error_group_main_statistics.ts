@@ -8,12 +8,19 @@
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import {
+  isElasticApmSource,
+  unflattenKnownApmEventFields,
+} from '@kbn/apm-data-access-plugin/server';
+import { compact } from 'lodash';
+import {
+  AT_TIMESTAMP,
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
+  ERROR_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRACE_ID,
@@ -25,6 +32,7 @@ import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 
 export interface ErrorGroupMainStatisticsResponse {
   errorGroups: Array<{
@@ -105,6 +113,8 @@ export async function getErrorGroupMainStatistics({
     body: {
       track_total_hits: false,
       size: 0,
+      // we don't use it, but still want the type
+      _source: true,
       query: {
         bool: {
           filter: [
@@ -129,16 +139,14 @@ export async function getErrorGroupMainStatistics({
             sample: {
               top_hits: {
                 size: 1,
-                _source: [
+                fields: asMutableArray([
                   TRACE_ID,
-                  ERROR_LOG_MESSAGE,
-                  ERROR_EXC_MESSAGE,
-                  ERROR_EXC_HANDLED,
-                  ERROR_EXC_TYPE,
                   ERROR_CULPRIT,
+                  AT_TIMESTAMP,
                   ERROR_GROUP_ID,
-                  '@timestamp',
-                ],
+                  ERROR_ID,
+                ] as const),
+                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
                 sort: {
                   '@timestamp': 'desc',
                 },
@@ -155,19 +163,37 @@ export async function getErrorGroupMainStatistics({
 
   const maxCountExceeded = (response.aggregations?.error_groups.sum_other_doc_count ?? 0) > 0;
 
-  const errorGroups =
+  const errorGroups = compact(
     response.aggregations?.error_groups.buckets.map((bucket) => {
+      const errorSource = isElasticApmSource(bucket.sample.hits.hits[0]._source!)
+        ? bucket.sample.hits.hits[0]._source
+        : undefined;
+
+      const event = unflattenKnownApmEventFields(
+        bucket.sample.hits.hits[0].fields,
+        asMutableArray([TRACE_ID, AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const)
+      );
+
+      const mergedEvent = {
+        ...event,
+        error: {
+          ...(event.error ?? {}),
+          exception: errorSource?.error.exception,
+        },
+      };
+
       return {
         groupId: bucket.key as string,
-        name: getErrorName(bucket.sample.hits.hits[0]._source),
-        lastSeen: new Date(bucket.sample.hits.hits[0]._source['@timestamp']).getTime(),
+        name: getErrorName(mergedEvent),
+        lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
         occurrences: bucket.doc_count,
-        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
-        handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
-        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
-        traceId: bucket.sample.hits.hits[0]._source.trace?.id,
+        culprit: mergedEvent.error.culprit,
+        handled: mergedEvent.error.exception?.[0].handled,
+        type: mergedEvent.error.exception?.[0].type,
+        traceId: mergedEvent.trace?.id,
       };
-    }) ?? [];
+    }) ?? []
+  );
 
   return {
     errorGroups,

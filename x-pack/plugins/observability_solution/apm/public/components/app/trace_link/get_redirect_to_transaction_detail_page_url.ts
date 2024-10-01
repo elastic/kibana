@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { TransactionDetailRedirectInfo } from '../../../../server/routes/transactions/get_transaction_by_trace';
 
 export const getRedirectToTransactionDetailPageUrl = ({
   transaction,
@@ -14,7 +14,7 @@ export const getRedirectToTransactionDetailPageUrl = ({
   rangeTo,
   waterfallItemId,
 }: {
-  transaction: Transaction;
+  transaction: TransactionDetailRedirectInfo;
   rangeFrom?: string;
   rangeTo?: string;
   waterfallItemId?: string;

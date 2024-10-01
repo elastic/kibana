@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import Mustache from 'mustache';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { castArray, isEmpty } from 'lodash';
+import type { FlattenedTransaction } from '../../server/routes/settings/custom_link/get_transaction';
 
 export const INVALID_LICENSE = i18n.translate('xpack.apm.settings.customLink.license.text', {
   defaultMessage:
@@ -31,14 +31,14 @@ export const extractTemplateVariableNames = (url: string): string[] => {
   return Array.from(uniqueVariableNames);
 };
 
-export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) {
+export function getEncodedCustomLinkUrl(url: string, transaction?: FlattenedTransaction) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
     const encodedTemplateVariables = {};
     templateVariables.forEach((name) => {
-      const value = get(transaction, name);
-      if (value) {
-        const encodedValue = encodeURIComponent(value);
+      const value = transaction?.[name];
+      if (value && !isEmpty(value)) {
+        const encodedValue = encodeURIComponent(String(castArray(value)[0]));
         set(encodedTemplateVariables, name, encodedValue);
       }
     });

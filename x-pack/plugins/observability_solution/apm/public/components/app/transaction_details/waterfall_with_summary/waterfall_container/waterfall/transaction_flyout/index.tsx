@@ -54,7 +54,7 @@ export function TransactionFlyout({
   start,
   end,
 }: Props) {
-  const { data: transaction, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/transactions/{transactionId}', {
         params: { path: { traceId, transactionId }, query: { start, end } },
@@ -62,6 +62,8 @@ export function TransactionFlyout({
     },
     [traceId, transactionId, start, end]
   );
+
+  const transaction = data?.transaction;
 
   const isLoading = isPending(status);
 

@@ -195,15 +195,17 @@ export const tasks: TelemetryTask[] = [
             sort: {
               '@timestamp': 'desc' as const,
             },
+            fields: ['@timestamp' as const],
           },
         })
-      ).hits.hits[0] as { fields: { '@timestamp': string[] } };
+      ).hits.hits[0];
 
       if (!lastTransaction) {
         return {};
       }
 
-      const end = new Date(lastTransaction.fields['@timestamp'][0]).getTime() - 5 * 60 * 1000;
+      const end =
+        new Date(lastTransaction.fields['@timestamp']![0] as string).getTime() - 5 * 60 * 1000;
 
       const start = end - 60 * 1000;
 

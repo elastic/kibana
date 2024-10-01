@@ -59,27 +59,49 @@ export type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
 type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
 export type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
-type TypeOfProcessorEvent<T extends ProcessorEvent> = {
-  [ProcessorEvent.error]: APMError;
-  [ProcessorEvent.transaction]: Transaction;
-  [ProcessorEvent.span]: Span;
-  [ProcessorEvent.metric]: Metric;
-}[T];
+// dummy interface to force app code to deal with OTel source
+export interface OTelAPMDocument {
+  '@timestamp': string;
+  attributes: Record<string, unknown>;
+  resource: {
+    attributes: Record<string, unknown>;
+  };
+}
+
+export type ElasticAPMDocument = APMError | Transaction | Span | Metric;
+
+type TypeOfProcessorEvent<T extends ProcessorEvent> =
+  | {
+      [ProcessorEvent.error]: APMError;
+      [ProcessorEvent.transaction]: Transaction;
+      [ProcessorEvent.span]: Span;
+      [ProcessorEvent.metric]: Metric;
+    }[T]
+  | OTelAPMDocument;
 
 type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
   InferSearchResponseOf<Event, TParams>;
 
-type TypedSearchResponse<TParams extends APMEventESSearchRequest> = InferSearchResponseOf<
-  TParams['body'] extends { _source: SearchSourceConfig }
+type AssertSourceIsDefined<TSearchRequest extends APMEventESSearchRequest> =
+  TSearchRequest extends { _source: SearchSourceConfig }
+    ? true
+    : TSearchRequest['body'] extends { _source: SearchSourceConfig }
+    ? true
+    : false;
+
+type TypedSearchResponse<TSearchRequest extends APMEventESSearchRequest> = InferSearchResponseOf<
+  AssertSourceIsDefined<TSearchRequest> extends true
     ? TypeOfProcessorEvent<
-        TParams['apm'] extends { events: ProcessorEvent[] }
-          ? ValuesType<TParams['apm']['events']>
-          : TParams['apm'] extends { sources: ApmDataSource[] }
-          ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
+        TSearchRequest['apm'] extends { events: ProcessorEvent[] }
+          ? ValuesType<TSearchRequest['apm']['events']>
+          : TSearchRequest['apm'] extends { sources: ApmDataSource[] }
+          ? ProcessorEventOfDocumentType<
+              ValuesType<TSearchRequest['apm']['sources']>['documentType']
+            >
           : never
       >
     : undefined,
-  TParams
+  TSearchRequest
 >;
 
 interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {

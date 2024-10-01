@@ -9,11 +9,15 @@ Object {
 
 exports[`Error AGENT_ACTIVATION_METHOD 1`] = `undefined`;
 
+exports[`Error AGENT_EPHEMERAL_ID 1`] = `undefined`;
+
 exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Error AT_TIMESTAMP 1`] = `"2024-10-01T10:13:58.595Z"`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
 
@@ -36,6 +40,8 @@ Object {
 `;
 
 exports[`Error CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
+exports[`Error CLOUD_ACCOUNT_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
@@ -228,9 +234,19 @@ exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
+exports[`Error PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Error PROCESS_PID 1`] = `undefined`;
+
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error PROCESSOR_NAME 1`] = `"error"`;
 
 exports[`Error SERVICE 1`] = `
 Object {
@@ -357,11 +373,15 @@ Object {
 
 exports[`Span AGENT_ACTIVATION_METHOD 1`] = `undefined`;
 
+exports[`Span AGENT_EPHEMERAL_ID 1`] = `undefined`;
+
 exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Span AT_TIMESTAMP 1`] = `"2024-10-01T10:13:58.595Z"`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -384,6 +404,8 @@ Object {
 `;
 
 exports[`Span CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
+exports[`Span CLOUD_ACCOUNT_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
@@ -563,9 +585,19 @@ exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
+exports[`Span PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Span PROCESS_PID 1`] = `undefined`;
+
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
+
+exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -688,11 +720,15 @@ Object {
 
 exports[`Transaction AGENT_ACTIVATION_METHOD 1`] = `undefined`;
 
+exports[`Transaction AGENT_EPHEMERAL_ID 1`] = `undefined`;
+
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction AT_TIMESTAMP 1`] = `"2024-10-01T10:13:58.595Z"`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
@@ -715,6 +751,8 @@ Object {
 `;
 
 exports[`Transaction CLOUD_ACCOUNT_ID 1`] = `undefined`;
+
+exports[`Transaction CLOUD_ACCOUNT_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
 
@@ -908,9 +946,19 @@ exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
+
+exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
+
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
+exports[`Transaction PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Transaction PROCESS_PID 1`] = `undefined`;
+
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
+
+exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {

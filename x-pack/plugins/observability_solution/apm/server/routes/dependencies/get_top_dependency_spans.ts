@@ -8,8 +8,10 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
+  AT_TIMESTAMP,
   EVENT_OUTCOME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -28,6 +30,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 
 const MAX_NUM_SPANS = 1000;
 
@@ -98,7 +101,7 @@ export async function getTopDependencySpans({
             ],
           },
         },
-        _source: [
+        fields: asMutableArray([
           SPAN_ID,
           TRACE_ID,
           TRANSACTION_ID,
@@ -108,13 +111,28 @@ export async function getTopDependencySpans({
           AGENT_NAME,
           SPAN_DURATION,
           EVENT_OUTCOME,
-          '@timestamp',
-        ],
+          AT_TIMESTAMP,
+        ] as const),
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) =>
+    unflattenKnownApmEventFields(
+      hit.fields,
+      asMutableArray([
+        SPAN_ID,
+        TRACE_ID,
+        TRANSACTION_ID,
+        SPAN_NAME,
+        SERVICE_NAME,
+        SPAN_DURATION,
+        EVENT_OUTCOME,
+        AT_TIMESTAMP,
+        AGENT_NAME,
+      ] as const)
+    )
+  );
 
-  const transactionIds = spans.map((span) => span.transaction!.id);
+  const transactionIds = spans.map((span) => span.transaction.id);
 
   const transactions = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
@@ -129,13 +147,23 @@ export async function getTopDependencySpans({
             filter: [...termsQuery(TRANSACTION_ID, ...transactionIds)],
           },
         },
-        _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
+        fields: asMutableArray([
+          AT_TIMESTAMP,
+          TRANSACTION_ID,
+          TRANSACTION_TYPE,
+          TRANSACTION_NAME,
+        ] as const),
         sort: {
           '@timestamp': 'desc',
         },
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) =>
+    unflattenKnownApmEventFields(
+      hit.fields,
+      asMutableArray([AT_TIMESTAMP, TRANSACTION_ID] as const)
+    )
+  );
 
   const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 

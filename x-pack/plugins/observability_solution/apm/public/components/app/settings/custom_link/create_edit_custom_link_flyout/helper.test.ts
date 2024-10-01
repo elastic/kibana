@@ -6,7 +6,6 @@
  */
 
 import { getSelectOptions, replaceTemplateVariables } from './helper';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { Filter } from '../../../../../../common/custom_link/custom_link_types';
 
 describe('Custom link helper', () => {
@@ -93,9 +92,9 @@ describe('Custom link helper', () => {
 
   describe('replaceTemplateVariables', () => {
     const transaction = {
-      service: { name: 'foo' },
-      trace: { id: '123' },
-    } as unknown as Transaction;
+      'service.name': ['foo'],
+      'trace.id': ['123'],
+    };
 
     it('replaces template variables', () => {
       expect(
@@ -122,7 +121,7 @@ describe('Custom link helper', () => {
       expect(
         replaceTemplateVariables(
           'https://elastic.co?service.name={{service.name}}&trace.id={{trace.id}}',
-          {} as unknown as Transaction
+          {}
         )
       ).toEqual(expectedResult);
     });

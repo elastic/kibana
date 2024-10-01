@@ -6,6 +6,7 @@
  */
 
 import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { mapToSingleOrMultiValue } from '@kbn/apm-data-access-plugin/server';
 import { LABELS, SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
 
 export interface SourceDoc {
@@ -27,7 +28,7 @@ export function getApmAlertSourceFieldsAgg(topHitsOpts: AggregationsTopHitsAggre
 interface AggResultBucket {
   source_fields: {
     hits: {
-      hits: Array<{ fields: Record<string, unknown[]> }>;
+      hits: Array<{ fields: Partial<Record<string, unknown[]>> }>;
     };
   };
 }
@@ -37,7 +38,7 @@ export function getApmAlertSourceFields(bucket?: AggResultBucket): SourceDoc {
     return {};
   }
 
-  return bucket?.source_fields?.hits.hits[0]?.fields ?? {};
+  return mapToSingleOrMultiValue(bucket?.source_fields?.hits.hits[0]?.fields ?? {});
 }
 
 export function flattenSourceDoc(

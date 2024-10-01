@@ -7,7 +7,9 @@
 import { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server';
 import {
+  AT_TIMESTAMP,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_ID,
@@ -18,6 +20,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 const TRACE_SAMPLES_SIZE = 500;
 
 export interface TransactionTraceSamplesResponse {
@@ -81,7 +84,6 @@ export async function getTraceSamples({
       apm: {
         events: [ProcessorEvent.transaction],
       },
-      _source: [TRANSACTION_ID, TRACE_ID, '@timestamp'],
       body: {
         track_total_hits: false,
         query: {
@@ -94,6 +96,7 @@ export async function getTraceSamples({
           },
         },
         size: TRACE_SAMPLES_SIZE,
+        fields: asMutableArray([TRANSACTION_ID, TRACE_ID, AT_TIMESTAMP] as const),
         sort: [
           {
             _score: {
@@ -109,12 +112,18 @@ export async function getTraceSamples({
       },
     });
 
-    const traceSamples = response.hits.hits.map((hit) => ({
-      score: hit._score,
-      timestamp: hit._source['@timestamp'],
-      transactionId: hit._source.transaction.id,
-      traceId: hit._source.trace.id,
-    }));
+    const traceSamples = response.hits.hits.map((hit) => {
+      const event = unflattenKnownApmEventFields(
+        hit.fields,
+        asMutableArray([TRACE_ID, TRANSACTION_ID, AT_TIMESTAMP] as const)
+      );
+      return {
+        score: hit._score,
+        timestamp: event['@timestamp'],
+        transactionId: event.transaction.id,
+        traceId: event.trace.id,
+      };
+    });
 
     return { traceSamples };
   });

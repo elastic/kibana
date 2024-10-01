@@ -7,6 +7,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
+import { isOtelSource } from '@kbn/apm-data-access-plugin/server';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
@@ -20,6 +21,7 @@ import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Span } from '../../../typings/es_schemas/ui/span';
 
 async function fetchLinkedChildrenOfSpan({
   traceId,
@@ -59,12 +61,17 @@ async function fetchLinkedChildrenOfSpan({
     },
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
-  return response.hits.hits.filter(({ _source: source }) => {
-    const spanLinks = source.span?.links?.filter((spanLink) => {
-      return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
+  return response.hits.hits
+    .map((hit) => hit._source)
+    .filter((source): source is Span => {
+      if (isOtelSource(source)) {
+        return false;
+      }
+      const spanLinks = source.span?.links?.filter((spanLink) => {
+        return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
+      });
+      return !isEmpty(spanLinks);
     });
-    return !isEmpty(spanLinks);
-  });
 }
 
 function getSpanId(source: TransactionRaw | SpanRaw) {
@@ -90,7 +97,7 @@ export async function getSpanLinksCountById({
     start,
     end,
   });
-  return linkedChildren.reduce<Record<string, number>>((acc, { _source: source }) => {
+  return linkedChildren.reduce<Record<string, number>>((acc, source) => {
     source.span?.links?.forEach((link) => {
       // Ignores span links that don't belong to this trace
       if (link.trace.id === traceId) {
@@ -122,7 +129,7 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return linkedChildren.map(({ _source: source }) => {
+  return linkedChildren.map((source) => {
     return {
       trace: { id: source.trace.id },
       span: { id: getSpanId(source) },

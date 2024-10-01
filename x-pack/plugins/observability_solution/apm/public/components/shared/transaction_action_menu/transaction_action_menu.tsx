@@ -30,7 +30,6 @@ import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
@@ -40,9 +39,46 @@ import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 import { CustomLinkFlyout } from './custom_link_flyout';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import type { FlattenedTransaction } from '../../../../server/routes/settings/custom_link/get_transaction';
+import { AT_TIMESTAMP } from '../../../../common/es_fields/apm';
+
+export interface TransactionForActionMenu {
+  service: {
+    name: string;
+    environment?: string;
+  };
+  transaction: {
+    id: string;
+    name: string;
+    type: string;
+  };
+  trace: {
+    id: string;
+  };
+  host?: {
+    name?: string;
+    hostname?: string;
+  };
+  kubernetes?: {
+    pod?: {
+      uid?: string;
+    };
+  };
+  container?: {
+    id?: string;
+  };
+  timestamp: {
+    us: number;
+  };
+  [AT_TIMESTAMP]: string;
+  url?: {
+    domain?: string;
+  };
+}
 
 interface Props {
-  readonly transaction?: Transaction;
+  transaction?: TransactionForActionMenu;
+  fields?: FlattenedTransaction;
   isLoading: boolean;
 }
 
@@ -62,7 +98,7 @@ function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoadi
   );
 }
 
-export function TransactionActionMenu({ transaction, isLoading }: Props) {
+export function TransactionActionMenu({ transaction, fields, isLoading }: Props) {
   const license = useLicenseContext();
   const hasGoldLicense = license?.isActive && license?.hasAtLeast('gold');
 
@@ -105,6 +141,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
         {hasGoldLicense && (
           <CustomLinkMenuSection
             transaction={transaction}
+            fields={fields}
             openCreateCustomLinkFlyout={openCustomLinkFlyout}
           />
         )}
@@ -117,7 +154,7 @@ function ActionMenuSections({
   transaction,
   profilingLocators,
 }: {
-  transaction?: Transaction;
+  transaction?: TransactionForActionMenu;
   profilingLocators?: ProfilingLocators;
 }) {
   const { core, uiActions, share } = useApmPluginContext();
