@@ -295,6 +295,7 @@ export const CalendarForm: FC<Props> = ({
             saving={saving}
             showSearchBar={isDst === false}
             timezone={timezone}
+            isDst={isDst}
           />
         </>
       </EuiFormRow>

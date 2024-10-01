@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import moment from 'moment-timezone';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,6 +49,7 @@ interface Props {
   loading?: boolean;
   saving?: boolean;
   timezone?: string;
+  isDst: boolean;
 }
 
 export const EventsTable: FC<Props> = ({
@@ -60,6 +61,7 @@ export const EventsTable: FC<Props> = ({
   loading,
   saving,
   timezone,
+  isDst,
 }) => {
   const [canCreateCalendar, canDeleteCalendar] = usePermissionCheck([
     'canCreateCalendar',
@@ -96,17 +98,54 @@ export const EventsTable: FC<Props> = ({
     },
     {
       field: 'start_time',
-      name: i18n.translate('xpack.ml.calendarsEdit.eventsTable.startColumnName', {
-        defaultMessage: 'Start',
-      }),
+      name: (
+        <span>
+          {i18n.translate('xpack.ml.calendarsEdit.eventsTable.startColumnName', {
+            defaultMessage: 'Start',
+          })}
+          {isDst ? (
+            <>
+              &nbsp;
+              <EuiIconTip
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+                content={i18n.translate('xpack.ml.calendarsEdit.eventsTable.startColumnTooltip', {
+                  defaultMessage: 'The start time of the daylight savings change event.',
+                })}
+              />
+            </>
+          ) : null}
+        </span>
+      ),
       sortable: true,
       render: formatEventDate,
     },
     {
       field: 'end_time',
-      name: i18n.translate('xpack.ml.calendarsEdit.eventsTable.endColumnName', {
-        defaultMessage: 'End',
-      }),
+      name: (
+        <span>
+          {i18n.translate('xpack.ml.calendarsEdit.eventsTable.endColumnName', {
+            defaultMessage: 'End',
+          })}
+          {isDst ? (
+            <>
+              &nbsp;
+              <EuiIconTip
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+                content={i18n.translate('xpack.ml.calendarsEdit.eventsTable.endColumnTooltip', {
+                  defaultMessage:
+                    'The end time of the daylight savings change event. 2 days after the start time.',
+                })}
+              />
+            </>
+          ) : null}
+        </span>
+      ),
       sortable: true,
       render: formatEventDate,
     },
