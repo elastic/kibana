@@ -13,7 +13,7 @@ import {
   clearLegacyTransforms,
   createAndSyncRuleAndAlertsFactory,
   riskEngineRouteHelpersFactory,
-  waitForRiskEngineTaskToBeIdle,
+  waitForRiskEngineTaskStatus,
   waitForRiskScoresToBePresent,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -56,25 +56,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should run the risk engine when "scheduleNow" is called', async () => {
+      // create a document
       const firstDocumentId = uuidv4();
       await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, firstDocumentId)]);
       await createAndSyncRuleAndAlerts({ query: `id: ${firstDocumentId}` });
 
+      // first risk engine run
       await riskEngineRoutes.init();
+      await waitForRiskEngineTaskStatus({ log, supertest, status: 'running' });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+      await waitForRiskEngineTaskStatus({ log, supertest, status: 'idle' });
 
-      await waitForRiskEngineTaskToBeIdle({ log, supertest });
-
-      const secondDocumentId = uuidv4();
-      await indexListOfDocuments([buildDocument({ host: { name: 'host-2' } }, secondDocumentId)]);
-      await createAndSyncRuleAndAlerts({
-        query: `id: ${secondDocumentId}`,
-      });
-
+      // second risk engine run
       await riskEngineRoutes.scheduleNow();
-
-      // Should index 2 more document on the second run
-      await waitForRiskScoresToBePresent({ es, log, scoreCount: 3 });
+      await waitForRiskEngineTaskStatus({ log, supertest, status: 'running' });
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 }); // Should calculate risk score again for the same document
     });
   });
 };

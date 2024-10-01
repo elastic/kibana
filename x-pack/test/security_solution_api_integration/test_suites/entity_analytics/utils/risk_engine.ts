@@ -30,7 +30,10 @@ import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
-import { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import {
+  RiskEngineStatusResponse,
+  RiskEngineTaskStatusValues,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -278,21 +281,23 @@ export const waitForRiskScoresToBePresent = async ({
   );
 };
 
-export const waitForRiskEngineTaskToBeIdle = async ({
+export const waitForRiskEngineTaskStatus = async ({
   supertest,
   log,
+  status,
 }: {
   supertest: SuperTest.Agent;
   log: ToolingLog;
+  status: RiskEngineTaskStatusValues;
 }): Promise<void> => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   await waitFor(
     async () => {
       const { body } = await riskEngineRoutes.getStatus();
-      return body?.risk_engine_task_status?.status === 'idle';
+      return body?.risk_engine_task_status?.status === status;
     },
-    'waitForRiskEngineTaskToIdle',
+    'waitForRiskEngineTaskStatus ' + status,
     log
   );
 };
