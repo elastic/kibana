@@ -48,7 +48,7 @@ describe('EditSpaceAssignedRolesTab', () => {
   const loadRolesSpy = jest.spyOn(spacesManager, 'getRolesForSpace');
   const toastErrorSpy = jest.spyOn(notifications.toasts, 'addError');
 
-  const TestComponent: React.FC = ({ children }) => {
+  const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
       <IntlProvider locale="en">
         <EditSpaceProvider

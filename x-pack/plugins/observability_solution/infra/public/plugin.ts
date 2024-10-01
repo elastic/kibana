@@ -137,19 +137,24 @@ export class Plugin implements InfraClientPluginClass {
             ],
             isInfrastructureHostsViewEnabled,
           ]) => {
+            const { infrastructure, logs, discover, fleet } = capabilities;
             return [
-              ...(capabilities.logs.show
+              ...(logs.show
                 ? [
                     {
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
-                        {
-                          label: 'Explorer',
-                          app: 'observability-logs-explorer',
-                          path: '/',
-                          isBetaFeature: true,
-                        },
+                        ...(discover?.show && fleet?.read
+                          ? [
+                              {
+                                label: 'Explorer',
+                                app: 'observability-logs-explorer',
+                                path: '/',
+                                isBetaFeature: true,
+                              },
+                            ]
+                          : []),
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
                               { label: 'Stream', app: 'logs', path: '/stream' },
@@ -161,7 +166,7 @@ export class Plugin implements InfraClientPluginClass {
                     },
                   ]
                 : []),
-              ...(capabilities.infrastructure.show
+              ...(infrastructure.show
                 ? [
                     {
                       label: metricsTitle,

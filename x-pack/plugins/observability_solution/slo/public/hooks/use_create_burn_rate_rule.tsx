@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH, RuleTypeParams } from '@kbn/alerting-plugin/common';
@@ -13,18 +14,23 @@ import type {
   CreateRuleRequestBody,
   CreateRuleResponse,
 } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../utils/kibana_react';
 
 export function useCreateRule<Params extends RuleTypeParams = never>() {
   const {
     http,
+    i18n: i18nStart,
     notifications: { toasts },
+    theme,
   } = useKibana().services;
 
-  const createRule = useMutation<
+  return useMutation<
     CreateRuleResponse<Params>,
     Error,
-    { rule: CreateRuleRequestBody<Params> }
+    { rule: CreateRuleRequestBody<Params> },
+    { loadingToastId?: string }
   >(
     ['createRule'],
     ({ rule }) => {
@@ -39,6 +45,24 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       }
     },
     {
+      onMutate: async () => {
+        const loadingToast = toasts.addInfo({
+          title: toMountPoint(
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.slo.rules.createRule.loadingNotification.descriptionText', {
+                  defaultMessage: 'Creating burn rate rule ...',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+            { i18n: i18nStart, theme }
+          ),
+        });
+        return { loadingToastId: loadingToast.id };
+      },
       onError: (_err) => {
         toasts.addDanger(
           i18n.translate('xpack.slo.rules.createRule.errorNotification.descriptionText', {
@@ -54,8 +78,11 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
           })
         );
       },
+      onSettled: (_d, _err, _res, ctx) => {
+        if (ctx?.loadingToastId) {
+          toasts.remove(ctx?.loadingToastId);
+        }
+      },
     }
   );
-
-  return createRule;
 }

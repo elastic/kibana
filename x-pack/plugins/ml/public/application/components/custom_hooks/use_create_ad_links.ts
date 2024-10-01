@@ -12,6 +12,7 @@ import {
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
 } from '../../../../common/constants/settings';
 import { createResultsUrlForJobs } from '../../util/results_url';
+import type { MlSummaryJob } from '../../../../common';
 
 export const useCreateADLinks = () => {
   const {
@@ -23,7 +24,7 @@ export const useCreateADLinks = () => {
   const useUserTimeSettings = useUiSettings().get(ANOMALY_DETECTION_ENABLE_TIME_RANGE);
   const userTimeSettings = useUiSettings().get(ANOMALY_DETECTION_DEFAULT_TIME_RANGE);
   const createLinkWithUserDefaults = useCallback(
-    (location, jobList) => {
+    (location: string, jobList: MlSummaryJob[]) => {
       const resultsUrl = createResultsUrlForJobs(
         jobList,
         location,

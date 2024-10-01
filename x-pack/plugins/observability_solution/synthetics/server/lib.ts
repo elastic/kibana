@@ -90,7 +90,7 @@ export class SyntheticsEsClient {
       esRequestStatus = RequestStatus.ERROR;
     }
     const isInspectorEnabled = await this.getInspectEnabled();
-    if (isInspectorEnabled && this.request) {
+    if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
           esError,
@@ -102,7 +102,9 @@ export class SyntheticsEsClient {
           startTime: startTimeNow,
         })
       );
+    }
 
+    if (isInspectorEnabled && this.request) {
       debugESCall({
         startTime,
         request: this.request,
@@ -218,9 +220,6 @@ export class SyntheticsEsClient {
     return {};
   }
   async getInspectEnabled() {
-    if (this.isDev) {
-      return true;
-    }
     if (!this.uiSettings) {
       return false;
     }

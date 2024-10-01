@@ -305,4 +305,47 @@ export function defineRoutes({
       }
     })
   );
+  router.post(
+    {
+      path: APIRoutes.GET_INDEX_MAPPINGS,
+      validate: {
+        body: schema.object({
+          indices: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { indices } = request.body;
+
+      try {
+        if (indices.length === 0) {
+          return response.badRequest({
+            body: {
+              message: 'Indices cannot be empty',
+            },
+          });
+        }
+
+        const mappings = await client.asCurrentUser.indices.getMapping({
+          index: indices,
+        });
+        return response.ok({
+          body: {
+            mappings,
+          },
+        });
+      } catch (e) {
+        logger.error('Failed to get index mappings', e);
+        if (typeof e === 'object' && e.message) {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
+        }
+        throw e;
+      }
+    })
+  );
 }

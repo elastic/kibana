@@ -93,7 +93,7 @@ export const SearchIndexDetailsPage = () => {
   }, [detailsPageTabs, tabId]);
 
   const handleTabClick = useCallback(
-    (tab) => {
+    (tab: EuiTabbedContentTab) => {
       history.push(`index_details/${indexName}/${tab.id}`);
     },
 
