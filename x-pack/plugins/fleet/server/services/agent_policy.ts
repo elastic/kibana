@@ -84,7 +84,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
-  AgentlessPackagePolicyRequestError,
+  AgentlessPolicyExistsRequestError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -440,7 +440,7 @@ class AgentPolicyService {
 
       if (givenPolicy?.supports_agentless && !givenPolicy.id) {
         const integrationName = givenPolicy.name.split(' ').pop();
-        throw new AgentlessPackagePolicyRequestError(
+        throw new AgentlessPolicyExistsRequestError(
           `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
         );
       }
