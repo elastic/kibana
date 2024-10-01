@@ -15,3 +15,4 @@ export const ENTITY_METRICS_LOG_RATE = 'entity.metrics.logRate';
 export const ENTITY_METRICS_THROUGHPUT = 'entity.metrics.throughput';
 export const ENTITY_METRICS_FAILED_TRANSACTION_RATE = 'entity.metrics.failedTransactionRate';
 export const ENTITY_TYPE = 'entity.type';
+export const SOURCE_DATA_STREAM_TYPE = 'source_data_stream.type';
