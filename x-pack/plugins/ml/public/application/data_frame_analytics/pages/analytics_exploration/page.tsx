@@ -32,8 +32,9 @@ export const Page: FC<{
   analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(false);
   const [jobsExist, setJobsExist] = useState(true);
+  const [isLoadingJobsExist, setIsLoadingJobsExist] = useState(false);
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -49,12 +50,17 @@ export const Page: FC<{
   const [, setGlobalState] = useUrlState('_g');
 
   const checkJobsExist = async () => {
+    setIsLoadingJobsExist(true);
     try {
       const { count } = await getDataFrameAnalytics(undefined, undefined, 0);
-      setJobsExist(count > 0);
+      const hasAnalyticsJobs = count > 0;
+      setJobsExist(hasAnalyticsJobs);
+      setIsIdSelectorFlyoutVisible(hasAnalyticsJobs && !jobId);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
       console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
+    } finally {
+      setIsLoadingJobsExist(false);
     }
   };
 
@@ -98,6 +104,10 @@ export const Page: FC<{
   );
 
   const getEmptyState = () => {
+    if (isLoadingJobsExist) {
+      return null;
+    }
+
     if (jobsExist === false) {
       return <AnalyticsEmptyPrompt />;
     }
