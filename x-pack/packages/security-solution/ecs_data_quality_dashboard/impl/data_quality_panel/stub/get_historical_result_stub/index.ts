@@ -6,9 +6,9 @@
  */
 
 import { mockHistoricalResult } from '../../mock/historical_results/mock_historical_results_response';
-import { HistoricalResult } from '../../types';
+import type { LegacyHistoricalResult, NonLegacyHistoricalResult } from '../../types';
 
-export const getHistoricalResultStub = (indexName: string): HistoricalResult => ({
+export const getHistoricalResultStub = (indexName: string): NonLegacyHistoricalResult => ({
   ...mockHistoricalResult,
   indexName,
   markdownComments: [
@@ -19,3 +19,16 @@ export const getHistoricalResultStub = (indexName: string): HistoricalResult => 
     `\n\n#### Incompatible field values - ${indexName}\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | \`api\`, \`authentication\`, \`configuration\`, \`database\`, \`driver\`, \`email\`, \`file\`, \`host\`, \`iam\`, \`intrusion_detection\`, \`library\`, \`malware\`, \`network\`, \`package\`, \`process\`, \`registry\`, \`session\`, \`threat\`, \`vulnerability\`, \`web\` | \`siem\` (110616) |\n\n`,
   ],
 });
+
+export const getLegacyHistoricalResultStub = (indexName: string): LegacyHistoricalResult => {
+  const NonLegacyHistoricalResult = getHistoricalResultStub(indexName);
+
+  const {
+    incompatibleFieldMappingItems,
+    incompatibleFieldValueItems,
+    sameFamilyFieldItems,
+    ...legacyHistoricalResult
+  } = NonLegacyHistoricalResult;
+
+  return legacyHistoricalResult;
+};

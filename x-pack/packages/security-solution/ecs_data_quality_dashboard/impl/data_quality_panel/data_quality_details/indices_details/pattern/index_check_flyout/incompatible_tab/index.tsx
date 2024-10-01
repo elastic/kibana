@@ -56,7 +56,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
 
-  const incompatibleFieldsCount =
+  const incompatibleFieldCount =
     incompatibleMappingsFields.length + incompatibleValuesFields.length;
 
   const markdownComment: string = useMemo(
@@ -97,7 +97,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj="incompatibleTabContent">
-      {incompatibleFieldsCount > 0 ? (
+      {incompatibleFieldCount > 0 ? (
         <>
           <IncompatibleCallout />
 

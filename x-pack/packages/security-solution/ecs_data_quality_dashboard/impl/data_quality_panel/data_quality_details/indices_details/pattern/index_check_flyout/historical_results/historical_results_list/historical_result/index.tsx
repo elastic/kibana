@@ -11,6 +11,10 @@ import { EuiSpacer } from '@elastic/eui';
 import type { HistoricalResult as HistoricalResultType } from '../../../../../../../types';
 import { IndexStatsPanel } from '../../../index_stats_panel';
 import { HistoricalCheckFields } from './historical_check_fields';
+// eslint-disable-next-line no-restricted-imports
+import { isNonLegacyHistoricalResult } from './utils/is_non_legacy_historical_result';
+// eslint-disable-next-line no-restricted-imports
+import { LegacyHistoricalCheckFields } from './legacy_historical_check_fields';
 
 export interface Props {
   indexName: string;
@@ -24,22 +28,42 @@ const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResul
     ilmPhase,
     ecsFieldCount,
     totalFieldCount,
+    sameFamilyFieldCount,
     customFieldCount,
     checkedAt,
   } = historicalResult;
+
   return (
     <div data-test-subj={`historicalResult-${checkedAt}`}>
       <EuiSpacer />
-      <IndexStatsPanel
-        docsCount={docsCount}
-        sizeInBytes={sizeInBytes ?? 0}
-        ilmPhase={ilmPhase}
-        ecsCompliantFieldsCount={ecsFieldCount}
-        customFieldsCount={customFieldCount}
-        allFieldsCount={totalFieldCount}
-      />
-      <EuiSpacer />
-      <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+      {isNonLegacyHistoricalResult(historicalResult) ? (
+        <>
+          <IndexStatsPanel
+            docsCount={docsCount}
+            sizeInBytes={sizeInBytes ?? 0}
+            ilmPhase={ilmPhase}
+            ecsCompliantFieldsCount={ecsFieldCount}
+            customFieldsCount={customFieldCount}
+            allFieldsCount={totalFieldCount}
+          />
+          <EuiSpacer />
+          <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+        </>
+      ) : (
+        <>
+          <IndexStatsPanel
+            docsCount={docsCount}
+            sizeInBytes={sizeInBytes ?? 0}
+            ilmPhase={ilmPhase}
+            sameFamilyFieldsCount={sameFamilyFieldCount}
+            ecsCompliantFieldsCount={ecsFieldCount}
+            customFieldsCount={customFieldCount}
+            allFieldsCount={totalFieldCount}
+          />
+          <EuiSpacer />
+          <LegacyHistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
+        </>
+      )}
       <EuiSpacer size="m" />
     </div>
   );

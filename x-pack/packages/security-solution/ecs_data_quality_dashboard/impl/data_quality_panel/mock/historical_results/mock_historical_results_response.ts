@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HistoricalResult } from '../../types';
+import { NonLegacyHistoricalResult } from '../../types';
 
-export const mockHistoricalResult: HistoricalResult = {
+export const mockHistoricalResult: NonLegacyHistoricalResult = {
   batchId: 'b483fd8b-f46e-4db4-a419-f12214d9967f',
   indexName: '.ds-.kibana-event-log-ds-2024.09.03-000003',
   indexPattern: '.kibana-event-log-*',

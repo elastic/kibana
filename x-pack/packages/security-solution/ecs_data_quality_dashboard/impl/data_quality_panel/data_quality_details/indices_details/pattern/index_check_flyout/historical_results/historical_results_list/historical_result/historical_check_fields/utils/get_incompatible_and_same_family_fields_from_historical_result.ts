@@ -6,9 +6,9 @@
  */
 
 import { EcsFlatTyped } from '../../../../../../../../../constants';
-import {
-  HistoricalResult,
+import type {
   IncompatibleFieldMetadata,
+  NonLegacyHistoricalResult,
   SameFamilyFieldMetadata,
 } from '../../../../../../../../../types';
 
@@ -19,7 +19,7 @@ interface IncompatibleAndSameFamilyFields {
 }
 
 export const getIncompatibleAndSameFamilyFieldsFromHistoricalResult = (
-  historicalResult: HistoricalResult
+  historicalResult: NonLegacyHistoricalResult
 ): IncompatibleAndSameFamilyFields => {
   const incompatibleAndSameFamilyFields: IncompatibleAndSameFamilyFields = {
     incompatibleMappingsFields: [],

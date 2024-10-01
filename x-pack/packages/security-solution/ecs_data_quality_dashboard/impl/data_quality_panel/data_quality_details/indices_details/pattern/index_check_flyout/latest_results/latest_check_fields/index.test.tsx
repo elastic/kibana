@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { screen, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { LatestCheckFields } from '.';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../../../mock/test_providers/test_providers';
 import { auditbeatWithAllResults } from '../../../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import userEvent from '@testing-library/user-event';
+import { LatestCheckFields } from '.';
 
 describe('IndexCheckFields', () => {
   beforeEach(() => {

@@ -16,14 +16,18 @@ import {
   DOCS,
   ECS_COMPLIANT_FIELDS,
   ILM_PHASE,
+  SAME_FAMILY,
   SIZE,
 } from '../../../../../translations';
 import { Stat } from '../../../../../stat';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 
 const StyledFlexItem = styled(EuiFlexItem)`
+  justify-content: space-between;
   border-right: 1px solid ${({ theme }) => theme.eui.euiBorderColor};
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+
+  margin-bottom: 2px;
 
   &:last-child {
     border-right: none;
@@ -34,10 +38,15 @@ const StyledFlexItem = styled(EuiFlexItem)`
   }
 `;
 
+const UnpaddedStyledFlexItem = styled(StyledFlexItem)`
+  margin-bottom: 0;
+`;
+
 export interface Props {
   docsCount: number;
   ilmPhase?: string;
   sizeInBytes?: number;
+  sameFamilyFieldsCount?: number;
   ecsCompliantFieldsCount?: number;
   customFieldsCount?: number;
   allFieldsCount?: number;
@@ -47,6 +56,7 @@ export const IndexStatsPanelComponent: React.FC<Props> = ({
   docsCount,
   ilmPhase,
   sizeInBytes,
+  sameFamilyFieldsCount,
   customFieldsCount,
   ecsCompliantFieldsCount,
   allFieldsCount,
@@ -61,23 +71,28 @@ export const IndexStatsPanelComponent: React.FC<Props> = ({
           {formatNumber(docsCount)}
         </StyledFlexItem>
         {ilmPhase && (
-          <StyledFlexItem>
-            <div>
-              <strong>{ILM_PHASE}</strong>
-              <EuiSpacer />
-              <Stat
-                badgeText={ilmPhase}
-                tooltipText={getIlmPhaseDescription(ilmPhase)}
-                badgeProps={{ 'data-test-subj': 'ilmPhase' }}
-              />
-            </div>
-          </StyledFlexItem>
+          <UnpaddedStyledFlexItem>
+            <strong>{ILM_PHASE}</strong>
+            <EuiSpacer />
+            <Stat
+              badgeText={ilmPhase}
+              tooltipText={getIlmPhaseDescription(ilmPhase)}
+              badgeProps={{ 'data-test-subj': 'ilmPhase' }}
+            />
+          </UnpaddedStyledFlexItem>
         )}
         <StyledFlexItem>
           <strong>{SIZE}</strong>
           <EuiSpacer />
           {formatBytes(sizeInBytes ?? 0)}
         </StyledFlexItem>
+        {sameFamilyFieldsCount != null && (
+          <StyledFlexItem>
+            <strong>{SAME_FAMILY}</strong>
+            <EuiSpacer />
+            {formatNumber(sameFamilyFieldsCount)}
+          </StyledFlexItem>
+        )}
         {customFieldsCount != null && (
           <StyledFlexItem>
             <strong>{CUSTOM_FIELDS}</strong>

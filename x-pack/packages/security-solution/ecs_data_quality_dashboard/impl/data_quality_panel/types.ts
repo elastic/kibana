@@ -308,7 +308,7 @@ export interface IndexSummaryTableItem {
   checkedAt: number | undefined;
 }
 
-export interface StorageResult {
+export interface StorageResultBase {
   batchId: string;
   indexName: string;
   indexPattern: string;
@@ -319,11 +319,8 @@ export interface StorageResult {
   ecsFieldCount: number;
   customFieldCount: number;
   incompatibleFieldCount: number;
-  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
-  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
   sameFamilyFieldCount: number;
   sameFamilyFields: string[];
-  sameFamilyFieldItems: SameFamilyFieldItem[];
   unallowedMappingFields: string[];
   unallowedValueFields: string[];
   sizeInBytes: number;
@@ -334,7 +331,19 @@ export interface StorageResult {
   error: string | null;
 }
 
-export interface HistoricalResult extends StorageResult {
+export interface StorageResult extends StorageResultBase {
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
+}
+
+export interface HistoricalResultBase {
   '@timestamp': number;
   checkedBy: string;
 }
+
+export interface LegacyHistoricalResult extends StorageResultBase, HistoricalResultBase {}
+
+export interface NonLegacyHistoricalResult extends StorageResult, HistoricalResultBase {}
+
+export type HistoricalResult = LegacyHistoricalResult | NonLegacyHistoricalResult;
