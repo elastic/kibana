@@ -18,9 +18,10 @@ interface NewObj {
   };
 }
 
-interface Field {
+export interface Field {
   name: string;
   type: string;
+  description?: string;
   fields?: Field[];
 }
 
@@ -232,4 +233,44 @@ export function mergeSamples(objects: any[]): string {
   }
 
   return JSON.stringify(result, null, 2);
+}
+
+export function flattenObjectsList(
+  obj: Field[]
+): Array<{ name: string; type: string; description?: string }> {
+  const result: Array<{ name: string; type: string; description?: string }> = [];
+  flattenObject(obj, '', '.', result);
+
+  return sortArrayOfObjects(result);
+}
+
+function flattenObject(
+  obj: Field[],
+  parentKey: string = '',
+  separator: string = '.',
+  result: Array<{ name: string; type: string; description?: string }>
+): void {
+  obj.forEach((element) => {
+    if (element.name) {
+      const newKey = parentKey ? `${parentKey}${separator}${element.name}` : element.name;
+
+      if (element.fields && Array.isArray(element.fields)) {
+        flattenObject(element.fields, newKey, separator, result);
+      } else {
+        result.push({
+          name: newKey,
+          type: element.type,
+          description: element.description,
+        });
+      }
+    }
+  });
+}
+
+function sortArrayOfObjects(
+  objectsArray: Array<{ name: string; type: string; description?: string }>
+): Array<{ name: string; type: string; description?: string }> {
+  return objectsArray.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
 }

@@ -7,23 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { batch } from 'react-redux';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { batch } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
+import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
+import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import { coreServices, shareService } from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { pluginServices } from '../../services/plugin_services';
-import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
-import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -39,17 +41,6 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-
-  /**
-   * Unpack dashboard services
-   */
-  const {
-    share,
-    dashboardBackup,
-    settings: { uiSettings },
-    dashboardCapabilities: { showWriteControls },
-  } = pluginServices.getServices();
-  const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
   /**
    * Unpack dashboard state from redux
@@ -120,7 +111,7 @@ export const useDashboardMenuItems = ({
       const switchModes = switchToViewMode
         ? () => {
             dashboardApi.setViewMode(ViewMode.VIEW);
-            dashboardBackup.storeViewMode(ViewMode.VIEW);
+            getDashboardBackupService().storeViewMode(ViewMode.VIEW);
           }
         : undefined;
       if (!hasUnsavedChanges) {
@@ -138,7 +129,7 @@ export const useDashboardMenuItems = ({
         });
       }, viewMode as ViewMode);
     },
-    [dashboardApi, dashboardBackup, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
@@ -170,7 +161,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {
-          dashboardBackup.storeViewMode(ViewMode.EDIT);
+          getDashboardBackupService().storeViewMode(ViewMode.EDIT);
           dashboardApi.setViewMode(ViewMode.EDIT);
           dashboardApi.clearOverlays();
         },
@@ -243,7 +234,6 @@ export const useDashboardMenuItems = ({
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
-    dashboardBackup,
     quickSaveDashboard,
     resetChanges,
     isResetting,
@@ -275,9 +265,13 @@ export const useDashboardMenuItems = ({
   /**
    * Build ordered menus for view and edit mode.
    */
+  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
+
   const viewModeTopNavConfig = useMemo(() => {
+    const { showWriteControls } = getDashboardCapabilities();
+
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -290,19 +284,11 @@ export const useDashboardMenuItems = ({
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [
-    isLabsEnabled,
-    menuItems,
-    share,
-    showWriteControls,
-    managed,
-    showResetChange,
-    resetChangesMenuItem,
-  ]);
+  }, [isLabsEnabled, menuItems, managed, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = share ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
@@ -317,7 +303,7 @@ export const useDashboardMenuItems = ({
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
     return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [isLabsEnabled, menuItems, share, lastSavedId, showResetChange, resetChangesMenuItem]);
+  }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

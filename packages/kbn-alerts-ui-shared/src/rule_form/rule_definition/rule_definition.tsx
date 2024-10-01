@@ -22,8 +22,12 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -63,6 +67,7 @@ export const RuleDefinition = () => {
     flappingSettings,
   } = useRuleFormState();
 
+  const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks, application } = plugins;
@@ -94,6 +99,12 @@ export const RuleDefinition = () => {
       return false;
     }
     if (!authorizedConsumers.length) {
+      return false;
+    }
+    if (
+      authorizedConsumers.length <= 1 ||
+      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
+    ) {
       return false;
     }
     return (
@@ -202,24 +213,26 @@ export const RuleDefinition = () => {
             <EuiFlexGroup gutterSize="none" direction="column">
               <EuiFlexItem>
                 <EuiErrorBoundary>
-                  <RuleParamsExpressionComponent
-                    id={id}
-                    ruleParams={params}
-                    ruleInterval={schedule.interval}
-                    ruleThrottle={''}
-                    alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={paramsErrors || {}}
-                    setRuleParams={onSetRuleParams}
-                    setRuleProperty={onSetRuleProperty}
-                    defaultActionGroupId={selectedRuleType.defaultActionGroupId}
-                    actionGroups={selectedRuleType.actionGroups}
-                    metadata={metadata}
-                    charts={charts}
-                    data={data}
-                    dataViews={dataViews}
-                    unifiedSearch={unifiedSearch}
-                    onChangeMetaData={onChangeMetaData}
-                  />
+                  <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+                    <RuleParamsExpressionComponent
+                      id={id}
+                      ruleParams={params}
+                      ruleInterval={schedule.interval}
+                      ruleThrottle={''}
+                      alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
+                      errors={paramsErrors || {}}
+                      setRuleParams={onSetRuleParams}
+                      setRuleProperty={onSetRuleProperty}
+                      defaultActionGroupId={selectedRuleType.defaultActionGroupId}
+                      actionGroups={selectedRuleType.actionGroups}
+                      metadata={metadata}
+                      charts={charts}
+                      data={data}
+                      dataViews={dataViews}
+                      unifiedSearch={unifiedSearch}
+                      onChangeMetaData={onChangeMetaData}
+                    />
+                  </EuiThemeProvider>
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>
