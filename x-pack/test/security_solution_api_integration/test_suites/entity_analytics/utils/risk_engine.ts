@@ -30,6 +30,7 @@ import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
+import { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -97,7 +98,7 @@ export const createAndSyncRuleAndAlertsFactory =
     query: string;
     riskScoreOverride?: string;
   }): Promise<void> => {
-    const rule = getRuleForAlertTesting(['ecs_compliant']);
+    const rule = getRuleForAlertTesting(['ecs_compliant'], uuidv4());
     const { id } = await createRule(
       supertest,
       log,
@@ -273,6 +274,25 @@ export const waitForRiskScoresToBePresent = async ({
       return riskScores.length >= scoreCount;
     },
     'waitForRiskScoresToBePresent',
+    log
+  );
+};
+
+export const waitForRiskEngineTaskToBeIdle = async ({
+  supertest,
+  log,
+}: {
+  supertest: SuperTest.Agent;
+  log: ToolingLog;
+}): Promise<void> => {
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+
+  await waitFor(
+    async () => {
+      const { body } = await riskEngineRoutes.getStatus();
+      return body?.risk_engine_task_status?.status === 'idle';
+    },
+    'waitForRiskEngineTaskToIdle',
     log
   );
 };
@@ -550,7 +570,9 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
         .send()
         .expect(assertStatusCode(expectStatusCode)),
 
-    getStatus: async (expectStatusCode: number = 200) =>
+    getStatus: async (
+      expectStatusCode: number = 200
+    ): Promise<{ body: RiskEngineStatusResponse }> =>
       await supertest
         .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
         .set('kbn-xsrf', 'true')

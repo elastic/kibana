@@ -13,6 +13,7 @@ import {
   clearLegacyTransforms,
   createAndSyncRuleAndAlertsFactory,
   riskEngineRouteHelpersFactory,
+  waitForRiskEngineTaskToBeIdle,
   waitForRiskScoresToBePresent,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -33,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
     await riskEngineRoutes.cleanUp();
   };
 
-  describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
+  describe('@ess @serverless @serverlessQA Risk Engine schedule_now', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
@@ -61,6 +62,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       await riskEngineRoutes.init();
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+
+      await waitForRiskEngineTaskToBeIdle({ log, supertest });
 
       const secondDocumentId = uuidv4();
       await indexListOfDocuments([buildDocument({ host: { name: 'host-2' } }, secondDocumentId)]);
