@@ -31,10 +31,8 @@ export function EntityIcon({ entity }: EntityIconProps) {
   if (entityType === 'host' || entityType === 'container') {
     const cloudProvider = entity[CLOUD_PROVIDER] as CloudProvider;
 
-    if (!cloudProvider) return emptyIcon;
-
     const formattedCloudProvider =
-      typeof cloudProvider === 'string' ? cloudProvider : cloudProvider[0];
+      typeof cloudProvider === 'string' ? cloudProvider : cloudProvider?.[0];
 
     return (
       <EuiFlexGroup
