@@ -19,6 +19,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
+import { skip } from 'rxjs';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
