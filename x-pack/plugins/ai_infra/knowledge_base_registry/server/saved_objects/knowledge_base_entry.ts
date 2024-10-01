@@ -35,7 +35,6 @@ export const knowledgeBaseEntrySavedObjectType: SavedObjectsType<KnowledgeBaseEn
   },
   management: {
     importableAndExportable: false,
-    visibleInManagement: false,
   },
   modelVersions: {},
 };
