@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_inputs';
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
@@ -254,66 +255,67 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
 
   const flappingTitleTooltip = useMemo(() => {
     return (
-      <EuiPopover
-        repositionOnScroll
-        isOpen={isFlappingTitlePopoverOpen}
-        anchorPosition="leftCenter"
-        closePopover={() => setIsFlappingTitlePopoverOpen(false)}
-        panelStyle={{
-          width: 500,
-        }}
-        button={
-          <EuiButtonIcon
-            display="empty"
-            color="primary"
-            iconType="questionInCircle"
-            aria-label="Flapping title info"
-            onClick={() => setIsFlappingTitlePopoverOpen(true)}
-          />
-        }
-      >
-        <EuiPopoverTitle>Alert flapping detection</EuiPopoverTitle>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover1"
-            defaultMessage="When {flappingDetection} is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced."
-            values={{
-              flappingDetection: <b>{flappingTitlePopoverFlappingDetection}</b>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover2"
-            defaultMessage="The {alertStatus} defines a period (minimum number of runs) that is used in the detection algorithm. "
-            values={{
-              alertStatus: <b>{flappingTitlePopoverAlertStatus}</b>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover3"
-            defaultMessage="The {lookBack} indicates the minimum number of times alerts must switch states within the threshold period to qualify as flapping alerts."
-            values={{
-              lookBack: <b>{flappingTitlePopoverLookBack}</b>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover4"
-            defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
-            values={{
-              rules: <b>{flappingOffContentRules}</b>,
-              settings: <b>{flappingOffContentSettings}</b>,
-            }}
-          />
-        </EuiText>
-      </EuiPopover>
+      <EuiOutsideClickDetector onOutsideClick={() => setIsFlappingTitlePopoverOpen(false)}>
+        <EuiPopover
+          repositionOnScroll
+          isOpen={isFlappingTitlePopoverOpen}
+          anchorPosition="leftCenter"
+          panelStyle={{
+            width: 500,
+          }}
+          button={
+            <EuiButtonIcon
+              display="empty"
+              color="primary"
+              iconType="questionInCircle"
+              aria-label="Flapping title info"
+              onClick={() => setIsFlappingTitlePopoverOpen(!isFlappingTitlePopoverOpen)}
+            />
+          }
+        >
+          <EuiPopoverTitle>Alert flapping detection</EuiPopoverTitle>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover1"
+              defaultMessage="When {flappingDetection} is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced."
+              values={{
+                flappingDetection: <b>{flappingTitlePopoverFlappingDetection}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover2"
+              defaultMessage="The {alertStatus} defines a period (minimum number of runs) that is used in the detection algorithm. "
+              values={{
+                alertStatus: <b>{flappingTitlePopoverAlertStatus}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover3"
+              defaultMessage="The {lookBack} indicates the minimum number of times alerts must switch states within the threshold period to qualify as flapping alerts."
+              values={{
+                lookBack: <b>{flappingTitlePopoverLookBack}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover4"
+              defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
+              values={{
+                rules: <b>{flappingOffContentRules}</b>,
+                settings: <b>{flappingOffContentSettings}</b>,
+              }}
+            />
+          </EuiText>
+        </EuiPopover>
+      </EuiOutsideClickDetector>
     );
   }, [isFlappingTitlePopoverOpen]);
 
@@ -328,35 +330,36 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
 
     if (writeFlappingSettingsUI) {
       return (
-        <EuiPopover
-          repositionOnScroll
-          isOpen={isFlappingOffPopoverOpen}
-          anchorPosition="leftCenter"
-          closePopover={() => setIsFlappingOffPopoverOpen(false)}
-          panelStyle={{
-            width: 250,
-          }}
-          button={
-            <EuiButtonIcon
-              display="empty"
-              color="primary"
-              iconType="questionInCircle"
-              aria-label="Flapping Off Info"
-              onClick={() => setIsFlappingOffPopoverOpen(true)}
-            />
-          }
-        >
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingOffPopoverContent"
-              defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
-              values={{
-                rules: <b>{flappingOffContentRules}</b>,
-                settings: <b>{flappingOffContentSettings}</b>,
-              }}
-            />
-          </EuiText>
-        </EuiPopover>
+        <EuiOutsideClickDetector onOutsideClick={() => setIsFlappingOffPopoverOpen(false)}>
+          <EuiPopover
+            repositionOnScroll
+            isOpen={isFlappingOffPopoverOpen}
+            anchorPosition="leftCenter"
+            panelStyle={{
+              width: 250,
+            }}
+            button={
+              <EuiButtonIcon
+                display="empty"
+                color="primary"
+                iconType="questionInCircle"
+                aria-label="Flapping Off Info"
+                onClick={() => setIsFlappingOffPopoverOpen(!isFlappingOffPopoverOpen)}
+              />
+            }
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingOffPopoverContent"
+                defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
+                values={{
+                  rules: <b>{flappingOffContentRules}</b>,
+                  settings: <b>{flappingOffContentSettings}</b>,
+                }}
+              />
+            </EuiText>
+          </EuiPopover>
+        </EuiOutsideClickDetector>
       );
     }
     // TODO: Add the external doc link here!
