@@ -8,7 +8,7 @@
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
@@ -53,6 +53,8 @@ export function useModelActions({
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
+  const isMobileLayout = useIsWithinMaxBreakpoint('l');
+
   const {
     services: {
       application: { navigateToUrl },
@@ -132,7 +134,7 @@ export function useModelActions({
     []
   );
 
-  return useMemo(
+  return useMemo<Array<Action<ModelItem>>>(
     () => [
       {
         name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
@@ -423,7 +425,9 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
         icon: 'download',
-        type: 'icon',
+        color: 'text',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
@@ -540,7 +544,7 @@ export function useModelActions({
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
         type: 'icon',
-        isPrimary: true,
+        isPrimary: false,
         available: isTestable,
         onClick: (item) => {
           if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
@@ -612,6 +616,7 @@ export function useModelActions({
       trainedModelsApiService,
       urlLocator,
       onModelDownloadRequest,
+      isMobileLayout,
     ]
   );
 }
