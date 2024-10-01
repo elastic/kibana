@@ -6948,7 +6948,7 @@ paths:
         feature privileges, depending on the owner of the cases you're seeking.
       operationId: findCasesDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_assignees'
+        - $ref: '#/components/parameters/Cases_assignees_filter'
         - $ref: '#/components/parameters/Cases_category'
         - $ref: '#/components/parameters/Cases_defaultSearchOperator'
         - $ref: '#/components/parameters/Cases_from'
@@ -16440,11 +16440,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/Fleet_package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -20448,19 +20445,21 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
-                        $ref: >-
-                          #/components/schemas/Security_Timeline_API_TimelineResponse
-                        nullable: true
+                      data:
+                        type: object
+                        properties:
+                          getOneTimeline:
+                            $ref: >-
+                              #/components/schemas/Security_Timeline_API_TimelineResponse
+                        required:
+                          - getOneTimeline
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - additionalProperties: false
+                    type: object
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -20497,23 +20496,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -20575,21 +20559,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates the Timeline was successfully created.
         '405':
           content:
@@ -20603,6 +20574,37 @@ paths:
                     type: number
           description: Indicates that there was an error in the Timeline creation.
       summary: Create a Timeline or Timeline template
+      tags:
+        - Security Timeline API
+        - access:securitySolution
+  /api/timeline/_copy:
+    get:
+      description: |
+        Copies and returns a timeline or timeline template.
+      operationId: CopyTimeline
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+                timelineIdToCopy:
+                  type: string
+              required:
+                - timeline
+                - timelineIdToCopy
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
+          description: Indicates that the timeline has been successfully copied.
+      summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
@@ -20624,23 +20626,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
@@ -20702,23 +20689,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_PersistTimelineResponse
           description: >-
             Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
@@ -20874,28 +20846,14 @@ paths:
             schema:
               type: object
               properties:
-                file:
-                  allOf:
-                    - $ref: '#/components/schemas/Security_Timeline_API_Readable'
-                    - type: object
-                      properties:
-                        hapi:
-                          type: object
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              enum:
-                                - 'true'
-                                - 'false'
-                              type: string
-                          required:
-                            - filename
-                            - headers
-                      required:
-                        - hapi
+                file: {}
+                isImmutable:
+                  enum:
+                    - 'true'
+                    - 'false'
+                  type: string
+              required:
+                - file
         description: The Timelines to import as a readable stream.
         required: true
       responses:
@@ -20903,13 +20861,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Timeline_API_ImportTimelineResult
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_ImportTimelineResult
           description: Indicates the import of Timelines was successful.
         '400':
           content:
@@ -20968,7 +20921,9 @@ paths:
               properties:
                 prepackagedTimelines:
                   items:
-                    $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+                    $ref: >-
+                      #/components/schemas/Security_Timeline_API_TimelineSavedToReturnObject
+                    nullable: true
                   type: array
                 timelinesToInstall:
                   items:
@@ -20991,13 +20946,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Timeline_API_ImportTimelineResult
-                required:
-                  - data
+                $ref: >-
+                  #/components/schemas/Security_Timeline_API_ImportTimelineResult
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
@@ -21035,19 +20985,16 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
+                oneOf:
+                  - type: object
                     properties:
-                      getOneTimeline:
+                      data:
                         $ref: >-
-                          #/components/schemas/Security_Timeline_API_TimelineResponse
-                        nullable: true
+                          #/components/schemas/Security_Timeline_API_ResolvedTimeline
                     required:
-                      - getOneTimeline
-                required:
-                  - data
+                      - data
+                  - additionalProperties: false
+                    type: object
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -21116,36 +21063,26 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      customTemplateTimelineCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      timelines:
-                        items:
-                          $ref: >-
-                            #/components/schemas/Security_Timeline_API_TimelineResponse
-                        type: array
-                      totalCount:
-                        type: number
-                    required:
-                      - timelines
-                      - totalCount
-                      - defaultTimelineCount
-                      - templateTimelineCount
-                      - favoriteCount
-                      - elasticTemplateTimelineCount
-                      - customTemplateTimelineCount
+                  customTemplateTimelineCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  timeline:
+                    items:
+                      $ref: >-
+                        #/components/schemas/Security_Timeline_API_TimelineResponse
+                    type: array
+                  totalCount:
+                    type: number
                 required:
-                  - data
+                  - timeline
+                  - totalCount
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
@@ -24391,7 +24328,7 @@ components:
       schema:
         example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
         type: string
-    Cases_assignees:
+    Cases_assignees_filter:
       description: >
         Filters the returned cases by assignees. Valid values are `none` or
         unique identifiers for the user profiles. These identifiers can be found
@@ -27756,6 +27693,17 @@ components:
         force:
           description: Force agent policy creation even if packages are not verified.
           type: boolean
+        global_data_tags:
+          items:
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
+            type: object
+          type: array
         inactivity_timeout:
           type: integer
         is_protected:
@@ -37845,6 +37793,96 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
+    Security_Entity_Analytics_API_EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    Security_Entity_Analytics_API_EntityRiskScoreRecord:
+      type: object
+      properties:
+        '@timestamp':
+          description: The time at which the risk score was calculated.
+          example: '2017-07-21T17:32:28Z'
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+          example: Critical
+        calculated_score:
+          description: The raw numeric value of the given entity's risk score.
+          format: double
+          type: number
+        calculated_score_norm:
+          description: >-
+            The normalized numeric value of the given entity's risk score.
+            Useful for comparing with other entities.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          description: >-
+            The number of risk input documents that contributed to the Category
+            1 score (`category_1_score`).
+          format: integer
+          type: number
+        category_1_score:
+          description: >-
+            The contribution of Category 1 to the overall risk score
+            (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          format: double
+          type: number
+        category_2_count:
+          format: integer
+          type: number
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: >-
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+        criticality_modifier:
+          format: double
+          type: number
+        id_field:
+          description: >-
+            The identifier field defining this risk score. Coupled with
+            `id_value`, uniquely identifies the entity being scored.
+          example: host.name
+          type: string
+        id_value:
+          description: >-
+            The identifier value defining this risk score. Coupled with
+            `id_field`, uniquely identifies the entity being scored.
+          example: example.host
+          type: string
+        inputs:
+          description: >-
+            A list of the highest-risk documents contributing to this risk
+            score. Useful for investigative purposes.
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreInput'
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - id_field
+        - id_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - inputs
+        - notes
     Security_Entity_Analytics_API_EntityType:
       enum:
         - user
@@ -37853,6 +37891,14 @@ components:
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -37875,6 +37921,8 @@ components:
               format: date-time
               type: string
             schemaVersion:
+              type: string
+            source:
               type: string
             type:
               enum:
@@ -37919,6 +37967,9 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             type:
               items:
                 type: string
@@ -37961,6 +38012,44 @@ components:
       properties:
         success:
           type: boolean
+    Security_Entity_Analytics_API_RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -37976,6 +38065,14 @@ components:
     Security_Entity_Analytics_API_UserEntity:
       type: object
       properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - criticality
         entity:
           type: object
           properties:
@@ -37999,6 +38096,8 @@ components:
               type: string
             schemaVersion:
               type: string
+            source:
+              type: string
             type:
               enum:
                 - node
@@ -38013,6 +38112,7 @@ components:
             - type
             - firstSeenTimestamp
             - definitionId
+            - source
         user:
           type: object
           properties:
@@ -38038,6 +38138,9 @@ components:
               type: array
             name:
               type: string
+            risk:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_EntityRiskScoreRecord
             roles:
               items:
                 type: string
@@ -39181,30 +39284,39 @@ components:
       type: object
       properties:
         aggregatable:
+          nullable: true
           type: boolean
         category:
+          nullable: true
           type: string
         columnHeaderType:
+          nullable: true
           type: string
         description:
+          nullable: true
           type: string
         example:
-          oneOf:
-            - type: string
-            - type: number
+          nullable: true
+          type: string
         id:
+          nullable: true
           type: string
         indexes:
           items:
             type: string
+          nullable: true
           type: array
         name:
+          nullable: true
           type: string
         placeholder:
+          nullable: true
           type: string
         searchable:
+          nullable: true
           type: boolean
         type:
+          nullable: true
           type: string
     Security_Timeline_API_DataProviderQueryMatch:
       type: object
@@ -39226,6 +39338,10 @@ components:
           type: string
         queryMatch:
           $ref: '#/components/schemas/Security_Timeline_API_QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/Security_Timeline_API_DataProviderType'
+          nullable: true
     Security_Timeline_API_DataProviderResult:
       type: object
       properties:
@@ -39313,41 +39429,59 @@ components:
       type: object
       properties:
         exists:
-          type: boolean
+          nullable: true
+          type: string
         match_all:
+          nullable: true
           type: string
         meta:
+          nullable: true
           type: object
           properties:
             alias:
+              nullable: true
               type: string
             controlledBy:
+              nullable: true
               type: string
             disabled:
+              nullable: true
               type: boolean
             field:
+              nullable: true
               type: string
             formattedValue:
+              nullable: true
               type: string
             index:
+              nullable: true
               type: string
             key:
+              nullable: true
               type: string
             negate:
+              nullable: true
               type: boolean
             params:
+              nullable: true
               type: string
             type:
+              nullable: true
               type: string
             value:
+              nullable: true
               type: string
         missing:
+          nullable: true
           type: string
         query:
+          nullable: true
           type: string
         range:
+          nullable: true
           type: string
         script:
+          nullable: true
           type: string
     Security_Timeline_API_GetNotesResult:
       type: object
@@ -39412,6 +39546,12 @@ components:
             version:
               nullable: true
               type: string
+          required:
+            - savedObjectId
+            - version
+            - pinnedEventIds
+            - eventNotes
+            - globalNotes
     Security_Timeline_API_Note:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BareNote'
@@ -39432,6 +39572,23 @@ components:
                 #/components/schemas/Security_Timeline_API_PinnedEventBaseResponseBody
         - nullable: true
           type: object
+    Security_Timeline_API_PersistTimelineResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            persistTimeline:
+              type: object
+              properties:
+                timeline:
+                  $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+              required:
+                - timeline
+          required:
+            - persistTimeline
+      required:
+        - data
     Security_Timeline_API_PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BarePinnedEvent'
@@ -39469,34 +39626,29 @@ components:
           nullable: true
           type: string
         value:
-          nullable: true
-          type: string
-    Security_Timeline_API_Readable:
+          oneOf:
+            - nullable: true
+              type: string
+            - items:
+                type: string
+              nullable: true
+              type: array
+    Security_Timeline_API_ResolvedTimeline:
       type: object
       properties:
-        _data:
-          additionalProperties: true
-          type: object
-        _encoding:
+        alias_purpose:
+          $ref: >-
+            #/components/schemas/Security_Timeline_API_SavedObjectResolveAliasPurpose
+        alias_target_id:
           type: string
-        _events:
-          additionalProperties: true
-          type: object
-        _eventsCount:
-          type: number
-        _maxListeners:
-          additionalProperties: true
-          type: object
-        _position:
-          type: number
-        _read:
-          additionalProperties: true
-          type: object
-        _readableState:
-          additionalProperties: true
-          type: object
-        readable:
-          type: boolean
+        outcome:
+          $ref: '#/components/schemas/Security_Timeline_API_SavedObjectResolveOutcome'
+        timeline:
+          $ref: >-
+            #/components/schemas/Security_Timeline_API_TimelineSavedToReturnObject
+      required:
+        - timeline
+        - outcome
     Security_Timeline_API_ResponseNote:
       type: object
       properties:
@@ -39531,6 +39683,17 @@ components:
         - threat_match
         - zeek
       type: string
+    Security_Timeline_API_SavedObjectResolveAliasPurpose:
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+      type: string
+    Security_Timeline_API_SavedObjectResolveOutcome:
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+      type: string
     Security_Timeline_API_SavedTimeline:
       type: object
       properties:
@@ -39559,12 +39722,16 @@ components:
           properties:
             end:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
             start:
               oneOf:
-                - type: string
-                - type: number
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
         description:
           nullable: true
           type: string
@@ -39654,6 +39821,18 @@ components:
         updatedBy:
           nullable: true
           type: string
+    Security_Timeline_API_SavedTimelineWithSavedObjectId:
+      allOf:
+        - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+        - type: object
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+          required:
+            - savedObjectId
+            - version
     Security_Timeline_API_SerializedFilterQueryResult:
       type: object
       properties:
@@ -39703,27 +39882,64 @@ components:
     Security_Timeline_API_TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+        - $ref: >-
+            #/components/schemas/Security_Timeline_API_SavedTimelineWithSavedObjectId
         - type: object
           properties:
             eventIdToNoteIds:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
               type: array
             noteIds:
               items:
                 type: string
+              nullable: true
               type: array
             notes:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
               type: array
             pinnedEventIds:
               items:
                 type: string
+              nullable: true
               type: array
             pinnedEventsSaveObject:
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+              nullable: true
+              type: array
+    Security_Timeline_API_TimelineSavedToReturnObject:
+      allOf:
+        - $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              items:
+                $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
+              type: array
+            noteIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            notes:
+              items:
+                $ref: '#/components/schemas/Security_Timeline_API_Note'
+              nullable: true
+              type: array
+            pinnedEventIds:
+              items:
+                type: string
+              nullable: true
+              type: array
+            pinnedEventsSaveObject:
+              items:
+                $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+              nullable: true
               type: array
             savedObjectId:
               type: string
@@ -39853,9 +40069,7 @@ components:
           description: A description for the SLO.
           type: string
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: >-
             A optional and unique identifier for the SLO. Must be between 8 and
@@ -40014,6 +40228,21 @@ components:
           type: number
       title: Find SLO response
       type: object
+    SLOs_group_by:
+      description: >-
+        optional group by field or fields to use to generate an SLO per distinct
+        value
+      example:
+        - - service.name
+        - service.name
+        - - service.name
+          - service.environment
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      title: Group by
     SLOs_indicator_properties_apm_availability:
       description: Defines properties for the APM availability indicator type
       type: object
@@ -40604,9 +40833,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -40690,9 +40917,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -40913,6 +41138,8 @@ components:
         description:
           description: A description for the SLO.
           type: string
+        groupBy:
+          $ref: '#/components/schemas/SLOs_group_by'
         indicator:
           oneOf:
             - $ref: '#/components/schemas/SLOs_indicator_properties_custom_kql'
