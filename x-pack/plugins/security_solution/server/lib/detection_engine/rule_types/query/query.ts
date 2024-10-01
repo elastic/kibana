@@ -58,7 +58,6 @@ export const queryExecutor = async ({
       services,
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
-      fields: runOpts.inputIndexFields,
       loadFields: true,
     });
 
