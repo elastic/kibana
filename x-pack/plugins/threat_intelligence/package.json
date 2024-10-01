@@ -3,14 +3,5 @@
   "name": "@kbn/threat-intelligence-plugin",
   "version": "1.0.0",
   "license": "Elastic License 2.0",
-  "scripts": {
-    "cypress": "../../../node_modules/.bin/cypress",
-    "cypress:open": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node  ../security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../plugins/threat_intelligence/cypress/cypress.config.ts --ftr-config-file ../../test/threat_intelligence_cypress/cli_config_parallel",
-    "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/e2e/**/*.cy.ts'}; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/cases/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:reporter": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel run --config-file ../../plugins/threat_intelligence/cypress/cypress.config.ts --ftr-config-file ../../test/threat_intelligence_cypress/cli_config_parallel --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
-    "cypress:run:respops": "yarn cypress:run:reporter --browser chrome --spec ./cypress/e2e/detection_alerts/*.cy.ts,./cypress/e2e/detection_rules/*.cy.ts,./cypress/e2e/exceptions/*.cy.ts --ftr-config-file ../../x-pack/test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
-    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-threat-intelligence/cypress/results/mochawesome*.json > ../../../target/kibana-threat-intelligence/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-threat-intelligence/cypress/results/output.json --reportDir ../../../target/kibana-threat-intelligence/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-threat-intelligence/cypress/results/*.xml ../../../target/junit/"
-  }
+  "scripts": {}
 }

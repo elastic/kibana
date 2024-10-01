@@ -10,7 +10,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { execSync, ExecSyncOptions } from 'child_process';
 
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
 
 import { parseLinkHeader } from './parse_link_header';

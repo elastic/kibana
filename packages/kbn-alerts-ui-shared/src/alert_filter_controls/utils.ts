@@ -8,26 +8,24 @@
  */
 
 import type {
-  ControlGroupInput,
+  ControlGroupRuntimeState,
+  OptionsListControlState,
   ControlPanelState,
-  OptionsListEmbeddableInput,
-} from '@kbn/controls-plugin/common';
+} from '@kbn/controls-plugin/public';
 
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { FilterControlConfig } from './types';
 
-export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
-  const panels = controlInput.panels;
-
+export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
+  const panels = controlState.initialChildControlState;
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 
-export const getFilterItemObjListFromControlInput = (controlInput: ControlGroupInput) => {
-  const panels = getPanelsInOrderFromControlsInput(controlInput);
+export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
+  const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
-    const {
-      explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar },
-    } = panel as ControlPanelState<OptionsListEmbeddableInput>;
+    const { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar } =
+      panel as ControlPanelState<OptionsListControlState>;
 
     return {
       fieldName: fieldName as string,

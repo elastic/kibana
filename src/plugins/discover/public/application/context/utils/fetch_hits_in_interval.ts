@@ -10,7 +10,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -99,11 +99,11 @@ export async function fetchHitsInInterval(
 
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
-  const rows = rawResponse.hits?.hits.map((hit) =>
-    profilesManager.resolveDocumentProfile({
-      record: buildDataTableRecord(hit, dataView!),
-    })
-  );
+  const rows = buildDataTableRecordList({
+    records: rawResponse.hits?.hits,
+    dataView,
+    processRecord: (record) => profilesManager.resolveDocumentProfile({ record }),
+  });
   const interceptedWarnings: SearchResponseWarning[] = [];
   services.data.search.showWarnings(adapter, (warning) => {
     interceptedWarnings.push(warning);

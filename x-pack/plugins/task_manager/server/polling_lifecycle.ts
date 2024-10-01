@@ -94,6 +94,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
+  private currentPollInterval: number;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -122,6 +123,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -220,8 +225,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
-      eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
+      strategy: this.config.claim_strategy,
+      getPollInterval: () => this.currentPollInterval,
     });
   };
 

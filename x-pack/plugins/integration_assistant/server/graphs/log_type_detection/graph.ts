@@ -7,18 +7,33 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { SamplesFormat } from '../../../common';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
-import type { LogDetectionBaseNodeParams, LogDetectionGraphParams } from './types';
+import { ESProcessorItem, SamplesFormat } from '../../../common';
+import { getKVGraph } from '../kv/graph';
+import { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
+import { LogFormat } from '../../constants';
+import { getUnstructuredGraph } from '../unstructured/graph';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
+  packageName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
+  dataStreamName: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   logSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  jsonSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
@@ -34,6 +49,10 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
     default: () => ({ name: 'unsupported' }),
   },
+  header: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '8.11.0',
@@ -41,6 +60,10 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   results: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
+  },
+  additionalProcessors: {
+    value: (x: ESProcessorItem[], y?: ESProcessorItem[]) => y ?? x,
+    default: () => [],
   },
 };
 
@@ -58,25 +81,26 @@ function modelOutput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDe
     lastExecutedChain: 'modelOutput',
     results: {
       samplesFormat: state.samplesFormat,
-      parsedSamples: state.logSamples, // TODO: Add parsed samples
+      parsedSamples: state.jsonSamples,
+      additionalProcessors: state.additionalProcessors,
     },
   };
 }
 
 function logFormatRouter({ state }: LogDetectionBaseNodeParams): string {
-  // if (state.samplesFormat === LogFormat.STRUCTURED) {
-  //   return 'structured';
-  // }
-  // if (state.samplesFormat === LogFormat.UNSTRUCTURED) {
-  //   return 'unstructured';
-  // }
+  if (state.samplesFormat.name === LogFormat.STRUCTURED) {
+    return 'structured';
+  }
+  if (state.samplesFormat.name === LogFormat.UNSTRUCTURED) {
+    return 'unstructured';
+  }
   // if (state.samplesFormat === LogFormat.CSV) {
   //   return 'csv';
   // }
   return 'unsupported';
 }
 
-export async function getLogFormatDetectionGraph({ model }: LogDetectionGraphParams) {
+export async function getLogFormatDetectionGraph({ model, client }: LogDetectionGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -85,25 +109,25 @@ export async function getLogFormatDetectionGraph({ model }: LogDetectionGraphPar
     .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
       handleLogFormatDetection({ state, model })
     )
-    // .addNode('handleKVGraph', (state: LogFormatDetectionState) => getCompiledKvGraph({state, model}))
-    // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph({state, model}))
+    .addNode('handleKVGraph', await getKVGraph({ model, client }))
+    .addNode('handleUnstructuredGraph', await getUnstructuredGraph({ model, client }))
     // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph({state, model}))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
+    .addEdge('handleKVGraph', 'modelOutput')
+    .addEdge('handleUnstructuredGraph', 'modelOutput')
     .addEdge('modelOutput', END)
     .addConditionalEdges(
       'handleLogFormatDetection',
       (state: LogFormatDetectionState) => logFormatRouter({ state }),
       {
-        // TODO: Add structured, unstructured, csv nodes
-        // structured: 'handleKVGraph',
-        // unstructured: 'handleUnstructuredGraph',
+        structured: 'handleKVGraph',
+        unstructured: 'handleUnstructuredGraph',
         // csv: 'handleCsvGraph',
         unsupported: 'modelOutput',
       }
     );
 
   const compiledLogFormatDetectionGraph = workflow.compile();
-
   return compiledLogFormatDetectionGraph;
 }

@@ -36,7 +36,8 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
   const { chrome, http, analytics } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
-  const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
+  const isSideNavCollapsed = useObservable(chrome.sideNav.getIsCollapsed$(), true);
+  const selectedPanelNode = useObservable(chrome.sideNav.getPanelSelectedNode$(), null);
 
   const value: NavigationServices = useMemo(
     () => ({
@@ -47,6 +48,8 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       activeNodes$,
       isSideNavCollapsed,
       eventTracker: new EventTracker({ reportEvent: analytics.reportEvent }),
+      selectedPanelNode,
+      setSelectedPanelNode: chrome.sideNav.setPanelSelectedNode,
     }),
     [
       activeNodes$,
@@ -55,6 +58,8 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       chrome.recentlyAccessed,
       isSideNavCollapsed,
       navigateToUrl,
+      selectedPanelNode,
+      chrome.sideNav.setPanelSelectedNode,
     ]
   );
 

@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
-import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
+import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
@@ -37,8 +37,7 @@ import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_conf
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
-import { mlJobServiceFactory } from '../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
+import { jobCloningService } from '../../../../services/job_cloning_service';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -80,11 +79,6 @@ export class JobsListViewUI extends Component {
      * @private
      */
     this._isFiltersSet = false;
-
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApi
-    );
   }
 
   componentDidMount() {
@@ -106,7 +100,7 @@ export class JobsListViewUI extends Component {
   }
 
   openAutoStartDatafeedModal() {
-    const job = checkForAutoStartDatafeed(this.mlJobService);
+    const job = jobCloningService.checkForAutoStartDatafeed();
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }

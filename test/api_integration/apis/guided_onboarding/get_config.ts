@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getConfigsPath = `${API_BASE_PATH}/configs`;
@@ -19,7 +20,10 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
     // check that production guides are present
     ['siem', 'appSearch', 'websiteSearch', 'databaseSearch', 'kubernetes'].map((guideId) => {
       it(`returns config for ${guideId}`, async () => {
-        const response = await supertest.get(`${getConfigsPath}/${guideId}`).expect(200);
+        const response = await supertest
+          .get(`${getConfigsPath}/${guideId}`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(200);
         expect(response.body).not.to.be.empty();
         const { config } = response.body;
         expect(config).to.not.be.empty();

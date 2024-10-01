@@ -12,9 +12,9 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
+  SupportedAssetTypes,
 } from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SupportedAssetTypes } from '../../../common/asset_details/types';
 import { type AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';

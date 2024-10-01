@@ -13,7 +13,9 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  retieveMetadataColumns,
+  prettifyQuery,
+  isQueryWrappedByPipes,
+  retrieveMetadataColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -152,12 +154,12 @@ describe('esql query helpers', () => {
     });
 
     it('should return the time field if there is at least one time param', () => {
-      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?t_start')).toBe(
+      expect(getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?_tstart')).toBe(
         'time'
       );
     });
 
-    it('should return undefined if there is one named param but is not ?t_start or ?t_end', () => {
+    it('should return undefined if there is one named param but is not ?_tstart or ?_tend', () => {
       expect(
         getTimeFieldFromESQLQuery('from a | eval b = 1 | where time >= ?late')
       ).toBeUndefined();
@@ -165,29 +167,66 @@ describe('esql query helpers', () => {
 
     it('should return undefined if there is one named param but is used without a time field', () => {
       expect(
-        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?t_start)')
+        getTimeFieldFromESQLQuery('from a | eval b = DATE_TRUNC(1 day, ?_tstart)')
       ).toBeUndefined();
     });
 
     it('should return the time field if there is at least one time param in the bucket function', () => {
       expect(
         getTimeFieldFromESQLQuery(
-          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
     });
   });
 
-  describe('retieveMetadataColumns', () => {
+  describe('prettifyQuery', function () {
+    it('should return the code wrapped', function () {
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
+    });
+
+    it('should return the code unwrapped', function () {
+      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the code unwrapped and trimmed', function () {
+      const code = prettifyQuery(
+        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+  });
+
+  describe('isQueryWrappedByPipes', function () {
+    it('should return false if the query is not wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return true if the query is wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return true if the query is wrapped and prettified', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
+      expect(flag).toBeTruthy();
+    });
+  });
+
+  describe('retrieveMetadataColumns', () => {
     it('should return metadata columns if they exist', () => {
-      expect(retieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
+      expect(retrieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
         '_id',
         '_ignored',
       ]);
     });
 
     it('should return empty columns if metadata doesnt exist', () => {
-      expect(retieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
+      expect(retrieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
     });
   });
 });

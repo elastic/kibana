@@ -23,7 +23,7 @@ const state: LogFormatDetectionState = logFormatDetectionTestState;
 describe('Testing log type detection handler', () => {
   it('handleLogFormatDetection()', async () => {
     const response = await handleLogFormatDetection({ state, model });
-    expect(response.samplesFormat).toStrictEqual('structured');
+    expect(response.samplesFormat).toStrictEqual({ name: 'structured' });
     expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
 });

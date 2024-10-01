@@ -20,6 +20,9 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { ErrorCode } from '../../common/constants';
 
 export function registerCategorizationRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -45,8 +48,14 @@ export function registerCategorizationRoutes(
       },
       withAvailability(
         async (context, req, res): Promise<IKibanaResponse<CategorizationResponse>> => {
-          const { packageName, dataStreamName, rawSamples, currentPipeline, langSmithOptions } =
-            req.body;
+          const {
+            packageName,
+            dataStreamName,
+            rawSamples,
+            samplesFormat,
+            currentPipeline,
+            langSmithOptions,
+          } = req.body;
           const services = await context.resolve(['core']);
           const { client } = services.core.elasticsearch;
           const { getStartServices, logger } = await context.integrationAssistant;
@@ -79,6 +88,7 @@ export function registerCategorizationRoutes(
               dataStreamName,
               rawSamples,
               currentPipeline,
+              samplesFormat,
             };
             const options = {
               callbacks: [
@@ -91,8 +101,15 @@ export function registerCategorizationRoutes(
             const results = await graph.invoke(parameters, options);
 
             return res.ok({ body: CategorizationResponse.parse(results) });
-          } catch (e) {
-            return res.badRequest({ body: e });
+          } catch (err) {
+            try {
+              handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+            } catch (e) {
+              if (isErrorThatHandlesItsOwnResponse(e)) {
+                return e.sendResponse(res);
+              }
+            }
+            return res.badRequest({ body: err });
           }
         }
       )

@@ -9,24 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const elasticChart = getService('elasticChart');
 
   describe('lens formula tests', () => {
     it('should allow creation of a lens chart via formula', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
         formula: `ifelse(count() > 1, (count() + average(bytes)) / 2, 5)`,
       });
 
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
+      const data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data).to.be.ok();
     });
   });

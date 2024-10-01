@@ -95,7 +95,7 @@ export class Watcher {
         ignore: [
           '**/{node_modules,target,public,coverage,__*__}/**',
           '**/*.{test,spec,story,stories}.*',
-          '**/*.{md,sh,txt}',
+          '**/*.{http,md,sh,txt}',
           '**/debug.log',
         ],
       }

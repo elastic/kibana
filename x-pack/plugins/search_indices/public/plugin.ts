@@ -7,12 +7,15 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+
+import { docLinks } from '../common/doc_links';
 import type {
   SearchIndicesAppPluginStartDependencies,
   SearchIndicesPluginSetup,
   SearchIndicesPluginStart,
   SearchIndicesServicesContextDeps,
 } from './types';
+import { initQueryClient } from './services/query_client';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -20,6 +23,8 @@ export class SearchIndicesPlugin
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>
   ): SearchIndicesPluginSetup {
+    const queryClient = initQueryClient(core.notifications.toasts);
+
     core.application.register({
       id: 'elasticsearchStart',
       appRoute: '/app/elasticsearch/start',
@@ -34,7 +39,7 @@ export class SearchIndicesPlugin
           ...depsStart,
           history,
         };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element);
+        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
       },
     });
     core.application.register({
@@ -51,7 +56,7 @@ export class SearchIndicesPlugin
           ...depsStart,
           history,
         };
-        return renderApp(SearchIndicesRouter, coreStart, startDeps, element);
+        return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
 
@@ -61,6 +66,7 @@ export class SearchIndicesPlugin
   }
 
   public start(core: CoreStart): SearchIndicesPluginStart {
+    docLinks.setDocLinks(core.docLinks.links);
     return {};
   }
 

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceType, DataViewDataSource, DiscoverDataSource, EsqlDataSource } from './types';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  DataSourceType,
+  type DataViewDataSource,
+  type DiscoverDataSource,
+  type EsqlDataSource,
+} from './types';
 
 export const createDataViewDataSource = ({
   dataViewId,
@@ -21,6 +28,20 @@ export const createDataViewDataSource = ({
 export const createEsqlDataSource = (): EsqlDataSource => ({
   type: DataSourceType.Esql,
 });
+
+export const createDataSource = ({
+  dataView,
+  query,
+}: {
+  dataView: DataView | undefined;
+  query: Query | AggregateQuery | undefined;
+}) => {
+  return isOfAggregateQueryType(query)
+    ? createEsqlDataSource()
+    : dataView?.id
+    ? createDataViewDataSource({ dataViewId: dataView.id })
+    : undefined;
+};
 
 export const isDataSourceType = <T extends DataSourceType>(
   dataSource: DiscoverDataSource | undefined,

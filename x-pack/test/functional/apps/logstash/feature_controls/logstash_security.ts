@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('global all privileges (aka kibana_admin)', () => {
+    describe('global all privileges (aka kibana_admin)', function () {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
@@ -38,10 +38,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Ingest" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Ingest section"', function () {
+        this.tags('skipFIPS');
+        it('should not render', async function () {
+          await PageObjects.common.navigateToApp('management');
+          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
+          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+        });
       });
     });
 
@@ -57,13 +60,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Ingest" section with Logstash Pipelines', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
-        expect(sections[0]).to.eql({
-          sectionId: 'ingest',
-          sectionLinks: ['pipelines'],
+      describe('"Ingest" section with Logstash Pipelines', function () {
+        this.tags('skipFIPS');
+        it('should render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          expect(sections).to.have.length(1);
+          expect(sections[0]).to.eql({
+            sectionId: 'ingest',
+            sectionLinks: ['pipelines'],
+          });
         });
       });
     });

@@ -40,10 +40,10 @@ const path = INTERNAL_ROUTES.DIAGNOSE.BROWSER;
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
-  router.post(
+  router.get(
     {
       path,
-      validate: {},
+      validate: false,
       options: { access: 'internal' },
     },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {

@@ -22,11 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, dashboard, header, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'timePicker',
-    'settings',
     'dashboard',
     'header',
     'unifiedFieldList',
@@ -47,21 +46,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
+        await unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.unifiedFieldList.clickFieldListItem(columnName);
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(columnName, value);
+        await unifiedFieldList.clickFieldListItem(columnName);
+        await unifiedFieldList.clickFieldListPlusFilter(columnName, value);
       }
     });
     after(async () => {
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    it('should open the context view with the same columns', async () => {
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the selected document as anchor', async () => {
@@ -83,11 +87,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
-    });
-
     it('should open the context view with the filters disabled', async () => {
       let disabledFilterCounter = 0;
       for (const [_, value, columnId] of TEST_FILTER_COLUMN_NAMES) {
@@ -103,16 +102,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('navigates to context view from embeddable', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.saveSearch('my search');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
 
       await dashboardAddPanel.addSavedSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });

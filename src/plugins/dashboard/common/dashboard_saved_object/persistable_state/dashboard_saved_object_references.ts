@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
-import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 
 import {
   convertPanelMapToSavedPanels,
@@ -34,9 +33,6 @@ function parseDashboardAttributesWithType(
   }
 
   return {
-    controlGroupInput:
-      attributes.controlGroupInput &&
-      rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
     type: 'dashboard',
     panels: convertSavedPanelsToPanelMap(parsedPanels),
   } as ParsedDashboardAttributesWithType;
@@ -59,13 +55,6 @@ export function injectReferences(
     ...attributes,
     panelsJSON: JSON.stringify(injectedPanels),
   } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && injectedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
-    };
-  }
 
   return newAttributes;
 }
@@ -96,13 +85,6 @@ export function extractReferences(
     ...attributes,
     panelsJSON: JSON.stringify(extractedPanels),
   } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && extractedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
-    };
-  }
 
   return {
     references: [...references, ...extractedReferences],

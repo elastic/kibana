@@ -26,6 +26,8 @@ function createSpacesManagerMock() {
     updateSavedObjectsSpaces: jest.fn().mockResolvedValue(undefined),
     resolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(undefined),
     getShareSavedObjectPermissions: jest.fn().mockResolvedValue(undefined),
+    getContentForSpace: jest.fn().mockResolvedValue({ summary: [], total: 0 }),
+    getRolesForSpace: jest.fn().mockResolvedValue([]),
     redirectToSpaceSelector: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<SpacesManager>;
 }

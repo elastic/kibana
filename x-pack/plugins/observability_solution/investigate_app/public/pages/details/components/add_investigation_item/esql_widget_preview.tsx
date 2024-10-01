@@ -181,9 +181,6 @@ export function EsqlWidgetPreview({
         <PreviewContainer>
           <EsqlWidget
             suggestion={selectedSuggestion}
-            columns={displayedProps.value.columns}
-            allColumns={displayedProps.value.allColumns}
-            values={displayedProps.value.values}
             dataView={displayedProps.value.dataView}
             esqlQuery={esqlQuery}
             dateHistogramResults={dateHistoResponse.value}

@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect'; // For additional matchers like toHaveTextContent
 import { RuleDefinitionSection } from './rule_definition_section';
 import type {
   RuleResponse,

@@ -85,7 +85,7 @@ describe('ruleFormAdvancedOptions', () => {
       'An alert is flapping if it changes status at least 3 times in the last 10 rule runs.'
     );
 
-    userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
+    await userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
     expect(mockOnflappingChange).toHaveBeenCalledWith({
       lookBackWindow: 10,
       statusChangeThreshold: 3,
@@ -118,7 +118,7 @@ describe('ruleFormAdvancedOptions', () => {
       'An alert is flapping if it changes status at least 4 times in the last 6 rule runs.'
     );
 
-    userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
+    await userEvent.click(screen.getByTestId('ruleFormAdvancedOptionsOverrideSwitch'));
     expect(mockOnflappingChange).toHaveBeenCalledWith(null);
   });
 

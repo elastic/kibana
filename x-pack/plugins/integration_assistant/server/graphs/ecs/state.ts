@@ -6,6 +6,7 @@
  */
 
 import type { StateGraphArgs } from '@langchain/langgraph';
+import { ESProcessorItem, SamplesFormat } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { merge } from '../../util/samples';
 
@@ -24,6 +25,10 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   },
   rawSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  additionalProcessors: {
+    value: (x: ESProcessorItem[], y?: ESProcessorItem[]) => y ?? x,
     default: () => [],
   },
   prefixedSamples: {
@@ -95,8 +100,8 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     default: () => ({}),
   },
   samplesFormat: {
-    value: (x: string, y?: string) => y ?? x,
-    default: () => 'json',
+    value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
+    default: () => ({ name: 'json' }),
   },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,

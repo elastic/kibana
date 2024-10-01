@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
 
   describe('test large strings', function () {
     before(async function () {
@@ -42,9 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ' you’ll have to check the laws of the country where you are' +
         ' located before using this ebook.';
 
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
       await retry.try(async function tryingForTime() {
-        const rowData = await PageObjects.discover.getDocTableIndex(1, true);
+        const rowData = await discover.getDocTableIndex(1, true);
         expect(rowData).to.contain(expectedText);
       });
     });
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('Newsletter');
         await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
-          const hitCount = await PageObjects.discover.getHitCount();
+          const hitCount = await discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
           log.debug('test Newsletter keyword is searched');
         });
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('the search term Newsletter should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
-        const marks = await PageObjects.discover.getMarks();
+        const marks = await discover.getMarks();
         expect(marks.length).to.be(1);
         log.debug('Newsletter appears only once');
       });

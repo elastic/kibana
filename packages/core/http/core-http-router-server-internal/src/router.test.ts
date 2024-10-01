@@ -49,6 +49,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
           options: {
             deprecated: true,
+            discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
           },
@@ -66,6 +67,7 @@ describe('Router', () => {
         isVersioned: false,
         options: {
           deprecated: true,
+          discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
         },
@@ -227,6 +229,47 @@ describe('Router', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"[options.body.output: 'file'] in route POST / is not valid. Only 'data' or 'stream' are valid."`
+      );
+    });
+
+    it('throws if enabled security config is not valid', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              authz: {
+                requiredPrivileges: [],
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    it('throws if disabled security config does not provide opt-out reason', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              // @ts-expect-error
+              authz: {
+                enabled: false,
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.reason]: expected value of type [string] but got [undefined]"`
       );
     });
 

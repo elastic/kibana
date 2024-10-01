@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
@@ -24,10 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
             ensureCurrentUrl: false,
           });
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
           expect(timestamps).to.have.length(6);
           expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
@@ -39,11 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('cell renderers', () => {
         it('should render custom @timestamp', async () => {
-          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
           await dataViews.switchTo('my-example-*');
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
           expect(timestamps).to.have.length(6);
           expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');

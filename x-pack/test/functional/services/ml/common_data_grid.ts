@@ -37,16 +37,14 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
       // Get the content of each cell and divide them up into rows.
       // Virtualized cells outside the view area are not present in the DOM until they
       // are scroilled into view, so we're limiting the number of parsed columns.
-      // To determine row and column of a cell, we're utilizing the screen reader
-      // help text, which enumerates the rows and columns 1-based.
+      // To determine row and column of a cell, we're utilizing EUI's data attributes
       const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
         .map((cell) => {
-          const cellText = $(cell).text();
-          const pattern = /^(.*)-(?:.*), column (\d+), row (\d+)$/;
-          const matches = cellText.match(pattern);
-          expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
-          return { text: matches![1], column: Number(matches![2]), row: Number(matches![3]) };
+          const cellText = $(cell).find('.euiDataGridRowCell__content').text();
+          const columnData = $(cell).attr('data-gridcell-column-index');
+          const rowData = $(cell).attr('data-gridcell-row-index');
+          return { text: cellText, column: Number(columnData) + 1, row: Number(rowData) };
         })
         .filter((cell) =>
           maxColumnsToParse !== undefined ? cell?.column <= maxColumnsToParse : false
@@ -150,9 +148,9 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
 
     async assertColumnSelectorsSwitchState(expectedState: boolean) {
       await retry.tryForTime(5 * 1000, async () => {
-        const visibilityToggles = await (
-          await find.byClassName('euiDataGrid__controlScroll')
-        ).findAllByCssSelector('[role="switch"]');
+        const visibilityToggles = await find.allByCssSelector(
+          '.euiDataGridColumnSelector__item [role="switch"]'
+        );
 
         await asyncForEachWithLimit(visibilityToggles, 1, async (toggle) => {
           const checked = (await toggle.getAttribute('aria-checked')) === 'true';

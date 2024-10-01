@@ -25,6 +25,9 @@ export function EmbeddedConsoleProvider(ctx: FtrProviderContext) {
     async clickEmbeddedConsoleControlBar() {
       await testSubjects.click('consoleEmbeddedControlBar');
     },
+    async expectEmbeddedConsoleHaveFullscreenToggle() {
+      await testSubjects.existOrFail('consoleToggleFullscreenButton');
+    },
     async expectEmbeddedConsoleNotebooksButtonExists() {
       await testSubjects.existOrFail('consoleEmbeddedNotebooksButton');
     },

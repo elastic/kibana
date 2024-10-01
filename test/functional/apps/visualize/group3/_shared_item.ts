@@ -14,13 +14,13 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize']);
+  const { common, visualize } = getPageObjects(['common', 'visualize']);
 
   describe('data-shared-item', function indexPatternCreation() {
     before(async function () {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToApp('visualize');
+      await common.navigateToApp('visualize');
     });
 
     it('should have the correct data-shared-item title and description, and sharedItemContainer should exist', async function () {
@@ -29,12 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         description: 'AreaChart',
       };
 
-      await PageObjects.visualize.openSavedVisualization('Shared-Item Visualization AreaChart');
+      await visualize.openSavedVisualization('Shared-Item Visualization AreaChart');
       await retry.try(async function () {
-        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
+        const { title, description } = await common.getSharedItemTitleAndDescription();
         expect(title).to.eql(expected.title);
         expect(description).to.eql(expected.description);
-        const sharedItemContainers = await PageObjects.common.getSharedItemContainers();
+        const sharedItemContainers = await common.getSharedItemContainers();
         expect(sharedItemContainers.length).to.be(1);
       });
     });

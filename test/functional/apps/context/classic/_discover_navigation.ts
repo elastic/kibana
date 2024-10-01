@@ -20,16 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'settings',
-    'dashboard',
-    'context',
-    'header',
-    'unifiedFieldList',
-  ]);
+  const { common, discover, timePicker, dashboard, context, header, unifiedFieldList } =
+    getPageObjects([
+      'common',
+      'discover',
+      'timePicker',
+      'dashboard',
+      'context',
+      'header',
+      'unifiedFieldList',
+    ]);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
@@ -37,24 +37,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('context link in discover classic', () => {
     before(async () => {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': true,
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
+        await unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.unifiedFieldList.clickFieldListItem(columnName);
-        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(columnName, value);
+        await unifiedFieldList.clickFieldListItem(columnName);
+        await unifiedFieldList.clickFieldListPlusFilter(columnName, value);
       }
     });
     after(async () => {
       await kibanaServer.uiSettings.replace({});
+    });
+
+    it('should open the context view with the same columns', async () => {
+      const columnNames = await docTable.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the selected document as anchor and allows selecting next anchor', async () => {
@@ -76,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await docTable.clickRowToggle({ rowIndex: 0 });
         const rowActions = await docTable.getRowActions({ rowIndex: 0 });
         await rowActions[0].click();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstDiscoverTimestamp;
       });
@@ -87,15 +92,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await docTable.clickRowToggle({ rowIndex: 0 });
         const rowActions = await docTable.getRowActions({ rowIndex: 0 });
         await rowActions[0].click();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstContextTimestamp;
       });
-    });
-
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // bugfix: https://github.com/elastic/kibana/issues/92099
     it('should navigate to the first document and then back to discover', async () => {
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await context.waitUntilContextLoadingHasFinished();
 
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
@@ -128,26 +128,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasDocHit).to.be(true);
 
       await testSubjects.click('~breadcrumb & ~first');
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await discover.waitForDiscoverAppOnScreen();
+      await discover.waitForDocTableLoadingComplete();
     });
 
     it('navigates to doc view from embeddable', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.saveSearch('my classic search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.saveSearch('my classic search');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
 
       await dashboardAddPanel.addSavedSearch('my classic search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await docTable.clickRowToggle({ rowIndex: 0 });
       const rowActions = await docTable.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      await PageObjects.common.sleep(250);
+      await common.sleep(250);
 
       // close popup
       const alert = await browser.getAlert();
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return currentUrl.includes('#/doc');
       });
       await retry.waitFor('doc view being rendered', async () => {
-        return await PageObjects.discover.isShowingDocViewer();
+        return await discover.isShowingDocViewer();
       });
     });
   });

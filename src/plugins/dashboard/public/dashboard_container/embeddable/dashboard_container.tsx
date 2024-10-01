@@ -7,58 +7,81 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+import { omit } from 'lodash';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import {
+  BehaviorSubject,
+  Subject,
+  Subscription,
+  distinctUntilChanged,
+  first,
+  map,
+  skipWhile,
+  switchMap,
+} from 'rxjs';
+import { v4 } from 'uuid';
+
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import {
-  type PublishingSubject,
-  apiPublishesPanelTitle,
-  apiPublishesUnsavedChanges,
-  getPanelTitle,
-  PublishesViewMode,
-} from '@kbn/presentation-publishing';
+import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   Container,
   DefaultEmbeddableApi,
   EmbeddableFactoryNotFoundError,
-  embeddableInputToSubject,
-  isExplicitInputWithAttributes,
   PanelNotFoundError,
   ViewMode,
+  embeddableInputToSubject,
+  isExplicitInputWithAttributes,
   type EmbeddableFactory,
   type EmbeddableInput,
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   HasRuntimeChildState,
   HasSaveNotification,
   HasSerializedChildState,
+  PanelPackage,
   TrackContentfulRender,
   TracksQueryPerformance,
+  combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
-import { PanelPackage } from '@kbn/presentation-containers';
-import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import deepEqual from 'fast-deep-equal';
-import { omit } from 'lodash';
-import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs';
-import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardContainerInput, DashboardPanelState } from '../../../common';
-import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import {
+  PublishesDataLoading,
+  PublishesViewMode,
+  apiPublishesDataLoading,
+  apiPublishesPanelTitle,
+  apiPublishesUnsavedChanges,
+  getPanelTitle,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+
+import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
+import {
+  DashboardAttributes,
+  DashboardContainerInput,
+  DashboardPanelMap,
+  DashboardPanelState,
+} from '../../../common';
+import {
+  getReferencesForControls,
+  getReferencesForPanelId,
+} from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
+import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_UI_METRIC_ID,
@@ -66,33 +89,39 @@ import {
   DEFAULT_PANEL_WIDTH,
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
-import { DashboardAnalyticsService } from '../../services/analytics/types';
-import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
-import { pluginServices } from '../../services/plugin_services';
-import { placePanel } from '../panel_placement';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
+import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  usageCollectionService,
+} from '../../services/kibana_services';
+import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
-import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
+import { placePanel } from '../panel_placement';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import { DashboardPublicState, DashboardReduxState, UnsavedPanelState } from '../types';
 import {
-  addFromLibrary,
-  addOrUpdateEmbeddable,
-  runQuickSave,
-  runInteractiveSave,
-  showSettings,
-} from './api';
+  DashboardPublicState,
+  DashboardReduxState,
+  DashboardStateFromSettingsFlyout,
+  UnsavedPanelState,
+} from '../types';
+import { addFromLibrary, addOrUpdateEmbeddable, runInteractiveSave, runQuickSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  startSyncingDashboardControlGroup,
+} from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
   DashboardCreationOptions,
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -115,19 +144,9 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof dashboardContainerReducers
 >;
 
-export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
-export const useDashboardContainer = (): DashboardContainer => {
-  const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
-  if (dashboard == null) {
-    throw new Error('useDashboardContainer must be used inside DashboardContainerContext.');
-  }
-  return dashboard!;
-};
-
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
   implements
-    DashboardExternallyAccessibleApi,
     TrackContentfulRender,
     TracksQueryPerformance,
     HasSaveNotification,
@@ -148,7 +167,7 @@ export class DashboardContainer
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
-  public controlGroup?: ControlGroupContainer;
+  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -157,13 +176,13 @@ export class DashboardContainer
   public reload$ = new Subject<void>();
   public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
+  public unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   public readonly executionContext: KibanaExecutionContext;
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
-  private allDataViews: DataView[] = [];
 
   // performance monitoring
   public lastLoadStartTime?: number;
@@ -173,22 +192,20 @@ export class DashboardContainer
   private hadContentfulRender = false;
   private scrollPosition?: number;
 
+  // setup
+  public untilContainerInitialized: () => Promise<void>;
+
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
-  private analyticsService: DashboardAnalyticsService;
-  private showWriteControls: DashboardCapabilitiesService['showWriteControls'];
-  private i18n: I18nStart;
-  private theme;
-  private chrome;
-  private customBranding;
+  private showWriteControls: boolean;
 
   public trackContentfulRender() {
-    if (!this.hadContentfulRender && this.analyticsService) {
-      this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
+    if (!this.hadContentfulRender) {
+      coreServices.analytics.reportEvent('dashboard_loaded_with_data', {});
     }
     this.hadContentfulRender = true;
   }
@@ -198,6 +215,7 @@ export class DashboardContainer
     | undefined;
   // new embeddable framework
   public savedObjectReferences: Reference[] = [];
+  public controlGroupInput: DashboardAttributes['controlGroupInput'] | undefined;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -208,31 +226,47 @@ export class DashboardContainer
     creationOptions?: DashboardCreationOptions,
     initialComponentState?: DashboardPublicState
   ) {
-    const {
-      usageCollection,
-      embeddable: { getEmbeddableFactory },
-    } = pluginServices.getServices();
+    const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+    async function untilContainerInitialized(): Promise<void> {
+      return new Promise((resolve) => {
+        controlGroupApi$
+          .pipe(
+            skipWhile((controlGroupApi) => !controlGroupApi),
+            switchMap(async (controlGroupApi) => {
+              // Bug in main where panels are loaded before control filters are ready
+              // Want to migrate to react embeddable controls with same behavior
+              // TODO - do not load panels until control filters are ready
+              /*
+                await controlGroupApi?.untilInitialized();
+              */
+            }),
+            first()
+          )
+          .subscribe(() => {
+            resolve();
+          });
+      });
+    }
+
     super(
       {
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      getEmbeddableFactory,
-      parent
+      embeddableService.getEmbeddableFactory,
+      parent,
+      { untilContainerInitialized }
     );
 
-    this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
-      usageCollection,
+    ({ showWriteControls: this.showWriteControls } = getDashboardCapabilities());
+
+    this.controlGroupApi$ = controlGroupApi$;
+    this.untilContainerInitialized = untilContainerInitialized;
+
+    this.trackPanelAddMetric = usageCollectionService?.reportUiCounter.bind(
+      usageCollectionService,
       DASHBOARD_UI_METRIC_ID
     );
-
-    ({
-      analytics: this.analyticsService,
-      settings: { theme: this.theme, i18n: this.i18n },
-      chrome: this.chrome,
-      customBranding: this.customBranding,
-      dashboardCapabilities: { showWriteControls: this.showWriteControls },
-    } = pluginServices.getServices());
 
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
@@ -258,24 +292,77 @@ export class DashboardContainer
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
 
-    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.publishingSubscription.add(
-      this.onStateChange(() => {
-        if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
-        this.savedObjectId.next(this.getDashboardSavedObjectId());
-      })
-    );
-    this.publishingSubscription.add(
-      this.savedObjectId.subscribe(() => {
-        this.hadContentfulRender = false;
-      })
-    );
+    this.uuid$ = embeddableInputToSubject<string>(
+      this.publishingSubscription,
+      this,
+      'id'
+    ) as BehaviorSubject<string>;
 
-    this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
+    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
+    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
+    this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
+    this.hasRunMigrations$ = new BehaviorSubject(
+      this.getState().componentState.hasRunClientsideMigrations
+    );
+    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
+    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
+    this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
+    this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
+    this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
+    this.animatePanelTransforms$ = new BehaviorSubject(
+      this.getState().componentState.animatePanelTransforms
+    );
+    this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
+    this.embeddedExternally$ = new BehaviorSubject(
+      this.getState().componentState.isEmbeddedExternally
+    );
     this.publishingSubscription.add(
       this.onStateChange(() => {
-        if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
-        this.expandedPanelId.next(this.getExpandedPanelId());
+        const state = this.getState();
+        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
+          this.savedObjectId.next(this.getDashboardSavedObjectId());
+        }
+        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
+          this.expandedPanelId.next(this.getExpandedPanelId());
+        }
+        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
+          this.focusedPanelId$.next(state.componentState.focusedPanelId);
+        }
+        if (this.managed$.value !== state.componentState.managed) {
+          this.managed$.next(state.componentState.managed);
+        }
+        if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
+          this.fullScreenMode$.next(state.componentState.fullScreenMode);
+        }
+        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
+          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
+        }
+        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
+          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
+        }
+        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
+          this.hasOverlays$.next(state.componentState.hasOverlays);
+        }
+        if (this.useMargins$.value !== state.explicitInput.useMargins) {
+          this.useMargins$.next(state.explicitInput.useMargins);
+        }
+        if (this.scrollToPanelId$.value !== state.componentState.scrollToPanelId) {
+          this.scrollToPanelId$.next(state.componentState.scrollToPanelId);
+        }
+        if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
+          this.highlightPanelId$.next(state.componentState.highlightPanelId);
+        }
+        if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
+          this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
+        }
+        if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
+          this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
+        }
+        if (this.panels$.value !== state.explicitInput.panels) {
+          this.panels$.next(state.explicitInput.panels);
+        }
       })
     );
 
@@ -312,7 +399,41 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
+    startSyncingDashboardControlGroup(this);
+
     this.executionContext = initialInput.executionContext;
+
+    this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
+    this.publishingSubscription.add(
+      combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+        this,
+        'dataLoading',
+        apiPublishesDataLoading,
+        undefined,
+        // flatten method
+        (values) => {
+          return values.some((isLoading) => isLoading);
+        }
+      ).subscribe((isAtLeastOneChildLoading) => {
+        (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
+      })
+    );
+
+    this.dataViews = new BehaviorSubject<DataView[] | undefined>([]);
+
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
+    this.query$ = query$;
+    this.publishingSubscription.add(
+      this.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  }
+
+  public setControlGroupApi(controlGroupApi: ControlGroupApi) {
+    (this.controlGroupApi$ as BehaviorSubject<ControlGroupApi | undefined>).next(controlGroupApi);
   }
 
   public getAppContext() {
@@ -353,16 +474,16 @@ export class DashboardContainer
 
     ReactDOM.render(
       <KibanaRenderContextProvider
-        analytics={this.analyticsService}
-        i18n={this.i18n}
-        theme={this.theme}
+        analytics={coreServices.analytics}
+        i18n={coreServices.i18n}
+        theme={coreServices.theme}
       >
         <ExitFullScreenButtonKibanaProvider
-          coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
+          coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
-          <DashboardContainerContext.Provider value={this}>
+          <DashboardContext.Provider value={this as DashboardApi}>
             <DashboardViewport />
-          </DashboardContainerContext.Provider>
+          </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
       </KibanaRenderContextProvider>,
       dom
@@ -398,10 +519,10 @@ export class DashboardContainer
       panels,
     } = this.input;
 
-    let combinedFilters = filters;
-    if (this.controlGroup) {
-      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
-    }
+    const combinedFilters = combineDashboardFiltersWithControlGroupFilters(
+      filters,
+      this.controlGroupApi$?.value
+    );
     const hasCustomTimeRange = Boolean(
       (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
     );
@@ -430,7 +551,6 @@ export class DashboardContainer
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
-    this.controlGroup?.destroy();
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
@@ -444,7 +564,6 @@ export class DashboardContainer
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
-  public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
   public duplicatePanel(id: string) {
@@ -458,6 +577,19 @@ export class DashboardContainer
 
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
+  public focusedPanelId$: BehaviorSubject<string | undefined>;
+  public managed$: BehaviorSubject<boolean | undefined>;
+  public fullScreenMode$: BehaviorSubject<boolean | undefined>;
+  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
+  public hasOverlays$: BehaviorSubject<boolean | undefined>;
+  public useMargins$: BehaviorSubject<boolean>;
+  public scrollToPanelId$: BehaviorSubject<string | undefined>;
+  public highlightPanelId$: BehaviorSubject<string | undefined>;
+  public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
+  public panels$: BehaviorSubject<DashboardPanelMap>;
+  public embeddedExternally$: BehaviorSubject<boolean | undefined>;
+  public uuid$: BehaviorSubject<string>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
@@ -477,14 +609,9 @@ export class DashboardContainer
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean
   ) {
-    const {
-      notifications: { toasts },
-      embeddable: { getEmbeddableFactory, reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
-
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
-      toasts.addSuccess({
+      coreServices.notifications.toasts.addSuccess({
         title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
@@ -495,10 +622,10 @@ export class DashboardContainer
     if (this.trackPanelAddMetric) {
       this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
     }
-    if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
 
-      const getCustomPlacementSettingFunc = await getDashboardPanelPlacementSetting(
+      const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(
         panelPackage.panelType
       );
 
@@ -538,7 +665,7 @@ export class DashboardContainer
       return await this.untilReactEmbeddableLoaded<ApiType>(newId);
     }
 
-    const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
+    const embeddableFactory = embeddableService.getEmbeddableFactory(panelPackage.panelType);
     if (!embeddableFactory) {
       throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
     }
@@ -576,11 +703,8 @@ export class DashboardContainer
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
-    if (reactEmbeddableRegistryHasKey(panel.type)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
@@ -616,16 +740,12 @@ export class DashboardContainer
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
     if (refreshControlGroup) {
-      this.controlGroup?.reload();
-
       // only reload all panels if this refresh does not come from the control group.
       this.reload$.next();
     }
   }
 
-  public onDataViewsUpdate$ = new Subject<DataView[]>();
-
-  public resetToLastSavedState() {
+  public async asyncResetToLastSavedState() {
     this.dispatch.resetToLastSavedInput({});
     const {
       explicitInput: { timeRange, refreshInterval },
@@ -634,19 +754,13 @@ export class DashboardContainer
       },
     } = this.getState();
 
-    if (this.controlGroup) {
-      this.controlGroup.resetToLastSavedState();
+    if (this.controlGroupApi$.value) {
+      await this.controlGroupApi$.value.asyncResetUnsavedChanges();
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
-      const {
-        data: {
-          query: {
-            timefilter: { timefilter: timeFilterService },
-          },
-        },
-      } = pluginServices.getServices();
+      const timeFilterService = dataService.query.timefilter.timefilter;
       if (timeRange) timeFilterService.setTime(timeRange);
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }
@@ -661,13 +775,12 @@ export class DashboardContainer
     this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();
 
-    const {
-      dashboardContentManagement: { loadDashboardState },
-    } = pluginServices.getServices();
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
+    const loadDashboardReturn = await getDashboardContentManagementService().loadDashboardState({
+      id: newSavedObjectId,
+    });
 
     const dashboardContainerReady$ = new Subject<DashboardContainer>();
     const untilDashboardReady = () =>
@@ -680,7 +793,6 @@ export class DashboardContainer
 
     const initializeResult = await initializeDashboard({
       creationOptions: this.creationOptions,
-      controlGroup: this.controlGroup,
       untilDashboardReady,
       loadDashboardReturn,
     });
@@ -695,9 +807,6 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      if (this.controlGroup) {
-        this.controlGroup.setSavedState(loadDashboardReturn.dashboardInput?.controlGroupInput);
-      }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
@@ -708,28 +817,59 @@ export class DashboardContainer
   };
 
   /**
-   * Gets all the dataviews that are actively being used in the dashboard
-   * @returns An array of dataviews
-   */
-  public getAllDataViews = () => {
-    return this.allDataViews;
-  };
-
-  /**
    * Use this to set the dataviews that are used in the dashboard when they change/update
    * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
    */
   public setAllDataViews = (newDataViews: DataView[]) => {
-    this.allDataViews = newDataViews;
-    this.onDataViewsUpdate$.next(newDataViews);
+    (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
   };
 
   public getExpandedPanelId = () => {
     return this.getState().componentState.expandedPanelId;
   };
 
+  public getPanelsState = () => {
+    return this.getState().explicitInput.panels;
+  };
+
+  public getSettings = (): DashboardStateFromSettingsFlyout => {
+    const state = this.getState();
+    return {
+      description: state.explicitInput.description,
+      hidePanelTitles: state.explicitInput.hidePanelTitles,
+      lastSavedId: state.componentState.lastSavedId,
+      syncColors: state.explicitInput.syncColors,
+      syncCursor: state.explicitInput.syncCursor,
+      syncTooltips: state.explicitInput.syncTooltips,
+      tags: state.explicitInput.tags,
+      timeRestore: state.explicitInput.timeRestore,
+      title: state.explicitInput.title,
+      useMargins: state.explicitInput.useMargins,
+    };
+  };
+
+  public setSettings = (settings: DashboardStateFromSettingsFlyout) => {
+    this.dispatch.setStateFromSettingsFlyout(settings);
+  };
+
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
+  };
+
+  public setViewMode = (viewMode: ViewMode) => {
+    this.dispatch.setViewMode(viewMode);
+  };
+
+  public setFullScreenMode = (fullScreenMode: boolean) => {
+    this.dispatch.setFullScreenMode(fullScreenMode);
+  };
+
+  public setQuery = (query?: Query | undefined) => this.updateInput({ query });
+
+  public setFilters = (filters?: Filter[] | undefined) => this.updateInput({ filters });
+
+  public setTags = (tags: string[]) => {
+    this.updateInput({ tags });
   };
 
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
@@ -744,7 +884,6 @@ export class DashboardContainer
   public clearOverlays = () => {
     this.dispatch.setHasOverlays(false);
     this.dispatch.setFocusedPanelId(undefined);
-    this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
   };
 
@@ -753,13 +892,10 @@ export class DashboardContainer
   };
 
   public async getPanelTitles(): Promise<string[]> {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const titles: string[] = [];
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
-        if (reactEmbeddableRegistryHasKey(panel.type)) {
+        if (embeddableService.reactEmbeddableRegistryHasKey(panel.type)) {
           const child = this.children$.value[id];
           return apiPublishesPanelTitle(child) ? getPanelTitle(child) : '';
         }
@@ -826,6 +962,10 @@ export class DashboardContainer
     this.setScrollToPanelId(id);
   };
 
+  public setPanels = (panels: DashboardPanelMap) => {
+    this.dispatch.setPanels(panels);
+  };
+
   // ------------------------------------------------------------------------------------------------------
   // React Embeddable system
   // ------------------------------------------------------------------------------------------------------
@@ -849,6 +989,22 @@ export class DashboardContainer
     };
   };
 
+  public getSerializedStateForControlGroup = () => {
+    return {
+      rawState: this.controlGroupInput
+        ? (this.controlGroupInput as ControlGroupSerializedState)
+        : ({
+            controlStyle: 'oneLine',
+            chainingSystem: 'HIERARCHICAL',
+            showApplySelections: false,
+            panelsJSON: '{}',
+            ignoreParentSettingsJSON:
+              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+          } as ControlGroupSerializedState),
+      references: getReferencesForControls(this.savedObjectReferences),
+    };
+  };
+
   private restoredRuntimeState: UnsavedPanelState | undefined = undefined;
   public setRuntimeStateForChild = (childId: string, state: object) => {
     const runtimeState = this.restoredRuntimeState ?? {};
@@ -859,13 +1015,14 @@ export class DashboardContainer
     return this.restoredRuntimeState?.[childId];
   };
 
+  public getRuntimeStateForControlGroup = () => {
+    return this.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
+  };
+
   public removePanel(id: string) {
-    const {
-      embeddable: { reactEmbeddableRegistryHasKey },
-    } = pluginServices.getServices();
     const type = this.getInput().panels[id]?.type;
     this.removeEmbeddable(id);
-    if (reactEmbeddableRegistryHasKey(type)) {
+    if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
       const { [id]: childToRemove, ...otherChildren } = this.children$.value;
       this.children$.next(otherChildren);
     }

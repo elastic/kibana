@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
-        await testSubjects.existOrFail('TextBasedLangEditor');
+        await testSubjects.existOrFail('ESQLEditor');
         await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
 
         await testSubjects.missingOrFail('showQueryBarMenu');
@@ -113,16 +113,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         // I am not rendering the histogram for indices with no @timestamp field
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?t_start, ?t_end params are in the query', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?_tstart, ?_tend params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?t_start and timestamp <= ?t_end`;
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = 'Nov 15, 2018 @ 00:00:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
-        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       });
 
@@ -204,6 +204,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataGrid.getHeaders()).to.eql([
           'Select column',
           'Control column',
+          'Access to degraded docs',
+          'Access to available stacktraces',
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -350,7 +352,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
@@ -372,7 +374,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
@@ -388,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         // click a history item
         await esql.clickHistoryItem(1);
 
@@ -413,10 +415,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
-        await testSubjects.click('TextBasedLangEditor-queryHistory-runQuery-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-queryHistory-runQuery-button');
         const historyItem = await esql.getHistoryItem(0);
-        await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
+        await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
     });
 

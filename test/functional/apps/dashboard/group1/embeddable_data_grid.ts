@@ -16,7 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const { common, dashboard, header, timePicker } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'timePicker',
+  ]);
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
@@ -33,13 +38,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
         'doc_table:legacy': false,
       });
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultDataRange();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async function () {
@@ -59,11 +64,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('are added when a cell filter is clicked', async function () {
       await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
       // needs a short delay between becoming visible & being clickable
-      await PageObjects.common.sleep(250);
+      await common.sleep(250);
       await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await find.clickByCssSelector(`[role="gridcell"]:nth-child(4)`);
-      await PageObjects.common.sleep(250);
+      await common.sleep(250);
       await find.clickByCssSelector(`[data-test-subj="filterForButton"]`);
       const filterCount = await filterBar.getFilterCount();
       expect(filterCount).to.equal(2);
