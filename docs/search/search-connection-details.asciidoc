@@ -46,7 +46,7 @@ image::click-create-api-key.png[width=750]
 . Copy and securely store the API key, as it will not be shown again.
 
 [float]
-=== Serverless deployment
+=== Serverless deployments
 
 [float]
 [[find-cloud-id-serverless]]
