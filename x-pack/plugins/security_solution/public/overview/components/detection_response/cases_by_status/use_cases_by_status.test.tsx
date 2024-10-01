@@ -6,7 +6,8 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
@@ -81,13 +82,13 @@ describe('useCasesByStatus', () => {
   });
 
   test('fetch data', async () => {
-    const { result, waitForNextUpdate } = renderHook<
+    const { result } = renderHook<
       PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current).toEqual({
       closed: 3,
       inProgress: 2,
@@ -99,24 +100,23 @@ describe('useCasesByStatus', () => {
   });
 
   test('it should call setQuery when fetching', async () => {
-    const { waitForNextUpdate } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({ skip: false }), {
-      wrapper: TestProviders,
-    });
-    await waitForNextUpdate();
-    expect(mockSetQuery).toHaveBeenCalled();
+    renderHook<PropsWithChildren<UseCasesByStatusProps>, UseCasesByStatusResults>(
+      () => useCasesByStatus({ skip: false }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalled());
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    const { waitForNextUpdate, unmount } = renderHook<
+    const { unmount } = renderHook<
       PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     unmount();
 
@@ -127,13 +127,13 @@ describe('useCasesByStatus', () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = { skip: false };
 
-    const { rerender, waitForNextUpdate } = renderHook<
+    const { rerender } = renderHook<
       PropsWithChildren<UseCasesByStatusProps>,
       UseCasesByStatusResults
     >(() => useCasesByStatus(localProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     localProps.skip = true;
     act(() => rerender());

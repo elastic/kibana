@@ -72,7 +72,7 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(1000);
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(hook.result.current.status).toBe('success'));
 
       expect(hook.result.current).toEqual({
         data: 'response from hook',
@@ -100,7 +100,7 @@ describe('useFetcher', () => {
       hook = renderHook(() => useFetcher(() => fn(), []), { wrapper });
     });
 
-    it('should have loading spinner initally', async () => {
+    it('should have loading spinner initially', async () => {
       expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
@@ -127,7 +127,8 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(1000);
       });
 
-      await waitFor(() => null);
+      // @ts-ignore
+      await waitFor(() => expect(hook.result.current.status).toBe('failure'));
 
       expect(hook.result.current).toEqual({
         data: undefined,
@@ -160,7 +161,8 @@ describe('useFetcher', () => {
         status: 'loading',
       });
 
-      await waitFor(() => null);
+      // @ts-ignore
+      await waitFor(() => expect(hook.result.current.status).toBe('success'));
 
       // assert: first response has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -197,7 +199,7 @@ describe('useFetcher', () => {
         jest.advanceTimersByTime(500);
       });
 
-      await waitFor(() => null);
+      await waitFor(() => expect(hook.result.current.status).toBe('success'));
 
       // assert: "second response" has loaded and should be rendered
       expect(hook.result.current).toEqual({
@@ -209,20 +211,23 @@ describe('useFetcher', () => {
     });
 
     it('should return the same object reference when data is unchanged between rerenders', async () => {
+      const initialProps = {
+        callback: async () => 'data response',
+        args: ['a'],
+      };
+
       const hook = renderHook(
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
         ({ callback, args }) => useFetcher(callback, args),
         {
-          initialProps: {
-            callback: async () => 'data response',
-            args: ['a'],
-          },
+          initialProps,
           wrapper,
         }
       );
-      await hook.waitForNextUpdate();
+
+      await waitFor(() => expect(hook.result.current.status).toBe('success'));
       const firstResult = hook.result.current;
-      hook.rerender();
+      hook.rerender(initialProps);
       const secondResult = hook.result.current;
 
       // assert: subsequent rerender returns the same object reference

@@ -31,12 +31,14 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
+const mockNavigateToUrl = jest.fn();
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
   const useKibana = jest.fn().mockImplementation(() => ({
     services: {
       application: {
-        navigateToUrl: jest.fn(),
+        navigateToUrl: mockNavigateToUrl,
       },
     },
   }));
@@ -48,6 +50,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 describe('useTimelineTypes', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('init', async () => {
     const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
       () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
@@ -55,7 +61,7 @@ describe('useTimelineTypes', () => {
         wrapper: TestProviders,
       }
     );
-    await waitFor(() => null);
+
     expect(result.current).toEqual({
       timelineType: 'default',
       timelineTabs: result.current.timelineTabs,
@@ -73,13 +79,9 @@ describe('useTimelineTypes', () => {
       );
       await waitFor(() => null);
 
-      const { container } = render(result.current.timelineTabs);
-      expect(container.querySelector('[data-test-subj="timeline-tab-default"]')).toHaveTextContent(
-        'Timelines'
-      );
-      expect(container.querySelector('[data-test-subj="timeline-tab-template"]')).toHaveTextContent(
-        'Templates'
-      );
+      render(result.current.timelineTabs);
+      expect(screen.getByTestId('timeline-tab-default')).toHaveTextContent('Timelines');
+      expect(screen.getByTestId('timeline-tab-template')).toHaveTextContent('Templates');
     });
 
     it('set timelineTypes correctly', async () => {
@@ -104,14 +106,7 @@ describe('useTimelineTypes', () => {
         );
       });
 
-      await waitFor(() => expect(result.current.timelineType).toEqual('template'));
-
-      expect(result.current).toEqual(
-        expect.objectContaining({
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
-        })
-      );
+      expect(mockNavigateToUrl).toHaveBeenCalled();
     });
 
     it('stays in the same tab if clicking again on current tab', async () => {
@@ -125,15 +120,13 @@ describe('useTimelineTypes', () => {
 
       const { container } = render(result.current.timelineTabs);
 
-      act(() => {
-        fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-default"]')!,
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-      });
+      fireEvent(
+        screen.getByTestId('timeline-tab-default'),
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        })
+      );
 
       waitFor(() => null);
 

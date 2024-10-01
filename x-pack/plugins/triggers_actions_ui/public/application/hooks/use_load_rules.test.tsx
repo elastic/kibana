@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
 import {
   RuleExecutionStatusErrorReasons,
