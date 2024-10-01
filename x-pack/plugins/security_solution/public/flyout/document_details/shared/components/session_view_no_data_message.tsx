@@ -21,10 +21,6 @@ interface SessionViewNoDataMessageProps {
    * Whether the user has Session View configuration
    */
   hasSessionViewConfig: boolean;
-  /**
-   * The label header for the message
-   */
-  labelHeader: string;
 }
 
 /**
@@ -33,20 +29,19 @@ interface SessionViewNoDataMessageProps {
 export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
   isEnterprisePlus,
   hasSessionViewConfig,
-  labelHeader,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return !isEnterprisePlus ? (
     <div data-test-subj={SESSION_VIEW_UPSELL_TEST_ID}>
       <FormattedMessage
-        id={`${labelHeader}.sessionViewer.upsellDescription`}
+        id={'xpack.securitySolution.flyout.sessionViewer.upsellDescription'}
         defaultMessage="This feature requires an {subscription}"
         values={{
           subscription: (
             <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
               <FormattedMessage
-                id={`${labelHeader}.sessionViewer.upsellLinkText`}
+                id={'xpack.securitySolution.flyout.sessionViewer.upsellLinkText'}
                 defaultMessage="Enterprise subscription"
               />
             </EuiLink>
@@ -57,7 +52,7 @@ export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
   ) : !hasSessionViewConfig ? (
     <div data-test-subj={SESSION_VIEW_NO_DATA_TEST_ID}>
       <FormattedMessage
-        id={`${labelHeader}.sessionViewer.noDataDescription`}
+        id={'xpack.securitySolution.flyout.sessionViewer.noDataDescription'}
         defaultMessage="You can only view Linux session details if you’ve enabled the {setting} setting in your Elastic Defend integration policy. Refer to {link} for more information."
         values={{
           setting: (
@@ -67,7 +62,7 @@ export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
               `}
             >
               <FormattedMessage
-                id={`${labelHeader}.sessionViewer.noDataSettingDescription`}
+                id={'xpack.securitySolution.flyout.sessionViewer.noDataSettingDescription'}
                 defaultMessage="Include session data"
               />
             </span>
@@ -78,7 +73,7 @@ export const SessionViewNoDataMessage: FC<SessionViewNoDataMessageProps> = ({
               target="_blank"
             >
               <FormattedMessage
-                id={`${labelHeader}.sessionPreview.noDataLinkText`}
+                id={'xpack.securitySolution.flyout.sessionViewer.noDataLinkText'}
                 defaultMessage="Enable Session View data"
               />
             </EuiLink>

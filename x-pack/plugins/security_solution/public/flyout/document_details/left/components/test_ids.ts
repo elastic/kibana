@@ -11,8 +11,7 @@ import { PREFIX } from '../../../shared/test_ids';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
-export const SESSION_VIEW_UPSELL_TEST_ID = `${SESSION_VIEW_TEST_ID}Upsell` as const;
-export const SESSION_VIEW_NO_DATA_TEST_ID = `${SESSION_VIEW_TEST_ID}NoData` as const;
+
 /* Insights tab */
 
 /* Prevalence */

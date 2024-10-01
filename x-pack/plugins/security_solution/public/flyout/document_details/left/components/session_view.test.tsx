@@ -10,11 +10,11 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
+import { SESSION_VIEW_TEST_ID } from './test_ids';
 import {
-  SESSION_VIEW_TEST_ID,
   SESSION_VIEW_UPSELL_TEST_ID,
   SESSION_VIEW_NO_DATA_TEST_ID,
-} from './test_ids';
+} from '../../shared/components/test_ids';
 import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,

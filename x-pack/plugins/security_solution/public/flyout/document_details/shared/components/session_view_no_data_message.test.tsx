@@ -29,7 +29,6 @@ const renderSessionViewNoDataMessage = ({
       <SessionViewNoDataMessage
         isEnterprisePlus={isEnterprisePlus}
         hasSessionViewConfig={hasSessionViewConfig}
-        labelHeader="test"
       />
     </TestProviders>
   );

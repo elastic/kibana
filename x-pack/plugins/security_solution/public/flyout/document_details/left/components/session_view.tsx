@@ -27,7 +27,7 @@ import { detectionsTimelineIds } from '../../../../timelines/containers/helpers'
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionPreview } from '../../right/hooks/use_session_preview';
-import { SessionViewNoDataMessage } from './session_view_no_data_message';
+import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 
 export const SESSION_VIEW_ID = 'session-view';
 
@@ -97,7 +97,6 @@ export const SessionView: FC = () => {
       <SessionViewNoDataMessage
         isEnterprisePlus={isEnterprisePlus}
         hasSessionViewConfig={sessionViewConfig !== null}
-        labelHeader="xpack.securitySolution.flyout.left.visualizations"
       />
     </EuiPanel>
   );

@@ -23,7 +23,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { getScopedActions } from '../../../../helpers';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
-import { SessionViewNoDataMessage } from '../../left/components/session_view_no_data_message';
+import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 
 const timelineId = 'timeline-1';
 
@@ -117,7 +117,6 @@ export const SessionPreviewContainer: FC = () => {
         <SessionViewNoDataMessage
           isEnterprisePlus={isEnterprisePlus}
           hasSessionViewConfig={sessionViewConfig !== null}
-          labelHeader={'xpack.securitySolution.flyout.right.visualizations'}
         />
       )}
     </ExpandablePanel>
