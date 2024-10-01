@@ -1256,8 +1256,10 @@ describe('UnifiedDataTable', () => {
   describe('columns', () => {
     // Default column width in EUI is hardcoded to 100px for Jest envs
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
-    const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
-    const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getColumnHeader = (name: string) =>
+      screen.getByRole('columnheader', { name: (content) => content.startsWith(name) });
+    const queryColumnHeader = (name: string) =>
+      screen.queryByRole('columnheader', { name: (content) => content.startsWith(name) });
     const openColumnActions = async (name: string) => {
       const actionsButton = screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
       await userEvent.click(actionsButton);

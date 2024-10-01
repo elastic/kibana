@@ -963,7 +963,9 @@ describe('AllCasesListGeneric', () => {
         // Deactivates assignees filter
         await userEvent.click(await screen.findByRole('button', { name: 'More' }));
         await waitForEuiPopoverOpen();
-        await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
+        await userEvent.click(
+          await screen.findByRole('option', { name: (context) => context.startsWith('Assignees') })
+        );
 
         expect(useGetCasesMock).toHaveBeenLastCalledWith({
           filterOptions: {
@@ -974,7 +976,9 @@ describe('AllCasesListGeneric', () => {
         });
 
         // Reopens assignees filter
-        await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
+        await userEvent.click(
+          await screen.findByRole('option', { name: (context) => context.startsWith('Assignees') })
+        );
         // Opens the assignees popup
         await userEvent.click(assigneesButton);
         expect(await screen.findByLabelText('click to filter assignees')).toBeInTheDocument();

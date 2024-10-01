@@ -51,12 +51,12 @@ describe('FieldDescription', () => {
     const customDescription = 'test this long desc '.repeat(8).trim();
     render(<FieldDescription field={{ name: 'bytes', type: 'number', customDescription }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
-    fireEvent.click(screen.queryByTestId('toggleFieldDescription-bytes'));
+    fireEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
     expect(mockSetLocalStorage).toHaveBeenCalledWith(false);
-    fireEvent.click(screen.queryByTestId('toggleFieldDescription-bytes'));
+    fireEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
   });
@@ -69,7 +69,7 @@ describe('FieldDescription', () => {
       `${customDescription}View less`
     );
     expect(mockSetLocalStorage).not.toHaveBeenCalled();
-    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+    fireEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
   });

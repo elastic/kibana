@@ -55,7 +55,9 @@ describe('StatusFilter', () => {
 
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
+    await userEvent.click(
+      await screen.findByRole('option', { name: (context) => context.startsWith(LABELS.open) })
+    );
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({

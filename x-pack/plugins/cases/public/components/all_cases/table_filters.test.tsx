@@ -339,7 +339,9 @@ describe('CasesTableFilters ', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByRole('option', { name: 'Solution' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (content) => content.startsWith('Solution') })
+      );
 
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
@@ -417,7 +419,9 @@ describe('CasesTableFilters ', () => {
       // deactivate the assignees filter
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (context) => context.startsWith('Assignees') })
+      );
 
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
@@ -589,7 +593,9 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...customProps} />);
 
       await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
-      await userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
+      await userEvent.click(
+        await screen.findByRole('option', { name: (context) => context.startsWith('Toggle') })
+      );
 
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
@@ -654,7 +660,9 @@ describe('CasesTableFilters ', () => {
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
-      await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (context) => context.startsWith('Toggle') })
+      );
 
       const filterBar = await screen.findByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
@@ -670,7 +678,9 @@ describe('CasesTableFilters ', () => {
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
-      await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (context) => context.startsWith('Toggle') })
+      );
       const storedFilterState = localStorage.getItem(
         'securitySolution.cases.list.tableFiltersConfig'
       );
@@ -708,7 +718,9 @@ describe('CasesTableFilters ', () => {
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
-      await userEvent.click(screen.getByRole('option', { name: 'Status' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (context) => context.startsWith('Status') })
+      );
 
       const filterBar = await screen.findByTestId('cases-table-filters');
       const allFilters = within(filterBar).getAllByRole('button');
@@ -729,7 +741,9 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...customProps} />);
 
       await userEvent.click(await screen.findByRole('button', { name: 'More' }));
-      await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+      await userEvent.click(
+        await screen.findByRole('option', { name: (context) => context.startsWith('Status') })
+      );
 
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
@@ -749,7 +763,9 @@ describe('CasesTableFilters ', () => {
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
-      await userEvent.click(screen.getByRole('option', { name: 'Status' }));
+      await userEvent.click(
+        screen.getByRole('option', { name: (context) => context.startsWith('Status') })
+      );
 
       const storedFilterState = localStorage.getItem(
         'securitySolution.cases.list.tableFiltersConfig'
@@ -894,10 +910,14 @@ describe('CasesTableFilters ', () => {
 
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
       await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
-      await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+      await userEvent.click(
+        await screen.findByRole('option', { name: (context) => context.startsWith('Status') })
+      );
 
       await userEvent.click(await screen.findByTestId('options-filter-popover-button-filters'));
-      await userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+      await userEvent.click(
+        await screen.findByRole('option', { name: (context) => context.startsWith('Status') })
+      );
 
       allFilters = within(filterBar).getAllByRole('button');
       orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'Status', 'More'];
@@ -959,7 +979,9 @@ describe('CasesTableFilters ', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'More' }));
       // we need any user action to trigger the filter config update
-      await userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
+      await userEvent.click(
+        await screen.findByRole('option', { name: (context) => context.startsWith('Toggle') })
+      );
 
       const storedFilterState = localStorage.getItem(
         'securitySolution.cases.list.tableFiltersConfig'
