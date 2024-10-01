@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('for regular metric', () => {
         it('defaults to median for non-rolled up metric', async () => {
           await common.navigateToApp('lens');
-          await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
+          await lens.switchDataPanelIndexPattern(tsdbDataView);
           await lens.waitForField('bytes_gauge');
           await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
