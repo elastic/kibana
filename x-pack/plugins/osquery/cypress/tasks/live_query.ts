@@ -140,7 +140,7 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
   addToCase(caseId);
 };
 
-const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
+const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;
 export const viewRecentCaseAndCheckResults = () => {
   cy.contains('View case').click();
   cy.contains(casesOsqueryResultRegex);
