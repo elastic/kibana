@@ -8,10 +8,16 @@
  */
 
 import { apiHasParentApi } from '@kbn/presentation-publishing';
-import { apiHasCompressed } from './has_compressed';
+
+export interface HasCompressed {
+  compressed: boolean;
+}
+
+export const apiHasCompressed = (unknownApi: unknown): unknownApi is HasCompressed => {
+  return Boolean(unknownApi) && typeof (unknownApi as HasCompressed).compressed === 'boolean';
+};
 
 export function isCompressed(api: unknown): boolean {
-  if (api === null) return true;
   if (apiHasCompressed(api)) return api.compressed;
   return apiHasParentApi(api) ? isCompressed(api.parentApi) : true;
 }
