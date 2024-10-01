@@ -350,9 +350,13 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
           {
             link: 'fleet',
           },
+          // {
+          //   link: 'ml:machine_learning-landing', // STILL THIS DOES NOT APPEAR,
+          // },
           {
             id: 'machine_learning-landing',
-            link: 'securitySolutionUI:machine_learning-landing',
+            // link: 'securitySolutionUI:machine_learning-landing',
+            link: 'ml:machine_learning-landing',
             renderAs: 'panelOpener',
             spaceBefore: null,
             children: [

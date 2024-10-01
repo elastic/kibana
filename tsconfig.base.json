@@ -1100,6 +1100,8 @@
       "@kbn/kibana-utils-plugin/*": ["src/plugins/kibana_utils/*"],
       "@kbn/kubernetes-security-plugin": ["x-pack/plugins/kubernetes_security"],
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
+      "@kbn/landing-pages": ["x-pack/packages/landing_pages"],
+      "@kbn/landing-pages/*": ["x-pack/packages/landing_pages/*"],
       "@kbn/langchain": ["x-pack/packages/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/packages/kbn-langchain/*"],
       "@kbn/language-documentation": ["packages/kbn-language-documentation"],

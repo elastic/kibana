@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/landing-pages",
+  "owner": "@elastic/security-threat-hunting-explore"
+}

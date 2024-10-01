@@ -56,7 +56,7 @@
       "lens",
       "maps",
       "savedObjectsFinder",
-      "usageCollection"
+      "usageCollection",
     ],
     "extraPublicDirs": ["common"]
   }

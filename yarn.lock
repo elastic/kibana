@@ -5483,6 +5483,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/landing-pages@link:x-pack/packages/landing_pages":
+  version "0.0.0"
+  uid ""
+
 "@kbn/langchain@link:x-pack/packages/kbn-langchain":
   version "0.0.0"
   uid ""

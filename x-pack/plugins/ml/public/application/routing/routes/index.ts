@@ -18,3 +18,4 @@ export * from './trained_models';
 export * from './notifications';
 export * from './memory_usage';
 export * from './supplied_configurations';
+export * from './landing';

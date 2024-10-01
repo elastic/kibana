@@ -594,6 +594,7 @@
     "@kbn/kibana-usage-collection-plugin": "link:src/plugins/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
+    "@kbn/landing-pages": "link:x-pack/packages/landing_pages",
     "@kbn/langchain": "link:x-pack/packages/kbn-langchain",
     "@kbn/language-documentation": "link:packages/kbn-language-documentation",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
