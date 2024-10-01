@@ -64,27 +64,6 @@ export const CreateRpmPackage: Task = {
 };
 
 const dockerBuildDate = new Date().toISOString();
-export const CreateDockerUbuntu: Task = {
-  description: 'Creating Docker Ubuntu image',
-
-  async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubi',
-      context: false,
-      image: true,
-      dockerBuildDate,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'aarch64',
-      baseImage: 'ubi',
-      context: false,
-      image: true,
-      dockerBuildDate,
-    });
-  },
-};
-
 export const CreateDockerWolfi: Task = {
   description: 'Creating Docker Wolfi image',
 
