@@ -5883,6 +5883,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-synthetics-test-data@link:x-pack/packages/observability/synthetics_test_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
   version "0.0.0"
   uid ""
