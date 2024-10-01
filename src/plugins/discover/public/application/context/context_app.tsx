@@ -36,6 +36,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -46,6 +47,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const services = useDiscoverServices();
   const {
     analytics,
@@ -248,6 +250,25 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   };
 
   const titlePadding = useEuiPaddingSize('m');
+
+  useEffect(() => {
+    if (
+      isLegacy ||
+      [
+        fetchedState.anchorStatus.value,
+        fetchedState.predecessorsStatus.value,
+        fetchedState.successorsStatus.value,
+      ].includes(LoadingStatus.FAILED)
+    ) {
+      onSkipPluginRenderTime();
+    }
+  }, [
+    isLegacy,
+    fetchedState.anchorStatus.value,
+    fetchedState.predecessorsStatus.value,
+    fetchedState.successorsStatus.value,
+    onSkipPluginRenderTime,
+  ]);
 
   return (
     <Fragment>

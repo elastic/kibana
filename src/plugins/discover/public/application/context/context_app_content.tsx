@@ -55,6 +55,7 @@ import {
   useProfileAccessor,
 } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
+import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -109,6 +110,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
+  const { onTrackPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
 
@@ -206,6 +208,10 @@ export function ContextAppContent({
     timeRange,
   });
 
+  const onInitialRenderComplete = useCallback(() => {
+    onTrackPluginRenderTime();
+  }, [onTrackPluginRenderTime]);
+
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -273,6 +279,7 @@ export function ContextAppContent({
               settings={grid}
               onResize={onResize}
               externalCustomRenderers={cellRenderers}
+              onInitialRenderComplete={onInitialRenderComplete}
             />
           </CellActionsProvider>
         </div>
