@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiThemeProvider,
 } from '@elastic/eui';
+import { API_KEY_PLACEHOLDER } from '../../constants';
 
 export interface CodeSampleProps {
   id?: string;
@@ -23,9 +24,17 @@ export interface CodeSampleProps {
   language: string;
   code: string;
   onCodeCopyClick?: React.MouseEventHandler<HTMLElement>;
+  apiKey?: string | null;
 }
 
-export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeSampleProps) => {
+export const CodeSample = ({
+  id,
+  title,
+  language,
+  code,
+  apiKey,
+  onCodeCopyClick,
+}: CodeSampleProps) => {
   const onCodeClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
       if (onCodeCopyClick === undefined) return;
@@ -55,7 +64,7 @@ export const CodeSample = ({ id, title, language, code, onCodeCopyClick }: CodeS
               isCopyable
               transparentBackground
             >
-              {code}
+              {apiKey ? code.replace(API_KEY_PLACEHOLDER, apiKey) : code}
             </EuiCodeBlock>
           </div>
         </EuiPanel>

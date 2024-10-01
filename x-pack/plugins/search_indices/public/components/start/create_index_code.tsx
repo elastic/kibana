@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { ApiKeyForm } from '@kbn/search-api-keys-components/public';
+import { ApiKeyForm, useSearchApiKey } from '@kbn/search-api-keys-components/public';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
@@ -57,6 +57,7 @@ export const CreateIndexCodeView = ({
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
+  const { displayedApiKey, apiKeyIsVisible } = useSearchApiKey();
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
@@ -122,10 +123,12 @@ export const CreateIndexCodeView = ({
         />
       )}
       <CodeSample
+        id="createIndex"
         title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
           defaultMessage: 'Connect and create an index',
         })}
         language={Languages[selectedLanguage].codeBlockLanguage}
+        apiKey={apiKeyIsVisible ? displayedApiKey : null}
         code={selectedCodeExample.createIndex(codeParams)}
         onCodeCopyClick={() => {
           usageTracker.click([

@@ -20,7 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
-import { useSearchApiKey, Status } from '../hooks/use_search_api_key';
+import { useSearchApiKey } from '../hooks/use_search_api_key';
+import { Status } from '../constants';
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
@@ -28,7 +29,8 @@ interface ApiKeyFormProps {
 
 export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { apiKey, status, handleSaveKey, showAPIKey, displayedApiKey } = useSearchApiKey();
+  const { apiKey, status, updateApiKey, toggleApiKeyVisibility, displayedApiKey, apiKeyIsVisible } =
+    useSearchApiKey();
 
   const titleLocale = i18n.translate('searchApiKeysComponents.apiKeyForm.title', {
     defaultMessage: 'API Key',
@@ -43,9 +45,9 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         dataTestSubj="apiKeyFormAPIKey"
         actions={[
           <EuiButtonIcon
-            iconType="eye"
+            iconType={apiKeyIsVisible ? 'eyeClosed' : 'eye'}
             color="success"
-            onClick={showAPIKey}
+            onClick={toggleApiKeyVisibility}
             data-test-subj="showAPIKeyButton"
             aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
               defaultMessage: 'Show API Key',
@@ -90,7 +92,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
             />
           </EuiButton>
           {showFlyout && (
-            <ApiKeyFlyoutWrapper onCancel={() => setShowFlyout(false)} onSuccess={handleSaveKey} />
+            <ApiKeyFlyoutWrapper onCancel={() => setShowFlyout(false)} onSuccess={updateApiKey} />
           )}
         </EuiFlexItem>
       )}

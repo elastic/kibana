@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
@@ -68,6 +69,8 @@ export const AddDocumentsCodeExample = ({
     };
   }, [indexName, elasticsearchUrl, sampleDocument, codeSampleMappings, indexHasMappings]);
 
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   return (
     <EuiPanel
       hasBorder
@@ -113,6 +116,7 @@ export const AddDocumentsCodeExample = ({
               })}
               language="shell"
               code={selectedCodeExamples.installCommand}
+              apiKey={apiKeyIsVisible ? apiKey : null}
               onCodeCopyClick={() => {
                 usageTracker.click([
                   AnalyticsEvents.indexDetailsInstallCodeCopy,
@@ -131,6 +135,7 @@ export const AddDocumentsCodeExample = ({
               })}
               language={Languages[selectedLanguage].codeBlockLanguage}
               code={selectedCodeExamples.updateMappingsCommand(codeParams)}
+              apiKey={apiKeyIsVisible ? apiKey : null}
               onCodeCopyClick={() => {
                 usageTracker.click([
                   AnalyticsEvents.indexDetailsAddMappingsCodeCopy,
@@ -146,6 +151,7 @@ export const AddDocumentsCodeExample = ({
             title={ingestCodeExamples.ingestTitle}
             language={Languages[selectedLanguage].codeBlockLanguage}
             code={selectedCodeExamples.ingestCommand(codeParams)}
+            apiKey={apiKeyIsVisible ? apiKey : null}
             onCodeCopyClick={() => {
               usageTracker.click([
                 AnalyticsEvents.indexDetailsIngestDocumentsCodeCopy,

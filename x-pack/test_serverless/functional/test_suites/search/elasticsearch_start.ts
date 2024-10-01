@@ -109,6 +109,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         const newApiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         expect(newApiKeyUI).to.not.eql(apiKeyUI);
+        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyVisibleInCodeBlock(
+          newApiKeyUI
+        );
       });
 
       it('should explicitly ask to create api key when project already has an apikey', async () => {
@@ -133,18 +136,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);
-        it('should have file upload link', async () => {
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-          await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
-        });
-
-        it('should have o11y links', async () => {
-          await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-          await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
-          await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
-        });
       });
+
+      it('should have file upload link', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
+      });
+
+      it('should have o11y links', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
+        await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+      });
+
       describe('viewer', function () {
         before(async () => {
           await pageObjects.svlCommonPage.loginAsViewer();
