@@ -556,7 +556,7 @@ export const getLegacyRiskScoreDashboards = async ({
   return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
 };
 
-const assertStatusCode = (statusCode: number) => async (response: SuperTest.Response) => {
+const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {
     throw new Error(
       `Expected status code ${statusCode}, but got ${response.statusCode} \n` + response.text
@@ -566,68 +566,84 @@ const assertStatusCode = (statusCode: number) => async (response: SuperTest.Resp
 
 export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => {
   return {
-    init: async (expectStatusCode: number = 200) =>
-      await supertest
+    init: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
 
     getStatus: async (
       expectStatusCode: number = 200
-    ): Promise<{ body: RiskEngineStatusResponse }> =>
-      await supertest
+    ): Promise<{ body: RiskEngineStatusResponse }> => {
+      const response = await supertest
         .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
 
-    enable: async (expectStatusCode: number = 200) =>
-      await supertest
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    enable: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
 
-    disable: async (expectStatusCode: number = 200) =>
-      await supertest
+    disable: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
 
-    privileges: async (expectStatusCode: number = 200) =>
-      await supertest
+    privileges: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .get(RISK_ENGINE_PRIVILEGES_URL)
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
 
-    cleanUp: async (expectStatusCode: number = 200) =>
-      await supertest
+    cleanUp: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .delete(routeWithNamespace(RISK_ENGINE_CLEANUP_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
 
-    scheduleNow: async (expectStatusCode: number = 200) =>
-      await supertest
+    scheduleNow: async (expectStatusCode: number = 200) => {
+      const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
-        .expect(assertStatusCode(expectStatusCode)),
+        .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
   };
 };
 
@@ -640,41 +656,60 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
   supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
-  privilegesForUser: async ({ username, password }: Credentials) =>
-    await supertestWithoutAuth
+  privilegesForUser: async (
+    { username, password }: Credentials,
+    expectStatusCode: number = 200
+  ) => {
+    const response = await supertestWithoutAuth
       .get(RISK_ENGINE_PRIVILEGES_URL)
       .auth(username, password)
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200),
-  init: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
-    await supertestWithoutAuth
+      .send();
+
+    assertStatusCode(expectStatusCode, response);
+
+    return response;
+  },
+  init: async ({ username, password }: Credentials, expectStatusCode: number = 200) => {
+    const response = await supertestWithoutAuth
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(assertStatusCode(expectStatusCode)),
-  enable: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
-    await supertestWithoutAuth
+      .send();
+
+    assertStatusCode(expectStatusCode, response);
+
+    return response;
+  },
+  enable: async ({ username, password }: Credentials, expectStatusCode: number = 200) => {
+    const response = await supertestWithoutAuth
       .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(assertStatusCode(expectStatusCode)),
-  disable: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
-    await supertestWithoutAuth
+      .send();
+
+    assertStatusCode(expectStatusCode, response);
+
+    return response;
+  },
+  disable: async ({ username, password }: Credentials, expectStatusCode: number = 200) => {
+    const response = await supertestWithoutAuth
       .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(assertStatusCode(expectStatusCode)),
+      .send();
+
+    assertStatusCode(expectStatusCode, response);
+
+    return response;
+  },
 });
 
 export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
