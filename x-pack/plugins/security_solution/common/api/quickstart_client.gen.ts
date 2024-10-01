@@ -294,6 +294,10 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
+  ConfigureRiskEngineSavedObjectResponse,
+} from './entity_analytics/risk_engine/so_configure_route.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -575,6 +579,19 @@ If asset criticality records already exist for the specified entities, those rec
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async configureRiskEngineSavedObject(props: ConfigureRiskEngineSavedObjectProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ConfigureRiskEngineSavedObject`);
+    return this.kbnClient
+      .request<ConfigureRiskEngineSavedObjectResponse>({
+        path: '/api/risk_engine/saved_object/configure',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2062,6 +2079,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
+}
+export interface ConfigureRiskEngineSavedObjectProps {
+  body: ConfigureRiskEngineSavedObjectRequestBodyInput;
 }
 export interface CopyTimelineProps {
   body: CopyTimelineRequestBodyInput;

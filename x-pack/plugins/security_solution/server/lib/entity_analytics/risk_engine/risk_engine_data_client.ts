@@ -319,4 +319,21 @@ export class RiskEngineDataClient {
 
     return RiskEngineStatusEnum.ENABLED;
   }
+
+  public async updateSavedObjectConfiguration({ attributes }: { attributes: {} }) {
+    this.options.auditLogger?.log({
+      message: 'User updates the Risk Engine savedObject',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURATION_UPDATE,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.CHANGE,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
+    return updateSavedObjectAttribute({
+      savedObjectsClient: this.options.soClient,
+      attributes,
+    });
+  }
 }
