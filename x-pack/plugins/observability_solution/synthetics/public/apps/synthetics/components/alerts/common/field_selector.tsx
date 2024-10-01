@@ -61,18 +61,7 @@ export function FieldSelector({
         fullWidth
         isLoading={isLoading}
         onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
-          // removes ALL value option if a specific value is selected
-          if (selected.length && selected.at(-1)?.value !== ALL_VALUE) {
-            onChange(selected.filter((val) => val.value !== ALL_VALUE).map((val) => val.value!));
-            return;
-          }
-          // removes specific value if ALL value is selected
-          if (selected.length && selected.at(-1)?.value === ALL_VALUE) {
-            onChange([]);
-            return;
-          }
-
-          onChange([]);
+          onFieldChange(selected, onChange);
         }}
         onSearchChange={(val: string) => debouncedSearch(val)}
         options={options}
@@ -95,6 +84,24 @@ export function FieldSelector({
     </EuiFormRow>
   );
 }
+
+export const onFieldChange = (
+  selected: Array<EuiComboBoxOptionOption<string>>,
+  onChange: (selected: string[]) => void
+) => {
+  // removes ALL value option if a specific value is selected
+  if (selected.length && selected.at(-1)?.value !== ALL_VALUE) {
+    onChange(selected.filter((val) => val.value !== ALL_VALUE).map((val) => val.value!));
+    return;
+  }
+  // removes specific value if ALL value is selected
+  if (selected.length && selected.at(-1)?.value === ALL_VALUE) {
+    onChange([]);
+    return;
+  }
+
+  onChange([]);
+};
 
 function createOptions(suggestions: Suggestion[] = []): Option[] {
   return suggestions

@@ -6,14 +6,13 @@
  */
 
 import React, { useState, ReactNode } from 'react';
-import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { EuiExpression, EuiPopover, EuiExpressionProps } from '@elastic/eui';
 
-type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
   title?: ReactNode;
   value: ReactNode;
   children?: ReactNode;
-  color?: ExpressionColor;
+  color?: EuiExpressionProps['color'];
 }
 
 export function PopoverExpression(props: Props) {
