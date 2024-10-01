@@ -64,6 +64,7 @@
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/datemath",
+    "@kbn/calculate-auto",
+    "@kbn/ml-random-sampler-utils",
   ],
 }
