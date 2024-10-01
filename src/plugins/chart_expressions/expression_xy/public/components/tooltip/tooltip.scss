@@ -1,10 +1,11 @@
 .detailedTooltip {
-  @include euiToolTipStyle('s');
   pointer-events: none;
-  max-width: $euiSizeXL * 10;
-  overflow: hidden;
-  padding: $euiSizeS;
-
+  @include euiToolTipStyle('s');
+  & { // stylelint-disable-line no-duplicate-selectors
+    max-width: $euiSizeXL * 10;
+    overflow: hidden;
+    padding: $euiSizeS;
+  }
   table {
     table-layout: fixed;
     width: 100%;
