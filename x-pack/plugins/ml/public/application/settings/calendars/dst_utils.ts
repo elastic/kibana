@@ -12,6 +12,8 @@ import moment from 'moment-timezone';
 import type { MlCalendar, MlCalendarEvent } from '../../../../common/types/calendars';
 import { generateTempId } from './edit/utils';
 
+const YEARS_OF_DST_EVENTS = 20;
+
 function addZeroPadding(num: number) {
   return num < 10 ? `0${num}` : num;
 }
@@ -39,11 +41,9 @@ function createDstEvent(time: Moment, year: number, shiftSecs: number) {
   };
 }
 
-function getDSTChangeDates(timezone: string, year: number) {
+export function getDSTChangeDates(timezone: string, year: number) {
   let start: Moment | null = null;
   let end: Moment | null = null;
-
-  // debugDST(timezone, year);
 
   for (let month = 1; month < 13; month++) {
     for (let day = 1; day <= 31; day++) {
@@ -67,7 +67,6 @@ function getDSTChangeDates(timezone: string, year: number) {
             break;
           }
         }
-        // start = date;
       }
 
       if (start && !end && date.isDST() === false) {
@@ -89,7 +88,7 @@ function getDSTChangeDates(timezone: string, year: number) {
   return { start, end, year };
 }
 
-export function generateDSTChangeDates(
+function generateDSTChangeDates(
   timezone: string,
   years: number
 ): {
@@ -109,8 +108,6 @@ export function generateDSTChangeDates(
   const shiftSecs = diffMins * 60;
   return { dates, shiftSecs };
 }
-
-const YEARS_OF_DST_EVENTS = 20;
 
 export function createDstEvents(timezone: string) {
   const { dates, shiftSecs } = generateDSTChangeDates(timezone, YEARS_OF_DST_EVENTS);

@@ -21,8 +21,6 @@ interface Props {
 
 export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
   const generateEvents = () => {
-    //
-    // const dates = createDstEvents('Europe/London');
     if (selectedTimeZones.length === 0) {
       return;
     }
@@ -47,10 +45,6 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
       };
     });
   }, []);
-
-  // useEffect(() => {
-  //   console.log(timeZoneOptions);
-  // }, [timeZoneOptions]);
 
   return (
     <>

@@ -22,7 +22,6 @@ export interface UpdateCalendar extends MlCalendar {
 }
 
 export type MlCalendarEvent = estypes.MlCalendarEvent & {
-  // !!!!!!! move this to the common types
   force_time_shift?: number;
   skip_result?: boolean;
   skip_model_update?: boolean;

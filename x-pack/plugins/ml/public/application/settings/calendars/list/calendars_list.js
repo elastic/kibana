@@ -37,7 +37,6 @@ export class CalendarsListUI extends Component {
       selectedForDeletion: [],
       nodesAvailable: mlNodesAvailable(),
     };
-    console.log(this.props);
   }
 
   loadCalendars = async () => {
