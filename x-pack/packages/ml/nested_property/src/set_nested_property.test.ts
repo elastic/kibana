@@ -68,5 +68,9 @@ describe('object_utils', () => {
 
     const test11 = setNestedProperty(getFalseyObject(), 'the.other_nested.value', 'update');
     expect(test11.the.other_nested.value).toBe('update');
+
+    const test12 = setNestedProperty(getTestObj(), 'the.__proto__', 'update');
+    expect(test12.the).toBe('update');
+    expect(test12.the.__proto__.update).toBe(undefined);
   });
 });

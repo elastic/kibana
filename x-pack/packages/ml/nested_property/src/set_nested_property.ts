@@ -7,7 +7,7 @@
 
 export const setNestedProperty = (obj: Record<string, any>, accessor: string, value: any) => {
   let ref = obj;
-  const accessors = accessor.split('.');
+  const accessors = accessor.split('.').filter((a) => a !== '__proto__');
   const len = accessors.length;
   for (let i = 0; i < len - 1; i++) {
     const attribute = accessors[i];
