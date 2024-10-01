@@ -259,14 +259,12 @@ export function EntitiesGrid({
           );
         case ENTITY_DISPLAY_NAME:
           return (
-            <EuiLink
-              data-test-subj="inventoryCellValueLink"
-              className="eui-textTruncate"
-              href={getEntityRedirectUrl(entity)}
-            >
+            <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl(entity)}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={0}>{getEntityIcon(entity)}</EuiFlexItem>
-                <EuiFlexItem> {entity[columnEntityTableId]}</EuiFlexItem>
+                <EuiFlexItem className="eui-textTruncate">
+                  <span className="eui-textTruncate">{entity[columnEntityTableId]}</span>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiLink>
           );
