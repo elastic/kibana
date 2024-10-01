@@ -13,6 +13,22 @@ export const INFERENCE_CONNECTOR_TITLE = i18n.translate(
     defaultMessage: 'AI Connector',
   }
 );
+
+export enum ServiceProviderKeys {
+  amazonbedrock = 'amazonbedrock',
+  azureopenai = 'azureopenai',
+  azureaistudio = 'azureaistudio',
+  cohere = 'cohere',
+  elasticsearch = 'elasticsearch',
+  elser = 'elser',
+  googleaistudio = 'googleaistudio',
+  googlevertexai = 'googlevertexai',
+  hugging_face = 'hugging_face',
+  mistral = 'mistral',
+  openai = 'openai',
+  anthropic = 'anthropic',
+}
+
 export const INFERENCE_CONNECTOR_ID = '.inference';
 export enum SUB_ACTION {
   COMPLETION = 'completion',

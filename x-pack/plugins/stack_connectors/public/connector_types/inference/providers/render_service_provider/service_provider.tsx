@@ -7,6 +7,7 @@
 
 import { EuiHighlight, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { ServiceProviderKeys } from '../../../../../common/inference/constants';
 import elasticIcon from '../assets/images/elastic.svg';
 import huggingFaceIcon from '../assets/images/hugging_face.svg';
 import cohereIcon from '../assets/images/cohere.svg';
@@ -16,7 +17,6 @@ import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
-import { ServiceProviderKeys } from '../../types';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;

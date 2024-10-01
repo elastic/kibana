@@ -10,8 +10,8 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { PassThrough, Stream } from 'stream';
 import { IncomingMessage } from 'http';
 
-import { RequestBody } from '@elastic/elasticsearch';
 import { AxiosError } from 'axios';
+import { InferenceInferenceRequest, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -92,7 +92,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async performApiCompletion({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
-    const response = await this.performInferenceApi({ input }, false);
+    const response = await this.performInferenceApi(
+      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      false
+    );
     // const usageMetadata = response?.data?.usageMetadata;
     return response as ChatCompleteResponse;
   }
@@ -102,7 +105,15 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async performApiRerank({ input, query }: RerankParams): Promise<RerankResponse> {
-    const response = await this.performInferenceApi({ input, query }, false);
+    const response = await this.performInferenceApi(
+      {
+        query,
+        inference_id: this.inferenceId,
+        input,
+        task_type: this.taskType as InferenceTaskType,
+      },
+      false
+    );
     return response as RerankResponse;
   }
 
@@ -113,7 +124,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiSparseEmbedding({
     input,
   }: SparseEmbeddingParams): Promise<SparseEmbeddingResponse> {
-    const response = await this.performInferenceApi({ input }, false);
+    const response = await this.performInferenceApi(
+      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      false
+    );
     return response as SparseEmbeddingResponse;
   }
 
@@ -125,7 +139,17 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     input,
     inputType,
   }: TextEmbeddingParams): Promise<TextEmbeddingResponse> {
-    const response = await this.performInferenceApi({ input, inputType }, false);
+    const response = await this.performInferenceApi(
+      {
+        inference_id: this.inferenceId,
+        input,
+        task_type: this.taskType as InferenceTaskType,
+        task_settings: {
+          input_type: inputType,
+        },
+      },
+      false
+    );
     return response as TextEmbeddingResponse;
   }
 
@@ -133,13 +157,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  private async performInferenceApi(body: RequestBody, isStream?: boolean): Promise<unknown> {
+  private async performInferenceApi(
+    params: InferenceInferenceRequest,
+    asStream: boolean = false
+  ): Promise<unknown> {
     try {
-      const response = await this.esClient?.transport.request({
-        path: `/_inference/${this.taskType}/${this.inferenceId}`,
-        method: 'POST',
-        body,
-      });
+      const response = await this.esClient?.inference.inference(params, { asStream });
       this.logger.info(
         `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
       );
@@ -152,7 +175,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private async streamAPI({ input }: ChatCompleteParams): Promise<StreamingResponse> {
-    const response = await this.performInferenceApi({ input }, true);
+    const response = await this.performInferenceApi(
+      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      true
+    );
 
     return (response as Stream).pipe(new PassThrough());
   }

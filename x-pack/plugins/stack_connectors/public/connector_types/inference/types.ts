@@ -25,21 +25,6 @@ export interface InferenceActionParams {
   subActionParams: ChatCompleteParams | RerankParams | SparseEmbeddingParams | TextEmbeddingParams;
 }
 
-export enum ServiceProviderKeys {
-  amazonbedrock = 'amazonbedrock',
-  azureopenai = 'azureopenai',
-  azureaistudio = 'azureaistudio',
-  cohere = 'cohere',
-  elasticsearch = 'elasticsearch',
-  elser = 'elser',
-  googleaistudio = 'googleaistudio',
-  googlevertexai = 'googlevertexai',
-  hugging_face = 'hugging_face',
-  mistral = 'mistral',
-  openai = 'openai',
-  anthropic = 'anthropic',
-}
-
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
 export interface Config {

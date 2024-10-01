@@ -19,6 +19,8 @@ import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plu
 import {
   INFERENCE_CONNECTOR_TITLE,
   INFERENCE_CONNECTOR_ID,
+  ServiceProviderKeys,
+  SUB_ACTION,
 } from '../../../common/inference/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
 import { Config, Secrets } from '../../../common/inference/types';
@@ -108,7 +110,22 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {
-    // TODO: add validation
+    const { provider, taskType } = configObject;
+    if (!Object.keys(ServiceProviderKeys).includes(provider)) {
+      throw new Error(
+        `API Provider is not supported${
+          provider && provider.length ? `: ${provider}` : ``
+        } by Inference Endpoint.`
+      );
+    }
+
+    if (!Object.keys(SUB_ACTION).includes(taskType.toUpperCase())) {
+      throw new Error(
+        `Task type is not supported${
+          taskType && taskType.length ? `: ${taskType}` : ``
+        } by Inference Endpoint.`
+      );
+    }
     return configObject;
   } catch (err) {
     throw new Error(

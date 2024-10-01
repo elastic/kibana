@@ -10,13 +10,13 @@ import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ServiceProviderKeys } from '../../../../../common/inference/constants';
 import { InferenceProvider, useProviders } from '../get_providers';
 import {
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
 } from '../render_service_provider/service_provider';
-import { ServiceProviderKeys } from '../../types';
 
 /**
  * Modifies options by creating new property `providerTitle`(with value of `title`), and by setting `title` to undefined.

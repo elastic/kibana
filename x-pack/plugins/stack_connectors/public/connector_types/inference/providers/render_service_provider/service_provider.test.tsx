@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ServiceProviderIcon, ServiceProviderName } from './service_provider';
-import { ServiceProviderKeys } from '../../types';
+import { ServiceProviderKeys } from '../../../../../common/inference/constants';
 
 jest.mock('../assets/images/elastic.svg', () => 'elasticIcon.svg');
 jest.mock('../assets/images/hugging_face.svg', () => 'huggingFaceIcon.svg');

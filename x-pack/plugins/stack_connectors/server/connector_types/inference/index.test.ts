@@ -32,71 +32,44 @@ describe('AI Connector', () => {
         },
         provider: DEFAULT_PROVIDER,
         taskType: DEFAULT_TASK_TYPE,
-        inferenceId: '',
+        inferenceId: 'test',
         providerSchema: [],
+        taskTypeSchema: [],
         taskTypeConfig: {},
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
     });
 
-    test('config validation failed when a url is invalid', () => {
+    test('config validation failed when the task type is empty', () => {
       const config: Config = {
-        providerConfig: {
-          url: 'example.com/do-something',
-        },
-        provider: DEFAULT_PROVIDER,
-        taskType: DEFAULT_TASK_TYPE,
-        inferenceId: '',
+        providerConfig: {},
+        provider: 'openai',
+        taskType: '',
+        inferenceId: 'test',
         providerSchema: [],
         taskTypeConfig: {},
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring OpenAI action: Error: URL Error: Invalid URL: example.com/do-something"'
+        `"Error configuring Inference API action: Error: Task type is not supported by Inference Endpoint."`
       );
     });
 
-    test('config validation failed when the OpenAI API provider is empty', () => {
+    test('config validation failed when the provider is empty', () => {
       const config: Config = {
         providerConfig: {},
         provider: '',
         taskType: DEFAULT_TASK_TYPE,
-        inferenceId: '',
+        inferenceId: 'test',
         providerSchema: [],
         taskTypeConfig: {},
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring OpenAI action: Error: API Provider is not supported"'
-      );
-    });
-
-    test('config validation returns an error if the specified URL is not added to allowedHosts', () => {
-      const configUtils = {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_: string) => {
-          throw new Error(`target url is not present in allowedHosts`);
-        },
-      };
-
-      const config: Config = {
-        providerConfig: {
-          url: 'http://mylisteningserver.com:9200/endpoint',
-        },
-        provider: '',
-        taskType: DEFAULT_TASK_TYPE,
-        inferenceId: '',
-        providerSchema: [],
-        taskTypeConfig: {},
-      };
-
-      expect(() => {
-        configValidator(config, { configurationUtilities: configUtils });
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Error configuring OpenAI action: Error: error validating url: target url is not present in allowedHosts"`
+        `"Error configuring Inference API action: Error: API Provider is not supported by Inference Endpoint."`
       );
     });
   });
