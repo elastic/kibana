@@ -74,13 +74,13 @@ export const registerSplunkMatchPrebuiltRuleRoute = (
             ],
           };
           const graph = await getMatchPrebuiltRuleGraph({ model });
+          const matchPrebuiltRuleState = await graph.invoke(parameters, options);
 
-          const result = await graph.invoke(parameters, options);
-          const { matched, rule } = result as MatchPrebuiltRuleState;
+          const { matched, result } = matchPrebuiltRuleState as MatchPrebuiltRuleState;
           if (!matched) {
             return response.noContent();
           }
-          return response.ok({ body: rule });
+          return response.ok({ body: result });
         } catch (err) {
           return response.badRequest({
             body: err.message,

@@ -23,28 +23,33 @@ const callModel = async ({
   const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
   const elasticSecurityRules = Array(state.prebuiltRulesMap.keys()).join('\n');
-  const result = await matchPrebuiltRule.invoke({
+  const response = await matchPrebuiltRule.invoke({
     elasticSecurityRules,
     splunkRuleTitle: state.splunkRuleTitle,
     splunkRuleDescription: state.splunkRuleDescription,
   });
-  const response = result.trim();
-  if (response === 'no_match') {
+  return { response };
+};
+
+const processResponse = (state: MatchPrebuiltRuleState): Partial<MatchPrebuiltRuleState> => {
+  const cleanResponse = state.response.trim();
+  if (cleanResponse === 'no_match') {
     return { matched: false };
   }
-  if (state.prebuiltRulesMap.get(response)) {
-    return { matched: true, rule: state.prebuiltRulesMap.get(response), response };
+  const result = state.prebuiltRulesMap.get(cleanResponse);
+  if (result != null) {
+    return { matched: true, result };
   }
-  return { matched: false, response };
+  return { matched: false };
 };
 
 export async function getMatchPrebuiltRuleGraph({ model }: MatchPrebuiltRuleGraphParams) {
   const matchPrebuiltRuleGraph = new StateGraph(matchPrebuiltRuleState)
     .addNode('callModel', (state: MatchPrebuiltRuleState) => callModel({ state, model }))
-    // .addNode('processModelResponse', processModelResponse)
+    .addNode('processResponse', processResponse)
     .addEdge(START, 'callModel')
-    // .addEdge('callModel', 'processModelResponse')
-    .addEdge('callModel', END);
+    .addEdge('callModel', 'processResponse')
+    .addEdge('processResponse', END);
 
   return matchPrebuiltRuleGraph.compile();
 }
