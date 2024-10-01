@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Index } from '@kbn/index-management';
+import { Index } from '@kbn/index-management-shared-types';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { useState, useEffect } from 'react';
 import { normalize } from '../components/mappings_editor/lib';
@@ -45,18 +45,23 @@ export const useIndexErrors = (
           if (!model) {
             return {
               field,
-              error: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.missingModelError', {
-                defaultMessage: 'Model not found for inference endpoint {inferenceId}',
-                values: {
-                  inferenceId: field.source.inference_id as string,
-                },
-              }),
+              error: i18n.translate(
+                'xpack.idxMgmt.indexOverview.indexErrors.missingInferenceEndpointError',
+                {
+                  defaultMessage: 'Inference endpoint {inferenceId} not found',
+                  values: {
+                    inferenceId: field.source.inference_id as string,
+                  },
+                }
+              ),
             };
           }
           if (isLocalModel(model)) {
             const modelId = model.service_settings.model_id;
             const modelStats = trainedModelStats?.trained_model_stats.find(
-              (value) => value.model_id === modelId
+              (value) =>
+                value.model_id === modelId &&
+                value.deployment_stats?.deployment_id === field.source.inference_id
             );
             if (!modelStats || modelStats.deployment_stats?.state !== 'started') {
               return {
@@ -65,8 +70,9 @@ export const useIndexErrors = (
                   'xpack.idxMgmt.indexOverview.indexErrors.modelNotStartedError',
                   {
                     defaultMessage:
-                      'Model {modelId} for inference endpoint {inferenceId} in field {fieldName} has not been started',
+                      'Deployment {deploymentId} of model {modelId} for inference endpoint {inferenceId} in field {fieldName} has not been started',
                     values: {
+                      deploymentId: field.source.inference_id as string,
                       inferenceId: field.source.inference_id as string,
                       fieldName: field.path.join('.'),
                       modelId,

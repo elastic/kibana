@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 export * from './model/list_common.gen';
 export * from './model/list_schemas.gen';
 export * from './create_list_index/create_list_index.gen';
@@ -13,10 +15,10 @@ export * from './create_list/create_list.gen';
 export * from './delete_list_index/delete_list_index.gen';
 export * from './delete_list_item/delete_list_item.gen';
 export * from './delete_list/delete_list.gen';
-export * from './find_list_item/find_list_item.gen';
-export * from './find_list/find_list.gen';
-export * from './export_list_item/export_list_item.gen';
-export * from './import_list_item/import_list_item.gen';
+export * from './find_list_items/find_list_items.gen';
+export * from './find_lists/find_lists.gen';
+export * from './export_list_items/export_list_items.gen';
+export * from './import_list_items/import_list_items.gen';
 export * from './patch_list_item/patch_list_item.gen';
 export * from './patch_list/patch_list.gen';
 export * from './read_list_index/read_list_index.gen';

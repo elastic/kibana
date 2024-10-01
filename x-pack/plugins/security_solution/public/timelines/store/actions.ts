@@ -12,7 +12,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SessionViewConfig } from '../../../common/types';
 import type {
   DataProvider,
-  DataProviderType,
   QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
 
@@ -29,8 +28,9 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId } from '../../../common/api/timeline';
+import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -116,7 +116,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{
@@ -292,7 +292,7 @@ export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_C
 export const updateColumnWidth = actionCreator<{
   columnId: string;
   id: string;
-  width: number;
+  width?: number;
 }>('UPDATE_COLUMN_WIDTH');
 
 export const updateRowHeight = actionCreator<{

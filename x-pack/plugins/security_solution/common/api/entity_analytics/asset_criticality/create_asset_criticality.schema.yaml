@@ -1,3 +1,4 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
   version: '2023-10-31'
@@ -8,7 +9,11 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: CreateAssetCriticalityRecord
-      summary: Create Criticality Record
+      summary: Upsert an asset criticality record
+      description: |
+        Create or update an asset criticality record for a specific entity.
+
+        If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
       requestBody:
         required: true
         content:

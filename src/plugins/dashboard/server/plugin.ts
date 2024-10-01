@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,9 +12,10 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import {
   initializeDashboardTelemetryTask,
@@ -31,13 +33,14 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
 }
 
 interface StartDeps {
   taskManager: TaskManagerStartContract;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class DashboardPlugin
@@ -80,6 +83,25 @@ export class DashboardPlugin
       registerDashboardUsageCollector(
         plugins.usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
+      );
+    }
+
+    if (plugins.usageCollection) {
+      // Registers routes for tracking and fetching dashboard views
+      registerContentInsights(
+        {
+          usageCollection: plugins.usageCollection,
+          http: core.http,
+          getStartServices: () =>
+            core.getStartServices().then(([_, start]) => ({
+              usageCollection: start.usageCollection!,
+            })),
+        },
+        {
+          domainId: 'dashboard',
+          // makes sure that only users with read/all access to dashboard app can access the routes
+          routeTags: ['access:dashboardUsageStats'],
+        }
       );
     }
 

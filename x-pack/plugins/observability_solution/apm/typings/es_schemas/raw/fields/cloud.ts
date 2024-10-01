@@ -5,29 +5,4 @@
  * 2.0.
  */
 
-export interface Cloud {
-  availability_zone?: string;
-  instance?: {
-    name: string;
-    id: string;
-  };
-  machine?: {
-    type: string;
-  };
-  project?: {
-    id: string;
-    name: string;
-  };
-  provider?: string;
-  region?: string;
-  account?: {
-    id: string;
-    name: string;
-  };
-  image?: {
-    id: string;
-  };
-  service?: {
-    name: string;
-  };
-}
+export type { Cloud } from '@kbn/apm-types/es_schemas_raw';

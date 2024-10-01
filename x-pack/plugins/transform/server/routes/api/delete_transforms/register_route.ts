@@ -8,7 +8,7 @@
 import {
   deleteTransformsRequestSchema,
   type DeleteTransformsRequestSchema,
-} from '../../../../common/api_schemas/delete_transforms';
+} from '../../api_schemas/delete_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

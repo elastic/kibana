@@ -14,6 +14,10 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
+import type {
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../common/api/endpoint';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
@@ -22,7 +26,6 @@ import {
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import type {
-  HostIsolationRequestBody,
   HostResultList,
   Immutable,
   ImmutableObject,
@@ -153,10 +156,6 @@ const getAgentAndPoliciesForEndpointsList = async (
     return;
   }
 
-  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
-  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
-  // exists.
   const policiesFound = (
     await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
@@ -246,9 +245,9 @@ const handleIsolateEndpointHost = async (
     let response: ResponseActionApiResponse;
 
     if (action.payload.type === 'unisolate') {
-      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await unIsolateHost(action.payload.data as UnisolationRouteRequestBody);
     } else {
-      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await isolateHost(action.payload.data as IsolationRouteRequestBody);
     }
 
     dispatch({

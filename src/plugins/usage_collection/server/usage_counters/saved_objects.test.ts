@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { serializeCounterKey, storeCounter } from './saved_objects';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-
-import { UsageCounters } from '../../common';
-
 import moment from 'moment';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { serializeCounterKey, storeCounter } from './saved_objects';
+import type { UsageCounters } from '../../common';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { type UsageCountersSavedObjectAttributes, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '..';
 
 describe('counterKey', () => {
-  test('#serializeCounterKey returns a serialized string', () => {
+  test('#serializeCounterKey returns a serialized string that omits default namespace', () => {
     const result = serializeCounterKey({
       domainId: 'a',
       counterName: 'b',
@@ -24,7 +25,20 @@ describe('counterKey', () => {
       date: moment('09042021', 'DDMMYYYY'),
     });
 
-    expect(result).toEqual('a:b:c:ui:20210409:default');
+    expect(result).toEqual('a:b:c:ui:20210409');
+  });
+
+  test('#serializeCounterKey returns a serialized string for non-default namespaces', () => {
+    const result = serializeCounterKey({
+      domainId: 'a',
+      counterName: 'b',
+      counterType: 'c',
+      namespace: 'second',
+      source: 'ui',
+      date: moment('09042021', 'DDMMYYYY'),
+    });
+
+    expect(result).toEqual('second:a:b:c:ui:20210409');
   });
 });
 
@@ -77,3 +91,26 @@ describe('storeCounter', () => {
     `);
   });
 });
+
+export const createMockSavedObjectDoc = (
+  updatedAt: moment.Moment,
+  id: string,
+  domainId: string,
+  namespace?: string
+) =>
+  ({
+    id,
+    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    ...(namespace && { namespaces: [namespace] }),
+    attributes: {
+      count: 3,
+      domainId,
+      counterName: 'testName',
+      counterType: 'count',
+      source: 'server',
+    },
+    references: [],
+    updated_at: updatedAt.format(),
+    version: 'WzI5LDFd',
+    score: 0,
+  } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);

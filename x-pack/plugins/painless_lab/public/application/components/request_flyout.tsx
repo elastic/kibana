@@ -40,7 +40,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
           <EuiFlexItem>
             {/* We need an extra div to get out of flex grow */}
             <div>
-              <EuiTitle size="m">
+              <EuiTitle size="m" data-test-subj="painlessLabRequestFlyoutHeader">
                 <h2>
                   {i18n.translate('xpack.painlessLab.flyoutTitle', {
                     defaultMessage: 'API request',
@@ -74,7 +74,12 @@ export const RequestFlyout: FunctionComponent<Props> = ({
               id: 'request',
               name: 'Request',
               content: (
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                <EuiCodeBlock
+                  language="json"
+                  paddingSize="s"
+                  data-test-subj="painlessLabFlyoutRequest"
+                  isCopyable
+                >
                   {'POST _scripts/painless/_execute\n'}
                   {requestBody}
                 </EuiCodeBlock>
@@ -84,7 +89,12 @@ export const RequestFlyout: FunctionComponent<Props> = ({
               id: 'response',
               name: 'Response',
               content: (
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                <EuiCodeBlock
+                  language="json"
+                  paddingSize="s"
+                  data-test-subj="painlessLabFlyoutResponse"
+                  isCopyable
+                >
                   {response}
                 </EuiCodeBlock>
               ),

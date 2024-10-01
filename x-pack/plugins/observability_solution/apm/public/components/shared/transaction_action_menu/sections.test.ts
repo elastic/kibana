@@ -6,12 +6,17 @@
  */
 
 import { createMemoryHistory } from 'history';
+import rison from '@kbn/rison';
 import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 import { apmRouter as apmRouterBase, ApmRouter } from '../../routing/apm_route_config';
 import { logsLocatorsMock } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import {
+  AssetDetailsLocatorParams,
+  AssetDetailsLocator,
+} from '@kbn/observability-shared-plugin/common';
 
 const apmRouter = {
   ...apmRouterBase,
@@ -20,6 +25,15 @@ const apmRouter = {
 
 const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
 const uptimeLocator = sharePluginMock.createLocator();
+
+const mockAssetDetailsLocator = {
+  getRedirectUrl: jest
+    .fn()
+    .mockImplementation(
+      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+    ),
+} as unknown as jest.Mocked<AssetDetailsLocator>;
 
 const expectLogsLocatorsToBeCalled = () => {
   expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
@@ -69,6 +83,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
+        assetDetailsLocator: mockAssetDetailsLocator,
       })
     ).toEqual([
       [
@@ -137,6 +152,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
+        assetDetailsLocator: mockAssetDetailsLocator,
       })
     ).toEqual([
       [
@@ -153,7 +169,7 @@ describe('Transaction action menu', () => {
             {
               key: 'podMetrics',
               label: 'Pod metrics',
-              href: 'some-basepath/app/metrics/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
+              href: "/node-mock/pod/123?receivedParams=(dateRange:(from:'2020-02-06T10:55:00.000Z',to:'2020-02-06T11:05:00.000Z'))",
               condition: true,
             },
           ],
@@ -223,6 +239,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
+        assetDetailsLocator: mockAssetDetailsLocator,
       })
     ).toEqual([
       [
@@ -239,7 +256,7 @@ describe('Transaction action menu', () => {
             {
               key: 'hostMetrics',
               label: 'Host metrics',
-              href: 'some-basepath/app/metrics/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
+              href: "/node-mock/host/foo?receivedParams=(dateRange:(from:'2020-02-06T10:55:00.000Z',to:'2020-02-06T11:05:00.000Z'))",
               condition: true,
             },
           ],

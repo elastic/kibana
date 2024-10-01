@@ -1,7 +1,7 @@
 get:
   summary: List package policies
   tags:
-    - Package policies
+    - Fleet package policies
   responses:
     '200':
       description: OK
@@ -35,7 +35,7 @@ parameters: []
 post:
   summary: Create package policy
   tags:
-    - Package policies
+    - Fleet package policies
   operationId: create-package-policy
   responses:
     '200':

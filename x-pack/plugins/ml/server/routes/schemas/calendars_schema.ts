@@ -20,6 +20,9 @@ export const calendarSchema = schema.object({
       description: schema.maybe(schema.string()),
       start_time: schema.oneOf([schema.string(), schema.number()]),
       end_time: schema.oneOf([schema.string(), schema.number()]),
+      skip_result: schema.maybe(schema.boolean()),
+      skip_model_update: schema.maybe(schema.boolean()),
+      force_time_shift: schema.maybe(schema.number()),
     })
   ),
 });
@@ -27,6 +30,5 @@ export const calendarSchema = schema.object({
 export const calendarIdSchema = schema.object({ calendarId: schema.string() });
 
 export const calendarIdsSchema = schema.object({
-  /** Comma-separated list of calendar IDs */
-  calendarIds: schema.string(),
+  calendarIds: schema.string({ meta: { description: 'Comma-separated list of calendar IDs' } }),
 });

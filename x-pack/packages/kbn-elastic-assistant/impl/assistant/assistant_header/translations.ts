@@ -7,24 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ANONYMIZED_VALUES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.anonymizedValues',
-  {
-    defaultMessage: 'Anonymized values',
-  }
-);
-
 export const RESET_CONVERSATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.resetConversation',
   {
     defaultMessage: 'Reset conversation',
-  }
-);
-
-export const CONNECTOR_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.connectorTitle',
-  {
-    defaultMessage: 'Connector',
   }
 );
 
@@ -39,13 +25,6 @@ export const SHOW_REAL_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
   {
     defaultMessage: 'Show real values',
-  }
-);
-
-export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
-  {
-    defaultMessage: 'Show the anonymized values sent to and from the assistant',
   }
 );
 

@@ -727,6 +727,80 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getContentForSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getContentForSpace",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<{ summary: ",
+              "SpaceContentTypeSummaryItem",
+              "[]; total: number; }>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getContentForSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getRolesForSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getRolesForSpace",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getRolesForSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1794,13 +1868,13 @@
             ],
             "signature": [
               {
-                "pluginId": "cloud",
+                "pluginId": "spaces",
                 "scope": "common",
-                "docId": "kibCloudPluginApi",
-                "section": "def-common.OnBoardingDefaultSolution",
-                "text": "OnBoardingDefaultSolution"
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.SolutionView",
+                "text": "SolutionView"
               },
-              " | \"classic\" | undefined"
+              " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
@@ -1834,13 +1908,13 @@
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; solution?: ",
               {
-                "pluginId": "cloud",
+                "pluginId": "spaces",
                 "scope": "common",
-                "docId": "kibCloudPluginApi",
-                "section": "def-common.OnBoardingDefaultSolution",
-                "text": "OnBoardingDefaultSolution"
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.SolutionView",
+                "text": "SolutionView"
               },
-              " | \"classic\" | undefined; }"
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
@@ -2877,7 +2951,7 @@
         "\nSetup contract for the Spaces plugin."
       ],
       "signature": [
-        "{ hasOnlyDefaultSpace: boolean; }"
+        "{ hasOnlyDefaultSpace: boolean; isSolutionViewEnabled: boolean; }"
       ],
       "path": "x-pack/plugins/spaces/public/plugin.tsx",
       "deprecated": false,
@@ -2982,6 +3056,19 @@
               "section": "def-public.SpacesApiUi",
               "text": "SpacesApiUi"
             }
+          ],
+          "path": "x-pack/plugins/spaces/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "spaces",
+          "id": "def-public.SpacesApi.isSolutionViewEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isSolutionViewEnabled",
+          "description": [
+            "\nIndicates whether the solution view is enabled."
           ],
           "path": "x-pack/plugins/spaces/public/types.ts",
           "deprecated": false,
@@ -3717,13 +3804,13 @@
             ],
             "signature": [
               {
-                "pluginId": "cloud",
+                "pluginId": "spaces",
                 "scope": "common",
-                "docId": "kibCloudPluginApi",
-                "section": "def-common.OnBoardingDefaultSolution",
-                "text": "OnBoardingDefaultSolution"
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.SolutionView",
+                "text": "SolutionView"
               },
-              " | \"classic\" | undefined"
+              " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
@@ -4974,13 +5061,13 @@
             ],
             "signature": [
               {
-                "pluginId": "cloud",
+                "pluginId": "spaces",
                 "scope": "common",
-                "docId": "kibCloudPluginApi",
-                "section": "def-common.OnBoardingDefaultSolution",
-                "text": "OnBoardingDefaultSolution"
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.SolutionView",
+                "text": "SolutionView"
               },
-              " | \"classic\" | undefined"
+              " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
@@ -5054,6 +5141,28 @@
           "2"
         ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
+        "id": "def-common.SolutionView",
+        "type": "Type",
+        "tags": [],
+        "label": "SolutionView",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "cloud",
+            "scope": "common",
+            "docId": "kibCloudPluginApi",
+            "section": "def-common.OnBoardingDefaultSolution",
+            "text": "OnBoardingDefaultSolution"
+          },
+          " | \"classic\""
+        ],
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

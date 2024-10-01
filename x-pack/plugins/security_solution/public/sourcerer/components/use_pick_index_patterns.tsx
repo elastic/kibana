@@ -179,11 +179,11 @@ export const usePickIndexPatterns = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnlyDetectionAlerts, selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
 
-  const onChangeCombo = useCallback((newSelectedOptions) => {
+  const onChangeCombo = useCallback<UsePickIndexPatterns['onChangeCombo']>((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
   }, []);
 
-  const renderOption = useCallback(
+  const renderOption = useCallback<UsePickIndexPatterns['renderOption']>(
     ({ value }) => <span data-test-subj="sourcerer-combo-option">{value}</span>,
     []
   );
@@ -192,7 +192,7 @@ export const usePickIndexPatterns = ({
     async (newSelectedDataViewId: string, isAlerts?: boolean) => {
       if (
         kibanaDataViews.some(
-          (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
+          (kdv) => kdv.id === newSelectedDataViewId && Object.keys(kdv?.fields || {}).length === 0
         )
       ) {
         try {

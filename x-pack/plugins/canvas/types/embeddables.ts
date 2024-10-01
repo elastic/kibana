@@ -11,6 +11,7 @@ import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
 import type {
   HasAppContext,
   HasDisableTriggers,
+  HasType,
   PublishesViewMode,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
@@ -25,5 +26,6 @@ export type EmbeddableInput = Input & {
 export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &
   HasDisableTriggers &
+  HasType &
   HasSerializedChildState &
   Partial<HasAppContext & PublishesUnifiedSearch>;

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   type ApiVersion,
   ELASTIC_HTTP_VERSION_HEADER,
@@ -52,6 +54,11 @@ type KibanaRequestWithQueryVersion = KibanaRequest<
   { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
 >;
 
+export interface RequestLike {
+  headers: KibanaRequest['headers'];
+  query?: KibanaRequest['query'];
+}
+
 export function hasQueryVersion(
   request: Mutable<KibanaRequest>
 ): request is Mutable<KibanaRequestWithQueryVersion> {
@@ -61,13 +68,13 @@ export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersio
   delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
 
-function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+function readQueryVersion(request: RequestLike): undefined | ApiVersion {
   const version = get(request.query, ELASTIC_HTTP_VERSION_QUERY_PARAM);
   if (typeof version === 'string') return version;
 }
 /** Reading from header takes precedence over query param */
 export function readVersion(
-  request: KibanaRequest,
+  request: RequestLike,
   isQueryVersionEnabled?: boolean
 ): undefined | ApiVersion {
   const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];

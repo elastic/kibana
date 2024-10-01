@@ -51,12 +51,7 @@ describe('getSupportedUrlParams', () => {
 
   it('returns default values', () => {
     const { FILTERS, SEARCH, STATUS_FILTER } = CLIENT_DEFAULTS;
-    const {
-      DATE_RANGE_START,
-      DATE_RANGE_END,
-      AUTOREFRESH_INTERVAL_SECONDS,
-      AUTOREFRESH_IS_PAUSED,
-    } = CLIENT_DEFAULTS_SYNTHETICS;
+    const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
     const result = getSupportedUrlParams({});
     expect(result).toEqual({
       absoluteDateRangeStart: MOCK_DATE_VALUE,
@@ -75,8 +70,6 @@ describe('getSupportedUrlParams', () => {
       projects: [],
       schedules: [],
       tags: [],
-      refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-      refreshPaused: AUTOREFRESH_IS_PAUSED,
     });
   });
 

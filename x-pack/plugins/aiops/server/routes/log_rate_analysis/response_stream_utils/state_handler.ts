@@ -43,9 +43,9 @@ export const stateHandlerFactory = (overrides: Partial<StreamState>) => {
   function loaded(d?: number, replace = true) {
     if (typeof d === 'number') {
       if (replace) {
-        state.loaded = d;
+        state.loaded = Math.round(d * 100) / 100;
       } else {
-        state.loaded += d;
+        state.loaded += Math.round(d * 100) / 100;
       }
     } else {
       return state.loaded;

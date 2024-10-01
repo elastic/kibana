@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { MlApi } from '../../application/services/ml_api_service';
 
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -44,23 +44,21 @@ describe('AnomalyChartsInitializer', () => {
           initialInput={input}
           onCreate={(params) => onCreate(params)}
           onCancel={onCancel}
-          adJobsApiService={adJobsApiService as unknown as MlApiServices['jobs']}
+          adJobsApiService={adJobsApiService as unknown as MlApi['jobs']}
         />
       </KibanaContextProvider>,
       defaultOptions
     );
 
-    act(() => {
-      const confirmButton = screen.getByText(/Confirm/i).closest('button');
-      expect(confirmButton).toBeDefined();
-      expect(onCreate).toHaveBeenCalledTimes(0);
+    const confirmButton = screen.getByText(/Confirm/i).closest('button');
+    expect(confirmButton).toBeDefined();
+    expect(onCreate).toHaveBeenCalledTimes(0);
 
-      userEvent.click(confirmButton!);
-      expect(onCreate).toHaveBeenCalledWith({
-        jobIds: ['job1', 'job2'],
-        title: defaultTitle,
-        maxSeriesToPlot: input.maxSeriesToPlot,
-      });
+    await userEvent.click(confirmButton!);
+    expect(onCreate).toHaveBeenCalledWith({
+      jobIds: ['job1', 'job2'],
+      title: defaultTitle,
+      maxSeriesToPlot: input.maxSeriesToPlot,
     });
   });
 });

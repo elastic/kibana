@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TimelineSaveStatus } from '.';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TimelineId } from '../../../../common/types';
@@ -26,7 +26,7 @@ const renderTimelineSaveStatus = () => {
 describe('TimelineSaveStatus', () => {
   it('should render unsaved status if draft timeline', () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     });
 
     const { getByTestId, getByText } = renderTimelineSaveStatus();
@@ -61,7 +61,7 @@ describe('TimelineSaveStatus', () => {
   it('should not render any status', () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       changed: false,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       updated: Date.now(),
     });
 

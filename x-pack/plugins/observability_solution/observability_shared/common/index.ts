@@ -98,6 +98,7 @@ export {
   LABEL_NAME,
   HOST,
   HOST_HOSTNAME,
+  HOST_NAME,
   HOST_OS_PLATFORM,
   CONTAINER_ID,
   KUBERNETES,
@@ -144,6 +145,66 @@ export {
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+export {
+  type DataTier,
+  indexLifeCyclePhaseToDataTier,
+  IndexLifecyclePhaseSelectOption,
+} from './ilm_types';
 
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
+
+export type {
+  ServiceOverviewParams,
+  ServiceOverviewLocator,
+  TransactionDetailsByNameParams,
+  TransactionDetailsByNameLocator,
+  AssetDetailsFlyoutLocator,
+  AssetDetailsFlyoutLocatorParams,
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  HostsLocator,
+  HostsLocatorParams,
+  InventoryLocator,
+  InventoryLocatorParams,
+  MetricsExplorerLocator,
+  MetricsExplorerLocatorParams,
+  FlamegraphLocatorParams,
+  FlamegraphLocator,
+  StacktracesLocatorParams,
+  StacktracesLocator,
+  TopNFunctionsLocatorParams,
+  TopNFunctionsLocator,
+  ServiceEntityLocator,
+  ServiceEntityLocatorParams,
+  TransactionDetailsByTraceIdLocator,
+  TransactionDetailsByTraceIdLocatorParams,
+  EntitiesInventoryLocator,
+} from './locators';
+
+export {
+  ServiceOverviewLocatorDefinition,
+  TransactionDetailsByNameLocatorDefinition,
+  ASSET_DETAILS_FLYOUT_LOCATOR_ID,
+  AssetDetailsFlyoutLocatorDefinition,
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
+  HostsLocatorDefinition,
+  INVENTORY_LOCATOR_ID,
+  InventoryLocatorDefinition,
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorDefinition,
+  FlamegraphLocatorDefinition,
+  StacktracesLocatorDefinition,
+  TopNFunctionsLocatorDefinition,
+  HOSTS_LOCATOR_ID,
+  ServiceEntityLocatorDefinition,
+  SERVICE_ENTITY_LOCATOR,
+  TransactionDetailsByTraceIdLocatorDefinition,
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  EntitiesInventoryLocatorDefinition,
+  ENTITIES_INVENTORY_LOCATOR_ID,
+} from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

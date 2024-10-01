@@ -56,6 +56,10 @@ export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
 
+export const SAVE_WITH_ERRORS_MODAL = '[data-test-subj="save-with-errors-confirmation-modal"]';
+
+export const SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
@@ -118,6 +122,9 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 export const EQL_QUERY_VALIDATION_LABEL = '.euiFormLabel-isInvalid';
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
+export const EQL_QUERY_VALIDATION_ERROR_CONTENT =
+  '[data-test-subj="eql-validation-errors-popover-content"]';
 
 export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
 
@@ -261,9 +268,6 @@ export const ESQL_QUERY_BAR_INPUT_AREA =
 
 export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
 
-export const ESQL_QUERY_BAR_EXPAND_BTN =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] [data-test-subj="TextBasedLangEditor-expand"]';
-
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 
 export const NEW_TERMS_HISTORY_SIZE =
@@ -292,3 +296,19 @@ export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
+
+export const PREVIEW_SUBMIT_BUTTON = '[data-test-subj="previewSubmitButton"]';
+
+export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticsearch-requests"]';
+
+export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-item-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUEST_DESCRIPTION =
+  '[data-test-subj="preview-logged-request-description"]';
+
+export const PREVIEW_LOGGED_REQUEST_CODE_BLOCK =
+  '[data-test-subj="preview-logged-request-code-block"]';

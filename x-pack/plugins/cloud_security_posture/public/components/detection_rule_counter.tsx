@@ -9,6 +9,11 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
+import {
+  CREATE_DETECTION_RULE_FROM_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,7 +36,11 @@ interface DetectionRuleCounterProps {
 
 export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounterProps) => {
   const { data: rulesData, isLoading: ruleIsLoading } = useFetchDetectionRulesByTags(tags);
-  const { data: alertsData, isLoading: alertsIsLoading } = useFetchDetectionRulesAlertsStatus(tags);
+  const {
+    data: alertsData,
+    isLoading: alertsIsLoading,
+    isError: alertsIsError,
+  } = useFetchDetectionRulesAlertsStatus(tags);
 
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
@@ -58,6 +67,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_RULE_FROM_FLYOUT);
     const startServices = { analytics, notifications, i18n, theme };
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
@@ -67,6 +77,8 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
   }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
+
+  if (alertsIsError) return <>{'-'}</>;
 
   return (
     <EuiSkeletonText

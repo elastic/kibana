@@ -58,7 +58,8 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
   openInDiscover,
   showText = true,
 }) => {
-  const { labels, openFunction } = openInDiscover;
+  const { getLabels, openFunction } = openInDiscover;
+  const labels = getLabels(false);
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -67,7 +68,7 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
           <EuiButtonEmpty
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
             size="s"
-            onClick={() => openFunction(QUERY_MODE.INCLUDE)}
+            onClick={() => openFunction(QUERY_MODE.INCLUDE, true)}
             iconType="plusInCircle"
             iconSide="left"
           >
@@ -80,7 +81,7 @@ export const OpenInDiscoverButtons: FC<{ openInDiscover: OpenInDiscover; showTex
           <EuiButtonEmpty
             data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
             size="s"
-            onClick={() => openFunction(QUERY_MODE.EXCLUDE)}
+            onClick={() => openFunction(QUERY_MODE.EXCLUDE, true)}
             iconType="minusInCircle"
             iconSide="left"
           >

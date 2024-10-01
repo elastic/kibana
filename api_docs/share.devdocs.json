@@ -1359,7 +1359,7 @@
         "signature": [
           "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "path": "src/plugins/share/common/config.ts",
+        "path": "src/plugins/share/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

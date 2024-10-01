@@ -19,8 +19,8 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ml } from '../../services/ml_api_service';
 import type { Dictionary } from '../../../../common/types/common';
+import type { MlApi } from '../../services/ml_api_service';
 
 export type IndexPattern = string;
 
@@ -203,7 +203,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   if (response?.regression) {
     for (const statType in response.regression) {
-      if (response.regression.hasOwnProperty(statType)) {
+      if (Object.hasOwn(response.regression, statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
         if (currentStatValue && Number.isFinite(currentStatValue)) {
@@ -289,6 +289,7 @@ export enum REGRESSION_STATS {
 }
 
 interface LoadEvalDataConfig {
+  mlApi: MlApi;
   isTraining?: boolean;
   index: string;
   dependentVariable: string;
@@ -303,6 +304,7 @@ interface LoadEvalDataConfig {
 }
 
 export const loadEvalData = async ({
+  mlApi,
   isTraining,
   index,
   dependentVariable,
@@ -360,7 +362,7 @@ export const loadEvalData = async ({
   };
 
   try {
-    const evalResult = await ml.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
+    const evalResult = await mlApi.dataFrameAnalytics.evaluateDataFrameAnalytics(config);
     results.success = true;
     results.eval = evalResult;
     return results;
@@ -371,6 +373,7 @@ export const loadEvalData = async ({
 };
 
 interface LoadDocsCountConfig {
+  mlApi: MlApi;
   ignoreDefaultQuery?: boolean;
   isTraining?: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
@@ -384,6 +387,7 @@ interface LoadDocsCountResponse {
 }
 
 export const loadDocsCount = async ({
+  mlApi,
   ignoreDefaultQuery = true,
   isTraining,
   searchQuery,
@@ -398,7 +402,7 @@ export const loadDocsCount = async ({
       query,
     };
 
-    const resp: TrackTotalHitsSearchResponse = await ml.esSearch({
+    const resp: TrackTotalHitsSearchResponse = await mlApi.esSearch({
       index: destIndex,
       size: 0,
       body,

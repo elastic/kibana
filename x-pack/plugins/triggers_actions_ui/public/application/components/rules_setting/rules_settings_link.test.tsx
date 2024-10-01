@@ -165,7 +165,7 @@ describe('rules_settings_link', () => {
       expect(result.queryByTestId('rulesSettingsModal')).toBe(null);
     });
 
-    userEvent.click(result.getByText('Settings'));
+    await userEvent.click(result.getByText('Settings'));
 
     await waitFor(() => {
       expect(result.queryByTestId('rulesSettingsModal')).not.toBe(null);

@@ -6,10 +6,16 @@
  */
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { StaleDownConfig } from './status_rule/status_rule_executor';
+import {
+  AlertOverviewStatus,
+  StaleDownConfig,
+  SyntheticsCommonState,
+} from '../../common/runtime_types/alert_rules/common';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+const monitorName = 'test-monitor';
+const monitorId = '12345';
+const configId = '56789';
 
 describe('updateState', () => {
   let spy: jest.SpyInstance<string, []>;
@@ -187,13 +193,12 @@ describe('updateState', () => {
 describe('setRecoveredAlertsContext', () => {
   const alertUuid = 'alert-id';
   const location = 'us_west';
-  const configId = '12345';
   const idWithLocation = `${configId}-${location}`;
   const basePath = {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
 
-  const upConfigs = {
+  const upConfigs: AlertOverviewStatus['upConfigs'] = {
     [idWithLocation]: {
       configId,
       monitorQueryId: 'stale-config',
@@ -207,10 +212,19 @@ describe('setRecoveredAlertsContext', () => {
           },
         },
         monitor: {
-          name: 'test-monitor',
+          name: monitorName,
+        },
+        observer: {
+          geo: {
+            name: location,
+          },
         },
       } as StaleDownConfig['ping'],
       timestamp: new Date().toISOString(),
+      checks: {
+        downWithinXChecks: 1,
+        down: 0,
+      },
     },
   };
 
@@ -224,20 +238,23 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getUuid: () => alertUuid,
             getId: () => idWithLocation,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
             'location.id': location,
             configId,
+            downThreshold: 1,
           },
         },
       ]),
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -249,11 +266,20 @@ describe('setRecoveredAlertsContext', () => {
             id: '123456',
           },
           monitor: {
-            name: 'test-monitor',
+            name: monitorName,
+          },
+          observer: {
+            geo: {
+              name: location,
+            },
           },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
+        checks: {
+          downWithinXChecks: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -264,25 +290,30 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-        configId: '12345',
+        configId,
         linkMessage: '',
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
-        recoveryReason: 'the monitor has been deleted',
+        monitorName,
+        recoveryReason: 'has been deleted',
         recoveryStatus: 'has been deleted',
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+          'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         stateId: '123456',
         status: 'recovered',
         locationId: location,
+        locationNames: location,
+        locationName: location,
         idWithLocation,
+        timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
       },
     });
   });
@@ -297,7 +328,9 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getUuid: () => alertUuid,
             getId: () => idWithLocation,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
@@ -310,7 +343,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -324,9 +357,18 @@ describe('setRecoveredAlertsContext', () => {
           monitor: {
             name: 'test-monitor',
           },
+          observer: {
+            geo: {
+              name: 'us_west',
+            },
+          },
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
+        checks: {
+          downWithinXChecks: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -337,25 +379,30 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
       context: {
-        configId: '12345',
+        configId,
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
         monitorUrl: '(unavailable)',
-        reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
+        idWithLocation,
         linkMessage: '',
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
+        monitorName,
         recoveryReason: 'this location has been removed from the monitor',
         recoveryStatus: 'has recovered',
         stateId: '123456',
         status: 'recovered',
         monitorUrlLabel: 'URL',
-        idWithLocation,
+        timestamp: '2023-02-26T00:00:00.000Z',
+        locationName: location,
+        locationNames: location,
+        reason:
+          'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         locationId: location,
+        downThreshold: 1,
       },
     });
   });
@@ -370,7 +417,9 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getId: () => idWithLocation,
             getUuid: () => alertUuid,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
@@ -383,7 +432,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -400,6 +449,10 @@ describe('setRecoveredAlertsContext', () => {
         } as StaleDownConfig['ping'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
+        checks: {
+          downWithinXChecks: 1,
+          down: 1,
+        },
       },
     };
     setRecoveredAlertsContext({
@@ -410,6 +463,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs,
       dateFormat,
       tz: 'UTC',
+      groupByLocation: true,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -417,20 +471,250 @@ describe('setRecoveredAlertsContext', () => {
         configId,
         idWithLocation,
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        monitorName: 'test-monitor',
+        monitorName,
         status: 'up',
         recoveryReason:
           'the monitor is now up again. It ran successfully at Feb 26, 2023 @ 00:00:00.000',
         recoveryStatus: 'is now up',
         locationId: location,
+        locationNames: location,
+        locationName: location,
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
-        linkMessage:
-          '- Link: https://localhost:5601/app/synthetics/monitor/12345/errors/123456?locationId=us_west',
+        linkMessage: `- Link: https://localhost:5601/app/synthetics/monitor/${configId}/errors/123456?locationId=us_west`,
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM.',
-        stateId: null,
+          'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+        timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
+        stateId: '123456',
+      },
+    });
+  });
+
+  it('sets the correct default recovery summary', () => {
+    const alertsClientMock = {
+      report: jest.fn(),
+      getAlertLimitValue: jest.fn().mockReturnValue(10),
+      setAlertLimitReached: jest.fn(),
+      getRecoveredAlerts: jest.fn().mockReturnValue([
+        {
+          alert: {
+            getId: () => idWithLocation,
+            getUuid: () => alertUuid,
+            getState: () => ({
+              downThreshold: 1,
+            }),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': location,
+            'monitor.name': monitorName,
+            'monitor.id': monitorId,
+            '@timestamp': new Date().toISOString(),
+            'agent.name': 'test-host',
+            'observer.geo.name': 'Unnamed-location',
+            'observer.name.keyword': 'Unnamed-location-id',
+            'monitor.type': 'HTTP',
+            'error.message': 'test-error-message',
+            configId,
+          },
+        },
+      ]),
+      setAlertData: jest.fn(),
+      isTrackedAlert: jest.fn(),
+    };
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: true,
+    });
+    expect(alertsClientMock.setAlertData).toBeCalledWith({
+      id: idWithLocation,
+      context: {
+        configId,
+        idWithLocation,
+        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+        monitorName,
+        monitorId,
+        status: 'recovered',
+        recoveryReason: 'the alert condition is no longer met',
+        recoveryStatus: 'has recovered',
+        locationId: location,
+        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        linkMessage: '',
+        monitorUrl: '(unavailable)',
+        monitorUrlLabel: 'URL',
+        reason:
+          'Monitor "test-monitor" from Unnamed-location is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+        timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
+        locationNames: 'Unnamed-location',
+        locationName: 'Unnamed-location',
+        lastErrorMessage: 'test-error-message',
+        monitorType: 'HTTP',
+        hostName: 'test-host',
+      },
+    });
+  });
+
+  it('sets the recovery summary for recovered custom alerts', () => {
+    const alertsClientMock = {
+      report: jest.fn(),
+      getAlertLimitValue: jest.fn().mockReturnValue(10),
+      setAlertLimitReached: jest.fn(),
+      getRecoveredAlerts: jest.fn().mockReturnValue([
+        {
+          alert: {
+            getId: () => idWithLocation,
+            getUuid: () => alertUuid,
+            getState: () => ({
+              downThreshold: 1,
+              configId,
+            }),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': ['us_central', 'us_west'],
+            'monitor.name': monitorName,
+            'monitor.id': monitorId,
+            'monitor.type': 'HTTP',
+            'monitor.state.id': '123456',
+            '@timestamp': new Date().toISOString(),
+            'observer.geo.name': ['us-central', 'us-east'],
+            'error.message': 'test-error-message',
+            'url.full': 'http://test_url.com',
+            configId,
+            'agent.name': 'test-agent',
+          },
+        },
+      ]),
+      setAlertData: jest.fn(),
+      isTrackedAlert: jest.fn(),
+    };
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: true,
+    });
+    expect(alertsClientMock.setAlertData).toBeCalledWith({
+      id: idWithLocation,
+      context: {
+        configId,
+        idWithLocation,
+        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+        monitorName,
+        monitorId,
+        status: 'recovered',
+        recoveryReason: 'the alert condition is no longer met',
+        recoveryStatus: 'has recovered',
+        locationId: 'us_central and us_west',
+        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        linkMessage:
+          '- Link: https://localhost:5601/app/synthetics/monitor/56789/errors/123456?locationId=us_central',
+        monitorUrl: 'http://test_url.com',
+        hostName: 'test-agent',
+        monitorUrlLabel: 'URL',
+        reason:
+          'Monitor "test-monitor" from us-central and us-east is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+        stateId: '123456',
+        timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
+        locationNames: 'us-central and us-east',
+        locationName: 'us-central and us-east',
+        monitorType: 'HTTP',
+        lastErrorMessage: 'test-error-message',
+      },
+    });
+  });
+
+  it('handles ungrouped recoveries', () => {
+    const alertsClientMock = {
+      report: jest.fn(),
+      getAlertLimitValue: jest.fn().mockReturnValue(10),
+      setAlertLimitReached: jest.fn(),
+      getRecoveredAlerts: jest.fn().mockReturnValue([
+        {
+          alert: {
+            getId: () => idWithLocation,
+            getUuid: () => alertUuid,
+            getState: () => ({
+              downThreshold: 1,
+              configId,
+            }),
+            setContext: jest.fn(),
+          },
+          hit: {
+            'kibana.alert.instance.id': idWithLocation,
+            'location.id': location,
+            'monitor.name': monitorName,
+            'monitor.type': 'HTTP',
+            'monitor.id': monitorId,
+            'agent.name': 'test-agent',
+            '@timestamp': new Date().toISOString(),
+            'observer.geo.name': ['us-central', 'us-east'],
+            'error.message': 'test-error-message',
+            'url.full': 'http://test_url.com',
+            'monitor.state.id': '123456',
+            configId,
+          },
+        },
+      ]),
+      setAlertData: jest.fn(),
+      isTrackedAlert: jest.fn(),
+    };
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+    expect(alertsClientMock.setAlertData).toBeCalledWith({
+      id: idWithLocation,
+      context: {
+        configId,
+        idWithLocation,
+        alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
+        monitorName,
+        monitorId,
+        status: 'recovered',
+        recoveryReason: 'the alert condition is no longer met',
+        recoveryStatus: 'has recovered',
+        locationId: location,
+        checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
+        linkMessage:
+          '- Link: https://localhost:5601/app/synthetics/monitor/56789/errors/123456?locationId=us_west',
+        monitorUrl: 'http://test_url.com',
+        hostName: 'test-agent',
+        monitorUrlLabel: 'URL',
+        reason:
+          'Monitor "test-monitor" from us-central and us-east is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+        stateId: '123456',
+        timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
+        locationNames: 'us-central and us-east',
+        locationName: 'us-central and us-east',
+        monitorType: 'HTTP',
+        lastErrorMessage: 'test-error-message',
       },
     });
   });

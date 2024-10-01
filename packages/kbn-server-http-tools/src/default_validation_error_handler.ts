@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
+import { Lifecycle, Request, ResponseToolkit, Utils } from '@hapi/hapi';
 import { ValidationError } from 'joi';
 import Hoek from '@hapi/hoek';
 
@@ -16,7 +17,7 @@ import Hoek from '@hapi/hoek';
 export interface HapiValidationError extends ValidationError {
   output: {
     statusCode: number;
-    headers: Util.Dictionary<string | string[]>;
+    headers: Utils.Dictionary<string | string[]>;
     payload: {
       statusCode: number;
       error: string;
@@ -43,7 +44,7 @@ export function defaultValidationErrorHandler(
   //
   // The Hapi code we're 'overwriting' can be found here:
   //     https://github.com/hapijs/hapi/blob/master/lib/validation.js#L102
-  if (err && err.name === 'ValidationError' && err.hasOwnProperty('output')) {
+  if (err && err.name === 'ValidationError' && Object.hasOwn(err, 'output')) {
     const validationError: HapiValidationError = err as HapiValidationError;
     const validationKeys: string[] = [];
 

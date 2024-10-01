@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityMetrics, SignalTypes } from '../../../../common/entities/types';
+import { EntityMetrics, EntityDataStreamType } from '../../../../common/entities/types';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateAvgMetrics, mergeMetrics } from './calculate_avg_metrics';
 
@@ -14,7 +14,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -34,10 +34,11 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: [
@@ -57,6 +58,7 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ];
 
@@ -65,7 +67,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
         environments: [],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
@@ -76,10 +78,11 @@ describe('calculateAverageMetrics', () => {
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: [],
         latestTimestamp: '2024-06-05T10:34:40.810Z',
         metrics: {
@@ -90,6 +93,7 @@ describe('calculateAverageMetrics', () => {
           throughput: 10,
         },
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -97,7 +101,7 @@ describe('calculateAverageMetrics', () => {
     const entities = [
       {
         agentName: 'nodejs' as AgentName,
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: [
@@ -117,6 +121,7 @@ describe('calculateAverageMetrics', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ];
 
@@ -125,7 +130,7 @@ describe('calculateAverageMetrics', () => {
     expect(result).toEqual([
       {
         agentName: 'nodejs',
-        signalTypes: [SignalTypes.METRICS],
+        dataStreamTypes: [EntityDataStreamType.METRICS],
         environments: ['env-service-1', 'env-service-2'],
         latestTimestamp: '2024-03-05T10:34:40.810Z',
         metrics: {
@@ -135,6 +140,7 @@ describe('calculateAverageMetrics', () => {
           throughput: 7.5,
         },
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -176,5 +182,55 @@ describe('mergeMetrics', () => {
     const result = mergeMetrics(metrics);
 
     expect(result).toEqual({});
+  });
+
+  it('returns metrics with zero value', () => {
+    const metrics = [
+      {
+        failedTransactionRate: 0,
+        latency: 4,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [0],
+      latency: [4],
+      logErrorRate: [5],
+      logRate: [5],
+      throughput: [5],
+    });
+  });
+
+  it('does not return metrics with null', () => {
+    const metrics = [
+      {
+        failedTransactionRate: null,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+      {
+        failedTransactionRate: 5,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [5],
+      logErrorRate: [5, 5],
+      logRate: [5, 5],
+      throughput: [5, 5],
+    });
   });
 });

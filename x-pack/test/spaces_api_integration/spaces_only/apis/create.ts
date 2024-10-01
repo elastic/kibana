@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SuperTest } from 'supertest';
 import { SPACES } from '../../common/lib/spaces';
 import { createTestSuiteFactory } from '../../common/suites/create';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -20,7 +21,7 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
     expectConflictResponse,
     expectReservedSpecifiedResult,
     expectSolutionSpecifiedResult,
-  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('create', () => {
     [

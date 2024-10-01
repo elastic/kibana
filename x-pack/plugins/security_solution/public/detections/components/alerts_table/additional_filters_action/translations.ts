@@ -27,10 +27,3 @@ export const ADDITIONAL_FILTERS_ACTIONS_SHOW_ONLY_THREAT_INDICATOR_ALERTS = i18n
     defaultMessage: 'Show only threat indicator alerts',
   }
 );
-
-export const TAKE_ACTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle',
-  {
-    defaultMessage: 'Take action',
-  }
-);

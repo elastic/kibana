@@ -20,8 +20,8 @@ import {
   PromptsBulkCrudActionResponse,
   PromptsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -126,11 +126,15 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            body: buildRouteValidationWithZod(PerformPromptsBulkActionRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformPromptsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
 

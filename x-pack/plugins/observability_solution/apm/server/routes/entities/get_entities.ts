@@ -4,21 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import {
-  AGENT_NAME,
-  DATA_STEAM_TYPE,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
-import { FIRST_SEEN, LAST_SEEN, ENTITY, ENTITY_TYPE } from '../../../common/es_fields/entities';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { getServiceEntitiesHistoryMetrics } from './get_service_entities_history_metrics';
-import { EntitiesRaw, EntityType, ServiceEntities } from './types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
+import { getEntityLatestServices } from './get_entity_latest_services';
+import type { EntityLatestServiceRaw } from './types';
+import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
-export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
+  if (!start || !end) {
+    return [];
+  }
+
   return [
     {
       range: {
@@ -44,60 +41,48 @@ export async function getEntities({
   environment,
   kuery,
   size,
+  serviceName,
 }: {
   entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   environment: string;
-  kuery: string;
+  kuery?: string;
   size: number;
-}) {
-  const entities = (
-    await entitiesESClient.searchLatest(`get_entities`, {
-      body: {
-        size,
-        track_total_hits: false,
-        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE, SERVICE_NAME, SERVICE_ENVIRONMENT],
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...environmentQuery(environment, SERVICE_ENVIRONMENT),
-              ...entitiesRangeQuery(start, end),
-              ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
-            ],
-          },
-        },
-      },
-    })
-  ).hits.hits.map((hit) => hit._source as EntitiesRaw);
+  serviceName?: string;
+}): Promise<EntityLatestServiceRaw[]> {
+  const entityLatestServices = await getEntityLatestServices({
+    entitiesESClient,
+    start,
+    end,
+    environment,
+    kuery,
+    size,
+    serviceName,
+  });
 
-  const serviceEntitiesHistoryMetricsMap = entities.length
-    ? await getServiceEntitiesHistoryMetrics({
+  const serviceEntitiesHistoryMetricsMap = entityLatestServices.length
+    ? await getEntityHistoryServicesMetrics({
         start,
         end,
         entitiesESClient,
-        entityIds: entities.map((entity) => entity.entity.id),
+        entityIds: entityLatestServices.map((latestEntity) => latestEntity.entity.id),
+        size,
       })
     : undefined;
 
-  return entities.map((entity): ServiceEntities => {
+  return entityLatestServices.map((latestEntity) => {
+    const historyEntityMetrics = serviceEntitiesHistoryMetricsMap?.[latestEntity.entity.id];
     return {
-      serviceName: entity.service.name,
-      environment: Array.isArray(entity.service?.environment) // TODO fix this in the EEM
-        ? entity.service.environment[0]
-        : entity.service.environment,
-      agentName: entity.agent.name[0],
-      signalTypes: entity.data_stream.type,
+      ...latestEntity,
       entity: {
-        ...entity.entity,
-        // History metrics undefined means that for the selected time range there was no ingestion happening.
-        metrics: serviceEntitiesHistoryMetricsMap?.[entity.entity.id] || {
-          latency: null,
-          logErrorRate: null,
-          failedTransactionRate: null,
-          logRate: null,
-          throughput: null,
+        ...latestEntity.entity,
+        metrics: historyEntityMetrics || {
+          latency: undefined,
+          logErrorRate: undefined,
+          failedTransactionRate: undefined,
+          logRate: undefined,
+          throughput: undefined,
         },
       },
     };

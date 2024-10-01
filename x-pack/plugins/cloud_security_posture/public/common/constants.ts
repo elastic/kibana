@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
@@ -15,8 +15,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
@@ -29,22 +27,13 @@ import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
-export const statusColors = {
-  passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
-};
-
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
-export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
 export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'cloudPosture:dataTable:columns';
-export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
-export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
-  'cloudPosture:complianceDashboard:clusterSort';
 export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
@@ -253,6 +242,7 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
+  SOURCE: 'data_stream.dataset',
 } as const;
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',

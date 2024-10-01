@@ -82,14 +82,20 @@ export const createLogsExplorerProfileCustomizations =
     customizations.set({
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
-        module.createCustomControlColumnsConfiguration(service)
+      rowAdditionalLeadingControls: await import('./custom_control_column').then((module) =>
+        module.getRowAdditionalControlColumns()
       ),
     });
 
     customizations.set({
       id: 'field_list',
-      logsFieldsEnabled: true,
+      /**
+       * We are switching from these virtual columns to the One Discover Summary column.
+       * In this effort we don't want to immediately cleanup everything about these virtual columns,
+       * but only disable their instantiation.
+       * We'll clean this part as soon as we decide to definitevely discard these columns.
+       **/
+      logsFieldsEnabled: false,
     });
 
     // Fix bug where filtering on histogram does not work

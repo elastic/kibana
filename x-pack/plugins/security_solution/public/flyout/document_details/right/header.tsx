@@ -9,14 +9,13 @@ import type { EuiFlyoutHeader } from '@elastic/eui';
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
+import { FlyoutHeader, FlyoutHeaderTabs } from '@kbn/security-solution-common';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentDetailsContext } from '../shared/context';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import {
   AlertsCasesTourSteps,
   getTourAnchor,

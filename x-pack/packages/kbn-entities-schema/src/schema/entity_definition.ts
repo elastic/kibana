@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -48,6 +48,31 @@ export const entityDefinitionSchema = z.object({
       ),
     })
   ),
+  installStatus: z.optional(
+    z.union([
+      z.literal('installing'),
+      z.literal('upgrading'),
+      z.literal('installed'),
+      z.literal('failed'),
+    ])
+  ),
+  installStartedAt: z.optional(z.string()),
 });
 
+export const entityDefinitionUpdateSchema = entityDefinitionSchema
+  .omit({
+    id: true,
+    managed: true,
+    installStatus: true,
+    installStartedAt: true,
+  })
+  .partial()
+  .merge(
+    z.object({
+      history: z.optional(entityDefinitionSchema.shape.history.partial()),
+      version: semVerSchema,
+    })
+  );
+
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
+export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;

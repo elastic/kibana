@@ -20,7 +20,6 @@ export const store = configureStore({
   preloadedState: {},
   enhancers: [],
 });
-
 sagaMW.run(rootEffect);
 
 export const storage = new Storage(window.localStorage);

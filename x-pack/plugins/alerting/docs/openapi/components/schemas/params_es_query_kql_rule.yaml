@@ -1,0 +1,65 @@
+title: Elasticsearch KQL query rule params
+description: > 
+  An Elasticsearch query rule can run a query defined in KQL or Lucene and compare the number of matches to a configured threshold. These parameters are appropriate when `rule_type_id` is `.es-query`.
+type: object
+required:
+  - searchType
+  - size
+  - threshold
+  - thresholdComparator
+  - timeWindowSize
+  - timeWindowUnit
+properties:
+  aggField:
+    $ref: 'aggfield.yaml'
+  aggType:
+    $ref: 'aggtype.yaml'
+  excludeHitsFromPreviousRun:
+    $ref: 'excludehitsfrompreviousrun.yaml'
+  groupBy:
+    $ref: 'groupby.yaml'
+  searchConfiguration:
+    description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+    type: object
+    properties:
+      filter:
+        type: array
+        items:
+          $ref: 'filter.yaml'
+      index:
+        description: The indices to query.
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      query:
+        type: object
+        properties:
+          language:
+            type: string
+            example: kuery
+          query:
+            type: string
+  searchType:
+    description: The type of query, in this case a text-based query that uses KQL or Lucene.
+    type: string
+    enum:
+      - searchSource
+    example: searchSource
+  size:
+    $ref: 'size.yaml'
+  termField:
+    $ref: 'termfield.yaml'
+  termSize:
+    $ref: 'termsize.yaml'
+  threshold:
+    $ref: 'threshold.yaml'
+  thresholdComparator:
+    $ref: 'thresholdcomparator.yaml'
+  timeField:
+    $ref: 'timefield.yaml'
+  timeWindowSize:
+    $ref: 'timewindowsize.yaml'
+  timeWindowUnit:
+    $ref: 'timewindowunit.yaml'

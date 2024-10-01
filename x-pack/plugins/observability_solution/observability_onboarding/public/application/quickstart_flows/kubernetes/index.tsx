@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiPanel,
   EuiSkeletonRectangle,
@@ -14,30 +14,36 @@ import {
   EuiSteps,
   EuiStepStatus,
 } from '@elastic/eui';
-import useEvent from 'react-use/lib/useEvent';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CommandSnippet } from './command_snippet';
 import { DataIngestStatus } from './data_ingest_status';
+import { FeedbackButtons } from '../shared/feedback_buttons';
+import { useKubernetesFlow } from './use_kubernetes_flow';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 
 export const KubernetesPanel: React.FC = () => {
-  const [windowLostFocus, setWindowLostFocus] = useState(false);
-  const { data, status, error, refetch } = useFetcher((callApi) => {
-    return callApi('POST /internal/observability_onboarding/kubernetes/flow');
-  }, []);
+  const { data, status, error, refetch } = useKubernetesFlow();
 
-  useEvent('blur', () => setWindowLostFocus(true), window);
+  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+    isActive: status === FETCH_STATUS.SUCCESS,
+    onboardingFlowType: 'kubernetes',
+    onboardingId: data?.onboardingId,
+  });
 
   if (error !== undefined) {
-    return <EmptyPrompt error={error} onRetryClick={refetch} />;
+    return <EmptyPrompt onboardingFlowType="kubernetes" error={error} onRetryClick={refetch} />;
   }
-
-  const isMonitoringStepActive =
-    status === FETCH_STATUS.SUCCESS && data !== undefined && windowLostFocus;
 
   const steps = [
     {
-      title: 'Install Elastic Agent on your host',
+      title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.installStepTitle',
+        {
+          defaultMessage: 'Install standalone Elastic Agent on your Kubernetes cluster',
+        }
+      ),
       children: (
         <>
           {status !== FETCH_STATUS.SUCCESS && (
@@ -60,15 +66,23 @@ export const KubernetesPanel: React.FC = () => {
       ),
     },
     {
-      title: 'Monitor your Kubernetes cluster',
+      title: i18n.translate(
+        'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.monitorStepTitle',
+        {
+          defaultMessage: 'Monitor your Kubernetes cluster',
+        }
+      ),
       status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
-      children: isMonitoringStepActive && <DataIngestStatus onboardingId={data.onboardingId} />,
+      children: isMonitoringStepActive && data && (
+        <DataIngestStatus onboardingId={data.onboardingId} />
+      ),
     },
   ];
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiSteps steps={steps} />
+      <FeedbackButtons flow="kubernetes" />
     </EuiPanel>
   );
 };

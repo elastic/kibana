@@ -13,7 +13,7 @@ import { timelineActions } from '../../../store';
 import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { TestProviders } from '../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { RowRendererId } from '../../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/unified_components/default_headers';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
@@ -73,7 +73,7 @@ describe('NewTimelineButton', () => {
         show: true,
         timelineType: 'default',
         updated: undefined,
-        excludedRowRendererIds: [...Object.keys(RowRendererId)],
+        excludedRowRendererIds: RowRendererValues,
       });
     });
 

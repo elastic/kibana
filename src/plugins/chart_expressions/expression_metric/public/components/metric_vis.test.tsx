@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -428,14 +429,12 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      expect(visConfig!.value).toMatchInlineSnapshot(
-        `
+      expect(visConfig!.value).toMatchInlineSnapshot(`
         Array [
           "text-28.984375",
           "text-100",
         ]
-      `
-      );
+      `);
     });
 
     it('should display multi-values numeric values formatted and without quotes', () => {
@@ -451,14 +450,24 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      expect(visConfig!.value).toMatchInlineSnapshot(
-        `
+      expect(visConfig!.value).toMatchInlineSnapshot(`
         Array [
           "number-28.984375",
           "number-100",
         ]
-      `
-      );
+      `);
+    });
+
+    it('should display an empty tile if no data is provided', () => {
+      const newTable = {
+        ...table,
+        rows: [],
+      };
+      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+
+      const [[visConfig]] = component.find(Metric).props().data!;
+
+      expect(visConfig!.value).toMatchInlineSnapshot(`NaN`);
     });
   });
 
@@ -552,6 +561,7 @@ describe('MetricVisComponent', function () {
         componentWithSecondaryDimension
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -593,6 +603,7 @@ describe('MetricVisComponent', function () {
         componentWithExtraText
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHostsTable } from './use_hosts_table';
+import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
@@ -41,7 +41,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
       {
-        name: 'cpu',
+        name: 'cpuV2',
         value: 0.6353277777777777,
       },
       {
@@ -75,11 +75,12 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-0',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
   {
     metrics: [
       {
-        name: 'cpu',
+        name: 'cpuV2',
         value: 0.8647805555555556,
       },
       {
@@ -113,6 +114,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-1',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
 ];
 
@@ -156,7 +158,7 @@ describe('useHostTable hook', () => {
     } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const expected = [
+    const expected: Array<Partial<HostNodeRow>> = [
       {
         name: 'host-0',
         os: '-',
@@ -169,11 +171,12 @@ describe('useHostTable hook', () => {
         rx: 252456.92916666667,
         tx: 252758.425,
         memory: 0.94525,
-        cpu: 0.6353277777777777,
+        cpuV2: 0.6353277777777777,
         diskSpaceUsage: 0.2040001,
         memoryFree: 34359.738368,
         normalizedLoad1m: 239.2040001,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
       {
         name: 'host-1',
@@ -187,11 +190,12 @@ describe('useHostTable hook', () => {
         rx: 95.86339715321859,
         tx: 110.38566859563191,
         memory: 0.5400000214576721,
-        cpu: 0.8647805555555556,
+        cpuV2: 0.8647805555555556,
         diskSpaceUsage: 0.5400000214576721,
         memoryFree: 9.194304,
         normalizedLoad1m: 100,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
     ];
 

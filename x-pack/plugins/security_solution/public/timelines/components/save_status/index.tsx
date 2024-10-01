@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 
 const UNSAVED = i18n.translate('xpack.securitySolution.timeline.saveStatus.unsavedLabel', {
   defaultMessage: 'Unsaved',
@@ -47,7 +47,7 @@ export const TimelineSaveStatus = React.memo<TimelineSaveStatusProps>(({ timelin
     pick(['changed', 'status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
 
-  const isDraft = status === TimelineStatus.draft;
+  const isDraft = status === TimelineStatusEnum.draft;
 
   let statusContent: React.ReactNode;
   if (isDraft || !updated) {

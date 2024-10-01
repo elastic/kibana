@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../services/http_service';
-import { mlApiServicesProvider } from '../../services/ml_api_service';
+import { mlApiProvider } from '../../services/ml_api_service';
 import { type CloudInfo, extractDeploymentId } from '../../services/ml_server_info';
 
 export function useMlNodeAvailableCheck() {
@@ -25,7 +25,7 @@ export function useMlNodeAvailableCheck() {
 
 export function useMlNodeCheck() {
   const { http } = useKibana().services;
-  const ml = useMemo(() => mlApiServicesProvider(new HttpService(http!)), [http]);
+  const mlApi = useMemo(() => mlApiProvider(new HttpService(http!)), [http]);
   const [mlNodeCount, setMlNodeCount] = useState<number | null>(null);
   const [lazyMlNodeCount, setLazyMlNodeCount] = useState<number | null>(null);
   const [userHasPermissionToViewMlNodeCount, setUserHasPermissionToViewMlNodeCount] = useState<
@@ -35,7 +35,7 @@ export function useMlNodeCheck() {
 
   const checkNodes = useCallback(async () => {
     try {
-      const { count, lazyNodeCount } = await ml.mlNodeCount();
+      const { count, lazyNodeCount } = await mlApi.mlNodeCount();
       setMlNodeCount(count);
       setLazyMlNodeCount(lazyNodeCount);
       setUserHasPermissionToViewMlNodeCount(true);
@@ -47,7 +47,7 @@ export function useMlNodeCheck() {
         setMlNodesAvailable(true);
       }
     }
-  }, [ml]);
+  }, [mlApi]);
 
   useEffect(
     function checkNodesInit() {
@@ -70,28 +70,32 @@ const defaultCloudInfo: CloudInfo = {
   isCloud: false,
   isCloudTrial: false,
   deploymentId: null,
+  cloudUrl: null,
+  isMlAutoscalingEnabled: false,
 };
 
 export function useCloudCheck() {
   const { http } = useKibana().services;
-  const ml = useMemo(() => mlApiServicesProvider(new HttpService(http!)), [http]);
+  const mlApi = useMemo(() => mlApiProvider(new HttpService(http!)), [http]);
   const [cloudInfo, setCloudInfo] = useState<CloudInfo>(defaultCloudInfo);
 
   const loadInfo = useCallback(async () => {
     try {
-      const resp = await ml.mlInfo();
+      const resp = await mlApi.mlInfo();
       setCloudInfo({
         cloudId: resp.cloudId ?? null,
         isCloud: resp.cloudId !== undefined,
         isCloudTrial: resp.isCloudTrial === true,
         deploymentId: !resp.cloudId ? null : extractDeploymentId(resp.cloudId),
+        cloudUrl: resp.cloudUrl ?? null,
+        isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
       });
     } catch (error) {
       if (error.statusCode === 403) {
         setCloudInfo(defaultCloudInfo);
       }
     }
-  }, [ml]);
+  }, [mlApi]);
 
   useEffect(
     function loadInfoInit() {

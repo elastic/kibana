@@ -16,13 +16,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { agentStatusesToSummary } from '../../../common/services';
-
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
-
 import { appContextService } from '../app_context';
-
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { getAgentById, removeSOAttributes } from './crud';
@@ -42,19 +40,30 @@ export async function getAgentStatusById(
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
 
+/**
+ * getAgentStatusForAgentPolicy
+ * @param esClient
+ * @param soClient
+ * @param agentPolicyId @deprecated use agentPolicyIds instead since the move to multi-policy
+ * @param filterKuery
+ * @param spaceId
+ * @param agentPolicyIds
+ */
+
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
   filterKuery?: string,
-  spaceId?: string
+  spaceId?: string,
+  agentPolicyIds?: string[]
 ) {
   const logger = appContextService.getLogger();
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
   const clauses: QueryDslQueryContainer[] = [];
 
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (useSpaceAwareness && spaceId) {
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(
@@ -73,8 +82,14 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-
-  if (agentPolicyId) {
+  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
+  if (agentPolicyIds) {
+    clauses.push({
+      terms: {
+        policy_id: agentPolicyIds,
+      },
+    });
+  } else if (agentPolicyId) {
     clauses.push({
       term: {
         policy_id: agentPolicyId,

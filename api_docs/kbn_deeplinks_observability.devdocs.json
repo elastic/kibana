@@ -22,6 +22,104 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DataQualityDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataQualityDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.DataQualityDetailsLocatorParams",
+            "text": "DataQualityDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.dataStream",
+            "type": "string",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "TimeRangeConfig | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.degradedFields",
+            "type": "Object",
+            "tags": [],
+            "label": "degradedFields",
+            "description": [],
+            "signature": [
+              "{ table?: DegradedFieldsTable | undefined; } | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.expandedDegradedField",
+            "type": "string",
+            "tags": [],
+            "label": "expandedDegradedField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.DataQualityLocatorParams",
         "type": "Interface",
         "tags": [],
@@ -57,20 +155,6 @@
             "description": [],
             "signature": [
               "Filters | undefined"
-            ],
-            "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/deeplinks-observability",
-            "id": "def-common.DataQualityLocatorParams.flyout",
-            "type": "Object",
-            "tags": [],
-            "label": "flyout",
-            "description": [],
-            "signature": [
-              "{ dataset: DatasetConfig; } | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
             "deprecated": false,
@@ -759,9 +843,24 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"synthetics\" | \"ux\" | \"apm\" | \"logs\" | \"profiling\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
+          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DATA_QUALITY_DETAILS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_DETAILS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"DATA_QUALITY_DETAILS_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -825,7 +924,7 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"profiling:functions\""
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,

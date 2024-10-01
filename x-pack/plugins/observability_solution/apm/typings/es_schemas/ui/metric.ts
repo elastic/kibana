@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { MetricRaw } from '../raw/metric_raw';
-
-export type Metric = MetricRaw;
+export type { Metric } from '@kbn/apm-types/es_schemas_ui';

@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -31,9 +32,10 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
@@ -72,6 +74,8 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -100,7 +104,6 @@ export interface RunOpts<TParams extends RuleParams> {
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
-  inputIndexFields: DataViewFieldBase[];
   experimentalFeatures?: ExperimentalFeatures;
 }
 
@@ -124,7 +127,12 @@ export type SecurityAlertType<
       services: PersistenceServices;
       runOpts: RunOpts<TParams>;
     }
-  ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
+  ) => Promise<
+    SearchAfterAndBulkCreateReturnType & {
+      state: TState;
+      loggedRequests?: RulePreviewLoggedRequest[];
+    }
+  >;
 };
 
 export interface CreateSecurityRuleTypeWrapperProps {
@@ -139,6 +147,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
+  analytics?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -158,15 +167,15 @@ export interface CreateRuleOptions {
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
-  responseActions: RuleResponseAction[];
+  signalsCount: number;
+  responseActions: RuleResponseAction[] | undefined;
 }
-export interface CreateQueryRuleAdditionalOptions {
+
+export interface CreateRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
 }
 
-export interface CreateQueryRuleOptions
-  extends CreateRuleOptions,
-    CreateQueryRuleAdditionalOptions {
+export interface CreateQueryRuleOptions extends CreateRuleOptions, CreateRuleAdditionalOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }

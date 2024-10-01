@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -32,7 +33,7 @@ interface BundleOptions {
    */
   prototypeDocument?: PrototypeDocument | string;
   /**
-   * When specified the produced bundle will contain only
+   * When `includeLabels` are specified the produced bundle will contain only
    * operations objects with matching labels
    */
   includeLabels?: string[];
@@ -40,7 +41,7 @@ interface BundleOptions {
 
 export const bundle = async ({
   sourceGlob,
-  outputFilePath = 'bundled-{version}.schema.yaml',
+  outputFilePath = 'bundled_{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
   const prototypeDocument = options?.prototypeDocument
@@ -82,6 +83,7 @@ export const bundle = async ({
     splitDocumentsByVersion: true,
     skipServers: Boolean(prototypeDocument?.servers),
     skipSecurity: Boolean(prototypeDocument?.security),
+    addTags: prototypeDocument?.tags,
   });
 
   await writeDocuments(resultDocumentsMap, outputFilePath);

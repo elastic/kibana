@@ -22,9 +22,15 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Osquery API (Elastic Cloud Serverless)',
+          title: 'Security Osquery API (Elastic Cloud Serverless)',
           description: 'Run live queries, manage packs and saved queries.',
         },
+        tags: [
+          {
+            name: 'Security Osquery API',
+            description: 'Run live queries, manage packs and saved queries.',
+          },
+        ],
       },
     },
   });
@@ -37,9 +43,15 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Osquery API (Elastic Cloud and self-hosted)',
+          title: 'Security Osquery API (Elastic Cloud and self-hosted)',
           description: 'Run live queries, manage packs and saved queries.',
         },
+        tags: [
+          {
+            name: 'Security Osquery API',
+            description: 'Run live queries, manage packs and saved queries.',
+          },
+        ],
       },
     },
   });

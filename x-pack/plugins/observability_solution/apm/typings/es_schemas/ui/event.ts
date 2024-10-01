@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { EventRaw } from '../raw/event_raw';
-import { Agent } from './fields/agent';
-
-export interface Event extends EventRaw {
-  agent: Agent;
-}
+export type { Event } from '@kbn/apm-types/es_schemas_ui';

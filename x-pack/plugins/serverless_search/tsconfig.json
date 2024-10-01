@@ -45,7 +45,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
     "@kbn/search-connectors-plugin",
-    "@kbn/index-management",
+    "@kbn/index-management-shared-types",
     "@kbn/react-kibana-context-render",
     "@kbn/search-playground",
     "@kbn/security-api-key-management",

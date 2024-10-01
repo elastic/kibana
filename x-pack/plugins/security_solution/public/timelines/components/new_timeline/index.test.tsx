@@ -11,7 +11,11 @@ import { NewTimelineButton } from '.';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions } from '../../store';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { RowRendererId, TimelineType } from '../../../../common/api/timeline';
+import {
+  RowRendererValues,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../common/api/timeline';
 import { TestProviders } from '../../../common/mock';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
@@ -43,7 +47,7 @@ describe('NewTimelineButton', () => {
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
-      TimelineType.default
+      TimelineTypeEnum.default
     );
 
     const button = getByTestId('timelines-page-create-new-timeline');
@@ -62,9 +66,9 @@ describe('NewTimelineButton', () => {
         id: TimelineId.active,
         indexNames: selectedPatterns,
         show: true,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         updated: undefined,
-        excludedRowRendererIds: [...Object.values(RowRendererId)],
+        excludedRowRendererIds: RowRendererValues,
       });
     });
   });
@@ -73,7 +77,7 @@ describe('NewTimelineButton', () => {
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
-      TimelineType.template
+      TimelineTypeEnum.template
     );
 
     const button = getByTestId('timelines-page-create-new-timeline-template');
@@ -92,7 +96,7 @@ describe('NewTimelineButton', () => {
         id: TimelineId.active,
         indexNames: selectedPatterns,
         show: true,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
         updated: undefined,
         excludedRowRendererIds: [],
       });

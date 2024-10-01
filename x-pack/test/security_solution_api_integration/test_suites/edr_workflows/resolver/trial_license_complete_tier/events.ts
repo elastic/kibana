@@ -18,6 +18,7 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import TestAgent from 'supertest/lib/agent';
 import {
   GeneratedTrees,
   Options,
@@ -26,8 +27,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflo
 import { compareArrays, HEADERS } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
+  const utils = getService('securitySolutionUtils');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
@@ -54,7 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('@ess @serverless event route', function () {
     let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
+    let adminSupertest: TestAgent;
+
     before(async () => {
+      adminSupertest = await utils.createSuperTest();
+
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
@@ -78,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           filter: [{ term: { 'event.id': tree.origin.relatedEvents[0]?.event?.id } }],
         },
       });
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -101,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           filter: [{ term: { 'process.entity_id': '5555' } }],
         },
       });
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -118,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return related events for the root node', async () => {
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -144,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         },
       });
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -165,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return paginated results for the root node', async () => {
-      let { body }: { body: ResolverPaginatedEvents } = await supertest
+      let { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events?limit=2`)
         .set(HEADERS)
         .send({
@@ -181,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
       compareArrays(tree.origin.relatedEvents, body.events);
       expect(body.nextEvent).not.to.eql(null);
 
-      ({ body } = await supertest
+      ({ body } = await adminSupertest
         .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
         .set(HEADERS)
         .send({
@@ -197,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
       compareArrays(tree.origin.relatedEvents, body.events);
       expect(body.nextEvent).to.not.eql(null);
 
-      ({ body } = await supertest
+      ({ body } = await adminSupertest
         .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
         .set(HEADERS)
         .send({
@@ -214,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the first page of information when the cursor is invalid', async () => {
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events?afterEvent=blah`)
         .set(HEADERS)
         .send({
@@ -232,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should sort the events in descending order', async () => {
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -259,7 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
         timestampAsDateSafeVersion(tree.origin.relatedEvents[0])?.toISOString() ??
         new Date(0).toISOString();
       const to = from;
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -277,7 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not find events when using an incorrect index pattern', async () => {
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -296,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should retrieve lifecycle events for multiple ids', async () => {
       const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
       expect(originParentID).to.not.be('');
-      const { body }: { body: ResolverPaginatedEvents } = await supertest
+      const { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .set(HEADERS)
         .send({
@@ -323,7 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should paginate lifecycle events for multiple ids', async () => {
       const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
       expect(originParentID).to.not.be('');
-      let { body }: { body: ResolverPaginatedEvents } = await supertest
+      let { body }: { body: ResolverPaginatedEvents } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .query({ limit: 2 })
         .set(HEADERS)
@@ -346,7 +351,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.events.length).to.eql(2);
       expect(body.nextEvent).not.to.eql(null);
 
-      ({ body } = await supertest
+      ({ body } = await adminSupertest
         .post(`/api/endpoint/resolver/events`)
         .query({ limit: 3, afterEvent: body.nextEvent })
         .set(HEADERS)

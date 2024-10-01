@@ -245,8 +245,86 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/search_playground\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SEARCH_MODE_FEATURE_FLAG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_MODE_FEATURE_FLAG_ID",
+        "description": [],
+        "signature": [
+          "\"searchPlayground:searchModeEnabled\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.DEFAULT_PAGINATION",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_PAGINATION",
+        "description": [],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.from",
+            "type": "number",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

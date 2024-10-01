@@ -68,7 +68,7 @@ describe('utils', () => {
       expect(tableStylesOverride).toMatchInlineSnapshot(`
         Object {
           "border": "horizontal",
-          "cellPadding": "l",
+          "cellPadding": "s",
           "fontSize": "s",
           "header": "underline",
           "rowClasses": Object {

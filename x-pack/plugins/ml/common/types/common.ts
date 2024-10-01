@@ -35,14 +35,6 @@ type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;
 };
 
-export interface ListingPageUrlState {
-  pageSize: number;
-  pageIndex: number;
-  sortField: string;
-  sortDirection: string;
-  queryText?: string;
-}
-
 export type AppPageState<T> = {
   [key in MlPages]?: Partial<T>;
 };

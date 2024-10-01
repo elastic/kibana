@@ -8,8 +8,8 @@
 import { difference, isEqual, isEqualWith } from 'lodash';
 
 import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { PrivilegesService } from '@kbn/security-authorization-core';
 
-import type { PrivilegesService } from './privileges';
 import { serializePrivileges } from './privileges_serializer';
 
 export async function registerPrivilegesWithCluster(

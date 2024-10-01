@@ -1,15 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
   ESQLAstCommand,
+  ESQLAstComment,
+  ESQLAstExpression,
   ESQLAstItem,
   ESQLAstNode,
+  ESQLAstNodeFormatting,
+  ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,
@@ -19,11 +24,13 @@ import type {
   ESQLList,
   ESQLLiteral,
   ESQLParamLiteral,
+  ESQLProperNode,
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
   ESQLUnknownItem,
 } from '../types';
+import { NodeMatchTemplate, templateToPredicate } from './helpers';
 
 type Node = ESQLAstNode | ESQLAstNode[];
 
@@ -31,15 +38,24 @@ export interface WalkerOptions {
   visitCommand?: (node: ESQLCommand) => void;
   visitCommandOption?: (node: ESQLCommandOption) => void;
   visitCommandMode?: (node: ESQLCommandMode) => void;
-  visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
-  visitSource?: (node: ESQLSource) => void;
+  /** @todo Rename to `visitExpression`. */
+  visitSingleAstItem?: (node: ESQLAstExpression) => void;
+  visitQuery?: (node: ESQLAstQueryExpression) => void;
   visitFunction?: (node: ESQLFunction) => void;
+  visitSource?: (node: ESQLSource) => void;
   visitColumn?: (node: ESQLColumn) => void;
   visitLiteral?: (node: ESQLLiteral) => void;
   visitListLiteral?: (node: ESQLList) => void;
   visitTimeIntervalLiteral?: (node: ESQLTimeInterval) => void;
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
+
+  /**
+   * Called for any node type that does not have a specific visitor.
+   *
+   * @param node Any valid AST node.
+   */
+  visitAny?: (node: ESQLProperNode) => void;
 }
 
 export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
@@ -103,6 +119,82 @@ export class Walker {
   };
 
   /**
+   * Finds and returns the first node that matches the search criteria.
+   *
+   * @param node AST node to start the search from.
+   * @param predicate A function that returns true if the node matches the search criteria.
+   * @returns The first node that matches the search criteria.
+   */
+  public static readonly find = (
+    node: WalkerAstNode,
+    predicate: (node: ESQLProperNode) => boolean
+  ): ESQLProperNode | undefined => {
+    let found: ESQLProperNode | undefined;
+    Walker.walk(node, {
+      visitAny: (child) => {
+        if (!found && predicate(child)) {
+          found = child;
+        }
+      },
+    });
+    return found;
+  };
+
+  /**
+   * Finds and returns all nodes that match the search criteria.
+   *
+   * @param node AST node to start the search from.
+   * @param predicate A function that returns true if the node matches the search criteria.
+   * @returns All nodes that match the search criteria.
+   */
+  public static readonly findAll = (
+    node: WalkerAstNode,
+    predicate: (node: ESQLProperNode) => boolean
+  ): ESQLProperNode[] => {
+    const list: ESQLProperNode[] = [];
+    Walker.walk(node, {
+      visitAny: (child) => {
+        if (predicate(child)) {
+          list.push(child);
+        }
+      },
+    });
+    return list;
+  };
+
+  /**
+   * Matches a single node against a template object. Returns the first node
+   * that matches the template.
+   *
+   * @param node AST node to match against the template.
+   * @param template Template object to match against the node.
+   * @returns The first node that matches the template
+   */
+  public static readonly match = (
+    node: WalkerAstNode,
+    template: NodeMatchTemplate
+  ): ESQLProperNode | undefined => {
+    const predicate = templateToPredicate(template);
+    return Walker.find(node, predicate);
+  };
+
+  /**
+   * Matches all nodes against a template object. Returns all nodes that match
+   * the template.
+   *
+   * @param node AST node to match against the template.
+   * @param template Template object to match against the node.
+   * @returns All nodes that match the template
+   */
+  public static readonly matchAll = (
+    node: WalkerAstNode,
+    template: NodeMatchTemplate
+  ): ESQLProperNode[] => {
+    const predicate = templateToPredicate(template);
+    return Walker.findAll(node, predicate);
+  };
+
+  /**
    * Finds the first function that matches the predicate.
    *
    * @param node AST node from which to search for a function
@@ -138,6 +230,58 @@ export class Walker {
     return !!Walker.findFunction(node, (fn) => fn.name === name);
   };
 
+  public static readonly visitComments = (
+    root: ESQLAstNode | ESQLAstNode[],
+    callback: (
+      comment: ESQLAstComment,
+      node: ESQLProperNode,
+      attachment: keyof ESQLAstNodeFormatting
+    ) => void
+  ): void => {
+    Walker.walk(root, {
+      visitAny: (node) => {
+        const formatting = node.formatting;
+        if (!formatting) return;
+
+        if (formatting.top) {
+          for (const decoration of formatting.top) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'top');
+            }
+          }
+        }
+
+        if (formatting.left) {
+          for (const decoration of formatting.left) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'left');
+            }
+          }
+        }
+
+        if (formatting.right) {
+          for (const decoration of formatting.right) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'right');
+            }
+          }
+        }
+
+        if (formatting.rightSingleLine) {
+          callback(formatting.rightSingleLine, node, 'rightSingleLine');
+        }
+
+        if (formatting.bottom) {
+          for (const decoration of formatting.bottom) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'bottom');
+            }
+          }
+        }
+      },
+    });
+  };
+
   constructor(protected readonly options: WalkerOptions) {}
 
   public walk(node: undefined | ESQLAstNode | ESQLAstNode[]): void {
@@ -161,7 +305,8 @@ export class Walker {
   }
 
   public walkCommand(node: ESQLAstCommand): void {
-    this.options.visitCommand?.(node);
+    const { options } = this;
+    (options.visitCommand ?? options.visitAny)?.(node);
     switch (node.name) {
       default: {
         this.walk(node.args);
@@ -171,7 +316,8 @@ export class Walker {
   }
 
   public walkOption(node: ESQLCommandOption): void {
-    this.options.visitCommandOption?.(node);
+    const { options } = this;
+    (options.visitCommandOption ?? options.visitAny)?.(node);
     for (const child of node.args) {
       this.walkAstItem(child);
     }
@@ -188,20 +334,48 @@ export class Walker {
   }
 
   public walkMode(node: ESQLCommandMode): void {
-    this.options.visitCommandMode?.(node);
+    const { options } = this;
+    (options.visitCommandMode ?? options.visitAny)?.(node);
   }
 
   public walkListLiteral(node: ESQLList): void {
-    this.options.visitListLiteral?.(node);
+    const { options } = this;
+    (options.visitListLiteral ?? options.visitAny)?.(node);
     for (const value of node.values) {
       this.walkAstItem(value);
     }
   }
 
-  public walkSingleAstItem(node: ESQLSingleAstItem): void {
+  public walkFunction(node: ESQLFunction): void {
+    const { options } = this;
+    (options.visitFunction ?? options.visitAny)?.(node);
+    const args = node.args;
+    const length = args.length;
+    for (let i = 0; i < length; i++) {
+      const arg = args[i];
+      this.walkAstItem(arg);
+    }
+  }
+
+  public walkQuery(node: ESQLAstQueryExpression): void {
+    const { options } = this;
+    (options.visitQuery ?? options.visitAny)?.(node);
+    const commands = node.commands;
+    const length = commands.length;
+    for (let i = 0; i < length; i++) {
+      const arg = commands[i];
+      this.walkCommand(arg);
+    }
+  }
+
+  public walkSingleAstItem(node: ESQLAstExpression): void {
     const { options } = this;
     options.visitSingleAstItem?.(node);
     switch (node.type) {
+      case 'query': {
+        this.walkQuery(node as ESQLAstQueryExpression);
+        break;
+      }
       case 'function': {
         this.walkFunction(node as ESQLFunction);
         break;
@@ -215,15 +389,15 @@ export class Walker {
         break;
       }
       case 'source': {
-        options.visitSource?.(node);
+        (options.visitSource ?? options.visitAny)?.(node);
         break;
       }
       case 'column': {
-        options.visitColumn?.(node);
+        (options.visitColumn ?? options.visitAny)?.(node);
         break;
       }
       case 'literal': {
-        options.visitLiteral?.(node);
+        (options.visitLiteral ?? options.visitAny)?.(node);
         break;
       }
       case 'list': {
@@ -231,27 +405,17 @@ export class Walker {
         break;
       }
       case 'timeInterval': {
-        options.visitTimeIntervalLiteral?.(node);
+        (options.visitTimeIntervalLiteral ?? options.visitAny)?.(node);
         break;
       }
       case 'inlineCast': {
-        options.visitInlineCast?.(node);
+        (options.visitInlineCast ?? options.visitAny)?.(node);
         break;
       }
       case 'unknown': {
-        options.visitUnknown?.(node);
+        (options.visitUnknown ?? options.visitAny)?.(node);
         break;
       }
-    }
-  }
-
-  public walkFunction(node: ESQLFunction): void {
-    this.options.visitFunction?.(node);
-    const args = node.args;
-    const length = args.length;
-    for (let i = 0; i < length; i++) {
-      const arg = args[i];
-      this.walkAstItem(arg);
     }
   }
 }

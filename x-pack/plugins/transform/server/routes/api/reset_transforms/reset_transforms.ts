@@ -7,12 +7,12 @@
 
 import type { KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
-import type { ResponseStatus } from '../../../../common/api_schemas/common';
+import type { ResponseStatus } from '../../api_schemas/common';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
-} from '../../../../common/api_schemas/reset_transforms';
+} from '../../api_schemas/reset_transforms';
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 

@@ -4,6 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+  # Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -14,17 +15,48 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-  - target: '$.components.securitySchemes'
-    description: Add an API key security scheme
+  # Mark all operations as beta
+  - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
+    description: Add x-beta
     update:
-      apiKeyAuth:
-        in: header
-        name: Authorization
-        type: apiKey
-        description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/docs/current/serverless/api-keys).
-  - target: '$'
-    description: Add document-level security.
+      x-beta: true
+  # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="alerting")]'
+    description: Change tag description and displayName
     update:
-      security:
-        - apiKeyAuth: []
-
+      description: >
+        Alerting enables you to define rules, which detect complex conditions within your data.
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
+        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      externalDocs:
+        description: Alerting documentation
+        url: https://www.elastic.co/docs/current/serverless/rules
+      x-displayName: "Alerting"
+  - target: '$.tags[?(@.name=="connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+        Alerting rules can use connectors to run actions when rule conditions are met.
+      externalDocs:
+        description: Connector documentation
+        url: https://www.elastic.co/docs/current/serverless/action-connectors
+      x-displayName: "Connectors"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="ml")]'
+    description: Change displayName
+    update:
+      x-displayName: "Machine learning"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, and installed plugins.

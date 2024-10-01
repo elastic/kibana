@@ -43,16 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
-   */
-  responseActionsEnabled: true,
-
-  /**
-   * Enables the automated endpoint response action in rule + alerts
-   */
-  endpointResponseActionsEnabled: true,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
@@ -82,10 +72,10 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: false,
+  responseActionsSentinelOneKillProcessEnabled: true,
 
   /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: false,
+  responseActionsSentinelOneProcessesEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
@@ -94,14 +84,14 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
-   * Enables scan response action on Endpoint
+   * Space awareness for Elastic Defend management.
+   * Feature depends on Fleet's corresponding features also being enabled:
+   * - `subfeaturePrivileges`
+   * - `useSpaceAwareness`
+   * and Fleet must set it runtime mode to spaces by calling the following API:
+   * - `POST /internal/fleet/enable_space_awareness`
    */
-  responseActionScanEnabled: false,
-
-  /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
+  endpointManagementSpaceAwarenessEnabled: false,
 
   /**
    * Enables new notes
@@ -129,6 +119,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantBedrockChat: true,
 
   /**
+   * Enables the NaturalLanguageESQLTool and disables the ESQLKnowledgeBaseTool, introduced in `8.16.0`.
+   */
+  assistantNaturalLanguageESQLTool: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -147,6 +142,11 @@ export const allowedExperimentalValues = Object.freeze({
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
+
+  /**
+   * enables logging requests during rule preview
+   */
+  loggingRequestsEnabled: false,
 
   /**
    * Enables Protection Updates tab in the Endpoint Policy Details page
@@ -183,9 +183,15 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: false,
+  jamfDataInAnalyzerEnabled: true,
 
   /*
    * Disables discover esql tab within timeline
@@ -237,12 +243,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
-  filterProcessDescendantsForEventFiltersEnabled: false,
+  filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,
+
+  /**
+   * Enables the new Entity Store engine routes
+   */
+  entityStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

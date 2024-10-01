@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useMemo } from 'react';
@@ -11,8 +12,9 @@ import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  DataViewField,
   DataView,
+  DataViewField,
+  DataViewLazy,
   DataPublicPluginStart,
   UsageCollectionStart,
   DataViewsPublicPluginStart,
@@ -37,7 +39,8 @@ export interface Props {
   /** The docLinks start service from core */
   docLinks: DocLinksStart;
   /** The index pattern where the field will be added  */
-  dataView: DataView;
+  dataView: DataViewLazy;
+  dataViewToUpdate: DataView | DataViewLazy;
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
@@ -72,6 +75,7 @@ export const FieldEditorFlyoutContentContainer = ({
   docLinks,
   fieldTypeToProcess,
   dataView,
+  dataViewToUpdate,
   dataViews,
   search,
   notifications,
@@ -92,6 +96,7 @@ export const FieldEditorFlyoutContentContainer = ({
           notifications,
         },
         dataView,
+        dataViewToUpdate,
         onSave,
         fieldToEdit,
         fieldTypeToProcess,
@@ -116,8 +121,6 @@ export const FieldEditorFlyoutContentContainer = ({
       services={services}
       fieldFormatEditors={fieldFormatEditors}
       fieldFormats={fieldFormats}
-      namesNotAllowed={controller.getNamesNotAllowed()}
-      existingConcreteFields={controller.getExistingConcreteFields()}
       fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
       subfields$={new BehaviorSubject(fieldToEdit?.fields)}
     >

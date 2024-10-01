@@ -8,9 +8,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteEndpointListItem
-      summary: Deletes an endpoint list item
-      tags:
-        - Endpoint exceptions API
+      summary: Delete an endpoint exception list item
+      description: Delete an endpoint exception list item using the `id` or `item_id` field.
       parameters:
         - name: id
           in: query

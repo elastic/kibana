@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
 import {
   AppMountParameters,
   AppStatus,
-  APP_WRAPPER_CLASS,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -56,16 +54,23 @@ export class InvestigateAppPlugin
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
-        defaultMessage: 'Observability Investigate',
+        defaultMessage: 'Investigations',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/investigate',
+      appRoute: '/app/investigations',
       category: DEFAULT_APP_CATEGORIES.observability,
       status: this.config.enabled ? AppStatus.accessible : AppStatus.inaccessible,
       visibleIn: [],
       deepLinks: [
         {
-          id: 'investigate',
+          id: 'investigations',
+          title: i18n.translate('xpack.investigateApp.investigationsDeepLinkTitle', {
+            defaultMessage: 'All investigations',
+          }),
+          path: '/',
+        },
+        {
+          id: 'investigationDetails',
           title: i18n.translate('xpack.investigateApp.newInvestigateDeepLinkTitle', {
             defaultMessage: 'New investigation',
           }),
@@ -99,17 +104,8 @@ export class InvestigateAppPlugin
           appMountParameters.element
         );
 
-        const appWrapperClassName = css`
-          overflow: auto;
-        `;
-
-        const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-
-        appWrapperElement.classList.add(appWrapperClassName);
-
         return () => {
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
-          appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
     });
@@ -118,28 +114,25 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    pluginsSetup.investigate.register((registerWidget) =>
-      Promise.all([
-        pluginsStartPromise,
-        import('./widgets/register_widgets').then((m) => m.registerWidgets),
-        getCreateEsqlService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
-        registerWidgets({
-          dependencies: {
-            setup: pluginsSetup,
-            start: pluginsStart,
-          },
-          services: {
-            esql: createEsqlService({
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              lens: pluginsStart.lens,
-            }),
-          },
-          registerWidget,
-        });
-      })
-    );
+    Promise.all([
+      pluginsStartPromise,
+      import('./items/register_items').then((m) => m.registerItems),
+      getCreateEsqlService(),
+    ]).then(([pluginsStart, registerItems, createEsqlService]) => {
+      registerItems({
+        dependencies: {
+          setup: pluginsSetup,
+          start: pluginsStart,
+        },
+        services: {
+          esql: createEsqlService({
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            lens: pluginsStart.lens,
+          }),
+        },
+      });
+    });
 
     return {};
   }

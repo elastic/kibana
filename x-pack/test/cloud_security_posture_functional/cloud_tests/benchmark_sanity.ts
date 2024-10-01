@@ -34,14 +34,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const benchmarksRows = await benchmark.benchmarkPage.getBenchmarkTableRows();
       for (const row of benchmarksRows) {
         const benchmarkName = await benchmark.benchmarkPage.getCisNameCellData(row);
-        const evaluated = await benchmark.benchmarkPage.getEvaluatedCellData(row);
-        const compliance = await benchmark.benchmarkPage.getComplianceCellData(row);
-        expect(await evaluated).to.not.contain(
-          'Add',
+        const isEvaluationEmpty = await benchmark.benchmarkPage.isEvaluationEmpty(row);
+        const isComplianceEmpty = await benchmark.benchmarkPage.isComplianceEmpty(row);
+
+        expect(isEvaluationEmpty).to.eql(
+          false,
           `The ${benchmarkName} does not have evaluated data`
         );
-        expect(await compliance).to.not.contain(
-          'No',
+
+        expect(isComplianceEmpty).to.eql(
+          false,
           `The ${benchmarkName} does not have compliance data`
         );
       }

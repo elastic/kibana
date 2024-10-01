@@ -10,12 +10,10 @@ import type { IconType } from '@elastic/eui';
 import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
-  SingleTimelineResolveResponse,
-  TimelineTypeLiteral,
-  TimelineTypeLiteralWithNull,
+  ResolvedTimeline,
+  TimelineType,
   TimelineStatus,
-  TemplateTimelineTypeLiteral,
-  TimelineStatusLiteralWithNull,
+  TemplateTimelineType,
   Note,
 } from '../../../../common/api/timeline';
 
@@ -63,7 +61,7 @@ export interface OpenTimelineResult {
   status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -98,7 +96,7 @@ export type OnOpenTimeline = ({
 }: {
   duplicate: boolean;
   timelineId: string;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -195,9 +193,9 @@ export interface OpenTimelineProps {
   /** the requested field to sort on */
   sortField: string;
   /** this affects timeline's behaviour like editable / duplicatible */
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   /* active or immutable */
-  timelineStatus: TimelineStatusLiteralWithNull;
+  timelineStatus: TimelineStatus | null;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
   /** timeline / timeline template */
@@ -208,13 +206,12 @@ export interface OpenTimelineProps {
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */
   hideActions?: ActionTimelineToShow[];
-  tabName?: string;
 }
 
 export interface ResolveTimelineConfig {
-  alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
-  outcome: SingleTimelineResolveResponse['data']['outcome'];
-  alias_purpose: SingleTimelineResolveResponse['data']['alias_purpose'];
+  alias_target_id: ResolvedTimeline['alias_target_id'];
+  outcome: ResolvedTimeline['outcome'];
+  alias_purpose: ResolvedTimeline['alias_purpose'];
 }
 export interface UpdateTimeline {
   duplicate: boolean;
@@ -240,13 +237,13 @@ export enum TimelineTabsStyle {
 export interface TimelineTab {
   disabled: boolean;
   href: string;
-  id: TimelineTypeLiteral;
+  id: TimelineType;
   name: string;
-  onClick: (ev: { preventDefault: () => void }) => void;
+  onClick: (ev: React.SyntheticEvent) => void;
 }
 
 export interface TemplateTimelineFilter {
-  id: TemplateTimelineTypeLiteral;
+  id: TemplateTimelineType;
   name: string;
   disabled: boolean;
   withNext: boolean;

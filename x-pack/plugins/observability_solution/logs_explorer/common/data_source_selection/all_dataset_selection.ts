@@ -8,16 +8,18 @@
 import { Dataset } from '../datasets';
 import { DataSourceSelectionStrategy } from './types';
 
+const SELECTION_TYPE = 'all' as const;
+
 export class AllDatasetSelection implements DataSourceSelectionStrategy {
-  selectionType: 'all';
+  selectionType: typeof SELECTION_TYPE;
   selection: {
     dataset: Dataset;
   };
 
-  private constructor() {
-    this.selectionType = 'all';
+  private constructor({ indices }: { indices: string }) {
+    this.selectionType = SELECTION_TYPE;
     this.selection = {
-      dataset: Dataset.createAllLogsDataset(),
+      dataset: Dataset.createAllLogsDataset({ indices }),
     };
   }
 
@@ -30,8 +32,13 @@ export class AllDatasetSelection implements DataSourceSelectionStrategy {
       selectionType: this.selectionType,
     };
   }
+  public static getLocatorPlainSelection() {
+    return {
+      selectionType: SELECTION_TYPE,
+    };
+  }
 
-  public static create() {
-    return new AllDatasetSelection();
+  public static create({ indices }: { indices: string }) {
+    return new AllDatasetSelection({ indices });
   }
 }

@@ -174,7 +174,8 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         timestamp: new Date().toISOString(),
         status: HealthStatus.OK,
         value: {
-          max_workers: 10,
+          capacity: { config: 10, as_cost: 20, as_workers: 10 },
+          claim_strategy: 'update_by_query',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
@@ -193,16 +194,19 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         status: HealthStatus.OK,
         value: {
           count: 4,
+          cost: 8,
           task_types: {
-            actions_telemetry: { count: 2, status: { idle: 2 } },
-            alerting_telemetry: { count: 1, status: { idle: 1 } },
-            session_cleanup: { count: 1, status: { idle: 1 } },
+            actions_telemetry: { count: 2, cost: 4, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, cost: 2, status: { idle: 1 } },
+            session_cleanup: { count: 1, cost: 2, status: { idle: 1 } },
           },
           schedule: [],
           overdue: 0,
+          overdue_cost: 0,
           overdue_non_recurring: 0,
           estimatedScheduleDensity: [],
           non_recurring: 20,
+          non_recurring_cost: 40,
           owner_ids: 2,
           estimated_schedule_density: [],
           capacity_requirements: {

@@ -231,7 +231,7 @@ describe('Regressions', () => {
           // It's valid to execute a block against an undefined context, but
           // helpers can not do so, so we expect to have an empty object here;
           for (const name in this) {
-            if (Object.prototype.hasOwnProperty.call(this, name)) {
+            if (Object.hasOwn(this, name)) {
               return 'found';
             }
           }

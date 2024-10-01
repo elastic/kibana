@@ -18,7 +18,7 @@ import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagri
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import type { ColumnConfig } from '../../../../common/expressions';
+import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
 import { buildColumnsMetaLookup } from './helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
@@ -46,7 +46,7 @@ export const createGridColumns = (
       ) => void)
     | undefined,
   isReadOnly: boolean,
-  columnConfig: ColumnConfig,
+  columnConfig: DatatableColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,

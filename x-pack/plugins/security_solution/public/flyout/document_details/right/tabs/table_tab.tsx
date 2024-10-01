@@ -13,11 +13,8 @@ import { type EuiBasicTableColumn, EuiText, EuiInMemoryTable, useEuiFontSize } f
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  BrowserField,
-  BrowserFields,
-  TimelineEventsDetailsItem,
-} from '@kbn/timelines-plugin/common';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { TableFieldNameCell } from '../components/table_field_name_cell';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
@@ -26,9 +23,10 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../../timelines/store';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { CellActions } from '../components/cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isInTableScope, isTimelineScope } from '../../../../helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
@@ -58,10 +56,10 @@ const search = {
  * Retrieve the correct field from the BrowserField
  */
 export const getFieldFromBrowserField = memoizeOne(
-  (field: string, browserFields: BrowserFields): BrowserField | undefined => {
+  (field: string, browserFields: BrowserFields): FieldSpec | undefined => {
     const category = getCategory(field);
 
-    return browserFields[category]?.fields?.[field] as BrowserField;
+    return browserFields[category]?.fields?.[field] as FieldSpec;
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
@@ -80,12 +78,27 @@ export type ColumnsProvider = (providerOptions: {
    */
   scopeId: string;
   /**
+   * Id of the rule
+   */
+  ruleId: string;
+  /**
+   * Whether the preview link is in preview mode
+   */
+  isPreview: boolean;
+  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue: (field: string) => string | null;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
-export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, getLinkValue }) => [
+export const getColumns: ColumnsProvider = ({
+  browserFields,
+  eventId,
+  scopeId,
+  getLinkValue,
+  ruleId,
+  isPreview,
+}) => [
   {
     field: 'field',
     name: (
@@ -111,11 +124,13 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <TableFieldValueCell
-            contextId={scopeId}
+            scopeId={scopeId}
             data={data as EventFieldsData}
             eventId={eventId}
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
+            ruleId={ruleId}
+            isPreview={isPreview}
             values={values}
           />
         </CellActions>
@@ -130,8 +145,9 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
 export const TableTab = memo(() => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
 
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, isPreview } =
     useDocumentDetailsContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
     pageIndex: 0,
@@ -202,8 +218,10 @@ export const TableTab = memo(() => {
         eventId,
         scopeId,
         getLinkValue,
+        ruleId,
+        isPreview,
       }),
-    [browserFields, eventId, scopeId, getLinkValue]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview]
   );
 
   return (

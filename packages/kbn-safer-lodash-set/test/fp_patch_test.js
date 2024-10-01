@@ -190,7 +190,7 @@ setFunctions.forEach(([testPermutations, set, testName]) => {
         t.notStrictEqual(arr, result);
         t.ok(Array.isArray(result));
         Object.keys(expected).forEach((key) => {
-          t.ok(Object.prototype.hasOwnProperty.call(result, key));
+          t.ok(Object.hasOwn(result, key));
           t.deepEqual(result[key], expected[key]);
         });
       });

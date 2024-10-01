@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState } from 'react';
@@ -25,8 +26,10 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -56,7 +59,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
+  const dataViews = useStateFromPublishingSubject(
+    api.parentApi?.dataViews ? api.parentApi.dataViews : new BehaviorSubject(undefined)
+  );
 
   return (
     <EuiPopover
@@ -102,7 +107,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
             data-test-subj={'filtersNotificationModal__filterItems'}
           >
             <EuiFlexGroup wrap={true} gutterSize="xs">
-              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+              <FilterItems filters={filters} indexPatterns={dataViews ?? []} readOnly={true} />
             </EuiFlexGroup>
           </EuiFormRow>
         )}

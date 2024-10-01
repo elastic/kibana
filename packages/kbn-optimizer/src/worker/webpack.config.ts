@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -50,6 +51,7 @@ export function getWebpackConfig(
     profile: worker.profileWebpack,
 
     output: {
+      hashFunction: 'sha1',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
@@ -212,6 +214,18 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      logger: {
+                        warn: (message: string, warning: any) => {
+                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                          if (warning?.deprecationType?.id === 'mixed-decls') return;
+
+                          if (warning.deprecation)
+                            return process.stderr.write(
+                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                            );
+                          process.stderr.write('WARNING: ' + message);
+                        },
+                      },
                     },
                   },
                 },

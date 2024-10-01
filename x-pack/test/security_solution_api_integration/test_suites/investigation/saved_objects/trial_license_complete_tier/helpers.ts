@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import { TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 
 export const createBasicTimeline = async (supertest: SuperTest.Agent, titleToSaved: string) =>
   await supertest
@@ -35,6 +35,6 @@ export const createBasicTimelineTemplate = async (
         title: titleToSaved,
         templateTimelineId: uuidv4(),
         templateTimelineVersion: 1,
-        timelineType: TimelineType.template,
+        timelineType: TimelineTypeEnum.template,
       },
     });

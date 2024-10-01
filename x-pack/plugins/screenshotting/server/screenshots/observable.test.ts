@@ -6,10 +6,9 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { interval, lastValueFrom, of, throwError } from 'rxjs';
-import { map } from 'rxjs';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import { interval, lastValueFrom, map, of, throwError } from 'rxjs';
 import { createMockBrowserDriver } from '../browsers/mock';
-import type { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';

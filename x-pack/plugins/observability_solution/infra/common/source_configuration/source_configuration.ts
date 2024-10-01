@@ -80,7 +80,16 @@ export const logIndexNameReferenceRT = rt.type({
 });
 export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 
-export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
+// Kibana advanced setting
+export const logSourcesKibanaAdvancedSettingRT = rt.type({
+  type: rt.literal('kibana_advanced_setting'),
+});
+
+export const logIndexReferenceRT = rt.union([
+  logIndexPatternReferenceRT,
+  logIndexNameReferenceRT,
+  logSourcesKibanaAdvancedSettingRT,
+]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
 export const SourceConfigurationRT = rt.type({
@@ -130,15 +139,6 @@ export interface InfraSourceConfiguration
 /**
  * Source status
  */
-const SourceStatusFieldRuntimeType = rt.type({
-  name: rt.string,
-  type: rt.string,
-  searchable: rt.boolean,
-  aggregatable: rt.boolean,
-  displayable: rt.boolean,
-});
-
-export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeType>;
 
 export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,

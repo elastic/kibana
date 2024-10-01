@@ -12,13 +12,18 @@ import { useParams } from 'react-router-dom';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
+import type {
+  PrivilegesAPIClientPublicContract,
+  RolesAPIClient,
+} from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
@@ -27,13 +32,23 @@ interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   config: ConfigType;
+  logger: Logger;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
-  solutionNavExperiment: Promise<boolean>;
+  eventTracker: EventTracker;
+  getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config, solutionNavExperiment }: CreateParams) {
+  create({
+    getStartServices,
+    spacesManager,
+    config,
+    logger,
+    eventTracker,
+    getRolesAPIClient,
+    getPrivilegesAPIClient,
+  }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -44,14 +59,23 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
-          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
+        const [
+          [coreStart, { features }],
+          { SpacesGridPage },
+          { CreateSpacePage },
+          { EditSpacePage },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./create_space'),
+          import('./edit_space'),
+        ]);
 
         const spacesFirstBreadcrumb = {
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome } = coreStart;
+        const { notifications, application, chrome, http, overlays, theme } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -63,10 +87,11 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -82,41 +107,62 @@ export const spacesManagementApp = Object.freeze({
           ]);
 
           return (
-            <ManageSpacePage
+            <CreateSpacePage
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
 
         const EditSpacePageWithBreadcrumbs = () => {
-          const { spaceId } = useParams<{ spaceId: string }>();
+          const { spaceId, selectedTabId } = useParams<{
+            spaceId: string;
+            selectedTabId?: string;
+          }>();
+
+          const breadcrumbText = (space: Space) =>
+            i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
+              defaultMessage: 'Edit "{space}"',
+              values: { space: space.name },
+            });
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
               spacesFirstBreadcrumb,
               {
-                text: space.name,
+                text: breadcrumbText(space),
               },
             ]);
           };
 
           return (
-            <ManageSpacePage
+            <EditSpacePage
               capabilities={application.capabilities}
+              getUrlForApp={application.getUrlForApp}
+              navigateToUrl={application.navigateToUrl}
+              serverBasePath={http.basePath.serverBasePath}
               getFeatures={features.getFeatures}
+              http={http}
+              overlays={overlays}
               notifications={notifications}
+              theme={theme}
+              i18n={coreStart.i18n}
+              logger={logger}
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
+              selectedTabId={selectedTabId}
+              getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              getPrivilegesAPIClient={getPrivilegesAPIClient}
             />
           );
         };
@@ -133,7 +179,7 @@ export const spacesManagementApp = Object.freeze({
                     <Route path="/create">
                       <CreateSpacePageWithBreadcrumbs />
                     </Route>
-                    <Route path="/edit/:spaceId">
+                    <Route path={['/edit/:spaceId', '/edit/:spaceId/:selectedTabId']} exact>
                       <EditSpacePageWithBreadcrumbs />
                     </Route>
                   </Routes>

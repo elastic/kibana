@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildSqlRules, buildSqlStartRule, sqlLanguageAttributes } from './nested_sql';
 import { monaco } from '../../..';
 import { globals } from '../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
@@ -14,11 +16,13 @@ export const consoleSharedLanguageConfiguration: monaco.languages.LanguageConfig
   brackets: [
     ['{', '}'],
     ['[', ']'],
+    ['"""', '"""\n'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
     { open: '"', close: '"' },
+    { open: '"""', close: '"""' },
   ],
 };
 
@@ -87,21 +91,26 @@ export const matchTokensWithEOL = (
   };
 };
 
-export const xjsonRules = { ...buildXjsonRules('json_root') };
-// @ts-expect-error include comments into json
-xjsonRules.json_root = [{ include: '@comments' }, ...xjsonRules.json_root];
+const xjsonRules = { ...buildXjsonRules('json_root') };
+
 xjsonRules.json_root = [
+  // @ts-expect-error include comments into json
+  { include: '@comments' },
   // @ts-expect-error include variables into json
   matchToken('variable.template', /("\${\w+}")/),
+  // @ts-expect-error include a rule to start sql highlighting
+  buildSqlStartRule(),
   ...xjsonRules.json_root,
 ];
 
+const sqlRules = buildSqlRules();
 /*
  Lexer rules that are shared between the Console editor and the Console output panel.
  */
 export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),
   defaultToken: 'invalid',
+  ...sqlLanguageAttributes,
   tokenizer: {
     root: [
       // warning comment
@@ -127,5 +136,7 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
     ],
     // include json rules
     ...xjsonRules,
+    // include sql rules
+    ...sqlRules,
   },
 };

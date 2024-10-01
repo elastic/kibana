@@ -106,6 +106,8 @@ export type {
   Conversation,
   /** Message interface on the client */
   ClientMessage,
+  /** Function type to return messages UI */
+  GetAssistantMessages,
 } from './impl/assistant_context/types';
 
 /**

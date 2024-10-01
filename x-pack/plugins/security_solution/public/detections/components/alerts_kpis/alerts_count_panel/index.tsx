@@ -7,20 +7,15 @@
 
 import type { EuiComboBox } from '@elastic/eui';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-
 import type { Filter } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
-
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { FieldSelection } from '../../../../common/components/field_selection';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
@@ -44,8 +39,8 @@ interface AlertsCountPanelProps {
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
   title?: React.ReactNode;
-  isExpanded?: boolean;
-  setIsExpanded?: (status: boolean) => void;
+  isExpanded: boolean;
+  setIsExpanded: (status: boolean) => void;
 }
 const CHART_HEIGHT = 218; // px
 
@@ -71,22 +66,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     setIsExpanded,
   }) => {
     const { to, from } = useGlobalTime();
-    const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuidv4()}`, []);
-
-    const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_COUNT_ID);
-    const toggleQuery = useCallback(
-      (newToggleStatus: boolean) => {
-        if (isAlertsPageChartsEnabled && setIsExpanded) {
-          setIsExpanded(newToggleStatus);
-        } else {
-          setToggleStatus(newToggleStatus);
-        }
-      },
-      [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
-    );
-
     const timerange = useMemo(() => ({ from, to }), [from, to]);
 
     const extraVisualizationOptions = useMemo(
@@ -97,19 +78,10 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       [filters, stackByField1]
     );
 
-    const showCount = useMemo(() => {
-      if (isAlertsPageChartsEnabled) {
-        return isExpanded;
-      }
-      return toggleStatus;
-    }, [isAlertsPageChartsEnabled, toggleStatus, isExpanded]);
-
     return (
-      <InspectButtonContainer show={isAlertsPageChartsEnabled ? isExpanded : toggleStatus}>
+      <InspectButtonContainer show={isExpanded}>
         <KpiPanel
-          $toggleStatus={
-            isAlertsPageChartsEnabled && isExpanded !== undefined ? isExpanded : toggleStatus
-          }
+          $toggleStatus={Boolean(isExpanded)}
           data-test-subj="alertsCountPanel"
           hasBorder
           height={panelHeight}
@@ -123,8 +95,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             titleSize="s"
             hideSubtitle
             showInspectButton={chartOptionsContextMenu == null}
-            toggleStatus={isAlertsPageChartsEnabled ? isExpanded : toggleStatus}
-            toggleQuery={toggleQuery}
+            toggleStatus={isExpanded}
+            toggleQuery={setIsExpanded}
           >
             <FieldSelection
               setStackByField0={setStackByField0}
@@ -140,7 +112,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               useLensCompatibleFields={true}
             />
           </HeaderSection>
-          {showCount && (
+          {isExpanded && (
             <VisualizationEmbeddable
               data-test-subj="embeddable-alerts-count"
               extraActions={extraActions}

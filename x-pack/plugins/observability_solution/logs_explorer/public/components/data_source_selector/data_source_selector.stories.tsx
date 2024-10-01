@@ -64,7 +64,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
   const [dataSourceSelection, setDataSourceSelection] = useState<DataSourceSelection>(() =>
-    AllDatasetSelection.create()
+    AllDatasetSelection.create({ indices: 'logs-*-*' })
   );
 
   const [search, setSearch] = useState<DataSourceSelectorSearchParams>({

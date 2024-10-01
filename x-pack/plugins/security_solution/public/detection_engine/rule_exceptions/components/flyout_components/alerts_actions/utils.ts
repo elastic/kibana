@@ -58,3 +58,20 @@ export const entryHasNonEcsType = (
   }
   return false;
 };
+
+/**
+ * Determines whether the bulk close alerts option should be disabled.
+ */
+export const shouldDisableBulkClose = ({
+  items,
+  signalIndexPatterns,
+}: {
+  items: ExceptionsBuilderReturnExceptionItem[];
+  signalIndexPatterns: DataViewBase;
+}): boolean => {
+  return (
+    entryHasListType(items) ||
+    entryHasNonEcsType(items, signalIndexPatterns) ||
+    items.every((item) => item.entries.length === 0)
+  );
+};

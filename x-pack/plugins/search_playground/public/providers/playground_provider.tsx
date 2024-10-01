@@ -10,7 +10,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../utils/query_client';
 import { FormProvider } from './form_provider';
 
-export const PlaygroundProvider: FC = ({ children }) => {
+export const PlaygroundProvider: FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <FormProvider>{children}</FormProvider>

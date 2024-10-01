@@ -249,7 +249,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const [sortField, setSortField] = useState<keyof LatencyCorrelation>('correlation');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
-  const onTableChange = useCallback(({ sort }) => {
+  const onTableChange = useCallback(({ sort }: any) => {
     const { field: currentSortField, direction: currentSortDirection } = sort;
 
     setSortField(currentSortField);
