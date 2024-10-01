@@ -18,6 +18,11 @@ import {
   useEuiShadow,
   makeHighContrastColor,
 } from '@elastic/eui';
+// EUI allows reaching into internal folders for component-specific exports, but they aren't typed in Kibana
+// @ts-ignore
+import { useEuiButtonFocusCSS } from '@elastic/eui/lib/themes/amsterdam/global_styling/mixins/button';
+// @ts-ignore
+import { euiButtonDisplayStyles } from '@elastic/eui/lib/components/button/button_display/_button_display.styles';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';
@@ -42,9 +47,11 @@ const description = i18n.translate(
  */
 export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) => {
   const euiThemeContext = useEuiTheme();
+  const { euiButtonDisplay } = euiButtonDisplayStyles(euiThemeContext);
   const { colors, size, border } = euiThemeContext.euiTheme;
 
   const buttonCSS = [
+    euiButtonDisplay,
     css`
       padding: ${size.xs} ${size.s};
       background: ${colors.fullShade};
@@ -54,6 +61,7 @@ export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) 
       outline-color: ${colors.emptyShade};
     `,
     useEuiShadow('l'),
+    useEuiButtonFocusCSS(),
   ];
 
   return (
