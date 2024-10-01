@@ -14,8 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const archive = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
-  // FAILING ES FORWARD COMPATIBLITY: https://github.com/elastic/kibana/issues/179166
-  describe.skip('uptime ml anomaly', function () {
+  describe('uptime ml anomaly', function () {
     this.tags(['skipFirefox']);
     const dateStart = 'Sep 10, 2019 @ 12:40:08.078';
     const dateEnd = 'Sep 11, 2019 @ 19:40:08.078';
