@@ -6,7 +6,7 @@
  */
 
 import { uniqueId } from 'lodash';
-import { buildConversation } from '../../utils/builders';
+import { buildConversation } from '@kbn/ai-assistant/src/utils/builders';
 
 export function useConversations() {
   return [

@@ -86,7 +86,6 @@ export interface ObservabilityAIAssistantChatService {
     onActionClick: ChatActionClickHandler,
     scope?: AssistantScope
   ) => React.ReactNode;
-  setScope: (scope: AssistantScope) => void;
 }
 
 export interface ObservabilityAIAssistantConversationService {

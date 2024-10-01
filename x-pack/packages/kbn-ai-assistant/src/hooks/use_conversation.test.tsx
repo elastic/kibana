@@ -28,7 +28,7 @@ import {
   type UseConversationResult,
 } from './use_conversation';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
-import { createMockChatService } from '@kbn/observability-ai-assistant-app-plugin/public/utils/create_mock_chat_service';
+import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

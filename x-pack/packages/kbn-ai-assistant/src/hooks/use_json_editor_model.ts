@@ -6,7 +6,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { monaco } from '@kbn/monaco';
-import { createInitializedObject } from '@kbn/observability-ai-assistant-app-plugin/public/utils/create_initialized_object';
+import { createInitializedObject } from '../utils/create_initialized_object';
 import { useAIAssistantChatService } from './use_ai_assistant_chat_service';
 import { safeJsonParse } from '../utils/safe_json_parse';
 

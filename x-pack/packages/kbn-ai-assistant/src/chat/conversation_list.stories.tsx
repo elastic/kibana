@@ -7,7 +7,7 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import { buildConversation } from '@kbn/observability-ai-assistant-app-plugin/public/utils/builders';
+import { buildConversation } from '../utils/builders';
 import { KibanaReactStorybookDecorator } from '../utils/storybook_decorator.stories';
 import { ConversationList as Component } from './conversation_list';
 

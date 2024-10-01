@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildConversation } from '../../utils/builders';
+import { buildConversation } from '@kbn/ai-assistant/src/utils/builders';
 
 export function useConversationList() {
   return {

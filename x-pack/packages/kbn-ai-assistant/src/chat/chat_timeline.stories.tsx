@@ -18,7 +18,7 @@ import {
   buildFunctionResponseMessage,
   buildSystemMessage,
   buildUserMessage,
-} from '@kbn/observability-ai-assistant-app-plugin/public/utils/builders';
+} from '../utils/builders';
 import { ChatTimeline as Component, type ChatTimelineProps } from './chat_timeline';
 
 export default {
