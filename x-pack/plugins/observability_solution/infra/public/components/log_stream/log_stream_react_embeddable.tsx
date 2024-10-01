@@ -7,7 +7,7 @@
 
 import React, { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
@@ -21,6 +21,7 @@ import { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { euiThemeVars } from '@kbn/ui-theme';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LOG_STREAM_EMBEDDABLE } from './constants';
@@ -107,6 +108,8 @@ export function getLogStreamEmbeddableFactory(services: Services) {
 }
 
 const DISMISSAL_STORAGE_KEY = 'observability:logStreamEmbeddableDeprecationCalloutDismissed';
+const SAVED_SEARCH_DOCS_URL =
+  'https://www.elastic.co/guide/en/kibana/current/save-open-search.html';
 
 const DeprecationCallout = () => {
   const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
@@ -128,10 +131,24 @@ const DeprecationCallout = () => {
       }}
     >
       <p>
-        {i18n.translate('xpack.infra.logsStreamEmbeddable.deprecationWarningDescription', {
-          defaultMessage:
-            'This panel is not longer actively maintained. You might prefer using saved searches for this visualization.',
-        })}
+        <FormattedMessage
+          id="xpack.infra.logsStreamEmbeddable.deprecationWarningDescription"
+          defaultMessage="Logs Stream panels are no longer maintained. Try using {savedSearchDocsLink} for a similar visualization."
+          values={{
+            savedSearchDocsLink: (
+              <EuiLink
+                data-test-subj="infraDeprecationCalloutSavedSearchesLink"
+                href={SAVED_SEARCH_DOCS_URL}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.savedSearchesLinkLabel',
+                  { defaultMessage: 'saved searches' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
       </p>
     </EuiCallOut>
   );
