@@ -6,7 +6,6 @@
  */
 import { useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { firstValueFrom, take } from 'rxjs';
 import { SetupContext } from '../../application/setup_context';
 import { isSubscriptionAllowed } from '../../../common/utils/subscription';
 import { useKibana } from './use_kibana';
@@ -17,7 +16,7 @@ export const useSubscriptionStatus = () => {
   const { licensing } = useKibana().services;
   const { isCloudEnabled } = useContext(SetupContext);
   return useQuery([SUBSCRIPTION_QUERY_KEY], async () => {
-    const license = await firstValueFrom(licensing.license$.pipe(take(1)));
+    const license = await licensing.getLicense();
     return isSubscriptionAllowed(isCloudEnabled, license);
   });
 };

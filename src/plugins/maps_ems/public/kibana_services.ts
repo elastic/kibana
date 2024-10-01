@@ -9,7 +9,6 @@
 
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { firstValueFrom, take } from 'rxjs';
 import type { MapConfig } from '../server/config';
 import { LICENSE_CHECK_ID } from '../common';
 
@@ -33,7 +32,7 @@ export function getIsEnterprisePlus() {
 }
 
 export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
-  const license = await firstValueFrom(licensingPlugin.license$.pipe(take(1)));
+  const license = await licensingPlugin.getLicense();
   updateLicenseState(license);
   licensingPlugin.license$.subscribe(updateLicenseState);
 }

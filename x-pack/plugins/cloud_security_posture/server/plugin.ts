@@ -28,7 +28,6 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { firstValueFrom, take } from 'rxjs';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -116,7 +115,7 @@ export class CspPlugin
         plugins.fleet.registerExternalCallback(
           'packagePolicyCreate',
           async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-            const license = await firstValueFrom(plugins.licensing.license$.pipe(take(1)));
+            const license = await plugins.licensing.getLicense();
             if (isCspPackage(packagePolicy.package?.name)) {
               if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
                 throw new Error(
