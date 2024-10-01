@@ -51,3 +51,10 @@ export const FAIL = i18n.translate('securitySolutionPackages.ecsDataQualityDashb
 export const PASS = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.pass', {
   defaultMessage: 'Pass',
 });
+
+export const CHECK_NOW: string = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.checkNow',
+  {
+    defaultMessage: 'Check now',
+  }
+);

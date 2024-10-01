@@ -17,7 +17,7 @@ import {
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../../mock/stats/mock_stats';
-import * as useHistoricalResults from './hooks/use_historical_results';
+import * as useHistoricalResults from '../hooks/use_historical_results';
 import { mockHistoricalResult } from '../../../../mock/historical_results/mock_historical_results_response';
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 

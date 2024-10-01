@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockHistoricalResult } from '../../../../../../../mock/historical_results/mock_historical_results_response';
+import { mockHistoricalResult } from '../../../../../../mock/historical_results/mock_historical_results_response';
 import { fetchHistoricalResultsReducer } from './fetch_historical_results_reducer';
 
 const getInitialState = () => ({

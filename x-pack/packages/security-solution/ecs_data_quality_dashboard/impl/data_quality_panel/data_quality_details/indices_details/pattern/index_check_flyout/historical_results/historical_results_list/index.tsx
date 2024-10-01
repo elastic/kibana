@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { useDataQualityContext } from '../../../../../../data_quality_context';
-import { useHistoricalResultsContext } from '../../contexts/historical_results_context';
+import { useHistoricalResultsContext } from '../../../contexts/historical_results_context';
 import { StyledAccordion } from './styles';
 import { getFormattedCheckTime } from '../../utils/get_formatted_check_time';
 import { IndexResultBadge } from '../../../index_result_badge';
@@ -28,14 +28,16 @@ import {
   COUNTED_INCOMPATIBLE_FIELDS,
   NO_HISTORICAL_RESULTS,
   NO_HISTORICAL_RESULTS_BODY,
+  NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE,
   TOGGLE_HISTORICAL_RESULT_CHECKED_AT,
 } from './translations';
 
 interface Props {
   indexName: string;
+  latestCheckExists: boolean;
 }
 
-export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
+export const HistoricalResultsListComponent: FC<Props> = ({ indexName, latestCheckExists }) => {
   const [accordionState, setAccordionState] = useState<Record<number, boolean>>(() => ({}));
   const historicalResultsAccordionId = useGeneratedHtmlId({ prefix: 'historicalResultsAccordion' });
   const { historicalResultsState } = useHistoricalResultsContext();
@@ -94,7 +96,11 @@ export const HistoricalResultsListComponent: FC<Props> = ({ indexName }) => {
       ) : (
         <EuiEmptyPrompt
           iconType="clockCounter"
-          title={<h2>{NO_HISTORICAL_RESULTS}</h2>}
+          title={
+            <h2>
+              {latestCheckExists ? NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE : NO_HISTORICAL_RESULTS}
+            </h2>
+          }
           body={<p>{NO_HISTORICAL_RESULTS_BODY}</p>}
         />
       )}

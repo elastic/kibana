@@ -11,7 +11,7 @@ import { useIsMountedRef } from '../../../../../../../hooks/use_is_mounted_ref';
 import { useAbortControllerRef } from '../../../../../../../hooks/use_abort_controller_ref';
 import { DEFAULT_HISTORICAL_RESULTS_PAGE_SIZE } from '../../constants';
 import { FetchHistoricalResultsQueryAction, PaginationReducerState } from '../../types';
-import { useHistoricalResultsContext } from '../../../contexts/historical_results_context';
+import { useHistoricalResultsContext } from '../../../../contexts/historical_results_context';
 import { historicalResultsPaginationReducer } from './reducers/historical_results_pagination_reducer';
 import { FetchHistoricalResultsQueryState } from '../../../types';
 

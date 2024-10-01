@@ -23,16 +23,16 @@ export interface Props {
     checkState,
     isILMAvailable,
     pattern,
-    onExpandAction,
     onCheckNowAction,
+    onViewCheckHistoryAction,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
     checkState: UseIndicesCheckCheckState;
     isILMAvailable: boolean;
     pattern: string;
-    onExpandAction: (indexName: string) => void;
     onCheckNowAction: (indexName: string) => void;
+    onViewCheckHistoryAction: (indexName: string) => void;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
@@ -42,8 +42,8 @@ export interface Props {
   setPageSize: (pageSize: number) => void;
   setSorting: (sortConfig: SortConfig) => void;
   sorting: SortConfig;
-  onExpandAction: (indexName: string) => void;
   onCheckNowAction: (indexName: string) => void;
+  onViewCheckHistoryAction: (indexName: string) => void;
   checkState: UseIndicesCheckCheckState;
 }
 
@@ -57,8 +57,8 @@ const SummaryTableComponent: React.FC<Props> = ({
   setPageSize,
   setSorting,
   sorting,
-  onExpandAction,
   onCheckNowAction,
+  onViewCheckHistoryAction,
   checkState,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
@@ -70,18 +70,18 @@ const SummaryTableComponent: React.FC<Props> = ({
         checkState,
         isILMAvailable,
         pattern,
-        onExpandAction,
         onCheckNowAction,
+        onViewCheckHistoryAction,
       }),
     [
+      getTableColumns,
       formatBytes,
       formatNumber,
-      getTableColumns,
       checkState,
       isILMAvailable,
-      onCheckNowAction,
-      onExpandAction,
       pattern,
+      onCheckNowAction,
+      onViewCheckHistoryAction,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);

@@ -14,6 +14,13 @@ export const NO_HISTORICAL_RESULTS = i18n.translate(
   }
 );
 
+export const NO_HISTORICAL_RESULTS_FOR_GIVEN_RANGE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsForGivenRange',
+  {
+    defaultMessage: 'No historical check results for the given range',
+  }
+);
+
 export const NO_HISTORICAL_RESULTS_BODY = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.noHistoricalResultsBody',
   {

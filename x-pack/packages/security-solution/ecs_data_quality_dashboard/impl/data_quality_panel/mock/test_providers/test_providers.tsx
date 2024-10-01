@@ -24,12 +24,12 @@ import { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/type
 import { getMergeResultsRollupContextProps } from './utils/get_merged_results_rollup_context_props';
 import { getMergedDataQualityContextProps } from './utils/get_merged_data_quality_context_props';
 import { getMergedIndicesCheckContextProps } from './utils/get_merged_indices_check_context_props';
-import { HistoricalResultsContext } from '../../data_quality_details/indices_details/pattern/index_check_flyout/contexts/historical_results_context';
-import { initialFetchHistoricalResultsReducerState } from '../../data_quality_details/indices_details/pattern/index_check_flyout/hooks/use_historical_results';
+import { HistoricalResultsContext } from '../../data_quality_details/indices_details/pattern/contexts/historical_results_context';
+import { initialFetchHistoricalResultsReducerState } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results';
 import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
-} from '../../data_quality_details/indices_details/pattern/index_check_flyout/hooks/use_historical_results/types';
+} from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
