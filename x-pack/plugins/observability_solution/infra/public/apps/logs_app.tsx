@@ -19,7 +19,6 @@ import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { KbnUrlStateStorageFromRouterProvider } from '../containers/kbn_url_state_context';
-import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 
 export const renderApp = (
   core: CoreStart,
@@ -60,25 +59,6 @@ const LogsApp: React.FC<{
 }> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const { logs, discover, fleet } = core.application.capabilities;
 
-  const LogsRouteComponent =
-    discover?.show && fleet?.read ? (
-      <Route
-        path="/"
-        exact
-        render={() => {
-          plugins.share.url.locators
-            .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-            ?.navigate({});
-
-          return null;
-        }}
-      />
-    ) : (
-      // This needs to redirect to /categories once stream is deprecated when the below ticket is implemented
-      // https://github.com/elastic/kibana/issues/193321
-      <RedirectWithQueryParams from={'/'} to={'/stream'} exact />
-    );
-
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
       <CommonInfraProviders
@@ -94,7 +74,19 @@ const LogsApp: React.FC<{
             toastsService={core.notifications.toasts}
           >
             <Routes>
-              {LogsRouteComponent}
+              {Boolean(discover?.show && fleet?.read) && (
+                <Route
+                  path="/"
+                  exact
+                  render={() => {
+                    plugins.share.url.locators
+                      .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                      ?.navigate({});
+
+                    return null;
+                  }}
+                />
+              )}
               <Route path="/link-to" component={LinkToLogsPage} />
               {logs?.show && <Route path="/" component={LogsPage} />}
             </Routes>
