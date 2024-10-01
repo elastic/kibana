@@ -135,7 +135,7 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
-      app: ['infra', 'logs', 'kibana'],
+      app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra', 'rac'],
       alerting: {
