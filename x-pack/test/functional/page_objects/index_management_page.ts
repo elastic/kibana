@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { act } from "react-dom/test-utils";
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -116,6 +117,20 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         | 'enrich_policiesTab'
     ) {
       await testSubjects.click(tab);
+    },
+
+    async changeMappingsEditorTab(
+      tab: 'mappedFields' | 'runtimeFields' | 'dynamicTemplates' | 'advancedOptions'
+    ) {
+      const index = [
+        'mappedFields',
+        'runtimeFields',
+        'dynamicTemplates',
+        'advancedOptions',
+      ].indexOf(tab);
+
+      const tabs = await testSubjects.findAll('formTab');
+      await tabs[index].click();
     },
 
     async clickNextButton() {

@@ -25,7 +25,7 @@ import { createArrayItem, getInternalArrayFieldPath } from '../components/use_ar
 const DEFAULT_OPTIONS = {
   valueChangeDebounceTime: 500,
   stripEmptyFields: true,
-  stripUnmodifiedFields: false,
+  stripUnsetFields: false,
 };
 
 export interface UseFormReturn<T extends FormData, I extends FormData> {
@@ -70,15 +70,15 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const {
     valueChangeDebounceTime,
     stripEmptyFields: doStripEmptyFields,
-    stripUnmodifiedFields,
+    stripUnsetFields,
   } = options ?? {};
   const formOptions = useMemo(
     () => ({
       stripEmptyFields: doStripEmptyFields ?? DEFAULT_OPTIONS.stripEmptyFields,
       valueChangeDebounceTime: valueChangeDebounceTime ?? DEFAULT_OPTIONS.valueChangeDebounceTime,
-      stripUnmodifiedFields: stripUnmodifiedFields ?? DEFAULT_OPTIONS.stripUnmodifiedFields
+      stripUnsetFields: stripUnsetFields ?? DEFAULT_OPTIONS.stripUnsetFields,
     }),
-    [valueChangeDebounceTime, doStripEmptyFields, stripUnmodifiedFields]
+    [valueChangeDebounceTime, doStripEmptyFields, stripUnsetFields]
   );
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -186,7 +186,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const getFieldsForOutput = useCallback(
     (
       fields: FieldsMap,
-      opts: { stripEmptyFields: boolean; stripUnmodifiedFields: boolean }
+      opts: { stripEmptyFields: boolean; stripUnsetFields: boolean }
     ): FieldsMap => {
       return Object.entries(fields).reduce((acc, [key, field]) => {
         if (!field.__isIncludedInOutput) {
@@ -200,8 +200,8 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           }
         }
 
-        if (opts.stripUnmodifiedFields) {
-          if (!field.isModified) {
+        if (opts.stripUnsetFields) {
+          if (!field.isDirty && getFieldDefaultValue(field.path) === undefined) {
             return acc;
           }
         }
@@ -411,18 +411,13 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const getFormData: FormHook<T, I>['getFormData'] = useCallback(() => {
     const fieldsToOutput = getFieldsForOutput(fieldsRefs.current, {
       stripEmptyFields: formOptions.stripEmptyFields,
-      stripUnmodifiedFields: formOptions.stripUnmodifiedFields,
+      stripUnsetFields: formOptions.stripUnsetFields,
     });
     const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
     return serializer
       ? serializer(unflattenObject<I>(fieldsValue))
       : unflattenObject<T>(fieldsValue);
-  }, [
-    getFieldsForOutput,
-    formOptions.stripEmptyFields,
-    formOptions.stripUnmodifiedFields,
-    serializer,
-  ]);
+  }, [getFieldsForOutput, formOptions.stripEmptyFields, formOptions.stripUnsetFields, serializer]);
 
   const getErrors: FormHook<T, I>['getErrors'] = useCallback(() => {
     if (isValid === true) {

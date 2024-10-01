@@ -75,7 +75,7 @@ const formDeserializer = (formData: GenericObject) => {
   return {
     dynamicMapping: {
       enabled: dynamic === 'strict' ? false : dynamic,
-      throwErrorsForUnmappedFields: dynamic === 'strict',
+      throwErrorsForUnmappedFields: dynamic === 'strict' ? true : undefined,
       numeric_detection,
       date_detection,
       dynamic_date_formats,
@@ -108,11 +108,12 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
     schema: configurationFormSchema,
     serializer: serializerCallback,
     deserializer: formDeserializer,
+    defaultValue: value,
     id: 'configurationForm',
-    options: { stripUnmodifiedFields: true },
+    options: { stripUnsetFields: true },
   });
   const dispatch = useDispatch();
-  const { subscribe, submit, getFormData, updateFieldValues } = form;
+  const { subscribe, submit, reset, getFormData } = form;
 
   const isMapperSizeSectionVisible =
     value?._size !== undefined || esNodesPlugins.includes(MapperSizePluginId);
@@ -134,8 +135,12 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
   }, [dispatch, subscribe, submit]);
 
   useEffect(() => {
-    updateFieldValues(value);
-  }, [value, updateFieldValues]);
+    if (isMounted.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      reset({ resetValues: true, defaultValue: value });
+    }
+  }, [value, reset]);
 
   useEffect(() => {
     isMounted.current = true;
