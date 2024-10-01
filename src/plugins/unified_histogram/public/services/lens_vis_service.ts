@@ -461,7 +461,9 @@ export class LensVisService {
     breakdownField?: DataViewField;
   }): Suggestion | undefined => {
     const { dataView, query, timeRange, columns } = queryParams;
-    const breakdownColumn = columns?.find((column) => column.name === breakdownField?.name);
+    const breakdownColumn = breakdownField?.name
+      ? columns?.find((column) => column.name === breakdownField.name)
+      : undefined;
     if (dataView.isTimeBased() && query && isOfAggregateQueryType(query) && timeRange) {
       const isOnHistogramMode = shouldDisplayHistogram(query);
       if (!isOnHistogramMode) return undefined;
@@ -552,7 +554,7 @@ export class LensVisService {
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const breakdown = breakdownColumn
-      ? `, ${breakdownColumn.name} | sort ${breakdownColumn.name} asc`
+      ? `, \`${breakdownColumn.name}\` | sort \`${breakdownColumn.name}\` asc`
       : '';
     return appendToESQLQuery(
       safeQuery,
@@ -612,12 +614,17 @@ export class LensVisService {
       breakdownField: breakdownField?.name,
     };
 
-    const breakdownColumn = columns?.find((column) => column.name === breakdownField?.name);
-
     const currentQuery =
       suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
         ? {
-            esql: this.getESQLHistogramQuery({ dataView, query, timeRange, breakdownColumn }),
+            esql: this.getESQLHistogramQuery({
+              dataView,
+              query,
+              timeRange,
+              breakdownColumn: breakdownField?.name
+                ? columns?.find((column) => column.name === breakdownField.name)
+                : undefined,
+            }),
           }
         : query;
 

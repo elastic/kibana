@@ -33,11 +33,9 @@ export interface BreakdownFieldSelectorProps {
 
 const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
-    return esqlColumns.map((column) => ({
-      name: column.name,
-      displayName: column.name,
-      type: column.meta?.type,
-    }));
+    return esqlColumns.map(
+      (column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
+    );
   }
 
   return dataView.fields.filter(fieldSupportsBreakdown);
@@ -89,20 +87,12 @@ export const BreakdownFieldSelector = ({
 
   const onChange = useCallback<NonNullable<ToolbarSelectorProps['onChange']>>(
     (chosenOption) => {
-      let breakdownField: DataViewField | undefined;
-      if (esqlColumns) {
-        const breakdownColumn = esqlColumns?.find((column) => column.name === chosenOption?.value);
-        breakdownField = breakdownColumn
-          ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-          : undefined;
-      } else {
-        breakdownField = chosenOption?.value
-          ? dataView.fields.find((currentField) => currentField.name === chosenOption.value)
-          : undefined;
-      }
+      const breakdownField = chosenOption?.value
+        ? fields.find((currentField) => currentField.name === chosenOption.value)
+        : undefined;
       onBreakdownFieldChange?.(breakdownField);
     },
-    [dataView.fields, esqlColumns, onBreakdownFieldChange]
+    [fields, onBreakdownFieldChange]
   );
 
   return (
