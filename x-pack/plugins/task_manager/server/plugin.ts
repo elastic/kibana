@@ -403,6 +403,12 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    // Stop polling for tasks
+    if (this.taskPollingLifecycle) {
+      this.taskPollingLifecycle.stop();
+    }
+
+    // Remove this node from discovery
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();
       try {

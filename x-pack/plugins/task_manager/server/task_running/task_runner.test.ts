@@ -43,6 +43,7 @@ import { schema } from '@kbn/config-schema';
 import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
+import { TaskCancellationReason } from '../task_pool';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -1333,6 +1334,37 @@ describe('TaskManagerRunner', () => {
 
       expect(wasCancelled).toBeTruthy();
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('cancel passes along a reasion for cancellation, if provided', async () => {
+      let wasCancelled = false;
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 1000));
+                fakeTimer.tick(1000);
+                await promise;
+              },
+              async cancel(reason?: TaskCancellationReason) {
+                wasCancelled = true;
+                logger.debug(`task cancelled due to ${reason}`);
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel(TaskCancellationReason.Shutdown);
+      await promise;
+
+      expect(wasCancelled).toBeTruthy();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(`task cancelled due to Shutdown`);
     });
 
     test('debug logs if cancel is called on a non-cancellable task', async () => {

@@ -10,6 +10,7 @@ import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
+import { TaskCancellationReason } from './task_pool/task_pool';
 
 export const DEFAULT_TIMEOUT = '5m';
 
@@ -110,7 +111,9 @@ export interface FailedTaskResult {
 }
 
 export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type CancelFunction = (
+  reason?: TaskCancellationReason
+) => Promise<RunResult | undefined | void>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;

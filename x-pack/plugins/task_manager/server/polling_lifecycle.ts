@@ -34,7 +34,7 @@ import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
-import { TaskPool } from './task_pool';
+import { TaskCancellationReason, TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -44,6 +44,7 @@ import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
 import { TaskPartitioner } from './lib/task_partitioner';
+import { TaskPoller } from './polling/task_poller';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -87,6 +88,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private logger: Logger;
   public pool: TaskPool;
+  private poller: TaskPoller<string, TimedFillPoolResult>;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
 
@@ -170,7 +172,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
     }
 
-    const poller = createTaskPoller<string, TimedFillPoolResult>({
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
@@ -192,15 +194,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       work: this.pollForWork,
     });
 
-    this.subscribeToPoller(poller.events$);
+    this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
-        poller.start();
+        this.poller.start();
       } else if (!areESAndSOAvailable) {
-        poller.stop();
-        this.pool.cancelRunningTasks();
+        this.poller.stop();
+        this.pool.cancelRunningTasks(TaskCancellationReason.EsUnavailable);
       }
     });
   }
@@ -338,6 +340,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           )
         );
       });
+  }
+
+  public stop() {
+    this.poller.stop();
+    this.pool.cancelRunningTasks(TaskCancellationReason.Shutdown);
   }
 }
 

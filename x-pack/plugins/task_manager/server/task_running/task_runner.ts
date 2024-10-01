@@ -60,6 +60,7 @@ import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
+import { TaskCancellationReason } from '../task_pool';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -540,12 +541,12 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<void>}
    */
-  public async cancel() {
+  public async cancel(reason?: TaskCancellationReason) {
     const { task } = this;
     if (task?.cancel) {
       // it will cause the task state of "running" to be cleared
       this.task = undefined;
-      return task.cancel();
+      return task.cancel(reason);
     }
 
     this.logger.debug(`The task ${this} is not cancellable.`);

@@ -40,6 +40,12 @@ export enum TaskPoolRunResult {
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
+export enum TaskCancellationReason {
+  EsUnavailable = 'EsUnavailable',
+  Timeout = 'Timeout',
+  Shutdown = 'Shutdown',
+}
+
 const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
 
 /**
@@ -183,10 +189,10 @@ export class TaskPool {
     return TaskPoolRunResult.RunningAllClaimedTasks;
   }
 
-  public cancelRunningTasks() {
+  public cancelRunningTasks(reason?: TaskCancellationReason) {
     this.logger.debug('Cancelling running tasks.');
     for (const task of this.tasksInPool.values()) {
-      this.cancelTask(task);
+      this.cancelTask(task, reason);
     }
   }
 
@@ -233,18 +239,19 @@ export class TaskPool {
               : ``
           }.`
         );
-        this.cancelTask(taskRunner);
+        this.cancelTask(taskRunner, TaskCancellationReason.Timeout);
       }
     }
   }
 
-  private cancelTask(task: TaskRunner) {
+  private async cancelTask(task: TaskRunner, reason?: TaskCancellationReason) {
     // internally async (without rejections), but public-facing is synchronous
     (async () => {
       try {
-        this.logger.debug(`Cancelling task ${task.toString()}.`);
+        const loggerMsg = reason ? ` due to reason: ${reason}.` : '';
+        this.logger.debug(`Cancelling task ${task.toString()}${loggerMsg}`);
         this.tasksInPool.delete(task.taskExecutionId);
-        await task.cancel();
+        await task.cancel(reason);
       } catch (err) {
         this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
       }
