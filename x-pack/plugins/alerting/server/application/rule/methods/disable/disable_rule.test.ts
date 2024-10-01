@@ -85,6 +85,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
 };
 
+const fakeRuleName = 'fakeRuleName';
+
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   taskManager.get.mockResolvedValue({
@@ -113,6 +115,7 @@ describe('disableRule()', () => {
     id: '1',
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
+      name: fakeRuleName,
       consumer: 'myApp',
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
@@ -195,7 +198,7 @@ describe('disableRule()', () => {
             action: 'rule_disable',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: fakeRuleName } },
         })
       );
     });
@@ -214,6 +217,7 @@ describe('disableRule()', () => {
             saved_object: {
               id: '1',
               type: RULE_SAVED_OBJECT_TYPE,
+              name: fakeRuleName,
             },
           },
           error: {
@@ -239,6 +243,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -317,6 +322,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -387,6 +393,7 @@ describe('disableRule()', () => {
         id: '1',
         license: 'basic',
         ruleset: 'alerts',
+        name: fakeRuleName,
       },
     });
   });
@@ -406,6 +413,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -459,6 +467,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -509,6 +518,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -626,6 +636,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
@@ -679,6 +690,7 @@ describe('disableRule()', () => {
       RULE_SAVED_OBJECT_TYPE,
       '1',
       {
+        name: fakeRuleName,
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
