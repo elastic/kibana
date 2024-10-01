@@ -38,8 +38,10 @@ interface AuthorizedPurposes {
 interface Space {
   id: string;
   name: string;
+  color?: string;
   description: string;
   solution?: string;
+  _reserved?: boolean;
   disabledFeatures: string[];
 }
 
@@ -73,6 +75,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       // Disabled features are automatically added to the space when a solution is set
       'apm',
       'infrastructure',
+      'inventory',
       'logs',
       'observabilityAIAssistant',
       'observabilityCases',
@@ -89,48 +92,24 @@ const ALL_SPACE_RESULTS: Space[] = [
 const sortDisabledFeatures = (space: Space) => {
   return {
     ...space,
-    disabledFeatures: space.disabledFeatures.sort(),
+    disabledFeatures: [...space.disabledFeatures].sort(),
   };
 };
 
-const getAllSpacesResults = (license: 'basic' | 'trial' = 'basic') => {
-  const copySpacesResults: Space[] = [...ALL_SPACE_RESULTS];
-
-  if (license === 'trial') {
-    // In trial, "inventory" is also disabled
-    const index = copySpacesResults.findIndex((space) => space.id === 'space_3');
-    let space3: Space | undefined = copySpacesResults.find((space) => space.id === 'space_3');
-
-    if (space3) {
-      const updatedDisabledFeatures: string[] = [...space3.disabledFeatures, 'inventory'];
-      space3 = { ...space3, disabledFeatures: updatedDisabledFeatures };
-      copySpacesResults.splice(index, 1, space3);
-    }
-  }
-
-  return copySpacesResults.map(sortDisabledFeatures);
-};
-
-export function getAllTestSuiteFactory(
-  esArchiver: any,
-  supertest: SuperTest<any>,
-  license: 'basic' | 'trial' = 'basic'
-) {
+export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
-      const expectedBody = getAllSpacesResults(license).filter((entry) =>
-        spaceIds.includes(entry.id)
-      );
+      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id));
       expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
     };
 
   const createExpectAllPurposesResults =
     (authorizedPurposes: AuthorizedPurposes, ...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
-      const expectedBody = getAllSpacesResults(license)
-        .filter((entry) => spaceIds.includes(entry.id))
-        .map((x) => ({ ...x, authorizedPurposes }));
+      const expectedBody = ALL_SPACE_RESULTS.filter((entry) => spaceIds.includes(entry.id)).map(
+        (x) => ({ ...x, authorizedPurposes })
+      );
       expect(resp.body.map(sortDisabledFeatures)).to.eql(expectedBody.map(sortDisabledFeatures));
     };
 

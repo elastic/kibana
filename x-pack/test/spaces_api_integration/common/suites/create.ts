@@ -28,11 +28,7 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(
-  esArchiver: any,
-  supertest: SuperTest<any>,
-  license: 'basic' | 'trial' = 'basic'
-) {
+export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -80,6 +76,7 @@ export function createTestSuiteFactory(
         // Disabled features are automatically added to the space when a solution is set
         'apm',
         'infrastructure',
+        'inventory',
         'logs',
         'observabilityAIAssistant',
         'observabilityCases',
@@ -92,12 +89,6 @@ export function createTestSuiteFactory(
       ],
       solution: 'es',
     };
-
-    if (license === 'trial') {
-      // In trial, "inventory" is also disabled
-      expected.disabledFeatures.push('inventory');
-      expected.disabledFeatures.sort();
-    }
 
     expect({ ...resp.body, disabledFeatures }).to.eql(expected);
   };

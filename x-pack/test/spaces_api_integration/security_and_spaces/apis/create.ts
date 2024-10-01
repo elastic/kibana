@@ -15,8 +15,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function createSpacesOnlySuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const config = getService('config');
-  const license: 'basic' | 'trial' = config.get('esTestCluster.license');
 
   const {
     createTest,
@@ -25,11 +23,7 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
     expectConflictResponse,
     expectRbacForbiddenResponse,
     expectSolutionSpecifiedResult,
-  } = createTestSuiteFactory(
-    esArchiver,
-    supertestWithoutAuth as unknown as SuperTest<any>,
-    license
-  );
+  } = createTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('create', () => {
     [

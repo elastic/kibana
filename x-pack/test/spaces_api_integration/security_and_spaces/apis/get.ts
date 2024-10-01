@@ -15,8 +15,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const config = getService('config');
-  const license: 'basic' | 'trial' = config.get('esTestCluster.license');
 
   const {
     getTest,
@@ -24,7 +22,7 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
     createExpectNotFoundResult,
     createExpectRbacForbidden,
     nonExistantSpaceId,
-  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>, license);
+  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   describe('get', () => {
     [

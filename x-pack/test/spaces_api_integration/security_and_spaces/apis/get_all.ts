@@ -15,11 +15,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function getAllSpacesTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const config = getService('config');
-  const license: 'basic' | 'trial' = config.get('esTestCluster.license');
 
   const { getAllTest, createExpectResults, createExpectAllPurposesResults, expectRbacForbidden } =
-    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>, license);
+    getAllTestSuiteFactory(esArchiver, supertestWithoutAuth as unknown as SuperTest<any>);
 
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {
