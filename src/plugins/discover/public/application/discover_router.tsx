@@ -9,7 +9,6 @@
 
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -24,6 +23,7 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { DiscoverEBTPerformanceProvider } from '../services/telemetry';
 
 export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
   customizationContext$: Observable<DiscoverCustomizationContext>;
@@ -47,12 +47,14 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes
-            customizationContext={customizationContext}
-            services={services}
-            history={history}
-            {...routeProps}
-          />
+          <DiscoverEBTPerformanceProvider>
+            <DiscoverRoutes
+              customizationContext={customizationContext}
+              services={services}
+              history={history}
+              {...routeProps}
+            />
+          </DiscoverEBTPerformanceProvider>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
@@ -91,14 +93,10 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <PerformanceContextProvider>
-          <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
-        </PerformanceContextProvider>
+        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
       </Route>
       <Route path="/" exact>
-        <PerformanceContextProvider>
-          <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
-        </PerformanceContextProvider>
+        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
       </Route>
       <NotFoundRoute />
     </Routes>

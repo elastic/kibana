@@ -45,7 +45,7 @@ import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { getResultState } from '../../utils/get_result_state';
+import { getResultState, resultStatuses } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
@@ -58,6 +58,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useDiscoverEBTPerformanceContext } from '../../../../services/telemetry';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -81,6 +82,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
+  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -364,6 +366,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.documents$);
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
+
+  useEffect(() => {
+    if (
+      resultState === resultStatuses.NO_RESULTS ||
+      resultState === resultStatuses.UNINITIALIZED ||
+      viewMode !== VIEW_MODE.DOCUMENT_LEVEL
+    ) {
+      onSkipPluginRenderTime();
+    }
+  }, [onSkipPluginRenderTime, resultState, viewMode]);
 
   return (
     <EuiPage

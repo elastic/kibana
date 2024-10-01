@@ -68,8 +68,10 @@ export const getRenderCellValueFn = ({
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
-      onRenderComplete?.();
-    }, []);
+      if (rowIndex === 0) {
+        onRenderComplete?.();
+      }
+    }, [rowIndex]);
 
     useEffect(() => {
       if (row?.isAnchor) {

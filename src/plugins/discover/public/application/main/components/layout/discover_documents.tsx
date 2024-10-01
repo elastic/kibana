@@ -49,7 +49,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
@@ -80,6 +79,7 @@ import {
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
+import { useDiscoverEBTPerformanceContext } from '../../../../services/telemetry';
 
 const containerStyles = css`
   position: relative;
@@ -115,7 +115,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
-  const { onPageReady } = usePerformanceContext();
+  const { onTrackPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
@@ -521,7 +521,7 @@ function DiscoverDocumentsComponent({
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
-                onInitialRenderComplete={onPageReady}
+                onInitialRenderComplete={onTrackPluginRenderTime}
               />
             </CellActionsProvider>
           </div>
