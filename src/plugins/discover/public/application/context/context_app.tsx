@@ -252,23 +252,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   const titlePadding = useEuiPaddingSize('m');
 
   useEffect(() => {
-    if (
-      isLegacy ||
-      [
-        fetchedState.anchorStatus.value,
-        fetchedState.predecessorsStatus.value,
-        fetchedState.successorsStatus.value,
-      ].includes(LoadingStatus.FAILED)
-    ) {
+    if (isLegacy || fetchedState.anchorStatus.value === LoadingStatus.FAILED) {
       onSkipPluginRenderTime();
     }
-  }, [
-    isLegacy,
-    fetchedState.anchorStatus.value,
-    fetchedState.predecessorsStatus.value,
-    fetchedState.successorsStatus.value,
-    onSkipPluginRenderTime,
-  ]);
+  }, [isLegacy, fetchedState.anchorStatus.value, onSkipPluginRenderTime]);
 
   return (
     <Fragment>
