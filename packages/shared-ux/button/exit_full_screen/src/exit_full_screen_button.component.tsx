@@ -29,8 +29,6 @@ import cx from 'classnames';
 
 import type { ExitFullScreenButtonComponentProps as Props } from '../types';
 
-import './exit_full_screen_button.scss';
-
 const text = i18n.translate('sharedUXPackages.exitFullScreenButton.exitFullScreenModeButtonText', {
   defaultMessage: 'Exit full screen',
 });
