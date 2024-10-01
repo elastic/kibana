@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { auditLoggingService } from '../../../audit_logging';
 import { getAssetFromAssetsMap } from '../../archive';
 import { KibanaMiscAssetTypes } from '../../../../types';
 import type { Installation, KnowledgeBaseMiscAssetReference } from '../../../../types';
@@ -109,6 +110,11 @@ async function installKibanaKnowledgeBaseEntry(
   const savedObjectId = getSavedObjectId({
     entryName: entry.name,
     packageName: packageInstallContext.packageInfo.name,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'create',
+    id: savedObjectId,
+    savedObjectType: knowledgeBaseEntrySavedObjectType,
   });
   await savedObjectsClient.create(
     knowledgeBaseEntrySavedObjectType,

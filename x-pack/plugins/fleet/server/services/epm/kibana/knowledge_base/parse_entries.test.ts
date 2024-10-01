@@ -9,6 +9,46 @@ import { times } from 'lodash';
 import type { PackageInstallContext } from '../../../../../common/types';
 import { parseKnowledgeBaseEntries } from './parse_entries';
 
+export const createManifest = ({
+  title,
+  description = 'description',
+  systemIndex = true,
+  syntacticFields = ['field_1', 'field_2'],
+}: {
+  title: string;
+  description?: string;
+  systemIndex?: boolean;
+  syntacticFields?: string[];
+}) => {
+  return `
+    title: ${title}
+    description: ${description}
+    index:
+      system: ${systemIndex}
+    retrieval:
+      syntactic_fields: [${syntacticFields.join(',')}]
+      semantic_fields: []
+    `;
+};
+
+export const createFieldsFile = () => {
+  return `
+    - name: content_title
+      type: text
+      description: The title of the document
+    - name: content_body
+      type: semantic_text
+      inference_id: kibana-elser2
+      description: The content of the document
+    `;
+};
+
+export const createContentFile = (length = 5) => {
+  return times(5)
+    .map(() => '{}')
+    .join('\n');
+};
+
 describe('parseKnowledgeBaseEntries', () => {
   const createInstallContext = (assets: Record<string, string>): PackageInstallContext => {
     const installContext: PackageInstallContext = {
@@ -30,46 +70,6 @@ describe('parseKnowledgeBaseEntries', () => {
     });
 
     return installContext;
-  };
-
-  const createManifest = ({
-    title,
-    description = 'description',
-    systemIndex = true,
-    syntacticFields = ['field_1', 'field_2'],
-  }: {
-    title: string;
-    description?: string;
-    systemIndex?: boolean;
-    syntacticFields?: string[];
-  }) => {
-    return `
-    title: ${title}
-    description: ${description}
-    index:
-      system: ${systemIndex}
-    retrieval:
-      syntactic_fields: [${syntacticFields.join(',')}]
-      semantic_fields: []
-    `;
-  };
-
-  const createFieldsFile = () => {
-    return `
-    - name: content_title
-      type: text
-      description: The title of the document
-    - name: content_body
-      type: semantic_text
-      inference_id: kibana-elser2
-      description: The content of the document
-    `;
-  };
-
-  const createContentFile = (length = 5) => {
-    return times(5)
-      .map(() => '{}')
-      .join('\n');
   };
 
   it('parses a single entry package', async () => {
