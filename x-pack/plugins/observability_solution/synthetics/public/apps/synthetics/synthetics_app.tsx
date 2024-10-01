@@ -24,15 +24,8 @@ import { PageRouter } from './routes';
 import { setBasePath, store } from './state';
 
 const Application = (props: SyntheticsAppProps) => {
-  const {
-    basePath,
-    canSave,
-    coreStart,
-    startPlugins,
-    renderGlobalHelpControls,
-    setBadge,
-    appMountParameters,
-  } = props;
+  const { basePath, canSave, coreStart, renderGlobalHelpControls, setBadge, appMountParameters } =
+    props;
 
   useEffect(() => {
     renderGlobalHelpControls();
