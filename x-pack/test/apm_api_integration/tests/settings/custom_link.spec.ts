@@ -137,7 +137,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
           },
         });
         expect(response.status).to.be(200);
-        expect(response.body.service.name).to.eql('opbeans-java');
+        expect(response.body.transaction?.['service.name']).to.eql('opbeans-java');
       });
     }
   );
