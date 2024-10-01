@@ -455,6 +455,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
         ],
+        installed_misc: [],
         es_index_patterns: {
           test_logs: 'logs-all_assets.test_logs-*',
           test_metrics: 'metrics-all_assets.test_metrics-*',
