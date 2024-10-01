@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
-import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
+import { getVendorName } from '../../../common/utils/get_vendor_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -65,10 +65,9 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   },
   'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    const vendor =
-      finding?.observer?.vendor || getDatasetDisplayName(finding?.data_stream?.dataset);
+    const vendor = getVendorName(finding?.data_stream?.dataset);
 
-    return <>{vendor || finding?.data_stream?.dataset || ''}</>;
+    return <>{vendor || ''}</>;
   },
   '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);

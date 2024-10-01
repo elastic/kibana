@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-type Dataset = 'wiz.cloud_configuration_finding' | 'cloud_security_posture.findings';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 
 export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
 export const WIZ_MISCONFIGURATIONS_DATASET = 'wiz.cloud_configuration_finding';
 export const WIZ_VULN_DATASET = 'wiz.vulnerability';
 
-export const getDatasetDisplayName = (dataset?: Dataset | string) => {
+export const getVendorName = (finding: CspFinding | CspVulnerabilityFinding) => {
+  if (finding.observer?.vendor) return finding.observer.vendor;
+
+  const dataset = finding.data_stream?.dataset;
+
   if (dataset === WIZ_MISCONFIGURATIONS_DATASET || dataset === WIZ_VULN_DATASET) return 'Wiz';
-  if (dataset === CSP_MISCONFIGURATIONS_DATASET || dataset === CSP_VULN_DATASET)
-    return 'Elastic CSP';
+  if (dataset === CSP_MISCONFIGURATIONS_DATASET || dataset === CSP_VULN_DATASET) return 'Elastic';
 };

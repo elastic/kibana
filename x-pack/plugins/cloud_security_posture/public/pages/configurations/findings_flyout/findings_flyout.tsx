@@ -41,8 +41,8 @@ import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/sche
 import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
-  getDatasetDisplayName,
-} from '../../../common/utils/get_dataset_display_name';
+  getVendorName,
+} from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -208,10 +208,7 @@ export const MissingFieldsCallout = ({
   finding: CspFinding | CspVulnerabilityFinding;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const datasetDisplayName =
-    finding.observer?.vendor ||
-    getDatasetDisplayName(finding.data_stream.dataset) ||
-    finding.data_stream.dataset;
+  const vendor = getVendorName(finding);
 
   return (
     <EuiCallOut
@@ -225,9 +222,9 @@ export const MissingFieldsCallout = ({
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {datasource}"
+            defaultMessage="Some fields not provided by {vendor}"
             values={{
-              datasource: datasetDisplayName || 'the data source',
+              vendor: vendor || 'the vendor',
             }}
           />
         </span>
