@@ -117,9 +117,13 @@ export const WatchEditPage = ({
           dispatch({ command: 'setError', payload: error.body });
         }
       } else if (type) {
-        const WatchType = Watch.getWatchTypes()[type];
-        if (WatchType) {
+        const watchTypes = Watch.getWatchTypes();
+
+        if (watchTypes.hasOwnProperty(type) && typeof watchTypes[type] === 'function') {
+          const WatchType = watchTypes[type];
           dispatch({ command: 'setWatch', payload: new WatchType() });
+        } else {
+          dispatch({ command: 'setError', payload: { message: 'Invalid watch type' } });
         }
       }
     };
