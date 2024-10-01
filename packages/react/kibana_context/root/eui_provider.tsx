@@ -19,6 +19,7 @@ import {
   EuiThemeNewButtonOption2_1,
   EuiThemeNewButtonOption2_2,
   EuiThemeNewButtonOption3,
+  EuiThemeNewButtonOption4,
   EuiThemeShape,
 } from '@elastic/eui';
 
@@ -38,6 +39,7 @@ const BUTTON_KEY_TO_THEME_MAP: Record<
   '2.1': EuiThemeNewButtonOption2_1,
   '2.2': EuiThemeNewButtonOption2_2,
   '3': EuiThemeNewButtonOption3,
+  '4': EuiThemeNewButtonOption4,
 };
 
 /**
