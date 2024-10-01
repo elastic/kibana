@@ -70,14 +70,14 @@ export const CreateDockerUbuntu: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubuntu',
+      baseImage: 'ubi',
       context: false,
       image: true,
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'ubuntu',
+      baseImage: 'ubi',
       context: false,
       image: true,
       dockerBuildDate,
@@ -182,7 +182,7 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubuntu',
+      baseImage: 'ubi',
       context: true,
       image: false,
       dockerBuildDate,
