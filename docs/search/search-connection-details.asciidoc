@@ -26,7 +26,7 @@ deployment type you use. For secure connections, it’s recommended to use an AP
 [.screenshot]
 image::manage-deployment.png[width=750]
 . The Cloud ID is displayed on the right side of the page.
-
++
 [.screenshot]
 image::cloud-id.png[width=750]
 
