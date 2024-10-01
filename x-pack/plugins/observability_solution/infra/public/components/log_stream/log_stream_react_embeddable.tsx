@@ -6,6 +6,8 @@
  */
 
 import React, { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
@@ -17,6 +19,8 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { euiThemeVars } from '@kbn/ui-theme';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LOG_STREAM_EMBEDDABLE } from './constants';
@@ -81,7 +85,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
               theme$={services.coreStart.theme.theme$}
             >
               <EuiThemeProvider darkMode={darkMode}>
-                <div style={{ width: '100%' }}>
+                <div style={{ width: '100%', position: 'relative' }}>
                   <LogStream
                     logView={{ type: 'log-view-reference', logViewId: 'default' }}
                     startTimestamp={startTimestamp}
@@ -90,6 +94,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
                     query={query as Query | undefined}
                     filters={filters}
                   />
+                  <DeprecationCallout />
                 </div>
               </EuiThemeProvider>
             </LogStreamEmbeddableProviders>
@@ -100,6 +105,37 @@ export function getLogStreamEmbeddableFactory(services: Services) {
   };
   return factory;
 }
+
+const DISMISSAL_STORAGE_KEY = 'observability:logStreamEmbeddableDeprecationCalloutDismissed';
+
+const DeprecationCallout = () => {
+  const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
+
+  if (isDismissed) {
+    return null;
+  }
+
+  return (
+    <EuiCallOut
+      color="warning"
+      iconType="help"
+      onDismiss={() => setDismissed(true)}
+      css={{
+        position: 'absolute',
+        bottom: euiThemeVars.euiSizeM,
+        right: euiThemeVars.euiSizeM,
+        width: 'min(100%, 40ch)',
+      }}
+    >
+      <p>
+        {i18n.translate('xpack.infra.logsStreamEmbeddable.deprecationWarningDescription', {
+          defaultMessage:
+            'This panel is not longer actively maintained. You might prefer using saved searches for this visualization.',
+        })}
+      </p>
+    </EuiCallOut>
+  );
+};
 
 export interface LogStreamEmbeddableProvidersProps {
   core: CoreStart;
