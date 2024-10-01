@@ -24,7 +24,6 @@
     "@kbn/ui-theme",
     "@kbn/core",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
     "@kbn/std",

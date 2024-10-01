@@ -24,8 +24,6 @@
     "@kbn/actions-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/i18n-react",
-    "@kbn/monaco",
     "@kbn/data-views-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
@@ -34,7 +32,6 @@
     "@kbn/esql-utils",
     "@kbn/visualization-utils",
     "@kbn/ai-assistant-management-plugin",
-    "@kbn/utility-types-jest",
     "@kbn/kibana-react-plugin",
     "@kbn/licensing-plugin",
     "@kbn/logging",
@@ -71,7 +68,6 @@
     "@kbn/inference-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant",
-    "@kbn/observability-ai-assistant-app-plugin"
   ],
   "exclude": [
     "target/**/*"
