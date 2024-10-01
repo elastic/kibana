@@ -7,7 +7,7 @@
 import type { Fields } from './types';
 
 export const normalizeValue = <T>(field: unknown[] | unknown): T => {
-  return (Array.isArray(field) && field.length > 0 ? field[0] : field) as T;
+  return (Array.isArray(field) && field.length === 1 ? field[0] : field) as T;
 };
 
 export const isOptionalFieldDefined = (fields: Fields, fieldToCheck: string): boolean =>

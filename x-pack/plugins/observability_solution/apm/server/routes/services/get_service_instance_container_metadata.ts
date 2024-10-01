@@ -22,7 +22,7 @@ import {
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
-import { normalizeFields } from '../../utils/normalize_fields';
+import { kubernetesMapping } from '../../utils/es_fields_mappings';
 
 export type ServiceInstanceContainerMetadataDetails =
   | {
@@ -71,9 +71,7 @@ export const getServiceInstanceContainerMetadata = async ({
     },
   });
 
-  const sample = maybe(
-    normalizeFields(response.hits.hits[0]?.fields)
-  ) as ServiceInstanceContainerMetadataDetails;
+  const sample = maybe(kubernetesMapping(response.hits.hits[0]?.fields ?? {}));
 
   return {
     kubernetes: {

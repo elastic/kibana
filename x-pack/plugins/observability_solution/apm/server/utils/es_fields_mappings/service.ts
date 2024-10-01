@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { APMError, OBSERVER_VERSION, OBSERVER_VERSION_MAJOR, AGENT_NAME } from '@kbn/apm-types';
+import {
+  APMError,
+  OBSERVER_VERSION,
+  OBSERVER_VERSION_MAJOR,
+  AGENT_NAME,
+  SERVICE_RUNTIME_NAME,
+} from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Fields } from './types';
 import { normalizeValue } from './es_fields_mappings_helpers';
+import { cloudMapping } from '.';
 
 // todo: check https://github.com/jennypavlova/kibana/pull/6#discussion_r1771611817
 export const serviceVersionMapping = (
@@ -26,13 +33,23 @@ export const serviceVersionMapping = (
   };
 };
 
-// todo: missing `cloud` and `service` properties
 export const serviceAgentNameMapping = (fields: Fields) => {
   if (!fields) return undefined;
+  const serviceRuntimeName = normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]);
 
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
     },
+    service: {
+      ...(serviceRuntimeName
+        ? {
+            runtime: {
+              name: serviceRuntimeName,
+            },
+          }
+        : undefined),
+    },
+    ...cloudMapping(fields),
   };
 };
