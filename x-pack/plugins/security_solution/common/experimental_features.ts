@@ -183,6 +183,12 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables Response actions telemetry collection
+   * Should be enabled in 8.17.0
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
@@ -202,11 +208,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   analyzerDatePickersAndSourcererDisabled: false,
-
-  /**
-   * Enables visualization: session viewer and analyzer in expandable flyout
-   */
-  visualizationInFlyoutEnabled: false,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
