@@ -364,8 +364,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const selectedPolicies = packageAndAgentPolicies.find(({ agentPolicies: policies }) =>
     policies.find((policy) => policy.id === flyoutOpenForPolicyId)
   );
+
   const agentPolicies = selectedPolicies?.agentPolicies;
   const packagePolicy = selectedPolicies?.packagePolicy;
+  const flyoutPolicy = agentPolicies?.length === 1 ? agentPolicies[0] : undefined;
+
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
@@ -389,7 +392,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={undefined} // always show the agent policy selector in the flyout
+          agentPolicy={flyoutPolicy}
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',
