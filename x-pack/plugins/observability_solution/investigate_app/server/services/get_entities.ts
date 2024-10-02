@@ -6,12 +6,15 @@
  */
 import { z } from '@kbn/zod';
 import { entityLatestSchema } from '@kbn/entities-schema';
-import { GetEntitiesResponse, EntityWithSource, EntitySource } from '@kbn/investigation-shared';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { InvestigateAppRequestHandlerContext } from '../routes/types';
-import { EntitiesESClient } from '../clients/create_entities_es_client';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  GetEntitiesResponse,
+  EntityWithSource,
+  EntitySource,
+} from '@kbn/investigation-shared';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EntitiesESClient } from '../clients/create_entities_es_client';
 import {
   SERVICE_ENTITIES_LATEST_ALIAS,
   CONTAINER_ENTITIES_LATEST_ALIAS,
@@ -22,22 +25,20 @@ import {
 type EntitiesLatest = z.infer<typeof entityLatestSchema> & { sourceIndex: string[] };
 
 export async function getEntitiesWithSource({
-  context,
   serviceEnvironment,
   serviceName,
   containerId,
   hostName,
   entitiesEsClient,
+  esClient,
 }: {
-  context: InvestigateAppRequestHandlerContext;
   serviceName?: string;
   serviceEnvironment?: string;
   containerId?: string;
   hostName?: string;
   entitiesEsClient: EntitiesESClient;
+  esClient: ElasticsearchClient;
 }): Promise<GetEntitiesResponse> {
-  const core = await context.core;
-  const esClient = core.elasticsearch.client.asCurrentUser;
   const entityCategoryPromises = getFetchEntitiesPromises({
     entitiesEsClient,
     serviceName,

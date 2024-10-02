@@ -367,12 +367,12 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
     } = params?.query ?? {};
 
     const { entities } = await getEntitiesWithSource({
-      context,
       serviceName,
       serviceEnvironment,
       containerId,
       hostName,
       entitiesEsClient,
+      esClient,
     });
 
     return {
