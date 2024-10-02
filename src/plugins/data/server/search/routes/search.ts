@@ -79,7 +79,12 @@ export function registerSearchRoute(router: DataPluginRouter): void {
             .toPromise();
 
           if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
-            return res.ok({ body: response.rawResponse });
+            return res.ok({
+              body: response.rawResponse,
+              headers: {
+                requestParams: JSON.stringify(response.requestParams),
+              },
+            });
           } else {
             return res.ok({ body: response });
           }

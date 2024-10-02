@@ -465,9 +465,19 @@ export class SearchInterceptor {
         .then((rawResponse) => {
           const response = rawResponse.body;
           const warning = rawResponse.response?.headers.get('warning');
-          if ((response as Record<string, unknown>).error) {
+          const requestParams =
+            (response as Record<string, unknown>).requestParams ??
+            JSON.parse(rawResponse.response?.headers.get('requestParams') || '{}');
+          const error = (response as Record<string, unknown>).error;
+          if (error) {
             // eslint-disable-next-line no-throw-literal
-            throw { attributes: (response as Record<string, unknown>).error };
+            throw {
+              attributes: {
+                error,
+                rawResponse: response,
+                requestParams,
+              },
+            };
           }
           switch (strategy) {
             case ENHANCED_ES_SEARCH_STRATEGY:
@@ -480,6 +490,7 @@ export class SearchInterceptor {
                 isRunning: typedResponse.is_running,
                 rawResponse: shimmedResponse,
                 warning,
+                requestParams,
                 ...getTotalLoaded(shimmedResponse),
               };
             case ESQL_ASYNC_SEARCH_STRATEGY:
