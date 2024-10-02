@@ -13,11 +13,7 @@ import {
   deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../../../common/utils/security_solution';
-import {
-  createWebHookRuleAction,
-  getCustomQueryRuleParams,
-  getWebHookAction,
-} from '../../../../utils';
+import { getCustomQueryRuleParams, getSlackAction } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteConnector } from '../../../../utils/connectors';
 
@@ -34,7 +30,13 @@ export default ({ getService }: FtrProviderContext): void => {
     before(async () => {
       admin = await utils.createSuperTest('admin');
       socManager = await utils.createSuperTest('soc_manager');
-      webhookAction = await createWebHookRuleAction(admin);
+      const { body: ruleAction } = await admin
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'foo')
+        .send(getSlackAction())
+        .expect(200);
+      webhookAction = ruleAction;
     });
 
     after(async () => {
@@ -47,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'foo')
-          .send(getWebHookAction())
+          .send(getSlackAction())
           .expect(200);
       });
     });
