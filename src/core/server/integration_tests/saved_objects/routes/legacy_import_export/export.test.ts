@@ -82,9 +82,9 @@ describe('POST /api/dashboards/export', () => {
   });
 
   it('calls exportDashboards and records usage stats', async () => {
-    const result = await supertest(httpSetup.server.listener).get(
-      '/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c'
-    );
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c')
+      .set('x-elastic-internal-origin', 'kibana');
 
     expect(result.status).toBe(200);
     expect(result.header['content-type']).toEqual('application/json; charset=utf-8');
