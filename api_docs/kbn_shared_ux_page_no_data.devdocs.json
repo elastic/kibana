@@ -13,7 +13,7 @@
         "signature": [
           "({ solution, logo, action, docsLink, pageTitle, pageDescription, className, }: ",
           "NoDataPageProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/no_data/impl/src/no_data_page.tsx",
         "deprecated": false,
@@ -48,9 +48,9 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -64,9 +64,9 @@
             "label": "{\n  children,\n  ...dependencies\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
             "deprecated": false,
@@ -87,9 +87,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
         "deprecated": false,
@@ -103,9 +103,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataCardServices",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
             "deprecated": false,

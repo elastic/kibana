@@ -1022,6 +1022,10 @@
                 "path": "x-pack/plugins/security_solution/public/assistant/overlay.tsx"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/assistant/stack_management/management_settings.tsx"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/public/containers/user_profiles/api.test.ts"
               },
@@ -1127,7 +1131,7 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,

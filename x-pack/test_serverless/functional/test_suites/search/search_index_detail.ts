@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonPage',
     'embeddedConsole',
     'svlSearchIndexDetailPage',
+    'svlApiKeys',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
@@ -22,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search index detail page', () => {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
+      await pageObjects.svlApiKeys.deleteAPIKeys();
     });
     after(async () => {
       await esDeleteAllIndices(indexName);
@@ -66,6 +68,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+        await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
+        await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          'installCodeExample',
+          'pip install'
+        );
+        await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('javascript');
+        await pageObjects.svlSearchIndexDetailPage.codeSampleContainsValue(
+          'installCodeExample',
+          'npm install'
+        );
+        await pageObjects.svlSearchIndexDetailPage.selectCodingLanguage('curl');
+        await pageObjects.svlSearchIndexDetailPage.openConsoleCodeExample();
+        await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+        await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+      });
+
+      it('should show api key', async () => {
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+        await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
       });
 
       it('back to indices button should redirect to list page', async () => {
@@ -110,6 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         it('has page load error section', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
+          await pageObjects.svlSearchIndexDetailPage.expectIndexNotFoundErrorExists();
         });
         it('reload button shows details page again', async () => {
           await es.indices.create({ index: indexName });

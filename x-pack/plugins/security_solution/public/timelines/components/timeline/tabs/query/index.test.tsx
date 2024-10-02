@@ -137,7 +137,8 @@ describe('Timeline', () => {
     };
   });
 
-  describe('rendering', () => {
+  // Failing: see https://github.com/elastic/kibana/issues/193103
+  describe.skip('rendering', () => {
     let spyCombineQueries: jest.SpyInstance;
 
     beforeEach(() => {

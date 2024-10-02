@@ -274,6 +274,7 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -295,6 +296,10 @@ import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import type {
+  CopyTimelineRequestBodyInput,
+  CopyTimelineResponse,
+} from './timeline/copy_timeline/copy_timeline_route.gen';
 import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
@@ -536,6 +541,38 @@ If asset criticality records already exist for the specified entities, those rec
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   */
+  async cleanUpRiskEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API CleanUpRiskEngine`);
+    return this.kbnClient
+      .request<CleanUpRiskEngineResponse>({
+        path: '/api/risk_score/engine/dangerously_delete_data',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Copies and returns a timeline or timeline template.
+
+    */
+  async copyTimeline(props: CopyTimelineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CopyTimeline`);
+    return this.kbnClient
+      .request<CopyTimelineResponse>({
+        path: '/api/timeline/_copy',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1976,6 +2013,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
+}
+export interface CopyTimelineProps {
+  body: CopyTimelineRequestBodyInput;
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;

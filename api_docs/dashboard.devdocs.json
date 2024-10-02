@@ -94,7 +94,7 @@
         "signature": [
           "(props: ",
           "DashboardListingProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
         "deprecated": false,
@@ -129,7 +129,7 @@
         "signature": [
           "(props: ",
           "DashboardTopNavProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
         "deprecated": false,
@@ -346,7 +346,7 @@
         "signature": [
           "(props: ",
           "DashboardRendererProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
         "deprecated": false,
@@ -723,6 +723,60 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.SearchDashboardsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchDashboardsResponse",
+        "description": [],
+        "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.SearchDashboardsResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.SearchDashboardsResponse.hits",
+            "type": "Array",
+            "tags": [],
+            "label": "hits",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<",
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.DashboardAttributes",
+                "text": "DashboardAttributes"
+              },
+              ">[]"
+            ],
+            "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
