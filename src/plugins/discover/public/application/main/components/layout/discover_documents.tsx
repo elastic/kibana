@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -115,7 +115,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
-  const { onTrackPluginRenderTime } = useDiscoverEBTPerformanceContext();
+  const { onTrackPluginRenderTime, onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
@@ -406,20 +406,11 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
-  const currentSampleSizeState = useMemo(
-    () => getAllowedSampleSize(sampleSizeState, services.uiSettings),
-    [sampleSizeState, services.uiSettings]
-  );
-
-  const onInitialRenderComplete = useCallback(() => {
-    onTrackPluginRenderTime({
-      hits: {
-        sampleSize: currentSampleSizeState,
-        fetchedHits: rows.length,
-        totalHits: isEsqlMode ? undefined : totalHits,
-      },
-    });
-  }, [totalHits, currentSampleSizeState, rows.length, isEsqlMode, onTrackPluginRenderTime]);
+  useEffect(() => {
+    if (isLegacy) {
+      onSkipPluginRenderTime();
+    }
+  }, [isLegacy, onSkipPluginRenderTime]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -515,7 +506,7 @@ function DiscoverDocumentsComponent({
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-                sampleSizeState={currentSampleSizeState}
+                sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                 onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                 onFieldEdited={onFieldEdited}
                 configRowHeight={configRowHeight}
@@ -536,7 +527,7 @@ function DiscoverDocumentsComponent({
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
-                onInitialRenderComplete={onInitialRenderComplete}
+                onInitialRenderComplete={onTrackPluginRenderTime}
               />
             </CellActionsProvider>
           </div>

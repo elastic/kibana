@@ -11,9 +11,7 @@ import React, { createContext, useMemo, useContext } from 'react';
 import { PerformanceContextProvider, usePerformanceContext } from '@kbn/ebt-tools';
 
 interface DiscoverEBTPerformanceContextProps {
-  onTrackPluginRenderTime: (props?: {
-    hits?: { totalHits: number | undefined; fetchedHits: number; sampleSize: number };
-  }) => void; // track when the main plugin content is rendered (data grid or single doc view)
+  onTrackPluginRenderTime: () => void; // track when the main plugin content is rendered (data grid or single doc view)
   onSkipPluginRenderTime: () => void; // ignore and skip tracking the main plugin content render time if the initial render had secondary content (error, empty, etc)
 }
 
@@ -33,31 +31,13 @@ const DiscoverPluginRenderTimeProvider: React.FC<{ children?: React.ReactNode }>
   const shouldTrackPluginRenderTimeRef = React.useRef<boolean>(true);
 
   const onTrackPluginRenderTime: DiscoverEBTPerformanceContextProps['onTrackPluginRenderTime'] =
-    React.useCallback(
-      ({ hits } = {}) => {
-        if (!shouldTrackPluginRenderTimeRef.current) {
-          return;
-        }
-        shouldTrackPluginRenderTimeRef.current = false; // only once
-        onPageReady(
-          hits
-            ? {
-                key1: 'sampleSize',
-                value1: hits.sampleSize,
-                key2: 'fetchedHits',
-                value2: hits.fetchedHits,
-                ...(hits.totalHits
-                  ? {
-                      key3: 'totalHits',
-                      value3: hits.totalHits,
-                    }
-                  : {}),
-              }
-            : undefined
-        );
-      },
-      [onPageReady]
-    );
+    React.useCallback(() => {
+      if (!shouldTrackPluginRenderTimeRef.current) {
+        return;
+      }
+      shouldTrackPluginRenderTimeRef.current = false; // only once
+      onPageReady();
+    }, [onPageReady]);
 
   const onSkipPluginRenderTime: DiscoverEBTPerformanceContextProps['onSkipPluginRenderTime'] =
     React.useCallback(() => {

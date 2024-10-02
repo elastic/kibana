@@ -208,10 +208,6 @@ export function ContextAppContent({
     timeRange,
   });
 
-  const onInitialRenderComplete = useCallback(() => {
-    onTrackPluginRenderTime();
-  }, [onTrackPluginRenderTime]);
-
   return (
     <Fragment>
       <WrapperWithPadding>
@@ -279,7 +275,7 @@ export function ContextAppContent({
               settings={grid}
               onResize={onResize}
               externalCustomRenderers={cellRenderers}
-              onInitialRenderComplete={onInitialRenderComplete}
+              onInitialRenderComplete={onTrackPluginRenderTime}
             />
           </CellActionsProvider>
         </div>
