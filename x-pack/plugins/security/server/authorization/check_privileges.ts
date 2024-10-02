@@ -106,7 +106,6 @@ export function checkPrivilegesFactory(
         privileges.kibana ?? [],
         { requireLoginAction }
       );
-
       const clusterClient = await getClusterClient();
       const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
         body: {
@@ -129,7 +128,7 @@ export function checkPrivilegesFactory(
         applicationPrivilegesCheck.privileges,
         resources
       );
-
+      // console.log(applicationPrivilegesCheck.privileges, hasPrivilegesResponse);
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[applicationName];
 
       const clusterPrivilegesResponse = hasPrivilegesResponse.cluster ?? {};

@@ -10,6 +10,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { AttachmentRequest } from '../../../common/types/api';
 import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 import { CaseCommentModel } from '../../common/models';
@@ -68,10 +69,17 @@ export const bulkCreate = async (
       [[], []]
     );
 
-    await authorization.ensureAuthorized({
-      operation: Operations.bulkCreateAttachments,
-      entities,
-    });
+    if (attachments.every((attachment) => attachment.type === AttachmentType.user)) {
+      await authorization.ensureAuthorized({
+        operation: Operations.createComment,
+        entities,
+      });
+    } else {
+      await authorization.ensureAuthorized({
+        operation: Operations.bulkCreateAttachments,
+        entities,
+      });
+    }
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
     const updatedModel = await model.bulkCreate({

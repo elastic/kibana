@@ -216,6 +216,8 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     settings?: readonly string[];
+    createComment?: readonly string[];
+    reopenCases?: readonly string[];
   };
 
   /**

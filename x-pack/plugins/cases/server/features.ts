@@ -12,7 +12,12 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { APP_ID, FEATURE_ID } from '../common/constants';
+import {
+  APP_ID,
+  FEATURE_ID,
+  REOPEN_CASES_CAPABILITY,
+  COMMENT_CASES_CAPABILITY,
+} from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
 
 /**
@@ -26,7 +31,7 @@ const FEATURE_ORDER = 3100;
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
   const capabilities = createUICapabilities();
   const apiTags = getApiTags(APP_ID);
-
+  // TODO: first place cases perms are defined
   return {
     id: FEATURE_ID,
     name: i18n.translate('xpack.cases.features.casesFeatureName', {
@@ -124,6 +129,62 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                   settings: [APP_ID],
                 },
                 ui: capabilities.settings,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.addCommentsSubFeatureName', {
+          defaultMessage: 'Add comments',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: apiTags.all,
+                id: COMMENT_CASES_CAPABILITY,
+                name: i18n.translate('xpack.cases.features.addCommentsSubFeatureDetails', {
+                  defaultMessage: 'Add comments to cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  createComment: [APP_ID],
+                },
+                ui: capabilities.createComment,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.reopenCasesSubFeatureName', {
+          defaultMessage: 'Reopen Closed Cases',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: apiTags.all,
+                id: REOPEN_CASES_CAPABILITY,
+                name: i18n.translate('xpack.cases.features.reopenCasesSubFeatureDetails', {
+                  defaultMessage: 'Reopen closed cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  reopenCases: [APP_ID],
+                },
+                ui: capabilities.reopenCases,
               },
             ],
           },
