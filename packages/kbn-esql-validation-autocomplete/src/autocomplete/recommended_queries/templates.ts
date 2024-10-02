@@ -18,21 +18,33 @@ export const getRecommendedQueries = ({
 }) => {
   const queries = [
     {
-      label: i18n.translate('esqlUtils.recommendedQueries.aggregateExample.label', {
-        defaultMessage: 'Aggregate data with STATS',
-      }),
-      description: i18n.translate('esqlUtils.recommendedQueries.aggregateExample.description', {
-        defaultMessage: 'Count aggregation',
-      }),
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.aggregateExample.label',
+        {
+          defaultMessage: 'Aggregate data with STATS',
+        }
+      ),
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.aggregateExample.description',
+        {
+          defaultMessage: 'Count aggregation',
+        }
+      ),
       queryString: `${fromCommand}\n  | STATS count = COUNT(*) // you can group by a field using the BY operator`,
     },
     {
-      label: i18n.translate('esqlUtils.recommendedQueries.caseExample.label', {
-        defaultMessage: 'Create a conditional with CASE',
-      }),
-      description: i18n.translate('esqlUtils.recommendedQueries.caseExample.description', {
-        defaultMessage: 'Conditional',
-      }),
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.caseExample.label',
+        {
+          defaultMessage: 'Create a conditional with CASE',
+        }
+      ),
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.caseExample.description',
+        {
+          defaultMessage: 'Conditional',
+        }
+      ),
       queryString: `${fromCommand}\n  | STATS count = COUNT(*)\n  | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other")\n  | KEEP newField`,
     },
   ];
@@ -40,41 +52,65 @@ export const getRecommendedQueries = ({
   if (timeField) {
     queries.push(
       {
-        label: i18n.translate('esqlUtils.recommendedQueries.sortByTime.label', {
-          defaultMessage: 'Sort by time',
-        }),
-        description: i18n.translate('esqlUtils.recommendedQueries.sortByTime.description', {
-          defaultMessage: 'Sort by time',
-        }),
+        label: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.sortByTime.label',
+          {
+            defaultMessage: 'Sort by time',
+          }
+        ),
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.sortByTime.description',
+          {
+            defaultMessage: 'Sort by time',
+          }
+        ),
         queryString: `${fromCommand}\n  | SORT ${timeField} // Data is not sorted by default`,
       },
       {
-        label: i18n.translate('esqlUtils.recommendedQueries.dateHistogram.label', {
-          defaultMessage: 'Create a date histogram',
-        }),
-        description: i18n.translate('esqlUtils.recommendedQueries.dateHistogram.description', {
-          defaultMessage: 'Count aggregation over time',
-        }),
+        label: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.dateHistogram.label',
+          {
+            defaultMessage: 'Create a date histogram',
+          }
+        ),
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.dateHistogram.description',
+          {
+            defaultMessage: 'Count aggregation over time',
+          }
+        ),
         queryString: `${fromCommand}\n  | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n  | STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) // ?_tstart and ?_tend take the values of the time picker
 `,
       },
       {
-        label: i18n.translate('esqlUtils.recommendedQueries.dateIntervals.label', {
-          defaultMessage: 'Create 5 minute time buckets with EVAL',
-        }),
-        description: i18n.translate('esqlUtils.recommendedQueries.dateIntervals.description', {
-          defaultMessage: 'Count aggregation over time',
-        }),
+        label: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.dateIntervals.label',
+          {
+            defaultMessage: 'Create 5 minute time buckets with EVAL',
+          }
+        ),
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.dateIntervals.description',
+          {
+            defaultMessage: 'Count aggregation over time',
+          }
+        ),
         queryString: `${fromCommand}\n  | EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets // try out different intervals
 `,
       },
       {
-        label: i18n.translate('esqlUtils.recommendedQueries.lastHour.label', {
-          defaultMessage: 'Total count vs count last hour',
-        }),
-        description: i18n.translate('esqlUtils.recommendedQueries.lastHour.description', {
-          defaultMessage: 'A more complicated example',
-        }),
+        label: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.lastHour.label',
+          {
+            defaultMessage: 'Total count vs count last hour',
+          }
+        ),
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.recommendedQueries.lastHour.description',
+          {
+            defaultMessage: 'A more complicated example',
+          }
+        ),
         queryString: `${fromCommand}\n  | SORT ${timeField}
   | EVAL t = NOW()
   | EVAL key = CASE(${timeField} < (t - 1 hour) AND ${timeField} > (t - 2 hour), "Last hour", "Other")
