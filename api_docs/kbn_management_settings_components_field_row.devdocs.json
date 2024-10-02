@@ -21,7 +21,7 @@
             "section": "def-public.FieldRowProps",
             "text": "FieldRowProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
         "deprecated": false,
@@ -64,7 +64,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
         ],
         "signature": [
-          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "public",
@@ -72,7 +72,7 @@
             "section": "def-public.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -86,7 +86,7 @@
             "label": "{\n  children,\n  docLinks,\n  notifications,\n  settings,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
                 "scope": "public",
@@ -94,7 +94,7 @@
                 "section": "def-public.FieldRowKibanaDependencies",
                 "text": "FieldRowKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
@@ -123,7 +123,7 @@
             "section": "def-public.FieldRowProviderProps",
             "text": "FieldRowProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -381,7 +381,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,

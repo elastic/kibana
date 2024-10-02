@@ -35,7 +35,7 @@
             "section": "def-common.ProjectSwitcherProps",
             "text": "ProjectSwitcherProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/switcher.tsx",
         "deprecated": false,
@@ -76,7 +76,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, coreStart, projectChangeAPIUrl, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, coreStart, projectChangeAPIUrl, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/serverless-project-switcher",
             "scope": "common",
@@ -84,7 +84,7 @@
             "section": "def-common.KibanaDependencies",
             "text": "KibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
@@ -98,7 +98,7 @@
             "label": "{\n  children,\n  coreStart,\n  projectChangeAPIUrl,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/serverless-project-switcher",
                 "scope": "common",
@@ -106,7 +106,7 @@
                 "section": "def-common.KibanaDependencies",
                 "text": "KibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/serverless/project_switcher/src/services.tsx",
             "deprecated": false,
@@ -127,9 +127,9 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/serverless/project_switcher/src/services.tsx",
         "deprecated": false,
@@ -143,9 +143,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "Services",
-              ">>"
+              ">"
             ],
             "path": "packages/serverless/project_switcher/src/services.tsx",
             "deprecated": false,
