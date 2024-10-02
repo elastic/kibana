@@ -877,7 +877,7 @@ export class DashboardContainer
         return;
       }
 
-      return panelRef.scrollIntoView({ block: 'nearest' });
+      panelRef.scrollIntoView({ block: 'nearest' });
     });
   };
 
