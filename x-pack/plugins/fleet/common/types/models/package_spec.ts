@@ -127,6 +127,7 @@ export interface PackageSpecIcon {
   title?: string;
   size?: string;
   type?: string;
+  dark_mode?: boolean;
 }
 
 export interface PackageSpecScreenshot {

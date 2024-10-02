@@ -135,6 +135,7 @@ const PackageIconSchema = schema.object({
   title: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   size: schema.maybe(schema.string()),
+  dark_mode: schema.maybe(schema.boolean()),
 });
 
 export const PackageInfoSchema = schema
@@ -212,6 +213,9 @@ export const InstalledPackageSchema = schema.object({
   name: schema.string(),
   version: schema.string(),
   status: schema.string(),
+  title: schema.string(),
+  description: schema.maybe(schema.string()),
+  icons: schema.maybe(schema.arrayOf(PackageIconSchema)),
   dataStreams: schema.arrayOf(
     schema.object({
       name: schema.string(),
