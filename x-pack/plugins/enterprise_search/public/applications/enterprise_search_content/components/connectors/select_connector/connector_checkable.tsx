@@ -159,7 +159,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                                 'xpack.enterpriseSearch.content.newIndex.selectConnector.openNativePopoverLabel',
                                 {
                                   defaultMessage:
-                                    'Open popover with information about native connectors',
+                                    'Open popover with information about Elastic managed connectors',
                                 }
                               )}
                               iconType="questionInCircle"
@@ -220,7 +220,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectorCheckable.setupANativeConnectorContextMenuItemLabel',
-                              { defaultMessage: 'Setup a Native Connector' }
+                              { defaultMessage: 'Set up an Elastic managed connector' }
                             )}
                           </EuiContextMenuItem>,
                           <EuiSpacer key="spacer" size="s" />,
@@ -233,7 +233,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectorCheckable.setupAConnectorClientContextMenuItemLabel',
-                              { defaultMessage: 'Setup a Connector Client' }
+                              { defaultMessage: 'Set up a self-managed connector' }
                             )}
                           </EuiContextMenuItem>,
                         ]}
