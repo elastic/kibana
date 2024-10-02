@@ -59,7 +59,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
 
   if (entityType === 'service') {
     const agentName = entity[AGENT_NAME] as AgentName;
-    return <AgentIcon agentName={agentName}  role="presentation" />;
+    return <AgentIcon agentName={agentName} role="presentation" />;
   }
 
   return emptyIcon;
