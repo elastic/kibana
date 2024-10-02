@@ -19,6 +19,7 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Histogram } from './histogram';
@@ -79,6 +80,7 @@ export interface ChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
+  columns?: DatatableColumn[];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -114,6 +116,7 @@ export function Chart({
   onBrushEnd,
   withDefaultActions,
   abortController,
+  columns,
 }: ChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
@@ -312,6 +315,7 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                      esqlColumns={isPlainRecord ? columns : undefined}
                     />
                   )}
                 </div>
