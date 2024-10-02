@@ -1802,10 +1802,14 @@
 =======
   resolved "file:./elastic_eui_theme_base_0.0.1_setup_08.tgz#2ce9903eb93a54759c63d7e2b2a01e2c678bfd41"
 
-"@elastic/eui-theme-berlin@file:./elastic_eui_theme_berlin_0.0.1_setup_04.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.1_setup_01.tgz":
   version "0.0.1"
+<<<<<<< HEAD
   resolved "file:./elastic_eui_theme_berlin_0.0.1_setup_04.tgz#d11fad22cb6cd5b1348c76c607aa8b580029f14b"
 >>>>>>> f66a40e6d76 ([EUI-125]: add primitive and base semantic color tokens)
+=======
+  resolved "file:./elastic_eui_theme_borealis_0.0.1_setup_01.tgz#c76073db1e9e7e3ca516e9845bd2707f20c7c178"
+>>>>>>> 3c337e7fd00 (update theme name, cleanup old packages)
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"

@@ -10,7 +10,7 @@
 import { ThemeNameValue } from '@kbn/core-ui-settings-common';
 import { type EuiThemeSystem } from '@elastic/eui';
 import { EuiThemeAmsterdam } from '@elastic/eui';
-import { EuiThemeBerlin } from '@elastic/eui-theme-berlin';
+import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 
 export interface ThemeDescriptor {
   euiTheme: EuiThemeSystem;
@@ -20,8 +20,8 @@ export const KIBANA_THEMES: Record<ThemeNameValue, ThemeDescriptor> = {
   amsterdam: {
     euiTheme: EuiThemeAmsterdam,
   },
-  berlin: {
-    euiTheme: EuiThemeBerlin,
+  borealis: {
+    euiTheme: EuiThemeBorealis,
   },
 };
 
