@@ -28,21 +28,25 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
+  const adminRoleName = 'admin';
 
   describe('security/authorization', function () {
     // see details: https://github.com/elastic/kibana/issues/192282
     this.tags(['failsOnMKI']);
     before(async () => {
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
-        'admin',
+        adminRoleName,
         {
           useCookieHeader: true,
           withInternalHeaders: true,
         }
       );
-      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
-      });
+      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope(
+        adminRoleName,
+        {
+          withInternalHeaders: true,
+        }
+      );
     });
     after(async () => {
       await supertestAdminWithApiKey.destroy();
@@ -68,26 +72,26 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('create/update roleAuthc', async () => {
             const { body, status } = await supertestAdminWithApiKey.put('/api/security/role/test');
-            svlCommonApi.assertApiNotFound(body, status);
+            svlCommonApi.assertResponseStatusCode(400, status, body);
           });
 
           it('get roleAuthc', async () => {
             const { body, status } = await supertestAdminWithApiKey.get(
-              '/api/security/role/superuser'
+              `/api/security/role/${adminRoleName}`
             );
-            svlCommonApi.assertApiNotFound(body, status);
+            svlCommonApi.assertResponseStatusCode(404, status, body);
           });
 
           it('get all roles', async () => {
             const { body, status } = await supertestAdminWithApiKey.get('/api/security/role');
-            svlCommonApi.assertApiNotFound(body, status);
+            svlCommonApi.assertResponseStatusCode(200, status, body);
           });
 
           it('delete roleAuthc', async () => {
             const { body, status } = await supertestAdminWithApiKey.delete(
-              '/api/security/role/superuser'
+              `/api/security/role/${adminRoleName}`
             );
-            svlCommonApi.assertApiNotFound(body, status);
+            svlCommonApi.assertResponseStatusCode(400, status, body);
           });
 
           it('get shared saved object permissions', async () => {
