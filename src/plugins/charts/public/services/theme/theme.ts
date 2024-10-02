@@ -62,14 +62,14 @@ export class ThemeService {
     return {
       lineSeriesStyle: {
         point: {
-          visible: false,
+          visible: 'never',
           strokeWidth: 1,
           radius: 1,
         },
       },
       areaSeriesStyle: {
         point: {
-          visible: false,
+          visible: 'never',
           strokeWidth: 1,
           radius: 1,
         },
