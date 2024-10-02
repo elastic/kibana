@@ -6,12 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { omit } from 'lodash';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_fields';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -29,10 +31,10 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     syntheticsMonitorClient,
     savedObjectsClient,
   }): Promise<any> => {
-    const monitor = request.body as MonitorFields;
+    const fields = request.body as MonitorFields;
     const { monitorId } = request.params;
 
-    const validationResult = validateMonitor(monitor);
+    const validationResult = validateMonitor(fields);
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -47,13 +49,24 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       decodedMonitor
     );
 
+    const monitorFields = {
+      ...decodedMonitor,
+      [ConfigKey.CONFIG_ID]: monitorId,
+      [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+    } as MonitorFields;
+    const zippedProjectFields = await mapInlineToProjectFields({
+      monitorType: decodedMonitor.type,
+      monitor: monitorFields,
+      logger: server.logger,
+      includeInlineScript: false,
+    });
+    const monitor = omit(
+      Object.assign(monitorFields, zippedProjectFields),
+      ConfigKey.SOURCE_INLINE
+    ) as MonitorFields;
     const [, errors] = await syntheticsMonitorClient.testNowConfigs(
       {
-        monitor: {
-          ...decodedMonitor,
-          [ConfigKey.CONFIG_ID]: monitorId,
-          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-        } as MonitorFields,
+        monitor,
         id: monitorId,
         testRunId: monitorId,
       },
@@ -66,6 +79,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return { errors };
     }
 
-    return monitor;
+    return fields;
   },
 });
