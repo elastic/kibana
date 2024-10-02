@@ -155,18 +155,15 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               hasBorder
               title={rule.name}
               onClick={() => onSelectRuleType(rule.id)}
-              description={
-                <>
-                  {rule.description}
-                  {rule.description && <EuiSpacer size="s" />}
-                  <EuiText
-                    color="subdued"
-                    size="xs"
-                    style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-                  >
-                    {producerToDisplayName(rule.producer)}
-                  </EuiText>
-                </>
+              description={rule.description}
+              footer={
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
+                >
+                  {producerToDisplayName(rule.producer)}
+                </EuiText>
               }
               style={{ marginRight: '8px', flexGrow: 0 }}
               data-test-subj={`${rule.id}-SelectOption`}
