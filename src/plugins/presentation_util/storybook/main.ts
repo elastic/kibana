@@ -12,8 +12,6 @@ import { Options } from '@storybook/core-common';
 import path from 'path';
 import webpack from 'webpack';
 
-window.jest = jest;
-
 module.exports = {
   ...defaultConfig,
   define: {
