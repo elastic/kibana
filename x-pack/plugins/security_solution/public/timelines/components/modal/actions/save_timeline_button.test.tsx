@@ -78,7 +78,8 @@ describe('SaveTimelineButton', () => {
       <TestProviders>
         <SaveTimelineButton
           timelineId="timeline-1"
-          options={{ buttonText: 'TEST', color: 'warning' }}
+          buttonText="TEST"
+          buttonColor="warning"
           data-test-subj={'TEST_ID'}
         />
       </TestProviders>
