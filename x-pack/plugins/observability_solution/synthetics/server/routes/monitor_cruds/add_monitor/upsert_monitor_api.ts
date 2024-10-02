@@ -66,7 +66,7 @@ export class UpsertMonitorAPI {
     const newMonitorId = id ?? uuidV4();
 
     let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
-    const monitorWithNamespace = await this.hydrateMonitorFields({
+    const monitorWithNamespace = this.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,
     });
@@ -292,7 +292,7 @@ export class UpsertMonitorAPI {
     }
   };
 
-  async hydrateMonitorFields({
+  hydrateMonitorFields({
     newMonitorId,
     normalizedMonitor,
   }: {

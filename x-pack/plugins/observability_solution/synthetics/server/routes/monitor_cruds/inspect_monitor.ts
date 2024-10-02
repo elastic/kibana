@@ -67,7 +67,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
       const addMonitorAPI = new UpsertMonitorAPI(routeContext);
 
-      const monitorWithNamespace = await addMonitorAPI.hydrateMonitorFields({
+      const monitorWithNamespace = addMonitorAPI.hydrateMonitorFields({
         normalizedMonitor,
         newMonitorId,
       });

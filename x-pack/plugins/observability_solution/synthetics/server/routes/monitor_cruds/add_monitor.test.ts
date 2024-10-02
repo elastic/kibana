@@ -9,7 +9,7 @@ import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UpsertMonitorAPI } from './add_monitor/upsert_monitor_api';
 
 describe('hydrateMonitorFields', () => {
-  it('does not add project field value for inline browser monitor', async () => {
+  it('does not add project field value for inline browser monitor', () => {
     const normalizedMonitor: SyntheticsMonitor = {
       // @ts-expect-error extra field
       type: 'browser',
@@ -71,7 +71,7 @@ step('fail', () => {
         logger: jest.fn(),
       },
     } as any);
-    const hydratedMonitor = await api.hydrateMonitorFields({
+    const hydratedMonitor = api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId: 'testMonitorId',
     });
@@ -79,7 +79,7 @@ step('fail', () => {
     expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeUndefined();
   });
 
-  it('does not add b64 zip data to lightweight monitors', async () => {
+  it('does not add b64 zip data to lightweight monitors', () => {
     const newMonitorId = 'testMonitorId';
     const routeContext = {
       request: {
@@ -133,7 +133,7 @@ step('fail', () => {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
     const api = new UpsertMonitorAPI(routeContext as any);
-    const hydratedMonitor = await api.hydrateMonitorFields({
+    const hydratedMonitor = api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,
     });
