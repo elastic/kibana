@@ -21,7 +21,8 @@ import type {
   IntegrationAssistantPluginStart,
   IntegrationAssistantPluginStartDependencies,
 } from './types';
-import { IntegrationAssistantConfigType, parseExperimentalConfigValue } from '../common';
+import { IntegrationAssistantConfigType } from './config';
+import { ExperimentalFeaturesService } from '../public/services';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
@@ -63,8 +64,6 @@ export class IntegrationAssistantPlugin
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     this.logger.debug('integrationAssistant api: Setup');
-    const config = this.config;
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     registerRoutes(router);
 
     return {
@@ -73,7 +72,6 @@ export class IntegrationAssistantPlugin
           this.isAvailable = false;
         }
       },
-      experimentalFeatures,
     };
   }
 
