@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Cloud Security Posture', function () {
-    // loadTestFile(require.resolve('./create_agent'));
+    loadTestFile(require.resolve('./create_agent'));
     loadTestFile(require.resolve('./security_posture'));
   });
 }
