@@ -13,14 +13,11 @@ import {
   SearchAssistantPluginStartDependencies,
 } from './types';
 
-export function plugin(
-  context: PluginInitializerContext<PublicConfigType>
-): PluginInitializer<
+export const plugin: PluginInitializer<
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
   {},
   SearchAssistantPluginStartDependencies
-> {
-  return new SearchAssistantPlugin(context);
-}
+> = (context: PluginInitializerContext<PublicConfigType>) => new SearchAssistantPlugin(context);
+
 export type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';

@@ -7,36 +7,28 @@
 
 import React from 'react';
 import { ConversationView } from '@kbn/ai-assistant';
-import { useSearchAIAssistantParams } from '../../../hooks/use_ai_assistant_params';
-import { useSearchAIAssistantRouter } from '../../../hooks/use_ai_assistant_router';
+import { useParams } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function ConversationViewWithProps() {
-  const { path } = useSearchAIAssistantParams('/conversations/*');
-  const conversationId = 'conversationId' in path ? path.conversationId : undefined;
-  const searchAIAssistantRouter = useSearchAIAssistantRouter();
+  const { conversationId } = useParams<{ conversationId?: string }>();
+  const {
+    services: { application, http },
+  } = useKibana();
   function navigateToConversation(nextConversationId?: string) {
-    if (nextConversationId) {
-      searchAIAssistantRouter.push('/conversations/{conversationId}', {
-        path: {
-          conversationId: nextConversationId,
-        },
-        query: {},
-      });
-    } else {
-      searchAIAssistantRouter.push('/conversations/new', { path: {}, query: {} });
-    }
+    application?.navigateToUrl(
+      http?.basePath.prepend(`/app/searchAssistant/conversations/${nextConversationId || ''}`) || ''
+    );
   }
   return (
     <ConversationView
       conversationId={conversationId}
       navigateToConversation={navigateToConversation}
-      newConversationHref={searchAIAssistantRouter.link('/conversations/new')}
+      newConversationHref={
+        http?.basePath.prepend(`/app/searchAssistant/conversations/new|| ''}`) || ''
+      }
       getConversationHref={(id: string) =>
-        searchAIAssistantRouter.link(`/conversations/{conversationId}`, {
-          path: {
-            conversationId: id,
-          },
-        })
+        http?.basePath.prepend(`/app/searchAssistant/conversations/${id || ''}`) || ''
       }
     />
   );

@@ -7,14 +7,26 @@
 
 import React from 'react';
 import { History } from 'history';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { useSearchAIAssistantRouter } from '../../hooks/use_ai_assistant_router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { SearchAIAssistantPageTemplate } from '../page_template';
+import { ConversationViewWithProps } from './conversations/conversation_view_with_props';
 
 export const SearchAssistantRouter: React.FC<{ history: History }> = ({ history }) => {
-  const router = useSearchAIAssistantRouter();
   return (
-    <RouterProvider history={history} router={router}>
-      <RouteRenderer />
-    </RouterProvider>
+    <SearchAIAssistantPageTemplate>
+      <Router history={history}>
+        <Routes>
+          <Redirect from="/" to="/conversations/new" exact />
+          <Redirect from="/conversations" to="/conversations/new" exact />
+          <Route path="/conversations/new" exact>
+            <ConversationViewWithProps />
+          </Route>
+          <Route path="/conversations/:conversationId">
+            <ConversationViewWithProps />
+          </Route>
+        </Routes>
+      </Router>
+    </SearchAIAssistantPageTemplate>
   );
 };
