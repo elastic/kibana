@@ -11,7 +11,7 @@
         "label": "CspEvaluationBadge",
         "description": [],
         "signature": [
-          "({ type }: Props) => JSX.Element"
+          "({ type }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/src/components/csp_evaluation_badge.tsx",
         "deprecated": false,

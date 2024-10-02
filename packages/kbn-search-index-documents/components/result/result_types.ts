@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IconType } from '@elastic/eui';
 
 export interface ResultFieldProps {
@@ -20,4 +21,6 @@ export interface MetaDataProps {
   id: string;
   onDocumentDelete?: Function;
   title?: string;
+  score?: SearchHit['_score'];
+  showScore?: boolean;
 }
