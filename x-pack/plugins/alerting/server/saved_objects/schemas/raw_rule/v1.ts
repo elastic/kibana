@@ -167,7 +167,7 @@ const rawRuleAlertsFilterSchema = schema.object({
             isMultiIndex: schema.maybe(schema.boolean()),
             type: schema.maybe(schema.string()),
             key: schema.maybe(schema.string()),
-            params: schema.maybe(schema.arrayOf(schema.any())),
+            params: schema.maybe(schema.any()),
             value: schema.maybe(schema.string()),
             field: schema.maybe(schema.string()),
             relation: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')])),
