@@ -35,7 +35,7 @@ export class BundleMetricsPlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'BundleMetricsPlugin',
-          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
         () => {
           const assets = Object.entries(compilation.assets)
