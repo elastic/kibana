@@ -110,14 +110,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                   indexSelectorOptions={[
                     {
                       description: i18n.translate(
-                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.description',
                         {
                           defaultMessage: 'Browse content sync history',
                         }
                       ),
                       error: errorOnContentSync,
                       title: i18n.translate(
-                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.title',
                         {
                           defaultMessage: 'Content syncs',
                         }
@@ -126,14 +126,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                     },
                     {
                       description: i18n.translate(
-                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControlSync.description',
                         {
                           defaultMessage: 'Browse access control sync history',
                         }
                       ),
                       error: errorOnAccessSync,
                       title: i18n.translate(
-                        'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
+                        'xpack.enterpriseSearch.content.searchIndex.documents.selectorSync.accessControl.title',
                         {
                           defaultMessage: 'Access control syncs',
                         }
