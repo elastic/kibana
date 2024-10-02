@@ -40,11 +40,11 @@ const formatBytes = (bytes: number) => {
   return numeral(bytes).format('0.0 b');
 };
 
-export const chartKeyToTitleMap: Record<MetricKey, string> = {
-  ingestedMax: i18n.translate('xpack.dataUsage.charts.ingestedMax', {
+export const chartKeyToTitleMap: Record<MetricTypes, string> = {
+  ingest_rate: i18n.translate('xpack.dataUsage.charts.ingestedMax', {
     defaultMessage: 'Data Ingested',
   }),
-  retainedMax: i18n.translate('xpack.dataUsage.charts.retainedMax', {
+  storage_retained: i18n.translate('xpack.dataUsage.charts.retainedMax', {
     defaultMessage: 'Data Retained in Storage',
   }),
 };

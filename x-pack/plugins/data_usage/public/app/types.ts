@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MetricKey } from '../../common/types';
+
+import { MetricTypes } from '../../common/rest_types';
 
 export interface DataPoint {
   x: number;
@@ -16,7 +17,7 @@ export interface Series {
   data: DataPoint[];
 }
 export interface Chart {
-  key: MetricKey;
+  key: MetricTypes;
   series: Series[];
 }
 
