@@ -36,7 +36,7 @@ export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
     description: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
       {
-        defaultMessage: 'Browse documents ingested by your content syncs',
+        defaultMessage: 'Browse documents ingested by content syncs',
       }
     ),
     title: i18n.translate(
@@ -51,7 +51,7 @@ export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
     description: i18n.translate(
       'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
       {
-        defaultMessage: 'Browse access control lists ingested by your access control syncs',
+        defaultMessage: 'Browse access control lists ingested by access control syncs',
       }
     ),
     title: i18n.translate(
