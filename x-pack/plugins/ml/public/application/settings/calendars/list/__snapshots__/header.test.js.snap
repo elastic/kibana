@@ -77,7 +77,7 @@ exports[`CalendarListsHeader renders header 1`] = `
       >
         <MemoizedFormattedMessage
           defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
-          id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
+          id="xpack.ml.settings.calendars.listHeader.calendarsDstDescription"
           values={
             Object {
               "br": <br />,
