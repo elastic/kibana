@@ -106,7 +106,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
               ),
             },
             { isDivider: true },
-            ...(authz.fleet.readAgents
+            ...(authz.fleet.readAgents && !agentPolicy?.supports_agentless
               ? [
                   {
                     label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
