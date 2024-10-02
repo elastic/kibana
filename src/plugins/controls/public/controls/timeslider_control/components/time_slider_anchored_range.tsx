@@ -19,6 +19,7 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
+  compressed: boolean;
 }
 
 export function TimeSliderAnchoredRange(props: Props) {
@@ -40,7 +41,7 @@ export function TimeSliderAnchoredRange(props: Props) {
       max={props.timeRangeMax}
       step={props.stepSize}
       ticks={props.ticks}
-      compressed
+      compressed={props.compressed}
     />
   );
 }
