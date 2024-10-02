@@ -137,7 +137,6 @@ export const useRuleIndexPattern = ({
   const { data } = useKibana().services;
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
-
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
   // when the index pattern changes
