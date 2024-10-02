@@ -368,6 +368,14 @@ export function mlApiProvider(httpService: HttpService) {
       });
     },
 
+    deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string }) {
+      return httpService.http<any>({
+        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_forecast/${forecastId}`,
+        method: 'DELETE',
+        version: '1',
+      });
+    },
+
     overallBuckets({
       jobId,
       topN,

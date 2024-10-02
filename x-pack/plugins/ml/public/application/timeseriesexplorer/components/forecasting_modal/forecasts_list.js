@@ -17,8 +17,10 @@ import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlApi } from '../../../contexts/kibana';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 
-function getColumns(viewForecast) {
+function getColumns(viewForecast, deleteForecast) {
   return [
     {
       field: 'forecast_create_timestamp',
@@ -72,16 +74,64 @@ function getColumns(viewForecast) {
         );
       },
     },
+    {
+      width: '65px',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          description: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastDescription',
+            {
+              defaultMessage: 'Delete forecast',
+            }
+          ),
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          enabled: () => true,
+          onClick: (item) => {
+            deleteForecast(item.forecast_id);
+          },
+          'data-test-subj': 'mlForecastingModalDeleteAction',
+        },
+      ],
+    },
   ];
 }
 
 // TODO - add in ml-info-icon to the h3 element,
 //        then remove tooltip and inline style.
-export function ForecastsList({ forecasts, viewForecast }) {
+export function ForecastsList({ forecasts, viewForecast, jobId }) {
+  const mlApi = useMlApi();
+  const toastNotificationService = useToastNotificationService();
+
   const getRowProps = (item) => {
     return {
       'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
     };
+  };
+
+  const deleteForecast = async (forecastId) => {
+    try {
+      const resp = await mlApi.deleteForecast({ jobId, forecastId });
+      if (resp?.acknowledged === true) {
+        toastNotificationService.displaySuccessToast(
+          i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastSuccess', {
+            defaultMessage: 'Request to delete forecast was received.',
+          })
+        );
+      }
+    } catch (error) {
+      toastNotificationService.displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastSuccess', {
+          defaultMessage: 'Error deleting forecast.',
+          values: { jobId },
+        })
+      );
+    }
   };
 
   return (
@@ -108,7 +158,7 @@ export function ForecastsList({ forecasts, viewForecast }) {
       </EuiToolTip>
       <EuiInMemoryTable
         items={forecasts}
-        columns={getColumns(viewForecast)}
+        columns={getColumns(viewForecast, deleteForecast)}
         pagination={false}
         data-test-subj="mlModalForecastTable"
         rowProps={getRowProps}

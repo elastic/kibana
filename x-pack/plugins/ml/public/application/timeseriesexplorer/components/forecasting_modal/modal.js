@@ -70,7 +70,11 @@ export function Modal(props) {
 
         {props.forecasts.length > 0 && (
           <React.Fragment>
-            <ForecastsList forecasts={props.forecasts} viewForecast={props.viewForecast} />
+            <ForecastsList
+              forecasts={props.forecasts}
+              viewForecast={props.viewForecast}
+              jobId={props.job.job_id}
+            />
             <EuiSpacer />
           </React.Fragment>
         )}
