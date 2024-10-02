@@ -25,3 +25,6 @@ export {
   EuiComboBoxWithFieldStats,
   type EuiComboBoxWithFieldStatsProps,
 } from './eui_combo_box_with_field_stats';
+
+export { OptionListWithFieldStats } from './options_list_with_stats/option_list_with_stats';
+export type { DropDownLabel } from './options_list_with_stats/types';
