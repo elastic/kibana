@@ -310,7 +310,6 @@ describe('formatHeartbeatRequest', () => {
         heartbeatId,
         spaceId: 'test-space-id',
       },
-      jest.fn() as any,
       '{"a":"param"}'
     );
     expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
@@ -328,19 +327,6 @@ describe('formatHeartbeatRequest', () => {
       },
       fields_under_root: true,
     });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
   });
 
   it('uses monitor id when custom heartbeat id is not defined', async () => {
@@ -352,7 +338,6 @@ describe('formatHeartbeatRequest', () => {
         heartbeatId: monitorId,
         spaceId: 'test-space-id',
       },
-      jest.fn() as any,
       JSON.stringify({ key: 'value' })
     );
     expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
@@ -371,166 +356,18 @@ describe('formatHeartbeatRequest', () => {
       fields_under_root: true,
       params: '{"key":"value"}',
     });
-
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
-  });
-
-  it('sets project fields as null when project id is not defined', async () => {
-    const monitorId = 'test-monitor-id';
-    const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor,
-        configId: monitorId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      jest.fn() as any
-    );
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
-      ...monitor,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': undefined,
-        'monitor.project.id': undefined,
-        run_once: undefined,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
-  });
-
-  it('sets project fields as null when project id is empty', async () => {
-    const monitorId = 'test-monitor-id';
-    const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor,
-        configId: monitorId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      // @ts-expect-error not checking logger functionality
-      jest.fn()
-    );
-
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
-      ...monitor,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': undefined,
-        'monitor.project.id': undefined,
-        run_once: undefined,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
-  });
-
-  it('supports run once', async () => {
-    const monitorId = 'test-monitor-id';
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor: testBrowserConfig as SyntheticsMonitor,
-        configId: monitorId,
-        runOnce: true,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      // @ts-expect-error not checking logger functionality
-      jest.fn()
-    );
-
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
-      ...testBrowserConfig,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': testBrowserConfig.project_id,
-        'monitor.project.id': testBrowserConfig.project_id,
-        run_once: true,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      fields_under_root: true,
-    });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
   });
 
   it('supports test_run_id', async () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor: testBrowserConfig as SyntheticsMonitor,
-        configId: monitorId,
-        testRunId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      // @ts-expect-error not checking logger functionality
-      jest.fn()
-    );
+    const actual = await formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      testRunId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
 
     expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
@@ -547,35 +384,18 @@ describe('formatHeartbeatRequest', () => {
       },
       fields_under_root: true,
     });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
-        await page.goto('https://www.google.com/');
-      });
-      });"
-    `);
   });
 
-  it('supports empty params', async () => {
+  it('does not append project data', async () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
-        configId: monitorId,
-        testRunId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      // @ts-expect-error not checking logger functionality
-      jest.fn()
-    );
+    const actual = await formatHeartbeatRequest({
+      monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
+      configId: monitorId,
+      testRunId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
 
     expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
       ...testBrowserConfig,
@@ -593,49 +413,15 @@ describe('formatHeartbeatRequest', () => {
       },
       fields_under_root: true,
     });
-    const projectContent = (actual as BrowserSensitiveSimpleFields)[
-      ConfigKey.SOURCE_PROJECT_CONTENT
-    ];
-    expect(projectContent.length).toBeGreaterThan(0);
-    expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-      "import { journey, step, expect } from '@elastic/synthetics';
-
-      journey('inline', ({ page, context, browser, params, request }) => {
-      step('Go to https://www.google.com/', async () => {
+    expect(
+      (actual as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
+    ).toBeUndefined();
+    expect((actual as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE])
+      .toMatchInlineSnapshot(`
+      "step('Go to https://www.google.com/', async () => {
         await page.goto('https://www.google.com/');
-      });
       });"
     `);
-  });
-
-  it('does not perform a zip if inline source is missing', async () => {
-    const monitorId = 'test-monitor-id';
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor: { ...testBrowserConfig, [ConfigKey.SOURCE_INLINE]: '' } as SyntheticsMonitor,
-        configId: monitorId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      jest.fn() as any
-    );
-
-    expect(actual).toEqual({
-      ...testBrowserConfig,
-      id: monitorId,
-      fields: {
-        config_id: monitorId,
-        'monitor.project.name': testBrowserConfig.project_id,
-        'monitor.project.id': testBrowserConfig.project_id,
-        run_once: undefined,
-        test_run_id: undefined,
-        meta: {
-          space_id: 'test-space-id',
-        },
-      },
-      [ConfigKey.SOURCE_INLINE]: '',
-      fields_under_root: true,
-    });
   });
 
   it('retains project string if there is no inline content', async () => {
@@ -645,19 +431,16 @@ describe('formatHeartbeatRequest', () => {
       monitorId,
       jest.fn() as any
     );
-    const actual = await formatHeartbeatRequest(
-      {
-        monitor: {
-          ...testBrowserConfig,
-          [ConfigKey.SOURCE_INLINE]: '',
-          [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
-        } as SyntheticsMonitor,
-        configId: monitorId,
-        heartbeatId: monitorId,
-        spaceId: 'test-space-id',
-      },
-      jest.fn() as any
-    );
+    const actual = await formatHeartbeatRequest({
+      monitor: {
+        ...testBrowserConfig,
+        [ConfigKey.SOURCE_INLINE]: '',
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: projectZipInput,
+      } as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
 
     expect(actual).toEqual({
       ...testBrowserConfig,
