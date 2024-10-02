@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
-            apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+            apm: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
             enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-            apm: ['all', 'read', 'minimal_all', 'minimal_read'],
+            apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
             discover: [
               'all',
               'read',
