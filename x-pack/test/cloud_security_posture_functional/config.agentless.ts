@@ -33,6 +33,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     // load tests in the index file
-    testFiles: [require.resolve('./agentless/create_agent.ts')],
+    testFiles: [require.resolve('./agentless')],
   };
 }
