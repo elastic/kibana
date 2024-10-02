@@ -19,6 +19,7 @@ import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
+import { AssetCriticalityEcsMigrationClient } from '../../asset_criticality/asset_criticality_migration_client';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -45,12 +46,23 @@ export const initEntityEngineRoute = (
       },
 
       async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
-        await checkAndInitAssetCriticalityResources(context, logger);
+        const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
         const [_, { taskManager }] = await getStartServices();
         const riskScoreDataClient = secSol.getRiskScoreDataClient();
+        const core = await context.core;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const auditLogger = secSol.getAuditLogger();
+        const assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
+          esClient,
+          logger,
+          auditLogger,
+        });
+
+        // first initialse risk score and asset criticality resources
         await riskScoreDataClient.createRiskScoreLatestIndex();
-        const siemResponse = buildSiemResponse(response);
+        await checkAndInitAssetCriticalityResources(context, logger);
+
         try {
           if (!taskManager) {
             return siemResponse.error({
@@ -60,7 +72,12 @@ export const initEntityEngineRoute = (
           }
           const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, taskManager, request.body);
+            .init(
+              request.params.entityType,
+              taskManager,
+              assetCriticalityMigrationClient,
+              request.body
+            );
 
           return response.ok({ body });
         } catch (e) {

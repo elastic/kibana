@@ -37,7 +37,6 @@ interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   entityClient: EntityClient;
-  assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
 }
@@ -64,9 +63,10 @@ export class EntityStoreDataClient {
   public async init(
     entityType: EntityType,
     taskManager: TaskManagerStartContract,
+    assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-    const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
+    const { entityClient, logger } = this.options;
     const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
 
     if (requiresMigration) {
@@ -76,7 +76,6 @@ export class EntityStoreDataClient {
     }
 
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-    const { logger, entityClient } = this.options;
 
     logger.info(`Initializing entity store for ${entityType}`);
 
