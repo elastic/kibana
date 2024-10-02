@@ -140,8 +140,14 @@ export class ProductFeaturesService {
     // An additional check is performed to ensure the privilege has been registered by the productFeature service,
     // preventing full access (`*`) roles, such as superuser, from bypassing productFeature controls.
     const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
+    const SECURITY_PRIVILEGE_PREFIX = `${APP_ID}-`;
 
     http.registerOnPostAuth((request, response, toolkit) => {
+      // @ts-ignore just for check
+      const securityPrivilege = (
+        request.route.options.security?.authz?.requiredPrivileges ?? []
+      ).find((privilege) => privilege.startsWith(SECURITY_PRIVILEGE_PREFIX));
+
       for (const tag of request.route.options.tags) {
         let isEnabled = true;
         if (tag.startsWith(APP_FEATURE_TAG_PREFIX)) {
@@ -150,6 +156,10 @@ export class ProductFeaturesService {
           );
         } else if (tag.startsWith(API_ACTION_TAG_PREFIX)) {
           isEnabled = this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length));
+        } else if (securityPrivilege) {
+          isEnabled = this.isApiPrivilegeEnabled(
+            securityPrivilege.substring(SECURITY_PRIVILEGE_PREFIX.length)
+          );
         }
 
         if (!isEnabled) {
