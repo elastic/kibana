@@ -9,7 +9,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
 
 export type DropDownLabel<T = string> = EuiSelectableOption<{
-  key: string;
+  key?: string;
   label: string | React.ReactNode;
   isEmpty?: boolean;
   'data-is-empty'?: boolean;
