@@ -7502,7 +7502,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -7992,7 +7992,7 @@
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
@@ -8069,7 +8069,7 @@
             "section": "def-public.EmbeddableRendererProps",
             "text": "EmbeddableRendererProps"
           },
-          "<I>) => JSX.Element"
+          "<I>) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -8111,7 +8111,7 @@
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
-          "({ embeddable, loading, error, input }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -8120,12 +8120,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableRoot.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -9019,7 +9019,7 @@
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<SerializedState>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,

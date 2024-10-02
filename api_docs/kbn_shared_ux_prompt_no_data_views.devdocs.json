@@ -11,7 +11,7 @@
         "label": "DataViewIllustration",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/data_view_illustration.tsx",
         "deprecated": false,
@@ -32,7 +32,7 @@
         "signature": [
           "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
           "NoDataViewsPromptProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/no_data_views.tsx",
         "deprecated": false,
@@ -69,7 +69,7 @@
         "signature": [
           "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, onTryESQL, esqlDocLink, emptyPromptColor, }: ",
           "NoDataViewsPromptComponentProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/no_data_views.component.tsx",
         "deprecated": false,
@@ -104,9 +104,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "NoDataViewsPromptKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -120,9 +120,9 @@
             "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataViewsPromptKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
             "deprecated": false,
@@ -143,9 +143,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "NoDataViewsPromptServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -159,9 +159,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "NoDataViewsPromptServices",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
             "deprecated": false,

@@ -35,7 +35,7 @@
             "section": "def-common.Props",
             "text": "Props"
           },
-          "<string>) => JSX.Element"
+          "<string>) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
         "deprecated": false,

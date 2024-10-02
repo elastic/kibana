@@ -354,7 +354,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
-                { defaultMessage: 'Select roles(s)' }
+                { defaultMessage: 'Select roles' }
               )}
               labelAppend={
                 <EuiLink href={getUrlForApp('management', { deepLinkId: 'roles' })}>
@@ -367,7 +367,8 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               helpText={i18n.translate(
                 'xpack.spaces.management.spaceDetails.roles.selectRolesHelp',
                 {
-                  defaultMessage: 'Select Kibana spaces to which you wish to assign privileges.',
+                  defaultMessage:
+                    'Users assigned to selected roles will gain access to this space.',
                 }
               )}
             >
@@ -379,6 +380,10 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                     defaultMessage: 'Select role to assign to the "{spaceName}" space',
                     values: { spaceName: space.name },
                   }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
+                  { defaultMessage: 'Add a role...' }
                 )}
                 isLoading={fetchingDataDeps}
                 options={createRolesComboBoxOptions(spaceUnallocatedRoles)}

@@ -27,7 +27,7 @@
         "label": "RollupDeprecationTooltip",
         "description": [],
         "signature": [
-          "({ children }: RollupDeprecationTooltipProps) => JSX.Element"
+          "({ children }: RollupDeprecationTooltipProps) => React.JSX.Element"
         ],
         "path": "x-pack/packages/rollup/src/rollup_deprecation_tooltip/rollup_deprecation_tooltip.tsx",
         "deprecated": false,

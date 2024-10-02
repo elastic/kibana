@@ -328,7 +328,7 @@
         "label": "JSONCodeEditorCommonMemoized",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<JsonCodeEditorCommonProps> & { readonly type: (props: JsonCodeEditorCommonProps) => JSX.Element; }"
+          "React.NamedExoticComponent<JsonCodeEditorCommonProps> & { readonly type: (props: JsonCodeEditorCommonProps) => React.JSX.Element; }"
         ],
         "path": "packages/kbn-unified-data-table/src/components/json_code_editor/json_code_editor_common.tsx",
         "deprecated": false,
@@ -345,7 +345,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -534,7 +534,7 @@
             "section": "def-public.RowHeightSettingsProps",
             "text": "RowHeightSettingsProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/row_height_settings.tsx",
         "deprecated": false,
@@ -605,7 +605,7 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; dataTestSubj?: string | undefined; className?: string | undefined; isCompressed?: boolean | undefined; }) => JSX.Element"
+          "; dataTestSubj?: string | undefined; className?: string | undefined; isCompressed?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/source_document.tsx",
         "deprecated": false,
@@ -831,7 +831,7 @@
             "section": "def-public.UnifiedDataTableProps",
             "text": "UnifiedDataTableProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
         "deprecated": false,
@@ -2365,7 +2365,7 @@
               "\nOptional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions."
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
@@ -2766,9 +2766,7 @@
             "label": "gridProps",
             "description": [],
             "signature": [
-              "{ additionalControls?: React.ReactNode | ",
-              "EuiDataGridToolBarAdditionalControlsOptions",
-              "; }"
+              "{ additionalControls?: React.ReactNode; }"
             ],
             "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
             "deprecated": false,

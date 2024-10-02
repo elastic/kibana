@@ -160,9 +160,7 @@ export class FeatureTable extends Component<Props, State> {
             <EuiSpacer size="s" />
             {helpText && (
               <>
-                <EuiCallOut iconType="iInCircle" size="s">
-                  {helpText}
-                </EuiCallOut>
+                <EuiCallOut size="s" title={helpText} />
                 <EuiSpacer size="s" />
               </>
             )}
@@ -404,7 +402,7 @@ export class FeatureTable extends Component<Props, State> {
         'xpack.security.management.editRole.featureTable.managementCategoryHelpText',
         {
           defaultMessage:
-            'Access to Stack Management is determined by both Elasticsearch and Kibana privileges, and cannot be explicitly disabled.',
+            'Additional Stack Management permissions can be found outside of this menu, in index and cluster privileges.',
         }
       );
     }

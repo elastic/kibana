@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { deleteActionRoute } from './delete';
+import { deleteConnectorRoute } from './delete';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { actionsClientMock } from '../mocks';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../../../mocks';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -21,12 +21,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('deleteActionRoute', () => {
+describe('deleteConnectorRoute', () => {
   it('deletes an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteActionRoute(router, licenseState);
+    deleteConnectorRoute(router, licenseState);
 
     const [config, handler] = router.delete.mock.calls[0];
 
@@ -63,7 +63,7 @@ describe('deleteActionRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteActionRoute(router, licenseState);
+    deleteConnectorRoute(router, licenseState);
 
     const [, handler] = router.delete.mock.calls[0];
 
@@ -90,7 +90,7 @@ describe('deleteActionRoute', () => {
       throw new Error('OMG');
     });
 
-    deleteActionRoute(router, licenseState);
+    deleteConnectorRoute(router, licenseState);
 
     const [, handler] = router.delete.mock.calls[0];
 

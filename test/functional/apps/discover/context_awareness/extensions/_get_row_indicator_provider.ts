@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
 
   // Failing: See https://github.com/elastic/kibana/issues/194043
+  // Failing: See https://github.com/elastic/kibana/issues/194043
   describe.skip('extension getRowIndicatorProvider', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');

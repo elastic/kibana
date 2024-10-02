@@ -495,7 +495,14 @@ describe('edit package policy page', () => {
       },
     });
     (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
-      data: { item: { id: 'agentless', name: 'Agentless policy', namespace: 'default' } },
+      data: {
+        item: {
+          id: 'agentless',
+          name: 'Agentless policy',
+          namespace: 'default',
+          supports_agentless: true,
+        },
+      },
     });
 
     render();
@@ -512,6 +519,20 @@ describe('edit package policy page', () => {
     });
 
     expect(sendUpdatePackagePolicy).toHaveBeenCalled();
+  });
+
+  it('should hide the multiselect agent policies when agent policy is agentless', async () => {
+    (useGetAgentPolicies as MockFn).mockReturnValue({
+      data: {
+        items: [{ id: 'agent-policy-1', name: 'Agent policy 1', supports_agentless: true }],
+      },
+      isLoading: false,
+    });
+
+    await act(async () => {
+      render();
+    });
+    expect(renderResult.queryByTestId('agentPolicyMultiSelect')).not.toBeInTheDocument();
   });
 
   describe('modify agent policies', () => {
