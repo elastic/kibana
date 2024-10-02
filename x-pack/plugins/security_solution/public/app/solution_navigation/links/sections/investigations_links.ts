@@ -6,7 +6,6 @@
  */
 
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import IconNotes from './icons/notes';
 import { INVESTIGATIONS_PATH } from '../../../../../common/constants';
 import { SERVER_APP_ID } from '../../../../../common';
 import type { LinkItem } from '../../../../common/links/types';
@@ -49,7 +48,7 @@ export const updateInvestigationsLinkFromNotes = (
   currentLinks.push({
     ...noteLink,
     description: i18n.NOTE_DESCRIPTION,
-    landingIcon: IconNotes,
+    landingIcon: 'filebeatApp',
   });
   return {
     ...investigationsLink,
