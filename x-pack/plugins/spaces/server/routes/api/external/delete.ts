@@ -23,6 +23,9 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       description: `Delete a space`,
+      options: {
+        tags: ['oas-tag:spaces'],
+      },
     })
     .addVersion(
       {

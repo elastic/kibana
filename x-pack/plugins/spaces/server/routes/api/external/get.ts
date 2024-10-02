@@ -21,6 +21,9 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       description: `Get a space`,
+      options: {
+        tags: ['oas-tag:spaces'],
+      },
     })
     .addVersion(
       {

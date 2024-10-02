@@ -24,6 +24,9 @@ export function defineGetRolesRoutes({
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Get a role`,
+      options: {
+        tags: ['oas-tag:roles'],
+      },
     })
     .addVersion(
       {

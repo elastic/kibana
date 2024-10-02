@@ -18,6 +18,9 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Delete a role`,
+      options: {
+        tags: ['oas-tag:roles'],
+      },
     })
     .addVersion(
       {

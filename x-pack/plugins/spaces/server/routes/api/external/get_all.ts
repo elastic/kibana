@@ -20,6 +20,9 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       access: 'public',
       description: `Get all spaces`,
+      options: {
+        tags: ['oas-tag:spaces'],
+      },
     })
     .addVersion(
       {

@@ -45,6 +45,9 @@ export function defineBulkCreateOrUpdateRolesRoutes({
       path: '/api/security/roles',
       access: 'public',
       summary: 'Create or update roles',
+      options: {
+        tags: ['oas-tag:roles'],
+      },
     })
     .addVersion(
       {

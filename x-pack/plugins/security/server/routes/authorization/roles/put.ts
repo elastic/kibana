@@ -26,6 +26,9 @@ export function definePutRolesRoutes({
       path: '/api/security/role/{name}',
       access: 'public',
       summary: `Create or update a role`,
+      options: {
+        tags: ['oas-tag:roles'],
+      },
     })
     .addVersion(
       {
