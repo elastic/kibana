@@ -115,11 +115,7 @@ export class SyntheticsMonitorClient {
         configId: editedMonitor.id,
       };
 
-      const editedConfig = await formatHeartbeatRequest(
-        configData,
-        this.server.logger,
-        paramsString
-      );
+      const editedConfig = formatHeartbeatRequest(configData, paramsString);
       const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
       if (publicLocations.length > 0) {
         publicConfigs.push(configData);
@@ -372,13 +368,12 @@ export class SyntheticsMonitorClient {
       );
 
       heartbeatConfigs.push(
-        await formatHeartbeatRequest(
+        formatHeartbeatRequest(
           {
             spaceId,
             monitor: normalizedMonitor,
             configId: monitor.id,
           },
-          this.server.logger,
           paramsString
         )
       );
@@ -405,7 +400,7 @@ export class SyntheticsMonitorClient {
       monitor
     );
 
-    const formattedConfig = await formatHeartbeatRequest(config, this.server.logger, paramsString);
+    const formattedConfig = formatHeartbeatRequest(config, paramsString);
     return { formattedConfig, params, config };
   }
 

@@ -17,7 +17,6 @@ import {
   SyntheticsMonitor,
   TLSFields,
 } from '../../../../common/runtime_types';
-import { mapInlineToProjectFields } from '../../utils/map_inline_to_project_fields';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -90,11 +89,10 @@ export interface ConfigData {
   spaceId: string;
 }
 
-export const formatHeartbeatRequest = async (
+export const formatHeartbeatRequest = (
   { monitor, configId, heartbeatId, runOnce, testRunId, spaceId }: Omit<ConfigData, 'params'>,
-  logger: Logger,
   params?: string
-): Promise<HeartbeatConfig> => {
+): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
 
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
@@ -118,7 +116,6 @@ export const formatHeartbeatRequest = async (
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',
-    ...(await mapInlineToProjectFields({ monitorType: monitor.type, monitor, logger })),
   };
 };
 

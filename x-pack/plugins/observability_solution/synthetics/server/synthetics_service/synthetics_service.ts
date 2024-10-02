@@ -654,7 +654,7 @@ export class SyntheticsService {
           config.monitor
         );
 
-        const asHeartbeatConfig = await formatHeartbeatRequest(config, this.logger, paramsString);
+        const asHeartbeatConfig = formatHeartbeatRequest(config, paramsString);
 
         return formatMonitorConfigFields(
           Object.keys(asHeartbeatConfig) as ConfigKey[],
