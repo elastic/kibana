@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const ALL_CASES_CLOSED_CASES_STATS =
-  '[data-test-subj="closedStatsHeader"] .euiDescriptionList__description';
+export const ALL_CASES_CLOSED_CASES_STATS = '[data-test-subj="closedStatsHeader"] .euiStat__title';
 
 export const ALL_CASES_COMMENTS_COUNT = '[data-test-subj="case-table-column-commentCount"]';
 
@@ -15,7 +14,7 @@ export const ALL_CASES_CREATE_NEW_CASE_BTN = '[data-test-subj="createNewCaseBtn"
 export const ALL_CASES_CREATE_NEW_CASE_TABLE_BTN = '[data-test-subj="cases-table-add-case"]';
 
 export const ALL_CASES_IN_PROGRESS_CASES_STATS =
-  '[data-test-subj="inProgressStatsHeader"] .euiDescriptionList__description';
+  '[data-test-subj="inProgressStatsHeader"] .euiStat__title';
 
 export const ALL_CASES_NAME = '[data-test-subj="case-details-link"]';
 
@@ -27,8 +26,7 @@ export const ALL_CASES_STATUS_FILTER = '[data-test-subj="options-filter-popover-
 
 export const ALL_CASES_OPEN_FILTER = '[data-test-subj="options-filter-popover-item-open"]';
 
-export const ALL_CASES_OPEN_CASES_STATS =
-  '[data-test-subj="openStatsHeader"] .euiDescriptionList__description';
+export const ALL_CASES_OPEN_CASES_STATS = '[data-test-subj="openStatsHeader"] .euiStat__title';
 
 export const ALL_CASES_OPENED_ON = '[data-test-subj="case-table-column-createdAt"]';
 

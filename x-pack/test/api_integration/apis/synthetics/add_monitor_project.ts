@@ -2036,7 +2036,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev'",
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev|dev2'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
