@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { CreateMonitorPayLoad } from './add_monitor_api';
+import { CreateMonitorPayLoad } from './upsert_monitor_api';
 import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 

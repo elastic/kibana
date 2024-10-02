@@ -6,7 +6,7 @@
  */
 
 import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
-import { UpsertMonitorAPI } from './add_monitor/add_monitor_api';
+import { UpsertMonitorAPI } from './add_monitor/upsert_monitor_api';
 
 describe('hydrateMonitorFields', () => {
   it('creates expected zip b64 project field value for inline browser monitor', async () => {

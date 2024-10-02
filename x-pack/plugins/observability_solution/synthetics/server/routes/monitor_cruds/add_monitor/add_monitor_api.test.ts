@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpsertMonitorAPI } from './add_monitor_api';
+import { UpsertMonitorAPI } from './upsert_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 

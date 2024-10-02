@@ -9,7 +9,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { validatePermissions } from './edit_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { UpsertMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { UpsertMonitorAPI, CreateMonitorPayLoad } from './add_monitor/upsert_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
