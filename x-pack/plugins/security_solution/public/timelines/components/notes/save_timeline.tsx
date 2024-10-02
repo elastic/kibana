@@ -25,12 +25,13 @@ export const SAVE_TIMELINE_CALLOUT_CONTENT = i18n.translate(
     defaultMessage: 'You need to save your timeline before creating notes for it.',
   }
 );
-export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
-  {
+
+const saveTimelineButtonOptions = {
+  buttonText: i18n.translate('xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel', {
     defaultMessage: 'Save timeline',
-  }
-);
+  }),
+  color: 'danger' as const,
+};
 
 /**
  * Renders a callout to let the user know they have to save the timeline before creating notes
@@ -39,7 +40,7 @@ export const SaveTimelineCallout = memo(() => {
   return (
     <EuiCallOut
       title={SAVE_TIMELINE_CALLOUT_TITLE}
-      color="warning"
+      color="danger"
       iconType="iInCircle"
       data-test-subj={SAVE_TIMELINE_CALLOUT_TEST_ID}
       css={css`
@@ -53,7 +54,7 @@ export const SaveTimelineCallout = memo(() => {
         <EuiFlexItem grow={false}>
           <SaveTimelineButton
             timelineId={TimelineId.active}
-            buttonText={SAVE_TIMELINE_BUTTON}
+            options={saveTimelineButtonOptions}
             data-test-subj={SAVE_TIMELINE_BUTTON_TEST_ID}
           />
         </EuiFlexItem>

@@ -22,9 +22,18 @@ export interface SaveTimelineButtonProps {
    */
   timelineId: string;
   /**
-   * Ability to customize the text of the button
+   * Customize the button
    */
-  buttonText?: string;
+  options?: {
+    /**
+     * Ability to customize the text of the button
+     */
+    buttonText?: string;
+    /**
+     * Ability to customize the color of the button
+     */
+    color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
+  };
   /**
    * Optional data-test-subj value
    */
@@ -38,7 +47,7 @@ export interface SaveTimelineButtonProps {
 export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
   ({
     timelineId,
-    buttonText = i18n.SAVE,
+    options = { buttonText: i18n.SAVE, color: 'primary' },
     'data-test-subj': dataTestSubj = 'timeline-modal-save-timeline',
   }) => {
     const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
@@ -72,13 +81,14 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
             id={TIMELINE_TOUR_CONFIG_ANCHORS.SAVE_TIMELINE}
             fill
             size="s"
+            color={options.color}
             iconType="save"
             isLoading={isSaving}
             disabled={!canSaveTimeline}
             data-test-subj={dataTestSubj}
             onClick={toggleSaveTimeline}
           >
-            {buttonText}
+            {options.buttonText}
           </EuiButton>
         </EuiToolTip>
         {showEditTimelineOverlay && canSaveTimeline ? (

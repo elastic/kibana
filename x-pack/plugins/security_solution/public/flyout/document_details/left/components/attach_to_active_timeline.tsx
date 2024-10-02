@@ -20,8 +20,6 @@ import {
 } from './test_ids';
 import { timelineSelectors } from '../../../../timelines/store';
 
-const timelineCheckBoxId = 'xpack.securitySolution.flyout.notes.attachToTimeline.checkboxId';
-
 export const ATTACH_TO_TIMELINE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle',
   {
@@ -46,12 +44,14 @@ export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
     defaultMessage: 'Attach to active timeline',
   }
 );
-export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
-  {
+
+const timelineCheckBoxId = 'xpack.securitySolution.flyout.notes.attachToTimeline.checkboxId';
+const saveTimelineButtonOptions = {
+  buttonText: i18n.translate('xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel', {
     defaultMessage: 'Save timeline',
-  }
-);
+  }),
+  color: 'warning' as const,
+};
 
 export interface AttachToActiveTimelineProps {
   /**
@@ -93,7 +93,7 @@ export const AttachToActiveTimeline = memo(
     return (
       <EuiCallOut
         title={ATTACH_TO_TIMELINE_CALLOUT_TITLE}
-        color={'primary'}
+        color={isTimelineSaved ? 'primary' : 'warning'}
         iconType="iInCircle"
         data-test-subj={ATTACH_TO_TIMELINE_CALLOUT_TEST_ID}
         css={css`
@@ -119,7 +119,7 @@ export const AttachToActiveTimeline = memo(
             ) : (
               <SaveTimelineButton
                 timelineId={TimelineId.active}
-                buttonText={SAVE_TIMELINE_BUTTON}
+                options={saveTimelineButtonOptions}
                 data-test-subj={SAVE_TIMELINE_BUTTON_TEST_ID}
               />
             )}
