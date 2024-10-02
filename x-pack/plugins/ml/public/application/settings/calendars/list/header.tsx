@@ -94,22 +94,40 @@ export const CalendarsListHeader: FC<Props> = ({ totalCount, refreshCalendars, i
       <EuiText>
         <p>
           <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
-              defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies,
+            {isDst ? (
+              <FormattedMessage
+                id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
+                defaultMessage="DST Calendars contain a list of scheduled events for which you do not want to generate anomalies, taking into account daylight saving time shifts that may cause events to occur one hour earlier or later. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
+                values={{
+                  br: <br />,
+                  learnMoreLink: (
+                    <EuiLink href={docsUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.settings.calendars.listHeader.calendarsDstDescription"
+                defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies,
               such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
-              values={{
-                br: <br />,
-                learnMoreLink: (
-                  <EuiLink href={docsUrl} target="_blank">
-                    <FormattedMessage
-                      id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
+                values={{
+                  br: <br />,
+                  learnMoreLink: (
+                    <EuiLink href={docsUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )}
           </EuiTextColor>
         </p>
       </EuiText>

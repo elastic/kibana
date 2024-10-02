@@ -29,7 +29,7 @@ export const DescriptionDst: FC<PropsWithChildren<unknown>> = memo(({ children }
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsDstSelection.description"
-          defaultMessage="Something about DST calendars. {learnMoreLink}"
+          defaultMessage="A list of scheduled events you want to ignore, taking into account daylight saving time shifts. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docsUrl} target="_blank">

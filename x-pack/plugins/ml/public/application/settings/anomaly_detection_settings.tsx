@@ -181,7 +181,7 @@ export const AnomalyDetectionSettings: FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.ml.settings.anomalyDetection.calendarsDstText"
-                  defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
+                  defaultMessage="DST Calendars contain a list of scheduled events for which you do not want to generate anomalies, taking into account daylight saving time shifts that may cause events to occur one hour earlier or later."
                 />
               </p>
             </EuiTextColor>
