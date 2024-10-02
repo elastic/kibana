@@ -68,6 +68,9 @@ export function registerAPIRoutes({
     access: 'public',
     summary: 'Create a dashboard',
     description: TECHNICAL_PREVIEW_WARNING,
+    options: {
+      tags: ['oas-tag:Dashboards'],
+    },
   });
 
   createRoute.addVersion(
@@ -132,6 +135,9 @@ export function registerAPIRoutes({
     access: 'public',
     summary: `Update an existing dashboard.`,
     description: TECHNICAL_PREVIEW_WARNING,
+    options: {
+      tags: ['oas-tag:Dashboards'],
+    },
   });
 
   updateRoute.addVersion(
@@ -183,6 +189,9 @@ export function registerAPIRoutes({
     access: 'public',
     summary: `Get a list of dashboards.`,
     description: TECHNICAL_PREVIEW_WARNING,
+    options: {
+      tags: ['oas-tag:Dashboards'],
+    },
   });
 
   listRoute.addVersion(
@@ -242,6 +251,9 @@ export function registerAPIRoutes({
     access: 'public',
     summary: `Get a dashboard.`,
     description: TECHNICAL_PREVIEW_WARNING,
+    options: {
+      tags: ['oas-tag:Dashboards'],
+    },
   });
 
   getRoute.addVersion(
@@ -290,6 +302,9 @@ export function registerAPIRoutes({
     access: 'public',
     summary: `Delete a dashboard.`,
     description: TECHNICAL_PREVIEW_WARNING,
+    options: {
+      tags: ['oas-tag:Dashboards'],
+    },
   });
 
   deleteRoute.addVersion(
