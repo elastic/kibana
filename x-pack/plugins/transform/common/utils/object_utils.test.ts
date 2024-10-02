@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNestedProperty } from './object_utils';
+import { getNestedProperty, setNestedProperty } from './object_utils';
 
 describe('object_utils', () => {
   test('getNestedProperty()', () => {
@@ -67,5 +67,15 @@ describe('object_utils', () => {
     const test11 = getNestedProperty(falseyObj, 'the.other_nested.value');
     expect(typeof test11).toBe('number');
     expect(test11).toBe(0);
+
+    expect(() => {
+      setNestedProperty(testObj, 'the.__proto__', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(testObj, 'the.prototype', 'update');
+    }).toThrow('Invalid accessor');
+    expect(() => {
+      setNestedProperty(testObj, 'the.constructor', 'update');
+    }).toThrow('Invalid accessor');
   });
 });
