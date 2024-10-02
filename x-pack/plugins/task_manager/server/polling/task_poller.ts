@@ -146,7 +146,8 @@ export enum PollingErrorType {
 }
 
 function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Option<T> = none) {
-  return asErr(new PollingError<T>(`Failed to poll for work: ${err}`, type, data));
+  const errDescription: string = err instanceof Error ? `${err.message}\n${err.stack}` : err;
+  return asErr(new PollingError<T>(`Failed to poll for work: ${errDescription}`, type, data));
 }
 
 export class PollingError<T> extends Error {
