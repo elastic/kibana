@@ -49,7 +49,6 @@ import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { InitialComponentState } from '../../../dashboard_api/get_dashboard_api';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -101,17 +100,6 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Build the dashboard container.
   // --------------------------------------------------------------------------------------
-  const initialComponentState: InitialComponentState = {
-    anyMigrationRun: savedObjectResult.anyMigrationRun ?? false,
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
-    lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_INPUT,
-      id: input.id,
-    },
-    lastSavedId: savedObjectId,
-    managed: savedObjectResult.managed ?? false,
-  };
-
   const dashboardContainer = new DashboardContainer(
     input,
     reduxEmbeddablePackage,
@@ -119,7 +107,11 @@ export const createDashboard = async (
     dashboardCreationStartTime,
     undefined,
     creationOptions,
-    initialComponentState
+    {
+      isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
+      savedObjectId,
+      savedObjectResult,
+    }
   );
 
   // --------------------------------------------------------------------------------------

@@ -75,10 +75,7 @@ import {
   DashboardPanelMap,
   DashboardPanelState,
 } from '../../../common';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForControls } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
@@ -116,7 +113,8 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import { getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management_service/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -174,6 +172,8 @@ export class DashboardContainer
   public expandPanel: (panelId: string) => void;
   public scrollToPanel: (panelRef: HTMLDivElement) => Promise<void>;
   public scrollToTop: () => void;
+  public setReferences: (nextReferences: Reference[]) => void;
+  public getSerializedStateForChild: HasSerializedChildState['getSerializedStateForChild'];
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -223,7 +223,7 @@ export class DashboardContainer
     | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
     | undefined;
   // new embeddable framework
-  public savedObjectReferences: Reference[] = [];
+  public savedObjectReferences: Reference[];
   public controlGroupInput: DashboardAttributes['controlGroupInput'] | undefined;
 
   constructor(
@@ -233,7 +233,11 @@ export class DashboardContainer
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
-    initialComponentState?: InitialComponentState
+    creationState?: {
+      isEmbeddedExternally: boolean;
+      savedObjectId?: string;
+      savedObjectResult?: LoadDashboardReturn;
+    }
   ) {
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
     async function untilContainerInitialized(): Promise<void> {
@@ -306,18 +310,11 @@ export class DashboardContainer
       'id'
     ) as BehaviorSubject<string>;
 
-    const dashboardApi = getDashboardApi(
-      initialComponentState
-        ? initialComponentState
-        : {
-            anyMigrationRun: false,
-            isEmbeddedExternally: false,
-            lastSavedInput: initialInput,
-            lastSavedId: undefined,
-            managed: false,
-          },
-      (id: string) => this.untilEmbeddableLoaded(id)
-    );
+    const dashboardApi = getDashboardApi({
+      ...(creationState ?? {}),
+      initialInput: this.getState().explicitInput,
+      untilEmbeddableLoaded: (id: string) => this.untilEmbeddableLoaded(id),
+    });
     this.animatePanelTransforms$ = dashboardApi.animatePanelTransforms$;
     this.fullScreenMode$ = dashboardApi.fullScreenMode$;
     this.hasUnsavedChanges$ = dashboardApi.hasUnsavedChanges$;
@@ -346,6 +343,9 @@ export class DashboardContainer
     this.expandPanel = dashboardApi.expandPanel;
     this.scrollToPanel = dashboardApi.scrollToPanel;
     this.scrollToTop = dashboardApi.scrollToTop;
+    this.savedObjectReferences = dashboardApi.references;
+    this.setReferences = dashboardApi.setReferences;
+    this.getSerializedStateForChild = dashboardApi.getSerializedStateForChild;
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
@@ -871,17 +871,6 @@ export class DashboardContainer
   };
 
   public saveNotification$: Subject<void> = new Subject<void>();
-
-  public getSerializedStateForChild = (childId: string) => {
-    const rawState = this.getInput().panels[childId].explicitInput;
-    const { id, ...serializedState } = rawState;
-    if (!rawState || Object.keys(serializedState).length === 0) return;
-    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
-    return {
-      rawState,
-      references,
-    };
-  };
 
   public getSerializedStateForControlGroup = () => {
     return {

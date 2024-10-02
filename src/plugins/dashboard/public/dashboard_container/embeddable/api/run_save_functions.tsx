@@ -106,7 +106,7 @@ export async function runQuickSave(this: DashboardContainer) {
     lastSavedId,
   });
 
-  this.savedObjectReferences = saveResult.references ?? [];
+  this.setReferences(saveResult.references ?? []);
   this.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
 
@@ -248,7 +248,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           });
         }
 
-        this.savedObjectReferences = saveResult.references ?? [];
+        this.setReferences(saveResult.references ?? []);
         this.saveNotification$.next();
 
         resolve(saveResult);

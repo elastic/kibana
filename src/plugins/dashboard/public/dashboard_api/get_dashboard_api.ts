@@ -8,40 +8,49 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { omit } from 'lodash';
 import type { DashboardContainerInput } from '../../common';
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChanges } from './unsaved_changes';
+import { initializePanelsManager } from './panels_manager';
+import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
-export interface InitialComponentState {
-  anyMigrationRun: boolean;
-  isEmbeddedExternally: boolean;
-  lastSavedInput: DashboardContainerInput;
-  lastSavedId: string | undefined;
-  managed: boolean;
-}
-
-export function getDashboardApi(
-  initialComponentState: InitialComponentState,
-  untilEmbeddableLoaded: (id: string) => Promise<unknown>
-) {
+export function getDashboardApi({
+  isEmbeddedExternally,
+  savedObjectId,
+  savedObjectResult,
+  initialInput,
+  untilEmbeddableLoaded,
+}: {
+  isEmbeddedExternally?: boolean;
+  savedObjectId?: string;
+  savedObjectResult?: LoadDashboardReturn;
+  initialInput: DashboardContainerInput;
+  untilEmbeddableLoaded: (id: string) => Promise<unknown>;
+}) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const fullScreenMode$ = new BehaviorSubject(false);
-  const managed$ = new BehaviorSubject(initialComponentState.managed);
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(initialComponentState.lastSavedId);
+  const managed$ = new BehaviorSubject(savedObjectResult?.managed ?? false);
+  const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
 
   const trackPanel = initializeTrackPanel(untilEmbeddableLoaded);
 
   return {
     ...trackPanel,
+    ...initializePanelsManager(initialInput.panels, savedObjectResult?.references ?? []),
     ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
     ...initializeUnsavedChanges(
-      initialComponentState.anyMigrationRun,
-      initialComponentState.lastSavedInput
+      savedObjectResult?.anyMigrationRun ?? false,
+      omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
+        ...DEFAULT_DASHBOARD_INPUT,
+        id: initialInput.id,
+      }
     ),
     animatePanelTransforms$,
     fullScreenMode$,
-    isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
+    isEmbeddedExternally: isEmbeddedExternally ?? false,
     managed$,
     savedObjectId: savedObjectId$,
     setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
