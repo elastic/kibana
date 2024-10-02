@@ -20,13 +20,13 @@ Add the sample web logs data, and create and set up the dashboard.
 
 . On the home page, click *Try sample data*.
 
-. Click *Other sample data sets*. 
+. Expand *Other sample data sets*. 
 
 . On the *Sample web logs* card, click *Add data*.
 
 Create the dashboard where you'll display the visualization panels.
 
-. Open the main menu, then click *Dashboard*.
+. Open the main menu, then click *Dashboards*.
 
 . Click *Create dashboard*.
 
@@ -57,7 +57,10 @@ To create the visualizations in this tutorial, you'll use the following fields:
 
 * *referer.keyword*
 
-To see the most frequent values in a field, hover over the field name, then click *i*.
+Click a field name to view more details, such as its top values and distribution.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltff29bc11413cc5d8/66fdc386762d3a15135abec4/tutorial-field-top-values-distribution.gif[Clicking a field name to view more details]
 
 [discrete]
 [[view-the-number-of-website-visitors]]
