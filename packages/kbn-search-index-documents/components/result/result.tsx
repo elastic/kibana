@@ -50,14 +50,14 @@ export const Result: React.FC<ResultProps> = ({
   const tooltipText =
     fields.length <= defaultVisibleFields
       ? i18n.translate('searchIndexDocuments.result.expandTooltip.allVisible', {
-          defaultMessage: 'All fields are visible',
-        })
+        defaultMessage: 'All fields are visible',
+      })
       : isExpanded
-      ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
+        ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
           defaultMessage: 'Show {amount} fewer fields',
           values: { amount: fields.length - defaultVisibleFields },
         })
-      : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
+        : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
           defaultMessage: 'Show {amount} more fields',
           values: { amount: fields.length - defaultVisibleFields },
         });
