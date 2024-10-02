@@ -23,6 +23,12 @@ properties:
               type: string
             download_source_id:
               type: string
+            space_ids:
+              type: array
+              items:
+                type: string
+            data_output_id:
+              type: string
           required:
             - id
             - name
@@ -33,10 +39,16 @@ properties:
         $ref: ./fleet_server_host.yaml
       host_proxy:
         $ref: ./proxies.yaml
+      es_output:
+        $ref: ./output_create_request_elasticsearch.yaml
+      es_output_proxy:
+        $ref: ./proxies.yaml
     required:
       - agent_policies
       - has_active
   download_source:
     $ref: ./download_sources.yaml
+  download_source_proxy:
+    $ref: ./proxies.yaml
 required:
   - fleet_server

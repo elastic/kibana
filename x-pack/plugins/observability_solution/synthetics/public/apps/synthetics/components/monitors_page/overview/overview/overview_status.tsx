@@ -97,7 +97,7 @@ export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode 
       <EuiFlexGroup gutterSize="xl" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.up"
+            data-test-subj="syntheticsOverviewUp"
             description={upDescription}
             reverse
             title={title(statusConfig?.up)}
@@ -107,7 +107,7 @@ export function OverviewStatus({ titleAppend }: { titleAppend?: React.ReactNode 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
-            data-test-subj="xpack.uptime.synthetics.overview.status.down"
+            data-test-subj="syntheticsOverviewDown"
             description={downDescription}
             reverse
             title={title(statusConfig?.down)}

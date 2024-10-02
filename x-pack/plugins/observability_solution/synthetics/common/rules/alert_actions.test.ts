@@ -53,7 +53,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+            'The alert for monitor "{{context.monitorName}}" from {{context.locationNames}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationNames}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
         },
       },
       {
@@ -193,7 +193,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+            'The alert for monitor "{{context.monitorName}}" from {{context.locationNames}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationNames}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
         },
       },
       {
@@ -230,8 +230,7 @@ describe('Alert Actions factory', () => {
             dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
             eventAction: 'trigger',
             severity: 'error',
-            summary:
-              'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}.\n\nDetails:\n\nMonitor name: {{context.monitorName}}\n{{context.monitorUrlLabel}}: {{{context.monitorUrl}}}\nMonitor type: {{context.monitorType}}\nFrom: {{context.locationName}}\nLatest error received: {{{context.lastErrorMessage}}}\n{{{context.linkMessage}}}',
+            summary: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -263,11 +262,9 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message:
-            'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          message: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
           messageHTML: null,
-          subject:
-            '"{{context.monitorName}}" ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
+          subject: SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
           to: ['test@email.com'],
         },
       },
@@ -286,11 +283,9 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message:
-            '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          message: SyntheticsMonitorStatusTranslations.defaultActionMessage,
           messageHTML: null,
-          subject:
-            '"{{context.monitorName}}" ({{context.locationName}}) is down - Elastic Synthetics',
+          subject: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
           to: ['test@email.com'],
         },
       },

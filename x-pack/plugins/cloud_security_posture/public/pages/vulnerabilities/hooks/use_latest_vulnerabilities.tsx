@@ -57,6 +57,7 @@ export const getVulnerabilitiesQuery = (
   pageParam: number
 ) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
   sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {

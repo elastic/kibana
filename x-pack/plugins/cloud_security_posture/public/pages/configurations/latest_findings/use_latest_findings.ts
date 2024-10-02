@@ -51,7 +51,7 @@ export const getFindingsQuery = (
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),
-    ignore_unavailable: false,
+    ignore_unavailable: true,
     query: {
       ...query,
       bool: {

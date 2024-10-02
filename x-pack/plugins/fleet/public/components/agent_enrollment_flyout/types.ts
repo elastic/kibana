@@ -83,4 +83,5 @@ export interface InstructionProps extends BaseProps {
   fleetServerHost: string;
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
+  downloadSourceProxy?: FleetProxy;
 }

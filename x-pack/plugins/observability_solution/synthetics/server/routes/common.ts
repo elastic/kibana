@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
@@ -110,16 +111,7 @@ export const getMonitors = async (
   return context.savedObjectsClient.find(findParams);
 };
 
-export const getMonitorFilters = async ({
-  tags,
-  filter,
-  locations,
-  projects,
-  monitorTypes,
-  schedules,
-  monitorQueryIds,
-  context,
-}: {
+interface Filters {
   filter?: string;
   tags?: string | string[];
   monitorTypes?: string | string[];
@@ -127,10 +119,35 @@ export const getMonitorFilters = async ({
   projects?: string | string[];
   schedules?: string | string[];
   monitorQueryIds?: string | string[];
-  context: RouteContext;
-}) => {
+}
+
+export const getMonitorFilters = async (
+  data: {
+    context: RouteContext;
+  } & Filters
+) => {
+  const { context, locations } = data;
   const locationFilter = await parseLocationFilter(context, locations);
 
+  return parseArrayFilters({
+    ...data,
+    locationFilter,
+  });
+};
+
+export const parseArrayFilters = ({
+  tags,
+  filter,
+  configIds,
+  projects,
+  monitorTypes,
+  schedules,
+  monitorQueryIds,
+  locationFilter,
+}: Filters & {
+  locationFilter?: string | string[];
+  configIds?: string[];
+}) => {
   const filtersStr = [
     filter,
     getSavedObjectKqlFilter({ field: 'tags', values: tags }),
@@ -139,9 +156,11 @@ export const getMonitorFilters = async ({
     getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
+    getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
+
   return { filtersStr, locationFilter };
 };
 
@@ -156,7 +175,11 @@ export const getSavedObjectKqlFilter = ({
   operator?: string;
   searchAtRoot?: boolean;
 }) => {
-  if (!values) {
+  if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
+    return undefined;
+  }
+
+  if (isEmpty(values) || !values) {
     return '';
   }
   let fieldKey = '';
