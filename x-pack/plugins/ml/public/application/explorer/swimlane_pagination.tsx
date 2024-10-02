@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { calculateRowOptions } from './calculate_row_options';
 
 interface SwimLanePaginationProps {
   fromPage: number;
@@ -52,14 +53,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   const pageCount = Math.ceil(cardinality / perPage);
 
   const rowOptions = [5, 10, 20, 50, 100];
-  const items = rowOptions.reduce((acc, v) => {
-    if (v <= cardinality) {
-      acc.push(v);
-    } else if (acc.length === 0 || acc[acc.length - 1] < cardinality) {
-      acc.push(v);
-    }
-    return acc;
-  }, [] as number[]);
+  const items = calculateRowOptions(rowOptions, cardinality);
 
   const menuItems = items.map((v) => (
     <EuiContextMenuItem
