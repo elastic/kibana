@@ -51,7 +51,9 @@ export function EntityIcon({ entity }: EntityIconProps) {
 
   if (entityType === 'service') {
     const agentName = entity[AGENT_NAME] as AgentName;
-    return <AgentIcon agentName={agentName} role="presentation" />;
+    const formattedAgentName = typeof agentName === 'string' ? agentName : agentName?.[0];
+
+    return <AgentIcon agentName={formattedAgentName} role="presentation" />;
   }
 
   return <EuiIcon type="" size="l" />;

@@ -89,7 +89,7 @@ interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]?: string | null;
-  [AGENT_NAME]: AgentName | null;
+  [AGENT_NAME]: AgentName | AgentName[] | null;
 }
 
 interface HostEntity extends BaseEntity {
