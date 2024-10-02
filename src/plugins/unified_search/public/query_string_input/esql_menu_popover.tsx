@@ -58,7 +58,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     if (adHocDataview && typeof adHocDataview !== 'string') {
       const queryString = `from ${adHocDataview.name}`;
       const timeFieldName =
-        adHocDataview.timeFieldName ?? adHocDataview.fields.getByType('date')?.[0]?.name;
+        adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name;
 
       recommendedQueries.push(
         ...getRecommendedQueries({
