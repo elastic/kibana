@@ -10,7 +10,7 @@ import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 
 import { VarConfig as ChildComponent } from './var_config';
-import { useNotifyService } from '../../services/hooks';
+import { useNotifyService } from '../../services';
 import { CanvasVariable } from '../../../types';
 
 const strings = {

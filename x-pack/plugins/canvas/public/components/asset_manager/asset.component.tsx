@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService } from '../../services/hooks';
+import { useNotifyService } from '../../services';
 
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';

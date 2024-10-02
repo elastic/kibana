@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { CanvasTemplate } from '../../../../types';
-import { useNotifyService, useWorkpadService } from '../../../services/hooks';
+import { useNotifyService, useWorkpadService } from '../../../services';
 
 export const useCreateFromTemplate = () => {
   const workpadService = useWorkpadService();

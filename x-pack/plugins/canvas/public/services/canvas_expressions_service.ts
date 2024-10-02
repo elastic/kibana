@@ -21,8 +21,8 @@ interface Options {
 }
 
 class ExpressionsService {
-  private notifyService;
-  private filtersService;
+  public notifyService;
+  public filtersService;
 
   constructor() {
     this.notifyService = getCanvasNotifyService();

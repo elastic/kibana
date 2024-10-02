@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { camelCase } from 'lodash';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { useNotifyService, useCustomElementService } from '../../services/hooks';
+import { useNotifyService, useCustomElementService } from '../../services';
 // @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 // @ts-expect-error untyped local

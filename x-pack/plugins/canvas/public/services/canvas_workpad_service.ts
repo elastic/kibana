@@ -68,21 +68,16 @@ const sanitizeWorkpad = function (workpad: CanvasWorkpad) {
 };
 
 class CanvasWorkpadService {
-  private apiPath = `${API_ROUTE_WORKPAD}`;
-  private http;
-
-  constructor() {
-    ({ http: this.http } = coreServices);
-  }
+  public apiPath = `${API_ROUTE_WORKPAD}`;
 
   public async get(id: string): Promise<CanvasWorkpad> {
-    const workpad = await this.http.get<any>(`${this.apiPath}/${id}`, { version: '1' });
+    const workpad = await coreServices.http.get<any>(`${this.apiPath}/${id}`, { version: '1' });
 
     return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
   }
 
   public async export(id: string) {
-    const workpad = await this.http.get<SavedObject<CanvasWorkpad>>(
+    const workpad = await coreServices.http.get<SavedObject<CanvasWorkpad>>(
       `${this.apiPath}/export/${id}`,
       { version: '1' }
     );
@@ -99,7 +94,7 @@ class CanvasWorkpadService {
   }
 
   public async resolve(id: string): Promise<ResolveWorkpadResponse> {
-    const { workpad, ...resolveProps } = await this.http.get<ResolveWorkpadResponse>(
+    const { workpad, ...resolveProps } = await coreServices.http.get<ResolveWorkpadResponse>(
       `${this.apiPath}/resolve/${id}`,
       { version: '1' }
     );
@@ -117,7 +112,7 @@ class CanvasWorkpadService {
   }
 
   public async create(workpad: CanvasWorkpad): Promise<CanvasWorkpad> {
-    return this.http.post(this.apiPath, {
+    return coreServices.http.post(this.apiPath, {
       body: JSON.stringify({
         ...sanitizeWorkpad({ ...workpad }),
         assets: workpad.assets || {},
@@ -128,7 +123,7 @@ class CanvasWorkpadService {
   }
 
   public async import(workpad: CanvasWorkpad): Promise<CanvasWorkpad> {
-    return this.http.post(`${this.apiPath}/import`, {
+    return coreServices.http.post(`${this.apiPath}/import`, {
       body: JSON.stringify({
         ...sanitizeWorkpad({ ...workpad }),
         assets: workpad.assets || {},
@@ -139,21 +134,21 @@ class CanvasWorkpadService {
   }
 
   public async createFromTemplate(templateId: string): Promise<CanvasWorkpad> {
-    return this.http.post(this.apiPath, {
+    return coreServices.http.post(this.apiPath, {
       body: JSON.stringify({ templateId }),
       version: '1',
     });
   }
 
   public async findTemplates(): Promise<TemplateFindResponse> {
-    return this.http.get(API_ROUTE_TEMPLATES, { version: '1' });
+    return coreServices.http.get(API_ROUTE_TEMPLATES, { version: '1' });
   }
 
   public async find(searchTerm: string): Promise<WorkpadFindResponse> {
     // TODO: this shouldn't be necessary.  Check for usage.
     const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
 
-    return this.http.get(`${this.apiPath}/find`, {
+    return coreServices.http.get(`${this.apiPath}/find`, {
       query: {
         perPage: 10000,
         name: validSearchTerm ? searchTerm : '',
@@ -163,32 +158,32 @@ class CanvasWorkpadService {
   }
 
   public async remove(id: string) {
-    this.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+    coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
   }
 
   public async update(id: string, workpad: CanvasWorkpad) {
-    this.http.put(`${this.apiPath}/${id}`, {
+    coreServices.http.put(`${this.apiPath}/${id}`, {
       body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
       version: '1',
     });
   }
 
   public async updateWorkpad(id: string, workpad: CanvasWorkpad) {
-    this.http.put(`${API_ROUTE_WORKPAD_STRUCTURES}/${id}`, {
+    coreServices.http.put(`${API_ROUTE_WORKPAD_STRUCTURES}/${id}`, {
       body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
       version: '1',
     });
   }
 
   public async updateAssets(id: string, assets: CanvasWorkpad['assets']) {
-    this.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
+    coreServices.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
       body: JSON.stringify(assets),
       version: '1',
     });
   }
 
   public async getRuntimeZip(workpad: CanvasRenderedWorkpad): Promise<Blob> {
-    return this.http.post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
+    return coreServices.http.post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
       body: JSON.stringify(workpad),
       version: '1',
     });

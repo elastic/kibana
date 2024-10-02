@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../../state/defaults';
-import { useNotifyService, useWorkpadService } from '../../../services/hooks';
+import { useNotifyService, useWorkpadService } from '../../../services';
 
 import type { CanvasWorkpad } from '../../../../types';
 

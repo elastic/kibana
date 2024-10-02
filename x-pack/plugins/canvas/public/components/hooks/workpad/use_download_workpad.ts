@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
-import { useNotifyService, useWorkpadService } from '../../../services/hooks';
+import { useNotifyService, useWorkpadService } from '../../../services';
 import { CanvasWorkpad } from '../../../../types';
 import type { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
 

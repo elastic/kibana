@@ -15,33 +15,28 @@ export interface CustomElementFindResponse {
 }
 
 class CanvasCustomElementService {
-  private apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
-  private http;
-
-  constructor() {
-    ({ http: this.http } = coreServices);
-  }
+  public apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
 
   public async create(customElement: CustomElement) {
-    this.http.post(this.apiPath, { body: JSON.stringify(customElement), version: '1' });
+    coreServices.http.post(this.apiPath, { body: JSON.stringify(customElement), version: '1' });
   }
 
   public async get(customElementId: string): Promise<CustomElement> {
-    return this.http
+    return coreServices.http
       .get<{ data: CustomElement }>(`${this.apiPath}/${customElementId}`, { version: '1' })
       .then(({ data: element }) => element);
   }
 
   public async update(id: string, element: Partial<CustomElement>) {
-    this.http.put(`${this.apiPath}/${id}`, { body: JSON.stringify(element), version: '1' });
+    coreServices.http.put(`${this.apiPath}/${id}`, { body: JSON.stringify(element), version: '1' });
   }
 
   public async remove(id: string) {
-    this.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+    coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
   }
 
   public async find(searchTerm: string): Promise<CustomElementFindResponse> {
-    return this.http.get(`${this.apiPath}/find`, {
+    return coreServices.http.get(`${this.apiPath}/find`, {
       query: {
         name: searchTerm,
         perPage: 10000,

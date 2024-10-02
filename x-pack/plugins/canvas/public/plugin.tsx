@@ -38,7 +38,7 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
-import { setKibanaServices } from './services/kibana_services';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 
 export type { CoreStart, CoreSetup };
 
@@ -122,7 +122,10 @@ export class CanvasPlugin
         setupExpressions({ coreSetup, setupPlugins });
 
         // Get start services
-        const [coreStart, startPlugins] = await coreSetup.getStartServices();
+        const [[coreStart, startPlugins]] = await Promise.all([
+          coreSetup.getStartServices(),
+          untilPluginStartServicesReady(),
+        ]);
 
         srcPlugin.start(coreStart, startPlugins);
 
