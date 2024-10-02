@@ -45,7 +45,6 @@ export const initEntityEngineRoute = (
       },
 
       async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
-        // TODO: discuss this with the team
         await checkAndInitAssetCriticalityResources(context, logger);
         const secSol = await context.securitySolution;
         const [_, { taskManager }] = await getStartServices();

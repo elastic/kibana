@@ -9,8 +9,6 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 
 const BASE_ES_MAPPING: MappingTypeMapping['properties'] = {
-  // TODO: do we need to add dynamic: 'strict' here eventually?
-  // dynamic: 'strict',
   '@timestamp': {
     type: 'date',
   },

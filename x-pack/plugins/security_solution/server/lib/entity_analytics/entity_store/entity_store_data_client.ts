@@ -63,7 +63,7 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    taskManager: TaskManagerStartContract, // TODO: @tiansivive I have put this as ana argument because it seems a shame to require it in the constructor
+    taskManager: TaskManagerStartContract,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
     const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
@@ -318,7 +318,7 @@ export class EntityStoreDataClient {
       return { deleted: true };
     } catch (e) {
       this.options.logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
-      // TODO: should we set the engine status to error?
+      // TODO: should we set the engine status to error here?
       throw e;
     }
   }
