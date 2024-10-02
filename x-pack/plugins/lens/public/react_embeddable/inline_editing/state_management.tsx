@@ -12,7 +12,7 @@ import type { VisualizationMap, DatasourceMap } from '../../types';
 import type { TypedLensSerializedState } from '../types';
 
 export function getStateManagementForInlineEditing(
-  activeDatasourceId: string,
+  activeDatasourceId: 'formBased' | 'textBased',
   getAttributes: () => TypedLensSerializedState['attributes'],
   updateAttributes: (
     newAttributes: TypedLensSerializedState['attributes'],
@@ -24,18 +24,28 @@ export function getStateManagementForInlineEditing(
 ) {
   const updatePanelState = (datasourceState: unknown, visualizationState: unknown) => {
     const viz = getAttributes();
+    const datasourceStates: DatasourceStates = {
+      [activeDatasourceId]: {
+        isLoading: false,
+        state: datasourceState,
+      },
+    };
+    const newViz = mergeToNewDoc(
+      viz,
+      {
+        activeId: (viz.state.visualization as VisualizationState).activeId || viz.visualizationType,
+        state: visualizationState,
+      },
+      datasourceStates,
+      viz.state.query,
+      viz.state.filters,
+      activeDatasourceId,
+      viz.state.adHocDataViews || {},
+      { visualizationMap, datasourceMap, extractFilterReferences }
+    );
     const newDoc = {
       ...viz,
-      ...mergeToNewDoc(
-        viz,
-        visualizationState as VisualizationState,
-        datasourceState as DatasourceStates,
-        viz.state.query,
-        viz.state.filters,
-        activeDatasourceId,
-        viz.state.adHocDataViews || {},
-        { visualizationMap, datasourceMap, extractFilterReferences }
-      ),
+      ...newViz,
     };
 
     if (newDoc.state) {

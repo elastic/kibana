@@ -78,6 +78,7 @@ export function prepareInlineEditPanel(
           /**
            * SavedObjectId is undefined for by value panels and defined for the by reference ones.
            * Here we are converting the by reference panels to by value when user is inline editing
+           * @TODO: remove this in a follow up PR
            */
           ...(resetId ? { savedObjectId: undefined } : {}),
         });
