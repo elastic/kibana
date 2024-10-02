@@ -27,7 +27,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI, CasesConfigurationUICustomField } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -339,7 +339,9 @@ export const useCasesColumns = ({
       const customFieldDefinition = customFieldsBuilderMap[type]();
       const euiTableColumnProps =
         type === CustomFieldTypes.LIST ? { label, options: configuration.options } : { label };
-      const columnDefinition = customFieldDefinition.getEuiTableColumn(euiTableColumnProps);
+      const columnDefinition = customFieldDefinition.getEuiTableColumn(
+        euiTableColumnProps as CasesConfigurationUICustomField
+      );
 
       columnsDict[key] = {
         ...columnDefinition,
