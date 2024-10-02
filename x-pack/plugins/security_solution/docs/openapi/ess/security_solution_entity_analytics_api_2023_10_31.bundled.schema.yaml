@@ -577,6 +577,7 @@ components:
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
         - type: object
           properties:
             '@timestamp':
@@ -586,6 +587,46 @@ components:
               type: string
           required:
             - '@timestamp'
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     AssetCriticalityRecordIdParts:
       type: object
       properties:
