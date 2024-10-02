@@ -509,7 +509,7 @@ interface SOReference {
 // internal until we need them
 export interface EpmPackageAdditions {
   title: string;
-  latestVersion?: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   notice?: string;
   licensePath?: string;
