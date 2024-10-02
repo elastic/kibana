@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { LOG_RATE_ANALYSIS_TYPE } from './log_rate_analysis_type';
 import type { LogRateAnalysisType } from './log_rate_analysis_type';
 
-const REDUCTION_FACTOR = 0.000001;
-
 /**
  * Calculates the change in log rate between two time periods and generates a descriptive message.
  * It return the factor as a number as well as a human readable message.
@@ -24,7 +22,7 @@ export function getLogRateChange(
   analysisType: LogRateAnalysisType,
   baselineBucketRate: number,
   deviationBucketRate: number
-): { message: string; factor: number } {
+): { message: string; factor?: number } {
   if (analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
     if (baselineBucketRate > 0) {
       const factor = deviationBucketRate / baselineBucketRate;
@@ -53,8 +51,6 @@ export function getLogRateChange(
             values: { deviationBucketRate },
           }
         ),
-        // ensure factor change is always higher in sorting value than just docs up from 0
-        factor: deviationBucketRate * REDUCTION_FACTOR,
       };
     }
   } else {
@@ -86,7 +82,6 @@ export function getLogRateChange(
             values: { baselineBucketRate },
           }
         ),
-        factor: baselineBucketRate * REDUCTION_FACTOR,
       };
     }
   }

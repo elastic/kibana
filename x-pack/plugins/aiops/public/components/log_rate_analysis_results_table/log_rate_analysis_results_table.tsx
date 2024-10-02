@@ -56,7 +56,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const allSignificantItems = useMemo(() => {
     return allItems.map((item) => ({
       ...item,
-      logRateChangeSort: item.bg_count > 0 ? item.doc_count / item.bg_count : item.doc_count,
+      logRateChangeSort:
+        item.bg_count > 0 ? item.doc_count / item.bg_count : Number.POSITIVE_INFINITY,
     }));
   }, [allItems]);
 
@@ -129,7 +130,6 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     const itemCount = significantItems?.length ?? 0;
 
     let items: SignificantItem[] = significantItems ?? [];
-    // console.log('--- SORT FIELD ---', sortField.props.children[0]);
 
     const sortIteratees = [
       (item: SignificantItem) => {
@@ -142,8 +142,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     ];
     const sortDirections = [sortDirection];
 
-    // Only if the table is sorted by p-value, add a secondary sort by doc count.
-    if (sortField === 'pValue') {
+    // If the table is sorted by p-value or log rate change, add a secondary sort by doc count.
+    if (sortField === 'pValue' || sortField === 'logRateChangeSort') {
       sortIteratees.push((item: SignificantItem) => item.doc_count);
       sortDirections.push(sortDirection);
     }
