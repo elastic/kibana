@@ -539,6 +539,7 @@ packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 x-pack/packages/ml/json_schemas @elastic/ml-ui
+x-pack/packages/ai-infra/kb-artifact-builder @elastic/appex-ai-infra
 test/health_gateway/plugins/status @elastic/kibana-core
 test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
