@@ -531,7 +531,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           request: GetAgentUploadFileRequestSchema,
           response: {
             200: {
-              body: () => schema.any(), // Readable
+              body: () => schema.stream(), // Readable
             },
             400: {
               body: genericErrorResponse,

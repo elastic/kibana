@@ -534,7 +534,7 @@ export type PackageInfo =
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 export interface PackageMetadata {
-  has_policies: true;
+  has_policies: boolean;
 }
 
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';

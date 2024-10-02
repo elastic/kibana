@@ -600,16 +600,17 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
       pkgVersion,
     });
 
-    const resp = await handleTransformReauthorizeAndStart({
-      esClient,
-      savedObjectsClient,
-      logger,
-      pkgName,
-      pkgVersion,
-      transforms,
-      secondaryAuth,
-      username,
-    });
+    const resp: Array<{ transformId: string; success: boolean; error: null | any }> =
+      await handleTransformReauthorizeAndStart({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName,
+        pkgVersion,
+        transforms,
+        secondaryAuth,
+        username,
+      });
 
     return response.ok({ body: resp });
   } catch (error) {
