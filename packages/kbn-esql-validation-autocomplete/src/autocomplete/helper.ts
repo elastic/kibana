@@ -7,8 +7,9 @@
  */
 
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
+import type { FunctionDefinition } from '../definitions/types';
 import { getFunctionDefinition, isAssignment, isFunctionItem } from '../shared/helpers';
+import type { SuggestionRawDefinition } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -70,4 +71,12 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   const sources = args.filter((arg) => arg.sourceType === sourceType);
 
   return sources.length === 1 ? sources[0] : undefined;
+}
+
+export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
+  return suggestions.map((d) => ({
+    ...d,
+    // "text" -> text
+    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
+  }));
 }

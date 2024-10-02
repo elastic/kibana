@@ -12,7 +12,7 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_te
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   fifteenMinutesInMilliseconds,
-  HOST_FIELD,
+  HOST_NAME_FIELD,
   LINK_TO_INVENTORY,
   METRICS_EXPLORER_URL,
 } from '../../constants';
@@ -54,7 +54,7 @@ export const getInventoryViewInAppUrl = (
 
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
-  const hostName = inventoryFields[HOST_FIELD];
+  const hostName = inventoryFields[HOST_NAME_FIELD];
 
   if (nodeType) {
     if (hostName) {
@@ -95,7 +95,7 @@ export const getInventoryViewInAppUrl = (
 };
 
 export const getMetricsViewInAppUrl = (fields: ParsedTechnicalFields & Record<string, any>) => {
-  const hostName = fields[HOST_FIELD];
+  const hostName = fields[HOST_NAME_FIELD];
   const timestamp = fields[TIMESTAMP];
 
   return hostName ? getLinkToHostDetails({ hostName, timestamp }) : METRICS_EXPLORER_URL;

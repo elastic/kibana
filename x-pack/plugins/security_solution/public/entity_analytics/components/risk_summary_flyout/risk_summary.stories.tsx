@@ -10,11 +10,11 @@ import type { Story } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { RiskSummary } from './risk_summary';
+import { FlyoutRiskSummary } from './risk_summary';
 
 export default {
-  component: RiskSummary,
-  title: 'Components/RiskSummary',
+  component: FlyoutRiskSummary,
+  title: 'Components/FlyoutRiskSummary',
 };
 
 export const Default: Story<void> = () => {
@@ -22,7 +22,7 @@ export const Default: Story<void> = () => {
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
-          <RiskSummary
+          <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
@@ -39,7 +39,7 @@ export const PreviewMode: Story<void> = () => {
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '300px' }}>
-          <RiskSummary
+          <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}

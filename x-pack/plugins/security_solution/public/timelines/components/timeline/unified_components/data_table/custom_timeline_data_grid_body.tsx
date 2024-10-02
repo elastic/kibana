@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
-import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
+import { getEventTypeRowClassName } from './get_event_type_row_classname';
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -25,7 +25,7 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
 };
 
 // THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
-const DEFAULT_UDT_ROW_HEIGHT = 40;
+const DEFAULT_UDT_ROW_HEIGHT = 34;
 
 /**
  *
@@ -117,23 +117,13 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   className: `rowCellWrapper ${props.className ?? ''}`,
   role: 'row',
 }))`
-  display: flex;
-  align-items: center;
   height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
-    align-items: flex-start;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
     min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
     .unifiedDataTable__rowControl {
-      margin-top: 0;
+      margin-top: -4px;
     }
-  }
-  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
-    padding: 0;
   }
 `;
 
@@ -176,7 +166,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
-  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -191,11 +181,11 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
         : {},
     [canShowRowRenderer]
   );
-  const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
+  const eventTypeRowClassName = useMemo(() => getEventTypeRowClassName(rowData.ecs), [rowData.ecs]);
 
   return (
     <CustomGridRow
-      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
       $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >

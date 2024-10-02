@@ -131,11 +131,12 @@ export class DataViewLazy extends AbstractDataView {
           return col;
         }
         if (!cachedField) {
+          const fldAttrs = this.fieldAttrs.get(field.name) || {};
           cachedField = new DataViewField({
             ...field,
-            count: this.fieldAttrs?.[field.name]?.count,
-            customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-            customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+            count: fldAttrs.count,
+            customLabel: fldAttrs.customLabel,
+            customDescription: fldAttrs.customDescription,
             shortDotsEnable: this.shortDotsEnable,
           });
           this.fieldCache.set(field.name, cachedField);
@@ -157,7 +158,7 @@ export class DataViewLazy extends AbstractDataView {
       throw new CharacterNotAllowedInField('*', name);
     }
 
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, customLabel, customDescription, format, popularity } = runtimeField;
 
     if (type === 'composite') {
       return this.addCompositeRuntimeField(name, runtimeField);
@@ -170,6 +171,7 @@ export class DataViewLazy extends AbstractDataView {
       { type, script },
       {
         customLabel,
+        customDescription,
         format,
         popularity,
       }
@@ -215,6 +217,7 @@ export class DataViewLazy extends AbstractDataView {
             runtimeFieldSpec,
             {
               customLabel: subField.customLabel,
+              customDescription: subField.customDescription,
               format: subField.format,
               popularity: subField.popularity,
             }
@@ -335,6 +338,7 @@ export class DataViewLazy extends AbstractDataView {
       runtimeField: RuntimeFieldSpec,
       parentName?: string
     ) => {
+      const fldAttrs = this.fieldAttrs.get(name) || {};
       spec[name] = {
         name,
         type: castEsToKbnFieldTypeName(fieldType),
@@ -343,9 +347,9 @@ export class DataViewLazy extends AbstractDataView {
         aggregatable: true,
         searchable: true,
         readFromDocValues: false,
-        customLabel: this.fieldAttrs?.[name]?.customLabel,
-        customDescription: this.fieldAttrs?.[name]?.customDescription,
-        count: this.fieldAttrs?.[name]?.count,
+        customLabel: fldAttrs.customLabel,
+        customDescription: fldAttrs.customDescription,
+        count: fldAttrs.count,
       };
 
       if (parentName) {
@@ -388,14 +392,15 @@ export class DataViewLazy extends AbstractDataView {
       if (fld && !fld.scripted && fld.isMapped) {
         this.fieldCache.delete(field.name);
       }
+      const fldAttrs = this.fieldAttrs.get(field.name) || {};
       fld = new DataViewField({
         ...field,
         scripted: true,
         searchable: true,
         aggregatable: true,
-        count: this.fieldAttrs?.[field.name]?.count,
-        customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-        customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+        count: fldAttrs.count,
+        customLabel: fldAttrs.customLabel,
+        customDescription: fldAttrs.customDescription,
       });
       this.fieldCache.set(field.name, fld);
       dataViewFields[field.name] = fld;
@@ -434,11 +439,12 @@ export class DataViewLazy extends AbstractDataView {
         fld.spec.runtimeField = undefined; // unset if it was a runtime field but now mapped
         fld.spec.isMapped = true;
       } else {
+        const fldAttrs = this.fieldAttrs.get(field.name) || {};
         fld = new DataViewField({
           ...field,
-          count: this.fieldAttrs?.[field.name]?.count,
-          customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-          customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+          count: fldAttrs.count,
+          customLabel: fldAttrs.customLabel,
+          customDescription: fldAttrs.customDescription,
           shortDotsEnable: this.shortDotsEnable,
         });
         this.fieldCache.set(field.name, fld);

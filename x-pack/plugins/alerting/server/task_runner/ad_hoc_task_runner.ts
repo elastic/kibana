@@ -20,7 +20,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
-import { RunResult } from '@kbn/task-manager-plugin/server/task';
+import { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
 import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
 import { getExecutorServices } from './get_executor_services';
@@ -66,7 +66,7 @@ interface RunParams {
   validatedParams: RuleTypeParams;
 }
 
-export class AdHocTaskRunner {
+export class AdHocTaskRunner implements CancellableTask {
   private readonly context: TaskRunnerContext;
   private readonly executionId: string;
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
@@ -573,6 +573,10 @@ export class AdHocTaskRunner {
             : undefined,
       },
     });
+    this.shouldDeleteTask = !this.hasAnyPendingRuns();
+
+    // cleanup function is not called for timed out tasks
+    await this.cleanup();
   }
 
   async cleanup() {

@@ -57,7 +57,7 @@ function isAPIKeyCredentials(
     | ElasticsearchAnonymousUserCredentials
     | APIKeyCredentials
     | UsernameAndPasswordCredentials
-): credentials is APIKeyCredentials {
+): credentials is Readonly<APIKeyCredentials> {
   return !!(credentials as APIKeyCredentials).apiKey;
 }
 

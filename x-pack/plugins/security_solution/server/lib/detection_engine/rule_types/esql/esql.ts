@@ -135,7 +135,6 @@ export const esqlExecutor = async ({
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
-        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForEsqlRuleEnabled,
       });
 
       const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>

@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
+import { usePageReady } from '@kbn/ebt-tools';
+import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
@@ -45,6 +47,9 @@ export const OverviewPage: React.FC = () => {
   const { search } = useLocation();
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
+  const { loaded } = useSelector(selectOverviewStatus);
+
+  usePageReady({ isReady: loaded });
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {

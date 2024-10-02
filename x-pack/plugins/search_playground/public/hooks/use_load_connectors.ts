@@ -16,6 +16,7 @@ import {
   OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
   BEDROCK_CONNECTOR_ID,
+  GEMINI_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from './use_kibana';
@@ -71,6 +72,17 @@ const connectorTypeToLLM: Array<{
         defaultMessage: 'Bedrock',
       }),
       type: LLMs.bedrock,
+    }),
+  },
+  {
+    actionId: GEMINI_CONNECTOR_ID,
+    match: (connector) => connector.actionTypeId === GEMINI_CONNECTOR_ID,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.geminiConnectorTitle', {
+        defaultMessage: 'Gemini',
+      }),
+      type: LLMs.gemini,
     }),
   },
 ];

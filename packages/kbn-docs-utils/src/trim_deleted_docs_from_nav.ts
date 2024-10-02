@@ -30,7 +30,7 @@ export async function trimDeletedDocsFromNav(
     log.info('no deleted doc files detected');
   }
 
-  const navPath = Path.resolve(REPO_ROOT, 'nav-kibana-dev.docnav.json');
+  const navPath = Path.resolve(REPO_ROOT, 'dev_docs/nav-kibana-dev.docnav.json');
 
   let navJson;
   try {

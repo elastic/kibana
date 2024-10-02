@@ -59,7 +59,7 @@ export const config: PartitionChartProps['visConfig'] = {
 export const pieConfig: PartitionVisParams = {
   ...config,
   isDonut: false,
-  emptySizeRatio: 0,
+  emptySizeRatio: 0.3,
   distinctColors: false,
   nestedLegend: false,
   dimensions: {

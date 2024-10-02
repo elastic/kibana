@@ -121,12 +121,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const deleteIndexes = (indexes: string[]) => {
-    indexes.forEach((current) => {
-      es.transport.request({
-        path: `/${current}`,
-        method: 'DELETE',
-      });
-    });
+    return Promise.all(
+      indexes.map((current) =>
+        es.transport.request({
+          path: `/${current}`,
+          method: 'DELETE',
+        })
+      )
+    );
   };
 
   const createConnector = async (): Promise<string> => {
@@ -164,6 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return await testSubjects.exists('alertActionAccordion-0');
     });
 
+    await monacoEditor.waitCodeEditorReady('kibanaCodeEditor');
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
@@ -215,7 +218,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
-    await PageObjects.discover.waitUntilSearchingHasFinished();
+
+    await retry.waitFor('results', async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      const alreadyHasData = await testSubjects.exists('docTable');
+
+      if (!alreadyHasData) {
+        await testSubjects.click('querySubmitButton');
+      }
+
+      return alreadyHasData;
+    });
 
     const link = await getResultsLink();
     await filterBar.removeFilter('rule_id'); // clear filter bar
@@ -233,10 +248,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('triggersActions');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    const rulesList = await testSubjects.find('rulesList');
-    const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
-    await alertRule.click();
-    await PageObjects.header.waitUntilLoadingHasFinished();
+    let retries = 0;
+
+    await retry.try(async () => {
+      retries = retries + 1;
+      if (retries > 1) {
+        // It might take time for a rule to get created. Waiting for it.
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      await alertRule.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    });
   };
 
   const clickViewInApp = async (ruleName: string) => {
@@ -317,11 +342,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
-      const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
-      await deleteAlerts([adhocRuleId]);
-      await deleteDataView(outputDataViewId);
-      await deleteConnector(connectorId);
+      // clean up what we can in case of failures in some tests which blocked the creation of the following objects
+      try {
+        await deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
+      } catch {
+        // continue
+      }
+      try {
+        const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
+        await deleteAlerts([adhocRuleId]);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteDataView(outputDataViewId);
+      } catch {
+        // continue
+      }
+      try {
+        await deleteConnector(connectorId);
+      } catch {
+        // continue
+      }
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -351,10 +393,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await defineSearchSourceAlert(RULE_NAME);
       await testSubjects.click('selectDataViewExpression');
 
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       const input = await find.activeElement();
       // search-source-alert-output index does not have time field
       await input.type('search-source-alert-o*');
+      await testSubjects.existOrFail('explore-matching-indices-button');
       await testSubjects.click('explore-matching-indices-button');
 
       await retry.waitFor('selection to happen', async () => {
@@ -371,9 +415,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
+      await testSubjects.existOrFail('indexPattern-switcher--input');
       await testSubjects.click('indexPattern-switcher--input');
       if (await testSubjects.exists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
+        await testSubjects.missingOrFail('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
@@ -381,7 +427,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
+
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -477,6 +531,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('saveRuleButton');
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('saveRuleButton');
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(ADHOC_RULE_NAME);

@@ -18,6 +18,7 @@ import type {
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from './common';
+import { getSpaceUrl } from '../space';
 
 export const findAllRules = () => {
   return rootRequest<FetchRulesResponse>({
@@ -28,12 +29,14 @@ export const findAllRules = () => {
 export const createRule = (
   rule: RuleCreateProps
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
-  return rootRequest<RuleResponse>({
-    method: 'POST',
-    url: DETECTION_ENGINE_RULES_URL,
-    body: rule,
-    failOnStatusCode: false,
-  });
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'POST',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      body: rule,
+      failOnStatusCode: false,
+    })
+  );
 };
 
 /**

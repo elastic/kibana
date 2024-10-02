@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
-const timeout = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { streamFactory } from './stream_factory';
 
 export const handleStreamResponse = async ({
   stream,
   request,
   response,
   logger,
-  maxTimeoutMs = 250,
+  isCloud = false,
 }: {
   stream: ReadableStream;
   logger: Logger;
   request: KibanaRequest;
   response: KibanaResponseFactory;
   maxTimeoutMs?: number;
+  isCloud?: boolean;
 }) => {
-  const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
-  const reader = (stream as ReadableStream).getReader();
+  const { end, push, responseWithHeaders } = streamFactory(logger, isCloud);
+  const reader = stream.getReader();
   const textDecoder = new TextDecoder();
 
-  let handleStopRequest = false;
+  const abortController = new AbortController();
+
   request.events.aborted$.subscribe(() => {
-    handleStopRequest = true;
+    abortController.abort();
   });
   request.events.completed$.subscribe(() => {
-    handleStopRequest = true;
+    abortController.abort();
   });
 
   async function pushStreamUpdate() {
     try {
       const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
-
-      if (done || handleStopRequest) {
+      if (done || abortController.signal.aborted) {
         end();
         return;
       }
@@ -54,15 +54,21 @@ export const handleStreamResponse = async ({
 
       push(decodedValue);
 
-      await timeout(Math.floor(Math.random() * maxTimeoutMs));
-
       void pushStreamUpdate();
-    } catch (e) {
-      logger.error(`There was an error: ${e.toString()}`);
+    } catch (error) {
+      logger.error(`Error occurred while pushing the next chunk: ${error.toString()}`);
+      end();
+      abortController.abort();
+      throw error;
     }
   }
 
-  void pushStreamUpdate();
+  try {
+    void pushStreamUpdate();
+  } catch (error) {
+    logger.error('Failed to push stream update', error);
+    throw error;
+  }
 
   return response.ok(responseWithHeaders);
 };

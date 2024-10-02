@@ -27,6 +27,7 @@ interface Props {
   onClose: () => void;
   onSaveCancelled: () => void;
   onSaveConfirmed: () => void;
+  saveButtonDisabled?: boolean;
 }
 
 const FlyoutComponent: React.FC<Props> = ({
@@ -36,6 +37,7 @@ const FlyoutComponent: React.FC<Props> = ({
   onClose,
   onSaveCancelled,
   onSaveConfirmed,
+  saveButtonDisabled = false,
 }) => {
   return flyoutVisible ? (
     <EuiFlyout
@@ -71,6 +73,7 @@ const FlyoutComponent: React.FC<Props> = ({
               data-test-subj="save-button"
               onClick={onSaveConfirmed}
               iconType="check"
+              disabled={saveButtonDisabled}
               fill
             >
               {i18n.FLYOUT_SAVE_BUTTON_TITLE}

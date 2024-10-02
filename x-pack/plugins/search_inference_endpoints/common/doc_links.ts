@@ -8,14 +8,16 @@
 import { DocLinks } from '@kbn/doc-links';
 
 class InferenceEndpointsDocLinks {
-  public nlpImportModel: string = '';
-  public supportedNlpModels: string = '';
+  public createInferenceEndpoint: string = '';
+  public semanticSearchElser: string = '';
+  public semanticSearchE5: string = '';
 
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
-    this.nlpImportModel = newDocLinks.ml.nlpImportModel;
-    this.supportedNlpModels = newDocLinks.ml.supportedNlpModels;
+    this.createInferenceEndpoint = newDocLinks.enterpriseSearch.inferenceApiCreate;
+    this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
+    this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
   }
 }
 

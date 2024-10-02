@@ -89,7 +89,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
-      href={`${getHref('integration_policy_edit', {
+      href={`${getHref('edit_integration', {
+        policyId: agentPolicy?.id ?? '',
         packagePolicyId: packagePolicy.id,
       })}${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"

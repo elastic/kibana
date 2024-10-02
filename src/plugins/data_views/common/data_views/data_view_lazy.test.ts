@@ -311,6 +311,7 @@ describe('DataViewLazy', () => {
       ...runtime,
       popularity: 5,
       customLabel: 'custom name',
+      customDescription: 'custom desc',
       format: {
         id: 'bytes',
       },
@@ -339,6 +340,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.a,
           popularity: 3,
           customLabel: 'custom name a',
+          customDescription: 'custom desc a',
           format: {
             id: 'bytes',
           },
@@ -347,6 +349,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.b,
           popularity: 4,
           customLabel: 'custom name b',
+          customDescription: 'custom desc b',
           format: {
             id: 'bytes',
           },
@@ -461,6 +464,21 @@ describe('DataViewLazy', () => {
       dataViewLazy.removeRuntimeField(newField);
     });
 
+    test('add and remove a custom description from a runtime field', async () => {
+      const newField = 'new_field_test';
+      fieldCapsResponse = [];
+      dataViewLazy.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customDescription: 'test1',
+      });
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test1');
+      dataViewLazy.setFieldCustomDescription(newField, 'test2');
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test2');
+      dataViewLazy.setFieldCustomDescription(newField, undefined);
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toBeUndefined();
+      dataViewLazy.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', async () => {
       const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       const fieldCount = Object.values(fieldMap).length;
@@ -479,10 +497,12 @@ describe('DataViewLazy', () => {
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.a']).toEqual({
         count: 3,
         customLabel: 'custom name a',
+        customDescription: 'custom desc a',
       });
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.b']).toEqual({
         count: 4,
         customLabel: 'custom name b',
+        customDescription: 'custom desc b',
       });
 
       dataViewLazy.removeRuntimeField('new_field');

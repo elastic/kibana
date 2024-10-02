@@ -9,7 +9,7 @@
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
-type AssetType = 'host' | 'pod' | 'container' | 'service';
+type AssetType = 'host' | 'pod' | 'container' | 'service' | 'aws_rds';
 
 export interface AssetDocument extends Fields {
   'asset.id': string;

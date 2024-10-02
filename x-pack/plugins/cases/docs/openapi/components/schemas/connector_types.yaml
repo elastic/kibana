@@ -8,5 +8,4 @@ enum:
   - .servicenow
   - .servicenow-sir
   - .swimlane
-examples:
-  - .none
+example: .none

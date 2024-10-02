@@ -89,8 +89,11 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     group: [
       {} as GroupDetails,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroup: (_, group) => group,
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupNameChanged: (_, group) => group,
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupSourcesSaved: (_, group) => group,
         resetGroup: () => ({} as GroupDetails),
       },
@@ -106,6 +109,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     managerModalFormErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setGroupModalErrors: (_, errors) => errors,
       },
     ],
@@ -128,36 +132,52 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     groupNameInputValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroup: (_, { name }) => name,
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupNameChanged: (_, { name }) => name,
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupNameInputChange: (_, name) => name,
       },
     ],
     selectedGroupSources: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroup: (_, { contentSources }) => contentSources.map(({ id }) => id),
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupSourcesSaved: (_, { contentSources }) => contentSources.map(({ id }) => id),
+        // @ts-expect-error upgrade typescript v5.1.6
         selectAllSources: (_, contentSources) => contentSources.map(({ id }) => id),
+        // @ts-expect-error upgrade typescript v5.1.6
         hideOrgSourcesModal: (_, { contentSources }) => contentSources.map(({ id }) => id),
+        // @ts-expect-error upgrade typescript v5.1.6
         addGroupSource: (state, sourceId) => [...state, sourceId].sort(),
+        // @ts-expect-error upgrade typescript v5.1.6
         removeGroupSource: (state, sourceId) => state.filter((id) => id !== sourceId),
       },
     ],
     cachedSourcePriorities: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroup: (_, { contentSources }) => mapPriorities(contentSources),
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupPrioritiesChanged: (_, { contentSources }) => mapPriorities(contentSources),
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupSourcesSaved: (_, { contentSources }) => mapPriorities(contentSources),
       },
     ],
     activeSourcePriorities: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroup: (_, { contentSources }) => mapPriorities(contentSources),
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupPrioritiesChanged: (_, { contentSources }) => mapPriorities(contentSources),
+        // @ts-expect-error upgrade typescript v5.1.6
         onGroupSourcesSaved: (_, { contentSources }) => mapPriorities(contentSources),
+        // @ts-expect-error upgrade typescript v5.1.6
         updatePriority: (state, { id, boost }) => {
           const updated = { ...state };
           updated[id] = boost;

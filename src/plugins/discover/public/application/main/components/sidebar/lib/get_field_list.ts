@@ -8,6 +8,7 @@
 
 import { difference } from 'lodash';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '@kbn/discover-utils';
@@ -66,14 +67,6 @@ export function getEsqlQueryFieldList(esqlQueryColumns?: DatatableColumn[]): Dat
     return [];
   }
   return esqlQueryColumns.map(
-    (column) =>
-      new DataViewField({
-        name: column.name,
-        type: column.meta?.type ?? 'unknown',
-        esTypes: column.meta?.esType ? [column.meta?.esType] : undefined,
-        searchable: true,
-        aggregatable: false,
-        isNull: Boolean(column?.isNull),
-      })
+    (column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column))
   );
 }

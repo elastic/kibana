@@ -48,98 +48,116 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
     allTags: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { allTags }) => allTags,
+        // @ts-expect-error upgrade typescript v5.1.6
         onQueryDataLoad: (_, { allTags }) => allTags,
       },
     ],
     recentQueries: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { recentQueries }) => recentQueries,
       },
     ],
     topQueries: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { topQueries }) => topQueries,
       },
     ],
     topQueriesNoResults: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { topQueriesNoResults }) => topQueriesNoResults,
       },
     ],
     topQueriesNoClicks: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { topQueriesNoClicks }) => topQueriesNoClicks,
       },
     ],
     topQueriesWithClicks: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { topQueriesWithClicks }) => topQueriesWithClicks,
       },
     ],
     totalQueries: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { totalQueries }) => totalQueries,
       },
     ],
     totalQueriesNoResults: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { totalQueriesNoResults }) => totalQueriesNoResults,
       },
     ],
     totalClicks: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { totalClicks }) => totalClicks,
       },
     ],
     queriesPerDay: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { queriesPerDay }) => queriesPerDay,
       },
     ],
     queriesNoResultsPerDay: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { queriesNoResultsPerDay }) => queriesNoResultsPerDay,
       },
     ],
     clicksPerDay: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { clicksPerDay }) => clicksPerDay,
       },
     ],
     totalQueriesForQuery: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
       },
     ],
     queriesPerDayForQuery: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
       },
     ],
     topClicksForQuery: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onQueryDataLoad: (_, { topClicksForQuery }) => topClicksForQuery,
       },
     ],
     startDate: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onAnalyticsDataLoad: (_, { startDate }) => startDate,
+        // @ts-expect-error upgrade typescript v5.1.6
         onQueryDataLoad: (_, { startDate }) => startDate,
       },
     ],

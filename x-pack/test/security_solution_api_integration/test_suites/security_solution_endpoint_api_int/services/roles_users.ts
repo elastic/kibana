@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Role } from '@kbn/security-plugin/common';
 import {
   EndpointSecurityRoleNames,
   ENDPOINT_SECURITY_ROLE_NAMES,
@@ -61,9 +62,25 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
         await security.role.create(predefinedRole, roleConfig);
       }
       if (customRole) {
-        await security.role.create(customRole.roleName, {
-          permissions: { feature: { siem: [...customRole.extraPrivileges] } },
-        });
+        const role: Omit<Role, 'name'> = {
+          description: '',
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [
+            {
+              spaces: ['*'],
+              base: [],
+              feature: {
+                siem: customRole.extraPrivileges,
+              },
+            },
+          ],
+        };
+
+        await security.role.create(customRole.roleName, role);
       }
     },
 

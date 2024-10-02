@@ -1,7 +1,8 @@
 get:
-  summary: Aggregates and returns a list of case tags in the default space.
+  summary: Get case tags
   operationId: getCaseTagsDefaultSpace
   description: >
+    Aggregates and returns a list of case tags.
     You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases

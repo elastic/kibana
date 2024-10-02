@@ -5,134 +5,125 @@
  * 2.0.
  */
 
-import { ElasticsearchModelDefaultOptions, Service } from '@kbn/inference_integration_flyout/types';
-import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useCallback, useMemo } from 'react';
-import { useAppContext } from '../application/app_context';
-import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
-import { deNormalize } from '../application/components/mappings_editor/lib';
-import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
+import { Service } from '@kbn/inference_integration_flyout/types';
+import { ModelDownloadState, TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  DefaultInferenceModels,
-  DeploymentState,
-  NormalizedFields,
-} from '../application/components/mappings_editor/types';
+  LATEST_ELSER_VERSION,
+  LATEST_ELSER_MODEL_ID,
+  LATEST_E5_MODEL_ID,
+  ElserVersion,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { useCallback } from 'react';
+import { AppDependencies, useAppContext } from '../application/app_context';
+import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
+import { isLocalModel } from '../application/components/mappings_editor/lib/utils';
+import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
+import { DefaultInferenceModels } from '../application/components/mappings_editor/types';
 import { getInferenceEndpoints } from '../application/services/api';
 
-interface InferenceModel {
-  data: InferenceAPIConfigResponse[];
-}
-
-type DeploymentStatusType = Record<string, DeploymentState>;
-
 const getCustomInferenceIdMap = (
-  deploymentStatsByModelId: DeploymentStatusType,
-  models?: InferenceModel
-) => {
-  return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
-    const inferenceId = model.model_id;
-
-    const trainedModelId =
-      'model_id' in model.service_settings &&
-      (model.service_settings.model_id === ElasticsearchModelDefaultOptions.elser ||
-        model.service_settings.model_id === ElasticsearchModelDefaultOptions.e5)
-        ? model.service_settings.model_id
-        : '';
-    inferenceMap[inferenceId] = {
-      trainedModelId,
-      isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
-      isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
-    };
+  models: InferenceAPIConfigResponse[],
+  modelStatsById: Record<string, TrainedModelStat['deployment_stats'] | undefined>,
+  downloadStates: Record<string, ModelDownloadState | undefined>,
+  elser: string,
+  e5: string
+): InferenceToModelIdMap => {
+  const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
+    const inferenceEntry = isLocalModel(model)
+      ? {
+          trainedModelId: model.service_settings.model_id,
+          isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
+          isDeployed: modelStatsById[model.inference_id]?.state === 'started',
+          isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
+          modelStats: modelStatsById[model.inference_id],
+        }
+      : {
+          trainedModelId: '',
+          isDeployable: false,
+          isDeployed: false,
+          isDownloading: false,
+          modelStats: undefined,
+        };
+    inferenceMap[model.inference_id] = inferenceEntry;
     return inferenceMap;
   }, {});
-};
-
-export const getTrainedModelStats = (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
-  return (
-    modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
-      if (modelStat.model_id) {
-        acc[modelStat.model_id] =
-          modelStat?.deployment_stats?.state === 'started'
-            ? DeploymentState.DEPLOYED
-            : DeploymentState.NOT_DEPLOYED;
-      }
-      return acc;
-    }, {}) || {}
-  );
-};
-
-const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) => {
-  return {
+  const defaultInferenceIds = {
     [DefaultInferenceModels.elser_model_2]: {
-      trainedModelId: ElasticsearchModelDefaultOptions.elser,
+      trainedModelId: elser,
       isDeployable: true,
-      isDeployed:
-        deploymentStatsByModelId[ElasticsearchModelDefaultOptions.elser] ===
-        DeploymentState.DEPLOYED,
+      isDeployed: modelStatsById[elser]?.state === 'started',
+      isDownloading: Boolean(downloadStates[elser]),
+      modelStats: modelStatsById[elser],
     },
     [DefaultInferenceModels.e5]: {
-      trainedModelId: ElasticsearchModelDefaultOptions.e5,
+      trainedModelId: e5,
       isDeployable: true,
-      isDeployed:
-        deploymentStatsByModelId[ElasticsearchModelDefaultOptions.e5] === DeploymentState.DEPLOYED,
+      isDeployed: modelStatsById[e5]?.state === 'started',
+      isDownloading: Boolean(downloadStates[e5]),
+      modelStats: modelStatsById[e5],
     },
   };
+  return { ...defaultInferenceIds, ...inferenceIdMap };
 };
 
-export const useDetailsPageMappingsModelManagement = (
-  fields: NormalizedFields,
-  inferenceToModelIdMap?: InferenceToModelIdMap
-) => {
+async function getCuratedModelConfig(
+  ml: AppDependencies['plugins']['ml'] | undefined,
+  model: string,
+  version?: ElserVersion
+) {
+  if (ml?.mlApi) {
+    try {
+      const result = await ml.mlApi.trainedModels.getCuratedModelConfig(
+        model,
+        version ? { version } : undefined
+      );
+      return result.model_id;
+    } catch (e) {
+      // pass through and return default models below
+    }
+  }
+  return model === 'elser' ? LATEST_ELSER_MODEL_ID : LATEST_E5_MODEL_ID;
+}
+
+export const useDetailsPageMappingsModelManagement = () => {
   const {
     plugins: { ml },
   } = useAppContext();
 
   const dispatch = useDispatch();
 
-  const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
+  const fetchInferenceToModelIdMap = useCallback<() => Promise<InferenceToModelIdMap>>(async () => {
     const inferenceModels = await getInferenceEndpoints();
-
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-
-    return { inferenceModels, trainedModelStats };
-  }, [ml]);
-
-  const fetchInferenceToModelIdMap = useCallback(async () => {
-    const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
-    const deploymentStatsByModelId = getTrainedModelStats(trainedModelStats);
-    const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
-    const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, inferenceModels);
+    const downloadStates = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
+    const elser = await getCuratedModelConfig(ml, 'elser', LATEST_ELSER_VERSION);
+    const e5 = await getCuratedModelConfig(ml, 'e5');
+    const modelStatsById =
+      trainedModelStats?.trained_model_stats.reduce<
+        Record<string, TrainedModelStat['deployment_stats'] | undefined>
+      >((acc, { model_id: modelId, deployment_stats: stats }) => {
+        if (modelId && stats) {
+          acc[stats.deployment_id] = stats;
+        }
+        return acc;
+      }, {}) || {};
+    const modelIdMap = getCustomInferenceIdMap(
+      inferenceModels.data || [],
+      modelStatsById,
+      downloadStates || {},
+      elser,
+      e5
+    );
 
     dispatch({
       type: 'inferenceToModelIdMap.update',
-      value: { inferenceToModelIdMap: { ...defaultInferenceIds, ...modelIdMap } },
+      value: { inferenceToModelIdMap: modelIdMap },
     });
-  }, [dispatch, fetchInferenceModelsAndTrainedModelStats]);
-
-  const inferenceIdsInPendingList = useMemo(() => {
-    return Object.values(deNormalize(fields))
-      .filter((field) => field.type === 'semantic_text' && field.inference_id)
-      .map((field) => field.inference_id);
-  }, [fields]);
-
-  const pendingDeployments = useMemo(() => {
-    return inferenceIdsInPendingList
-      .map((inferenceId) => {
-        if (inferenceId === undefined) {
-          return undefined;
-        }
-        const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';
-        return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
-          ? trainedModelId
-          : undefined;
-      })
-      .filter((trainedModelId) => !!trainedModelId);
-  }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
+    return modelIdMap;
+  }, [dispatch, ml]);
 
   return {
-    pendingDeployments,
     fetchInferenceToModelIdMap,
-    fetchInferenceModelsAndTrainedModelStats,
   };
 };

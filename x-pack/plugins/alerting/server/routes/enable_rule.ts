@@ -24,7 +24,8 @@ export const enableRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_enable`,
       options: {
         access: 'public',
-        summary: `Enable a rule`,
+        summary: 'Enable a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

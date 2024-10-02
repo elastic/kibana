@@ -35,7 +35,8 @@ export const registerGetRoute = (
       path: '/{type}/{id}',
       options: {
         access,
-        description: `Get a saved object`,
+        summary: `Get a saved object`,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

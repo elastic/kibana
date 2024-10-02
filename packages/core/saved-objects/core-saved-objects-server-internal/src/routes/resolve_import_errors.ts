@@ -38,7 +38,9 @@ export const registerResolveImportErrorsRoute = (
       path: '/_resolve_import_errors',
       options: {
         access: 'public',
-        description: `Resolve import errors`,
+        summary: `Resolve import errors`,
+        description:
+          'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',

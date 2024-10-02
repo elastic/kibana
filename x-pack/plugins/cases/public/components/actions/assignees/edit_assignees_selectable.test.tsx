@@ -460,4 +460,18 @@ describe('EditAssigneesSelectable', () => {
       ],
     });
   });
+
+  it('renders even with no assignee set yet', async () => {
+    const selectedCases = [{ ...basicCase, assignees: [] }];
+    const result = appMock.render(
+      <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
+    expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
+    expect(result.getByText('Selected: 0')).toBeInTheDocument();
+  });
 });

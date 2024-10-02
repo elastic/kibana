@@ -112,12 +112,13 @@ export const HostPanel = ({
         id: HostDetailsPanelKey,
         params: {
           name: hostName,
+          scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, isRiskScoreExist]
+    [telemetry, openLeftPanel, hostName, isRiskScoreExist, scopeId]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);

@@ -45,14 +45,14 @@ describe('useFetchAnonymizationFields', () => {
       const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields());
       await waitForNextUpdate();
       expect(http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/anonymization_fields/_find',
+        '/api/security_ai_assistant/anonymization_fields/_find',
         {
           method: 'GET',
           query: {
             page: 1,
             per_page: 1000,
           },
-          version: API_VERSIONS.internal.v1,
+          version: API_VERSIONS.public.v1,
           signal: undefined,
         }
       );

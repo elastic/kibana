@@ -8,50 +8,53 @@
 import React from 'react';
 
 import {
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
+import { docLinks } from '../../../common/doc_links';
 
 import * as i18n from '../../../common/translations';
 
 import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 
-import { ElserPrompt } from './elser_prompt';
-import { MultilingualE5Prompt } from './multilingual_e5_prompt';
+import { EndpointPrompt } from './endpoint_prompt';
+import { useTrainedModelPageUrl } from '../../hooks/use_trained_model_page_url';
 
 import './add_empty_prompt.scss';
 
-interface AddEmptyPromptProps {
-  setIsInferenceFlyoutVisible: (value: boolean) => void;
-}
+export const AddEmptyPrompt: React.FC = () => {
+  const trainedModelPageUrl = useTrainedModelPageUrl();
 
-export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFlyoutVisible }) => {
   return (
-    <EuiEmptyPrompt
-      className="addEmptyPrompt"
+    <EuiPageTemplate.EmptyPrompt
       layout="horizontal"
+      restrictWidth
+      color="plain"
+      hasShadow
+      icon={<EuiImage size="fullWidth" src={inferenceEndpoint} alt="" />}
       title={<h2>{i18n.INFERENCE_ENDPOINT_LABEL}</h2>}
       body={
         <EuiFlexGroup direction="column">
           <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
             {i18n.CREATE_FIRST_INFERENCE_ENDPOINT_DESCRIPTION}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButton
-                color="primary"
-                fill
-                iconType="plusInCircle"
-                data-test-subj="addEndpointButtonForEmptyPrompt"
-                onClick={() => setIsInferenceFlyoutVisible(true)}
-              >
-                {i18n.ADD_ENDPOINT_LABEL}
-              </EuiButton>
-            </div>
+          <EuiFlexItem>
+            <EuiLink
+              href={docLinks.createInferenceEndpoint}
+              target="_blank"
+              data-test-subj="learn-how-to-create-inference-endpoints"
+            >
+              {i18n.LEARN_HOW_TO_CREATE_INFERENCE_ENDPOINTS_LINK}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink href={trainedModelPageUrl} target="_blank" data-test-subj="view-your-models">
+              {i18n.VIEW_YOUR_MODELS_LINK}
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -60,20 +63,41 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({ setIsInferenceFl
           <EuiFlexItem>
             <strong>{i18n.START_WITH_PREPARED_ENDPOINTS_LABEL}</strong>
           </EuiFlexItem>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <ElserPrompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
+              <EndpointPrompt
+                title={i18n.ELSER_TITLE}
+                description={i18n.ELSER_DESCRIPTION}
+                footer={
+                  <EuiLink
+                    href={docLinks.semanticSearchElser}
+                    target="_blank"
+                    data-test-subj="semantic-search-with-elser"
+                  >
+                    {i18n.SEMANTIC_SEARCH_WITH_ELSER_LINK}
+                  </EuiLink>
+                }
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MultilingualE5Prompt setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible} />
+              <EndpointPrompt
+                title={i18n.E5_TITLE}
+                description={i18n.E5_DESCRIPTION}
+                footer={
+                  <EuiLink
+                    href={docLinks.semanticSearchE5}
+                    target="_blank"
+                    data-test-subj="semantic-search-with-e5"
+                  >
+                    {i18n.SEMANTIC_SEARCH_WITH_E5_LINK}
+                  </EuiLink>
+                }
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>
       }
-      color="plain"
-      hasBorder
-      icon={<EuiImage size="fullWidth" src={inferenceEndpoint} alt="" />}
     />
   );
 };

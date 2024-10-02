@@ -44,6 +44,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
+import { OptionsListSelection } from '../../../common/options_list/options_list_selections';
 import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
@@ -232,8 +233,8 @@ export class OptionsListEmbeddable
               this.dispatch.clearValidAndInvalidSelections({});
             } else {
               const { invalidSelections } = this.getState().componentState ?? {};
-              const newValidSelections: string[] = [];
-              const newInvalidSelections: string[] = [];
+              const newValidSelections: OptionsListSelection[] = [];
+              const newInvalidSelections: OptionsListSelection[] = [];
               for (const selectedOption of newSelectedOptions) {
                 if (invalidSelections?.includes(selectedOption)) {
                   newInvalidSelections.push(selectedOption);
@@ -369,10 +370,10 @@ export class OptionsListEmbeddable
         });
         this.reportInvalidSelections(false);
       } else {
-        const valid: string[] = [];
-        const invalid: string[] = [];
+        const valid: OptionsListSelection[] = [];
+        const invalid: OptionsListSelection[] = [];
         for (const selectedOption of selectedOptions ?? []) {
-          if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
+          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
         this.dispatch.updateQueryResults({
@@ -437,14 +438,13 @@ export class OptionsListEmbeddable
 
   private buildFilter = async (): Promise<ControlFilterOutput> => {
     const {
-      componentState: { validSelections },
-      explicitInput: { existsSelected, exclude },
+      explicitInput: { existsSelected, exclude, selectedOptions },
     } = this.getState();
 
     return await this.selectionsToFilters({
       existsSelected,
       exclude,
-      selectedOptions: validSelections,
+      selectedOptions,
     });
   };
 

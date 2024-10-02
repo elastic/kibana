@@ -87,6 +87,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
             ? undefined
             : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
               systemPromptSelectorOption[0]?.label;
+
         onSystemPromptSelectionChange(newSystemPrompt);
       },
       [onSystemPromptSelectionChange, resetSettings, systemPrompts]
@@ -147,9 +148,8 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     const renderOption: (
       option: SystemPromptSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      searchValue: string
+    ) => React.ReactNode = (option, searchValue) => {
       const { label, value } = option;
       return (
         <EuiFlexGroup

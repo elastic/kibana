@@ -21,6 +21,10 @@ describe('prepareResponseValidation', () => {
         404: {
           body: jest.fn(() => schema.string()),
         },
+        500: {
+          description: 'just a description',
+          body: undefined,
+        },
         unsafe: {
           body: true,
         },
@@ -32,13 +36,15 @@ describe('prepareResponseValidation', () => {
     expect(prepared).toEqual({
       200: { body: expect.any(Function) },
       404: { body: expect.any(Function) },
+      500: { description: 'just a description', body: undefined },
       unsafe: { body: true },
     });
 
-    [1, 2, 3].forEach(() => prepared[200].body());
-    [1, 2, 3].forEach(() => prepared[404].body());
+    [1, 2, 3].forEach(() => prepared[200].body!());
+    [1, 2, 3].forEach(() => prepared[404].body!());
 
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);
+    expect(validation.response![500].body).toBeUndefined();
   });
 });

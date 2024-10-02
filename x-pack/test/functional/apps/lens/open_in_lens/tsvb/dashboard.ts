@@ -89,13 +89,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await dashboardPanelActions.customizePanel();
+
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.enableCustomTimeRange();
-      await dashboardCustomizePanel.openDatePickerQuickMenu();
+      await retry.waitFor('quick menu', async () => {
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        return await testSubjects.exists('superDatePickerCommonlyUsed_Last_30 days');
+      });
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 

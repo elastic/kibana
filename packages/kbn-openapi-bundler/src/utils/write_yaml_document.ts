@@ -7,7 +7,7 @@
  */
 
 import fs from 'fs/promises';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { dirname } from 'path';
 
 export async function writeYamlDocument(filePath: string, document: unknown): Promise<void> {
@@ -25,20 +25,14 @@ function stringifyToYaml(document: unknown): string {
   try {
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return dump(document, {
+    return safeDump(document, {
       noRefs: true,
       sortKeys: sortYamlKeys,
+      skipInvalid: true, // Skip invalid types like `undefined`
     });
   } catch (e) {
-    // RangeError might happened because of stack overflow
-    // due to circular references in the document
-    // since YAML Anchors are disabled
-    if (e instanceof RangeError) {
-      // Try to stringify with YAML Anchors enabled
-      return dump(document, { noRefs: false, sortKeys: sortYamlKeys });
-    }
-
-    throw e;
+    // Try to stringify with YAML Anchors enabled
+    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
   }
 }
 

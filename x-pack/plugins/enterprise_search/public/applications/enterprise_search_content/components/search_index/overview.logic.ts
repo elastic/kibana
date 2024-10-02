@@ -90,6 +90,7 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     isClientsPopoverOpen: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleClientsPopover: (state) => !state,
       },
     ],
@@ -104,6 +105,7 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
       false,
       {
         openGenerateModal: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleManageApiKeyPopover: (state) => !state,
       },
     ],

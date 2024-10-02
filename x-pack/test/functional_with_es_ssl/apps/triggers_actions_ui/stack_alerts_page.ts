@@ -90,7 +90,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Loads the page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187667
+    describe.skip('Loads the page', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await pageObjects.common.navigateToUrl(

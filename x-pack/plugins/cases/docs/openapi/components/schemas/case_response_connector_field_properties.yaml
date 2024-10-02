@@ -1,8 +1,7 @@
 title: Case response properties for connector fields
-type:
-  - "object"
-  - "null"
+type: object
 description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+nullable: true
 properties:
   caseId:
     description: The case identifier for Swimlane connectors.
@@ -12,9 +11,8 @@ properties:
     type: string
   destIp:
     description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-    type:
-      - "boolean"
-      - "null"
+    type: boolean
+    nullable: true
   impact:
     description: The effect an incident had on business for ServiceNow ITSM connectors.
     type: string
@@ -28,14 +26,12 @@ properties:
       type: string
   malwareHash:
     description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors. 
-    type:
-      - "boolean"
-      - "null"
+    type: boolean
+    nullable: true
   malwareUrl:
     description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors. 
-    type:
-      - "boolean"
-      - "null"
+    type: boolean
+    nullable: true
   parent:
     description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
     type: string

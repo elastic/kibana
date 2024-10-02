@@ -86,6 +86,7 @@ export const useAssistantOverlay = (
   const { data: connectors } = useLoadConnectors({
     http,
   });
+
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
 
@@ -101,7 +102,6 @@ export const useAssistantOverlay = (
     onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
-
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -130,31 +130,34 @@ export const useAssistantOverlay = (
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    async (showOverlay: boolean, silent?: boolean) => {
-      let conversation;
-      if (!isLoading) {
-        conversation = conversationTitle
-          ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
-          : undefined;
-      }
-
-      if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
-        try {
-          conversation = await createConversation({
-            apiConfig: {
-              ...apiConfig,
-              actionTypeId: defaultConnector?.actionTypeId,
-              connectorId: defaultConnector?.id,
-            },
-            category: 'assistant',
-            title: conversationTitle ?? '',
-          });
-        } catch (e) {
-          /* empty */
-        }
-      }
-
+    // shouldCreateConversation should only be passed for
+    // non-default conversations that may need to be initialized
+    async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
       if (promptContextId != null) {
+        if (shouldCreateConversation) {
+          let conversation;
+          if (!isLoading) {
+            conversation = conversationTitle
+              ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
+              : undefined;
+          }
+
+          if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
+            try {
+              await createConversation({
+                apiConfig: {
+                  ...apiConfig,
+                  actionTypeId: defaultConnector?.actionTypeId,
+                  connectorId: defaultConnector?.id,
+                },
+                category: 'assistant',
+                title: conversationTitle ?? '',
+              });
+            } catch (e) {
+              /* empty */
+            }
+          }
+        }
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,

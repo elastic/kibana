@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
+import {
+  uptimeOverviewLocatorID,
+  type UptimeOverviewLocatorInfraParams,
+  type UptimeOverviewLocatorParams,
+} from '@kbn/deeplinks-observability';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 
+export type { UptimeOverviewLocatorInfraParams, UptimeOverviewLocatorParams };
+
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;
-
-export interface UptimeOverviewLocatorInfraParams extends SerializableRecord {
-  ip?: string;
-  host?: string;
-  container?: string;
-  pod?: string;
-}
-
-export interface UptimeOverviewLocatorParams extends SerializableRecord {
-  dateRangeStart?: string;
-  dateRangeEnd?: string;
-  search?: string;
-}
 
 function isUptimeOverviewLocatorParams(
   args: UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams

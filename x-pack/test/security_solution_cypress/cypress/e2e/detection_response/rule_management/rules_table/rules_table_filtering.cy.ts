@@ -73,8 +73,8 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
           name: 'Failed rule',
           rule_id: 'failed_rule',
           index: ['test_index'],
-          // Setting a crazy large "Additional look-back time" to force a failure
-          from: 'now-9007199254746990s',
+          // Setting a malformed query to force a failure
+          query: 'host.name: "*',
           enabled: true,
         })
       );

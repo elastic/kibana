@@ -208,15 +208,16 @@ export const MetricVis = ({
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
     if (typeof value !== 'number') {
-      const nonNumericMetric: MetricWText = {
-        value: formatPrimaryMetric(value),
+      const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: renderSecondaryMetric(data.columns, row, config),
         color: config.metric.color ?? defaultColor,
       };
-      return nonNumericMetric;
+      return Array.isArray(value)
+        ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
+        : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
     const baseMetric: MetricWNumber = {

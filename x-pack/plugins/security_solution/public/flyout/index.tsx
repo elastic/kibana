@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import {
@@ -38,6 +38,7 @@ import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import { Flyouts } from './document_details/shared/constants/flyouts';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -126,28 +127,60 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
 ];
 
+export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;
+export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.timeline}`;
+
 /**
  * Flyout used for the Security Solution application
  * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
  */
-export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
-));
+export const SecuritySolutionFlyout = memo(() => {
+  const onClose = useCallback(
+    () =>
+      window.dispatchEvent(
+        new CustomEvent(SECURITY_SOLUTION_ON_CLOSE_EVENT, {
+          detail: Flyouts.securitySolution,
+        })
+      ),
+    []
+  );
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      onClose={onClose}
+    />
+  );
+});
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
  * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
  */
 export const TimelineFlyout = memo(() => {
   const { euiTheme } = useEuiTheme();
+
+  const onClose = useCallback(
+    () =>
+      window.dispatchEvent(
+        new CustomEvent(TIMELINE_ON_CLOSE_EVENT, {
+          detail: Flyouts.timeline,
+        })
+      ),
+    []
+  );
 
   return (
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      onClose={onClose}
     />
   );
 });

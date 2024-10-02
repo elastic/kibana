@@ -1695,10 +1695,35 @@ describe('Event log', () => {
       { actionTypeId: '.gen-ai', completion_tokens: 9, prompt_tokens: 10, total_tokens: 19 }
     );
   });
+  test('reports telemetry for token count events with additional properties', async () => {
+    const executorMock = setupActionExecutorMock('.gen-ai', {} as ConnectorType['validate'], {
+      defaultModel: 'gpt-4',
+      apiProvider: 'OpenAI',
+    });
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+      // @ts-ignore
+      data: mockGenAi,
+    });
+    await actionExecutor.execute(executeParams);
+    expect(actionExecutorInitializationParams.analyticsService.reportEvent).toHaveBeenCalledWith(
+      GEN_AI_TOKEN_COUNT_EVENT.eventType,
+      {
+        actionTypeId: '.gen-ai',
+        completion_tokens: 9,
+        prompt_tokens: 10,
+        total_tokens: 19,
+        model: 'gpt-4',
+        provider: 'OpenAI',
+      }
+    );
+  });
 });
 function setupActionExecutorMock(
   actionTypeId = 'test',
-  validationOverride?: ConnectorType['validate']
+  validationOverride?: ConnectorType['validate'],
+  additionalConfig?: Record<string, unknown>
 ) {
   const thisConnectorType: jest.Mocked<ConnectorType> = {
     ...connectorType,
@@ -1712,6 +1737,7 @@ function setupActionExecutorMock(
       actionTypeId,
       config: {
         bar: true,
+        ...additionalConfig,
       },
       secrets: {
         baz: true,

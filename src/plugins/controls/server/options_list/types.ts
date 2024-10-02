@@ -7,20 +7,21 @@
  */
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
-  OptionsListRequestBody,
   OptionsListParsedSuggestions,
+  OptionsListRequestBody,
 } from '../../common/options_list/types';
 
 export interface EsBucket {
-  key: any;
+  key: OptionsListSelection;
   key_as_string?: string;
   doc_count: number;
 }
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse, req: OptionsListRequestBody) => string[];
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListSelection[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {

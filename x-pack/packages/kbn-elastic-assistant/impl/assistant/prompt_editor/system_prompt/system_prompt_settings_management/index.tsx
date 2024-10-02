@@ -13,23 +13,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import {
-  PromptResponse,
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { Conversation, ConversationsBulkActions, useAssistantContext } from '../../../../..';
+  Conversation,
+  mergeBaseWithPersistedConversations,
+  useAssistantContext,
+  useFetchCurrentUserConversations,
+} from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
+import { FetchConversationsResponse, useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import {
   DEFAULT_TABLE_OPTIONS,
   useSessionPagination,
 } from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
-import { CANCEL, DELETE } from '../../../settings/translations';
+import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../../settings/translations';
+import { useSettingsUpdater } from '../../../settings/use_settings_updater/use_settings_updater';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
 import { SETTINGS_TITLE } from '../system_prompt_modal/translations';
 import { useSystemPromptEditor } from '../system_prompt_modal/use_system_prompt_editor';
@@ -38,42 +43,42 @@ import { useSystemPromptTable } from './use_system_prompt_table';
 
 interface Props {
   connectors: AIConnector[] | undefined;
-  conversationSettings: Record<string, Conversation>;
-  conversationsSettingsBulkActions: ConversationsBulkActions;
-  onSelectedSystemPromptChange: (systemPrompt?: PromptResponse) => void;
-  selectedSystemPrompt: PromptResponse | undefined;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
-  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  systemPromptSettings: PromptResponse[];
-  setConversationsSettingsBulkActions: React.Dispatch<
-    React.SetStateAction<ConversationsBulkActions>
-  >;
   defaultConnector?: AIConnector;
-  handleSave: (shouldRefetchConversation?: boolean) => void;
-  onCancelClick: () => void;
-  resetSettings: () => void;
-  promptsBulkActions: PromptsPerformBulkActionRequestBody;
-  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
-const SystemPromptSettingsManagementComponent = ({
-  connectors,
-  conversationSettings,
-  onSelectedSystemPromptChange,
-  setUpdatedSystemPromptSettings,
-  setConversationSettings,
-  selectedSystemPrompt,
-  systemPromptSettings,
-  conversationsSettingsBulkActions,
-  setConversationsSettingsBulkActions,
-  defaultConnector,
-  handleSave,
-  onCancelClick,
-  resetSettings,
-  promptsBulkActions,
-  setPromptsBulkActions,
-}: Props) => {
-  const { nameSpace } = useAssistantContext();
+const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector }: Props) => {
+  const {
+    nameSpace,
+    http,
+    assistantAvailability: { isAssistantEnabled },
+    baseConversations,
+    toasts,
+  } = useAssistantContext();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+    [baseConversations]
+  );
+
+  const { data: allPrompts, refetch: refetchPrompts, isFetched: promptsLoaded } = useFetchPrompts();
+
+  const {
+    data: conversations,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
+
+  const refetchAll = useCallback(() => {
+    refetchPrompts();
+    refetchConversations();
+  }, [refetchPrompts, refetchConversations]);
+
+  const isTableLoading = !conversationsLoaded || !promptsLoaded;
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -81,6 +86,48 @@ const SystemPromptSettingsManagementComponent = ({
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
   const [deletedPrompt, setDeletedPrompt] = useState<PromptResponse | null>();
+
+  const {
+    conversationSettings,
+    setConversationSettings,
+    systemPromptSettings,
+    setUpdatedSystemPromptSettings,
+    conversationsSettingsBulkActions,
+    setConversationsSettingsBulkActions,
+    resetSettings,
+    saveSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
+  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
+
+  // System Prompt Selection State
+  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
+
+  const onSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
+    setSelectedSystemPrompt(systemPrompt);
+  }, []);
+
+  useEffect(() => {
+    if (selectedSystemPrompt != null) {
+      setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
+    }
+  }, [selectedSystemPrompt, systemPromptSettings]);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+  }, [resetSettings]);
 
   const onCreate = useCallback(() => {
     onSelectedSystemPromptChange({
@@ -124,9 +171,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
-    handleSave(true);
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeConfirmModal, handleSave, setConversationsSettingsBulkActions]);
+  }, [closeConfirmModal, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -135,9 +182,9 @@ const SystemPromptSettingsManagementComponent = ({
 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
-    handleSave(true);
+    handleSave({ callback: refetchAll });
     setConversationsSettingsBulkActions({});
-  }, [closeFlyout, handleSave, setConversationsSettingsBulkActions]);
+  }, [closeFlyout, handleSave, refetchAll, setConversationsSettingsBulkActions]);
 
   const confirmationTitle = useMemo(
     () =>
@@ -156,8 +203,9 @@ const SystemPromptSettingsManagementComponent = ({
   });
 
   const columns = useMemo(
-    () => getColumns({ onEditActionClicked, onDeleteActionClicked }),
-    [getColumns, onEditActionClicked, onDeleteActionClicked]
+    () =>
+      getColumns({ isActionsDisabled: isTableLoading, onEditActionClicked, onDeleteActionClicked }),
+    [getColumns, isTableLoading, onEditActionClicked, onDeleteActionClicked]
   );
   const systemPromptListItems = useMemo(
     () =>
@@ -173,10 +221,13 @@ const SystemPromptSettingsManagementComponent = ({
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate}>
-              {SETTINGS_TITLE}
+            <EuiText size="m">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>
+              {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -196,6 +247,7 @@ const SystemPromptSettingsManagementComponent = ({
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
+        saveButtonDisabled={selectedSystemPrompt?.name == null || selectedSystemPrompt?.name === ''}
       >
         <SystemPromptEditor
           connectors={connectors}

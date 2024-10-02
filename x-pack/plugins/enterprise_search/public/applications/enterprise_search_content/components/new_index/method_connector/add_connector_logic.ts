@@ -54,9 +54,11 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     isModalVisible: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiError: (_, error) =>
           error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
         apiSuccess: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],

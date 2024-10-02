@@ -11,6 +11,12 @@ required:
 description: Defines properties for connectors when type is `.cases-webhook`.
 type: object
 properties:
+  authType:
+    $ref: 'auth_type.yaml'
+  ca:
+    $ref: 'ca.yaml'
+  certType:
+    $ref: 'cert_type.yaml'
   createCommentJson:
     type: string
     description: >
@@ -88,9 +94,7 @@ properties:
       validation will pass.
     example: https://example.com/issue/{{{external.system.id}}}
   hasAuth:
-    type: boolean
-    description: If true, a username and password for login type authentication must be provided.
-    default: true
+    $ref: 'has_auth.yaml'
   headers:
     type: string
     description: >
@@ -125,6 +129,8 @@ properties:
       can use a variable to add the external system ID to the URL. If you are
       using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
     example: https://example.com/issue/{{{external.system.ID}}}
+  verificationMode:
+    $ref: 'verification_mode.yaml'
   viewIncidentUrl:
     type: string
     description: >

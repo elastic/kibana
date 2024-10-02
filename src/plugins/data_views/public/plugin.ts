@@ -41,8 +41,11 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
+  private readonly callResolveCluster: boolean;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.callResolveCluster = initializerContext.env.packageInfo.buildFlavor === 'traditional';
+  }
 
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
@@ -83,7 +86,7 @@ export class DataViewsPublicPlugin
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     return new DataViewsServicePublic({
-      hasData: this.hasData.start(core),
+      hasData: this.hasData.start(core, this.callResolveCluster),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(http, async () => {

@@ -5,46 +5,37 @@ required:
 properties:
   comment:
     type: string
-    examples:
-      - A new comment.
+    example: A new comment.
   created_at:
     type: string
     format: date-time
-    examples:
-      - 2022-05-13T09:16:17.416Z
+    example: 2022-05-13T09:16:17.416Z
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
   id:
     type: string
-    examples:
-      - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   owner:
     $ref: 'owners.yaml'
   pushed_at:
-    type:
-      - "string"
-      - "null"
+    type: string
     format: date-time
-    examples:
-      - null
+    nullable: true
+    example: null
   pushed_by:
     $ref: 'case_response_pushed_by_properties.yaml'
   type: 
     type: string
-    examples:
-      - user
+    example: user
     enum:
       - user
   updated_at:
-    type:
-      - "string"
-      - "null"
+    type: string
     format: date-time
-    examples:
-      - null
+    nullable: true
+    example: null
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
-    examples:
-      - WzIwNDMxLDFd
+    example: WzIwNDMxLDFd

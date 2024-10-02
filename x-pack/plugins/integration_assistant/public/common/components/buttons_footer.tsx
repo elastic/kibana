@@ -44,7 +44,12 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
     const integrationsUrl = useKibana().services.application.getUrlForApp('integrations');
     return (
       <KibanaPageTemplate.BottomBar paddingSize="s" position="sticky" css={bottomBarCss}>
-        <EuiFlexGroup direction="column" alignItems="center" css={containerCss}>
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          css={containerCss}
+          data-test-subj="buttonsFooter"
+        >
           <EuiFlexItem css={contentCss}>
             <EuiFlexGroup
               direction="row"
@@ -54,7 +59,11 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
             >
               <EuiFlexItem>
                 {!hideCancel && (
-                  <EuiLink href={integrationsUrl} color="text">
+                  <EuiLink
+                    href={integrationsUrl}
+                    color="text"
+                    data-test-subj="buttonsFooter-cancelButton"
+                  >
                     {cancelButtonText || (
                       <FormattedMessage
                         id="xpack.integrationAssistant.footer.cancel"
@@ -73,7 +82,11 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                 >
                   <EuiFlexItem grow={false}>
                     {onBack && (
-                      <EuiLink onClick={onBack} color="text">
+                      <EuiLink
+                        onClick={onBack}
+                        color="text"
+                        data-test-subj="buttonsFooter-backButton"
+                      >
                         {backButtonText || (
                           <FormattedMessage
                             id="xpack.integrationAssistant.footer.back"
@@ -85,7 +98,13 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {onNext && (
-                      <EuiButton fill color="primary" onClick={onNext} isDisabled={isNextDisabled}>
+                      <EuiButton
+                        fill
+                        color="primary"
+                        onClick={onNext}
+                        isDisabled={isNextDisabled}
+                        data-test-subj="buttonsFooter-nextButton"
+                      >
                         {nextButtonText || (
                           <FormattedMessage
                             id="xpack.integrationAssistant.footer.next"

@@ -29,7 +29,8 @@ export const useQueryIndices = (
 
       return response.indices;
     },
+    initialData: [],
   });
 
-  return { indices: data || [], isLoading };
+  return { indices: data, isLoading };
 };

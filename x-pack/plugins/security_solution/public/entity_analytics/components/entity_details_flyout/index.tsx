@@ -14,7 +14,7 @@ import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 
-export const getRiskInputTab = ({ entityType, entityName }: RiskInputsTabProps) => ({
+export const getRiskInputTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
@@ -23,5 +23,5 @@ export const getRiskInputTab = ({ entityType, entityName }: RiskInputsTabProps) 
       defaultMessage="Risk contributions"
     />
   ),
-  content: <RiskInputsTab entityType={entityType} entityName={entityName} />,
+  content: <RiskInputsTab entityType={entityType} entityName={entityName} scopeId={scopeId} />,
 });

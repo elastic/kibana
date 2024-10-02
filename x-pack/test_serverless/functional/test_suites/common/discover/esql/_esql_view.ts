@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverQueryHits');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.existOrFail('shareTopNavButton');
-        await testSubjects.existOrFail('dataGridColumnSortingButton');
+        await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
         await testSubjects.click('field-@message-showDetails');

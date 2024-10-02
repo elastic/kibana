@@ -35,7 +35,8 @@ export const registerDeleteRoute = (
       path: '/{type}/{id}',
       options: {
         access,
-        description: `Delete a saved object`,
+        summary: `Delete a saved object`,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

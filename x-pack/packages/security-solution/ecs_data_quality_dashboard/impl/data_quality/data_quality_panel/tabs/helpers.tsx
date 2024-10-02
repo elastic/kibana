@@ -212,11 +212,7 @@ export const getTabs = ({
       </EuiBadge>
     ),
     content: (
-      <EcsCompliantTab
-        indexName={indexName}
-        onAddToNewCase={onAddToNewCase}
-        partitionedFieldMetadata={partitionedFieldMetadata}
-      />
+      <EcsCompliantTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />
     ),
     id: ECS_COMPLIANT_TAB_ID,
     name: i18n.ECS_COMPLIANT_FIELDS,

@@ -164,14 +164,14 @@ describe('Router', () => {
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![200].body()
+          )().response![200].body!()
         )
       ).toBe(true);
       expect(
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![404].body()
+          )().response![404].body!()
         )
       ).toBe(true);
     }
@@ -208,7 +208,7 @@ describe('Router', () => {
           (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [params]."`
+        `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
       );
     });
 

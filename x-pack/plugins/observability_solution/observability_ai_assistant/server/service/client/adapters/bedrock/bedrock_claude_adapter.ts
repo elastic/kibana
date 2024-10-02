@@ -17,12 +17,6 @@ import { getMessagesWithSimulatedFunctionCalling } from '../simulate_function_ca
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
 import { TOOL_USE_END } from '../simulate_function_calling/constants';
 
-function replaceFunctionsWithTools(content: string) {
-  return content.replaceAll(/(function)(s|[\s*\.])?(?!\scall)/g, (match, p1, p2) => {
-    return `tool${p2 || ''}`;
-  });
-}
-
 // Most of the work here is to re-format OpenAI-compatible functions for Claude.
 // See https://github.com/anthropics/anthropic-tools/blob/main/tool_use_package/prompt_constructors.py
 
@@ -46,7 +40,7 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       const formattedMessages = messagesWithSimulatedFunctionCalling.map((message) => {
         return {
           role: message.message.role,
-          content: replaceFunctionsWithTools(message.message.content ?? ''),
+          content: message.message.content ?? '',
         };
       });
 

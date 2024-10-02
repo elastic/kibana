@@ -16,11 +16,11 @@ import React, {
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
   WaterfallData,
-  WaterfallDataEntry,
+  WaterfallTooltipItem,
   WaterfallMetadata,
 } from '../../../common/network_data/types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
-import { SidebarItem } from '../../../common/network_data/types';
+import { WaterfallNetworkItem } from '../../../common/network_data/types';
 
 export type MarkerItems = Array<{
   id:
@@ -43,12 +43,9 @@ export interface IWaterfallContext {
   onSidebarClick?: OnSidebarClick;
   showOnlyHighlightedNetworkRequests: boolean;
   showCustomMarks: boolean;
-  sidebarItems?: SidebarItem[];
+  sidebarItems?: WaterfallNetworkItem[];
   metadata: WaterfallMetadata;
-  renderTooltipItem: (
-    item: WaterfallDataEntry['config']['tooltipProps'],
-    index?: number
-  ) => JSX.Element;
+  renderTooltipItem: (item: WaterfallTooltipItem, index?: number) => JSX.Element;
   markerItems?: MarkerItems;
   activeStep?: JourneyStep;
   activeFilters: string[];

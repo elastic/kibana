@@ -27,6 +27,7 @@ import {
   BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
   useVectorSearchBreadcrumbs,
+  useSemanticSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
   aiSearchTitle,
@@ -36,6 +37,7 @@ import {
   enterpriseSearchContentTitle,
   searchExperiencesTitle,
   searchTitle,
+  semanticSearchTitle,
   vectorSearchTitle,
   workplaceSearchTitle,
 } from './generate_title';
@@ -233,6 +235,22 @@ export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) 
   const docTitle = vectorSearchTitle(title);
 
   const breadcrumbs = useVectorSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetSemanticSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = semanticSearchTitle(title);
+
+  const breadcrumbs = useSemanticSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

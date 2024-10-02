@@ -6,15 +6,13 @@ properties:
     description: The new comment. It is required only when `type` is `user`.
     type: string
     maxLength: 30000
-    examples:
-      - A new comment.
+    example: A new comment.
   owner:
     $ref: 'owners.yaml'
   type: 
     type: string
     description: The type of comment.
-    examples:
-      - user
+    example: user
     enum:
       - user
 required:

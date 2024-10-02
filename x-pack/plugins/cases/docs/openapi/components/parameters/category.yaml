@@ -4,9 +4,8 @@ description: Filters the returned cases by category.
 schema:
   oneOf:
     - type: string
+      example: my-category
     - type: array
       items:
         type: string
       maxItems: 100
-      examples:
-        - [ my-category ]

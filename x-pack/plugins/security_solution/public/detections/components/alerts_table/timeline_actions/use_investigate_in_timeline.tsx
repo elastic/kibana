@@ -18,6 +18,7 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { isEmpty } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -144,13 +145,22 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
+
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      const newColumns = timeline.columns;
+      const newColumnsOverride =
+        !newColumns || isEmpty(newColumns)
+          ? !unifiedComponentsInTimelineDisabled
+            ? defaultUdtHeaders
+            : defaultHeaders
+          : newColumns;
+
       await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
@@ -160,12 +170,13 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: newColumnsOverride,
           indexNames: timeline.indexNames ?? [],
           show: true,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
-            ? timeline.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timeline.timelineType !== TimelineType.template
+              ? timeline.excludedRowRendererIds
+              : [],
         },
         to: toTimeline,
         ruleNote,
@@ -175,7 +186,7 @@ export const useInvestigateInTimeline = ({
       updateTimeline,
       updateTimelineIsLoading,
       clearActiveTimeline,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 

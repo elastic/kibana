@@ -7,7 +7,7 @@ parameters:
 get:
   summary: Get agent by ID
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -28,7 +28,7 @@ get:
 put:
   summary: Update agent by ID
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -62,7 +62,7 @@ put:
 delete:
   summary: Delete agent by ID
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

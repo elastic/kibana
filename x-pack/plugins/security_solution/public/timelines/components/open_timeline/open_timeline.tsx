@@ -312,7 +312,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               />
             </>
           ) : (
-            <NoteManagementPage />
+            <NoteManagementPage onOpenTimeline={onOpenTimeline} />
           )}
         </div>
       </>

@@ -21,3 +21,7 @@ export function useLocator<T extends SerializableRecord>(
 export function useDashboardLocator() {
   return useLocator(LOCATORS_IDS.DASHBOARD_APP);
 }
+
+export function useDiscoverLocator() {
+  return useLocator(LOCATORS_IDS.DISCOVER_APP_LOCATOR);
+}

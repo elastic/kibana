@@ -68,6 +68,8 @@ export class VisualizeEditorPageObject extends FtrService {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 
+    await this.common.sleep(500); // wait for the visualization to render
+
     const prevRenderingCount = await this.visChart.getVisualizationRenderingCount();
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');

@@ -105,11 +105,13 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
+      // @ts-expect-error upgrade typescript v5.1.6
       errors[errorKey].length >= 1 &&
       ruleParams[errorKey as keyof IndexThresholdRuleParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
+    // @ts-expect-error upgrade typescript v5.1.6
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
@@ -297,6 +299,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         })}
         fullWidth
         display="rowCompressed"
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.filterKuery.length > 0}
         error={errors.filterKuery}
       >
@@ -305,6 +308,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           onChange={handleFilterChange}
           value={filterKuery}
           fullWidth
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.filterKuery.length > 0}
         />
       </EuiFormRow>

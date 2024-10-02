@@ -36,7 +36,8 @@ export const registerUpdateRoute = (
       path: '/{type}/{id}',
       options: {
         access,
-        description: `Update a saved object`,
+        summary: `Update a saved object`,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

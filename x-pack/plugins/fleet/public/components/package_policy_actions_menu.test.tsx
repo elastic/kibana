@@ -157,4 +157,17 @@ describe('PackagePolicyActionsMenu', () => {
       expect(utils.queryByText('Add agent')).toBeNull();
     });
   });
+
+  it('Should show Edit integration with correct href when agentPolicy is defined', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'
+      );
+    });
+  });
 });

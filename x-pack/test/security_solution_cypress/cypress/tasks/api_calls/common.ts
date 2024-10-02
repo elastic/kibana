@@ -8,9 +8,11 @@
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
+import { getSpaceUrl } from '../space';
 
 export const API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
@@ -41,18 +43,24 @@ export const rootRequest = <T = unknown>({
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
 
-  rootRequest({
-    method: 'POST',
-    url: '/api/detection_engine/rules/_bulk_action',
-    body: {
-      query: '',
-      action: 'delete',
-    },
-    failOnStatusCode: false,
-    timeout: 300000,
-  });
+  cy.currentSpace().then((spaceId) => {
+    const url = spaceId
+      ? `/s/${spaceId}${DETECTION_ENGINE_RULES_BULK_ACTION}`
+      : DETECTION_ENGINE_RULES_BULK_ACTION;
 
-  deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
+    rootRequest({
+      method: 'POST',
+      url,
+      body: {
+        query: '',
+        action: 'delete',
+      },
+      failOnStatusCode: false,
+      timeout: 300000,
+    });
+
+    deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
+  });
 };
 
 export const getConnectors = () =>
@@ -62,20 +70,24 @@ export const getConnectors = () =>
   });
 
 export const deleteConnectors = () => {
-  getConnectors().then(($response) => {
-    if ($response.body.length > 0) {
-      const ids = $response.body.map((connector) => {
-        return connector.id;
-      });
-      ids.forEach((id) => {
-        if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
-          rootRequest({
-            method: 'DELETE',
-            url: `api/actions/connector/${id}`,
-          });
-        }
-      });
-    }
+  cy.currentSpace().then((spaceId) => {
+    getConnectors().then(($response) => {
+      if ($response.body.length > 0) {
+        const ids = $response.body.map((connector) => {
+          return connector.id;
+        });
+        ids.forEach((id) => {
+          if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
+            rootRequest({
+              method: 'DELETE',
+              url: spaceId
+                ? getSpaceUrl(spaceId, `api/actions/connector/${id}`)
+                : `api/actions/connector/${id}`,
+            });
+          }
+        });
+      }
+    });
   });
 };
 

@@ -43,6 +43,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
     return (
       <EmbeddableESQLFieldStatsTableWrapper
+        id={props.id}
         dataView={props.dataView}
         esqlQuery={props.esqlQuery}
         isEsqlMode={props.isEsqlMode ?? props.esql}
@@ -67,6 +68,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
   if (isFieldStatisticTableEmbeddableState(props)) {
     return (
       <EmbeddableFieldStatsTableWrapper
+        id={props.id}
         dataView={props.dataView}
         isEsqlMode={false}
         filters={props.filters}
@@ -173,6 +175,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
       <KibanaContextProvider services={servicesWithOverrides}>
         <DatePickerContextProvider {...datePickerDeps}>
           <FieldStatisticsWrapperContent
+            id={props.id}
             dataView={props.dataView}
             isEsqlMode={props.isEsqlMode ?? props.esql}
             esqlQuery={props.esqlQuery}

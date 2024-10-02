@@ -7,7 +7,7 @@
 
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(error: unknown, defaultMessage?: string): string {
   if (typeof error === 'string') {
     return error;
   }
@@ -19,7 +19,7 @@ export function getErrorMessage(error: unknown): string {
     return (error as { name: string }).name;
   }
 
-  return '';
+  return defaultMessage ?? '';
 }
 
 export function getErrorCode(error: unknown): number | undefined {

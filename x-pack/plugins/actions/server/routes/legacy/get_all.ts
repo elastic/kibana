@@ -23,6 +23,8 @@ export const getAllActionRoute = (
       options: {
         access: 'public',
         summary: `Get all connectors`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {},
     },

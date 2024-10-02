@@ -319,7 +319,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
                   bucketSpanValidationError !== '' ||
                   outerFormComplete === false
                 }
-                onClick={createJob.bind(null, layerIndex)}
+                onClick={createJob}
                 size="s"
                 data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
               >
@@ -332,7 +332,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={createADJobInWizard.bind(null, layerIndex)}
+                onClick={createADJobInWizard}
                 size="s"
                 iconType="popout"
                 iconSide="right"

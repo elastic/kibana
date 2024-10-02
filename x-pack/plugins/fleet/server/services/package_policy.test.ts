@@ -5188,6 +5188,39 @@ describe('getUpgradeDryRunDiff', () => {
       },
     ]);
   });
+
+  it('should omit spaceId when upgrading package policies with spaceId', async () => {
+    savedObjectsClient.get.mockImplementation((type, id) =>
+      Promise.resolve({
+        id,
+        type: 'abcd',
+        references: [],
+        version: '0.9.0',
+        attributes: { ...createPackagePolicyMock(), name: id, spaceId: 'test' },
+      })
+    );
+    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+      'package-policy-id-test-spaceId',
+    ]);
+
+    expect(res).toEqual([
+      {
+        id: 'package-policy-id-test-spaceId',
+        name: 'package-policy-id-test-spaceId',
+        success: true,
+      },
+    ]);
+
+    expect(savedObjectsClient.update).toBeCalledWith(
+      'ingest-package-policies',
+      'package-policy-id-test-spaceId',
+      expect.not.objectContaining({
+        spaceId: expect.anything(),
+      }),
+      expect.anything()
+    );
+  });
 });
 
 describe('_applyIndexPrivileges()', () => {

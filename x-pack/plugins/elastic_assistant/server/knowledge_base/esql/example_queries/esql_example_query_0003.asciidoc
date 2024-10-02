@@ -1,14 +1,10 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
+// 3. suspicious powershell cmds from base64 encoded cmdline
+// Helpful when answering questions on regex based searches and replacements, base64 conversions, and dealing with case sensitivity (TO_LOWER and TO_UPPER commands)
 from logs-*
-| where event.code is not null
-| stats event_code_count = count(event.code) by event.code,host.name
-| enrich win_events on event.code with EVENT_DESCRIPTION
-| where EVENT_DESCRIPTION is not null and host.name is not null
-| rename EVENT_DESCRIPTION as event.description
-| sort event_code_count desc
-| keep event_code_count,event.code,host.name,event.description
-```
+| where host.os.type == "windows" and event.category == "process" and event.action == "start" and TO_LOWER(process.name) == "powershell.exe" and process.command_line rlike ".+ -(e|E).*"
+| keep agent.id, process.command_line
+| grok process.command_line """(?<base64_data>([A-Za-z0-9+/]+={1,2}$|[A-Za-z0-9+/]{100,}))"""
+| where base64_data is not null
+| eval decoded_base64_cmdline = replace(TO_LOWER(FROM_BASE64(base64_data)), """\u0000""", "")
+| where decoded_base64_cmdline rlike """.*(http|webclient|download|mppreference|sockets|bxor|.replace|reflection|assembly|load|bits|start-proc|iwr|frombase64).*"""
+| keep agent.id, process.command_line, decoded_base64_cmdline

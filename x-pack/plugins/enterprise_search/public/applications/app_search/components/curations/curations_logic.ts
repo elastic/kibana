@@ -55,6 +55,7 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     selectedPageTab: [
       'overview',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectPageTab: (_, { pageTab }) => pageTab,
       },
     ],
@@ -67,13 +68,16 @@ export const CurationsLogic = kea<MakeLogicType<CurationsValues, CurationsAction
     curations: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onCurationsLoad: (_, { results }) => results,
       },
     ],
     meta: [
       DEFAULT_META,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onCurationsLoad: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],

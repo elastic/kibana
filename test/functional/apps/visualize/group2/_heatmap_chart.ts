@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/181884
-  describe.skip('heatmap chart', function indexPatternCreation() {
+  describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
     let isNewChartsLibraryEnabled = false;
 
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await PageObjects.visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
     });
 
     it('should save and load', async function () {
@@ -97,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show 6 color ranges if changed on options', async function () {
       await PageObjects.visEditor.clickOptionsTab();
       await PageObjects.visEditor.changeHeatmapColorNumbers(6);
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await PageObjects.visChart.getLegendEntries();
@@ -138,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('customize 2 last ranges');
       await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
       await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
 
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const legends = await PageObjects.visChart.getLegendEntries();

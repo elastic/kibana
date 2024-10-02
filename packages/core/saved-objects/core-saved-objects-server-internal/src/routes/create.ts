@@ -35,7 +35,8 @@ export const registerCreateRoute = (
       path: '/{type}/{id?}',
       options: {
         access,
-        description: `Create a saved object`,
+        summary: `Create a saved object`,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

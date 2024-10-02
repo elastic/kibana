@@ -360,6 +360,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
               values={{
                 percents: getReindexProgressLabel(
                   reindexTaskPercComplete,
+                  // @ts-expect-error upgrade typescript v5.1.6
                   lastCompletedStep,
                   hasExistingAliases
                 ),

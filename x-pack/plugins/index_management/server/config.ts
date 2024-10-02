@@ -36,7 +36,7 @@ const schemaLatest = schema.object(
       // deprecated as unused after index details page has been implemented
       enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
       // deprecate as unused after semantic text is enabled everywhere
-      enableSemanticText: schema.boolean({ defaultValue: false }),
+      enableSemanticText: schema.boolean({ defaultValue: true }),
     }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth

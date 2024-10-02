@@ -7,9 +7,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { CreatePackagePolicyRequestSchema, PackagePolicyInput } from '../../../types';
+import type {
+  CreatePackagePolicyRequestSchema,
+  PackagePolicyInput,
+  NewPackagePolicyInput,
+} from '../../../types';
 import { licenseService } from '../../../services';
 import type { SimplifiedPackagePolicy } from '../../../../common/services/simplified_package_policy_helper';
+import type { NewPackagePolicyInputStream } from '../../../../common';
 
 export function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
@@ -49,4 +54,34 @@ export function canUseMultipleAgentPolicies() {
     canUseReusablePolicies: hasEnterpriseLicence,
     errorMessage: 'Reusable integration policies are only available with an Enterprise license',
   };
+}
+
+function areAllInputStreamDisabled(streams: NewPackagePolicyInputStream[]) {
+  return streams.reduce((acc, stream, i) => {
+    return !stream.enabled && acc;
+  }, true);
+}
+
+/**
+ *
+ * Check if one input is enabled but all of its streams are disabled
+ * If true, switch input.enabled to false
+ */
+export function alignInputsAndStreams(
+  packagePolicyInputs: PackagePolicyInput[] | NewPackagePolicyInput[]
+) {
+  return packagePolicyInputs.map((input) => {
+    if (
+      input.enabled === true &&
+      input?.streams.length > 0 &&
+      areAllInputStreamDisabled(input.streams)
+    ) {
+      const newInput = {
+        ...input,
+        enabled: false,
+      };
+      return newInput;
+    }
+    return input;
+  });
 }

@@ -6,11 +6,7 @@
  */
 
 import { openTimeline } from '../../../tasks/timelines';
-import {
-  SERVER_SIDE_EVENT_COUNT,
-  TIMELINE_TAB_CONTENT_EQL,
-  TIMELINE_CORRELATION_INPUT,
-} from '../../../screens/timeline';
+import { TIMELINE_CORRELATION_INPUT, EQL_EVENT_COUNT } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
@@ -38,10 +34,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should update timeline after adding eql', () => {
-    cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
-      .invoke('text')
-      .then(parseInt)
-      .should('be.gt', 0);
+    cy.get(`${EQL_EVENT_COUNT}`).invoke('text').then(parseInt).should('be.gt', 0);
   });
 
   it('should update timeline after removing eql', () => {

@@ -8,8 +8,9 @@
 import {
   SortFieldInferenceEndpoint,
   QueryParams,
-  AlInferenceEndpointsTableState,
+  AllInferenceEndpointsTableState,
   SortOrder,
+  FilterOptions,
 } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
@@ -22,6 +23,12 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: SortOrder.asc,
 };
 
-export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AlInferenceEndpointsTableState = {
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  provider: [],
+  type: [],
+};
+
+export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTableState = {
+  filterOptions: DEFAULT_FILTER_OPTIONS,
   queryParams: DEFAULT_QUERY_PARAMS,
 };

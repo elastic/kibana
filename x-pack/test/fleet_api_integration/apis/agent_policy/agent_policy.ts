@@ -526,7 +526,7 @@ export default function (providerContext: FtrProviderContext) {
           is_managed: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
-          revision: 1,
+          revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
           package_policies: [],
@@ -650,6 +650,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(newPolicy.is_protected).to.eql(true);
+        expect(newPolicy.revision).to.eql(2);
       });
 
       it('should increment package policy copy names', async () => {

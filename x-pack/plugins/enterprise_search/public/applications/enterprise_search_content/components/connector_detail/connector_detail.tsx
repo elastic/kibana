@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
@@ -236,7 +236,7 @@ export const ConnectorDetail: React.FC = () => {
     ...CONFIG_TAB,
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
   return (
     <EnterpriseSearchContentPageTemplate

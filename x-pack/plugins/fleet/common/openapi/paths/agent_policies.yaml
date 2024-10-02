@@ -1,7 +1,7 @@
 get:
   summary: List agent policies
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK
@@ -47,7 +47,7 @@ get:
 post:
   summary: Create agent policy
   tags:
-    - Agent policies
+    - Elastic Agent policies
   responses:
     '200':
       description: OK

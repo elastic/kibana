@@ -43,7 +43,8 @@ const buildFindRulesRoute = ({
       path,
       options: {
         access: 'public',
-        summary: `Get rules`,
+        summary: 'Get information about rules',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         query: findRulesRequestQuerySchemaV1,

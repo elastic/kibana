@@ -126,6 +126,7 @@ export const EditConnector: React.FC = () => {
               >
                 <EuiContextMenu
                   initialPanelId={0}
+                  data-test-subj="serverlessSearchEditConnectorContextMenu"
                   panels={[
                     {
                       id: 0,

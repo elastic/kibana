@@ -48,6 +48,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
         'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
         'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
         'Execute Operations Perform script execution response actions in the response console.Execute Operations sub-feature privilegeAllNone',
+        'Scan Operations Perform folder scan response actions in the response console.Scan Operations sub-feature privilegeAllNone',
       ]);
   });
 

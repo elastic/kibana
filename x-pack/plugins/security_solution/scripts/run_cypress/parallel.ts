@@ -317,7 +317,7 @@ ${JSON.stringify(
               };
 
               // Setup fleet if Cypress config requires it
-              let fleetServer: void | StartedFleetServer;
+              let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
               try {

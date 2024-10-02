@@ -149,10 +149,6 @@ export async function installYarnDeps(log, opts = undefined) {
   await runBazel(log, ['run', '@nodejs//:yarn'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
-    env: {
-      RE2_DOWNLOAD_MIRROR:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
-    },
   });
 
   log.success('yarn deps installed');

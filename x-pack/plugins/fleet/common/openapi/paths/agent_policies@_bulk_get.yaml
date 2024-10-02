@@ -1,7 +1,7 @@
 post:
   summary: Bulk get agent policies
   tags:
-    - Agent policies
+    - Elastic Agent policies
   requestBody:
     content:
       application/json:
