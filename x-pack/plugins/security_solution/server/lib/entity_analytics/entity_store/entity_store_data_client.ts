@@ -134,12 +134,25 @@ export class EntityStoreDataClient {
     return { ...descriptor, ...updated };
   }
 
-  public executeFieldRetentionEnrichPolicy(entityType: EntityType) {
-    return executeFieldRetentionEnrichPolicy({
-      namespace: this.options.namespace,
-      esClient: this.options.esClient,
-      entityType,
-    });
+  public async executeFieldRetentionEnrichPolicy(
+    entityType: EntityType
+  ): Promise<{ executed: boolean }> {
+    try {
+      await executeFieldRetentionEnrichPolicy({
+        namespace: this.options.namespace,
+        esClient: this.options.esClient,
+        entityType,
+      });
+      return { executed: true };
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return { executed: false };
+      }
+      this.options.logger.error(
+        `Error executing field retention enrich policy for ${entityType}: ${e.message}`
+      );
+      throw e;
+    }
   }
 
   private async createFieldRetentionEnrichPolicy(entityType: EntityType) {

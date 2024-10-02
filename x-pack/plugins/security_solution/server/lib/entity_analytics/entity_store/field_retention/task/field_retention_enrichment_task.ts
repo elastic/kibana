@@ -12,9 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store/common.gen';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -24,6 +22,7 @@ import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { EntityStoreDataClient } from '../../entity_store_data_client';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
+import { getFieldRetentionDefinitions } from '../field_retention_definitions';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -44,12 +43,10 @@ type GetEntityStoreDataClient = (namespace: string) => Promise<EntityStoreDataCl
 export const registerEntityStoreFieldRetentionEnrichTask = ({
   getStartServices,
   logger,
-  auditLogger,
   taskManager,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
-  auditLogger: AuditLogger | undefined;
   taskManager: TaskManagerSetupContract | undefined;
 }): void => {
   if (!taskManager) {
@@ -175,29 +172,24 @@ export const runTask = async ({
       log('entity store data client is not available; exiting task');
       return { state: updatedState };
     }
-    // TODO: permissions issue with finding engines
-    //   [2024-09-25T10:25:02.617+01:00][ERROR][plugins.taskManager] Task entity_store:field_retention:enrichment "entity_store:field_retention:enrichment:default:1.0.0" failed: ResponseError: security_exception
-    // Root causes:
-    // 	security_exception: missing authentication credentials for REST request [/_security/user/_has_privileges]
 
-    // debugLog('fetching engines');
-    // const { engines } = await entityStoreDataClient.list();
-    // debugLog(`fetched engines: ${engines.length}`);
-
-    const entityTypes: EntityType[] = ['host', 'user'];
+    const entityTypes = getFieldRetentionDefinitions().map((def) => def.entityType);
     for (const entityType of entityTypes) {
-      if (entityType) {
-        // TODO: why is this optional?
-        const start = Date.now();
-        debugLog(`executing field retention enrich policy for ${entityType}`);
-        try {
-          await entityStoreDataClient.executeFieldRetentionEnrichPolicy(entityType);
+      const start = Date.now();
+      debugLog(`executing field retention enrich policy for ${entityType}`);
+      try {
+        const { executed } = await entityStoreDataClient.executeFieldRetentionEnrichPolicy(
+          entityType
+        );
+        if (!executed) {
+          debugLog(`Field retention encrich policy for ${entityType} does not exist`);
+        } else {
           log(
-            `executed field retention enrich policy for ${entityType} in ${Date.now() - start}ms`
+            `Executed field retention enrich policy for ${entityType} in ${Date.now() - start}ms`
           );
-        } catch (e) {
-          log(`error executing field retention enrich policy for ${entityType}: ${e.message}`);
         }
+      } catch (e) {
+        log(`error executing field retention enrich policy for ${entityType}: ${e.message}`);
       }
     }
 
