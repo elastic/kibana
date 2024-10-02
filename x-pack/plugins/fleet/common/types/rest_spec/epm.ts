@@ -164,7 +164,7 @@ export interface InstallResult {
   status?: InstallResultStatus;
   error?: Error;
   installType: InstallType;
-  installSource: InstallSource;
+  installSource?: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {

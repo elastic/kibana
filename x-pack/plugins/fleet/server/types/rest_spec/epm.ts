@@ -356,7 +356,7 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
       ),
       error: schema.maybe(schema.any()),
       installType: schema.string(),
-      installSource: schema.string(),
+      installSource: schema.maybe(schema.string()),
     }),
   }),
   schema.object({
