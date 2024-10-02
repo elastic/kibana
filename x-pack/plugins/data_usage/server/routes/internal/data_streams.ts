@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { DataUsageContext, DataUsageRouter, DataStreamsResponseSchema } from '../../types';
+import { DataStreamsResponseSchema } from '../../../common/rest_types';
+import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
+import { DataUsageContext, DataUsageRouter } from '../../types';
 
 import { getDataStreamsHandler } from './data_streams_handler';
 
@@ -17,7 +19,7 @@ export const registerDataStreamsRoute = (
     router.versioned
       .get({
         access: 'internal',
-        path: '/internal/api/data_usage/data_streams',
+        path: DATA_USAGE_DATA_STREAMS_API_ROUTE,
       })
       .addVersion(
         {

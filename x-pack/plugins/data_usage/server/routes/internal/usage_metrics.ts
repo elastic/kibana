@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  DataUsageContext,
-  DataUsageRouter,
-  UsageMetricsRequestSchema,
-  UsageMetricsResponseSchema,
-} from '../../types';
+import { UsageMetricsRequestSchema, UsageMetricsResponseSchema } from '../../../common/rest_types';
+import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
+import { DataUsageContext, DataUsageRouter } from '../../types';
 
 import { getUsageMetricsHandler } from './usage_metrics_handler';
 
@@ -22,7 +19,7 @@ export const registerUsageMetricsRoute = (
     router.versioned
       .get({
         access: 'internal',
-        path: '/internal/api/data_usage/metrics',
+        path: DATA_USAGE_METRICS_API_ROUTE,
       })
       .addVersion(
         {

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rest_types';
 export * from './types';
