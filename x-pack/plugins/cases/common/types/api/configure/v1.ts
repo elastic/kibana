@@ -17,7 +17,12 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../constants';
-import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
+import {
+  limitedArraySchema,
+  limitedStringSchema,
+  regexStringRt,
+  dateSchema,
+} from '../../../schema';
 import {
   CustomFieldDateTypeRt,
   CustomFieldTextTypeRt,
@@ -73,7 +78,7 @@ export const DateCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([rt.string, rt.null]), // will need date validation here
+      defaultValue: rt.union([dateSchema(), rt.null]),
     })
   ),
 ]);

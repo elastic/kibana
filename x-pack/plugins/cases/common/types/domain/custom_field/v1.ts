@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { dateSchema } from '../../../schema';
 
 export enum CustomFieldTypes {
   TEXT = 'text',
@@ -31,7 +32,7 @@ export const CaseCustomFieldToggleRt = rt.strict({
 export const CaseCustomFieldDateRt = rt.strict({
   key: rt.string,
   type: CustomFieldDateTypeRt,
-  value: rt.union([rt.string, rt.null]),
+  value: rt.union([dateSchema(), rt.null]),
 });
 
 export const CaseCustomFieldRt = rt.union([

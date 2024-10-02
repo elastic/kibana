@@ -36,6 +36,7 @@ import {
   CustomFieldConfigurationWithoutTypeRt,
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
+  DateCustomFieldConfigurationRt,
   TemplateConfigurationRt,
 } from './v1';
 
@@ -509,6 +510,78 @@ describe('configure', () => {
           })
         )[0]
       ).toContain('Invalid value "foobar" supplied');
+    });
+  });
+
+  describe('DateCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_date_custom_field',
+      label: 'Date Custom Field',
+      type: CustomFieldTypes.DATE,
+      required: true,
+    };
+
+    it('has expected attributes in request', () => {
+      const query = DateCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue', () => {
+      const query = DateCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        defaultValue: '05-30-2024',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, defaultValue: '05-30-2024' },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = DateCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('defaultValue fails if the type is not string', () => {
+      expect(
+        PathReporter.report(
+          DateCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it(`throws an error if the default value is invalid date`, () => {
+      expect(
+        PathReporter.report(
+          DateCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: '32-09-2024',
+          })
+        )[0]
+      ).toContain(`32-09-2024 is not a valid date.`);
+    });
+
+    it('throws an error if the default value is an empty string', () => {
+      expect(
+        PathReporter.report(
+          DateCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: '',
+          })
+        )[0]
+      ).toContain(' is not a valid date.');
     });
   });
 
