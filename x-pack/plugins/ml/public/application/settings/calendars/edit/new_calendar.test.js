@@ -122,7 +122,7 @@ describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar />
+        <NewCalendar isDst={false} />
       </IntlProvider>
     );
 
@@ -132,7 +132,7 @@ describe('NewCalendar', () => {
   test('Import modal button is disabled', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar />
+        <NewCalendar isDst={false} />
       </IntlProvider>
     );
 
@@ -144,7 +144,7 @@ describe('NewCalendar', () => {
   test('New event modal button is disabled', async () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <NewCalendar />
+        <NewCalendar isDst={false} />
       </IntlProvider>
     );
 
@@ -156,7 +156,7 @@ describe('NewCalendar', () => {
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
     const { getByTestId, queryByTestId, getByText } = render(
       <IntlProvider locale="en">
-        <NewCalendar />
+        <NewCalendar isDst={false} />
       </IntlProvider>
     );
 
