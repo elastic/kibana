@@ -29,17 +29,17 @@ import {
 
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import { EntityType } from '../../../common/entities';
+import type { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
-import { APIReturnType } from '../../api';
+import type { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { parseServiceParams } from '../../utils/parse_service_params';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
-import { EntityIcon } from '../entity_icon';
+import type { EntityIcon } from '../entity_icon';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 
