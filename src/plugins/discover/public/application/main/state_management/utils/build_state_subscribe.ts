@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isEqual } from 'lodash';
@@ -25,6 +26,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
+import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -160,6 +162,11 @@ export const buildStateSubscribe =
         '[buildStateSubscribe] state changes triggers data fetching',
         JSON.stringify(logData, null, 2)
       );
+
+      // Set documents loading to true immediately on state changes since there's a delay
+      // on the fetch and we don't want to see state changes reflected in the data grid
+      // until the fetch is complete (it also helps to minimize data grid re-renders)
+      sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
 
       dataState.fetch();
     }

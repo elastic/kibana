@@ -51,7 +51,7 @@ export const ProcessTreeAlertsFilter = ({
   };
 
   const onSelectedProcessEventAlertCategory = useCallback(
-    (event) => {
+    (event: any) => {
       const [_, selectedAlertEvent] = event.target.textContent.split(' ');
       setSelectedProcessEventAlertCategory(selectedAlertEvent);
       onAlertEventCategorySelected(selectedAlertEvent);
@@ -127,7 +127,7 @@ export const ProcessTreeAlertsFilter = ({
                 defaultMessage="{count, plural, one {Showing <bold>#</bold> alert} other {Showing <bold>#</bold> alerts}}"
                 values={{
                   count: totalAlertsCount,
-                  bold: (str: string) => <strong>{str}</strong>,
+                  bold: (str) => <strong>{str}</strong>,
                 }}
               />
             )}

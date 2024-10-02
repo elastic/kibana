@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
@@ -383,7 +384,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     );
   }
 
-  const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
+  const [initialUrlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
     queryParamsDeserializer: urlStateDeserializer,
     queryParamsSerializer: urlStateSerializer,
   });
@@ -494,7 +495,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     (query: Query) => {
       if (urlStateEnabled) {
         setUrlState({ s: query.text });
-        return;
       }
 
       dispatch({
@@ -848,12 +848,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.page || !urlStateEnabled) {
-        dispatch({
-          type: 'onTableChange',
-          data,
-        });
-      }
+      dispatch({
+        type: 'onTableChange',
+        data,
+      });
     },
     [setUrlState, urlStateEnabled]
   );
@@ -1023,6 +1021,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
+  // set the initial state from the URL
   useEffect(() => {
     if (!urlStateEnabled) {
       return;
@@ -1074,10 +1073,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
-    updateQueryFromURL(urlState.s);
-    updateSortFromURL(urlState.sort);
-    updateFilterFromURL(urlState.filter);
-  }, [urlState, buildQueryFromText, urlStateEnabled]);
+    updateQueryFromURL(initialUrlState.s);
+    updateSortFromURL(initialUrlState.sort);
+    updateFilterFromURL(initialUrlState.filter);
+  }, [initialUrlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;

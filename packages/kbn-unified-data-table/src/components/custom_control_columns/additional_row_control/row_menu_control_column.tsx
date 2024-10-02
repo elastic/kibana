@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
@@ -18,9 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { DataTableRowControl, Size } from '../../data_table_row_control';
-import type { RowControlColumn, RowControlProps } from '../../../types';
+import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -33,7 +32,7 @@ export const RowMenuControlCell = ({
 }: EuiDataGridCellValueElementProps & {
   rowControlColumns: RowControlColumn[];
 }) => {
-  const rowProps = useControlColumn(props);
+  const { record, rowIndex } = useControlColumn(props);
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
 
   const buttonLabel = i18n.translate('unifiedDataTable.grid.additionalRowActions', {
@@ -50,7 +49,9 @@ export const RowMenuControlCell = ({
             icon={iconType}
             color={color}
             onClick={() => {
-              onClick?.(rowProps);
+              if (record) {
+                onClick?.({ record, rowIndex });
+              }
               setIsMoreActionsPopoverOpen(false);
             }}
           >
@@ -58,7 +59,7 @@ export const RowMenuControlCell = ({
           </EuiContextMenuItem>
         );
       },
-    [rowProps, setIsMoreActionsPopoverOpen]
+    [record, rowIndex]
   );
 
   const popoverMenuItems = useMemo(
@@ -67,36 +68,30 @@ export const RowMenuControlCell = ({
         const Control = getControlComponent(rowControlColumn.id);
         return (
           <Fragment key={rowControlColumn.id}>
-            {rowControlColumn.renderControl(Control, rowProps)}
+            {record ? rowControlColumn.renderControl(Control, { record, rowIndex }) : null}
           </Fragment>
         );
       }),
-    [rowControlColumns, rowProps, getControlComponent]
+    [rowControlColumns, getControlComponent, record, rowIndex]
   );
 
   return (
     <EuiPopover
       id={`rowMenuActionsPopover_${props.rowIndex}`}
+      className="unifiedDataTable__rowControl"
       button={
-        <DataTableRowControl size={Size.normal}>
-          <EuiToolTip content={buttonLabel} delay="long">
-            <EuiButtonIcon
-              data-test-subj={`unifiedDataTable_${props.columnId}`}
-              iconSize="s"
-              iconType="boxesVertical"
-              color="text"
-              aria-label={buttonLabel}
-              css={css`
-                .euiDataGridRowCell__content--defaultHeight & {
-                  margin-top: 2px; // to align with other controls
-                }
-              `}
-              onClick={() => {
-                setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
-              }}
-            />
-          </EuiToolTip>
-        </DataTableRowControl>
+        <EuiToolTip content={buttonLabel} delay="long">
+          <EuiButtonIcon
+            data-test-subj={`unifiedDataTable_${props.columnId}`}
+            iconSize="s"
+            iconType="boxesVertical"
+            color="text"
+            aria-label={buttonLabel}
+            onClick={() => {
+              setIsMoreActionsPopoverOpen(!isMoreActionsPopoverOpen);
+            }}
+          />
+        </EuiToolTip>
       }
       isOpen={isMoreActionsPopoverOpen}
       closePopover={() => setIsMoreActionsPopoverOpen(false)}

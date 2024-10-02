@@ -13,7 +13,7 @@ import { BodyRows } from './body_rows';
 
 const Row = <Item extends object>({ item, itemIndex }: { item: Item; itemIndex: number }) => (
   <div>
-    {item} {itemIndex}
+    {item as React.ReactNode} {itemIndex}
   </div>
 );
 

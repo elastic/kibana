@@ -17,7 +17,7 @@ const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 export const Persona = memo<EuiAvatarProps>(
   ({ name, className, 'data-test-subj': dataTestSubj, title, ...otherAvatarProps }) => {
     const getTestId = useCallback(
-      (suffix) => {
+      (suffix: any) => {
         if (dataTestSubj) {
           return `${dataTestSubj}-${suffix}`;
         }

@@ -34,7 +34,7 @@ import * as i18n from './translations';
 /**
  * List of allowed action type IDs for the integrations assistant.
  */
-const AllowedActionTypeIds = ['.bedrock'];
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
 interface ConnectorStepProps {
   connector: AIConnector | undefined;

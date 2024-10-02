@@ -31,6 +31,15 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest
+      .fn()
+      .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
+  };
+});
+
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
@@ -486,7 +495,14 @@ describe('edit package policy page', () => {
       },
     });
     (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
-      data: { item: { id: 'agentless', name: 'Agentless policy', namespace: 'default' } },
+      data: {
+        item: {
+          id: 'agentless',
+          name: 'Agentless policy',
+          namespace: 'default',
+          supports_agentless: true,
+        },
+      },
     });
 
     render();
@@ -505,6 +521,20 @@ describe('edit package policy page', () => {
     expect(sendUpdatePackagePolicy).toHaveBeenCalled();
   });
 
+  it('should hide the multiselect agent policies when agent policy is agentless', async () => {
+    (useGetAgentPolicies as MockFn).mockReturnValue({
+      data: {
+        items: [{ id: 'agent-policy-1', name: 'Agent policy 1', supports_agentless: true }],
+      },
+      isLoading: false,
+    });
+
+    await act(async () => {
+      render();
+    });
+    expect(renderResult.queryByTestId('agentPolicyMultiSelect')).not.toBeInTheDocument();
+  });
+
   describe('modify agent policies', () => {
     beforeEach(() => {
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
@@ -515,7 +545,7 @@ describe('edit package policy page', () => {
       jest.clearAllMocks();
     });
 
-    it('should create agent policy with sys monitoring when new hosts is selected', async () => {
+    it('should create agent policy with sys monitoring when new agent policy button is clicked', async () => {
       await act(async () => {
         render();
       });
@@ -528,7 +558,7 @@ describe('edit package policy page', () => {
       });
 
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('newHostsTab'));
+        fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
       });
 
       await act(async () => {
@@ -555,6 +585,7 @@ describe('edit package policy page', () => {
           policy_ids: ['agent-policy-1', 'agent-policy-2'],
         })
       );
+      expect(sendGetAgentStatus).toHaveBeenCalledTimes(1);
     });
 
     it('should not remove managed policy when policies are modified', async () => {

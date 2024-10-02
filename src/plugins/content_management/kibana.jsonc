@@ -6,6 +6,9 @@
   "plugin": {
     "id": "contentManagement",
     "server": true,
-    "browser": true
+    "browser": true,
+    "optionalPlugins": [
+      "usageCollection"
+    ]
   }
 }

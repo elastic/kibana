@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -11,6 +12,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -232,6 +234,12 @@ export const DiscoverTopNav = ({
     uiSettings,
   ]);
 
+  const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
+    if (isOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlDocs);
+    }
+  }, []);
+
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   const SearchBar = useMemo(
@@ -277,6 +285,7 @@ export const DiscoverTopNav = ({
             <searchBarCustomization.PrependFilterBar />
           ) : undefined
         }
+        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

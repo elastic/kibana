@@ -1,22 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
 
 import { NotificationsSetup } from '@kbn/core/public';
 
-import {
-  EuiIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -114,15 +109,15 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <EuiLink
+      <EuiButtonIcon
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
         aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
-      >
-        <EuiIcon type="boxesVertical" />
-      </EuiLink>
+        iconType="boxesVertical"
+        iconSize="s"
+      />
     );
 
     const items = [

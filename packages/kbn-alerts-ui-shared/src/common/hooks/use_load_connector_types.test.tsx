@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,11 +13,11 @@ import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { useLoadActionTypes } from './use_load_connector_types';
+import { useLoadConnectorTypes } from './use_load_connector_types';
 
 const queryClient = new QueryClient();
 
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -45,7 +46,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call API endpoint with the correct parameters', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: true,
         }),
@@ -73,7 +74,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call the correct endpoint if system actions is true', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: true,
         }),
@@ -90,7 +91,7 @@ describe('useLoadConnectorTypes', () => {
   test('should call the correct endpoint if system actions is false', async () => {
     const { result } = renderHook(
       () =>
-        useLoadActionTypes({
+        useLoadConnectorTypes({
           http,
           includeSystemActions: false,
         }),

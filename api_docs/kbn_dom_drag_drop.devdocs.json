@@ -31,7 +31,7 @@
         "signature": [
           "({ value, children }: ",
           "ProviderProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
@@ -68,7 +68,7 @@
           "\nDraggable component"
         ],
         "signature": [
-          "({ reorderableGroup, ...props }: DraggableProps) => JSX.Element"
+          "({ reorderableGroup, ...props }: DraggableProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
         "deprecated": false,
@@ -105,7 +105,7 @@
           "\nThis prevents the in-place droppable styles (under children) and allows to rather show an overlay with droppable styles (on top of children)"
         ],
         "signature": [
-          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/dom-drag-drop",
             "scope": "common",
@@ -113,7 +113,7 @@
             "section": "def-common.DropOverlayWrapperProps",
             "text": "DropOverlayWrapperProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
         "deprecated": false,
@@ -127,7 +127,7 @@
             "label": "{\n  isVisible,\n  children,\n  overlayProps,\n  className,\n  ...otherProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/dom-drag-drop",
                 "scope": "common",
@@ -135,7 +135,7 @@
                 "section": "def-common.DropOverlayWrapperProps",
                 "text": "DropOverlayWrapperProps"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,
@@ -159,8 +159,14 @@
         ],
         "signature": [
           "(props: ",
-          "DroppableProps",
-          ") => JSX.Element"
+          {
+            "pluginId": "@kbn/dom-drag-drop",
+            "scope": "common",
+            "docId": "kibKbnDomDragDropPluginApi",
+            "section": "def-common.DroppableProps",
+            "text": "DroppableProps"
+          },
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
         "deprecated": false,
@@ -174,7 +180,13 @@
             "label": "props",
             "description": [],
             "signature": [
-              "DroppableProps"
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "common",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-common.DroppableProps",
+                "text": "DroppableProps"
+              }
             ],
             "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
             "deprecated": false,
@@ -193,7 +205,7 @@
         "label": "ReorderProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          "({\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
         "deprecated": false,
@@ -218,7 +230,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "deprecated": false,
@@ -276,7 +288,7 @@
             "section": "def-common.DragContextState",
             "text": "DragContextState"
           },
-          "> | undefined; }) => JSX.Element"
+          "> | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
@@ -301,7 +313,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
                 "deprecated": false,
@@ -525,6 +537,322 @@
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-common.DroppableProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DroppableProps",
+        "description": [
+          "\nThe base props to the Droppable component."
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [
+              "\nThe CSS class(es) for the root element."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.onDrop",
+            "type": "Function",
+            "tags": [],
+            "label": "onDrop",
+            "description": [
+              "\nThe event handler that fires when an item\nis dropped onto this Droppable component."
+            ],
+            "signature": [
+              "DropHandler",
+              " | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nThe value associated with this item."
+            ],
+            "signature": [
+              "Record<string, unknown> & { id: string; humanData: ",
+              "HumanData",
+              "; }"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nThe React element which will be passed the draggable handlers"
+            ],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "\nDisable any drag & drop behaviour"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.getAdditionalClassesOnEnter",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalClassesOnEnter",
+            "description": [
+              "\nAdditional class names to apply when another element is over the drop target"
+            ],
+            "signature": [
+              "((dropType?: ",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "common",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-common.DropType",
+                "text": "DropType"
+              },
+              " | undefined) => string | undefined) | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-common.DroppableProps.getAdditionalClassesOnEnter.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dom-drag-drop",
+                    "scope": "common",
+                    "docId": "kibKbnDomDragDropPluginApi",
+                    "section": "def-common.DropType",
+                    "text": "DropType"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.getAdditionalClassesOnDroppable",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalClassesOnDroppable",
+            "description": [
+              "\nAdditional class names to apply when another element is droppable for a currently dragged item"
+            ],
+            "signature": [
+              "((dropType?: ",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "common",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-common.DropType",
+                "text": "DropType"
+              },
+              " | undefined) => string | undefined) | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-common.DroppableProps.getAdditionalClassesOnDroppable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dom-drag-drop",
+                    "scope": "common",
+                    "docId": "kibKbnDomDragDropPluginApi",
+                    "section": "def-common.DropType",
+                    "text": "DropType"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [
+              "\nThe optional test subject associated with this DOM element."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.reorderableGroup",
+            "type": "Array",
+            "tags": [],
+            "label": "reorderableGroup",
+            "description": [
+              "\nitems belonging to the same group that can be reordered"
+            ],
+            "signature": [
+              "{ id: string; }[] | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.dropTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "dropTypes",
+            "description": [
+              "\nIndicates the type of drop targets - when undefined, the currently dragged item\ncannot be dropped onto this component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "common",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-common.DropType",
+                "text": "DropType"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.order",
+            "type": "Array",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "\nOrder for keyboard dragging. This takes an array of numbers which will be used to order hierarchically"
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-common.DroppableProps.getCustomDropTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomDropTarget",
+            "description": [
+              "\nExtra drop targets by dropType"
+            ],
+            "signature": [
+              "((dropType: ",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "common",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-common.DropType",
+                "text": "DropType"
+              },
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-common.DroppableProps.getCustomDropTarget.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dom-drag-drop",
+                    "scope": "common",
+                    "docId": "kibKbnDomDragDropPluginApi",
+                    "section": "def-common.DropType",
+                    "text": "DropType"
+                  }
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

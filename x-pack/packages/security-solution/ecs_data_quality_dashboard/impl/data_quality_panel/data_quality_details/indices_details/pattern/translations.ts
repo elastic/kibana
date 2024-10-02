@@ -22,3 +22,24 @@ export const LOADING_STATS = i18n.translate(
     defaultMessage: 'Loading stats',
   }
 );
+
+export const PASSED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.passedTooltip',
+  {
+    defaultMessage: 'Passed',
+  }
+);
+
+export const FAILED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.failedTooltip',
+  {
+    defaultMessage: 'Failed',
+  }
+);
+
+export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.thisIndexHasNotBeenCheckedTooltip',
+  {
+    defaultMessage: 'This index has not been checked',
+  }
+);

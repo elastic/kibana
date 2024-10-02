@@ -35,11 +35,7 @@ exports[`it renders without crashing 1`] = `
         >
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
                 <Memo(MemoizedFormattedMessage)
@@ -47,7 +43,6 @@ exports[`it renders without crashing 1`] = `
                   id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
                 />
               }
-              labelType="label"
             >
               <EuiComboBox
                 async={false}
@@ -69,11 +64,7 @@ exports[`it renders without crashing 1`] = `
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              describedByIds={Array []}
-              display="row"
               fullWidth={true}
-              hasChildLabel={true}
-              hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
                 <Memo(MemoizedFormattedMessage)
@@ -81,7 +72,6 @@ exports[`it renders without crashing 1`] = `
                   id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
                 />
               }
-              labelType="label"
             >
               <EuiComboBox
                 async={false}

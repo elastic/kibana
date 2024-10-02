@@ -13,9 +13,9 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 import { http, HttpResponse, JsonBodyType } from 'msw';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
-import { CspClientPluginStartDeps } from '../../types';
 import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
 
 /**

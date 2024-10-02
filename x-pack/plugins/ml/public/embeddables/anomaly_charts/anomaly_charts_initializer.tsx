@@ -29,7 +29,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { getDefaultExplorerChartsPanelTitle } from './utils';
 import { useMlLink } from '../../application/contexts/kibana';
 import { getJobSelectionErrors } from '../utils';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { MlApi } from '../../application/services/ml_api_service';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
@@ -42,7 +42,7 @@ export interface AnomalyChartsInitializerProps {
     maxSeriesToPlot?: number;
   }) => void;
   onCancel: () => void;
-  adJobsApiService: MlApiServices['jobs'];
+  adJobsApiService: MlApi['jobs'];
 }
 
 export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({

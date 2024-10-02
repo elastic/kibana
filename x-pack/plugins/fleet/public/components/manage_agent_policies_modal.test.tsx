@@ -64,7 +64,8 @@ jest.mock('../hooks', () => ({
   }),
 }));
 
-describe('ManageAgentPoliciesModal', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/189004
+describe.skip('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;
   const mockOnClose = jest.fn();
   const mockPolicies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
@@ -151,16 +152,24 @@ describe('ManageAgentPoliciesModal', () => {
     });
   });
 
-  it('should display callout and disable confirm if policy is removed', async () => {
+  it('should display callout and allow to submit if all policies are removed', async () => {
     const results = render();
 
     await act(async () => {
       results.getByTestId('comboBoxClearButton').click();
     });
-    expect(results.getByText('Confirm').getAttribute('disabled')).toBeDefined();
+    expect(results.getByText('Confirm').getAttribute('disabled')).toBeNull();
     expect(results.getByTestId('confirmRemovePoliciesCallout')).toBeInTheDocument();
     expect(results.getByTestId('confirmRemovePoliciesCallout').textContent).toContain(
       'Test policy will no longer use this integration.'
     );
+
+    await act(async () => {
+      results.getByText('Confirm').click();
+    });
+    expect(usePackagePolicyWithRelatedData('', {}).savePackagePolicy).toHaveBeenCalledWith({
+      policy_id: undefined,
+      policy_ids: [],
+    });
   });
 });

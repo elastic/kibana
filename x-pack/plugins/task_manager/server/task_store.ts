@@ -26,6 +26,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 
+import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -36,6 +37,8 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  PartialConcreteTaskInstance,
+  PartialSerializedConcreteTaskInstance,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -43,6 +46,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
+import { ErrorOutput } from './lib/bulk_operation_buffer';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -87,13 +91,11 @@ export interface FetchResult {
 
 export interface BulkUpdateOpts {
   validate: boolean;
-  excludeLargeFields?: boolean;
 }
 
-export type BulkUpdateResult = Result<
-  ConcreteTaskInstance,
-  { type: string; id: string; error: SavedObjectError }
->;
+export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
+
+export type PartialBulkUpdateResult = Result<PartialConcreteTaskInstance, ErrorOutput>;
 
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
@@ -114,7 +116,6 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
   public readonly taskValidator: TaskValidator;
-  private readonly logger: Logger;
 
   private esClient: ElasticsearchClient;
   private esClientWithoutRetries: ElasticsearchClient;
@@ -141,7 +142,6 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
-    this.logger = opts.logger;
     this.taskValidator = new TaskValidator({
       logger: opts.logger,
       definitions: opts.definitions,
@@ -302,23 +302,13 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, excludeLargeFields = false }: BulkUpdateOpts
+    { validate }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
-    // if we're excluding large fields (state and params), we cannot apply validation so log a warning
-    if (validate && excludeLargeFields) {
-      validate = false;
-      this.logger.warn(`Skipping validation for bulk update because excludeLargeFields=true.`);
-    }
-
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
         validate,
       });
-      const taskAttributes = taskInstanceToAttributes(taskInstance, doc.id);
-      attrsById.set(
-        doc.id,
-        excludeLargeFields ? omit(taskAttributes, 'state', 'params') : taskAttributes
-      );
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
       return attrsById;
     }, new Map());
 
@@ -361,6 +351,67 @@ export class TaskStore {
         validate,
       });
       return asOk(result);
+    });
+  }
+
+  public async bulkPartialUpdate(
+    docs: PartialConcreteTaskInstance[]
+  ): Promise<PartialBulkUpdateResult[]> {
+    if (docs.length === 0) {
+      return [];
+    }
+
+    const bulkBody = [];
+    for (const doc of docs) {
+      bulkBody.push({
+        update: {
+          _id: `task:${doc.id}`,
+          ...(doc.version ? decodeRequestVersion(doc.version) : {}),
+        },
+      });
+      bulkBody.push({
+        doc: {
+          task: partialTaskInstanceToAttributes(doc),
+        },
+      });
+    }
+
+    let result: estypes.BulkResponse;
+    try {
+      result = await this.esClient.bulk({ index: this.index, refresh: false, body: bulkBody });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return result.items.map((item) => {
+      if (!item.update || !item.update._id) {
+        return asErr({
+          type: 'task',
+          id: 'unknown',
+          error: { type: 'malformed response' },
+        });
+      }
+
+      const docId = item.update._id.startsWith('task:')
+        ? item.update._id.slice(5)
+        : item.update._id;
+
+      if (item.update?.error) {
+        return asErr({
+          type: 'task',
+          id: docId,
+          status: item.update.status,
+          error: item.update.error,
+        });
+      }
+
+      const doc = docs.find((d) => d.id === docId);
+
+      return asOk({
+        ...doc,
+        id: docId,
+      });
     });
   }
 
@@ -717,6 +768,20 @@ export function taskInstanceToAttributes(
     status: (doc as ConcreteTaskInstance).status || 'idle',
     partition: doc.partition || murmurhash.v3(id) % MAX_PARTITIONS,
   } as SerializedConcreteTaskInstance;
+}
+
+export function partialTaskInstanceToAttributes(
+  doc: PartialConcreteTaskInstance
+): PartialSerializedConcreteTaskInstance {
+  return {
+    ...omit(doc, 'id', 'version'),
+    ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
+    ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
+    ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
+    ...(doc.startedAt ? { startedAt: doc.startedAt.toISOString() } : {}),
+    ...(doc.retryAt ? { retryAt: doc.retryAt.toISOString() } : {}),
+    ...(doc.runAt ? { runAt: doc.runAt.toISOString() } : {}),
+  } as PartialSerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(

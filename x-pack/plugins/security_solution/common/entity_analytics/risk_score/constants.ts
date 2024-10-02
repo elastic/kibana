@@ -9,6 +9,7 @@
  * Internal Risk Score routes
  */
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
+export const PUBLIC_RISK_SCORE_URL = '/api/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
 export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>

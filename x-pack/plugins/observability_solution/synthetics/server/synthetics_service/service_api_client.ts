@@ -24,7 +24,7 @@ import {
   ServiceLocation,
   ServiceLocationErrors,
 } from '../../common/runtime_types';
-import { ServiceConfig } from '../../common/config';
+import { ServiceConfig } from '../config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 

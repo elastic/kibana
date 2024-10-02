@@ -363,7 +363,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in serverless env', async () => {
+    it('should create a policy  agentless feature flag is set and in serverless env', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: true } as any);
@@ -392,7 +392,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',
@@ -401,7 +401,7 @@ describe('Agent policy', () => {
       });
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
+    it('should create a policy if agentless feature flag is set and in cloud env', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
@@ -428,7 +428,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',
@@ -952,8 +952,11 @@ describe('Agent policy', () => {
           });
         }
       });
-
-      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      await agentPolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -993,6 +996,10 @@ describe('Agent policy', () => {
       mockedDownloadSourceService.getDefaultDownloadSourceId.mockResolvedValue(
         'default-download-source-id'
       );
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -1010,11 +1017,7 @@ describe('Agent policy', () => {
         ],
       } as any);
 
-      await agentPolicyService.removeDefaultSourceFromAll(
-        soClient,
-        esClient,
-        'default-download-source-id'
-      );
+      await agentPolicyService.removeDefaultSourceFromAll(esClient, 'default-download-source-id');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(

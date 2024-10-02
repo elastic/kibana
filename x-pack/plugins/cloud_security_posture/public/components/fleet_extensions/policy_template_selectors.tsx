@@ -10,12 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  VULN_MGMT_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
-} from '../../../common/constants';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';

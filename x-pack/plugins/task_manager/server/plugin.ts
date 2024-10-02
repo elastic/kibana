@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -106,6 +106,7 @@ export class TaskManagerPlugin
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
+  private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -169,6 +170,7 @@ export class TaskManagerPlugin
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
+      numOfKibanaInstances$: this.numOfKibanaInstances$,
     });
     const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
@@ -260,6 +262,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       currentNode: this.taskManagerId!,
       config: this.config.discovery,
+      onNodesCounted: (numOfNodes: number) => this.numOfKibanaInstances$.next(numOfNodes),
     });
 
     if (this.shouldRunBackgroundTasks) {
@@ -317,6 +320,7 @@ export class TaskManagerPlugin
       });
 
       const taskPartitioner = new TaskPartitioner({
+        logger: this.logger,
         podName: this.taskManagerId!,
         kibanaDiscoveryService: this.kibanaDiscoveryService,
         kibanasPerPartition: this.config.kibanas_per_partition,
@@ -403,6 +407,7 @@ export class TaskManagerPlugin
 
   public async stop() {
     if (this.kibanaDiscoveryService?.isStarted()) {
+      this.kibanaDiscoveryService.stop();
       try {
         await this.kibanaDiscoveryService.deleteCurrentNode();
       } catch (e) {

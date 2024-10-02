@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../../../constants';
-import { getSummaryTableColumns } from './helpers';
+import { getSummaryTableColumns } from './utils/columns';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../../mock/stats/mock_stats';
@@ -18,9 +18,9 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../mock/test_providers/test_providers';
-import { getSummaryTableItems } from '../helpers';
 import { SortConfig } from '../../../../types';
 import { Props, SummaryTable } from '.';
+import { getSummaryTableItems } from '../../../../utils/get_summary_table_items';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -39,7 +39,7 @@ const indexNames = [
   '.ds-packetbeat-8.6.1-2023.02.04-000001',
 ];
 
-export const defaultSort: SortConfig = {
+const defaultSort: SortConfig = {
   sort: {
     direction: 'desc',
     field: 'docsCount',

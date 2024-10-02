@@ -9,8 +9,9 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from './translations';
 import type { ErrorSummary } from '../../../../../types';
+import { INDEX } from '../../../../../translations';
+import { ERROR, PATTERN } from '../../../translations';
 
 export const EMPTY_PLACEHOLDER = '--';
 
@@ -20,14 +21,14 @@ export const ERRORS_CONTAINER_MIN_WIDTH = 450; // px
 export const getErrorsViewerTableColumns = (): Array<EuiTableFieldDataColumnType<ErrorSummary>> => [
   {
     field: 'pattern',
-    name: i18n.PATTERN,
+    name: PATTERN,
     sortable: true,
     truncateText: false,
     width: '25%',
   },
   {
     field: 'indexName',
-    name: i18n.INDEX,
+    name: INDEX,
     render: (indexName: string | null) =>
       indexName != null && indexName !== '' ? (
         <span data-test-subj="indexName">{indexName}</span>
@@ -40,7 +41,7 @@ export const getErrorsViewerTableColumns = (): Array<EuiTableFieldDataColumnType
   },
   {
     field: 'error',
-    name: i18n.ERROR,
+    name: ERROR,
     render: (errorText) => <EuiCode data-test-subj="error">{errorText}</EuiCode>,
     sortable: false,
     truncateText: false,

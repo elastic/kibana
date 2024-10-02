@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.wrappedStateRt",
+        "id": "def-server.wrappedStateRt",
         "type": "Function",
         "tags": [],
         "label": "wrappedStateRt",
@@ -89,7 +81,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.ActionsCompletion",
+        "id": "def-server.ActionsCompletion",
         "type": "Enum",
         "tags": [],
         "label": "ActionsCompletion",
@@ -103,7 +95,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.AlertInstanceContext",
+        "id": "def-server.AlertInstanceContext",
         "type": "Type",
         "tags": [],
         "label": "AlertInstanceContext",
@@ -118,7 +110,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestAlertInstanceMetaSchema",
+        "id": "def-server.LatestAlertInstanceMetaSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestAlertInstanceMetaSchema",
@@ -133,7 +125,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestAlertInstanceStateSchema",
+        "id": "def-server.LatestAlertInstanceStateSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestAlertInstanceStateSchema",
@@ -148,7 +140,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestLastScheduledActionsSchema",
+        "id": "def-server.LatestLastScheduledActionsSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestLastScheduledActionsSchema",
@@ -163,7 +155,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestRawAlertInstanceSchema",
+        "id": "def-server.LatestRawAlertInstanceSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestRawAlertInstanceSchema",
@@ -178,7 +170,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestTaskStateSchema",
+        "id": "def-server.LatestTaskStateSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestTaskStateSchema",
@@ -193,7 +185,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.LatestThrottledActionSchema",
+        "id": "def-server.LatestThrottledActionSchema",
         "type": "Type",
         "tags": [],
         "label": "LatestThrottledActionSchema",
@@ -208,7 +200,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.MutableLatestAlertInstanceMetaSchema",
+        "id": "def-server.MutableLatestAlertInstanceMetaSchema",
         "type": "Type",
         "tags": [],
         "label": "MutableLatestAlertInstanceMetaSchema",
@@ -223,7 +215,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.MutableLatestTaskStateSchema",
+        "id": "def-server.MutableLatestTaskStateSchema",
         "type": "Type",
         "tags": [],
         "label": "MutableLatestTaskStateSchema",
@@ -238,7 +230,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.RuleTaskParams",
+        "id": "def-server.RuleTaskParams",
         "type": "Type",
         "tags": [],
         "label": "RuleTaskParams",
@@ -253,7 +245,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.TrackedLifecycleAlertState",
+        "id": "def-server.TrackedLifecycleAlertState",
         "type": "Type",
         "tags": [],
         "label": "TrackedLifecycleAlertState",
@@ -268,7 +260,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.WrappedLifecycleRuleState",
+        "id": "def-server.WrappedLifecycleRuleState",
         "type": "Type",
         "tags": [],
         "label": "WrappedLifecycleRuleState",
@@ -287,7 +279,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.emptyState",
+        "id": "def-server.emptyState",
         "type": "Object",
         "tags": [],
         "label": "emptyState",
@@ -298,7 +290,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.emptyState.alertTypeState",
+            "id": "def-server.emptyState.alertTypeState",
             "type": "Object",
             "tags": [],
             "label": "alertTypeState",
@@ -310,7 +302,7 @@
           },
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.emptyState.alertInstances",
+            "id": "def-server.emptyState.alertInstances",
             "type": "Object",
             "tags": [],
             "label": "alertInstances",
@@ -322,7 +314,7 @@
           },
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.emptyState.alertRecoveredInstances",
+            "id": "def-server.emptyState.alertRecoveredInstances",
             "type": "Object",
             "tags": [],
             "label": "alertRecoveredInstances",
@@ -334,7 +326,7 @@
           },
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.emptyState.previousStartedAt",
+            "id": "def-server.emptyState.previousStartedAt",
             "type": "Uncategorized",
             "tags": [],
             "label": "previousStartedAt",
@@ -348,7 +340,7 @@
           },
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.emptyState.summaryActions",
+            "id": "def-server.emptyState.summaryActions",
             "type": "Object",
             "tags": [],
             "label": "summaryActions",
@@ -363,7 +355,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.ruleParamsSchema",
+        "id": "def-server.ruleParamsSchema",
         "type": "Object",
         "tags": [],
         "label": "ruleParamsSchema",
@@ -387,7 +379,7 @@
       },
       {
         "parentPluginId": "@kbn/alerting-state-types",
-        "id": "def-common.stateSchemaByVersion",
+        "id": "def-server.stateSchemaByVersion",
         "type": "Object",
         "tags": [],
         "label": "stateSchemaByVersion",
@@ -398,7 +390,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/alerting-state-types",
-            "id": "def-common.stateSchemaByVersion.1",
+            "id": "def-server.stateSchemaByVersion.1",
             "type": "Object",
             "tags": [],
             "label": "1",
@@ -462,5 +454,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

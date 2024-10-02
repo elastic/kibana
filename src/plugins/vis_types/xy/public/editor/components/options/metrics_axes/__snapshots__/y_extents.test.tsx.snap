@@ -2,14 +2,10 @@
 
 exports[`YExtents component should init with the default set of props 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
   error={Array []}
   fullWidth={true}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   isInvalid={false}
-  labelType="label"
 >
   <EuiFlexGroup
     gutterSize="s"

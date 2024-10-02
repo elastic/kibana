@@ -212,6 +212,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             name: ecsString(),
             id: ecsString(),
+            type_id: ecsString(),
             execution: schema.maybe(
               schema.object({
                 source: ecsString(),
@@ -225,6 +226,11 @@ export const EventSchema = schema.maybe(
                         total_tokens: ecsStringOrNumber(),
                       })
                     ),
+                  })
+                ),
+                usage: schema.maybe(
+                  schema.object({
+                    request_body_bytes: ecsStringOrNumber(),
                   })
                 ),
               })

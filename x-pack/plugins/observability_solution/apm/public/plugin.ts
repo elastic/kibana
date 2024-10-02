@@ -19,7 +19,10 @@ import {
   PluginInitializerContext,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
+import {
+  EntityManagerPublicPluginSetup,
+  EntityManagerPublicPluginStart,
+} from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -69,6 +72,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -134,6 +138,7 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -143,7 +148,7 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
-  entityManager: EntityManagerPublicPluginSetup;
+  entityManager: EntityManagerPublicPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -151,7 +156,7 @@ const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
 });
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service Inventory',
 });
 
 const serviceGroupsTitle = i18n.translate('xpack.apm.navigation.serviceGroupsTitle', {
@@ -288,16 +293,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent/rum_script')
     );
 

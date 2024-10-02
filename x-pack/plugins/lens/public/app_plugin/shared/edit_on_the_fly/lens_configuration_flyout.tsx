@@ -26,7 +26,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -48,7 +48,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 
 export function LensEditConfigurationFlyout({
@@ -288,7 +288,7 @@ export function LensEditConfigurationFlyout({
       prevVisState
     );
     if (telemetryEvents && telemetryEvents.length) {
-      trackUiCounterEvents(telemetryEvents);
+      trackSaveUiCounterEvents(telemetryEvents);
     }
 
     onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
@@ -321,7 +321,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q, abortController) => {
+    async (q: AggregateQuery, abortController?: AbortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -477,7 +477,7 @@ export function LensEditConfigurationFlyout({
         >
           {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-              <TextBasedLangEditor
+              <ESQLLangEditor
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, IRouter } from '@kbn/core/server';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { registerChatCompleteRoute } from './chat_complete';
@@ -12,11 +13,13 @@ import { registerConnectorsRoute } from './connectors';
 
 export const registerRoutes = ({
   router,
+  logger,
   coreSetup,
 }: {
   router: IRouter;
+  logger: Logger;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
 }) => {
-  registerChatCompleteRoute({ router, coreSetup });
+  registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerConnectorsRoute({ router, coreSetup });
 };

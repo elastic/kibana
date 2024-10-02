@@ -8,16 +8,15 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
 
 const SameFamilyBadge = styled(EuiBadge)`
   margin: ${({ theme }) => `0 ${theme.eui.euiSizeXS}`};
 `;
 
-import * as i18n from './translations';
-
 const SameFamilyComponent: React.FC = () => (
   <SameFamilyBadge data-test-subj="sameFamily" color="warning">
-    {i18n.SAME_FAMILY}
+    {SAME_FAMILY_BADGE_LABEL}
   </SameFamilyBadge>
 );
 

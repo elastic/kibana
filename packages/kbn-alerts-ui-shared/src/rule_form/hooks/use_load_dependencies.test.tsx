@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,6 +16,7 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 import { useLoadDependencies } from './use_load_dependencies';
 import { RuleTypeRegistryContract } from '../../common';
+import { ApplicationStart } from '@kbn/core-application-browser';
 
 jest.mock('../../common/hooks/use_load_ui_config', () => ({
   useLoadUiConfig: jest.fn(),
@@ -32,6 +34,18 @@ jest.mock('../../common/hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
 }));
 
+jest.mock('../../common/hooks/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn(),
+}));
+
+jest.mock('../../common/hooks/use_load_connector_types', () => ({
+  useLoadConnectorTypes: jest.fn(),
+}));
+
+jest.mock('../../common/hooks/use_load_rule_type_aad_template_fields', () => ({
+  useLoadRuleTypeAadTemplateField: jest.fn(),
+}));
+
 jest.mock('../utils/get_authorized_rule_types', () => ({
   getAvailableRuleTypes: jest.fn(),
 }));
@@ -39,6 +53,11 @@ jest.mock('../utils/get_authorized_rule_types', () => ({
 const { useLoadUiConfig } = jest.requireMock('../../common/hooks/use_load_ui_config');
 const { useHealthCheck } = jest.requireMock('../../common/hooks/use_health_check');
 const { useResolveRule } = jest.requireMock('../../common/hooks/use_resolve_rule');
+const { useLoadConnectors } = jest.requireMock('../../common/hooks/use_load_connectors');
+const { useLoadConnectorTypes } = jest.requireMock('../../common/hooks/use_load_connector_types');
+const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
+  '../../common/hooks/use_load_rule_type_aad_template_fields'
+);
 const { useLoadRuleTypesQuery } = jest.requireMock('../../common/hooks/use_load_rule_types_query');
 const { getAvailableRuleTypes } = jest.requireMock('../utils/get_authorized_rule_types');
 
@@ -140,9 +159,58 @@ getAvailableRuleTypes.mockReturnValue([
   },
 ]);
 
+const mockConnector = {
+  id: 'test-connector',
+  name: 'Test',
+  connector_type_id: 'test',
+  is_preconfigured: false,
+  is_deprecated: false,
+  is_missing_secrets: false,
+  is_system_action: false,
+  referenced_by_count: 0,
+  secrets: {},
+  config: {},
+};
+
+const mockConnectorType = {
+  id: 'test',
+  name: 'Test',
+  enabled: true,
+  enabled_in_config: true,
+  enabled_in_license: true,
+  supported_feature_ids: ['alerting'],
+  minimum_license_required: 'basic',
+  is_system_action_type: false,
+};
+
+const mockAadTemplateField = {
+  name: '@timestamp',
+  deprecated: false,
+  useWithTripleBracesInTemplates: false,
+  usesPublicBaseUrl: false,
+};
+
+useLoadConnectors.mockReturnValue({
+  data: [mockConnector],
+  isLoading: false,
+  isInitialLoading: false,
+});
+
+useLoadConnectorTypes.mockReturnValue({
+  data: [mockConnectorType],
+  isLoading: false,
+  isInitialLoading: false,
+});
+
+useLoadRuleTypeAadTemplateField.mockReturnValue({
+  data: [mockAadTemplateField],
+  isLoading: false,
+  isInitialLoading: false,
+});
+
 const queryClient = new QueryClient();
 
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -168,6 +236,13 @@ describe('useLoadDependencies', () => {
           http: httpMock as unknown as HttpStart,
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }
@@ -185,6 +260,9 @@ describe('useLoadDependencies', () => {
       uiConfig: uiConfigMock,
       healthCheckError: null,
       fetchedFormData: ruleMock,
+      connectors: [mockConnector],
+      connectorTypes: [mockConnectorType],
+      aadTemplateFields: [mockAadTemplateField],
     });
   });
 
@@ -196,6 +274,13 @@ describe('useLoadDependencies', () => {
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
           filteredRuleTypes: ['test-rule-type'],
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }
@@ -221,6 +306,13 @@ describe('useLoadDependencies', () => {
           ruleTypeRegistry: ruleTypeRegistryMock,
           validConsumers: ['stackAlerts', 'logs'],
           consumer: 'logs',
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }
@@ -246,6 +338,13 @@ describe('useLoadDependencies', () => {
           toasts: toastsMock as unknown as ToastsStart,
           ruleTypeRegistry: ruleTypeRegistryMock,
           id: 'test-rule-id',
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }
@@ -276,6 +375,13 @@ describe('useLoadDependencies', () => {
           ruleTypeRegistry: ruleTypeRegistryMock,
           ruleTypeId: '.index-threshold',
           consumer: 'stackAlerts',
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }
@@ -303,6 +409,13 @@ describe('useLoadDependencies', () => {
           ruleTypeRegistry: ruleTypeRegistryMock,
           id: 'rule-id',
           consumer: 'stackAlerts',
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          } as unknown as ApplicationStart['capabilities'],
         });
       },
       { wrapper }

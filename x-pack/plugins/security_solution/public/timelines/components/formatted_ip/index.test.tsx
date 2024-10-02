@@ -13,6 +13,8 @@ import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { NetworkPanelKey } from '../../../flyout/network_details';
+import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -46,13 +48,15 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
 jest.mock('../../store');
 
 const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openFlyout: mockOpenFlyout,
-  }),
-}));
+jest.mock('@kbn/expandable-flyout');
 
 describe('FormattedIp', () => {
+  beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+    });
+  });
   const props = {
     value: '192.168.1.1',
     contextId: 'test-context-id',
@@ -87,7 +91,7 @@ describe('FormattedIp', () => {
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -102,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {
         id: NetworkPanelKey,

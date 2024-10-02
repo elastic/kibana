@@ -9,7 +9,7 @@ import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
 import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 

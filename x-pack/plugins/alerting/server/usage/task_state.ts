@@ -146,6 +146,9 @@ export const stateSchemaByVersion = {
       }),
       count_rules_snoozed: schema.number(),
       count_rules_muted: schema.number(),
+      count_mw_total: schema.number(),
+      count_mw_with_repeat_toggle_on: schema.number(),
+      count_mw_with_filter_alert_toggle_on: schema.number(),
       count_rules_with_muted_alerts: schema.number(),
       count_connector_types_by_consumers: schema.recordOf(
         schema.string(),
@@ -194,6 +197,8 @@ export const stateSchemaByVersion = {
         schema.string(),
         schema.recordOf(schema.string(), schema.number())
       ),
+      count_alerts_total: schema.number(),
+      count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
     }),
   },
 };
@@ -248,6 +253,9 @@ export const emptyState: LatestTaskStateSchema = {
   },
   count_rules_snoozed: 0,
   count_rules_muted: 0,
+  count_mw_total: 0,
+  count_mw_with_repeat_toggle_on: 0,
+  count_mw_with_filter_alert_toggle_on: 0,
   count_rules_with_muted_alerts: 0,
   count_connector_types_by_consumers: {},
   count_rules_namespaces: 0,
@@ -272,4 +280,6 @@ export const emptyState: LatestTaskStateSchema = {
   percentile_num_generated_actions_by_type_per_day: {},
   percentile_num_alerts_per_day: {},
   percentile_num_alerts_by_type_per_day: {},
+  count_alerts_total: 0,
+  count_alerts_by_rule_type: {},
 };

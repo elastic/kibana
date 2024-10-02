@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import expect from '@kbn/expect';
 import { entityLatestSchema } from '@kbn/entities-schema';
 import {
@@ -14,7 +15,12 @@ import {
 import { PartialConfig, cleanup, generate } from '@kbn/data-forge';
 import { generateLatestIndexName } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { installDefinition, uninstallDefinition, getInstalledDefinitions } from './helpers/request';
+import {
+  installDefinition,
+  uninstallDefinition,
+  updateDefinition,
+  getInstalledDefinitions,
+} from './helpers/request';
 import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -27,43 +33,98 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Entity definitions', () => {
     describe('definitions installations', () => {
       it('can install multiple definitions', async () => {
-        await installDefinition(supertest, mockDefinition);
-        await installDefinition(supertest, mockBackfillDefinition);
+        await installDefinition(supertest, { definition: mockDefinition });
+        await installDefinition(supertest, { definition: mockBackfillDefinition });
 
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(2);
         expect(
-          definitions.find(
+          definitions.some(
             (definition) =>
               definition.id === mockDefinition.id &&
               definition.state.installed === true &&
               definition.state.running === true
           )
-        );
+        ).to.eql(true);
         expect(
-          definitions.find(
+          definitions.some(
             (definition) =>
               definition.id === mockBackfillDefinition.id &&
               definition.state.installed === true &&
               definition.state.running === true
           )
-        );
+        ).to.eql(true);
 
-        await uninstallDefinition(supertest, mockDefinition.id);
-        await uninstallDefinition(supertest, mockBackfillDefinition.id);
+        await Promise.all([
+          uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true }),
+          uninstallDefinition(supertest, { id: mockBackfillDefinition.id, deleteData: true }),
+        ]);
       });
 
       it('does not start transforms when specified', async () => {
-        await installDefinition(supertest, mockDefinition, { installOnly: true });
+        await installDefinition(supertest, { definition: mockDefinition, installOnly: true });
 
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(1);
         expect(definitions[0].state.installed).to.eql(true);
         expect(definitions[0].state.running).to.eql(false);
 
-        await uninstallDefinition(supertest, mockDefinition.id);
+        await uninstallDefinition(supertest, { id: mockDefinition.id });
       });
     });
+
+    describe('definitions update', () => {
+      it('returns 404 if the definitions does not exist', async () => {
+        await updateDefinition(supertest, {
+          id: 'i-dont-exist',
+          update: { version: '1.0.0' },
+          expectedCode: 404,
+        });
+      });
+
+      it('accepts partial updates', async () => {
+        const incVersion = semver.inc(mockDefinition.version, 'major');
+        await installDefinition(supertest, { definition: mockDefinition, installOnly: true });
+        await updateDefinition(supertest, {
+          id: mockDefinition.id,
+          update: {
+            version: incVersion!,
+            history: {
+              timestampField: '@updatedTimestampField',
+            },
+          },
+        });
+
+        const {
+          definitions: [updatedDefinition],
+        } = await getInstalledDefinitions(supertest);
+        expect(updatedDefinition.version).to.eql(incVersion);
+        expect(updatedDefinition.history.timestampField).to.eql('@updatedTimestampField');
+
+        await uninstallDefinition(supertest, { id: mockDefinition.id });
+      });
+
+      it('rejects updates to managed definitions', async () => {
+        await installDefinition(supertest, {
+          definition: { ...mockDefinition, managed: true },
+          installOnly: true,
+        });
+
+        await updateDefinition(supertest, {
+          id: mockDefinition.id,
+          update: {
+            version: '1.0.0',
+            history: {
+              timestampField: '@updatedTimestampField',
+            },
+          },
+          expectedCode: 403,
+        });
+
+        await uninstallDefinition(supertest, { id: mockDefinition.id });
+      });
+    });
+
     describe('entity data', () => {
       let dataForgeConfig: PartialConfig;
       let dataForgeIndices: string[];
@@ -95,12 +156,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esDeleteAllIndices(dataForgeIndices);
-        await uninstallDefinition(supertest, mockDefinition.id, true);
+        await uninstallDefinition(supertest, { id: mockDefinition.id, deleteData: true });
         await cleanup({ client: esClient, config: dataForgeConfig, logger });
       });
 
       it('should create the proper entities in the latest index', async () => {
-        await installDefinition(supertest, mockDefinition);
+        await installDefinition(supertest, { definition: mockDefinition });
         const sample = await waitForDocumentInIndex({
           esClient,
           indexName: generateLatestIndexName(mockDefinition),
@@ -108,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
         });
+
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
       });

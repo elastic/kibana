@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   CreateInventoryViewAttributesRequestPayload,
   CreateInventoryViewResponsePayload,
   FindInventoryViewResponsePayload,
@@ -15,10 +15,11 @@ import {
   UpdateInventoryViewResponsePayload,
 } from '../../../common/http_api/latest';
 
-export type InventoryViewsServiceSetup = void;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InventoryViewsServiceSetup {}
 
 export interface InventoryViewsServiceStart {
-  client: IInventoryViewsClient;
+  getClient: () => Promise<IInventoryViewsClient>;
 }
 
 export interface InventoryViewsServiceStartDeps {

@@ -182,9 +182,9 @@
               ", \"description\"> & { description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[]; }"
@@ -304,9 +304,9 @@
           ", \"description\"> & { description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.Reference",
+            "section": "def-server.Reference",
             "text": "Reference"
           },
           "[]; }"
@@ -422,9 +422,9 @@
             "() => Promise<",
             {
               "pluginId": "@kbn/content-management-utils",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnContentManagementUtilsPluginApi",
-              "section": "def-common.SOWithMetadata",
+              "section": "def-server.SOWithMetadata",
               "text": "SOWithMetadata"
             },
             "<",

@@ -18,9 +18,10 @@ import {
 import * as i18n from '../translations';
 import { MaintenanceWindowStatus } from '../../../../common';
 
-interface TableActionsPopoverProps {
+export interface TableActionsPopoverProps {
   id: string;
   status: MaintenanceWindowStatus;
+  isLoading: boolean;
   onEdit: (id: string) => void;
   onCancel: (id: string) => void;
   onArchive: (id: string, archive: boolean) => void;
@@ -30,7 +31,7 @@ type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive';
 type ActionType = ModalType | 'edit';
 
 export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
-  ({ id, status, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
+  ({ id, status, isLoading, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();
@@ -197,6 +198,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
     const button = useMemo(
       () => (
         <EuiButtonIcon
+          isDisabled={isLoading}
           data-test-subj="table-actions-icon-button"
           iconType="boxesHorizontal"
           size="s"
@@ -204,7 +206,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           onClick={onButtonClick}
         />
       ),
-      [onButtonClick]
+      [isLoading, onButtonClick]
     );
 
     return (

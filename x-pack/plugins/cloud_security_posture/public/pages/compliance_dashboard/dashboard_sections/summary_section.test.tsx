@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { render, screen } from '@testing-library/react';
 import { expectIdsInDoc } from '../../../test/utils';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { SummarySection } from './summary_section';
 import { mockDashboardData } from '../mock';
 import { TestProvider } from '../../../test/test_provider';
-import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 
 describe('<CloudSummarySection />', () => {
   const renderCloudSummarySection = (alterMockData = {}) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react';
+import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -35,6 +35,9 @@ import { defaultColumnHeaderType } from '../../body/column_headers/default_heade
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -87,15 +90,7 @@ jest.mock(`@elastic/ebt/client`);
 
 const mockOpenFlyout = jest.fn();
 const mockCloseFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openFlyout: mockOpenFlyout,
-      closeFlyout: mockCloseFlyout,
-    }),
-    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
+jest.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -106,8 +101,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -139,7 +137,7 @@ const mockState = {
 
 mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
 
-const TestWrapper: FunctionComponent = ({ children }) => {
+const TestWrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => {
   return <TestProviders store={createMockStore(mockState)}>{children}</TestProviders>;
 };
 
@@ -162,6 +160,13 @@ let useTimelineEventsMock = jest.fn();
 describe('query tab with unified timeline', () => {
   beforeAll(() => {
     // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+
+    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+      closeFlyout: mockCloseFlyout,
+    }));
+
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
       get() {
         return true;
@@ -382,11 +387,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Move left')).toBeEnabled();
@@ -415,11 +416,7 @@ describe('query tab with unified timeline', () => {
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="message"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Remove column')).toBeVisible();
@@ -448,16 +445,12 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="@timestamp"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="@timestamp"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
         await waitFor(() => {
           expect(screen.getByTitle('Sort Old-New')).toBeVisible();
         });
-        expect(screen.getByTitle('Sort New-Old')).toBeVisible();
+        expect(screen.getByTitle('Unsort New-Old')).toBeVisible();
 
         useTimelineEventsMock.mockClear();
 
@@ -494,11 +487,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector('[data-gridcell-column-id="host.name"]')
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            '[data-gridcell-column-id="host.name"] .euiDataGridHeaderCell__icon'
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-host.name'));
 
         await waitFor(() => {
           expect(screen.getByTestId('dataGridHeaderCellActionGroup-host.name')).toBeVisible();
@@ -553,11 +542,7 @@ describe('query tab with unified timeline', () => {
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
         ).toBeInTheDocument();
 
-        fireEvent.click(
-          container.querySelector(
-            `[data-gridcell-column-id="${field.name}"] .euiDataGridHeaderCell__icon`
-          ) as HTMLElement
-        );
+        fireEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${field.name}`));
 
         await waitFor(() => {
           expect(screen.getByTestId(`dataGridHeaderCellActionGroup-${field.name}`)).toBeVisible();
@@ -1020,7 +1005,7 @@ describe('query tab with unified timeline', () => {
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
           await waitFor(() => {
-            expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
+            expect(screen.queryByTestId(OPEN_FLYOUT_BUTTON_TEST_ID)).not.toBeInTheDocument();
           });
         },
         SPECIAL_TEST_TIMEOUT

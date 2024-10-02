@@ -60,7 +60,7 @@ import type {
 import type { JobMessage } from '../../../../../../common/types/audit_message';
 import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useCurrentThemeVars, useMlApiContext } from '../../../../contexts/kibana';
+import { useCurrentThemeVars, useMlApi } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -110,6 +110,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   onClose,
   onModelSnapshotAnnotationClick,
 }) => {
+  const mlApi = useMlApi();
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -143,7 +144,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const {
     getModelSnapshots,
     results: { getDatafeedResultChartData },
-  } = useMlApiContext();
+  } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const { euiTheme } = useCurrentThemeVars();
   const handleChange = (date: moment.Moment) => setEndDate(date);
@@ -212,7 +213,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
   const getJobAndSnapshotData = useCallback(async () => {
     try {
-      const job: CombinedJobWithStats = await loadFullJob(jobId);
+      const job: CombinedJobWithStats = await loadFullJob(mlApi, jobId);
       const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
       const modelSnapshotsResp = await getModelSnapshots(jobId);
       const modelSnapshots = modelSnapshotsResp.model_snapshots ?? [];
@@ -427,7 +428,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           theme={{
                             lineSeriesStyle: {
                               point: {
-                                visible: false,
+                                visible: 'never',
                               },
                             },
                           }}
@@ -659,6 +660,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   unsetShowFunction,
   refreshJobs,
 }) => {
+  const mlApi = useMlApi();
   const [isVisible, setIsVisible] = useState(false);
   const [job, setJob] = useState<MlSummaryJob | undefined>();
   const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();
@@ -675,9 +677,11 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   const showRevertModelSnapshot = useCallback(async () => {
     // Need to load the full job with stats, as the model snapshot
     // flyout needs the timestamp of the last result.
-    const fullJob: CombinedJobWithStats = await loadFullJob(job!.id);
+    const fullJob: CombinedJobWithStats = await loadFullJob(mlApi, job!.id);
     setJobWithStats(fullJob);
     setIsRevertModelSnapshotFlyoutVisible(true);
+    // exclude mlApi from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 
   useEffect(() => {

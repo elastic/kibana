@@ -9,6 +9,7 @@ import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { INCOMPATIBLE_FIELDS } from '../../../../../../../translations';
 import { getSizeInBytes } from '../../../../../../../utils/stats';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../utils/get_incompatible_stat_badge_color';
 import { AllTab } from './all_tab';
@@ -21,8 +22,7 @@ import {
   ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
-} from '../../helpers';
-import { getMarkdownComment } from '../../markdown/helpers';
+} from '../constants';
 import * as i18n from '../../translations';
 import { SameFamilyTab } from './same_family_tab';
 import type {
@@ -31,6 +31,7 @@ import type {
   MeteringStatsIndex,
   PartitionedFieldMetadata,
 } from '../../../../../../../types';
+import { getMarkdownComment } from '../utils/markdown';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
@@ -96,7 +97,7 @@ export const getTabs = ({
       />
     ),
     id: INCOMPATIBLE_TAB_ID,
-    name: i18n.INCOMPATIBLE_FIELDS,
+    name: INCOMPATIBLE_FIELDS,
   },
   {
     append: <StyledBadge color="hollow">{partitionedFieldMetadata.sameFamily.length}</StyledBadge>,

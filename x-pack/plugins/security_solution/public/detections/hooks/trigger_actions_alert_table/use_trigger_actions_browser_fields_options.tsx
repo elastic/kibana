@@ -6,6 +6,7 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
@@ -13,7 +14,7 @@ export const getUseTriggersActionsFieldBrowserOptions = (scopeId: SourcererScope
   const useTriggersActionsFieldBrowserOptions: AlertsTableConfigurationRegistry['useFieldBrowserOptions'] =
     ({ onToggleColumn }) => {
       const upsertColumn = useCallback(
-        (column) => {
+        (column: EuiDataGridColumn) => {
           onToggleColumn(column.id);
         },
         [onToggleColumn]
