@@ -624,6 +624,15 @@ describe('notesSlice', () => {
       ).toHaveLength(0);
     });
 
+    it('should return all notes for an existing document id and existing saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'timeline-1',
+        })
+      ).toHaveLength(1);
+    });
+
     it('should return all notes sorted for an existing document id', () => {
       const oldestNote = {
         eventId: '1', // should be a valid id based on mockTimelineData

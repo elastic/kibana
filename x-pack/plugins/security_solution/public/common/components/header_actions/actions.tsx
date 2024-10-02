@@ -232,25 +232,26 @@ const ActionsComponent: React.FC<ActionProps> = ({
     })
   );
 
-  /* only applicable notes before event based notes */
-  const timelineNoteIds = useMemo(
-    () => eventIdToNoteIds?.[eventId] ?? emptyNotes,
-    [eventIdToNoteIds, eventId]
-  );
-
-  const notesCount = useMemo(
-    () => (securitySolutionNotesEnabled ? documentBasedNotes.length : timelineNoteIds.length),
-    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
-  );
-
-  /* note ids specific to the current timeline, it is used to enable/disable pinning */
-  const noteIdsInTimeline = useMemo(() => {
+  /* note ids associated with the document AND attached to the current timeline, used for pinning */
+  const timelineNoteIds = useMemo(() => {
     if (securitySolutionNotesEnabled) {
       // if timeline is unsaved, there is no notes associated to timeline yet
       return savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [];
     }
-    return timelineNoteIds;
-  }, [documentBasedNotesInTimeline, timelineNoteIds, securitySolutionNotesEnabled, savedObjectId]);
+    return eventIdToNoteIds?.[eventId] ?? emptyNotes;
+  }, [
+    eventIdToNoteIds,
+    eventId,
+    documentBasedNotesInTimeline,
+    savedObjectId,
+    securitySolutionNotesEnabled,
+  ]);
+
+  /* note count of the document */
+  const notesCount = useMemo(
+    () => (securitySolutionNotesEnabled ? documentBasedNotes.length : timelineNoteIds.length),
+    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
+  );
 
   return (
     <ActionsContainer data-test-subj="actions-container">
@@ -303,7 +304,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             isAlert={isAlert(eventType)}
             key="pin-event"
             onPinClicked={handlePinClicked}
-            noteIds={noteIdsInTimeline}
+            noteIds={timelineNoteIds}
             eventIsPinned={isEventPinned}
             timelineType={timelineType}
           />
