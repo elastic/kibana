@@ -70,7 +70,7 @@ export class AssetCriticalityEcsMigrationClient {
     return this.assetCriticalityDataClient.createOrUpdateIndex();
   };
 
-  public migrateEcsData = () => {
+  public migrateEcsData = (abortSignal?: AbortSignal) => {
     return this.options.esClient.updateByQuery(
       {
         index: this.assetCriticalityDataClient.getIndex(),
@@ -89,6 +89,7 @@ export class AssetCriticalityEcsMigrationClient {
       {
         retryOnTimeout: true,
         maxRetries: 2,
+        signal: abortSignal,
       }
     );
   };
