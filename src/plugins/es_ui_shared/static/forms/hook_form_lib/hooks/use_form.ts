@@ -183,6 +183,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const fieldsToArray = useCallback<() => FieldHook[]>(() => Object.values(fieldsRefs.current), []);
 
+  const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
+    (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
+    []
+  );
+
   const getFieldsForOutput = useCallback(
     (
       fields: FieldsMap,
@@ -470,11 +475,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   }, []);
 
   const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
-
-  const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
-    (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
-    []
-  );
 
   const updateFieldValues: FormHook<T, I>['updateFieldValues'] = useCallback(
     (updatedFormData, { runDeserializer = true } = {}) => {
