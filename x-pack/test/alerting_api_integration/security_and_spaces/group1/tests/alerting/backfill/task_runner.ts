@@ -678,7 +678,10 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      body: {
+        sort: [{ [ALERT_ORIGINAL_TIME]: { order: 'asc' } }],
+        query: { match_all: {} },
+      },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
