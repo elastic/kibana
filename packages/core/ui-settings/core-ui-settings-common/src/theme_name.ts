@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ThemeNameValue = 'amsterdam' | 'berlin' | string;
+export type ThemeNameValue = 'amsterdam' | 'borealis' | string;
 
 export const parseThemeNameValue = (rawValue: unknown): ThemeNameValue => {
-  if (rawValue === 'amsterdam' || rawValue === 'berlin') {
+  if (rawValue === 'amsterdam' || rawValue === 'borealis') {
     return rawValue;
   }
 
