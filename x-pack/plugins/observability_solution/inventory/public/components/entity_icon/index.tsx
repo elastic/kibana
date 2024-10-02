@@ -56,6 +56,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
       return <AgentIcon agentName={agentName} role="presentation" />;
     }
     default:
+      // Return an empty EuiIcon instead of null to maintain UI alignment across all EntityIcon usages
       return <EuiIcon type="" size="l" />;
   }
 }
