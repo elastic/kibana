@@ -19,6 +19,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
+import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
 
@@ -61,6 +62,10 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       timeFieldName =
         adHocDataview.timeFieldName ?? adHocDataview.fields.getByType('date')?.[0]?.name;
     }
+    const recommendedQueries = getRecommendedQueries({
+      fromCommand: queryString,
+      timeField: timeFieldName,
+    });
     const panels = [
       {
         id: 0,
@@ -142,49 +147,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         title: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
           defaultMessage: 'Recommended queries',
         }),
-        items: [
-          {
-            name: 'Aggregate data with STATS',
+        items: recommendedQueries.map((query) => {
+          return {
+            name: query.label,
             onClick: () => {
-              onESQLQuerySubmit?.(`${queryString} | STATS count = COUNT(*) `);
+              onESQLQuerySubmit?.(query.queryString);
               setIsESQLMenuPopoverOpen(false);
             },
-          },
-          {
-            name: 'Set a conditional with CASE',
-            onClick: () => {
-              onESQLQuerySubmit?.(
-                `${queryString} | STATS count =  COUNT(*) | EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other") | KEEP newField`
-              );
-              setIsESQLMenuPopoverOpen(false);
-            },
-          },
-          {
-            name: 'Create a date histogram',
-            onClick: () => {
-              onESQLQuerySubmit?.(
-                `${queryString} | WHERE ${timeFieldName} <=?_tend and ${timeFieldName} >?_tstart | STATS count = COUNT(*) BY BUCKET(${timeFieldName}, 50, ?_tstart, ?_tend)`
-              );
-              setIsESQLMenuPopoverOpen(false);
-            },
-          },
-          {
-            name: 'Sort by time',
-            onClick: () => {
-              onESQLQuerySubmit?.(`${queryString} | SORT ${timeFieldName} DESC `);
-              setIsESQLMenuPopoverOpen(false);
-            },
-          },
-          {
-            name: 'Create field with EVAL',
-            onClick: () => {
-              onESQLQuerySubmit?.(
-                `${queryString} | EVAL buckets = DATE_TRUNC(5 minute, ${timeFieldName}) | KEEP buckets`
-              );
-              setIsESQLMenuPopoverOpen(false);
-            },
-          },
-        ],
+          };
+        }),
       },
     ];
     return panels as EuiContextMenuPanelProps[];

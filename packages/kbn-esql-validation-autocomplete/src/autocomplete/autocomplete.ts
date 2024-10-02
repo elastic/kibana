@@ -113,7 +113,7 @@ import {
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
 import { countBracketsUnclosed } from '../shared/helpers';
-import { getRecommendedQueries } from './recommended_queries';
+import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -197,7 +197,7 @@ export async function suggest(
         resourceRetriever
       );
       // empty state
-      const recommendedQueriesSuggestions = await getRecommendedQueries(
+      const recommendedQueriesSuggestions = await getRecommendedQueriesSuggestions(
         getFieldsByTypeEmptyState,
         fromCommand
       );
@@ -928,7 +928,7 @@ async function getExpressionSuggestionsByType(
           const sources = await getSources();
 
           const recommendedQueriesSuggestions = hasRecommendedQueries
-            ? await getRecommendedQueries(getFieldsByType)
+            ? await getRecommendedQueriesSuggestions(getFieldsByType)
             : [];
 
           const suggestionsToAdd = await handleFragment(
@@ -1034,7 +1034,7 @@ async function getExpressionSuggestionsByType(
 
     // / handle recommended queries for from
     if (hasRecommendedQueries) {
-      suggestions.push(...(await getRecommendedQueries(getFieldsByType)));
+      suggestions.push(...(await getRecommendedQueriesSuggestions(getFieldsByType)));
     }
   }
   // Due to some logic overlapping functions can be repeated
