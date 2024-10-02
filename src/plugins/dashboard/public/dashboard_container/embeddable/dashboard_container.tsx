@@ -83,7 +83,6 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
   DASHBOARD_APP_ID,
-  DASHBOARD_MARGIN_SIZE,
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
