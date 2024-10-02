@@ -247,7 +247,23 @@ function messageContentMedia(content: Record<string, unknown>): InlineDataPart {
   throw new Error('Invalid media content');
 }
 
-const badFinishReasons = [FinishReason.RECITATION, FinishReason.SAFETY];
+// TODO Google's TS library is behind the API
+// remove this enum once the library is updated
+// https://github.com/google-gemini/generative-ai-js/pull/270
+enum FinishReasonMore {
+  BLOCKLIST = 'BLOCKLIST',
+  PROHIBITED_CONTENT = 'PROHIBITED_CONTENT',
+  SPII = 'SPII',
+  MALFORMED_FUNCTION_CALL = 'MALFORMED_FUNCTION_CALL',
+}
+const badFinishReasons = [
+  FinishReason.RECITATION,
+  FinishReason.SAFETY,
+  FinishReasonMore.BLOCKLIST,
+  FinishReasonMore.PROHIBITED_CONTENT,
+  FinishReasonMore.SPII,
+  FinishReasonMore.MALFORMED_FUNCTION_CALL,
+];
 function hadBadFinishReason(candidate: { finishReason?: FinishReason }) {
   return !!candidate.finishReason && badFinishReasons.includes(candidate.finishReason);
 }
@@ -264,9 +280,9 @@ export function convertResponseBadFinishReasonToErrorMsg(
         (candidate.safetyRatings?.length ?? 0) > 0
       ) {
         const safetyReasons = getSafetyReasons(candidate.safetyRatings as SafetyReason[]);
-        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason} - ${safetyReasons}`;
+        return `Gemini Utils: action result status is error. Candidate was blocked due to ${candidate.finishReason} - ${safetyReasons}`;
       } else {
-        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason}`;
+        return `Gemini Utils: action result status is error. Candidate was blocked due to ${candidate.finishReason}`;
       }
     }
   }
