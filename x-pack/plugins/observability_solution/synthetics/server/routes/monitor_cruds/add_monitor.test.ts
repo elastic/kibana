@@ -9,7 +9,7 @@ import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UpsertMonitorAPI } from './add_monitor/upsert_monitor_api';
 
 describe('hydrateMonitorFields', () => {
-  it('creates expected zip b64 project field value for inline browser monitor', async () => {
+  it('does not add project field value for inline browser monitor', async () => {
     const normalizedMonitor: SyntheticsMonitor = {
       // @ts-expect-error extra field
       type: 'browser',
@@ -41,7 +41,6 @@ describe('hydrateMonitorFields', () => {
 step('fail', () => {
   throw Error('fail');
 })`,
-      'source.project.content': '',
       playwright_text_assertion: '',
       urls: '',
       screenshots: 'on',
@@ -77,9 +76,7 @@ step('fail', () => {
       newMonitorId: 'testMonitorId',
     });
 
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeDefined();
-    // zip is not deterministic, so we can't check the exact value
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]?.length).toBeGreaterThan(0);
+    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeUndefined();
   });
 
   it('does not add b64 zip data to lightweight monitors', async () => {

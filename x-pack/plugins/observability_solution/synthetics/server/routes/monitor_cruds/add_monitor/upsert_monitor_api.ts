@@ -313,11 +313,6 @@ export class UpsertMonitorAPI {
       [ConfigKey.NAMESPACE]: preserveNamespace
         ? normalizedMonitor[ConfigKey.NAMESPACE]
         : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
-      ...(await mapInlineToProjectFields({
-        monitorType: normalizedMonitor.type,
-        monitor: normalizedMonitor,
-        logger: this.routeContext.server.logger,
-      })),
     };
   }
 
