@@ -52,12 +52,23 @@ export const register = (deps: RouteDependencies): void => {
             ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
             : undefined;
 
-          // Resolve cluster status for this specific cluster.
-          // `none` is never a valid index/alias/data-stream name so that way we can
-          // avoid using * which could be computationally expensive.
-          const clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
-            name: `${clusterName}:none`,
-          });
+          // Resolve cluster status
+          let clusterStatus;
+
+          try {
+            clusterStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
+              name: `${clusterName}:*`,
+              filter_path: '*.connected',
+            });
+          } catch (error) {
+            // If the cluster is not reachable, we'll get a TimeoutError.
+            // In this case, we'll set the cluster status to disconnected.
+            if (error.name === 'TimeoutError') {
+              clusterStatus = { [clusterName]: { connected: false } };
+            } else {
+              throw error;
+            }
+          }
 
           return {
             ...deserializeCluster(
@@ -69,7 +80,7 @@ export const register = (deps: RouteDependencies): void => {
             isConfiguredByNode,
             // We prioritize the cluster status from the resolve cluster API, and fallback to
             // the cluster connected status in case it's not present.
-            isConnected: clustersStatus[clusterName]?.connected || cluster.connected,
+            isConnected: clusterStatus[clusterName]?.connected || cluster.connected,
           };
         })
       );
