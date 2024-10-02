@@ -137,6 +137,15 @@ export const useRuleIndexPattern = ({
   const { data } = useKibana().services;
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index);
+
+  // initial indexPattern is empty, until getting replaced with fetched data view in useEffect below
+  // but if rule is configured with data view id, we want to preserve it, in order not to create new data views
+  // from empty index patterns downstream in QueryBar component
+  // QueryBar will attempt to create data view if one is not passed, so having this id here, will prevent this behaviour
+  if (dataSourceType === DataSourceType.DataView && dataViewId) {
+    initIndexPattern.id = dataViewId;
+  }
+
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
   // when the index pattern changes
