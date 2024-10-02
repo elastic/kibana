@@ -70,3 +70,8 @@ post:
   security: []
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: boolean
+      in: query
+      name: sys_monitoring
+      description: Enable collection of system logs and metrics.

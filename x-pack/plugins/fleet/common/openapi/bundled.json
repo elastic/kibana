@@ -3436,6 +3436,14 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "sys_monitoring",
+            "description": "Enable collection of system logs and metrics."
           }
         ]
       }
