@@ -515,10 +515,10 @@ describe('TaskPollingLifecycle', () => {
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
       );
 
-      expect(pollingCycleEvent!.event).toEqual({
-        tag: 'err',
-        error: new Error(`Failed to poll for work: Error: booo`),
-      });
+      expect(pollingCycleEvent!.event.tag).toEqual('err');
+      expect((pollingCycleEvent!.event as Err<Error>).error.message).toEqual(
+        expect.stringContaining('Failed to poll for work: booo')
+      );
     });
 
     test('should emit failure event when polling is successful but individual task errors reported', async () => {

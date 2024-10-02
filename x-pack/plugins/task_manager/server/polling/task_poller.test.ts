@@ -239,13 +239,14 @@ describe('TaskPoller', () => {
     const pollInterval = 100;
 
     const handler = jest.fn();
+    const errorToThrow = new Error('failed to work');
     const poller = createTaskPoller<string, string[]>({
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
       pollIntervalDelay$: of(0),
       work: async (...args) => {
-        throw new Error('failed to work');
+        throw errorToThrow;
       },
       getCapacity: () => 5,
     });
@@ -256,7 +257,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: failed to work',
+      `Failed to poll for work: ${errorToThrow.message}\n${errorToThrow.stack}`,
       PollingErrorType.WorkError,
       none
     );
@@ -269,10 +270,11 @@ describe('TaskPoller', () => {
 
     const handler = jest.fn();
     let callCount = 0;
+    const errorToThrow = new Error('failed to work')
     const work = jest.fn(async () => {
       callCount++;
       if (callCount === 2) {
-        throw new Error('failed to work');
+        throw errorToThrow;
       }
       return callCount;
     });
@@ -296,7 +298,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: failed to work',
+      `Failed to poll for work: ${errorToThrow.message}\n${errorToThrow.stack}`,
       PollingErrorType.WorkError,
       none
     );
