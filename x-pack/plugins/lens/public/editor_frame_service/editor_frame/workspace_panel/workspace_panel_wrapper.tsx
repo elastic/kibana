@@ -8,13 +8,7 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import {
-  EuiPageTemplate,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -144,9 +138,6 @@ export function WorkspacePanelWrapper({
   const maxDimensions = displayOptions?.maxDimensions;
   const minDimensions = displayOptions?.minDimensions;
 
-  const [resizeRef, setResizeRef] = React.useState<Element | null>(null);
-  const { width, height } = useResizeObserver(resizeRef, 'width');
-
   let visDimensionsCSS: Interpolation<Theme> = {};
 
   if (aspectRatio) {
@@ -158,7 +149,7 @@ export function WorkspacePanelWrapper({
       ? `${maxDimensions.x.value}${unitToCSSUnit[maxDimensions.x.unit]}`
       : '';
     visDimensionsCSS.maxHeight = maxDimensions.y
-      ? `${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]}`
+      ? `min(100%, ${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]})`
       : '';
   }
 
@@ -169,14 +160,6 @@ export function WorkspacePanelWrapper({
     visDimensionsCSS.minHeight = minDimensions.y
       ? `${minDimensions.y.value}${unitToCSSUnit[minDimensions.y.unit]}`
       : '';
-  }
-
-  if (width < height) {
-    visDimensionsCSS.width = '100%';
-    visDimensionsCSS.height = 'auto';
-  } else {
-    visDimensionsCSS.width = 'auto';
-    visDimensionsCSS.height = '100%';
   }
   return (
     <EuiPageTemplate
@@ -265,7 +248,6 @@ export function WorkspacePanelWrapper({
           alignItems="center"
           justifyContent="center"
           direction="column"
-          ref={setResizeRef}
           css={css`
             height: 100%;
           `}
@@ -275,8 +257,8 @@ export function WorkspacePanelWrapper({
             grow={false}
             css={{
               flexGrow: 0,
-              height: '100%',
               width: '100%',
+              height: '100%',
               ...visDimensionsCSS,
             }}
           >
