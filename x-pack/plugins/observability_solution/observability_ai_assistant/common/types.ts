@@ -157,3 +157,5 @@ export interface ObservabilityAIAssistantScreenContext {
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }
+
+export type AssistantScope = 'observability' | 'search' | 'all';

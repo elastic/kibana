@@ -31,6 +31,7 @@ export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
+  PanelSelectedNode,
   AppDeepLinkId,
   AppId,
   CloudLinkId,

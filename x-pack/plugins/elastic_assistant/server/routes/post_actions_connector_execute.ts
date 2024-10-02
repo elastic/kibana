@@ -92,6 +92,7 @@ export const postActionsConnectorExecuteRoute = (
 
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
+          const inference = ctx.elasticAssistant.inference;
           const actionsClient = await actions.getActionsClientWithRequest(request);
 
           const conversationsDataClient =
@@ -132,6 +133,7 @@ export const postActionsConnectorExecuteRoute = (
             context: ctx,
             getElser,
             logger,
+            inference,
             messages: (newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,
@@ -155,9 +157,9 @@ export const postActionsConnectorExecuteRoute = (
           const v2KnowledgeBaseEnabled =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-              v2KnowledgeBaseEnabled
-            )) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              v2KnowledgeBaseEnabled,
+            })) ?? undefined;
           const isEnabledKnowledgeBase = await getIsKnowledgeBaseEnabled(kbDataClient);
 
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {

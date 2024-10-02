@@ -47,6 +47,8 @@ import {
   noCaseCompare,
   correctQuerySyntax,
   getColumnByName,
+  sourceExists,
+  findFinalWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -89,7 +91,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getOverlapRange,
@@ -100,6 +102,7 @@ import {
   removeQuoteForSuggestedSources,
   getValidSignaturesAndTypesToSuggestNext,
 } from './helper';
+import { getSortPos } from './commands/sort/helper';
 import {
   FunctionParameter,
   FunctionReturnType,
@@ -107,12 +110,10 @@ import {
   isParameterType,
   isReturnType,
 } from '../definitions/types';
+import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';
+import { countBracketsUnclosed } from '../shared/helpers';
 
-type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataStreamsForIntegrationFn = (
-  sourceName: string
-) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[],
@@ -178,8 +179,7 @@ export async function suggest(
     queryForFields,
     resourceRetriever
   );
-  const getSources = getSourcesRetriever(resourceRetriever);
-  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
+  const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -201,7 +201,6 @@ export async function suggest(
       ast,
       astContext,
       getSources,
-      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -287,29 +286,15 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async () => {
-    const list = (await helper()) || [];
-    // hide indexes that start with .
-    return buildSourcesDefinitions(
-      list
-        .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title, type }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
-        })
-    );
-  };
-}
-
-function getDatastreamsForIntegrationRetriever(
-  resourceRetriever?: ESQLCallbacks
-): GetDataStreamsForIntegrationFn {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async (sourceName: string) => {
-    const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName)?.dataStreams;
-  };
+function getSourceSuggestions(sources: ESQLSourceResult[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
 }
 
 function findNewVariable(variables: Map<string, ESQLVariable[]>) {
@@ -487,8 +472,7 @@ async function getExpressionSuggestionsByType(
     option: ESQLCommandOption | undefined;
     node: ESQLSingleAstItem | undefined;
   },
-  getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
+  getSources: () => Promise<ESQLSourceResult[]>,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -572,10 +556,18 @@ async function getExpressionSuggestionsByType(
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
+  const previousWord = findPreviousWord(innerText);
   // enrich with assignment has some special rules who are handled somewhere else
-  const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
+  const canHaveAssignments =
+    ['eval', 'stats', 'row'].includes(command.name) &&
+    !comparisonFunctions.map((fn) => fn.name).includes(previousWord);
 
   const references = { fields: fieldsMap, variables: anyVariables };
+  if (command.name === 'sort') {
+    return await suggestForSortCmd(innerText, getFieldsByType, (col) =>
+      Boolean(getColumnByName(col, references))
+    );
+  }
 
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -625,63 +617,43 @@ async function getExpressionSuggestionsByType(
           }
         );
 
-        /**
-         * @TODO — this string manipulation is crude and can't support all cases
-         * Checking for a partial word and computing the replacement range should
-         * really be done using the AST node, but we'll have to refactor further upstream
-         * to make that available. This is a quick fix to support the most common case.
-         */
-        const words = innerText.split(/\s+/);
-        const lastWord = words[words.length - 1];
-        if (lastWord !== '') {
-          // ... | <COMMAND> <word><suggest>
-
-          const rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
-
-          // check if lastWord is an existing field
-          const column = getColumnByName(lastWord, references);
-          if (column) {
+        const fieldFragmentSuggestions = await handleFragment(
+          innerText,
+          (fragment) => Boolean(getColumnByName(fragment, references)),
+          (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+            // COMMAND fie<suggest>
+            return fieldSuggestions.map((suggestion) => ({
+              ...suggestion,
+              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            }));
+          },
+          (fragment: string, rangeToReplace: { start: number; end: number }) => {
+            // COMMAND field<suggest>
             if (['grok', 'dissect'].includes(command.name)) {
-              return [];
+              return fieldSuggestions.map((suggestion) => ({
+                ...suggestion,
+                text: suggestion.text + ' ',
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              }));
             }
-            // now we know that the user has already entered a column,
-            // so suggest comma and pipe
-            // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-            // const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
-            const textToUse = lastWord;
+
             return [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
             ].map<SuggestionRawDefinition>((s) => ({
               ...s,
-              filterText: textToUse,
-              text: textToUse + s.text,
+              filterText: fragment,
+              text: fragment + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
             }));
-          } else {
-            suggestions.push(
-              ...fieldSuggestions.map((suggestion) => ({
-                ...suggestion,
-                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              }))
-            );
           }
-        } else {
-          // ... | <COMMAND> <suggest>
-          suggestions.push(
-            ...fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-              command: TRIGGER_SUGGESTION_COMMAND,
-            }))
-          );
-        }
+        );
+
+        suggestions.push(...fieldFragmentSuggestions);
       }
     }
     if (argDef.type === 'function' || argDef.type === 'any') {
@@ -912,9 +884,22 @@ async function getExpressionSuggestionsByType(
       if (argDef.innerTypes?.includes('policy')) {
         // ... | ENRICH <suggest>
         const policies = await getPolicies();
+        const lastWord = findFinalWord(innerText);
+        if (lastWord !== '') {
+          policies.forEach((suggestion) => {
+            suggestions.push({
+              ...suggestion,
+              rangeToReplace: {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              },
+            });
+          });
+        }
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const index = getSourcesFromCommands(commands, 'index');
+        const indexes = getSourcesFromCommands(commands, 'index');
+        const lastIndex = indexes[indexes.length - 1];
         const canRemoveQuote = isNewExpression && innerText.includes('"');
         // Function to add suggestions based on canRemoveQuote
         const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
@@ -923,24 +908,60 @@ async function getExpressionSuggestionsByType(
           );
         };
 
-        if (index && index.text && index.text !== EDITOR_MARKER) {
-          const source = index.text.replace(EDITOR_MARKER, '');
-          const dataStreams = await getDatastreamsForIntegration(source);
+        if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
+          const sources = await getSources();
+          const suggestionsToAdd = await handleFragment(
+            innerText,
+            (fragment) =>
+              sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+            (_fragment, rangeToReplace) => {
+              return getSourceSuggestions(sources).map((suggestion) => ({
+                ...suggestion,
+                rangeToReplace,
+              }));
+            },
+            (fragment, rangeToReplace) => {
+              const exactMatch = sources.find(({ name: _name }) => _name === fragment);
+              if (exactMatch?.dataStreams) {
+                // this is an integration name, suggest the datastreams
+                const definitions = buildSourcesDefinitions(
+                  exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+                );
 
-          if (dataStreams) {
-            // Integration name, suggest the datastreams
-            await addSuggestionsBasedOnQuote(
-              buildSourcesDefinitions(
-                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-              )
-            );
-          } else {
-            // Not an integration, just a partial source name
-            await addSuggestionsBasedOnQuote(await getSources());
-          }
+                return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+              } else {
+                const _suggestions: SuggestionRawDefinition[] = [
+                  {
+                    ...pipeCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ' | ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...commaCompleteItem,
+                    filterText: fragment,
+                    text: fragment + ', ',
+                    command: TRIGGER_SUGGESTION_COMMAND,
+                    rangeToReplace,
+                  },
+                  {
+                    ...buildOptionDefinition(metadataOption),
+                    filterText: fragment,
+                    text: fragment + ' METADATA ',
+                    asSnippet: false, // turn this off because $ could be contained within the source name
+                    rangeToReplace,
+                  },
+                ];
+
+                return _suggestions;
+              }
+            }
+          );
+          addSuggestionsBasedOnQuote(suggestionsToAdd);
         } else {
           // FROM <suggest> or no index/text
-          await addSuggestionsBasedOnQuote(await getSources());
+          await addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
         }
       }
     }
@@ -1397,10 +1418,9 @@ async function getFunctionArgsSuggestions(
       suggestions.push(
         ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
           label: name,
-          text: name + ' ',
+          text: name,
           kind: 'Function' as ItemKind,
           detail: description,
-          command: TRIGGER_SUGGESTION_COMMAND,
         }))
       );
     }
@@ -1541,7 +1561,7 @@ async function getOptionArgsSuggestions(
       // if it's a new expression, suggest fields to match on
       if (
         isNewExpression ||
-        findPreviousWord(innerText) === 'ON' ||
+        noCaseCompare(findPreviousWord(innerText), 'ON') ||
         (option && isAssignment(option.args[0]) && !option.args[1])
       ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
@@ -1561,7 +1581,7 @@ async function getOptionArgsSuggestions(
         suggestions.push(
           buildOptionDefinition(getCommandOption('with')!),
           ...getFinalSuggestions({
-            comma: true,
+            comma: false,
           })
         );
       }
@@ -1588,7 +1608,23 @@ async function getOptionArgsSuggestions(
         if (policyMetadata) {
           if (isNewExpression || (assignFn && !isAssignmentComplete(assignFn))) {
             // ... | ENRICH ... WITH a =
-            suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
+            // ... | ENRICH ... WITH b
+            const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
+            // in this case, we don't want to open the suggestions menu when the field is accepted
+            // because we're keeping the suggestions simple here for now. Could always revisit.
+            fieldSuggestions.forEach((s) => (s.command = undefined));
+
+            // attach the replacement range if needed
+            const lastWord = findFinalWord(innerText);
+            if (lastWord) {
+              // ENRICH ... WITH a <suggest>
+              const rangeToReplace = {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              };
+              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+            }
+            suggestions.push(...fieldSuggestions);
           }
         }
 
@@ -1641,12 +1677,46 @@ async function getOptionArgsSuggestions(
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
     if (isNewExpression) {
-      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
-    } else if (existingFields.size > 0) {
-      if (filteredMetaFields.length > 0) {
-        suggestions.push(commaCompleteItem);
+      suggestions.push(
+        ...(await handleFragment(
+          innerText,
+          (fragment) => METADATA_FIELDS.includes(fragment),
+          (_fragment, rangeToReplace) =>
+            buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
+              ...suggestion,
+              rangeToReplace,
+            })),
+          (fragment, rangeToReplace) => {
+            const _suggestions = [
+              {
+                ...pipeCompleteItem,
+                text: fragment + ' | ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              },
+            ];
+            if (filteredMetaFields.length > 1) {
+              _suggestions.push({
+                ...commaCompleteItem,
+                text: fragment + ', ',
+                filterText: fragment,
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              });
+            }
+            return _suggestions;
+          }
+        ))
+      );
+    } else {
+      if (existingFields.size > 0) {
+        // METADATA field <suggest>
+        if (filteredMetaFields.length > 0) {
+          suggestions.push(commaCompleteItem);
+        }
+        suggestions.push(pipeCompleteItem);
       }
-      suggestions.push(pipeCompleteItem);
     }
   }
 
@@ -1717,10 +1787,13 @@ async function getOptionArgsSuggestions(
             openSuggestions: true,
           }))
         );
+        // Checks if cursor is still within function ()
+        // by checking if the marker editor/cursor is within an unclosed parenthesis
+        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)
-          if (command.name === 'stats') {
+          if (command.name === 'stats' && canHaveAssignment) {
             suggestions.push({
               label: i18n.translate(
                 'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
@@ -1751,12 +1824,13 @@ async function getOptionArgsSuggestions(
               {
                 functions: true,
                 fields: false,
-              }
+              },
+              { ignoreFn: canHaveAssignment ? [] : ['bucket', 'case'] }
             ))
           );
         }
 
-        if (command.name === 'stats' && isNewExpression) {
+        if (command.name === 'stats' && isNewExpression && canHaveAssignment) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
         }
       }
@@ -1764,3 +1838,238 @@ async function getOptionArgsSuggestions(
   }
   return suggestions;
 }
+
+/**
+ * This function handles the logic to suggest completions
+ * for a given fragment of text in a generic way. A good example is
+ * a field name.
+ *
+ * When typing a field name, there are three scenarios
+ *
+ * 1. user hasn't begun typing
+ * KEEP /
+ *
+ * 2. user is typing a partial field name
+ * KEEP fie/
+ *
+ * 3. user has typed a complete field name
+ * KEEP field/
+ *
+ * This function provides a framework for handling all three scenarios in a clean way.
+ *
+ * @param innerText - the query text before the current cursor position
+ * @param isFragmentComplete — return true if the fragment is complete
+ * @param getSuggestionsForIncomplete — gets suggestions for an incomplete fragment
+ * @param getSuggestionsForComplete - gets suggestions for a complete fragment
+ * @returns
+ */
+function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+
+const sortModifierSuggestions = {
+  ASC: {
+    label: 'ASC',
+    text: 'ASC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  } as SuggestionRawDefinition,
+};
+
+export const suggestForSortCmd = async (
+  innerText: string,
+  getFieldsByType: GetFieldsByTypeFn,
+  columnExists: (column: string) => boolean
+): Promise<SuggestionRawDefinition[]> => {
+  const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
+
+  const { pos, nulls } = getSortPos(innerText);
+
+  switch (pos) {
+    case 'space2': {
+      return [
+        sortModifierSuggestions.ASC,
+        sortModifierSuggestions.DESC,
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+    case 'order': {
+      return handleFragment(
+        innerText,
+        (fragment) => ['ASC', 'DESC'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment, rangeToReplace) => {
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+          }));
+        },
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+            prependSpace(sortModifierSuggestions.NULLS_FIRST),
+            prependSpace(sortModifierSuggestions.NULLS_LAST),
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
+    }
+    case 'space3': {
+      return [
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+    case 'nulls': {
+      return handleFragment(
+        innerText,
+        (fragment) =>
+          ['FIRST', 'LAST'].some((completeWord) => noCaseCompare(completeWord, fragment)),
+        (_fragment) => {
+          const end = innerText.length + 1;
+          const start = end - nulls.length;
+          return Object.values(sortModifierSuggestions).map((suggestion) => ({
+            ...suggestion,
+            // we can't use the range generated by handleFragment here
+            // because it doesn't really support multi-word completions
+            rangeToReplace: { start, end },
+          }));
+        },
+        (fragment, rangeToReplace) => {
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+          ].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
+    }
+    case 'space4': {
+      return [
+        pipeCompleteItem,
+        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      ];
+    }
+  }
+
+  const fieldSuggestions = await getFieldsByType('any', [], {
+    openSuggestions: true,
+  });
+  const functionSuggestions = await getFieldsOrFunctionsSuggestions(
+    ['any'],
+    'sort',
+    undefined,
+    getFieldsByType,
+    {
+      functions: true,
+      fields: false,
+    }
+  );
+
+  return await handleFragment(
+    innerText,
+    columnExists,
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      // SORT fie<suggest>
+      return [
+        ...pushItUpInTheList(
+          fieldSuggestions.map((suggestion) => ({
+            ...suggestion,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          })),
+          true
+        ),
+        ...functionSuggestions,
+      ];
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      // SORT field<suggest>
+      return [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+        prependSpace(sortModifierSuggestions.ASC),
+        prependSpace(sortModifierSuggestions.DESC),
+        prependSpace(sortModifierSuggestions.NULLS_FIRST),
+        prependSpace(sortModifierSuggestions.NULLS_LAST),
+      ].map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    }
+  );
+};
