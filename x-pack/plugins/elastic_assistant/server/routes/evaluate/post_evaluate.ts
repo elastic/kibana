@@ -337,15 +337,20 @@ export const postEvaluateRoute = (
               return output;
             };
 
-            const evalOutput = evaluate(predict, {
+            evaluate(predict, {
               data: datasetName ?? '',
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
               maxConcurrency: 5,
-            });
-            logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
+            })
+              .then((output) => {
+                logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
+              })
+              .catch((err) => {
+                logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
+              });
           });
 
           return response.ok({
