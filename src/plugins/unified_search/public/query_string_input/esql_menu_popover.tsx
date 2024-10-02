@@ -185,7 +185,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         panelPaddingSize="s"
         display="block"
       >
-        {/* <EuiContextMenuPanel size="s" items={esqlPanelItems} /> */}
         <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
       </EuiPopover>
       <LanguageDocumentationFlyout

@@ -183,24 +183,24 @@ export async function suggest(
     // filter source commands if already defined
     const suggestions = commandAutocompleteDefinitions;
     if (!ast.length) {
-      let fromCommand = '';
+      // Display the recommended queries if there are no commands (empty state)
+      const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
       if (getSources) {
+        let fromCommand = '';
         const sources = await getSources();
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
         } else fromCommand = `FROM ${visibleSources[0].name}`;
-      }
 
-      const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
-        fromCommand,
-        resourceRetriever
-      );
-      // empty state
-      const recommendedQueriesSuggestions = await getRecommendedQueriesSuggestions(
-        getFieldsByTypeEmptyState,
-        fromCommand
-      );
+        const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
+          fromCommand,
+          resourceRetriever
+        );
+        recommendedQueriesSuggestions.push(
+          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+        );
+      }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
@@ -1032,7 +1032,7 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...finalSuggestions);
     }
 
-    // / handle recommended queries for from
+    // handle recommended queries for from
     if (hasRecommendedQueries) {
       suggestions.push(...(await getRecommendedQueriesSuggestions(getFieldsByType)));
     }
