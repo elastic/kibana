@@ -114,6 +114,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
         isLoading={isLoading}
         grow
         css={css({
+          width: '100%',
           padding: euiThemeVars.euiSizeS,
           height: euiThemeVars.euiButtonHeight,
           fontWeight: euiThemeVars.euiFontWeightRegular,
@@ -161,7 +162,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth={fullWidth} css={css({ width: '100%' })}>
+    <EuiFilterGroup fullWidth={fullWidth}>
       <EuiInputPopover
         id={popoverId}
         ownFocus
@@ -171,6 +172,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         panelMinWidth={MIN_POPOVER_WIDTH}
+        fullWidth
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={setPopoverOpen.bind(null, false)}
         panelProps={{
