@@ -20,8 +20,8 @@ import {
   type Services,
   type RenderUpselling,
 } from './services';
-import { parseExperimentalConfigValue } from '../common';
-import type { ExperimentalFeatures } from '../common';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { type IntegrationAssistantConfigType } from '../server/config';
 
 export class IntegrationAssistantPlugin
