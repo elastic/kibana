@@ -45,7 +45,6 @@ export const buildFieldRetentionIngestPipeline = ({
         target_field: ENRICH_FIELD,
       },
     },
-    // TODO: is this a bug should the entity definition framework set this?
     {
       set: {
         field: '@timestamp',
