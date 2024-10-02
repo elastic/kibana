@@ -24,7 +24,7 @@ import { MonitorDetailsState } from '../../../state';
  */
 export const mockState: SyntheticsAppState = {
   ui: {
-    alertFlyoutVisible: null,
+    ruleFlyoutVisible: null,
     basePath: 'yyz',
     esKuery: '',
     integrationsPopoverOpen: null,

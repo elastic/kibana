@@ -268,4 +268,24 @@ describe('ServiceProvider component', () => {
       expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
     });
   });
+
+  describe('with alibabacloud-ai-search service', () => {
+    const mockEndpoint = {
+      inference_id: 'alibabacloud-ai-search-1',
+      service: 'alibabacloud-ai-search',
+      service_settings: {
+        service_id: 'service-123',
+        host: 'host-123',
+        workspace: 'default-123',
+      },
+    } as any;
+
+    it('renders the component with endpoint details', () => {
+      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+
+      expect(screen.getByText('AlibabaCloud AI Search')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-alibabacloud-ai-search');
+      expect(icon).toBeInTheDocument();
+    });
+  });
 });
