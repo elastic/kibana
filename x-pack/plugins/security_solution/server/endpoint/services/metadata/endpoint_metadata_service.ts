@@ -419,7 +419,6 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-
         const runtimeFields: Partial<typeof _agent> = {
           status: doc?.fields?.status?.[0],
           last_checkin: doc?.fields?.last_checkin?.[0],
@@ -445,13 +444,10 @@ export class EndpointMetadataService {
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByIDs(endpointIDs);
-    const { body } = await this.esClient.search<HostMetadata>(query, {
-      meta: true,
-    });
+    const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
-    await this.ensureDataValidForSpace(body);
+    await this.ensureDataValidForSpace(searchResult);
 
-    const hosts = queryResponseToHostListResult(body);
-    return hosts.resultList;
+    return queryResponseToHostListResult(searchResult).resultList;
   }
 }
