@@ -30,9 +30,6 @@ export function AnnotationEvent({ event }: { event: EventSchema }) {
           <EuiIcon style={{ marginTop: -16 }} type={'dot'} size="l" />
         </span>
       }
-      // markerBody={
-      //   // <EuiText style={{ marginTop: -45, position: 'relative' }}>{event.description}</EuiText>
-      // }
       markerPosition="bottom"
     />
   );

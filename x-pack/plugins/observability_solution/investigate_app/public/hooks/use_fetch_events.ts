@@ -35,7 +35,7 @@ export function useFetchEvents({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.events(),
+    queryKey: investigationKeys.events(rangeFrom, rangeTo),
     queryFn: async ({ signal }) => {
       return await http.get<GetEventsResponse>(`/api/observability/events`, {
         query: {

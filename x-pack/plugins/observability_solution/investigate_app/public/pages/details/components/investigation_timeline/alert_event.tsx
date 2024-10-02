@@ -8,7 +8,6 @@
 import { LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { EventSchema } from '@kbn/investigation-shared';
 
@@ -32,14 +31,6 @@ export const AlertEvent = ({ event }: { event: EventSchema }) => {
           >
             <EuiIcon type="warning" size="s" color="white" />
           </div>
-          <span
-            style={{
-              position: 'relative',
-              top: -40,
-            }}
-          >
-            {ALERT_LABEL}
-          </span>
         </>
       }
       markerPosition="bottom"
@@ -53,7 +44,3 @@ export const AlertEvent = ({ event }: { event: EventSchema }) => {
     />
   );
 };
-
-const ALERT_LABEL = i18n.translate('xpack.investigateApp.alertEvent.alertLabel', {
-  defaultMessage: 'Alert',
-});
