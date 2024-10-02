@@ -210,7 +210,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
         return acc;
       }, {} as FieldsMap);
     },
-    []
+    [getFieldDefaultValue]
   );
 
   const updateFormDataAt: FormHook<T, I>['__updateFormDataAt'] = useCallback(
