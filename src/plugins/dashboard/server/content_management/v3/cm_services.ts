@@ -94,35 +94,28 @@ export const controlGroupInputSchema = schema.object({
     }
   ),
   enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: schema.maybe(
-    schema.object({
-      ignoreFilters: schema.maybe(
-        schema.boolean({
-          meta: { description: 'Ignore global filters in controls.' },
-        })
-      ),
-      ignoreQuery: schema.maybe(
-        schema.boolean({
-          meta: { description: 'Ignore the global query bar in controls.' },
-        })
-      ),
-      ignoreTimerange: schema.maybe(
-        schema.boolean({
-          meta: { description: 'Ignore the global time range in controls.' },
-        })
-      ),
-      ignoreValidations: schema.maybe(
-        schema.boolean({
-          meta: { description: 'Ignore validations in controls.' },
-        })
-      ),
-    })
-  ),
-  showApplySelections: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Show apply selections button in controls.' },
-    })
-  ),
+  ignoreParentSettings: schema.object({
+    ignoreFilters: schema.boolean({
+      meta: { description: 'Ignore global filters in controls.' },
+      defaultValue: false,
+    }),
+    ignoreQuery: schema.boolean({
+      meta: { description: 'Ignore the global query bar in controls.' },
+      defaultValue: false,
+    }),
+    ignoreTimerange: schema.boolean({
+      meta: { description: 'Ignore the global time range in controls.' },
+      defaultValue: false,
+    }),
+    ignoreValidations: schema.boolean({
+      meta: { description: 'Ignore validations in controls.' },
+      defaultValue: false,
+    }),
+  }),
+  showApplySelections: schema.boolean({
+    meta: { description: 'Show apply selections button in controls.' },
+    defaultValue: false,
+  }),
 });
 
 const searchSourceSchema = schema.object(
@@ -226,7 +219,7 @@ const searchSourceSchema = schema.object(
       )
     ),
   },
-  { defaultValue: {} }
+  { defaultValue: {}, unknowns: 'allow' }
 );
 
 export const gridDataSchema = schema.object({
@@ -349,6 +342,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
       meta: {
         description: 'A container for various metadata',
       },
+      defaultValue: {},
     }
   ),
   // Time
@@ -402,7 +396,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
   options: optionsSchema,
-  version: schema.number({ meta: { deprecated: true } }),
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });
 
 export const referenceSchema = schema.object(
