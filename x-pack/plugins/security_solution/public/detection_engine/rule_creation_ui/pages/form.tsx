@@ -145,6 +145,10 @@ export const useRuleIndexPattern = ({
   if (dataSourceType === DataSourceType.DataView && dataViewId) {
     initIndexPattern.id = dataViewId;
   }
+  // remove id, if it was set previously for data view
+  if (dataSourceType === DataSourceType.IndexPatterns && initIndexPattern.id) {
+    delete initIndexPattern.id;
+  }
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
