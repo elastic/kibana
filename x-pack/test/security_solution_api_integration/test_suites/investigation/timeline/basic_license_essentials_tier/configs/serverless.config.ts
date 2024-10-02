@@ -16,7 +16,7 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'essentials' },
     ])}`,
   ],
-  testFiles: [require.resolve('../tests')],
+  testFiles: [require.resolve('../../tests')],
   junit: {
     reportName: 'Timeline Integration Tests - Serverless Env - Essentials Tier',
   },
