@@ -35,8 +35,16 @@ import {
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
 import { log10ParameterTypes, powParameterTypes } from './__tests__/constants';
+import { getRecommendedQueries } from './recommended_queries/templates';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
+
+const getRecommendedQueriesSuggestions = (fromCommand: string, timeField?: string) =>
+  getRecommendedQueries({
+    fromCommand,
+    timeField,
+  });
+
 describe('autocomplete', () => {
   type TestArgs = [
     string,
@@ -82,10 +90,11 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
-    testSuggestions(
-      '/',
-      sourceCommands.map((name) => name.toUpperCase() + ' $0')
-    );
+    const expectedSuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    testSuggestions('/', [
+      ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
+      ...expectedSuggestions.map((q) => q.queryString),
+    ]);
     testSuggestions(
       'from a | /',
       commandDefinitions
@@ -523,10 +532,11 @@ describe('autocomplete', () => {
    */
   describe('Invoke trigger kind (all commands)', () => {
     // source command
-    testSuggestions(
-      'f/',
-      sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`)
-    );
+    let expectedSuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    testSuggestions('f/', [
+      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`),
+      ...expectedSuggestions.map((q) => q.queryString),
+    ]);
 
     // pipe command
     testSuggestions(
@@ -575,7 +585,13 @@ describe('autocomplete', () => {
     ]);
 
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [',', 'METADATA $0', '| ']);
+    expectedSuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+    testSuggestions('FROM index1 M/', [
+      ',',
+      'METADATA $0',
+      '| ',
+      ...expectedSuggestions.map((q) => q.queryString),
+    ]);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -710,12 +726,12 @@ describe('autocomplete', () => {
       ...s,
       asSnippet: true,
     });
-
+    let expectedSuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     // Source command
-    testSuggestions(
-      'F/',
-      ['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet)
-    );
+    testSuggestions('F/', [
+      ...['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ...expectedSuggestions.map((q) => q.queryString),
+    ]);
 
     // Pipe command
     testSuggestions(
@@ -787,11 +803,14 @@ describe('autocomplete', () => {
       );
     });
 
+    expectedSuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+
     // PIPE (|)
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      ...expectedSuggestions.map((q) => q.queryString),
     ]);
 
     // Assignment
@@ -833,6 +852,7 @@ describe('autocomplete', () => {
           ],
         ]
       );
+      expectedSuggestions = getRecommendedQueriesSuggestions('index1', 'dateField');
 
       testSuggestions(
         'FROM index1/',
@@ -840,6 +860,7 @@ describe('autocomplete', () => {
           { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          ...expectedSuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -851,12 +872,14 @@ describe('autocomplete', () => {
         ]
       );
 
+      expectedSuggestions = getRecommendedQueriesSuggestions('index2', 'dateField');
       testSuggestions(
         'FROM index1, index2/',
         [
           { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          ...expectedSuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -872,6 +895,7 @@ describe('autocomplete', () => {
       // meaning that Monaco by default will only set the replacement
       // range to cover "bar" and not "foo$bar". We have to make sure
       // we're setting it ourselves.
+      expectedSuggestions = getRecommendedQueriesSuggestions('foo$bar', 'dateField');
       testSuggestions(
         'FROM foo$bar/',
         [
@@ -894,18 +918,21 @@ describe('autocomplete', () => {
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 6, end: 13 },
           },
+          ...expectedSuggestions.map((q) => q.queryString),
         ],
         undefined,
         [, [{ name: 'foo$bar', hidden: false }]]
       );
 
       // This is an identifier that matches multiple sources
+      expectedSuggestions = getRecommendedQueriesSuggestions('i*', 'dateField');
       testSuggestions(
         'FROM i*/',
         [
           { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
           { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+          ...expectedSuggestions.map((q) => q.queryString),
         ],
         undefined,
         [
@@ -918,11 +945,13 @@ describe('autocomplete', () => {
       );
     });
 
+    expectedSuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
     testSuggestions('FROM index1 M/', [
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
       '| ',
+      ...expectedSuggestions.map((q) => q.queryString),
     ]);
 
     describe('ENRICH', () => {
