@@ -7452,6 +7452,10 @@
                 "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "searchprofiler",
                 "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
               },
@@ -9819,7 +9823,7 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/delete.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.ts"
               },
               {
                 "plugin": "actions",
@@ -10094,18 +10098,6 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/delete.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/delete.test.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/delete.test.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/index.test.ts"
               },
@@ -10152,6 +10144,18 @@
               {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/delete/delete.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -13692,7 +13696,9 @@
             "signature": [
               "(req: ",
               "Request",
-              ", responseToolkit: ",
+              "<",
+              "ReqRefDefaults",
+              ">, responseToolkit: ",
               "ResponseToolkit",
               ") => Promise<",
               "Boom",
@@ -13712,7 +13718,10 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  "Request"
+                  "Request",
+                  "<",
+                  "ReqRefDefaults",
+                  ">"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/router.ts",
                 "deprecated": false,
@@ -19574,7 +19583,9 @@
         "description": [],
         "signature": [
           "Request",
-          " | ",
+          "<",
+          "ReqRefDefaults",
+          "> | ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
