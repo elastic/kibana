@@ -8,7 +8,7 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ControlStyle, DefaultControlState, ParentIgnoreSettings } from '../types';
+import { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
 
@@ -31,7 +31,7 @@ export interface ControlGroupEditorConfig {
 
 export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
   chainingSystem: ControlGroupChainingSystem;
-  labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
+  labelPosition: ControlLabelPosition;
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
@@ -50,7 +50,7 @@ export interface ControlGroupSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
-  controlStyle: ControlStyle;
+  controlStyle: ControlLabelPosition;
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
   showApplySelections?: boolean;
