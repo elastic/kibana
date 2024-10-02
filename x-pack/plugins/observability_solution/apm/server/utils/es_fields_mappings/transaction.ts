@@ -38,9 +38,9 @@ import {
   LABEL_TYPE,
   LABEL_TELEMETRY_AUTO_VERSION,
   LABEL_LIFECYCLE_STATE,
+  TIMESTAMP,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { isOptionalFieldDefined, normalizeValue } from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 import { linkedParentsOfSpanMapping } from './span_links';

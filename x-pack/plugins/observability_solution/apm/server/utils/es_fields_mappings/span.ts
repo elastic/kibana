@@ -37,9 +37,9 @@ import {
   DATA_STREAM_NAMESPACE,
   DATA_STEAM_TYPE,
   DATA_STREAM_DATASET,
+  TIMESTAMP,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 
