@@ -18,43 +18,44 @@ interface EntityIconProps {
   entity: Entity;
 }
 
+type NotNullableCloudProvider = Exclude<CloudProvider, null>;
+
+const getSingleValue = <T,>(value?: T | T[] | null): T | undefined => {
+  return value == null ? undefined : Array.isArray(value) ? value[0] : value;
+};
+
 export function EntityIcon({ entity }: EntityIconProps) {
   const entityType = entity[ENTITY_TYPE];
-  const defaultSizeIconPx = euiThemeVars.euiSizeL;
+  const defaultIconSize = euiThemeVars.euiSizeL;
 
-  if (entityType === 'host' || entityType === 'container') {
-    const cloudProvider = entity[CLOUD_PROVIDER] as CloudProvider;
-
-    const formattedCloudProvider =
-      typeof cloudProvider === 'string' ? cloudProvider : cloudProvider?.[0];
-
-    return (
-      <EuiFlexGroup
-        style={{
-          width: defaultSizeIconPx,
-          height: defaultSizeIconPx,
-        }}
-        alignItems="center"
-        justifyContent="center"
-      >
-        <EuiFlexItem grow={false}>
-          <CloudProviderIcon
-            cloudProvider={formattedCloudProvider}
-            size="m"
-            title={formattedCloudProvider}
-            role="presentation"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  switch (entityType) {
+    case 'host':
+    case 'container': {
+      const cloudProvider = getSingleValue(
+        entity[CLOUD_PROVIDER] as NotNullableCloudProvider | NotNullableCloudProvider[]
+      );
+      return (
+        <EuiFlexGroup
+          style={{ width: defaultIconSize, height: defaultIconSize }}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <EuiFlexItem grow={false}>
+            <CloudProviderIcon
+              cloudProvider={cloudProvider}
+              size="m"
+              title={cloudProvider}
+              role="presentation"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    case 'service': {
+      const agentName = getSingleValue(entity[AGENT_NAME] as AgentName | AgentName[]);
+      return <AgentIcon agentName={agentName} role="presentation" />;
+    }
+    default:
+      return <EuiIcon type="" size="l" />;
   }
-
-  if (entityType === 'service') {
-    const agentName = entity[AGENT_NAME] as AgentName;
-    const formattedAgentName = typeof agentName === 'string' ? agentName : agentName?.[0];
-
-    return <AgentIcon agentName={formattedAgentName} role="presentation" />;
-  }
-
-  return <EuiIcon type="" size="l" />;
 }
