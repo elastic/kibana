@@ -32,7 +32,7 @@ export const useGetDataUsageMetrics = (
     keepPreviousData: true,
     queryFn: async () => {
       return http.get<UsageMetricsResponseSchemaBody>(DATA_USAGE_METRICS_API_ROUTE, {
-        version: '2023-10-31',
+        version: '1',
         query: {
           from: query.from,
           to: query.to,

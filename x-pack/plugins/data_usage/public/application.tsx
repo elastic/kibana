@@ -17,6 +17,7 @@ import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';
 import { DataUsage } from './app/data_usage';
+import { DataUsageReactQueryClientProvider } from '../common/query_client';
 
 export const renderApp = (
   core: CoreStart,
@@ -77,7 +78,9 @@ const App = ({ core, plugins, pluginStart, params }: AppProps) => {
   return (
     <KibanaRenderContextProvider {...core} {...params}>
       <KibanaContextProviderForPlugin>
-        <AppWithExecutionContext core={core} params={params} />
+        <DataUsageReactQueryClientProvider>
+          <AppWithExecutionContext core={core} params={params} />
+        </DataUsageReactQueryClientProvider>
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>
   );
