@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiModal,
   EuiModalBody,
@@ -263,6 +263,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
+
+  // Whenever the formData changes, we need to re-validate the dataRetention field
+  // as it depends on the timeUnit field.
+  useEffect(() => {
+    form.validateFields(['dataRetention']);
+  }, [formData, form]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
