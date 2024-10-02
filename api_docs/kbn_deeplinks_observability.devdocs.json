@@ -1186,7 +1186,7 @@
         "label": "SmartFieldGridColumnOptions",
         "description": [],
         "signature": [
-          "{ type: \"smart-field\"; smartField: \"resource\" | \"content\"; width?: number | undefined; }"
+          "{ type: \"smart-field\"; smartField: \"content\" | \"resource\"; width?: number | undefined; }"
         ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,

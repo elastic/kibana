@@ -677,10 +677,7 @@
             "signature": [
               "(kibanaResponse: ",
               "KibanaResponse",
-              "<any>) => ",
-              "Boom",
-              "<any> | ",
-              "ResponseObject"
+              "<any>) => any"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,

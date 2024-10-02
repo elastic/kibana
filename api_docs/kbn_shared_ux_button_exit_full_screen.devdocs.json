@@ -37,7 +37,7 @@
             "section": "def-common.ExitFullScreenButtonProps",
             "text": "ExitFullScreenButtonProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
         "deprecated": false,
@@ -78,9 +78,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "KibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
         "deprecated": false,
@@ -94,9 +94,9 @@
             "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "KibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
             "deprecated": false,

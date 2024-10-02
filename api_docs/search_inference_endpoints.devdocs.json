@@ -52,14 +52,14 @@
             {
               "parentPluginId": "searchInferenceEndpoints",
               "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEdnpointsProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -73,7 +73,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -87,7 +87,7 @@
           "label": "InferenceEndpoints",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<{}>"
           ],
           "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
           "deprecated": false,
@@ -97,14 +97,14 @@
             {
               "parentPluginId": "searchInferenceEndpoints",
               "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEndpoints.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -118,7 +118,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
