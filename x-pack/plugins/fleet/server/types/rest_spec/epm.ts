@@ -129,6 +129,14 @@ export const InstallationInfoSchema = schema.object({
   ),
 });
 
+const PackageIconSchema = schema.object({
+  path: schema.maybe(schema.string()),
+  src: schema.string(),
+  title: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+  size: schema.maybe(schema.string()),
+});
+
 export const PackageInfoSchema = schema.object({
   status: schema.maybe(schema.string()),
   savedObject: schema.maybe(schema.any({ meta: { deprecated: true } })),
@@ -137,27 +145,45 @@ export const PackageInfoSchema = schema.object({
   version: schema.string(),
   description: schema.string(),
   title: schema.string(),
-  icons: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        path: schema.string(),
-        src: schema.string(),
-        title: schema.maybe(schema.string()),
-        type: schema.maybe(schema.string()),
-        size: schema.maybe(schema.string()),
-      })
-    )
+  icons: schema.maybe(schema.arrayOf(PackageIconSchema)),
+  conditions: schema.maybe(
+    schema.object({
+      kibana: schema.object({ version: schema.string() }),
+      elastic: schema.maybe(
+        schema.object({
+          subscription: schema.string(),
+          capabilities: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+    })
   ),
   release: schema.maybe(
     schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
   ),
   type: schema.maybe(schema.oneOf([schema.literal('integration'), schema.literal('input')])),
-  path: schema.string(),
-  download: schema.string(),
+  path: schema.maybe(schema.string()),
+  download: schema.maybe(schema.string()),
   internal: schema.maybe(schema.boolean()),
   data_streams: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
   policy_templates: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
   categories: schema.maybe(schema.arrayOf(schema.string())),
+  owner: schema.object({
+    github: schema.maybe(schema.string()),
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('elastic'),
+        schema.literal('partner'),
+        schema.literal('community'),
+      ])
+    ),
+  }),
+  readme: schema.maybe(schema.string()),
+  signature_path: schema.maybe(schema.string()),
+  source: schema.maybe(
+    schema.object({
+      license: schema.string(),
+    })
+  ),
 });
 
 export const PackageListItemSchema = PackageInfoSchema.extends({
@@ -238,23 +264,13 @@ export const GetInputsResponseSchema = schema.oneOf([
   }),
 ]);
 
-export const GetFileResponseSchema = schema.buffer();
+export const GetFileResponseSchema = schema.any();
 
 export const PackageMetadataSchema = schema.object({
   has_policies: schema.boolean(),
 });
 
 export const GetPackageInfoSchema = PackageInfoSchema.extends({
-  owner: schema.object({
-    github: schema.string(),
-    type: schema.maybe(
-      schema.oneOf([
-        schema.literal('elastic'),
-        schema.literal('partner'),
-        schema.literal('community'),
-      ])
-    ),
-  }),
   latestVersion: schema.string(),
   assets: schema.recordOf(schema.string(), schema.any()),
   notice: schema.maybe(schema.string()),
@@ -262,38 +278,7 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
   keepPoliciesUpToDate: schema.maybe(schema.boolean()),
   format_version: schema.string(),
   license: schema.maybe(schema.string()),
-  source: schema.maybe(
-    schema.object({
-      license: schema.string(),
-    })
-  ),
-  conditions: schema.maybe(
-    schema.object({
-      kibana: schema.object({ version: schema.string() }),
-      elastic: schema.maybe(schema.object({ subscription: schema.string() })),
-    })
-  ),
-  icons: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        src: schema.string(),
-        title: schema.maybe(schema.string()),
-        type: schema.maybe(schema.string()),
-        size: schema.maybe(schema.string()),
-      })
-    )
-  ),
-  screenshots: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        path: schema.string(),
-        src: schema.string(),
-        title: schema.maybe(schema.string()),
-        type: schema.maybe(schema.string()),
-        size: schema.maybe(schema.string()),
-      })
-    )
-  ),
+  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema)),
   vars: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
   elasticsearch: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   agent: schema.maybe(
@@ -314,9 +299,6 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
       })
     )
   ),
-  readme: schema.maybe(schema.string()),
-  internal: schema.maybe(schema.boolean()),
-  signature_path: schema.maybe(schema.string()),
 });
 
 export const GetInfoResponseSchema = schema.object({

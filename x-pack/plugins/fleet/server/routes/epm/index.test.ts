@@ -236,6 +236,7 @@ describe('schema validation', () => {
         },
         elastic: {
           subscription: 'basic',
+          capabilities: ['test'],
         },
       },
       icons: [
@@ -244,6 +245,7 @@ describe('schema validation', () => {
           title: 'title',
           size: 'size',
           type: 'type',
+          path: 'path',
         },
       ],
       screenshots: [
@@ -381,6 +383,7 @@ describe('schema validation', () => {
       ],
       categories: ['advanced_analytics_ueba'],
       savedObject,
+      owner: { github: 'test', type: 'elastic' },
     };
     const expectedResponse: GetPackagesResponse = {
       items: [packageItem],

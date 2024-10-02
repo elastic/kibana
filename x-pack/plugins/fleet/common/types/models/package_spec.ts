@@ -26,7 +26,7 @@ export interface PackageSpecManifest {
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
-  owner: { github: string; type?: 'elastic' | 'partner' | 'community' };
+  owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
@@ -118,6 +118,7 @@ export interface PackageSpecConditions {
   };
   elastic?: {
     subscription: string;
+    capabilities?: string[];
   };
 }
 
