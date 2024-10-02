@@ -27,6 +27,6 @@ describe('DocumentList', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Browse documents')).toBeInTheDocument();
+    expect(screen.getByText('No documents found for index')).toBeInTheDocument();
   });
 });
