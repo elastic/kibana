@@ -291,7 +291,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         P,
         Q,
         B,
-        typeof request.method
+        typeof request.method extends RouteMethod ? typeof request.method : any
       >;
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
