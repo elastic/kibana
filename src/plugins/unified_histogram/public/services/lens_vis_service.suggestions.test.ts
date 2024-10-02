@@ -8,6 +8,7 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
@@ -194,5 +195,56 @@ describe('LensVisService suggestions', () => {
 
     expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
     expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
+  });
+
+  test('should return histogramSuggestion if no suggestions returned by the api with the breakdown field if it is given', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | limit 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: { name: 'var0' } as DataViewField,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      hasHistogramSuggestionForESQL: true,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+    expect(lensVis.currentSuggestionContext?.suggestion?.visualizationState).toHaveProperty(
+      'layers',
+      [
+        {
+          layerId: '662552df-2cdc-4539-bf3b-73b9f827252c',
+          seriesType: 'bar_stacked',
+          xAccessor: '@timestamp every 30 second',
+          accessors: ['results'],
+          layerType: 'data',
+          splitAccessor: 'var0',
+        },
+      ]
+    );
+
+    const histogramQuery = {
+      esql: `from the-data-view | limit 100
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`var0\` | sort \`var0\` asc | rename timestamp as \`@timestamp every 30 minute\``,
+    };
+
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 });

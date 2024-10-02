@@ -29,7 +29,7 @@
         "signature": [
           "({ children, ...props }: ",
           "BrowserRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
@@ -64,7 +64,7 @@
         "signature": [
           "({ children, ...props }: ",
           "HashRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
@@ -99,7 +99,7 @@
         "signature": [
           "({ children, ...props }: ",
           "MemoryRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
@@ -136,7 +136,7 @@
         "signature": [
           "<T extends {}>({ children, component: Component, render, ...rest }: ",
           "RouteProps",
-          "<string, { [K: string]: string; } & T>) => JSX.Element"
+          "<string, { [K: string]: string; } & T>) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/route.tsx",
         "deprecated": false,
@@ -172,7 +172,7 @@
         "signature": [
           "({ children, ...props }: ",
           "RouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/router.tsx",
         "deprecated": false,
@@ -205,7 +205,7 @@
         "label": "Routes",
         "description": [],
         "signature": [
-          "({ legacySwitch, children, }: { legacySwitch?: boolean | undefined; children: React.ReactNode; }) => JSX.Element"
+          "({ legacySwitch, children, }: { legacySwitch?: boolean | undefined; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/router/impl/routes.tsx",
         "deprecated": false,
@@ -244,7 +244,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/shared-ux/router/impl/routes.tsx",
                 "deprecated": false,
