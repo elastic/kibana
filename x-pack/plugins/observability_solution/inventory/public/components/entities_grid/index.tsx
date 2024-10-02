@@ -184,7 +184,7 @@ export function EntitiesGrid({
   );
 
   const renderNameCellValue = useCallback(
-    (entity) => {
+    (entity: LatestEntity) => {
       return (
         <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl(entity)}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
