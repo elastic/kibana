@@ -91,11 +91,13 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
   return {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
+      // Custom role has no descriptors by default, check if it was added before authentication
       throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
 
     async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
+      // Custom role has no descriptors by default, check if it was added before authentication
       throwIfRoleNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getApiCredentialsForRole(role);
     },
@@ -150,6 +152,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
 
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
+      // Get admin credentials in order to invalidate the API key
       const adminCookieHeader = await getAdminCredentials();
 
       const { status } = await supertestWithoutAuth
@@ -180,6 +183,8 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         .send(customRoleDescriptors);
 
       expect(status).to.be(204);
+
+      // Update descriptors for custome role, it will be used to create API key
       supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
     },
 
