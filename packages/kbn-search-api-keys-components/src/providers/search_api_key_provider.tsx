@@ -72,7 +72,7 @@ export const ApiKeyContext = createContext<APIKeyContext>({
   initialiseKey: () => {},
 });
 
-export const SearchApiKeyProvider: React.FC<{ children: any }> = ({ children }) => {
+export const SearchApiKeyProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { http } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
 
