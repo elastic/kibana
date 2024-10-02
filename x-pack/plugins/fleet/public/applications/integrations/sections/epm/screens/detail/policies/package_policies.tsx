@@ -52,6 +52,7 @@ interface PackagePoliciesPanelProps {
 interface InMemoryPackagePolicyAndAgentPolicy {
   packagePolicy: InMemoryPackagePolicy;
   agentPolicies: GetAgentPoliciesResponseItem[];
+  tableIndex: number;
 }
 
 const IntegrationDetailsLink = memo<{
@@ -87,6 +88,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string | null>(
     agentPolicyIdFromParams
   );
+  const [selectedTableIndex, setSelectedTableIndex] = useState<number | undefined>();
+
   const { getPath, getHref } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
@@ -111,12 +114,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicies: GetAgentPoliciesResponseItem[];
     packagePolicy: InMemoryPackagePolicy;
+    tableIndex: number;
   }> => {
     if (!data?.items) {
       return [];
     }
 
-    const newPolicies = data.items.map(({ agentPolicies, packagePolicy }) => {
+    const newPolicies = data.items.map(({ agentPolicies, packagePolicy }, index) => {
       const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
       return {
@@ -125,6 +129,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           ...packagePolicy,
           hasUpgrade,
         },
+        tableIndex: index,
       };
     });
 
@@ -279,7 +284,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ agentPolicies, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+        render({ agentPolicies, packagePolicy, tableIndex }: InMemoryPackagePolicyAndAgentPolicy) {
           if (agentPolicies.length === 0) {
             return (
               <EuiText color="subdued" size="xs">
@@ -293,7 +298,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           return (
             <PackagePolicyAgentsCell
               agentPolicies={agentPolicies}
-              onAddAgent={() => setFlyoutOpenForPolicyId(agentPolicies[0].id)}
+              onAddAgent={() => {
+                setSelectedTableIndex(tableIndex);
+                setFlyoutOpenForPolicyId(agentPolicies[0].id);
+              }}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
             />
           );
@@ -361,9 +369,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );
   }
-  const selectedPolicies = packageAndAgentPolicies.find(({ agentPolicies: policies }) =>
-    policies.find((policy) => policy.id === flyoutOpenForPolicyId)
-  );
+
+  const selectedPolicies =
+    selectedTableIndex !== undefined ? packageAndAgentPolicies[selectedTableIndex] : undefined;
 
   const agentPolicies = selectedPolicies?.agentPolicies;
   const packagePolicy = selectedPolicies?.packagePolicy;
@@ -393,6 +401,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             history.replace({ search: stringify(rest) });
           }}
           agentPolicy={flyoutPolicy}
+          selectedAgentPolicies={agentPolicies}
           isIntegrationFlow={true}
           installedPackagePolicy={{
             name: packagePolicy?.package?.name || '',

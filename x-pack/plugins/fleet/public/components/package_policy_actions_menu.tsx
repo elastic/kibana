@@ -169,6 +169,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicies.length === 1 ? agentPolicies[0] : undefined} // in case of multiple policies, show the selector in the flyout
+            selectedAgentPolicies={agentPolicies}
             onClose={onEnrollmentFlyoutClose}
             isIntegrationFlow={true}
             installedPackagePolicy={{

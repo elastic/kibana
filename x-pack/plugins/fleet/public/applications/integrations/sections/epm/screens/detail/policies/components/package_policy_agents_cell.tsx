@@ -149,7 +149,7 @@ export const AgentsCountBreakDown = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const getKuery = (agentPolicyId: string) =>
-    `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}${
+    `${AGENTS_PREFIX}.policy_id : "${agentPolicyId}"${
       privilegeMode
         ? ` and ${
             privilegeMode === 'unprivileged' ? UNPRIVILEGED_AGENT_KUERY : PRIVILEGED_AGENT_KUERY
