@@ -6,7 +6,7 @@
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { linkedParentsOfSpanMapping } from '../../utils/es_fields_mappings';
+import type { TransactionRaw, SpanRaw } from '@kbn/apm-types';
 import {
   SPAN_ID,
   SPAN_LINKS,
@@ -37,7 +37,6 @@ export async function getLinkedParentsOfSpan({
     },
     _source: [SPAN_LINKS],
     body: {
-      fields: [SPAN_LINKS],
       track_total_hits: false,
       size: 1,
       query: {
@@ -56,7 +55,7 @@ export async function getLinkedParentsOfSpan({
     },
   });
 
-  const fieldsNorm = linkedParentsOfSpanMapping(response.hits.hits[0]?.fields);
+  const source = response.hits.hits?.[0]?._source as TransactionRaw | SpanRaw;
 
-  return fieldsNorm?.span?.links || [];
+  return source?.span?.links || [];
 }
