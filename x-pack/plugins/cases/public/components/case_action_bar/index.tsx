@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import type { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import { CaseMetricsFeature } from '../../../common/types/api';
 import { ActionBarStatusItem } from './action_bar_status_item';
@@ -66,6 +66,20 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       }),
     [caseData.settings, onUpdateField]
   );
+  const disableStatusMenu = useMemo(() => {
+    // User has full permissions
+    if (permissions.update && permissions.reopenCases) {
+      return false;
+    } else {
+      // When true, we only want to block if the case is closed
+      if (caseData.status === CaseStatuses.closed) {
+        return !permissions.reopenCases;
+      } else {
+        // Allow the update permission to disable as before
+        return !permissions.update;
+      }
+    }
+  }, [caseData.status, permissions.update, permissions.reopenCases]);
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
@@ -83,7 +97,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
         <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
-            disabled={!permissions.update}
+            disabled={disableStatusMenu}
             isLoading={isLoading}
             onStatusChanged={onStatusChanged}
           />
@@ -98,7 +112,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
           </EuiFlexItem>
         ) : null}
 
-        {permissions.update && isSyncAlertsEnabled ? (
+        {(permissions.update || permissions.reopenCases) && isSyncAlertsEnabled ? (
           <EuiFlexItem grow={false}>
             <ActionBarStatusItem
               title={

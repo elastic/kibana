@@ -348,11 +348,21 @@ export const bulkUpdate = async (
       casesMap,
       query.cases
     );
-
-    await authorization.ensureAuthorized({
-      entities: casesToAuthorize,
-      operation: Operations.updateCase,
+    const requestToChangeStatusFromClosed = Array.from(casesMap.values()).some((c) => {
+      return c.attributes.status === CaseStatuses.closed;
     });
+
+    if (requestToChangeStatusFromClosed) {
+      await authorization.ensureAuthorized({
+        entities: casesToAuthorize,
+        operation: Operations.reopenCases,
+      });
+    } else {
+      await authorization.ensureAuthorized({
+        entities: casesToAuthorize,
+        operation: Operations.updateCase,
+      });
+    }
 
     if (nonExistingCases.length > 0) {
       throw Boom.notFound(

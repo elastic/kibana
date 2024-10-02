@@ -98,6 +98,8 @@ export const CasesProvider: FC<
         read: permissions.read,
         settings: permissions.settings,
         update: permissions.update,
+        reopenCases: permissions.reopenCases,
+        createComment: permissions.createComment,
       },
       basePath,
       /**
@@ -127,6 +129,8 @@ export const CasesProvider: FC<
       permissions.read,
       permissions.settings,
       permissions.update,
+      permissions.reopenCases,
+      permissions.createComment,
     ]
   );
 

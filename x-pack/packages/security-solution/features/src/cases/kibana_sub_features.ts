@@ -29,6 +29,7 @@ export const getCasesSubFeaturesMap = ({
   apiTags,
   savedObjects,
 }: CasesFeatureParams) => {
+  // TODO: second place cases perms are defined
   const deleteCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate('securitySolutionPackages.features.featureRegistry.deleteSubFeatureName', {
       defaultMessage: 'Delete',

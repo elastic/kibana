@@ -18,6 +18,8 @@ export interface CasesApiTags {
   all: readonly string[];
   read: readonly string[];
   delete: readonly string[];
+  changeStatus: readonly string[];
+  addComment: readonly string[];
 }
 
 export const getApiTags = (owner: Owner): CasesApiTags => {
@@ -40,5 +42,7 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       read,
     ] as const,
     delete: [deleteTag] as const,
+    changeStatus: ['changeState'] as const,
+    addComment: ['addComment'] as const,
   };
 };
