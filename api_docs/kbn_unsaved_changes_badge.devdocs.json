@@ -87,7 +87,7 @@
           "\nBadge component. It opens a menu panel with actions once pressed."
         ],
         "signature": [
-          "({ badgeText, onRevert, onSave, onSaveAs, }: React.PropsWithChildren<",
+          "({ badgeText, onRevert, onSave, onSaveAs, }: ",
           {
             "pluginId": "@kbn/unsaved-changes-badge",
             "scope": "common",
@@ -95,7 +95,7 @@
             "section": "def-common.UnsavedChangesBadgeProps",
             "text": "UnsavedChangesBadgeProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
         "deprecated": false,
@@ -104,20 +104,18 @@
           {
             "parentPluginId": "@kbn/unsaved-changes-badge",
             "id": "def-common.UnsavedChangesBadge.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  badgeText,\n  onRevert,\n  onSave,\n  onSaveAs,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unsaved-changes-badge",
                 "scope": "common",
                 "docId": "kibKbnUnsavedChangesBadgePluginApi",
                 "section": "def-common.UnsavedChangesBadgeProps",
                 "text": "UnsavedChangesBadgeProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-unsaved-changes-badge/src/components/unsaved_changes_badge/unsaved_changes_badge.tsx",
             "deprecated": false,

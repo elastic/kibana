@@ -94,7 +94,7 @@
         "signature": [
           "(props: ",
           "DashboardListingProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
         "deprecated": false,
@@ -129,7 +129,7 @@
         "signature": [
           "(props: ",
           "DashboardTopNavProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
         "deprecated": false,
@@ -346,7 +346,7 @@
         "signature": [
           "(props: ",
           "DashboardRendererProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/dashboard/public/dashboard_container/external_api/lazy_dashboard_renderer.tsx",
         "deprecated": false,
