@@ -32,9 +32,9 @@ export let kibanaVersion: string;
 export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
-export let expressionsService: ExpressionsStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let embeddableService: EmbeddableStart;
+export let expressionsService: ExpressionsStart;
 export let presentationUtilService: PresentationUtilPluginStart;
 export let reportingService: ReportingStart | undefined;
 export let spacesService: SpacesApi | undefined;
@@ -56,9 +56,9 @@ export const setKibanaServices = (
   coreServices = kibanaCore;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
-  expressionsService = deps.expressions;
   dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
+  expressionsService = deps.expressions;
   presentationUtilService = deps.presentationUtil;
   reportingService = kibanaCore.application.capabilities.canvas?.generatePdf
     ? deps.reporting
