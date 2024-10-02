@@ -39,6 +39,10 @@ import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import {
+  DiscoverEBTPerformanceProviderMock,
+  DiscoverEBTPerformanceMockValue,
+} from '../../../../__mocks__/ebt_performance';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -122,9 +126,11 @@ async function mountComponent(
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={stateContainer}>
-        <DiscoverLayout {...props} />
-      </DiscoverMainProvider>
+      <DiscoverEBTPerformanceProviderMock>
+        <DiscoverMainProvider value={stateContainer}>
+          <DiscoverLayout {...props} />
+        </DiscoverMainProvider>
+      </DiscoverEBTPerformanceProviderMock>
     </KibanaContextProvider>,
     mountOptions
   );
@@ -139,6 +145,17 @@ async function mountComponent(
 }
 
 describe('Discover component', () => {
+  beforeEach(() => {
+    DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime.mockReset();
+    DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime.mockReset();
+  });
+
+  it('should render', async () => {
+    await mountComponent(dataViewWithTimefieldMock);
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).not.toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).toHaveBeenCalled();
+  }, 10000);
+
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
@@ -185,5 +202,7 @@ describe('Discover component', () => {
     expect(component.find(ErrorCallout)).toHaveLength(1);
     expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
     expect(component.find(PanelsToggle).prop('renderedFor')).toBe('prompt');
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
   }, 10000);
 });

@@ -21,6 +21,10 @@ import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/publ
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import {
+  DiscoverEBTPerformanceMockValue,
+  DiscoverEBTPerformanceProviderMock,
+} from '../../../__mocks__/ebt_performance';
 
 const discoverServices = createDiscoverServicesMock();
 const mockSearchApi = jest.fn();
@@ -85,7 +89,9 @@ async function mountDoc(update = false) {
   await act(async () => {
     comp = mountWithIntl(
       <KibanaContextProvider services={services}>
-        <Doc {...props} />
+        <DiscoverEBTPerformanceProviderMock>
+          <Doc {...props} />
+        </DiscoverEBTPerformanceProviderMock>
       </KibanaContextProvider>
     );
     if (update) comp.update();
@@ -107,12 +113,16 @@ describe('Test of <Doc /> of Discover', () => {
     mockSearchApi.mockImplementation(() => throwError({ status: 404 }));
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-notFound').length).toBe(1);
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
   });
 
   test('renders error msg', async () => {
     mockSearchApi.mockImplementation(() => throwError({ error: 'something else' }));
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
   });
 
   test('renders elasticsearch hit ', async () => {
@@ -121,5 +131,7 @@ describe('Test of <Doc /> of Discover', () => {
     );
     const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-hit').length).toBe(1);
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).not.toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).toHaveBeenCalled();
   });
 });

@@ -851,6 +851,20 @@ describe('UnifiedDataTable', () => {
     EXTENDED_JEST_TIMEOUT
   );
 
+  it(
+    'should call onInitialRenderComplete when the grid is rendered',
+    async () => {
+      const onInitialRenderComplete = jest.fn();
+      await getComponent({
+        ...getProps(),
+        onInitialRenderComplete,
+      });
+
+      expect(onInitialRenderComplete).toHaveBeenCalled();
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
   describe('externalAdditionalControls', () => {
     it(
       'should render external additional toolbar controls',

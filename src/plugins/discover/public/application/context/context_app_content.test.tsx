@@ -22,6 +22,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import {
+  DiscoverEBTPerformanceMockValue,
+  DiscoverEBTPerformanceProviderMock,
+} from '../../__mocks__/ebt_performance';
 
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
@@ -83,7 +87,9 @@ describe('ContextAppContent test', () => {
 
     const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <ContextAppContent {...props} />
+        <DiscoverEBTPerformanceProviderMock>
+          <ContextAppContent {...props} />
+        </DiscoverEBTPerformanceProviderMock>
       </KibanaContextProvider>
     );
     await act(async () => {
@@ -93,12 +99,18 @@ describe('ContextAppContent test', () => {
     return component;
   };
 
+  beforeEach(() => {
+    DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime.mockReset();
+    DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime.mockReset();
+  });
+
   it('should render legacy table correctly', async () => {
     const component = await mountComponent({});
     expect(component.find(DocTableWrapper).length).toBe(1);
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
   });
 
   it('renders loading indicator', async () => {
@@ -106,12 +118,15 @@ describe('ContextAppContent test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(component.find(DocTableWrapper).length).toBe(1);
     expect(loadingIndicator.length).toBe(1);
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
   });
 
   it('should render discover grid correctly', async () => {
     const component = await mountComponent({ isLegacy: false });
     expect(component.find(UnifiedDataTable).length).toBe(1);
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).not.toHaveBeenCalled();
+    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).toHaveBeenCalled();
   });
 
   it('should not show display options button', async () => {

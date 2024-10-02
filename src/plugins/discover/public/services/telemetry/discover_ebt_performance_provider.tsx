@@ -15,7 +15,7 @@ interface DiscoverEBTPerformanceContextProps {
   onSkipPluginRenderTime: () => void; // ignore and skip tracking the main plugin content render time if the initial render had secondary content (error, empty, etc)
 }
 
-const DiscoverEBTPerformanceContext = createContext<DiscoverEBTPerformanceContextProps>({
+export const DiscoverEBTPerformanceContext = createContext<DiscoverEBTPerformanceContextProps>({
   onTrackPluginRenderTime: () => {},
   onSkipPluginRenderTime: () => {},
 });
