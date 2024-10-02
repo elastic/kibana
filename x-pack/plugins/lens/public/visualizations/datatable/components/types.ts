@@ -72,8 +72,8 @@ export type DatatableRenderProps = DatatableProps & {
 export interface DataContextType {
   table?: Datatable;
   rowHasRowClickTriggerActions?: boolean[];
-  alignments?: Record<string, 'left' | 'right' | 'center'>;
-  minMaxByColumnId?: Record<string, { min: number; max: number }>;
+  alignments?: Map<string, 'left' | 'right' | 'center'>;
+  minMaxByColumnId?: Map<string, { min: number; max: number }>;
   handleFilterClick?: (
     field: string,
     value: unknown,

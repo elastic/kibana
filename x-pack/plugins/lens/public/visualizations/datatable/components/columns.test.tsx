@@ -72,7 +72,7 @@ const callCreateGridColumns = (
     params.formatFactory ?? (((x: unknown) => ({ convert: () => x })) as unknown as FormatFactory),
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
-    params.alignments ?? {},
+    params.alignments ?? new Map(),
     params.headerRowHeight ?? RowHeightMode.auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],

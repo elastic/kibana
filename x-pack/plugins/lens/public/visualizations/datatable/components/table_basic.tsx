@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-import { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
+import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -267,30 +267,26 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
-  const isNumericMap: Record<string, boolean> = useMemo(
+  const isNumericMap: Map<string, boolean> = useMemo(
     () =>
-      firstLocalTable.columns.reduce<Record<string, boolean>>(
-        (map, column) => ({
-          ...map,
-          [column.id]: isNumericField(column.meta),
-        }),
-        {}
-      ),
+      firstLocalTable.columns.reduce((acc, column) => {
+        acc.set(column.id, isNumericField(column.meta));
+        return acc;
+      }, new Map<string, boolean>()),
     [firstLocalTable.columns]
   );
 
-  const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
-    const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
-    columnConfig.columns.forEach((column) => {
-      alignmentMap[column.columnId] = getColumnAlignment(column, isNumericMap[column.columnId]);
-    });
-    return alignmentMap;
+  const alignments: Map<string, 'left' | 'right' | 'center'> = useMemo(() => {
+    return columnConfig.columns.reduce((acc, column) => {
+      acc.set(column.columnId, getColumnAlignment(column, isNumericMap.get(column.columnId)));
+      return acc;
+    }, new Map<string, 'left' | 'right' | 'center'>());
   }, [columnConfig.columns, isNumericMap]);
 
-  const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
+  const minMaxByColumnId: Map<string, { min: number; max: number }> = useMemo(() => {
     return findMinMaxByColumnId(
       columnConfig.columns
-        .filter(({ columnId }) => isNumericMap[columnId])
+        .filter(({ columnId }) => isNumericMap.get(columnId))
         .map(({ columnId }) => columnId),
       props.data,
       getOriginalId
@@ -416,7 +412,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         : {
             type: 'ranges',
             bins: 0,
-            ...minMaxByColumnId[originalId],
+            ...(minMaxByColumnId.get(originalId) ?? getFallbackDataBounds()),
           };
       const colorFn = getCellColorFn(
         props.paletteService,
@@ -488,7 +484,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ])
       );
       return ({ columnId }: { columnId: string }) => {
-        const currentAlignment = alignments && alignments[columnId];
+        const currentAlignment = alignments.get(columnId);
         const alignmentClassName = `lnsTableCell--${currentAlignment}`;
         const columnName =
           columns.find(({ id }) => id === columnId)?.displayAsText?.replace(/ /g, '-') || columnId;

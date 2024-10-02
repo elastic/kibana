@@ -147,8 +147,8 @@ export const getDatatableVisualization = ({
               .map(({ id }) => id) || []
           : [accessor];
         const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
-
-        if (palette && !showColorByTerms && !palette?.canDynamicColoring) {
+        const dataBounds = minMaxByColumnId.get(accessor);
+        if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {
             type: 'palette',
             name: showColorByTerms ? 'default' : defaultPaletteParams.name,
@@ -158,7 +158,7 @@ export const getDatatableVisualization = ({
             palette: {
               ...newPalette,
               params: {
-                stops: applyPaletteParams(paletteService, newPalette, minMaxByColumnId[accessor]),
+                stops: applyPaletteParams(paletteService, newPalette, dataBounds),
               },
             },
           };

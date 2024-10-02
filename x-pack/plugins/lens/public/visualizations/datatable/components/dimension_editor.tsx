@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
@@ -95,7 +95,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
       []
     : [accessor];
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
-  const currentMinMax = minMaxByColumnId[accessor];
+  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
   const activePalette = column?.palette ?? {
     type: 'palette',
