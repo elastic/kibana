@@ -204,7 +204,7 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           ...slo,
           settings: newSettings,
@@ -316,7 +316,7 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('Transform install error');
 
-      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(1); // for the sli only
@@ -343,7 +343,7 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('summary transform start error');
 
-      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();
