@@ -11,6 +11,10 @@ import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api
 import _ from 'lodash';
 import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
+  CRITICALITY_VALUES,
+  CriticalityValues,
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import {
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
@@ -93,6 +97,41 @@ export default ({ getService }: FtrProviderContext) => {
             },
             updated_at: {
               type: 'date',
+            },
+            asset: {
+              properties: {
+                criticality: {
+                  type: 'keyword',
+                },
+              },
+            },
+            host: {
+              properties: {
+                asset: {
+                  properties: {
+                    criticality: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+            user: {
+              properties: {
+                asset: {
+                  properties: {
+                    criticality: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
             },
           },
         });
@@ -197,12 +236,23 @@ export default ({ getService }: FtrProviderContext) => {
       const startTime = Date.now() - 1000 * TEST_DATA_LENGTH;
       const records: AssetCriticalityRecord[] = Array.from(
         { length: TEST_DATA_LENGTH },
-        (__, i) => ({
-          id_field: 'host.name',
-          id_value: `host-${i}`,
-          criticality_level: LEVELS[Math.floor(i / 10)],
-          '@timestamp': new Date(startTime + i * 1000).toISOString(),
-        })
+        (__, i) => {
+          const hostName = `host-${i}`;
+          const criticality = LEVELS[Math.floor(i / 10)];
+          return {
+            id_field: 'host.name',
+            id_value: hostName,
+            criticality_level: criticality,
+            '@timestamp': new Date(startTime + i * 1000).toISOString(),
+            host: {
+              name: hostName,
+              criticality,
+            },
+            asset: {
+              criticality,
+            },
+          };
+        }
       );
 
       const createRecords = () => createAssetCriticalityRecords(records, es);
@@ -346,7 +396,6 @@ export default ({ getService }: FtrProviderContext) => {
       const expectAssetCriticalityDocMatching = async (expectedDoc: {
         id_field: string;
         id_value: string;
-        criticality_level: string;
       }) => {
         const esDoc = await getAssetCriticalityDoc({
           es,
@@ -403,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
           failed: 0,
         });
 
-        await expectAssetCriticalityDocMatching(validRecord);
+        await expectAssetCriticalityDocMatching(assetCreateTypeToAssetRecord(validRecord));
       });
 
       it('should correctly upload valid records for multiple entities', async () => {
@@ -424,7 +473,9 @@ export default ({ getService }: FtrProviderContext) => {
           failed: 0,
         });
 
-        await Promise.all(validRecords.map(expectAssetCriticalityDocMatching));
+        await Promise.all(
+          validRecords.map(assetCreateTypeToAssetRecord).map(expectAssetCriticalityDocMatching)
+        );
       });
 
       it('should return a 400 if a record is invalid', async () => {
@@ -448,7 +499,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('delete', () => {
       it('should correctly delete asset criticality if it exists', async () => {
-        const assetCriticality = {
+        const assetCriticality: CreateAssetCriticalityRecord = {
           id_field: 'host.name',
           id_value: 'delete-me',
           criticality_level: 'high_impact',
@@ -459,16 +510,21 @@ export default ({ getService }: FtrProviderContext) => {
         const res = await assetCriticalityRoutes.delete('host.name', 'delete-me');
 
         expect(res.body.deleted).to.eql(true);
-        expect(_.omit(res.body.record, '@timestamp')).to.eql(assetCriticality);
+        expect(_.omit(res.body.record, '@timestamp')).to.eql(
+          assetCreateTypeToAssetRecord(assetCriticality)
+        );
+
         const doc = await getAssetCriticalityDoc({
           idField: 'host.name',
           idValue: 'delete-me',
           es,
         });
 
-        const deletedDoc = { ...assetCriticality, criticality_level: 'deleted' };
-
-        expect(_.omit(doc, '@timestamp')).to.eql(deletedDoc);
+        const deletedDoc = {
+          ...assetCriticality,
+          criticality_level: CRITICALITY_VALUES.DELETED,
+        };
+        expect(_.omit(doc, '@timestamp')).to.eql(assetCreateTypeToAssetRecord(deletedDoc));
       });
 
       it('should not return 404 if the asset criticality does not exist', async () => {
@@ -488,3 +544,23 @@ export default ({ getService }: FtrProviderContext) => {
     });
   });
 };
+
+// Update type to allow 'deleted' value
+type CreateAssetCriticalityRecordWithDeleted = {
+  [K in keyof CreateAssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
+
+const assetCreateTypeToAssetRecord = (asset: CreateAssetCriticalityRecordWithDeleted) => ({
+  ...asset,
+  asset: {
+    criticality: asset.criticality_level,
+  },
+  host: {
+    name: asset.id_value,
+    asset: {
+      criticality: asset.criticality_level,
+    },
+  },
+});
