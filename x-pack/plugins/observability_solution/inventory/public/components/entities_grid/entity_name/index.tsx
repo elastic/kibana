@@ -7,13 +7,12 @@
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
   ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { useKibana } from '../../../hooks/use_kibana';
 import { EntityIcon } from '../../entity_icon';
 import { ENTITY_DISPLAY_NAME, ENTITY_TYPE } from '../../../../common/es_fields/entities';
 import { Entity, EntityType } from '../../../../common/entities';
@@ -24,7 +23,7 @@ interface EntityNameProps {
 }
 
 export function EntityName({ entity }: EntityNameProps) {
-  const { services } = useKibana<{ share?: SharePluginStart }>();
+  const { services } = useKibana();
 
   const assetDetailsLocator =
     services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
