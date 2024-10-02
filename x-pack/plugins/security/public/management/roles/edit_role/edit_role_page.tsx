@@ -728,7 +728,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         } else {
           notifications.toasts.addSuccess(
             i18n.translate(
-              'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
+              'xpack.security.management.editRole.roleSuccessfullyCreatedNotificationMessage',
               { defaultMessage: 'Created role' }
             )
           );
