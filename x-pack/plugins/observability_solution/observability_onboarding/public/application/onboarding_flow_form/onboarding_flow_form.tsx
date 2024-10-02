@@ -182,7 +182,39 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
               name={radioGroupId}
-              label={<EuiText css={{ fontWeight: 'bold' }}>{option.label}</EuiText>}
+              label={
+                <>
+                  <EuiText>
+                    <strong>{option.label}</strong>
+                  </EuiText>
+                  {/* The description and logo icons are passed into `label` prop instead of `children` to ensure they are clickable */}
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="s">
+                    {option.description}
+                  </EuiText>
+                  {(option.logos || option.showIntegrationsBadge) && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                        {option.logos?.map((logo) => (
+                          <EuiFlexItem key={logo} grow={false}>
+                            <LogoIcon logo={logo} size="l" />
+                          </EuiFlexItem>
+                        ))}
+                        {option.showIntegrationsBadge && (
+                          <EuiBadge color="hollow">
+                            <FormattedMessage
+                              defaultMessage="+ Integrations"
+                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                              description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
+                            />
+                          </EuiBadge>
+                        )}
+                      </EuiFlexGroup>
+                    </>
+                  )}
+                </>
+              }
               checked={option.id === searchParams.get('category')}
               /**
                * onKeyDown and onKeyUp handlers disable
@@ -209,32 +241,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 }
               }}
               css={{ height: '100%' }}
-            >
-              <EuiText color="subdued" size="s">
-                {option.description}
-              </EuiText>
-              {(option.logos || option.showIntegrationsBadge) && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {option.logos?.map((logo) => (
-                      <EuiFlexItem key={logo} grow={false}>
-                        <LogoIcon logo={logo} size="l" />
-                      </EuiFlexItem>
-                    ))}
-                    {option.showIntegrationsBadge && (
-                      <EuiBadge color="hollow">
-                        <FormattedMessage
-                          defaultMessage="+ Integrations"
-                          id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
-                          description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
-                        />
-                      </EuiBadge>
-                    )}
-                  </EuiFlexGroup>
-                </>
-              )}
-            </EuiCheckableCard>
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

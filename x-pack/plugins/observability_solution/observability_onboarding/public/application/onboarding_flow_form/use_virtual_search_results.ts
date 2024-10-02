@@ -24,6 +24,7 @@ export function useVirtualSearchResults(): CustomCard[] {
   const getUrlForApp = application?.getUrlForApp;
   const firehoseQuickstartCard: CustomCard = {
     id: 'firehose-quick-start',
+    name: 'firehose-quick-start',
     type: 'virtual',
     title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
       defaultMessage: 'AWS Firehose',
@@ -35,7 +36,6 @@ export function useVirtualSearchResults(): CustomCard[] {
         defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
       }
     ),
-    name: 'firehose-quick-start',
     categories: [],
     icons: [
       {
@@ -46,7 +46,7 @@ export function useVirtualSearchResults(): CustomCard[] {
     url: firehoseUrl,
     version: '',
     integration: '',
-    isCollectionCard: false,
+    isQuickstart: true,
   };
 
   return [
