@@ -289,12 +289,19 @@ export function DataPreviewChart({
                 theme={[
                   {
                     lineSeriesStyle: {
-                      point: { visible: false },
+                      point: { visible: 'never' },
                     },
                   },
                 ]}
                 noResults={
-                  <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                  <EuiIcon
+                    type="visualizeApp"
+                    size="l"
+                    color="subdued"
+                    title={i18n.translate('xpack.slo.dataPreviewChart.noResultsLabel', {
+                      defaultMessage: 'no results',
+                    })}
+                  />
                 }
                 locale={i18n.getLocale()}
               />
