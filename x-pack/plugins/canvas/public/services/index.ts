@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { useNotifyService } from './hooks';
 export * from './legacy';

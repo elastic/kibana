@@ -20,22 +20,27 @@ export const useCustomElementService = () => {
   const canvasCustomElementService = useMemo(() => getCustomElementService(), []);
   return canvasCustomElementService;
 };
+
 export const useExpressionsService = () => {
   const canvasExpressionService = useMemo(() => getCanvasExpressionService(), []);
   return canvasExpressionService;
 };
+
 export const useFiltersService = () => {
   const canvasFiltersService = useMemo(() => getCanvasFiltersService(), []);
   return canvasFiltersService;
 };
+
 export const useNotifyService = () => {
   const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
   return canvasNotifyService;
 };
+
 export const useWorkpadService = () => {
   const canvasWorkpadService = useMemo(() => getCanvasWorkpadService(), []);
   return canvasWorkpadService;
 };
+
 export const useDataViewsService = () => {
   const notifyService = useNotifyService();
 
