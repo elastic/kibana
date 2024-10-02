@@ -6283,6 +6283,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-api-keys-components@link:packages/kbn-search-api-keys-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-api-keys-server@link:packages/kbn-search-api-keys-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-api-panels@link:packages/kbn-search-api-panels":
   version "0.0.0"
   uid ""
@@ -6332,6 +6340,10 @@
   uid ""
 
 "@kbn/search-response-warnings@link:packages/kbn-search-response-warnings":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-shared-ui@link:x-pack/packages/search/shared_ui":
   version "0.0.0"
   uid ""
 
