@@ -65,25 +65,25 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     moment().utc().subtract(14, 'days').toISOString(),
 
     // backfill execution set 1
-    moment().utc().startOf('day').subtract(13, 'days').add(64, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(13, 'days').add(65, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(13, 'days').add(66, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(10, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(11, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(13, 'days').add(12, 'minutes').toISOString(),
 
     // backfill execution set 2
-    moment().utc().startOf('day').subtract(12, 'days').add(89, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(12, 'days').add(20, 'minutes').toISOString(),
 
     // backfill execution set 3
-    moment().utc().startOf('day').subtract(11, 'days').add(785, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(888, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(954, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(1045, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(11, 'days').add(1145, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(30, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(31, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(32, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(33, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(11, 'days').add(34, 'minutes').toISOString(),
 
     // backfill execution set 4 purposely left empty
 
     // after last backfill
-    moment().utc().startOf('day').subtract(9, 'days').add(666, 'seconds').toISOString(),
-    moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
+    moment().utc().startOf('day').subtract(9, 'days').add(40, 'minutes').toISOString(),
+    moment().utc().startOf('day').subtract(9, 'days').add(41, 'minutes').toISOString(),
   ];
 
   describe('ad hoc backfill task', () => {
@@ -108,7 +108,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     // - checks that the expected alerts are generated in the alerts as data index
     // - checks that the timestamps in the alerts are as expected
     // - checks that the expected event log documents are written for the backfill
-    it('should run all execution sets of a scheduled backfill and correctly generate alerts', async () => {
+    it('testtest should run all execution sets of a scheduled backfill and correctly generate alerts', async () => {
       const spaceId = SuperuserAtSpace1.space.id;
 
       // Index documents
@@ -174,6 +174,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .send([{ rule_id: ruleId, start, end }])
         .expect(200);
+
+      console.log(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
 
       console.log(`scheduledBackfill ${JSON.stringify(response2.body)}`);
 
@@ -365,7 +367,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       }
 
       console.log(`alertDocsBackfill3 ${JSON.stringify(alertDocsBackfill3)}`);
-      console.log(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
 
       expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[5]);
       expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[6]);
