@@ -128,7 +128,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'source_data_stream.type: logs',
+            filter: 'data_stream.type: logs',
           },
         ],
       },
