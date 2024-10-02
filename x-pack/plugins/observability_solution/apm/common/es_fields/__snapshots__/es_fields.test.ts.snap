@@ -15,7 +15,7 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Error AT_TIMESTAMP 1`] = `"2023-12-31T23:00:00.000Z"`;
+exports[`Error AT_TIMESTAMP 1`] = `"2024-01-01T11:09:00"`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
 
@@ -419,7 +419,7 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Span AT_TIMESTAMP 1`] = `"2023-12-31T23:00:00.000Z"`;
+exports[`Span AT_TIMESTAMP 1`] = `"2024-01-01T11:09:00"`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -806,7 +806,7 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Transaction AT_TIMESTAMP 1`] = `"2023-12-31T23:00:00.000Z"`;
+exports[`Transaction AT_TIMESTAMP 1`] = `"2024-01-01T11:09:00"`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
