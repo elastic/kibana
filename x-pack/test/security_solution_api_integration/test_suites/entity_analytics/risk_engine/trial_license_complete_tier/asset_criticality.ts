@@ -30,10 +30,10 @@ export default ({ getService }: FtrProviderContext) => {
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
-    const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
+    const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
     before(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
       await cleanAssetCriticality({ log, es });
     });
 
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
       await cleanAssetCriticality({ log, es });
     });
 

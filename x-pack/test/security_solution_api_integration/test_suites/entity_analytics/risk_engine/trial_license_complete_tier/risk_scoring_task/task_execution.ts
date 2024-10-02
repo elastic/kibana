@@ -42,10 +42,9 @@ export default ({ getService }: FtrProviderContext): void => {
         index: 'ecs_compliant',
         log,
       });
-      const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
 
       before(async () => {
-        await riskEngineRoutesForNamespace.cleanUp();
+        await riskEngineRoutes.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -61,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await riskEngineRoutesForNamespace.cleanUp();
+        await riskEngineRoutes.cleanUp();
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });

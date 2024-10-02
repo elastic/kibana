@@ -30,10 +30,7 @@ import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
-import {
-  RiskEngineStatusResponse,
-  RiskEngineTaskStatusValues,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import { RiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -260,23 +257,27 @@ export const waitForRiskScoresToBePresent = async ({
   );
 };
 
-export const waitForRiskEngineTaskStatus = async ({
+/**
+ *
+ * It waits for the risk engine 'runAt' time to be bigger than the initial time.
+ */
+export const waitForRiskEngineRun = async ({
   supertest,
   log,
-  status,
 }: {
   supertest: SuperTest.Agent;
   log: ToolingLog;
-  status: RiskEngineTaskStatusValues;
 }): Promise<void> => {
+  const initialTime = new Date();
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   await waitFor(
     async () => {
       const { body } = await riskEngineRoutes.getStatus();
-      return body?.risk_engine_task_status?.status === status;
+      const runAtTime = body?.risk_engine_task_status?.runAt;
+      return !!runAtTime && new Date(runAtTime) > initialTime;
     },
-    'waitForRiskEngineTaskStatus ' + status,
+    'waitForRiskEngineToRun',
     log
   );
 };

@@ -34,10 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
       index: 'ecs_compliant',
       log,
     });
-    const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
 
     before(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
@@ -53,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
     });
 
     it('should return empty metrics when the risk engine is disabled', async () => {

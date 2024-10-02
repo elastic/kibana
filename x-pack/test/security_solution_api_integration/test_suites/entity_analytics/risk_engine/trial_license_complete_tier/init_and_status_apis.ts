@@ -28,14 +28,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/191637
   describe.skip('@ess @serverless @serverlessQA init_and_status_apis', () => {
-    const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
-
     before(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
     });
 
     afterEach(async () => {
-      await riskEngineRoutesForNamespace.cleanUp();
+      await riskEngineRoutes.cleanUp();
       await clearLegacyTransforms({ es, log });
       await clearLegacyDashboards({ supertest, log });
     });
