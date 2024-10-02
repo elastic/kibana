@@ -30,7 +30,7 @@
         "label": "CustomAssetsAccordion",
         "description": [],
         "signature": [
-          "({ views, initialIsOpen, title, }: React.PropsWithChildren<",
+          "({ views, initialIsOpen, title, }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -38,7 +38,7 @@
             "section": "def-public.CustomAssetsAccordionProps",
             "text": "CustomAssetsAccordionProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
         "deprecated": false,
@@ -47,20 +47,18 @@
           {
             "parentPluginId": "fleet",
             "id": "def-public.CustomAssetsAccordion.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  views,\n  initialIsOpen = false,\n  title,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
                 "docId": "kibFleetPluginApi",
                 "section": "def-public.CustomAssetsAccordionProps",
                 "text": "CustomAssetsAccordionProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/fleet/public/components/custom_assets_accordion.tsx",
             "deprecated": false,
@@ -79,7 +77,7 @@
         "label": "LazyPackagePolicyInputVarField",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<React.FunctionComponent<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -87,15 +85,7 @@
             "section": "def-public.InputFieldProps",
             "text": "InputFieldProps"
           },
-          " & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
-          {
-            "pluginId": "fleet",
-            "scope": "public",
-            "docId": "kibFleetPluginApi",
-            "section": "def-public.InputFieldProps",
-            "text": "InputFieldProps"
-          },
-          ">; }"
+          ">>"
         ],
         "path": "x-pack/plugins/fleet/public/index.ts",
         "deprecated": false,
@@ -112,7 +102,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -127,11 +117,11 @@
         "label": "PackageIcon",
         "description": [],
         "signature": [
-          "({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }: React.PropsWithChildren<",
+          "({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }: ",
           "UsePackageIconType",
           " & Omit<",
           "EuiIconProps",
-          ", \"type\">>) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/fleet/public/components/package_icon.tsx",
         "deprecated": false,
@@ -145,11 +135,10 @@
             "label": "{ packageName, integrationName, version, icons, tryApi, ...euiIconProps }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               "UsePackageIconType",
               " & Omit<",
               "EuiIconProps",
-              ", \"type\">>"
+              ", \"type\">"
             ],
             "path": "x-pack/plugins/fleet/public/components/package_icon.tsx",
             "deprecated": false,
@@ -187,7 +176,7 @@
         "label": "PackagePolicyEditorDatastreamMappings",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -195,7 +184,7 @@
             "section": "def-public.PackagePolicyEditorDatastreamMappingsProps",
             "text": "PackagePolicyEditorDatastreamMappingsProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
         "deprecated": false,
@@ -204,20 +193,18 @@
           {
             "parentPluginId": "fleet",
             "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
                 "docId": "kibFleetPluginApi",
                 "section": "def-public.PackagePolicyEditorDatastreamMappingsProps",
                 "text": "PackagePolicyEditorDatastreamMappingsProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
             "deprecated": false,
@@ -236,7 +223,7 @@
         "label": "PackagePolicyEditorDatastreamPipelines",
         "description": [],
         "signature": [
-          "({ packageInputStream, packageInfo, customDataset }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo, customDataset }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -244,7 +231,7 @@
             "section": "def-public.PackagePolicyEditorDatastreamPipelinesProps",
             "text": "PackagePolicyEditorDatastreamPipelinesProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
         "deprecated": false,
@@ -253,20 +240,18 @@
           {
             "parentPluginId": "fleet",
             "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ packageInputStream, packageInfo, customDataset }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
                 "docId": "kibFleetPluginApi",
                 "section": "def-public.PackagePolicyEditorDatastreamPipelinesProps",
                 "text": "PackagePolicyEditorDatastreamPipelinesProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
             "deprecated": false,
@@ -1510,18 +1495,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
@@ -1722,7 +1695,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<{ children?: React.ReactNode; } | React.RefAttributes<React.Component<{}, any, any>>> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -1730,7 +1703,7 @@
                 "section": "def-public.PackageAssetsComponent",
                 "text": "PackageAssetsComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -1747,7 +1720,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1802,31 +1775,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackageCustomExtensionComponentProps",
-                "text": "PackageCustomExtensionComponentProps"
-              },
-              " & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackageCustomExtensionComponentProps",
-                "text": "PackageCustomExtensionComponentProps"
-              },
-              ", any, any>>) | (",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackageCustomExtensionComponentProps",
-                "text": "PackageCustomExtensionComponentProps"
-              },
-              " & { children?: React.ReactNode; })> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -1834,7 +1783,7 @@
                 "section": "def-public.PackageCustomExtensionComponent",
                 "text": "PackageCustomExtensionComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -1851,7 +1800,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2402,31 +2351,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateExtensionComponentProps",
-                "text": "PackagePolicyCreateExtensionComponentProps"
-              },
-              " & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateExtensionComponentProps",
-                "text": "PackagePolicyCreateExtensionComponentProps"
-              },
-              ", any, any>>) | (",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateExtensionComponentProps",
-                "text": "PackagePolicyCreateExtensionComponentProps"
-              },
-              " & { children?: React.ReactNode; })> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -2434,7 +2359,7 @@
                 "section": "def-public.PackagePolicyCreateExtensionComponent",
                 "text": "PackagePolicyCreateExtensionComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -2451,7 +2376,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2617,7 +2542,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<{ children?: React.ReactNode; } | React.RefAttributes<React.Component<{}, any, any>>> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -2625,7 +2550,7 @@
                 "section": "def-public.PackagePolicyCreateMultiStepExtensionComponent",
                 "text": "PackagePolicyCreateMultiStepExtensionComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -2642,7 +2567,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2711,31 +2636,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyEditExtensionComponentProps",
-                "text": "PackagePolicyEditExtensionComponentProps"
-              },
-              " & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyEditExtensionComponentProps",
-                "text": "PackagePolicyEditExtensionComponentProps"
-              },
-              ", any, any>>) | (",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyEditExtensionComponentProps",
-                "text": "PackagePolicyEditExtensionComponentProps"
-              },
-              " & { children?: React.ReactNode; })> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -2743,7 +2644,7 @@
                 "section": "def-public.PackagePolicyEditExtensionComponent",
                 "text": "PackagePolicyEditExtensionComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -2760,7 +2661,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3233,31 +3134,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyResponseExtensionComponentProps",
-                "text": "PackagePolicyResponseExtensionComponentProps"
-              },
-              " & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyResponseExtensionComponentProps",
-                "text": "PackagePolicyResponseExtensionComponentProps"
-              },
-              ", any, any>>) | (",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyResponseExtensionComponentProps",
-                "text": "PackagePolicyResponseExtensionComponentProps"
-              },
-              " & { children?: React.ReactNode; })> & { readonly _result: ",
+              "React.LazyExoticComponent<",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -3265,7 +3142,7 @@
                 "section": "def-public.PackagePolicyResponseExtensionComponent",
                 "text": "PackagePolicyResponseExtensionComponent"
               },
-              "; }"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
             "deprecated": false,
@@ -3282,7 +3159,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -23898,18 +23775,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/view/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
               {
@@ -26102,7 +25967,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"password\" | \"bool\" | \"select\" | \"textarea\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
