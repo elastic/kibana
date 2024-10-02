@@ -8,39 +8,7 @@
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { spanMapping } from '../../../utils/es_fields_mappings';
-import {
-  AGENT_NAME,
-  AGENT_VERSION,
-  AT_TIMESTAMP,
-  DATA_STEAM_TYPE,
-  DATA_STREAM_DATASET,
-  DATA_STREAM_NAMESPACE,
-  EVENT_OUTCOME,
-  EVENT_SUCCESS_COUNT,
-  HTTP_RESPONSE_STATUS_CODE,
-  OBSERVER_TYPE,
-  OBSERVER_VERSION,
-  OBSERVER_VERSION_MAJOR,
-  PARENT_ID,
-  PROCESSOR_EVENT,
-  PROCESSOR_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_NAME,
-  SERVICE_TARGET_NAME,
-  SERVICE_TARGET_TYPE,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DURATION,
-  SPAN_ID,
-  SPAN_NAME,
-  SPAN_REPRESENTATIVE_COUNT,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-  TIMESTAMP,
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../get_transaction';
