@@ -71,19 +71,6 @@ export function ChatHeader({
     setNewTitle(title);
   }, [title]);
 
-  // const handleNavigateToConversations = () => {
-  //   if (conversationId) {
-  //     router.push('/conversations/{conversationId}', {
-  //       path: {
-  //         conversationId,
-  //       },
-  //       query: {},
-  //     });
-  //   } else {
-  //     router.push('/conversations/new', { path: {}, query: {} });
-  //   }
-  // };
-
   const handleToggleFlyoutPositionMode = () => {
     if (flyoutPositionMode) {
       onToggleFlyoutPositionMode?.(
