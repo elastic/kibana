@@ -23,6 +23,6 @@ export class ExperimentalFeaturesService {
   }
 
   private static throwUninitializedError(): never {
-    throw new Error('Experimental features services not initialized');
+    throw new Error('Experimental features service not initialized');
   }
 }
