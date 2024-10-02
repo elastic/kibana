@@ -8,12 +8,14 @@
 import { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import {
   PublishesUnifiedSearch,
-  PublishingSubject,
   StateComparators,
   initializeTimeRange,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import {
+  PublishesSearchSession,
+  apiPublishesSearchSession,
+} from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { buildObservableVariable } from '../helper';
 import { LensRuntimeState, LensUnifiedSearchContext } from '../types';
 
@@ -21,7 +23,7 @@ export function initializeSearchContext(
   initialState: LensRuntimeState,
   parentApi: unknown
 ): {
-  api: PublishesUnifiedSearch & { searchSessionId$: PublishingSubject<string | undefined> };
+  api: PublishesUnifiedSearch & PublishesSearchSession;
   comparators: StateComparators<LensUnifiedSearchContext>;
   serialize: () => LensUnifiedSearchContext;
   cleanup: () => void;

@@ -87,6 +87,7 @@ export const createLensEmbeddableFactory = (
       const inspectorConfig = initializeInspector(services);
       const editConfig = initializeEditApi(
         uuid,
+        initialState,
         getState,
         stateConfig.api.updateState,
         isTextBasedLanguage,

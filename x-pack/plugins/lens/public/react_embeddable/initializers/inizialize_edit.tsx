@@ -48,6 +48,7 @@ function getSupportedTriggers(
  **/
 export function initializeEditApi(
   uuid: string,
+  initialState: LensRuntimeState,
   getState: GetStateType,
   updateState: (newState: LensRuntimeState) => void,
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
@@ -69,6 +70,8 @@ export function initializeEditApi(
     viewMode$.next(parentApi.viewMode.getValue());
   }
 
+  const inESQLModeEnabled = () => !uiSettings.get(ENABLE_ESQL);
+
   /**
    * Inline editing section
    */
@@ -78,20 +81,23 @@ export function initializeEditApi(
         return;
       }
       const parentApiContext = parentApi.getAppContext();
+      const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
         path: getEditPath(savedObjectId),
         state: {
           embeddableId: uuid,
-          valueInput: getState(),
+          valueInput: currentState,
           originatingApp: parentApiContext.currentAppId ?? 'dashboards',
           originatingPath: parentApiContext.getCurrentPath?.(),
-          // searchSessionId: api.searchSessionId,
+          searchSessionId: currentState.searchSessionId,
         },
         skipAppLeave,
       });
     };
 
-  const panelManagementApi = setupPanelManagement(uuid, parentApi);
+  const panelManagementApi = setupPanelManagement(uuid, parentApi, {
+    canBeCreatedInline: isTextBasedLanguage(initialState),
+  });
 
   const openInlineEditor = prepareInlineEditPanel(
     getState,
@@ -113,8 +119,8 @@ export function initializeEditApi(
     if (viewMode$.getValue() !== 'edit') {
       return false;
     }
-    // if ESQL check one it is in TextBased mode &&
-    if (isTextBasedLanguage(getState()) && !uiSettings.get(ENABLE_ESQL)) {
+    // check if it's in ES|QL mode
+    if (isTextBasedLanguage(getState()) && !inESQLModeEnabled()) {
       return false;
     }
     return (

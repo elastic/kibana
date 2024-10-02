@@ -15,9 +15,18 @@ export interface PanelManagementApi {
   onStopEditing: (isCancel: boolean, state: LensRuntimeState | undefined) => void;
 }
 
-export function setupPanelManagement(uuid: string, parentApi?: unknown): PanelManagementApi {
+export function setupPanelManagement(
+  uuid: string,
+  parentApi: unknown,
+  { canBeCreatedInline }: { canBeCreatedInline: boolean }
+): PanelManagementApi {
   const isEditing$ = new BehaviorSubject(false);
   const isNewlyCreated$ = new BehaviorSubject(true);
+
+  // Remove this once the inline creation is fully supported
+  if (!canBeCreatedInline) {
+    isNewlyCreated$.next(!canBeCreatedInline);
+  }
 
   return {
     isEditingEnabled: () => !isEditing$.getValue(),
