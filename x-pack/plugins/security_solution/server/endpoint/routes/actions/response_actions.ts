@@ -80,7 +80,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: ISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -99,7 +104,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UNISOLATE_HOST_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -119,7 +129,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: ISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -139,7 +154,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UNISOLATE_HOST_ROUTE_V2,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -159,7 +179,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: KILL_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -182,7 +207,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SUSPEND_PROCESS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -205,7 +235,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_PROCESSES_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -225,7 +260,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: GET_FILE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -245,7 +285,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: EXECUTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -265,9 +310,14 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: UPLOAD_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
         authRequired: true,
-        tags: ['access:securitySolution'],
+
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
@@ -293,7 +343,12 @@ export function registerResponseActionRoutes(
     .post({
       access: 'public',
       path: SCAN_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

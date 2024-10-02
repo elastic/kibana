@@ -62,8 +62,12 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

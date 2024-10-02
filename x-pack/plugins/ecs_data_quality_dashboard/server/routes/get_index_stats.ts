@@ -26,7 +26,11 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_STATS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

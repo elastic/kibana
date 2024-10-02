@@ -41,7 +41,11 @@ export const getIndexResultsLatestRoute = (
     .get({
       path: GET_INDEX_RESULTS_LATEST,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

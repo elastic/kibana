@@ -31,8 +31,10 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
     .get({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

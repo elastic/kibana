@@ -15,8 +15,10 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
   router.post(
     {
       path: `${KBN_CLIENT_API_PREFIX}/_bulk_delete`,
-      options: {
-        tags: ['access:ftrApis'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ftrApis'],
+        },
       },
       validate: {
         body: schema.arrayOf(

@@ -20,8 +20,10 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: BENCHMARKS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(

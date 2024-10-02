@@ -21,6 +21,10 @@ const isTemplateLiteralNonAccessTag = (el) =>
   el.type === 'TemplateLiteral' && !el.quasis[0].value.raw.startsWith(ACCESS_TAG_PREFIX);
 
 const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = false) => {
+  if (process.env.MIGRATE_DISABLED_AUTHZ !== '1') {
+    return;
+  }
+
   const callee = node.callee;
   const isAddVersionCall =
     callee.type === 'MemberExpression' && callee.property.name === 'addVersion';
@@ -170,7 +174,7 @@ const handleRouteConfig = (node, context, isVersionedRoute = false) => {
 
       const getAccessPrivilege = (el) => {
         if (el.type === 'Literal') {
-          return `'${el.value.split(':')[1]}'`;
+          return `'${el.value.split(ACCESS_TAG_PREFIX)[1]}'`;
         }
 
         if (el.type === 'TemplateLiteral') {

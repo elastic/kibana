@@ -120,8 +120,12 @@ export const bulkActionAnonymizationFieldsRoute = (
     .post({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution-updateAIAssistantAnonymization'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution-updateAIAssistantAnonymization'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },

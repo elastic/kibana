@@ -21,8 +21,10 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-summary'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-summary'],
+        },
       },
       path: `${EXCEPTION_LIST_URL}/summary`,
     })

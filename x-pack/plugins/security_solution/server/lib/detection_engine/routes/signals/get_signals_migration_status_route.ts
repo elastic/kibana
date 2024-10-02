@@ -23,8 +23,10 @@ export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRou
     .get({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

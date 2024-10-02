@@ -30,7 +30,12 @@ export function registerActionListRoutes(
     .get({
       access: 'public',
       path: BASE_ENDPOINT_ACTION_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

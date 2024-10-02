@@ -38,8 +38,10 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/data_visualizer/get_field_histograms/{indexPattern}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
       summary: 'Gets histograms for fields',
       description: 'Returns the histograms on a list fields in the specified index pattern.',

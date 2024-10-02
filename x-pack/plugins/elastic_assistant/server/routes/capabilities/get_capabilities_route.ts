@@ -30,8 +30,10 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
     .get({
       access: INTERNAL_API_ACCESS,
       path: CAPABILITIES,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

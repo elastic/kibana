@@ -23,8 +23,10 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })

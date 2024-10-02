@@ -37,9 +37,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_copy_saved_objects',
+      security: {
+        authz: {
+          requiredPrivileges: ['copySavedObjectsToSpaces'],
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
-        tags: ['access:copySavedObjectsToSpaces'],
+
         description: `Copy saved objects to spaces`,
       },
       validate: {
@@ -155,9 +160,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
+      security: {
+        authz: {
+          requiredPrivileges: ['copySavedObjectsToSpaces'],
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
-        tags: ['access:copySavedObjectsToSpaces'],
+
         description: `Resolve conflicts copying saved objects`,
       },
       validate: {

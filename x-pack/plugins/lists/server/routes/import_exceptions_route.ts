@@ -30,12 +30,16 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
   router.versioned
     .post({
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
       options: {
         body: {
           maxBytes: config.maxImportPayloadBytes,
           output: 'stream',
         },
-        tags: ['access:lists-all'],
       },
       path: `${EXCEPTION_LIST_URL}/_import`,
     })

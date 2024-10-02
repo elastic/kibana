@@ -21,8 +21,10 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .delete({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
       },
       path: EXCEPTION_LIST_URL,
     })

@@ -25,8 +25,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .post({
       path: '/internal/data_visualizer/test_grok_pattern',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -71,8 +73,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .get({
       path: '/internal/data_visualizer/inference_services',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(

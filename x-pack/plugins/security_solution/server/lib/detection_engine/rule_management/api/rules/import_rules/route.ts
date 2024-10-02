@@ -39,8 +39,12 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
     .post({
       access: 'public',
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',

@@ -32,8 +32,10 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/status`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get job and trained model saved object status',
       description:
@@ -63,13 +65,17 @@ export function savedObjectsRoutes(
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       access: 'public',
       summary: 'Synchronize machine learning saved objects',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
+      },
       options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-          'oas-tag:machine learning',
-        ],
+        tags: ['oas-tag:machine learning'],
       },
       description:
         'Synchronizes Kibana saved objects for machine learning jobs and trained models. This API runs automatically when you start Kibana and periodically thereafter.',
@@ -104,12 +110,14 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/initialize`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
       },
       summary: 'Create saved objects for all job and trained models',
       description:
@@ -145,12 +153,14 @@ export function savedObjectsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/sync_check`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Check whether job and trained model saved objects need synchronizing',
       description: 'Check whether job and trained model saved objects need synchronizing.',
@@ -185,8 +195,10 @@ export function savedObjectsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Update what spaces jobs are assigned to',
       description: 'Update a list of jobs to add and/or remove them from given spaces.',
@@ -224,8 +236,10 @@ export function savedObjectsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'Update what spaces trained models are assigned to',
       description: 'Update a list of trained models to add and/or remove them from given spaces.',
@@ -262,8 +276,10 @@ export function savedObjectsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/remove_item_from_current_space`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+        },
       },
       summary: 'Remove jobs or trained models from the current space',
       description: 'Remove a list of jobs or trained models from the current space.',
@@ -326,8 +342,10 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/jobs_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs', 'ml:canGetDataFrameAnalytics'],
+        },
       },
       summary: 'Get all jobs and their spaces',
       description: 'List all jobs and their spaces.',
@@ -355,8 +373,10 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/trained_models_spaces`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get all trained models and their spaces',
       description: 'List all trained models and their spaces.',
@@ -384,12 +404,14 @@ export function savedObjectsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_delete_ml_space_aware_item/{jobType}`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Check whether user can delete a job or trained model',
       description: `Check the user's ability to delete jobs or trained models. Returns whether they are able to fully delete the job or trained model and whether they are able to remove it from the current space. Note, this is only for enabling UI controls. A user calling endpoints directly will still be able to delete or remove the job or trained model from a space.`,

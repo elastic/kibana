@@ -32,8 +32,12 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
     .post({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

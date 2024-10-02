@@ -21,8 +21,10 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
       },
       path: LIST_ITEM_URL,
     })

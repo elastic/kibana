@@ -26,8 +26,10 @@ export const cancelAttackDiscoveryRoute = (
     .put({
       access: 'internal',
       path: ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

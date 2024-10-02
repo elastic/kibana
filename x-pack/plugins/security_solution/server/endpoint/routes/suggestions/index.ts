@@ -38,7 +38,12 @@ export function registerEndpointSuggestionsRoutes(
     .post({
       access: 'public',
       path: SUGGESTIONS_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

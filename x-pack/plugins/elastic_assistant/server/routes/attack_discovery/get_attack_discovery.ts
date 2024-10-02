@@ -24,8 +24,10 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
     .get({
       access: 'internal',
       path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

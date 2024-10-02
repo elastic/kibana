@@ -25,8 +25,10 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     .get({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL_FIND,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

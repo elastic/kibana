@@ -21,8 +21,12 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
   router.get(
     {
       path: '/api/features',
+      security: {
+        authz: {
+          requiredPrivileges: ['features'],
+        },
+      },
       options: {
-        tags: ['access:features'],
         access: 'public',
         summary: `Get features`,
       },

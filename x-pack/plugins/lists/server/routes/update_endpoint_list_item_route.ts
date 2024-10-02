@@ -23,8 +23,10 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
   router.versioned
     .put({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
       },
       path: ENDPOINT_LIST_ITEM_URL,
     })

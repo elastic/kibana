@@ -44,7 +44,6 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
@@ -89,8 +88,10 @@ export const previewRulesRoute = (
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

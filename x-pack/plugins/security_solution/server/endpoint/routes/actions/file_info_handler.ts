@@ -74,7 +74,12 @@ export const registerActionFileInfoRoute = (
     .get({
       access: 'public',
       path: ACTION_AGENT_FILE_INFO_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

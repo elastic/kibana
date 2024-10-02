@@ -37,8 +37,10 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/fields_service/field_cardinality`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
       summary: 'Gets cardinality of fields',
       description:
@@ -76,8 +78,10 @@ export function fieldsService({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFieldInfo'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFieldInfo'],
+        },
       },
       summary: 'Get time field range',
       description:

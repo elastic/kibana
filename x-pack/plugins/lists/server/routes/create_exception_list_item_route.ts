@@ -25,8 +25,10 @@ export const createExceptionListItemRoute = (router: ListsPluginRouter): void =>
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
       },
       path: EXCEPTION_LIST_ITEM_URL,
     })

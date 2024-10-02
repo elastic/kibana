@@ -22,8 +22,10 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })

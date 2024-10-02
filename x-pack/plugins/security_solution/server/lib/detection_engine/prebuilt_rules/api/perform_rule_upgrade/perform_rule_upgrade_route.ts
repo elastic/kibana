@@ -36,8 +36,12 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
     .post({
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

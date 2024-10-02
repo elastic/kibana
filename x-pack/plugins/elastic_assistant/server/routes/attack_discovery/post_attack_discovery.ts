@@ -39,8 +39,12 @@ export const postAttackDiscoveryRoute = (
     .post({
       access: 'internal',
       path: ATTACK_DISCOVERY,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },

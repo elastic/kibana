@@ -25,7 +25,6 @@ import {
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
-import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -61,8 +60,12 @@ export const performBulkActionRoute = (
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },

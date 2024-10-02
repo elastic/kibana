@@ -104,8 +104,12 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
     .post({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },
