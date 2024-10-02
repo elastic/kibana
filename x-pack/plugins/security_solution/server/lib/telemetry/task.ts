@@ -123,7 +123,7 @@ export class SecurityTelemetryTask {
 
   public start = async (taskManager: TaskManagerStartContract) => {
     const taskId = this.getTaskId();
-    this.logger.l('Attempting to schedule task', { taskId });
+    this.logger.debug('Attempting to schedule task', { taskId } as LogMeta);
     try {
       await taskManager.ensureScheduled({
         id: taskId,
@@ -143,25 +143,25 @@ export class SecurityTelemetryTask {
   };
 
   public runTask = async (taskId: string, executionPeriod: TaskExecutionPeriod) => {
-    this.logger.l('Attempting to run', { taskId });
+    this.logger.debug('Attempting to run', { taskId } as LogMeta);
     if (taskId !== this.getTaskId()) {
-      this.logger.l('outdated task', { taskId });
+      this.logger.info('outdated task', { taskId } as LogMeta);
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
-      this.logger.l('Telemetry is not opted-in', { taskId });
+      this.logger.info('Telemetry is not opted-in', { taskId } as LogMeta);
       return 0;
     }
 
     const isTelemetryServicesReachable = await this.sender.isTelemetryServicesReachable();
     if (!isTelemetryServicesReachable) {
-      this.logger.l('Cannot reach telemetry services', { taskId });
+      this.logger.info('Cannot reach telemetry services', { taskId } as LogMeta);
       return 0;
     }
 
-    this.logger.l('Running task', { taskId });
+    this.logger.debug('Running task', { taskId } as LogMeta);
     return this.config.runTask(
       taskId,
       this.logger,
