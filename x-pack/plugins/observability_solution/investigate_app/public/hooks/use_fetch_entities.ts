@@ -7,7 +7,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { GetEntitiesResponse } from '@kbn/investigation-shared';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';
 
@@ -18,7 +17,6 @@ export interface EntityParams {
   hostName?: string;
   containerId?: string;
 }
-
 
 export function useFetchEntities({
   investigationId,
