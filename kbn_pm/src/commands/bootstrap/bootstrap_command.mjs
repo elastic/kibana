@@ -96,7 +96,7 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      await buildWebpackBundles(log, { offline, quiet });
+      await buildWebpackBundles(log, { quiet });
     });
 
     await Promise.all([

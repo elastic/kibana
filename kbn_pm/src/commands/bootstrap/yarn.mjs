@@ -46,6 +46,12 @@ export async function haveNodeModulesBeenManuallyDeleted() {
   return !(await areNodeModulesPresent()) && (await haveBazelFoldersBeenCreatedBefore());
 }
 
+/**
+ * Installs project dependencies, using yarn
+ * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {{offline: boolean, quiet:boolean } } options
+ * @returns {Promise<void>}
+ */
 export async function yarnInstallDeps(log, { offline, quiet }) {
   log.info('installing node dependencies with yarn');
   const args = ['install', '--non-interactive'];
