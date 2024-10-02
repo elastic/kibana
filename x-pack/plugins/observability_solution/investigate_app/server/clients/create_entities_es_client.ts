@@ -8,7 +8,7 @@
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { entitiesAliasPattern, ENTITY_LATEST, ENTITY_HISTORY } from '@kbn/entities-schema';
+import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import {
   MsearchMultisearchBody,
@@ -19,35 +19,18 @@ export const SERVICE_ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: 'service',
   dataset: ENTITY_LATEST,
 });
-export const SERVICE_ENTITIES_HISTORY_ALIAS = entitiesAliasPattern({
-  type: 'service',
-  dataset: ENTITY_HISTORY,
-});
 export const HOST_ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: 'host',
   dataset: ENTITY_LATEST,
-});
-export const HOST_ENTITIES_HISTORY_ALIAS = entitiesAliasPattern({
-  type: 'host',
-  dataset: ENTITY_HISTORY,
 });
 export const CONTAINER_ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   type: 'container',
   dataset: ENTITY_LATEST,
 });
-export const CONTAINER_ENTITIES_HISTORY_ALIAS = entitiesAliasPattern({
-  type: 'container',
-  dataset: ENTITY_HISTORY,
-});
 type LatestAlias =
   | typeof SERVICE_ENTITIES_LATEST_ALIAS
   | typeof HOST_ENTITIES_LATEST_ALIAS
   | typeof CONTAINER_ENTITIES_LATEST_ALIAS;
-
-type HistoryAlias =
-  | typeof SERVICE_ENTITIES_HISTORY_ALIAS
-  | typeof HOST_ENTITIES_HISTORY_ALIAS
-  | typeof CONTAINER_ENTITIES_HISTORY_ALIAS;
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -103,14 +86,14 @@ export function createEntitiesESClient({
 
   return {
     async search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
-      entityIndexAlias: LatestAlias | HistoryAlias,
+      entityIndexAlias: LatestAlias,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
       return search(entityIndexAlias, searchRequest);
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
-      allSearches: Array<TSearchRequest & { index: LatestAlias | HistoryAlias }>
+      allSearches: Array<TSearchRequest & { index: LatestAlias }>
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
       const searches = allSearches
         .map((params) => {
