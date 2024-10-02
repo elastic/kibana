@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './data_stream_details_client';
 export * from './data_stream_details_service';
 export * from './types';
