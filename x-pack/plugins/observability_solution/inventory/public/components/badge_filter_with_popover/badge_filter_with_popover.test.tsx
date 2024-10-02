@@ -9,7 +9,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { BadgeFilterWithPopover } from '.';
 import { EuiThemeProvider, copyToClipboard } from '@elastic/eui';
-import { ENTITY_TYPE } from '../../../common/es_fields/entities';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

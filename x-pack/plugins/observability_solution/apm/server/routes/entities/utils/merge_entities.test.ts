@@ -18,7 +18,7 @@ describe('mergeEntities', () => {
           environment: 'test',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['metrics', 'logs'] },
+        source_data_stream: { type: ['metrics', 'logs'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -64,7 +64,7 @@ describe('mergeEntities', () => {
           environment: 'env-service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['foo'] },
+        source_data_stream: { type: ['foo'] },
         entity: {
           firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
@@ -85,7 +85,7 @@ describe('mergeEntities', () => {
           environment: 'env-service-2',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['bar'] },
+        source_data_stream: { type: ['bar'] },
         entity: {
           firstSeenTimestamp: '2024-03-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
@@ -106,7 +106,7 @@ describe('mergeEntities', () => {
           environment: 'env-service-3',
         },
         agent: { name: ['java'] },
-        data_stream: { type: ['baz'] },
+        source_data_stream: { type: ['baz'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -127,7 +127,7 @@ describe('mergeEntities', () => {
           environment: 'env-service-4',
         },
         agent: { name: ['java'] },
-        data_stream: { type: ['baz'] },
+        source_data_stream: { type: ['baz'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -204,7 +204,7 @@ describe('mergeEntities', () => {
           environment: 'test',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['metrics', 'logs'] },
+        source_data_stream: { type: ['metrics', 'logs'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -225,7 +225,7 @@ describe('mergeEntities', () => {
           environment: 'test',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['metrics', 'logs'] },
+        source_data_stream: { type: ['metrics', 'logs'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -246,7 +246,7 @@ describe('mergeEntities', () => {
           environment: 'prod',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['foo'] },
+        source_data_stream: { type: ['foo'] },
         entity: {
           firstSeenTimestamp: '2024-23-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
@@ -305,7 +305,7 @@ describe('mergeEntities', () => {
           environment: undefined,
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -348,7 +348,7 @@ describe('mergeEntities', () => {
           name: 'service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -368,7 +368,7 @@ describe('mergeEntities', () => {
           name: 'service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -420,7 +420,7 @@ describe('mergeEntities', () => {
           name: 'service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -463,7 +463,7 @@ describe('mergeEntities', () => {
           name: 'service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -483,7 +483,7 @@ describe('mergeEntities', () => {
           name: 'service-1',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: [] },
+        source_data_stream: { type: [] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
@@ -536,7 +536,7 @@ describe('mergeEntities', () => {
           environment: 'test',
         },
         agent: { name: ['nodejs'] },
-        data_stream: { type: ['metrics'] },
+        source_data_stream: { type: ['metrics'] },
         entity: {
           firstSeenTimestamp: '2024-06-05T10:34:40.810Z',
           lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
