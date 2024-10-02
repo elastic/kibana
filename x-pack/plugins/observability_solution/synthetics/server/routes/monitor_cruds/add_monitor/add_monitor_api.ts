@@ -51,12 +51,9 @@ export type CreateMonitorPayLoad = MonitorFields & {
   schedule?: number | MonitorFields['schedule'];
 };
 
-export class AddEditMonitorAPI {
-  routeContext: RouteContext;
+export class UpsertMonitorAPI {
   allPrivateLocations?: PrivateLocationAttributes[];
-  constructor(routeContext: RouteContext, private readonly logger: Logger) {
-    this.routeContext = routeContext;
-  }
+  constructor(private readonly routeContext: RouteContext) {}
 
   async syncNewMonitor({
     id,
@@ -319,7 +316,7 @@ export class AddEditMonitorAPI {
       ...(await mapInlineToProjectFields({
         monitorType: normalizedMonitor.type,
         monitor: normalizedMonitor,
-        logger: this.logger,
+        logger: this.routeContext.server.logger,
       })),
     };
   }
