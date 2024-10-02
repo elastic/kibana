@@ -7,47 +7,7 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { serviceInstanceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
-import {
-  AGENT_ACTIVATION_METHOD,
-  AGENT_NAME,
-  AGENT_VERSION,
-  AT_TIMESTAMP,
-  CLOUD_ACCOUNT_ID,
-  CLOUD_ACCOUNT_NAME,
-  CLOUD_AVAILABILITY_ZONE,
-  CLOUD_IMAGE_ID,
-  CLOUD_INSTANCE_ID,
-  CLOUD_INSTANCE_NAME,
-  CLOUD_MACHINE_TYPE,
-  CLOUD_PROJECT_ID,
-  CLOUD_PROJECT_NAME,
-  CLOUD_PROVIDER,
-  CLOUD_REGION,
-  CLOUD_SERVICE_NAME,
-  CONTAINER_ID,
-  CONTAINER_IMAGE,
-  HOST_ARCHITECTURE,
-  HOST_HOSTNAME,
-  HOST_IP,
-  HOST_NAME,
-  HOST_OS_PLATFORM,
-  KUBERNETES_NAMESPACE,
-  KUBERNETES_NODE_NAME,
-  KUBERNETES_POD_NAME,
-  KUBERNETES_POD_UID,
-  METRICSET_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_LANGUAGE_VERSION,
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_NAME,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
-} from '../../../common/es_fields/apm';
+import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -60,6 +20,7 @@ import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Host } from '../../../typings/es_schemas/raw/fields/host';
 import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+import { serviceInstanceMetadataDetailsMapping } from '../../utils/es_fields_mappings';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;
@@ -70,45 +31,6 @@ export interface ServiceInstanceMetadataDetailsResponse {
   host?: Host;
   cloud?: Cloud;
 }
-const SERVICE_INSTANCE_METADATA_FIELDS = [
-  AT_TIMESTAMP,
-  AGENT_NAME,
-  AGENT_VERSION,
-  AGENT_ACTIVATION_METHOD,
-  HOST_ARCHITECTURE,
-  HOST_HOSTNAME,
-  HOST_NAME,
-  HOST_IP,
-  HOST_OS_PLATFORM,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_NAME,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_LANGUAGE_VERSION,
-  SERVICE_VERSION,
-  KUBERNETES_NAMESPACE,
-  KUBERNETES_NODE_NAME,
-  KUBERNETES_POD_NAME,
-  KUBERNETES_POD_UID,
-  CLOUD_ACCOUNT_ID,
-  CLOUD_ACCOUNT_NAME,
-  CLOUD_AVAILABILITY_ZONE,
-  CLOUD_IMAGE_ID,
-  CLOUD_INSTANCE_ID,
-  CLOUD_INSTANCE_NAME,
-  CLOUD_MACHINE_TYPE,
-  CLOUD_PROJECT_ID,
-  CLOUD_PROJECT_NAME,
-  CLOUD_PROVIDER,
-  CLOUD_REGION,
-  CLOUD_SERVICE_NAME,
-  CONTAINER_ID,
-  CONTAINER_IMAGE,
-];
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
@@ -145,12 +67,12 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat({ term: { [METRICSET_NAME]: 'app' } }),
             },
           },
-          fields: SERVICE_INSTANCE_METADATA_FIELDS,
+          fields: ['*'],
         },
       }
     );
 
-    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
+    return serviceInstanceMetadataDetailsMapping(maybe(response.hits.hits[0])?.fields);
   }
 
   async function getTransactionEventSample() {
@@ -165,12 +87,12 @@ export async function getServiceInstanceMetadataDetails({
           terminate_after: 1,
           size: 1,
           query: { bool: { filter } },
-          fields: SERVICE_INSTANCE_METADATA_FIELDS,
+          fields: ['*'],
         },
       }
     );
 
-    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
+    return serviceInstanceMetadataDetailsMapping(maybe(response.hits.hits[0])?.fields);
   }
 
   async function getTransactionMetricSample() {
@@ -189,11 +111,11 @@ export async function getServiceInstanceMetadataDetails({
               filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
             },
           },
-          fields: SERVICE_INSTANCE_METADATA_FIELDS,
+          fields: ['*'],
         },
       }
     );
-    return maybe(serviceInstanceMetadataDetailsMapping(response.hits.hits[0]?.fields));
+    return serviceInstanceMetadataDetailsMapping(maybe(response.hits.hits[0])?.fields);
   }
 
   // we can expect the most detail of application metrics,
