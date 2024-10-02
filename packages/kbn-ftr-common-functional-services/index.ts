@@ -30,7 +30,7 @@ export type {
   InternalRequestHeader,
   RoleCredentials,
   CookieCredentials,
-  RolePrivileges,
+  KibanaRoleDescriptors,
 } from './services/saml_auth';
 
 import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
