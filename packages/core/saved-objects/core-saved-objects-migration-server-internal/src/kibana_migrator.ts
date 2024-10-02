@@ -158,7 +158,6 @@ export class KibanaMigrator implements IKibanaMigrator {
 
   private runMigrationsInternal(): Promise<MigrationResult[]> {
     const migrationAlgorithm = this.soMigrationsConfig.algorithm;
-    this.log.error(`Running migrations using ${migrationAlgorithm} algorithm`);
     if (migrationAlgorithm === 'zdt') {
       return runZeroDowntimeMigration({
         kibanaVersion: this.kibanaVersion,

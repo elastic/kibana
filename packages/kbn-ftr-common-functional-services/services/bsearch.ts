@@ -78,9 +78,6 @@ export class BsearchService extends FtrService {
         .send(options);
     };
 
-    // const response = await makeRequest();
-    // console.log({ response });
-
     const { body } = await this.retry.try(makeRequest);
 
     if (!body.isRunning) {
