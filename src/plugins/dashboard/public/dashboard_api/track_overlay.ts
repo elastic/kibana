@@ -12,20 +12,20 @@ import { BehaviorSubject } from 'rxjs';
 
 export function initializeTrackOverlay(setFocusedPanelId: (id: string | undefined) => void) {
   let overlayRef: OverlayRef;
-  const hasOverlayers$ = new BehaviorSubject(false);
+  const hasOverlays$ = new BehaviorSubject(false);
 
   function clearOverlays() {
-    hasOverlayers$.next(false);
+    hasOverlays$.next(false);
     setFocusedPanelId(undefined);
     overlayRef?.close();
   }
 
   return {
     clearOverlays,
-    hasOverlayers$,
+    hasOverlays$,
     openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
       clearOverlays();
-      hasOverlayers$.next(true);
+      hasOverlays$.next(true);
       overlayRef = ref;
       if (options?.focusedPanelId) {
         setFocusedPanelId(options.focusedPanelId);

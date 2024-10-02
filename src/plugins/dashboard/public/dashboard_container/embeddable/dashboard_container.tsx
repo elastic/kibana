@@ -336,7 +336,7 @@ export class DashboardContainer
     this.scrollToPanelId$ = dashboardApi.scrollToPanelId$;
     this.setScrollToPanelId = dashboardApi.setScrollToPanelId;
     this.clearOverlays = dashboardApi.clearOverlays;
-    this.hasOverlays$ = dashboardApi.hasOverlayers$;
+    this.hasOverlays$ = dashboardApi.hasOverlays$;
     this.openOverlay = dashboardApi.openOverlay;
     this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
     this.setLastSavedInput = dashboardApi.setLastSavedInput;
@@ -820,7 +820,7 @@ export class DashboardContainer
 
   public setViewMode = (viewMode: ViewMode) => {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
-    if (this.managed$.value && viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()) {
+    if (this.managed$.value && viewMode?.toLowerCase() === ViewMode.EDIT) {
       return;
     }
     this.dispatch.setViewMode(viewMode);
