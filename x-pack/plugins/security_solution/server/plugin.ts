@@ -228,7 +228,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
         taskManager: plugins.taskManager,
       });
     }
