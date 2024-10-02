@@ -36,7 +36,7 @@ const getSharedMetadataFields = (entityType: EntityType) => [
 export const buildHostEntityDefinition = (namespace: string): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('host', namespace),
-    name: 'EA Host Store',
+    name: 'Security Host Entity Store Definition',
     type: 'host',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['host.name'],
@@ -63,7 +63,7 @@ export const buildHostEntityDefinition = (namespace: string): EntityDefinition =
 export const buildUserEntityDefinition = (namespace: string): EntityDefinition =>
   entityDefinitionSchema.parse({
     id: buildEntityDefinitionId('user', namespace),
-    name: 'EA User Store',
+    name: 'Security User Entity Store Definition',
     type: 'user',
     indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
     identityFields: ['user.name'],
