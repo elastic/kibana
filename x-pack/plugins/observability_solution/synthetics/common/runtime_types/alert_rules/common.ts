@@ -25,14 +25,7 @@ export const SyntheticsCommonStateCodec = t.intersection([
 
 export type SyntheticsCommonState = t.TypeOf<typeof SyntheticsCommonStateCodec>;
 
-export const SyntheticsMonitorStatusAlertStateCodec = t.type({
-  configId: t.string,
-  locationId: t.string,
-  locationName: t.string,
-  errorStartedAt: t.string,
-  lastErrorMessage: t.string,
-  stateId: t.string,
-});
+export const SyntheticsMonitorStatusAlertStateCodec = t.type({});
 
 export type SyntheticsMonitorStatusAlertState = t.TypeOf<
   typeof SyntheticsMonitorStatusAlertStateCodec
@@ -45,6 +38,10 @@ export const AlertStatusMetaDataCodec = t.interface({
   locationId: t.string,
   timestamp: t.string,
   ping: OverviewPingCodec,
+  checks: t.type({
+    downWithinXChecks: t.number,
+    down: t.number,
+  }),
 });
 
 export const StaleAlertStatusMetaDataCodec = t.intersection([
@@ -69,9 +66,6 @@ export const AlertPendingStatusMetaDataCodec = t.intersection([
 ]);
 
 export const AlertStatusCodec = t.interface({
-  up: t.number,
-  down: t.number,
-  pending: t.number,
   upConfigs: t.record(t.string, AlertStatusMetaDataCodec),
   downConfigs: t.record(t.string, AlertStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, AlertPendingStatusMetaDataCodec),
@@ -79,7 +73,7 @@ export const AlertStatusCodec = t.interface({
   staleDownConfigs: t.record(t.string, StaleAlertStatusMetaDataCodec),
 });
 
-export type AlertPendingStatusMetaData = t.TypeOf<typeof AlertPendingStatusMetaDataCodec>;
 export type StaleDownConfig = t.TypeOf<typeof StaleAlertStatusMetaDataCodec>;
 export type AlertStatusMetaData = t.TypeOf<typeof AlertStatusMetaDataCodec>;
 export type AlertOverviewStatus = t.TypeOf<typeof AlertStatusCodec>;
+export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;
