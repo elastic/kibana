@@ -14,7 +14,7 @@ import {
   TimelineEventsAllStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { BsearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { getFieldsToRequest, getFilterValue } from '../../../../utils';
 
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     },
   });
 
-  describe('Timeline', () => {
+  describe('@skipInServerless Timeline', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
 

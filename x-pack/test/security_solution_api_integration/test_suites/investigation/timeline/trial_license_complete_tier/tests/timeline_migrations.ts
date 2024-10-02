@@ -34,7 +34,7 @@ interface PinnedEventWithoutTimelineId {
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const supertest = getService('supertest');
 
-  describe('Timeline migrations', () => {
+  describe('@skipInServerless Timeline migrations', () => {
     const esArchiver = getService('esArchiver');
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');

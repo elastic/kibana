@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     },
   });
 
-  describe('Timeline', () => {
+  describe('@skipInServerless Timeline', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
 
