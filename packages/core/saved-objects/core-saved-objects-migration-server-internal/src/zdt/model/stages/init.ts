@@ -81,11 +81,6 @@ export const init: ModelStage<
     message: `INIT: current algo check result: ${currentAlgo}`,
   });
 
-  logs.push({
-    level: 'error',
-    message: `currentAlgo-------: ${currentAlgo},${JSON.stringify(currentMappings, null, 2)}}`,
-  });
-
   // incompatible (pre 8.8/index-split https://github.com/elastic/kibana/pull/154888) v2 algo => we terminate
   if (currentAlgo === 'v2-incompatible') {
     return {

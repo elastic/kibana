@@ -144,13 +144,6 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-    this.logger.error(
-      `Saved Object config : XXX : ${JSON.stringify(
-        { savedObjectsConfig, savedObjectsMigrationConfig, config: this.config },
-        null,
-        2
-      )}`
-    );
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
         kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
