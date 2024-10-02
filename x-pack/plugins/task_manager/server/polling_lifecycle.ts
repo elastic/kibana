@@ -199,6 +199,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // start polling for work
         poller.start();
       } else if (!areESAndSOAvailable) {
+        this.logger.info(
+          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
+        );
         poller.stop();
         this.pool.cancelRunningTasks();
       }

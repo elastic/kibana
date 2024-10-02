@@ -66,8 +66,14 @@ export function createTaskPoller<T, H>({
         const result = await work();
         subject.next(asOk(result));
       } catch (e) {
-        subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+        try {
+          subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+        } catch (err) {
+          logger.error('Failed to push polling error', err);
+        }
       }
+    } else {
+      logger.debug('Skipping polling cycle because there is no capacity available');
     }
     if (running) {
       // Set the next runCycle call
@@ -77,6 +83,8 @@ export function createTaskPoller<T, H>({
       );
       // Reset delay, it's designed to shuffle only once
       pollIntervalDelay = 0;
+    } else {
+      logger.info('Task poller finished running its last cycle');
     }
   }
 
@@ -112,6 +120,7 @@ export function createTaskPoller<T, H>({
     events$: subject,
     start: () => {
       if (!running) {
+        logger.info('Starting the task poller');
         running = true;
         runCycle().catch(() => {});
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
@@ -120,6 +129,7 @@ export function createTaskPoller<T, H>({
       }
     },
     stop: () => {
+      logger.info('Stopping the task poller');
       if (timeoutId) {
         clearTimeout(timeoutId);
         timeoutId = null;
