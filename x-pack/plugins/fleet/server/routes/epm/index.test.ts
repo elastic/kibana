@@ -383,7 +383,6 @@ describe('schema validation', () => {
       ],
       categories: ['advanced_analytics_ueba'],
       savedObject,
-      owner: { github: 'test', type: 'elastic' },
     };
     const expectedResponse: GetPackagesResponse = {
       items: [packageItem],
@@ -412,6 +411,17 @@ describe('schema validation', () => {
             {
               name: 'test',
               title: 'test',
+            },
+          ],
+          title: 'test',
+          description: 'test',
+          icons: [
+            {
+              src: 'src',
+              title: 'title',
+              size: 'size',
+              type: 'type',
+              dark_mode: true,
             },
           ],
         },

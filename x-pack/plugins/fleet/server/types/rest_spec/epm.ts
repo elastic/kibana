@@ -214,7 +214,7 @@ export const InstalledPackageSchema = schema.object({
   name: schema.string(),
   version: schema.string(),
   status: schema.string(),
-  title: schema.string(),
+  title: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
   icons: schema.maybe(schema.arrayOf(PackageIconSchema)),
   dataStreams: schema.arrayOf(
