@@ -43,6 +43,7 @@
 
 .globalFilterItem-isPinned {
   position: relative;
+  overflow: hidden;
 
   &::before {
     content: '';
@@ -52,8 +53,6 @@
     left: 0;
     width: $euiSizeXS;
     background-color: $kbnGlobalFilterItemBorderColor;
-    border-top-left-radius: calc($euiBorderRadius / 2);
-    border-bottom-left-radius: calc($euiBorderRadius / 2);
   }
 }
 
