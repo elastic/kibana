@@ -29,13 +29,13 @@ import {
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { FC } from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -76,16 +76,6 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
-const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
-  return roles.filter((role) => {
-    const normalized = `${role.name}`.toLowerCase();
-    const normalizedQuery = filter.toLowerCase();
-    return (
-      normalized.indexOf(normalizedQuery) !== -1 && (includeReservedRoles || !isRoleReserved(role))
-    );
-  });
-};
-
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
@@ -110,15 +100,16 @@ export const RolesGridPage: FC<Props> = ({
   theme,
   i18n: i18nStart,
 }) => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [visibleRoles, setVisibleRoles] = useState<Role[]>([]);
+  const [rolesResponse, setRolesResponse] = useState<QueryRolesResult>({} as QueryRolesResult);
+
   const [selection, setSelection] = useState<Role[]>([]);
-  const [filter, setFilter] = useState<string>('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
-  const [includeReservedRoles, setIncludeReservedRoles] = useState<boolean>(true);
+  const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
-  const [state, queryRoles] = useAsyncFn(async (tableStateArgs: RolesTableState) => {
+  const loadRoles = async (tableStateArgs: RolesTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
 
     const requestBody = {
@@ -126,16 +117,40 @@ export const RolesGridPage: FC<Props> = ({
       ...(tableStateArgs.sort ? { sort: tableStateArgs.sort } : DEFAULT_TABLE_STATE.sort),
       query: queryContainer,
     };
-    return await rolesAPIClient.queryRoles(requestBody);
-  }, []);
+
+    try {
+      setIsLoading(true);
+      const rolesFromApi = await rolesAPIClient.queryRoles(requestBody);
+      setRolesResponse(rolesFromApi);
+    } catch (e) {
+      if (_.get(e, 'body.statusCode') === 403) {
+        setPermissionDenied(true);
+      } else {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.security.management.roles.fetchingRolesErrorMessage', {
+            defaultMessage: 'Error fetching roles: {message}',
+            values: { message: _.get(e, 'body.message', '') },
+          })
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    queryRoles(DEFAULT_TABLE_STATE);
+    loadRoles(DEFAULT_TABLE_STATE);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
-    setIncludeReservedRoles(e.target.checked);
-    setVisibleRoles(getVisibleRoles(roles, filter, e.target.checked));
+    const newTableStateArgs = {
+      ...tableState,
+      filters: {
+        showReserved: e.target.checked,
+      },
+    };
+    setTableState(newTableStateArgs);
+    loadRoles(newTableStateArgs);
   };
 
   const getRoleStatusBadges = (role: Role) => {
@@ -183,7 +198,7 @@ export const RolesGridPage: FC<Props> = ({
   const handleDelete = () => {
     setSelection([]);
     setShowDeleteConfirmation(false);
-    queryRoles(tableState);
+    loadRoles(tableState);
   };
 
   const deleteOneRole = (roleToDelete: Role) => {
@@ -224,7 +239,7 @@ export const RolesGridPage: FC<Props> = ({
               defaultMessage="Show reserved roles"
             />
           }
-          checked={includeReservedRoles}
+          checked={tableState.filters.showReserved ?? true}
           onChange={onIncludeReservedRolesChange}
         />
       );
@@ -239,7 +254,7 @@ export const RolesGridPage: FC<Props> = ({
       sort: sort ?? tableState.sort,
     };
     setTableState(newState);
-    queryRoles(newState);
+    loadRoles(newState);
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
@@ -249,7 +264,7 @@ export const RolesGridPage: FC<Props> = ({
         query: args.query,
       };
       setTableState(newState);
-      queryRoles(newState);
+      loadRoles(newState);
     }
   };
 
@@ -374,23 +389,8 @@ export const RolesGridPage: FC<Props> = ({
     setShowDeleteConfirmation(false);
   };
 
-  const isLoading = state.loading;
-  let permissionDenied = false;
-  if (state.error) {
-    if (state.error.message.includes('Forbidden')) {
-      permissionDenied = true;
-    } else {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.security.management.roles.fetchingRolesErrorMessage', {
-          defaultMessage: 'Error fetching roles: {message}',
-          values: { message: _.get(state.error, 'body.message', '') },
-        })
-      );
-    }
-  }
-
-  const tableItems = state.value?.roles ?? [];
-  const totalItemCount = state.value?.total ?? 0;
+  const tableItems = rolesResponse.roles ?? [];
+  const totalItemCount = rolesResponse.total ?? 0;
 
   const pagination = {
     pageIndex: tableState.from / tableState.size,

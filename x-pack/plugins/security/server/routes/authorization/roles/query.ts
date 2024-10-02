@@ -6,8 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '../..';
+import { transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
@@ -27,6 +29,7 @@ export function defineQueryRolesRoutes({
       path: '/api/security/role/_query',
       options: {
         summary: `Query roles`,
+        access: 'public',
       },
       validate: {
         body: schema.object({
@@ -49,13 +52,8 @@ export function defineQueryRolesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const hideReservedRoles =
-          buildFlavor === 'serverless' || request.body.filters?.showReserved === false;
         const esClient = (await context.core).elasticsearch.client;
         const features = await getFeatures();
-        const [elasticsearchRoles] = await Promise.all([
-          await esClient.asCurrentUser.security.getRole(),
-        ]);
 
         const { query, size, from, sort, filters } = request.body;
 
@@ -73,24 +71,30 @@ export function defineQueryRolesRoutes({
           queryPayload.bool.must.push(query);
         }
 
-        queryPayload.bool.should.push({ term: { 'metadata._reserved': showReservedRoles } });
+        if (showReservedRoles) {
+          queryPayload.bool.should.push({ term: { 'metadata._reserved': showReservedRoles } });
+        }
 
         const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
-        const queryRoles = await esClient.asCurrentUser.transport.request({
-          path: '/_security/_query/role',
-          method: 'POST',
-          body: {
-            query: queryPayload,
-            from,
-            size,
-            sort: transformedSort,
-          },
+
+        const queryRoles = await esClient.asCurrentUser.security.queryRole({
+          query: queryPayload,
+          from,
+          size,
+          sort: transformedSort,
         });
 
-        // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
-        return response.ok({
+        const transformedRoles = queryRoles.roles?.map((role) =>
           // @ts-expect-error
-          body: queryRoles,
+          transformElasticsearchRoleToRole(features, role, role.name, authz.applicationName, logger)
+        );
+
+        return response.ok<QueryRolesResult>({
+          body: {
+            roles: transformedRoles,
+            count: queryRoles.count,
+            total: queryRoles.total,
+          },
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

@@ -9,6 +9,7 @@ import type { Criteria } from '@elastic/eui';
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
 
 import type { HttpStart } from '@kbn/core/public';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { copyRole } from '../../../common/model';
@@ -30,7 +31,7 @@ export class RolesAPIClient {
   };
 
   public queryRoles = async (params?: QueryRoleParams) => {
-    return await this.http.post<any>(`/api/security/role/_query`, {
+    return await this.http.post<QueryRolesResult>(`/api/security/role/_query`, {
       body: JSON.stringify(params || {}),
     });
   };
