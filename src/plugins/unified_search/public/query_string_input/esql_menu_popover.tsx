@@ -54,18 +54,19 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   );
 
   const esqlContextMenuPanels = useMemo(() => {
-    const hasRecommendedQueries = adHocDataview && typeof adHocDataview !== 'string';
-    let queryString = '';
-    let timeFieldName = '';
-    if (hasRecommendedQueries) {
-      queryString = `from ${adHocDataview.name}`;
-      timeFieldName =
+    const recommendedQueries = [];
+    if (adHocDataview && typeof adHocDataview !== 'string') {
+      const queryString = `from ${adHocDataview.name}`;
+      const timeFieldName =
         adHocDataview.timeFieldName ?? adHocDataview.fields.getByType('date')?.[0]?.name;
+
+      recommendedQueries.push(
+        ...getRecommendedQueries({
+          fromCommand: queryString,
+          timeField: timeFieldName,
+        })
+      );
     }
-    const recommendedQueries = getRecommendedQueries({
-      fromCommand: queryString,
-      timeField: timeFieldName,
-    });
     const panels = [
       {
         id: 0,
@@ -108,7 +109,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
               </EuiContextMenuItem>
             ),
           },
-          ...(Boolean(hasRecommendedQueries)
+          ...(Boolean(recommendedQueries.length)
             ? [
                 {
                   name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.exampleQueries', {
@@ -116,6 +117,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                   }),
                   icon: 'nested',
                   panel: 1,
+                  'data-test-subj': 'esql-recommended-queries',
                 },
               ]
             : []),
