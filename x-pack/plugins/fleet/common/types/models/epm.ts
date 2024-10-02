@@ -292,7 +292,6 @@ export type RegistrySearchResult = Pick<
   | 'data_streams'
   | 'policy_templates'
   | 'categories'
-  | 'owner'
 >;
 
 // from /categories
