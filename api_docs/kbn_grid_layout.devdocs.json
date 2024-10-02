@@ -27,7 +27,7 @@
             "section": "def-public.GridSettings",
             "text": "GridSettings"
           },
-          "; }; renderPanelContents: (panelId: string) => React.ReactNode; }) => JSX.Element"
+          "; }; renderPanelContents: (panelId: string) => React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
         "deprecated": false,
