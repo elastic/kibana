@@ -48,10 +48,9 @@ export const checkUntrackedNamespacesTask: TaskSignature<TaskOptions> = (
               rootPath,
               definedPathsForRoot
             )) {
-              const { untrackedFilePath, extractedMessages, totalChecked, totalToCheck } =
-                untrackedMessageDetails;
+              const { untrackedFilePath, extractedMessages } = untrackedMessageDetails;
 
-              task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
+              // task.output = `[${totalChecked}/${totalToCheck}] Found ${extractedMessages.size} untracked messages in file ${untrackedFilePath}`;
               if (extractedMessages.size > 0) {
                 const error = new Error(
                   `The file ${untrackedFilePath} contains i18n messages but is not defined in the .i18nrc namespaces paths`
