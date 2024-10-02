@@ -72,16 +72,16 @@ import { createGeminiAdapter } from './adapters/gemini/gemini_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
-import { LangTracer } from './instrumentation/lang_tracer';
+import { GenAITracer } from './instrumentation/gen_ai_tracer';
 import { continueConversation } from './operators/continue_conversation';
 import { extractMessages } from './operators/extract_messages';
 import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
 import {
-  LangtraceServiceProvider,
-  withLangtraceChatCompleteSpan,
-} from './operators/with_langtrace_chat_complete_span';
+  GenAIServiceProvider,
+  withGenAIChatCompleteSpan,
+} from './operators/with_genai_chat_complete_span';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -192,7 +192,7 @@ export class ObservabilityAIAssistantClient {
           except: string[];
         };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return new LangTracer(context.active()).startActiveSpan(
+    return new GenAITracer(context.active()).startActiveSpan(
       'complete',
       ({ tracer: completeTracer }) => {
         const isConversationUpdate = persist && !!predefinedConversationId;
@@ -475,7 +475,7 @@ export class ObservabilityAIAssistantClient {
       functionCall?: string;
       signal: AbortSignal;
       simulateFunctionCalling?: boolean;
-      tracer: LangTracer;
+      tracer: GenAITracer;
     }
   ): Observable<ChatCompletionChunkEvent | TokenCountEvent> => {
     return defer(() =>
@@ -569,15 +569,15 @@ export class ObservabilityAIAssistantClient {
               },
               ({ span }) => {
                 return adapter.streamIntoObservable(response).pipe(
-                  withLangtraceChatCompleteSpan({
+                  withGenAIChatCompleteSpan({
                     span,
                     messages,
                     functions,
                     model: connector.name,
                     serviceProvider:
                       connector.actionTypeId === ObservabilityAIAssistantConnectorType.OpenAI
-                        ? LangtraceServiceProvider.OpenAI
-                        : LangtraceServiceProvider.Anthropic,
+                        ? GenAIServiceProvider.OpenAI
+                        : GenAIServiceProvider.Anthropic,
                   })
                 );
               }

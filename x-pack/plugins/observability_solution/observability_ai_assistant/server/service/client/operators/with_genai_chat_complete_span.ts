@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Event, LLMSpanAttributes } from '@langtrase/trace-attributes';
-import { Span } from '@opentelemetry/api';
+import { Attributes, Span } from '@opentelemetry/api';
 import { FunctionDefinition } from 'openai/resources';
 import { ignoreElements, last, merge, OperatorFunction, share, tap } from 'rxjs';
 import { Message, StreamingChatResponseEventType } from '../../../../common';
@@ -15,13 +14,16 @@ import { concatenateChatCompletionChunks } from '../../../../common/utils/concat
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import { getLangtraceSpanAttributes } from '../instrumentation/get_langtrace_span_attributes';
 
-export enum LangtraceServiceProvider {
+export enum GenAIServiceProvider {
   OpenAI = 'OpenAI',
   Azure = 'Azure',
   Anthropic = 'Anthropic',
 }
 
-export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
+const EVENT_STREAM_START = 'stream.start';
+const EVENT_STREAM_OUTPUT = 'stream.output';
+
+export function withGenAIChatCompleteSpan<T extends ChatEvent>({
   span,
   model,
   messages,
@@ -31,10 +33,10 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
   span: Span;
   model: string;
   messages: Message[];
-  serviceProvider: LangtraceServiceProvider;
+  serviceProvider: GenAIServiceProvider;
   functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
 }): OperatorFunction<T, T> {
-  const attributes: LLMSpanAttributes = {
+  const attributes: Attributes = {
     ...getLangtraceSpanAttributes(),
     'langtrace.service.name': serviceProvider,
     'llm.api': '/chat/completions',
@@ -72,12 +74,12 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
   return (source$) => {
     const shared$ = source$.pipe(share());
 
-    span.addEvent(Event.STREAM_START);
+    span.addEvent(EVENT_STREAM_START);
 
     const passThrough$ = shared$.pipe(
       tap((value) => {
         if (value.type === StreamingChatResponseEventType.ChatCompletionChunk) {
-          span.addEvent(Event.STREAM_OUTPUT, {
+          span.addEvent(EVENT_STREAM_OUTPUT, {
             response: value.message.content,
           });
           return;

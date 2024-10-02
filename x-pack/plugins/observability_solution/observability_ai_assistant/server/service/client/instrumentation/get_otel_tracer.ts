@@ -7,6 +7,6 @@
 
 import { trace } from '@opentelemetry/api';
 
-export function getLangtraceTracer() {
+export function getOTelTracer() {
   return trace.getTracer('langtrace');
 }
