@@ -41,9 +41,9 @@ describe('Expand panel action', () => {
   });
 
   it('calls onChange when expandedPanelId changes', async () => {
-    const onChange = jest.fn((isCompatible: boolean, expandAction: ExpandPanelAction) => {});
-    expandPanelIdSubject.next('superPanelId');
+    const onChange = jest.fn();
     action.subscribeToCompatibilityChanges(context, onChange);
+    expandPanelIdSubject.next('superPanelId');
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
