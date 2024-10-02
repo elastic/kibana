@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
-        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         // I am not rendering the histogram for indices with no @timestamp field
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toTime = 'Nov 15, 2018 @ 00:00:00.000';
         await timePicker.setAbsoluteRange(fromTime, toTime);
 
-        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       });
 
@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
@@ -400,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
@@ -416,7 +416,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         // click a history item
         await esql.clickHistoryItem(1);
 
@@ -441,9 +441,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
-        await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
+        await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });
     });
 
@@ -673,6 +673,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(editorValue).to.eql(
           `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
         );
+      });
+    });
+
+    describe('histogram breakdown', () => {
+      before(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should choose breakdown field', async () => {
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await discover.chooseBreakdownField('extension');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+      });
+
+      it('should add filter using histogram legend values', async () => {
+        await discover.clickLegendFilter('png', '+');
+        await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const editorValue = await monacoEditor.getCodeEditorValue();
+        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\`=="png"`);
+      });
+
+      it('should save breakdown field in saved search', async () => {
+        // revert the filter
+        const testQuery = 'from logstash-*';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await discover.saveSearch('esql view with breakdown');
+
+        await discover.clickNewSearchButton();
+        await header.waitUntilLoadingHasFinished();
+        const prevList = await discover.getHistogramLegendList();
+        expect(prevList).to.eql([]);
+
+        await discover.loadSavedSearch('esql view with breakdown');
+        await header.waitUntilLoadingHasFinished();
+        const list = await discover.getHistogramLegendList();
+        expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
     });
   });

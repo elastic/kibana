@@ -10,6 +10,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 
 export interface ServiceOverviewParams extends SerializableRecord {
   serviceName: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
 }
@@ -23,8 +24,9 @@ export class ServiceOverviewLocatorDefinition implements LocatorDefinition<Servi
     rangeFrom,
     rangeTo,
     serviceName,
+    environment,
   }: ServiceOverviewParams) => {
-    const params = { rangeFrom, rangeTo };
+    const params = { rangeFrom, rangeTo, environment };
     return {
       app: 'apm',
       path: `/services/${serviceName}/overview?${qs.stringify(params)}`,
