@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -384,9 +384,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async filterField(name: string) {
-    const input = await this.testSubjects.find('indexPatternFieldFilter');
+    const input: WebElementWrapper = await this.testSubjects.find('indexPatternFieldFilter');
     await input.clearValueWithKeyboard();
     await input.type(name);
+    const value = await this.testSubjects.getAttribute('indexPatternFieldFilter', 'value');
+    expect(value).to.eql(
+      name,
+      `Expected new value to be the input: [${name}}], but got: [${value}]`
+    );
   }
 
   async openControlsByName(name: string) {
@@ -1047,5 +1052,25 @@ export class SettingsPageObject extends FtrService {
       `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
       [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
     );
+  }
+
+  async openEditFlyoutByRowNumber(rowNumber: number = 0) {
+    const editBtns = await this.testSubjects.findAll('editFieldFormat');
+    const editFlyoutBtn = editBtns[rowNumber];
+    await editFlyoutBtn.click();
+  }
+
+  async assertEditFlyoutByFieldType(name: string, fieldType: string) {
+    await this.filterField(name);
+    await this.setFieldTypeFilter(fieldType);
+    await this.testSubjects.click('editFieldFormat');
+
+    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+
+    await this.retry.tryForTime(5000, async () => {
+      const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
+      expect(previewText).to.be('css');
+    });
+    await this.closeIndexPatternFieldEditor();
   }
 }

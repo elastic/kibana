@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -32,23 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show preview for fields in _source', async function () {
-        await PageObjects.settings.filterField('extension');
-        await testSubjects.click('editFieldFormat');
-        await retry.tryForTime(5000, async () => {
-          const previewText = await testSubjects.getVisibleText('fieldPreviewItem > value');
-          expect(previewText).to.be('css');
-        });
-        await PageObjects.settings.closeIndexPatternFieldEditor();
+        await PageObjects.settings.assertEditFlyoutByFieldType('extension', 'text');
       });
 
       it('should show preview for fields not in _source', async function () {
-        await PageObjects.settings.filterField('extension.raw');
-        await testSubjects.click('editFieldFormat');
-        await retry.tryForTime(5000, async () => {
-          const previewText = await testSubjects.getVisibleText('fieldPreviewItem > value');
-          expect(previewText).to.be('css');
-        });
-        await PageObjects.settings.closeIndexPatternFieldEditor();
+        await PageObjects.settings.assertEditFlyoutByFieldType('extension.raw', 'keyword');
       });
     });
   });
