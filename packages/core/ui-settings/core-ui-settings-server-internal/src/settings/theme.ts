@@ -97,18 +97,18 @@ export const getThemeSettings = (
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),
-        schema.literal('berlin'),
+        schema.literal('borealis'),
         // Accept any string for theming experiments
         schema.string(),
       ]),
       type: 'select',
-      options: ['amsterdam', 'berlin'],
+      options: ['amsterdam', 'borealis'],
       optionLabels: {
         amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
           defaultMessage: 'Amsterdam',
         }),
-        berlin: i18n.translate('core.ui_settings.params.themeName.options.berlin', {
-          defaultMessage: 'Berlin',
+        borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+          defaultMessage: 'Borealis',
         }),
       },
     },
