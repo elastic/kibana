@@ -88,7 +88,6 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
     useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
-  const shouldShowProjectLevelRetention = enableProjectLevelRetentionChecks;
 
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
@@ -155,7 +154,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           </EuiText>
         </EuiFlexItem>
 
-        {shouldShowProjectLevelRetention && (
+        {enableProjectLevelRetentionChecks && (
           <EuiFlexItem grow={false}>
             <EuiLink href={cloud?.deploymentUrl} target="_blank">
               <FormattedMessage
@@ -293,7 +292,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
       <EuiPageSection paddingSize="none" data-test-subj="dataStreamList">
-        {shouldShowProjectLevelRetention && projectLevelRetentionCallout && (
+        {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
           <>
             <EuiCallOut
               onDismiss={() => setprojectLevelRetentionCallout(false)}

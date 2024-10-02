@@ -155,12 +155,6 @@ const configurationFormSchema: FormSchema = {
   infiniteRetentionPeriod: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    label: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
-      {
-        defaultMessage: 'Keep data up to maximum retention period',
-      }
-    ),
   },
   dataRetentionEnabled: {
     type: FIELD_TYPES.TOGGLE,
@@ -426,6 +420,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             path="infiniteRetentionPeriod"
             component={ToggleField}
             data-test-subj="infiniteRetentionPeriod"
+            label={i18n.translate(
+              'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.infiniteRetentionPeriodField',
+              {
+                defaultMessage:
+                  'Keep data {withProjectLevelRetention, plural, one {up to maximum retention period} other {indefinitely}}',
+                values: { withProjectLevelRetention: enableProjectLevelRetentionChecks ? 1 : 0 },
+              }
+            )}
             componentProps={{
               euiFieldProps: {
                 disabled: !formData.dataRetentionEnabled && enableTogglingDataRetention,
