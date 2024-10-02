@@ -50,6 +50,7 @@ export function ChatHeader({
   onCopyConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
+  onClose,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -60,6 +61,7 @@ export function ChatHeader({
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
+  onClose: () => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -73,6 +75,7 @@ export function ChatHeader({
   }, [title]);
 
   const handleNavigateToConversations = () => {
+    onClose();
     if (conversationId) {
       router.push('/conversations/{conversationId}', {
         path: {
