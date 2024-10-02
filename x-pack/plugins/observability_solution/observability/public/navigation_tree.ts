@@ -236,6 +236,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   defaultMessage: 'Logs stream',
                 }),
               },
+              {
+                link: 'logs:settings',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsSettings', {
+                  defaultMessage: 'Logs settings',
+                }),
+              },
               { link: 'maps' },
               { link: 'canvas' },
               { link: 'graph' },

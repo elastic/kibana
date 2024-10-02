@@ -28,12 +28,12 @@ export interface LogsAppRoutes {
 export const getLogsAppRoutes = ({ isLogsStreamEnabled }: { isLogsStreamEnabled: boolean }) => {
   const routes: LogsAppRoutes = {
     logsAnomalies: {
-      id: 'logs-anomalies',
+      id: 'anomalies',
       title: logsAnomaliesTitle,
       path: '/anomalies',
     },
     logsCategories: {
-      id: 'logs-categories',
+      id: 'log-categories',
       title: logCategoriesTitle,
       path: '/log-categories',
     },

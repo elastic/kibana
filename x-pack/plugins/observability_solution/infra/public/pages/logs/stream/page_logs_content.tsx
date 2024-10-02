@@ -234,7 +234,7 @@ export const StreamPageLogsContent = React.memo<{
 
   return (
     <>
-      <LogsDeprecationCallout />
+      <LogsDeprecationCallout page="stream" />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />

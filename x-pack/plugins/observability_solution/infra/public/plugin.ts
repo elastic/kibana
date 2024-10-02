@@ -429,9 +429,13 @@ const getLogsNavigationEntries = ({
     });
   }
 
+  // Display Stream nav entry when Logs Stream is enabled
   if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
+  // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
+  // Display Logs Settings entry when Logs Stream is not enabled
+  if (!routes.stream) entries.push(createNavEntryFromRoute(routes.settings));
 
   return entries;
 };
