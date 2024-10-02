@@ -8,5 +8,5 @@
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:field_retention:enrichment';
 export const VERSION = '1.0.0';
-export const INTERVAL = '1h';
+export const INTERVAL = '30s'; // TODO: this will be one hour when we move to 24h lookback
 export const TIMEOUT = '10m';
