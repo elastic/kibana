@@ -34,6 +34,9 @@ interface RegisterAPIRoutesArgs {
   logger: Logger;
 }
 
+const TECHNICAL_PREVIEW_WARNING =
+  'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+
 function recursiveSortObjectByKeys(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) return obj;
   if (Array.isArray(obj)) {
@@ -63,7 +66,8 @@ export function registerAPIRoutes({
   const createRoute = versionedRouter.post({
     path: `${PUBLIC_API_PATH}/{id?}`,
     access: 'public',
-    description: `Create a new dashboard.`,
+    summary: 'Create a dashboard',
+    description: TECHNICAL_PREVIEW_WARNING,
   });
 
   createRoute.addVersion(
@@ -73,9 +77,6 @@ export function registerAPIRoutes({
         request: {
           params: schema.object({
             id: schema.maybe(schema.string()),
-          }),
-          query: schema.object({
-            overwrite: schema.boolean({ defaultValue: false }),
           }),
           body: schema.object({
             attributes: dashboardAttributesSchema,
@@ -92,7 +93,6 @@ export function registerAPIRoutes({
     },
     async (ctx, req, res) => {
       const { id } = req.params;
-      const { overwrite } = req.query;
       const { attributes, references, spaces: initialNamespaces } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
@@ -101,14 +101,16 @@ export function registerAPIRoutes({
       try {
         ({ result } = await client.create(attributes, {
           id,
-          overwrite,
           references,
           initialNamespaces,
         }));
       } catch (e) {
-        // TODO do some error handling
         if (e.isBoom && e.output.statusCode === 409) {
-          return res.conflict();
+          return res.conflict({
+            body: {
+              message: `A dashboard with saved object ID ${id} already exists.`,
+            },
+          });
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
@@ -128,7 +130,8 @@ export function registerAPIRoutes({
   const updateRoute = versionedRouter.put({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    description: `Update an existing dashboard.`,
+    summary: `Update an existing dashboard.`,
+    description: TECHNICAL_PREVIEW_WARNING,
   });
 
   updateRoute.addVersion(
@@ -178,7 +181,8 @@ export function registerAPIRoutes({
   const listRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}`,
     access: 'public',
-    description: `Get a list of dashboards.`,
+    summary: `Get a list of dashboards.`,
+    description: TECHNICAL_PREVIEW_WARNING,
   });
 
   listRoute.addVersion(
@@ -236,7 +240,8 @@ export function registerAPIRoutes({
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    description: `Get a dashboard.`,
+    summary: `Get a dashboard.`,
+    description: TECHNICAL_PREVIEW_WARNING,
   });
 
   getRoute.addVersion(
@@ -283,7 +288,8 @@ export function registerAPIRoutes({
   const deleteRoute = versionedRouter.delete({
     path: `${PUBLIC_API_PATH}/{id}`,
     access: 'public',
-    description: `Delete a dashboard.`,
+    summary: `Delete a dashboard.`,
+    description: TECHNICAL_PREVIEW_WARNING,
   });
 
   deleteRoute.addVersion(
