@@ -122,7 +122,9 @@ export function createTaskPoller<T, H>({
       if (!running) {
         logger.info('Starting the task poller');
         running = true;
-        runCycle().catch(() => {});
+        runCycle().catch((e) => {
+          logger.error(`Error when starting the task poller: ${getErrorDescription(e)}`);
+        });
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
         setTimeout(() => subscribe(), 0);
@@ -146,8 +148,13 @@ export enum PollingErrorType {
 }
 
 function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Option<T> = none) {
-  const errDescription: string = err instanceof Error ? `${err.message}\n${err.stack}` : err;
-  return asErr(new PollingError<T>(`Failed to poll for work: ${errDescription}`, type, data));
+  return asErr(
+    new PollingError<T>(`Failed to poll for work: ${getErrorDescription(err)}`, type, data)
+  );
+}
+
+function getErrorDescription(err: string | Error): string {
+  return err instanceof Error ? `${err.message}\n${err.stack}` : err;
 }
 
 export class PollingError<T> extends Error {
