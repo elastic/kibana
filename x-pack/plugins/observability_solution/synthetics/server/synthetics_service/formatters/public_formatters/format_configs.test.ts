@@ -300,10 +300,10 @@ describe('browser fields', () => {
 });
 
 describe('formatHeartbeatRequest', () => {
-  it('uses heartbeat id', async () => {
+  it('uses heartbeat id', () => {
     const monitorId = 'test-monitor-id';
     const heartbeatId = 'test-custom-heartbeat-id';
-    const actual = await formatHeartbeatRequest(
+    const actual = formatHeartbeatRequest(
       {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
@@ -329,9 +329,9 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('uses monitor id when custom heartbeat id is not defined', async () => {
+  it('uses monitor id when custom heartbeat id is not defined', () => {
     const monitorId = 'test-monitor-id';
-    const actual = await formatHeartbeatRequest(
+    const actual = formatHeartbeatRequest(
       {
         monitor: testBrowserConfig as SyntheticsMonitor,
         configId: monitorId,
@@ -358,10 +358,10 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports test_run_id', async () => {
+  it('supports test_run_id', () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = await formatHeartbeatRequest({
+    const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       configId: monitorId,
       testRunId,
@@ -386,10 +386,10 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('does not append project data', async () => {
+  it('does not append project data', () => {
     const monitorId = 'test-monitor-id';
     const testRunId = 'beep';
-    const actual = await formatHeartbeatRequest({
+    const actual = formatHeartbeatRequest({
       monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
       configId: monitorId,
       testRunId,
@@ -431,7 +431,7 @@ describe('formatHeartbeatRequest', () => {
       monitorId,
       jest.fn() as any
     );
-    const actual = await formatHeartbeatRequest({
+    const actual = formatHeartbeatRequest({
       monitor: {
         ...testBrowserConfig,
         [ConfigKey.SOURCE_INLINE]: '',
