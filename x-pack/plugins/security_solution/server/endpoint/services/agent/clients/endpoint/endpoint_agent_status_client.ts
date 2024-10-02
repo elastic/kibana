@@ -56,7 +56,9 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
       }, {});
     } catch (err) {
       const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds}], failed with: ${err.message}`,
+        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
+          err.message
+        }`,
         500,
         err
       );

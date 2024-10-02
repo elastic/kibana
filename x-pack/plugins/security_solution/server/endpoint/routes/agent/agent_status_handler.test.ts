@@ -147,7 +147,7 @@ describe('Agent Status API route handler', () => {
     });
   });
 
-  it('should NOT use space id when feature is disabled', async () => {
+  it('should NOT use space ID in creating SO client when feature is disabled', async () => {
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -161,6 +161,7 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
+    // @ts-expect-error write to readonly property
     apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
       true;
 
