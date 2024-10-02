@@ -8,11 +8,12 @@
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 const _allowedExperimentalValues = {
+  // Leaving this in here until we have a 'real' experimental feature
   testFeature: false,
 };
 
 /**
- * A list of allowed values that can be used in `xpack.fleet.enableExperimental`.
+ * A list of allowed values that can be used in `xpack.integration_assistant.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze<
@@ -26,7 +27,7 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
- * Parses the string value used in `xpack.fleet.enableExperimental` kibana configuration,
+ * Parses the string value used in `xpack.integration_assistant.enableExperimental` kibana configuration,
  * which should be a string of values delimited by a comma (`,`)
  *
  * @param configValue
