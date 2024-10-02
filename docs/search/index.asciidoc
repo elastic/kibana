@@ -28,7 +28,7 @@ As a result, the release notes for your features of interest might live in diffe
 // | Connectors
 // | link:https://example.com/connectors/api[API reference]
 // | link:https://example.com/connectors/docs[Documentation]
-// | link:https://example.com/connectors/notes[Release notes]
+// | link:{reference}/es-release-notes.html[Elasticsearch guide]
 
 // | Web crawler
 // | link:https://example.com/web_crawlers/api[API reference]
@@ -38,32 +38,32 @@ As a result, the release notes for your features of interest might live in diffe
 // | Playground
 // | link:https://example.com/playground/api[API reference]
 // | link:https://example.com/playground/docs[Documentation]
-// | link:https://example.com/playground/notes[Release notes]
+// | link:<<release-notes, Kibana guide>>
 
 // | Search Applications
 // | link:https://example.com/search_apps/api[API reference]
 // | link:https://example.com/search_apps/docs[Documentation]
-// | link:https://example.com/search_apps/notes[Release notes]
+// | link:{reference}/es-release-notes.html[Elasticsearch guide]
 
 // | Behavioral Analytics
 // | link:https://example.com/behavioral_analytics/api[API reference]
 // | link:https://example.com/behavioral_analytics/docs[Documentation]
-// | link:https://example.com/behavioral_analytics/notes[Release notes]
+// | link:{reference}/es-release-notes.html[Elasticsearch guide]
 
 // | Inference Endpoints
 // | link:https://example.com/inference_endpoints/api[API reference]
 // | link:https://example.com/inference_endpoints/docs[Documentation]
-// | link:https://example.com/inference_endpoints/notes[Release notes]
+// | link:{reference}/es-release-notes.html[Elasticsearch guide]
 
 // | Console
 // | link:https://example.com/console/api[API reference]
 // | link:https://example.com/console/docs[Documentation]
-// | link:https://example.com/console/notes[Release notes]
+// | link:<<release-notes, Kibana guide>>
 
 // | Search UI
 // | link:https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
 // | link:https://www.elastic.co/docs/current/search-ui/overview[Documentation]
-// | link:https://example.com/search_ui/notes[Release notes]
+// | link:https://www.elastic.co/docs/current/search-ui[Search UI]
 
 // |===
 
