@@ -75,7 +75,8 @@ export class BsearchService extends FtrService {
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'true')
-        .send(options);
+        .send(options)
+        .expect(200);
     };
 
     const { body } = await this.retry.try(makeRequest);
