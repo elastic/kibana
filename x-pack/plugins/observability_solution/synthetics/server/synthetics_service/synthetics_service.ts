@@ -46,7 +46,6 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
-import { mapInlineToProjectFields } from './utils/map_inline_to_project_fields';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -328,7 +327,7 @@ export class SyntheticsService {
     if (!config) {
       return null;
     }
-    const monitors = await this.formatConfigs(config);
+    const monitors = this.formatConfigs(config);
     const license = await this.getLicense();
 
     const output = await this.getOutput();
@@ -348,7 +347,7 @@ export class SyntheticsService {
         return;
       }
 
-      const monitors = await this.formatConfigs(configs);
+      const monitors = this.formatConfigs(configs);
       const license = await this.getLicense();
 
       const output = await this.getOutput();
@@ -373,7 +372,7 @@ export class SyntheticsService {
         return;
       }
       const license = await this.getLicense();
-      const monitors = await this.formatConfigs(monitorConfig);
+      const monitors = this.formatConfigs(monitorConfig);
 
       const output = await this.getOutput();
       if (output) {
@@ -414,28 +413,7 @@ export class SyntheticsService {
         this.locations,
         async (location) => {
           if (bucketsByLocation[location.id].length > perBucket && output) {
-            const locMonitors = await Promise.all(
-              bucketsByLocation[location.id].splice(0, PER_PAGE).map(async (monitorData) => {
-                if (!monitorData?.[ConfigKey.SOURCE_INLINE]) {
-                  return monitorData;
-                } else if (!!monitorData?.[ConfigKey.SOURCE_PROJECT_CONTENT]) {
-                  return {
-                    ...monitorData,
-                    [ConfigKey.SOURCE_INLINE]: undefined,
-                  };
-                }
-
-                return {
-                  ...monitorData,
-                  ...(await mapInlineToProjectFields({
-                    monitorType: monitorData.type,
-                    monitor: monitorData,
-                    logger: this.logger,
-                    includeInlineScript: false,
-                  })),
-                };
-              })
-            );
+            const locMonitors = bucketsByLocation[location.id].splice(0, PER_PAGE);
 
             this.logger.debug(
               `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
@@ -474,7 +452,7 @@ export class SyntheticsService {
           }
 
           const monitors = result.saved_objects.filter(({ error }) => !error);
-          const formattedConfigs = await this.normalizeConfigs(monitors, paramsBySpace);
+          const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
 
           this.logger.debug(
             `${formattedConfigs.length} monitors will be pushed to synthetics service.`
@@ -515,7 +493,7 @@ export class SyntheticsService {
     if (!configs) {
       return;
     }
-    const monitors = await this.formatConfigs(configs);
+    const monitors = this.formatConfigs(configs);
     if (monitors.length === 0) {
       return;
     }
@@ -556,7 +534,7 @@ export class SyntheticsService {
 
         const data = {
           output,
-          monitors: await this.formatConfigs(configs),
+          monitors: this.formatConfigs(configs),
           license,
         };
         return await this.apiClient.delete(data);
@@ -576,7 +554,7 @@ export class SyntheticsService {
     }
 
     for await (const result of finder.find()) {
-      const monitors = await this.normalizeConfigs(result.saved_objects, paramsBySpace);
+      const monitors = this.normalizeConfigs(result.saved_objects, paramsBySpace);
       const hasPublicLocations = monitors.some((config) =>
         config.locations.some(({ isServiceManaged }) => isServiceManaged)
       );
@@ -644,29 +622,27 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async formatConfigs(configData: ConfigData[] | ConfigData) {
+  formatConfigs(configData: ConfigData[] | ConfigData) {
     const configDataList = Array.isArray(configData) ? configData : [configData];
 
-    return Promise.all(
-      configDataList.map(async (config) => {
-        const { str: paramsString, params } = mixParamsWithGlobalParams(
-          config.params,
-          config.monitor
-        );
+    return configDataList.map((config) => {
+      const { str: paramsString, params } = mixParamsWithGlobalParams(
+        config.params,
+        config.monitor
+      );
 
-        const asHeartbeatConfig = formatHeartbeatRequest(config, paramsString);
+      const asHeartbeatConfig = formatHeartbeatRequest(config, paramsString);
 
-        return formatMonitorConfigFields(
-          Object.keys(asHeartbeatConfig) as ConfigKey[],
-          asHeartbeatConfig as Partial<MonitorFields>,
-          this.logger,
-          params ?? {}
-        );
-      })
-    );
+      return formatMonitorConfigFields(
+        Object.keys(asHeartbeatConfig) as ConfigKey[],
+        asHeartbeatConfig as Partial<MonitorFields>,
+        this.logger,
+        params ?? {}
+      );
+    });
   }
 
-  async normalizeConfigs(
+  normalizeConfigs(
     monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
   ) {
@@ -685,7 +661,7 @@ export class SyntheticsService {
       };
     });
 
-    return this.formatConfigs(configDataList) as Promise<MonitorFields[]>;
+    return this.formatConfigs(configDataList) as MonitorFields[];
   }
   checkMissingSchedule(state: Record<string, string>) {
     try {

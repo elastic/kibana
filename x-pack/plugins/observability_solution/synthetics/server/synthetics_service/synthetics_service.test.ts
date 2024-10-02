@@ -16,7 +16,6 @@ import { LocationStatus, HeartbeatConfig, ConfigKey } from '../../common/runtime
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
 import { SyntheticsServerSetup } from '../types';
-import { unzipFile } from '../common/unzip_project_code';
 
 jest.mock('axios', () => jest.fn());
 
@@ -357,7 +356,7 @@ describe('SyntheticsService', () => {
       );
     });
 
-    it('pushes zip of inline source', async () => {
+    it('does not add zip to inline source', async () => {
       const { service, locations } = getMockedService();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
@@ -381,14 +380,7 @@ describe('SyntheticsService', () => {
       const projectContent = (mockArg as AxiosRequestConfig).data.monitors[0].streams[0][
         ConfigKey.SOURCE_PROJECT_CONTENT
       ];
-      expect(projectContent).toBeDefined();
-      expect(await unzipFile(projectContent)).toMatchInlineSnapshot(`
-        "import { journey, step, expect } from '@elastic/synthetics';
-
-        journey('inline', ({ page, context, browser, params, request }) => {
-        step('goto', () => page.goto('https://elastic.co'))
-        });"
-      `);
+      expect(projectContent).not.toBeDefined();
     });
 
     it('does not push a zip if inline content is missing', async () => {
