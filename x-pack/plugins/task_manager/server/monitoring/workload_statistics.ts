@@ -16,7 +16,6 @@ import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
-import { createRunningAveragedStat } from './task_run_calculators';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskCost } from '../task';
 
@@ -45,12 +44,8 @@ interface RawWorkloadStat extends JsonObject {
   capacity_requirements: CapacityRequirements;
 }
 
-export interface WorkloadStat extends RawWorkloadStat {
-  owner_ids: number[];
-}
-export interface SummarizedWorkloadStat extends RawWorkloadStat {
-  owner_ids: number;
-}
+export type WorkloadStat = RawWorkloadStat;
+export type SummarizedWorkloadStat = RawWorkloadStat;
 export interface CapacityRequirements extends JsonObject {
   per_minute: number;
   per_hour: number;
@@ -143,7 +138,6 @@ export function createWorkloadAggregator({
 
   const totalNumTaskDefinitions = taskDefinitions.getAllTypes().length;
   const taskTypeTermAggSize = Math.min(totalNumTaskDefinitions, 10000);
-  const ownerIdsQueue = createRunningAveragedStat<number>(scheduleDensityBuckets);
 
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
@@ -162,10 +156,6 @@ export function createWorkloadAggregator({
             aggs: {
               taskType: { terms: { size: taskTypeTermAggSize, field: 'task.taskType' } },
             },
-          },
-          ownerIds: {
-            filter: { range: { 'task.startedAt': { gte: 'now-1w/w' } } },
-            aggs: { ownerIds: { cardinality: { field: 'task.ownerId' } } },
           },
           idleTasks: {
             filter: { term: { 'task.status': 'idle' } },
@@ -225,7 +215,6 @@ export function createWorkloadAggregator({
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
       const nonRecurringTaskTypes = aggregations.nonRecurringTasks.taskType.buckets;
-      const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
@@ -297,7 +286,6 @@ export function createWorkloadAggregator({
         task_types: taskTypeSummary,
         non_recurring: nonRecurring,
         non_recurring_cost: totalNonRecurringCost,
-        owner_ids: ownerIdsQueue(ownerIds),
         schedule: schedules
           .sort((scheduleLeft, scheduleRight) => scheduleLeft.asSeconds - scheduleRight.asSeconds)
           .map((schedule) => [schedule.interval, schedule.count]),
@@ -452,12 +440,7 @@ export function summarizeWorkloadStat(workloadStats: WorkloadStat): {
   status: HealthStatus;
 } {
   return {
-    value: {
-      ...workloadStats,
-      // assume the largest number we've seen of active owner IDs
-      // matches the number of active Task Managers in the cluster
-      owner_ids: Math.max(...workloadStats.owner_ids),
-    },
+    value: workloadStats,
     status: HealthStatus.OK,
   };
 }
@@ -477,7 +460,6 @@ export interface WorkloadAggregationResponse {
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
   nonRecurringTasks: { doc_count: number; taskType: TaskTypeAggregation };
-  ownerIds: { ownerIds: { value: number } };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
 

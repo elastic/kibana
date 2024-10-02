@@ -10,7 +10,7 @@ import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import {
   createDatasetQualityControllerStateMachine,
   DEFAULT_CONTEXT,
@@ -22,17 +22,19 @@ type InitialState = DatasetQualityPublicStateUpdate;
 
 interface Dependencies {
   core: CoreStart;
-  dataStreamStatsClient: IDataStreamsStatsClient;
+  dataStreamStatsService: DataStreamsStatsServiceStart;
 }
 
 export const createDatasetQualityControllerFactory =
-  ({ core, dataStreamStatsClient }: Dependencies) =>
+  ({ core, dataStreamStatsService }: Dependencies) =>
   async ({
     initialState = DEFAULT_CONTEXT,
   }: {
     initialState?: InitialState;
   }): Promise<DatasetQualityController> => {
     const initialContext = getContextFromPublicState(initialState ?? {});
+
+    const dataStreamStatsClient = await dataStreamStatsService.getClient();
 
     const machine = createDatasetQualityControllerStateMachine({
       initialContext,
