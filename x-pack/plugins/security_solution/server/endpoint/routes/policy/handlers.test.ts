@@ -27,6 +27,8 @@ import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { TypeOf } from '@kbn/config-schema';
+import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -51,7 +53,11 @@ describe('test policy response handler', () => {
       const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(response);
-      const mockRequest = httpServerMock.createKibanaRequest({
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
         query: { agentId: 'id' },
       });
 
@@ -75,7 +81,11 @@ describe('test policy response handler', () => {
 
       mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
 
-      const mockRequest = httpServerMock.createKibanaRequest({
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
         query: { agentId: 'foo' },
       });
 
@@ -88,9 +98,9 @@ describe('test policy response handler', () => {
       );
 
       expect(mockResponse.notFound).toHaveBeenCalledWith({
-        body: {
+        body: expect.objectContaining({
           message: 'Policy response for endpoint id [foo] not found',
-        },
+        }),
       });
     });
 
@@ -101,7 +111,11 @@ describe('test policy response handler', () => {
         'getInternalFleetServices'
       );
       const hostPolicyResponseHandler = getHostPolicyResponseHandler(endpointAppContextService);
-      const mockRequest = httpServerMock.createKibanaRequest({
+      const mockRequest = httpServerMock.createKibanaRequest<
+        never,
+        TypeOf<typeof GetPolicyResponseSchema.query>,
+        never
+      >({
         query: { agentId: 'foo' },
       });
       const mockContext = requestContextMock.convertContext(
