@@ -24,12 +24,11 @@ export const PartialCodeSignatureCallout = () => {
       size="s"
       data-test-subj="partialCodeSignatureCallout"
     >
-      <p>
-        <FormattedMessage
-          id="exceptionList-components.partialCodeSignatureCallout.body"
-          defaultMessage='Please review field values, as your filter criteria may be incomplete. We recommend both the signer name and trust status be included (using the "AND" operator) to avoid potential security gaps.'
-        />
-      </p>
+      <FormattedMessage
+        id="exceptionList-components.partialCodeSignatureCallout.body"
+        defaultMessage='Please review field values, as your filter criteria may be incomplete. We recommend both the signer name and trust status be included (using the "AND" operator) to avoid potential security gaps.'
+        tagName="p"
+      />
     </EuiCallOut>
   );
 };

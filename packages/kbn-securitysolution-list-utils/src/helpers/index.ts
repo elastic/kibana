@@ -1061,21 +1061,21 @@ export const hasWrongOperatorWithWildcard = (
 export const hasPartialCodeSignatureEntry = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
-  const os = items[0]?.os_types ?? ['windows'];
+  const { os_types: os = ['windows'], entries = [] } = items[0] || {};
   let name = false;
   let trusted = false;
-  let nestedName = false;
-  let nestedTrusted = false;
 
-  items[0]?.entries.forEach((e) => {
+  for (const e of entries) {
     if (e.type === 'nested' && e.field === 'process.Ext.code_signature') {
-      e.entries.forEach((n) => {
-        if (n.field === 'subject_name') {
-          nestedName = true;
-        } else if (n.field === 'trusted') {
-          nestedTrusted = true;
-        }
-      });
+      const includesNestedName = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'subject_name'
+      );
+      const includesNestedTrusted = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'trusted'
+      );
+      if (includesNestedName !== includesNestedTrusted) {
+        return true;
+      }
     } else if (
       e.field === 'process.code_signature.subject_name' ||
       (os.includes('macos') && e.field === 'process.code_signature.team_id')
@@ -1084,6 +1084,6 @@ export const hasPartialCodeSignatureEntry = (
     } else if (e.field === 'process.code_signature.trusted') {
       trusted = true;
     }
-  });
-  return name !== trusted || nestedName !== nestedTrusted;
+  }
+  return name !== trusted;
 };
