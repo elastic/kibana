@@ -27,7 +27,7 @@ export const loadSecurityLabs = async (
     const docsLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/security_labs'),
       {
-        '.mdx': (path) => new TextLoader(path),
+        '.md': (path) => new TextLoader(path),
       },
       true
     );
