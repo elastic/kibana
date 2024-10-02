@@ -79,28 +79,26 @@ export const AppContainer: FC<Props> = ({
 
     const mount = async () => {
       setShowSpinner(true);
-      setTimeout(async () => {
-        try {
-          unmountRef.current =
-            (await mounter.mount({
-              appBasePath: mounter.appBasePath,
-              history: createScopedHistory(appPath),
-              element: elementRef.current!,
-              theme$,
-              onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
-              setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
-            })) || null;
-        } catch (e) {
-          setError(e);
-          // eslint-disable-next-line no-console
-          console.error(e);
-        } finally {
-          if (elementRef.current) {
-            setShowSpinner(false);
-          }
-          setIsMounting(false);
+      try {
+        unmountRef.current =
+          (await mounter.mount({
+            appBasePath: mounter.appBasePath,
+            history: createScopedHistory(appPath),
+            element: elementRef.current!,
+            theme$,
+            onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
+            setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
+          })) || null;
+      } catch (e) {
+        setError(e);
+        // eslint-disable-next-line no-console
+        console.error(e);
+      } finally {
+        if (elementRef.current) {
+          setShowSpinner(false);
         }
-      });
+        setIsMounting(false);
+      }
     };
 
     mount();
