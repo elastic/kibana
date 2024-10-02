@@ -29,6 +29,8 @@ interface SelectionProps {
 }
 
 export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
+// eslint-disable-next-line import/no-default-export
+export default ConnectorsSelection;
 
 function ConnectorsSelectionComponent({
   allowGroupConnector,

@@ -37,6 +37,7 @@ import type { NewPackagePolicyWithId } from './package_policy';
 
 export interface PackagePolicyService {
   asScoped(request: KibanaRequest): PackagePolicyClient;
+
   get asInternalUser(): PackagePolicyClient;
 }
 
@@ -164,7 +165,7 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    options?: { logger?: Logger; installMissingPackage?: boolean }
+    options?: { logger?: Logger; installMissingPackage?: boolean; connectorId: string }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(

@@ -297,6 +297,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     has_fleet_server: hasFleetServer,
     force,
     space_ids: spaceIds,
+    connector_id: connectorId,
     ...newPolicy
   } = request.body;
   const spaceId = fleetContext.spaceId;
@@ -326,6 +327,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       user,
       authorizationHeader,
       force,
+      connectorId,
     });
 
     const body: CreateAgentPolicyResponse = {

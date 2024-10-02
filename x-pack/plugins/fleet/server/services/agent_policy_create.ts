@@ -59,10 +59,11 @@ async function createPackagePolicy(
     user: AuthenticatedUser | undefined;
     authorizationHeader?: HTTPAuthorizationHeader | null;
     force?: boolean;
+    connectorId: string;
   }
 ) {
   const newPackagePolicy = await packagePolicyService
-    .buildPackagePolicyFromPackage(soClient, packageToInstall)
+    .buildPackagePolicyFromPackage(soClient, packageToInstall, { connectorId: options.connectorId })
     .catch(async (error) => {
       // rollback agent policy on error
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id, {
@@ -77,15 +78,17 @@ async function createPackagePolicy(
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.namespace = agentPolicy.namespace;
+  newPackagePolicy.connector_id = options.connectorId;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+  const policy = await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
     authorizationHeader: options.authorizationHeader,
     force: options.force || agentPolicy.supports_agentless === true,
   });
+  return policy;
 }
 
 interface CreateAgentPolicyParams {
@@ -99,6 +102,7 @@ interface CreateAgentPolicyParams {
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   force?: boolean;
+  connectorId: string;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -112,6 +116,7 @@ export async function createAgentPolicyWithPackages({
   user,
   authorizationHeader,
   force,
+  connectorId,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -157,6 +162,7 @@ export async function createAgentPolicyWithPackages({
       user,
       authorizationHeader,
       force,
+      connectorId,
     });
   }
 
@@ -167,6 +173,7 @@ export async function createAgentPolicyWithPackages({
       user,
       authorizationHeader,
       force,
+      connectorId,
     });
   }
 

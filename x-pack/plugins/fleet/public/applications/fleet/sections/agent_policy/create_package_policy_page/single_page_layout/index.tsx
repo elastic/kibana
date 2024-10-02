@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -76,6 +77,8 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
+import { AddConnectorFlyout } from './components/add_connector_flyout';
+
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
@@ -120,6 +123,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       namespace: spaceSettings.defaultNamespace,
     })
   );
+  const [connectorId, setConnectorId] = useState('');
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy, {
@@ -179,12 +183,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useOnSubmit({
     agentCount,
     packageInfo,
-    newAgentPolicy,
+    // newAgentPolicy,
+    newAgentPolicy: { ...newAgentPolicy, connector_id: connectorId },
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
     hasFleetAddAgentsPrivileges,
+    connectorId,
   });
 
   const setPolicyValidation = useCallback(
@@ -422,6 +428,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               submitAttempted={formState === 'INVALID'}
             />
           )}
+          <EuiFlexItem>
+            <AddConnectorFlyout
+              packageName={`.${packageInfo.title.toLowerCase()}`}
+              onSelectorChange={(connector) => setConnectorId(connector.id)}
+            />
+          </EuiFlexItem>
 
           {/* If a package has been loaded, then show UI extension (if any) */}
           {extensionView && packagePolicy.package?.name && (

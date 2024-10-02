@@ -49,6 +49,7 @@ export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
   private readonly connectorActionsClient: NormalizedExternalConnectorClient;
+  private readonly elasticAgentId: string;
 
   constructor({ connectorActions, ...options }: CrowdstrikeActionsClientOptions) {
     super(options);
@@ -104,7 +105,10 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         `calling connector actions 'execute()' for Crowdstrike with:\n${stringify(executeOptions)}`
     );
 
-    const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
+    const actionSendResponse = await this.connectorActionsClient.execute(
+      executeOptions,
+      this.elasticAgentId
+    );
 
     if (actionSendResponse.status === 'error') {
       this.log.error(stringify(actionSendResponse));
@@ -128,7 +132,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       // Multiple indexes:  .falcon, .fdr, .host, .alert
       index: ['logs-crowdstrike*'],
       size: 1,
-      _source: ['host.hostname', 'host.name'],
+      _source: ['host.hostname', 'host.name', 'elastic.agent.id'],
       body: {
         query: {
           bool: {
@@ -143,6 +147,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
           ignore: [404],
         });
 
+      const elasticAgentId = result.hits.hits?.[0]?._source?.elastic?.agent?.id;
+      this.elasticAgentId = elasticAgentId;
       // Check if host name exists
       const host = result.hits.hits?.[0]?._source?.host;
       const hostName = host?.name || host?.hostname;

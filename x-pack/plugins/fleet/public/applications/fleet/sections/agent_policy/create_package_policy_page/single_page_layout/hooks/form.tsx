@@ -142,6 +142,7 @@ export function useOnSubmit({
   packageInfo,
   integrationToEnable,
   hasFleetAddAgentsPrivileges,
+  connectorId,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -151,6 +152,7 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
   hasFleetAddAgentsPrivileges: boolean;
+  connectorId: string;
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
@@ -171,6 +173,7 @@ export function useOnSubmit({
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
+    connector_id: connectorId,
   });
 
   // Validation state
@@ -223,6 +226,7 @@ export function useOnSubmit({
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
+        connector_id: connectorId,
       };
       setPackagePolicy(newPackagePolicy);
 
@@ -270,13 +274,22 @@ export function useOnSubmit({
           '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
-          integrationToEnable
+          integrationToEnable,
+          connectorId
         )
       );
       setIsInitialized(true);
     }
+
     init();
-  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [
+    packageInfo,
+    agentPolicies,
+    updatePackagePolicy,
+    integrationToEnable,
+    isInitialized,
+    connectorId,
+  ]);
 
   useEffect(() => {
     if (
@@ -327,7 +340,7 @@ export function useOnSubmit({
           setFormState('LOADING');
           const newPolicy = await createAgentPolicyIfNeeded({
             newAgentPolicy,
-            packagePolicy,
+            packagePolicy: { ...packagePolicy, connector_id: connectorId },
             withSysMonitoring,
             packageInfo,
             selectedPolicyTab,
@@ -363,6 +376,7 @@ export function useOnSubmit({
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
+        connector_id: connectorId,
         policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
@@ -462,18 +476,19 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
+      agentPolicies,
+      selectedPolicyTab,
       isAgentlessIntegration,
       packageInfo,
-      selectedPolicyTab,
+      isAgentlessPackagePolicy,
       packagePolicy,
       isAgentlessAgentPolicy,
-      isAgentlessPackagePolicy,
       hasFleetAddAgentsPrivileges,
-      withSysMonitoring,
       newAgentPolicy,
+      connectorId,
+      withSysMonitoring,
       updatePackagePolicy,
       notifications.toasts,
-      agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
     ]

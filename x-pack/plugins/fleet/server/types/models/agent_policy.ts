@@ -44,6 +44,7 @@ export const AgentPolicyBaseSchema = {
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: AgentPolicyNamespaceSchema,
+  connector_id: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
   is_managed: schema.maybe(schema.boolean()),
   has_fleet_server: schema.maybe(schema.boolean()),

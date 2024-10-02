@@ -212,9 +212,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           'data-test-subj': `${tab.id}Tab`,
         }))}
       />
-
       <EuiSpacer size="l" />
-
       {addFlyoutVisible && (
         <CreateConnectorFlyout
           onClose={() => {
@@ -245,7 +243,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           actionTypeRegistry={actionTypeRegistry}
         />
       )}
-
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Routes>
