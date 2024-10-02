@@ -150,29 +150,31 @@ describe('Policy Config helpers', () => {
         isEnabled: jest.fn().mockReturnValue(true),
       } as unknown as ProductFeaturesService;
 
-      const result = createDefaultPolicy(
-        licenseService,
-        { type: 'cloud' },
-        cloud,
-        esClientInfo,
-        productFeatures
-      );
+      [{ type: 'cloud' }, undefined].forEach((cloudType) => {
+        const result = createDefaultPolicy(
+          licenseService,
+          cloudType,
+          cloud,
+          esClientInfo,
+          productFeatures
+        );
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          linux: expect.objectContaining({
-            events: expect.objectContaining({
-              session_data: true,
+        expect(result).toEqual(
+          expect.objectContaining({
+            linux: expect.objectContaining({
+              events: expect.objectContaining({
+                session_data: true,
+              }),
             }),
-          }),
-          windows: expect.objectContaining({
-            antivirus_registration: expect.objectContaining({
-              mode: AntivirusRegistrationModes.sync,
-              enabled: false,
+            windows: expect.objectContaining({
+              antivirus_registration: expect.objectContaining({
+                mode: AntivirusRegistrationModes.sync,
+                enabled: false,
+              }),
             }),
-          }),
-        })
-      );
+          })
+        );
+      });
     });
   });
 

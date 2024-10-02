@@ -14,12 +14,13 @@ import {
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { AntivirusRegistrationModes } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
-  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import {
   disableProtections,
@@ -48,10 +49,13 @@ export const createDefaultPolicy = (
     cloud?.isServerlessEnabled
   );
 
-  let defaultPolicyPerType: PolicyConfig =
-    config?.type === 'cloud'
-      ? getCloudPolicyConfig(factoryPolicy)
-      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+  // config won't be defined if inputs is an empty array, this happens on managed cloud onboarding.
+  const useCloudConfig =
+    config?.type === 'cloud' || (!config && cloud?.isCloudEnabled && !cloud?.isServerlessEnabled);
+
+  let defaultPolicyPerType: PolicyConfig = useCloudConfig
+    ? getCloudPolicyConfig(factoryPolicy)
+    : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
@@ -152,6 +156,14 @@ const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
       events: {
         ...policyWithDisabledProtections.linux.events,
         session_data: true,
+      },
+    },
+    windows: {
+      ...policyWithDisabledProtections.windows,
+      antivirus_registration: {
+        ...policyWithDisabledProtections.windows.antivirus_registration,
+        enabled: false,
+        mode: AntivirusRegistrationModes.sync,
       },
     },
   };
