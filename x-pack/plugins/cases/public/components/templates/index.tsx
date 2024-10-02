@@ -82,6 +82,7 @@ const TemplatesComponent: React.FC<Props> = ({
       }
       description={<p>{i18n.TEMPLATE_DESCRIPTION}</p>}
       data-test-subj="templates-form-group"
+      css={{ alignItems: 'flex-start' }}
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {templates.length ? (
