@@ -8,9 +8,6 @@
  */
 
 import { defaultConfig } from '@kbn/storybook';
-import { Options } from '@storybook/core-common';
-import path from 'path';
-import webpack from 'webpack';
 
 module.exports = {
   ...defaultConfig,
@@ -18,13 +15,4 @@ module.exports = {
     global: 'window',
   },
   stories: ['../../**/*.stories.+(tsx|mdx)'],
-  webpackFinal: async (config: webpack.Configuration, options: Options) => {
-    const originalConfig = await defaultConfig.webpackFinal!(config, options);
-
-    originalConfig!.resolve!.alias!['../public/services/kibana_services'] = path.resolve(
-      __dirname,
-      '../public/services/mock_kibana_services'
-    );
-    return originalConfig;
-  },
 };
