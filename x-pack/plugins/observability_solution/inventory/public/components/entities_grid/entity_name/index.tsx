@@ -15,7 +15,7 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { EntityIcon } from '../../entity_icon';
 import { ENTITY_DISPLAY_NAME, ENTITY_TYPE } from '../../../../common/es_fields/entities';
-import { Entity, EntityType } from '../../../../common/entities';
+import { Entity } from '../../../../common/entities';
 import { parseServiceParams } from '../../../utils/parse_service_params';
 
 interface EntityNameProps {
@@ -32,7 +32,7 @@ export function EntityName({ entity }: EntityNameProps) {
     services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
 
   const getEntityRedirectUrl = useCallback(() => {
-    const type = entity[ENTITY_TYPE] as EntityType;
+    const type = entity[ENTITY_TYPE];
 
     // Any unrecognised types will always return undefined
     switch (type) {
