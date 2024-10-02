@@ -56,6 +56,7 @@ export const SplitFieldSelect: FC<Props> = ({
 
   return (
     <OptionListWithFieldStats
+      singleSelection={true}
       options={options}
       selectedOptions={selection}
       onChange={onChange}

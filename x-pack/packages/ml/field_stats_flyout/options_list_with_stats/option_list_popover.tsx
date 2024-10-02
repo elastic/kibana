@@ -53,13 +53,18 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
 
   return (
     <EuiSelectable
-      singleSelection
+      singleSelection={Boolean(singleSelection)}
       searchable
       options={selectableOptions}
       renderOption={renderOption}
       listProps={{ onFocusBadge: false }}
-      onChange={(newSuggestions, _, changedOption) => {
+      onChange={(opts, _, changedOption) => {
         if (singleSelection) {
+          if (onChange) {
+            onChange([changedOption]);
+            setPopoverOpen(false);
+          }
+        } else {
           if (onChange) {
             onChange([changedOption]);
             setPopoverOpen(false);

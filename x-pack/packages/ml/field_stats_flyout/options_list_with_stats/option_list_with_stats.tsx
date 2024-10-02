@@ -67,14 +67,13 @@ const clearIconCss = css`
 `;
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   options,
-  placeholder,
-  singleSelection,
+  singleSelection = false,
   onChange,
   selectedOptions,
   fullWidth,
   isDisabled,
   isLoading,
-  isClearable,
+  isClearable = true,
   'aria-label': ariaLabel,
 }) => {
   const { renderOption } = useFieldStatsTrigger();
@@ -115,7 +114,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
         isLoading={isLoading}
         grow
         css={css({
-          padding: hasSelections ? euiThemeVars.euiSizeXS : undefined,
+          padding: euiThemeVars.euiSizeS,
           height: euiThemeVars.euiButtonHeight,
           fontWeight: euiThemeVars.euiFontWeightRegular,
           color: hasSelections ? euiThemeVars.euiTextColor : euiThemeVars.euiTextSubduedColor,
@@ -131,8 +130,8 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       >
         <EuiFlexGroup alignItems="center">
           {hasSelections ? <EuiFlexItem>{selectionDisplayNode}</EuiFlexItem> : null}
-          {hasSelections ? (
-            <EuiFlexItem css={css({ position: 'absolute', right: 24 })}>
+          {
+            <EuiFlexItem css={css({ position: 'absolute', right: euiThemeVars.euiSizeXL })}>
               <button
                 css={css({
                   width: '16px',
@@ -141,6 +140,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
                   borderRadius: '50%',
                   lineHeight: '0',
                   pointerEvents: 'all',
+                  opacity: hasSelections ? 1 : 0,
                 })}
                 type="button"
                 onClick={() => onChange([])}
@@ -154,7 +154,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
                 <EuiIcon type="cross" css={clearIconCss} />
               </button>
             </EuiFlexItem>
-          ) : null}
+          }
         </EuiFlexGroup>
       </EuiFilterButton>
     </>
