@@ -10,12 +10,15 @@ import type { Client } from '@elastic/elasticsearch';
 const inferenceEndpointId = 'kibana-elser2';
 
 export const installElser = async ({ client }: { client: Client }) => {
-  const getInferenceRes = await client.inference.get({
-    task_type: 'sparse_embedding',
-    inference_id: 'kibana-elser2',
-  });
+  const getInferenceRes = await client.inference.get(
+    {
+      task_type: 'sparse_embedding',
+      inference_id: 'kibana-elser2',
+    },
+    { ignore: [404] }
+  );
 
-  const installed = getInferenceRes.endpoints.some(
+  const installed = (getInferenceRes.endpoints ?? []).some(
     (endpoint) => endpoint.inference_id === inferenceEndpointId
   );
 

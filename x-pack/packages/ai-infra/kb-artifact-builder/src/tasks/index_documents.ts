@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { chunk as toChunks } from 'lodash';
+import type { Client } from '@elastic/elasticsearch';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
-
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ExtractedDocument } from './extract_documentation';
 
-const chunkSize = 10;
+const indexingChunkSize = 10;
 
 export const indexDocuments = async ({
   index,
   client,
   documents,
+  log,
 }: {
   index: string;
   documents: ExtractedDocument[];
   client: Client;
+  log: ToolingLog;
 }) => {
-  const chunks = toChunks(documents, chunkSize);
+  const chunks = toChunks(documents, indexingChunkSize);
 
-  console.log(`starting indexing process`);
+  log.info(`starting indexing process`);
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
@@ -41,6 +43,6 @@ export const indexDocuments = async ({
     );
 
     const duration = Date.now() - before;
-    console.log(`indexed ${i + 1} of ${chunks.length} chunks (took ${duration})`);
+    log.info(`indexed ${i + 1} of ${chunks.length} chunks (took ${duration})`);
   }
 };

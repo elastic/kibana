@@ -1425,6 +1425,7 @@
     "@kbn/jest-serializers": "link:packages/kbn-jest-serializers",
     "@kbn/journeys": "link:packages/kbn-journeys",
     "@kbn/json-ast": "link:packages/kbn-json-ast",
+    "@kbn/kb-artifact-builder": "link:x-pack/packages/ai-infra/kb-artifact-builder",
     "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",

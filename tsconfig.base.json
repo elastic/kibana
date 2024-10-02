@@ -1072,6 +1072,8 @@
       "@kbn/json-ast/*": ["packages/kbn-json-ast/*"],
       "@kbn/json-schemas": ["x-pack/packages/ml/json_schemas"],
       "@kbn/json-schemas/*": ["x-pack/packages/ml/json_schemas/*"],
+      "@kbn/kb-artifact-builder": ["x-pack/packages/ai-infra/kb-artifact-builder"],
+      "@kbn/kb-artifact-builder/*": ["x-pack/packages/ai-infra/kb-artifact-builder/*"],
       "@kbn/kbn-health-gateway-status-plugin": ["test/health_gateway/plugins/status"],
       "@kbn/kbn-health-gateway-status-plugin/*": ["test/health_gateway/plugins/status/*"],
       "@kbn/kbn-sample-panel-action-plugin": ["test/plugin_functional/plugins/kbn_sample_panel_action"],

@@ -9,7 +9,9 @@ import Path from 'path';
 import Fs from 'fs/promises';
 import type { Client } from '@elastic/elasticsearch';
 
-export const writeToDisk = async ({
+const fileSizeLimit = 250_000;
+
+export const createChunkFiles = async ({
   index,
   productName,
   destFolder,
@@ -32,10 +34,23 @@ export const writeToDisk = async ({
 
   await Fs.mkdir(destFolder, { recursive: true });
 
-  for (const hit of searchRes.hits.hits) {
-    await Fs.writeFile(
-      Path.join(destFolder, hit._id + '.json'),
-      JSON.stringify(hit._source, undefined, 2)
-    );
+  let chunkNumber = 1;
+  let chunkContent: string = '';
+
+  const writeCurrentChunk = async () => {
+    await Fs.writeFile(Path.join(destFolder, `content-${chunkNumber}.ndjson`), chunkContent);
+    chunkContent = '';
+    chunkNumber++;
+  };
+
+  for (let i = 0; i < searchRes.hits.hits.length; i++) {
+    const hit = searchRes.hits.hits[i];
+    chunkContent += JSON.stringify(hit._source) + '\n';
+    if (
+      Buffer.byteLength(chunkContent, 'utf8') > fileSizeLimit ||
+      i === searchRes.hits.hits.length - 1
+    ) {
+      await writeCurrentChunk();
+    }
   }
 };

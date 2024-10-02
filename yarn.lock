@@ -5415,6 +5415,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kb-artifact-builder@link:x-pack/packages/ai-infra/kb-artifact-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
