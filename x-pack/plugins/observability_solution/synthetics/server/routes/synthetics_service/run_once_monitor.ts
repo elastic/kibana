@@ -31,10 +31,10 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     syntheticsMonitorClient,
     savedObjectsClient,
   }): Promise<any> => {
-    const fields = request.body as MonitorFields;
+    const requestFields = request.body as MonitorFields;
     const { monitorId } = request.params;
 
-    const validationResult = validateMonitor(fields);
+    const validationResult = validateMonitor(requestFields);
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -79,6 +79,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       return { errors };
     }
 
-    return fields;
+    return requestFields;
   },
 });
