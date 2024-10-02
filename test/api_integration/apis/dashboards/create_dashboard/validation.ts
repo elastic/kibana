@@ -14,15 +14,50 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('validation', () => {
-    describe('dashboards - create', () => {
-      it('returns error when attributes object is not provided', async () => {
-        const response = await supertest.post(PUBLIC_API_PATH).send({});
-        expect(response.status).to.be(400);
-        expect(response.body.statusCode).to.be(400);
-        expect(response.body.message).to.be(
-          '[request body.attributes.title]: expected value of type [string] but got [undefined]'
-        );
-      });
+    it('returns error when attributes object is not provided', async () => {
+      const response = await supertest
+        .post(PUBLIC_API_PATH)
+        .set('kbn-xsrf', 'true')
+        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .send({});
+      expect(response.status).to.be(400);
+      expect(response.body.statusCode).to.be(400);
+      expect(response.body.message).to.be(
+        '[request body.attributes.title]: expected value of type [string] but got [undefined]'
+      );
+    });
+
+    it('returns error when title is not provided', async () => {
+      const response = await supertest
+        .post(PUBLIC_API_PATH)
+        .set('kbn-xsrf', 'true')
+        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .send({
+          attributes: {},
+        });
+      expect(response.status).to.be(400);
+      expect(response.body.statusCode).to.be(400);
+      expect(response.body.message).to.be(
+        '[request body.attributes.title]: expected value of type [string] but got [undefined]'
+      );
+    });
+
+    it('returns error if panels is not an array', async () => {
+      const response = await supertest
+        .post(PUBLIC_API_PATH)
+        .set('kbn-xsrf', 'true')
+        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .send({
+          attributes: {
+            title: 'foo',
+            panels: {},
+          },
+        });
+      expect(response.status).to.be(400);
+      expect(response.body.statusCode).to.be(400);
+      expect(response.body.message).to.be(
+        '[request body.attributes.panels]: expected value of type [array] but got [Object]'
+      );
     });
   });
 }
