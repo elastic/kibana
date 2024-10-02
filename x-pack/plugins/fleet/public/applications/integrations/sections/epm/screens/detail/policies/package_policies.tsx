@@ -52,7 +52,7 @@ interface PackagePoliciesPanelProps {
 interface InMemoryPackagePolicyAndAgentPolicy {
   packagePolicy: InMemoryPackagePolicy;
   agentPolicies: GetAgentPoliciesResponseItem[];
-  tableIndex: number;
+  rowIndex: number;
 }
 
 const IntegrationDetailsLink = memo<{
@@ -114,7 +114,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicies: GetAgentPoliciesResponseItem[];
     packagePolicy: InMemoryPackagePolicy;
-    tableIndex: number;
+    rowIndex: number;
   }> => {
     if (!data?.items) {
       return [];
@@ -129,7 +129,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           ...packagePolicy,
           hasUpgrade,
         },
-        tableIndex: index,
+        rowIndex: index,
       };
     });
 
@@ -284,7 +284,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentCount', {
           defaultMessage: 'Agents',
         }),
-        render({ agentPolicies, packagePolicy, tableIndex }: InMemoryPackagePolicyAndAgentPolicy) {
+        render({ agentPolicies, packagePolicy, rowIndex }: InMemoryPackagePolicyAndAgentPolicy) {
           if (agentPolicies.length === 0) {
             return (
               <EuiText color="subdued" size="xs">
@@ -299,7 +299,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             <PackagePolicyAgentsCell
               agentPolicies={agentPolicies}
               onAddAgent={() => {
-                setSelectedTableIndex(tableIndex);
+                setSelectedTableIndex(rowIndex);
                 setFlyoutOpenForPolicyId(agentPolicies[0].id);
               }}
               hasHelpPopover={showAddAgentHelpForPackagePolicyId === packagePolicy.id}
