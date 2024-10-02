@@ -19,6 +19,7 @@ import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { unzipFile } from '../../common/unzip_project_code';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -151,12 +152,11 @@ describe('refreshInlineZip', () => {
       playwright_options: '',
       __ui: { script_source: { is_generated_script: false, file_name: '' } },
       'url.port': null,
-      'source.inline.script':
-        "step('goto', ()=> page.goto('https://elastic.co'))\n" +
-        "step('fail', () => {\n" +
-        '    // add a comment\n' +
-        "    throw Error('fail')\n" +
-        '})',
+      'source.inline.script': `step('goto', ()=> page.goto('https://elastic.co'))
+        step('fail', () => {
+            // add a comment
+            throw Error('fail')
+        })`,
       'source.project.content': `UEsDBBQACAAIAAiNSVgAAAAAAAAAAAAAAAARAAAAaW5saW5lLmpvdXJuZXkudHM1jsEKwjAQRO/5irmlgWDviuLFD4lhtZE2GzdbVEr/XVor7GmG92bTUFgUEx48SqaPR1UqHvQuFBUzbsID7Jn6UDXFtn6ydqQpVnswZoMam3KfMlmPZkIJd/KInJXe6nEVflUSjxIkDNVD6DlSVcwOxxMmg3WysXdWXgzueFoduyVobKda6r5ttw92ka1z5ofcQupX5G8CtBN+4SLCsvXOzMsdzBdQSwcIvqw1HaUAAADsAAAAUEsBAi0DFAAIAAgACI1JWL6sNR2lAAAA7AAAABEAAAAAAAAAAAAgAKSBAAAAAGlubGluZS5qb3VybmV5LnRzUEsFBgAAAAABAAEAPwAAAOQAAAAAAA==`,
       playwright_text_assertion: '',
       urls: '',
@@ -236,14 +236,24 @@ describe('refreshInlineZip', () => {
     expect(typeof (result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]).toBe(
       'string'
     );
-    // zip is not determinstic, so we can't check the exact value
     expect(
-      (result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT].length
-    ).toBeGreaterThan(0);
+      await unzipFile((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT])
+    ).toMatchInlineSnapshot(`
+      "import { journey, step, expect } from '@elastic/synthetics';
+
+      journey('inline', ({ page, context, browser, params, request }) => {
+      step('goto', ()=> page.goto('https://elastic.co'))
+              step('fail', () => {
+                  // add a comment
+                  throw Error('fail')
+              })
+      });"
+    `);
     // the inline script was edited, and thus the new zip should be different
     expect((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]).not.toEqual(
       (normalized as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
     );
+    expect((result as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]).toBeUndefined();
   });
 
   it('does nothing for lightweight monitors', async () => {

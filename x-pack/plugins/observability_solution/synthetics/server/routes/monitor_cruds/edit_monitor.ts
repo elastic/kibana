@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { omit } from 'lodash';
 import { isEmpty } from 'lodash';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
@@ -225,17 +226,21 @@ export const refreshInlineZip = async (
   previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   server: SyntheticsServerSetup
 ) => {
-  return {
-    ...normalizedMonitor,
-    [ConfigKey.MONITOR_QUERY_ID]:
-      normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
-    [ConfigKey.CONFIG_ID]: previousMonitor.id,
-    ...(await mapInlineToProjectFields({
-      monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
-      monitor: normalizedMonitor,
-      logger: server.logger,
-    })),
-  };
+  return omit(
+    {
+      ...normalizedMonitor,
+      [ConfigKey.MONITOR_QUERY_ID]:
+        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+      [ConfigKey.CONFIG_ID]: previousMonitor.id,
+      ...(await mapInlineToProjectFields({
+        monitorType: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+        monitor: normalizedMonitor,
+        logger: server.logger,
+        includeInlineScript: false,
+      })),
+    },
+    ConfigKey.SOURCE_INLINE
+  );
 };
 
 export const syncEditedMonitor = async ({
