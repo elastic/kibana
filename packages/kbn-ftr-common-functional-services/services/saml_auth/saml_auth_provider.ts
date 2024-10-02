@@ -165,7 +165,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
     },
 
-    async setCustomRole(privilliages: CustomRolePrivilliages) {
+    async setCustomRole(privileges: CustomRolePrivilliages) {
       log.debug(`updating role ${CUSTOM_ROLE}`);
       const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
 
@@ -174,12 +174,12 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send({
-          kibana: privilliages.kibana,
-          elasticsearch: privilliages.elasticsearch,
+          kibana: privileges.kibana,
+          elasticsearch: privileges.elasticsearch,
         });
       expect(status).to.be(204);
       // update descriptors for custome role
-      supportedRoleDescriptors.set(CUSTOM_ROLE, privilliages);
+      supportedRoleDescriptors.set(CUSTOM_ROLE, privileges);
     },
 
     getCommonRequestHeader() {
