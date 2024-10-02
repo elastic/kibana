@@ -57,7 +57,7 @@ export class ServerlessAuthProvider implements AuthProvider {
       )
     );
     if (this.projectType !== 'oblt') {
-      // no privilliages set by default
+      // no privileges set by default
       roleDescriptors.set(this.getCustomRole(), null);
     }
     return roleDescriptors;

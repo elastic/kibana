@@ -39,7 +39,7 @@ const throwErrorIfCustomRoleIsNotSet = (
 ) => {
   if (currentRole === customeRoleName && !roleDescriptors.get(customeRoleName)) {
     throw new Error(
-      `Set privilliages for '${customeRoleName}' role using 'samlAuth.setCustomRole' before authentication`
+      `Set privileges for '${customeRoleName}' role using 'samlAuth.setCustomRole' before authentication`
     );
   }
 };
@@ -111,7 +111,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
-              ? `Update privilliages for '${CUSTOM_ROLE}' role using 'samlAuth.setCustomRole' before creating API key`
+              ? `Update privileges for '${CUSTOM_ROLE}' role using 'samlAuth.setCustomRole' before creating API key`
               : `Cannot create API key for non-existent role "${role}"`
           );
         }

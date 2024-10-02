@@ -25,7 +25,7 @@ export class StatefulAuthProvider implements AuthProvider {
         readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
       )
     );
-    // no privilliages set by default
+    // no privileges set by default
     roleDescriptors.set(this.getCustomRole(), null);
 
     return roleDescriptors;
