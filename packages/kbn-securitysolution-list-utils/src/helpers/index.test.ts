@@ -281,7 +281,7 @@ describe('Helpers', () => {
         ])
       ).toBeFalsy();
     });
-    it('returns true if the entry has code signature subject name but not trusted field or vice versa', () => {
+    it('returns true if the entry has code signature subject name but not trusted field', () => {
       expect(
         hasPartialCodeSignatureEntry([
           {
@@ -300,6 +300,8 @@ describe('Helpers', () => {
           },
         ])
       ).toBeTruthy();
+    });
+    it('returns true if the entry has code signature trusted but not the subject name field', () => {
       expect(
         hasPartialCodeSignatureEntry([
           {
@@ -319,7 +321,7 @@ describe('Helpers', () => {
         ])
       ).toBeTruthy();
     });
-    it('returns false if the entry has both code signature subject, or team id for mac, name and trusted field or vice versa', () => {
+    it('returns false if the entry has both code signature subject name and trusted field', () => {
       expect(
         hasPartialCodeSignatureEntry([
           {
@@ -344,6 +346,8 @@ describe('Helpers', () => {
           },
         ])
       ).toBeFalsy();
+    });
+    it('returns false if the entry has both code signature team_id and trusted fields for mac os', () => {
       expect(
         hasPartialCodeSignatureEntry([
           {
