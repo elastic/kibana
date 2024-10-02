@@ -792,7 +792,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       ) : undefined;
 
     const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
-    const inputClassName = classNames('kbnQueryBar__textarea', {
+    const inputClassName = classNames('kbnQueryBar__textarea', 'eui-scrollBar', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
       'kbnQueryBar__textarea--withPrepend': prependElement,
