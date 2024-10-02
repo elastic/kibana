@@ -29,7 +29,7 @@
         "signature": [
           "(props: Omit<",
           "MonacoEditorProps",
-          ", \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }) => JSX.Element"
+          ", \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/code_editor/mocks/code_editor_mock.tsx",
         "deprecated": false,
