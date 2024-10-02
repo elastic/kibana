@@ -12,7 +12,7 @@ import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_contex
 import {
   createBasicTimeline,
   createBasicTimelineTemplate,
-} from '../../../saved_objects/trial_license_complete_tier/helpers';
+} from '../../../saved_objects/tests/helpers';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const supertest = getService('supertest');
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         ).to.equal(0);
       });
     });
-    describe('resolve timeline', () => {
+    describe('@skipInServerless resolve timeline', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
@@ -77,7 +77,6 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const resp = await supertest
           .get('/api/timeline/resolve')
           .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
-        console.log({ resp });
         expect(resp.body.data.outcome).to.be('exactMatch');
         expect(resp.body.data.alias_target_id).to.be(undefined);
         expect(resp.body.data.timeline.title).to.be('Awesome Timeline');

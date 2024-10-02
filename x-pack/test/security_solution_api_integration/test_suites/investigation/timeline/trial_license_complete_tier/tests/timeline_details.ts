@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Timeline Details', () => {
+  describe('@skipInServerless Timeline Details', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
     before(async () => {

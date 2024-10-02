@@ -396,6 +396,13 @@
     "investigations:saved-objects:server:ess": "npm run initialize-server:investigations saved_objects ess",
     "investigations:saved-objects:runner:ess": "npm run run-tests:investigations saved_objects ess essEnv",
 
+    "investigations:basic:saved-objects:server:serverless": "npm run initialize-server:investigations:basic_essentials saved_objects serverless",
+    "investigations:basic:saved-objects:runner:serverless": "npm run run-tests:investigations:basic_essentials saved_objects serverless serverlessEnv",
+    "investigations:basic:saved-objects:runner:qa:serverless": "npm run run-tests:investigations:basic_essentials saved_objects serverless qaPeriodicEnv",
+    "investigations:basic:saved-objects:runner:qa:serverless:release": "npm run run-tests:investigations:basic_essentials saved_objects serverless qaEnv",
+    "investigations:basic:saved-objects:server:ess": "npm run initialize-server:investigations:basic_essentials saved_objects ess",
+    "investigations:basic:saved-objects:runner:ess": "npm run run-tests:investigations:basic_essentials saved_objects ess essEnv",
+
     "explore:hosts:server:serverless": "npm run intialize-server:explore hosts serverless",
     "explore:hosts:runner:serverless": "npm run run-tests:explore hosts serverless serverlessEnv",
     "explore:hosts:runner:qa:serverless": "npm run run-tests:explore hosts serverless qaPeriodicEnv",
