@@ -8,7 +8,7 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { InvestigateTimeLine } from '../investigation_timeline/investigation_timeline';
+import { EventsTimeLine } from '../events_timeline/events_timeline';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
@@ -34,7 +34,7 @@ export function InvestigationItems() {
         />
 
         <EuiFlexItem grow={false}>
-          <InvestigateTimeLine />
+          <EventsTimeLine />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

@@ -18,7 +18,7 @@ import { useInvestigation } from '../../contexts/investigation_context';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { AlertEvent } from './alert_event';
 
-export const InvestigateTimeLine = () => {
+export const EventsTimeLine = () => {
   const { dependencies } = useKibana();
 
   const baseTheme = dependencies.start.charts.theme.useChartsBaseTheme();
