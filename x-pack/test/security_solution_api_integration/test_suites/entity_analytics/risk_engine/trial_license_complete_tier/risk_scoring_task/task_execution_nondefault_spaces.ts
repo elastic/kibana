@@ -16,8 +16,6 @@ import {
   waitForRiskScoresToBePresent,
   normalizeScores,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
-  deleteRiskScoreIndices,
 } from '../../../utils';
 
 import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
@@ -47,36 +45,21 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         );
       });
 
-      beforeEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
-      afterEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
       describe('with alerts in a non-default space', () => {
-        let namespace: string;
-        let index: string[];
-        let documentId: string;
-        let createAndSyncRuleAndAlertsForOtherSpace: ReturnType<
-          typeof createAndSyncRuleAndAlertsFactory
-        >;
+        const namespace = uuidv4();
+        const documentId = uuidv4();
+        const index = [`risk-score.risk-score-${namespace}`];
+        const createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
+          supertest,
+          log,
+          namespace,
+        });
+        const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
 
         beforeEach(async () => {
-          documentId = uuidv4();
-          namespace = uuidv4();
-          index = [`risk-score.risk-score-${namespace}`];
-
-          createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
-            supertest,
-            log,
-            namespace,
-          });
-          const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
+          await riskEngineRoutesForNamespace.cleanUp();
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
 
           const spaces = getService('spaces');
           await spaces.create({
@@ -105,8 +88,10 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         });
 
         afterEach(async () => {
+          await riskEngineRoutesForNamespace.cleanUp();
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
           await getService('spaces').delete(namespace);
-          await deleteRiskScoreIndices({ log, es, namespace });
         });
 
         it('calculates and persists risk scores for alert documents', async () => {
