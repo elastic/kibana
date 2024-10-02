@@ -1,17 +1,11 @@
 #!/bin/bash
 
-# Example usage:
-# Runs the specified CodeQL query on the specified file/folder
-# bash scripts/codeql_quick_check.sh -f /path/to/file -q /path/to/query.ql
-# bash scripts/codeql_quick_check.sh -f x-pack/plugins/security_solution/public/common/components/ml/conditional_links/replace_kql_commas_with_or.ts -q javascript/ql/src/Performance/ReDoS.ql
-# Runs the default security suit on the specified file/folder
-# bash scripts/codeql_quick_check.sh -f /path/to/file
-
 LANGUAGE="javascript"
 CODEQL_DIR=".codeql"
 DATABASE_PATH="$CODEQL_DIR/database"
-QUERIES_PATH="$CODEQL_DIR/codeql-queries"
 QUERY_OUTPUT="$DATABASE_PATH/results.sarif"
+OUTPUT_FORMAT="sarif-latest"
+DOCKER_IMAGE="docker.elastic.co/employees/elena-shostak/codeql-env:latest"
 
 # Colors
 bold=$(tput bold)
@@ -21,131 +15,48 @@ green=$(tput setaf 2)
 blue=$(tput setaf 4)
 yellow=$(tput setaf 3)
 
-# Detect platform
-case $(uname | tr '[:upper:]' '[:lower:]') in
-  linux*)
-    OS_NAME="linux"
-    ;;
-  darwin*)
-    OS_NAME="osx"
-    ;;
-  msys*|cygwin*|mingw*)
-    OS_NAME="windows"
-    ;;
-  *)
-    OS_NAME="notset"
-    ;;
-esac
-
-install_codeql() {
-    case "$OS_NAME" in
-        osx)
-            echo "${yellow}${bold}Installing CodeQL CLI using Homebrew...${reset}"
-            brew install codeql
-            ;;
-        linux)
-            echo "${yellow}${bold}Installing CodeQL CLI using apt...${reset}"
-            sudo apt update && sudo apt install -y wget unzip
-            wget -q "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-linux64.zip" -O codeql.zip
-            unzip codeql.zip -d codeql && rm codeql.zip
-            export PATH="$PATH:$(pwd)/codeql"
-            ;;
-        windows)
-            echo "${yellow}${bold}Downloading and extracting CodeQL bundle for Windows...${reset}"
-            wget -q "https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-bundle-win64.tar.gz" -O codeql.tar.gz
-            mkdir -p codeql && tar -xzf codeql.tar.gz -C codeql --strip-components 1 && rm codeql.tar.gz
-            export PATH="$PATH:$(pwd)/codeql"
-            ;;
-        *)
-            echo "${red}${bold}Unknown OS. Please install CodeQL CLI manually.${reset}"
-            exit 1
-            ;;
-    esac
-}
-
-while getopts ":f:q:" opt; do
+while getopts ":s:r:" opt; do
   case $opt in
-    f)
-      FILE_TO_ANALYZE="$OPTARG"
-      ;;
-    q)
-      SINGLE_QUERY="$OPTARG"
-      ;;
-    \?)
-      echo "${red}${bold}Invalid option -$OPTARG${reset}" >&2
-      exit 1
-      ;;
-    :)
-      echo "${red}${bold}Option -$OPTARG requires an argument.${reset}" >&2
-      exit 1
-      ;;
+    s) SRC_DIR="$OPTARG" ;;
+    r) CODEQL_DIR="$OPTARG"; DATABASE_PATH="$CODEQL_DIR/database"; QUERY_OUTPUT="$DATABASE_PATH/results.sarif" ;;
+    \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
+    :) echo "Option -$OPTARG requires an argument." >&2; exit 1 ;;
   esac
 done
 
-# Prompt for FILE_TO_ANALYZE if not set
-if [ -z "$FILE_TO_ANALYZE" ]; then
-    read -rp "${blue}${bold}Enter the path to the file you want to analyze: ${reset}" FILE_TO_ANALYZE
-fi
-
-if [ -f "$FILE_TO_ANALYZE" ]; then
-    SOURCE_ROOT="$(dirname "$FILE_TO_ANALYZE")"
-elif [ -d "$FILE_TO_ANALYZE" ]; then
-    SOURCE_ROOT="$FILE_TO_ANALYZE"
-else
-    echo "${red}${bold}Error: The path $FILE_TO_ANALYZE is neither a file nor a directory.${reset}"
+if [ -z "$SRC_DIR" ]; then
+    echo "Usage: $0 -s <source_dir> [-r <results_dir>]"
     exit 1
 fi
 
-# Prompt for SINGLE_QUERY if not set
-if [ -z "$SINGLE_QUERY" ]; then
-    read -rp "${blue}${bold}Enter the path to a single CodeQL query (or press Enter for default suite): ${reset}" SINGLE_QUERY
-fi
-
-
 mkdir -p "$CODEQL_DIR"
-if ! grep -q "^$CODEQL_DIR$" .gitignore 2>/dev/null; then
-    echo "$CODEQL_DIR" >> .gitignore
+
+# Check the architecture
+ARCH=$(uname -m)
+PLATFORM_FLAG=""
+
+# CodeQL CLI binary does not support arm64 architecture, setting the platform to linux/amd64
+if [[ "$ARCH" == "arm64" ]]; then
+    PLATFORM_FLAG="--platform linux/amd64"
 fi
 
-# 1. Check if CodeQL CLI is installed
-if ! command -v codeql &> /dev/null; then
-    install_codeql
+SRC_DIR="$(cd "$(dirname "$SRC_DIR")"; pwd)/$(basename "$SRC_DIR")"
+CODEQL_DIR="$(cd "$(dirname "$CODEQL_DIR")"; pwd)/$(basename "$CODEQL_DIR")"
+DATABASE_PATH="$(cd "$(dirname "$DATABASE_PATH")"; pwd)/$(basename "$DATABASE_PATH")"
 
-    # Verify if the installation was successful
-    if ! command -v codeql &> /dev/null; then
-        echo "${red}${bold}CodeQL CLI could not be installed. Exiting.${reset}"
-        exit 1
-    fi
-else
-    echo "${green}${bold}CodeQL CLI is already installed.${reset}"
-fi
+# Step 1: Run the Docker container to create a CodeQL database from the source code.
+echo "Creating a CodeQL database from the source code: $SRC_DIR"
+docker run $PLATFORM_FLAG --rm -v "$SRC_DIR":/workspace/source-code \
+    -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
+    "codeql database create /workspace/shared/codeql-db --language=javascript --source-root=/workspace/source-code --overwrite"
 
-# 2. Clone the CodeQL queries repository
-if [ ! -d "$QUERIES_PATH" ]; then
-    echo "${yellow}${bold}Cloning the CodeQL query repository...${reset}"
-    git clone https://github.com/github/codeql.git "$QUERIES_PATH"
-else
-    echo "${green}${bold}CodeQL query repository already exists. Skipping download.${reset}"
-fi
+echo "Analyzing a CodeQL database: $DATABASE_PATH"
+# Step 3: Run the Docker container to analyze the CodeQL database.
+docker run $PLATFORM_FLAG --rm -v "${DATABASE_PATH}":/workspace/shared $DOCKER_IMAGE \
+    "codeql database analyze --format=${OUTPUT_FORMAT} --output=/workspace/shared/results.sarif /workspace/shared/codeql-db javascript-security-and-quality.qls"
 
-# 3. Create a CodeQL database for the single file
-echo "${blue}${bold}Creating CodeQL database for $FILE_TO_ANALYZE...${reset}"
-mkdir -p "$DATABASE_PATH"
-codeql database create "$DATABASE_PATH" --language="$LANGUAGE" --source-root="$SOURCE_ROOT" --overwrite
-
-# 4. Determine whether to run a single query or a suite
-if [ -n "$SINGLE_QUERY" ]; then
-    echo "${blue}${bold}Running single CodeQL query $SINGLE_QUERY on the file...${reset}"
-    codeql database analyze "$DATABASE_PATH" "$QUERIES_PATH/$SINGLE_QUERY" --format=sarifv2.1.0 --output="$QUERY_OUTPUT"
-else
-    echo "${blue}${bold}Running CodeQL security and quality suite for language $LANGUAGE on the single file...${reset}"
-    codeql database analyze "$DATABASE_PATH" "$QUERIES_PATH/$LANGUAGE/ql/src/codeql-suites/$LANGUAGE-security-and-quality.qls" --format=sarifv2.1.0 --output="$QUERY_OUTPUT"
-fi
-
-# 5. Display the SARIF results path
-echo "${green}${bold}Analysis complete. Results saved to $QUERY_OUTPUT.${reset}"
-
-# 6. Print summary of SARIF results
+# Step 4: Print summary of SARIF results
+echo "Analysis complete. Results saved to $QUERY_OUTPUT"
 if command -v jq &> /dev/null; then
     echo "${yellow}${bold}Summary of SARIF results:${reset}"
     jq -r '
