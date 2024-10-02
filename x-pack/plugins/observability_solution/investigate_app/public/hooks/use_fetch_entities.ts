@@ -19,14 +19,6 @@ export interface EntityParams {
   containerId?: string;
 }
 
-export interface UseFetchAlertResponse {
-  isInitialLoading: boolean;
-  isLoading: boolean;
-  isRefetching: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-  data: EcsFieldsResponse | undefined | null;
-}
 
 export function useFetchEntities({
   investigationId,
