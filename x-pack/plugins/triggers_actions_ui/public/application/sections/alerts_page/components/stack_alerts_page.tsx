@@ -21,6 +21,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
+  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery } from '@kbn/es-query';
@@ -31,7 +32,6 @@ import { NoPermissionPrompt } from '../../../components/prompts/no_permission_pr
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
 import { alertProducersData } from '../../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -75,6 +75,7 @@ const PageContent = () => {
     setBreadcrumbs,
     alertsTableConfigurationRegistry,
   } = useKibana().services;
+
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
   const [activeFeatureFilters, setActiveFeatureFilters] = useState<AlertConsumers[]>([]);
 
@@ -82,6 +83,7 @@ const PageContent = () => {
   const {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
+    authorizedRuleTypes,
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 
@@ -93,14 +95,23 @@ const PageContent = () => {
     () => activeFeatureFilters.length > 0,
     [activeFeatureFilters.length]
   );
+  const authorizedFeatureIds = useMemo(
+    () => [
+      ...authorizedRuleTypes.reduce(
+        (fids, ruleType) => fids.add(ruleType.producer as ValidFeatureId),
+        new Set<ValidFeatureId>()
+      ),
+    ],
+    [authorizedRuleTypes]
+  );
   const featureIds = useMemo(
     () =>
       filteringBySolution
         ? browsingSiem
           ? [AlertConsumers.SIEM]
           : activeFeatureFilters
-        : NON_SIEM_FEATURE_IDS,
-    [activeFeatureFilters, browsingSiem, filteringBySolution]
+        : authorizedFeatureIds.filter((fid) => fid !== AlertConsumers.SIEM),
+    [activeFeatureFilters, authorizedFeatureIds, browsingSiem, filteringBySolution]
   );
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
@@ -143,11 +154,6 @@ const PageContent = () => {
     });
     return filters;
   }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureId]);
-  const tableConfigurationId = useMemo(
-    // TODO in preparation for using solution-specific configurations
-    () => ALERT_TABLE_GLOBAL_CONFIG_ID,
-    []
-  );
 
   useEffect(() => {
     setBreadcrumbs([getAlertingSectionBreadcrumb('alerts')]);
@@ -196,7 +202,7 @@ const PageContent = () => {
               // columns alignment from breaking after a change in the number of columns
               key={featureIds.join()}
               id="stack-alerts-page-table"
-              configurationId={tableConfigurationId}
+              configurationId={ALERT_TABLE_GLOBAL_CONFIG_ID}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               featureIds={featureIds}
               query={esQuery}
