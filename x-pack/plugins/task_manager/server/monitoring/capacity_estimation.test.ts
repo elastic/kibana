@@ -63,7 +63,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -119,7 +120,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -158,7 +160,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -214,7 +217,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -271,7 +275,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -327,7 +332,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        3
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 3,
@@ -396,7 +402,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        2
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: provisionedKibanaInstances,
@@ -477,7 +484,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        2
       ).value
     ).toMatchObject({
       observed: {
@@ -561,7 +569,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -626,7 +635,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -691,7 +701,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -755,7 +766,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -831,7 +843,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -905,7 +918,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,

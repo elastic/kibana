@@ -63,7 +63,7 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiText>
+                        <EuiText size="s">
                           <h4>
                             <TruncatedText text={template.name} />
                           </h4>
