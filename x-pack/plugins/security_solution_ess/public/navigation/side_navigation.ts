@@ -28,9 +28,6 @@ export const initSideNavigation = async (services: Services) => {
   const essNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
       produce(navigationTree, (draft) => {
-        if (draft.footer) {
-          draft.footer.unshift({ type: 'recentlyAccessed' });
-        }
         const footerGroup: GroupDefinition | undefined = draft.footer?.find(
           (node): node is GroupDefinition => node.type === 'navGroup'
         );
@@ -56,147 +53,67 @@ export const initSideNavigation = async (services: Services) => {
   });
 };
 
-// Temporary configuration to render the stack management links in the panel
-// const stackManagementLinksOld: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
-//   {
-//     title: 'Ingest',
-//     children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
-//   },
-//   {
-//     title: 'Data',
-//     children: [
-//       { link: 'management:index_management' },
-//       { link: 'management:index_lifecycle_management' },
-//       { link: 'management:snapshot_restore' },
-//       { link: 'management:rollup_jobs' },
-//       { link: 'management:transform' },
-//       { link: 'management:cross_cluster_replication' },
-//       { link: 'management:remote_clusters' },
-//       { link: 'management:migrate_data' },
-//     ],
-//   },
-//   {
-//     title: 'Alerts and Insights',
-//     children: [
-//       { link: 'management:triggersActions' },
-//       { link: 'management:cases' },
-//       { link: 'management:triggersActionsConnectors' },
-//       { link: 'management:reporting' },
-//       { link: 'management:jobsListLink' },
-//       { link: 'management:watcher' },
-//       { link: 'management:maintenanceWindows' },
-//     ],
-//   },
-//   {
-//     title: 'Security',
-//     children: [
-//       { link: 'management:users' },
-//       { link: 'management:roles' },
-//       { link: 'management:api_keys' },
-//       { link: 'management:role_mappings' },
-//     ],
-//   },
-//   {
-//     title: 'Kibana',
-//     children: [
-//       { link: 'management:dataViews' },
-//       { link: 'management:filesManagement' },
-//       { link: 'management:objects' },
-//       { link: 'management:tags' },
-//       { link: 'management:search_sessions' },
-//       { link: 'management:aiAssistantManagementSelection' },
-//       { link: 'management:spaces' },
-//       { link: 'management:settings' },
-//     ],
-//   },
-//   {
-//     title: 'Stack',
-//     children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
-//   },
-// ];
-
-// Temporary configuration to render the stack management links in the panel
+// Stack Management static node definition
 const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
+  {
+    title: 'Ingest',
+    children: [{ link: 'management:ingest_pipelines' }, { link: 'management:pipelines' }],
+  },
   {
     title: 'Data',
     children: [
       { link: 'management:index_management' },
+      { link: 'management:index_lifecycle_management' },
+      { link: 'management:snapshot_restore' },
+      { link: 'management:rollup_jobs' },
       { link: 'management:transform' },
-      { link: 'management:ingest_pipelines' },
-      { link: 'management:dataViews' },
-      { link: 'management:rollup_jobs' }, // ML
-      { link: 'management:pipelines' },
-      { link: 'management:data_quality' },
-      // missing
-      // { link: 'management:index_lifecycle_management' },
-      // { link: 'management:snapshot_restore' },
-      // { link: 'management:jobsListLink' },
-      // { link: 'management:cross_cluster_replication' },
-      // { link: 'management:migrate_data' },
-      // { link: 'management:remote_clusters' },
+      { link: 'management:cross_cluster_replication' },
+      { link: 'management:remote_clusters' },
+      { link: 'management:migrate_data' },
     ],
-  },
-  {
-    title: 'Access',
-    children: [{ link: 'management:api_keys' }],
   },
   {
     title: 'Alerts and Insights',
     children: [
       { link: 'management:triggersActions' },
+      { link: 'management:cases' },
       { link: 'management:triggersActionsConnectors' },
+      { link: 'management:reporting' },
+      { link: 'management:jobsListLink' },
+      { link: 'management:watcher' },
       { link: 'management:maintenanceWindows' },
       { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsManagement}` },
       { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsAssetClassification}` },
-      // missing
-      // { link: 'management:cases' },
-      // { link: 'management:watcher' },
     ],
   },
-  // missing
-  // {
-  //   title: 'Security',
-  //   children: [
-  //     { link: 'management:users' },
-  //     { link: 'management:roles' },
-  //     { link: 'management:role_mappings' },
-  //   ],
-  // },
   {
-    title: 'Content',
+    title: 'Security',
     children: [
-      { link: 'management:objects' },
+      { link: 'management:users' },
+      { link: 'management:roles' },
+      { link: 'management:api_keys' },
+      { link: 'management:role_mappings' },
+    ],
+  },
+  {
+    title: 'Kibana',
+    children: [
+      { link: 'management:dataViews' },
       { link: 'management:filesManagement' },
-      { link: 'management:reporting' },
+      { link: 'management:objects' },
       { link: 'management:tags' },
+      { link: 'management:search_sessions' },
+      { link: 'management:aiAssistantManagementSelection' },
+      { link: 'management:spaces' },
       { link: 'maps' },
       { link: 'visualize' },
-      // missing
-      // { link: 'management:search_sessions' },
-      // { link: 'management:aiAssistantManagementSelection' },
-      // { link: 'management:spaces' },
-      // { link: 'management:settings' },
+      { link: 'graph' },
+      { link: 'canvas' },
+      { link: 'management:settings' },
     ],
   },
-  // missing
-  // {
-  //   title: 'Stack',
-  //   children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
-  // },
   {
-    title: 'Other',
-    children: [{ link: 'management:settings' }],
+    title: 'Stack',
+    children: [{ link: 'management:license_management' }, { link: 'management:upgrade_assistant' }],
   },
 ];
-
-// {
-//   title: 'Security Solution',
-//   children: [
-//     { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsManagement}` },
-//     { link: `${SECURITY_UI_APP_ID}:${SecurityPageName.entityAnalyticsAssetClassification}` },
-//     { link: 'maps' },
-//     { link: 'visualize' },
-//     { link: 'graph' },
-//     { link: 'canvas' },
-//   ],
-// },
