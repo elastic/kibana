@@ -75,7 +75,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     isLoadingAgentPolicies,
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
-  
+
   // Have the option to pass agentPolicies from props, otherwise use the fetched ones
   const agentPolicies = selectedAgentPolicies ? selectedAgentPolicies : fetchedAgentPolicies;
 
