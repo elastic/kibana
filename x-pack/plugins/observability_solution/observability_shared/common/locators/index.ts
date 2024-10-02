@@ -17,3 +17,4 @@ export * from './infra/metrics_explorer_locator';
 export * from './profiling/flamegraph_locator';
 export * from './profiling/stacktraces_locator';
 export * from './profiling/topn_functions_locator';
+export * from './entity_inventory/entity_inventory_locator';

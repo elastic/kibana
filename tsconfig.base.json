@@ -1306,6 +1306,8 @@
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability_solution/observability/*"],
       "@kbn/observability-shared-plugin": ["x-pack/plugins/observability_solution/observability_shared"],
       "@kbn/observability-shared-plugin/*": ["x-pack/plugins/observability_solution/observability_shared/*"],
+      "@kbn/observability-synthetics-test-data": ["x-pack/packages/observability/synthetics_test_data"],
+      "@kbn/observability-synthetics-test-data/*": ["x-pack/packages/observability/synthetics_test_data/*"],
       "@kbn/observability-utils": ["x-pack/packages/observability/observability_utils"],
       "@kbn/observability-utils/*": ["x-pack/packages/observability/observability_utils/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],
@@ -1498,6 +1500,10 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
       "@kbn/screenshotting-server": ["packages/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["packages/kbn-screenshotting-server/*"],
+      "@kbn/search-api-keys-components": ["packages/kbn-search-api-keys-components"],
+      "@kbn/search-api-keys-components/*": ["packages/kbn-search-api-keys-components/*"],
+      "@kbn/search-api-keys-server": ["packages/kbn-search-api-keys-server"],
+      "@kbn/search-api-keys-server/*": ["packages/kbn-search-api-keys-server/*"],
       "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-assistant": ["x-pack/plugins/search_assistant"],
@@ -1524,6 +1530,8 @@
       "@kbn/search-playground/*": ["x-pack/plugins/search_playground/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
       "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
+      "@kbn/search-shared-ui": ["x-pack/packages/search/shared_ui"],
+      "@kbn/search-shared-ui/*": ["x-pack/packages/search/shared_ui/*"],
       "@kbn/search-types": ["packages/kbn-search-types"],
       "@kbn/search-types/*": ["packages/kbn-search-types/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
@@ -1994,7 +2002,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
