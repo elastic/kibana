@@ -43,6 +43,7 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
         description: getDescription(d.name, EcsFlat),
       }));
     },
+    cacheTime: 0,
     refetchOnWindowFocus: false,
     enabled,
   });

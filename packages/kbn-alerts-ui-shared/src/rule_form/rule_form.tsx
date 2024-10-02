@@ -24,10 +24,11 @@ const queryClient = new QueryClient();
 export interface RuleFormProps {
   plugins: RuleFormPlugins;
   returnUrl: string;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins, returnUrl } = props;
+  const { plugins, returnUrl, onSubmit } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
@@ -35,23 +36,31 @@ export const RuleForm = (props: RuleFormProps) => {
 
   const ruleFormComponent = useMemo(() => {
     if (id) {
-      return <EditRuleForm id={id} plugins={plugins} returnUrl={returnUrl} />;
+      return <EditRuleForm id={id} plugins={plugins} returnUrl={returnUrl} onSubmit={onSubmit} />;
     }
     if (ruleTypeId) {
-      return <CreateRuleForm ruleTypeId={ruleTypeId} plugins={plugins} returnUrl={returnUrl} />;
+      return (
+        <CreateRuleForm
+          ruleTypeId={ruleTypeId}
+          plugins={plugins}
+          returnUrl={returnUrl}
+          onSubmit={onSubmit}
+        />
+      );
     }
     return (
       <EuiEmptyPrompt
         color="danger"
         iconType="error"
         title={<h2>{RULE_FORM_ROUTE_PARAMS_ERROR_TITLE}</h2>}
-      >
-        <EuiText>
-          <p>{RULE_FORM_ROUTE_PARAMS_ERROR_TEXT}</p>
-        </EuiText>
-      </EuiEmptyPrompt>
+        body={
+          <EuiText>
+            <p>{RULE_FORM_ROUTE_PARAMS_ERROR_TEXT}</p>
+          </EuiText>
+        }
+      />
     );
-  }, [id, ruleTypeId, plugins, returnUrl]);
+  }, [id, ruleTypeId, plugins, returnUrl, onSubmit]);
 
   return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };

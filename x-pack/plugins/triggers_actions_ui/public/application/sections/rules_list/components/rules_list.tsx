@@ -33,7 +33,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import {
   RuleExecutionStatus,
@@ -45,8 +45,12 @@ import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
+  triggersActionsRoute,
+  getCreateRuleRoute,
+  getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import {
   Rule,
   RuleTableItem,
@@ -139,6 +143,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  useNewRuleForm?: boolean;
 }
 
 export const percentileFields = {
@@ -180,12 +185,13 @@ export const RulesList = ({
   onRefresh,
   setHeaderActions,
   initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
+  useNewRuleForm = false,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities },
+    application: { capabilities, navigateToUrl },
     http,
     kibanaFeatures,
     notifications: { toasts },
@@ -193,6 +199,8 @@ export const RulesList = ({
     i18n: i18nStart,
     theme,
   } = kibanaServices;
+
+  const { search } = useLocation();
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -312,8 +320,16 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    setEditFlyoutVisibility(true);
-    setCurrentRuleToEdit(ruleItem);
+    if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
+      navigateToUrl(`${triggersActionsRoute}${getEditRuleRoute(ruleItem.id)}`, {
+        state: {
+          returnUrl: `${triggersActionsRoute}/rules${search}`,
+        },
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+      setCurrentRuleToEdit(ruleItem);
+    }
   };
 
   const onRunRule = async (id: string) => {
@@ -1006,9 +1022,17 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              setRuleTypeIdToCreate(ruleTypeId);
-              setRuleTypeModalVisibility(false);
-              setRuleFlyoutVisibility(true);
+              if (USE_NEW_RULE_FORM_FEATURE_FLAG) {
+                navigateToUrl(`${triggersActionsRoute}${getCreateRuleRoute(ruleTypeId)}`, {
+                  state: {
+                    returnUrl: `${triggersActionsRoute}/rules${search}`,
+                  },
+                });
+              } else {
+                setRuleTypeIdToCreate(ruleTypeId);
+                setRuleTypeModalVisibility(false);
+                setRuleFlyoutVisibility(true);
+              }
             }}
             http={http}
             toasts={toasts}

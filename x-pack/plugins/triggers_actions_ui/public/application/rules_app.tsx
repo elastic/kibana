@@ -31,7 +31,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -58,6 +58,8 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
+const CreateRuleRoute = lazy(() => import('./sections/rule_form/create_rule_route'));
+const EditRuleRoute = lazy(() => import('./sections/rule_form/edit_rule_route'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -124,6 +126,16 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Routes>
         <Route
+          exact
+          path={createRuleRoute}
+          component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
+        />
+        <Route
+          exact
+          path={editRuleRoute}
+          component={suspendedComponentWithProps(EditRuleRoute, 'xl')}
+        />
+        <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
@@ -152,7 +164,6 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
             return null;
           }}
         />
-
         <Redirect from={'/'} to="rules" />
       </Routes>
     </ConnectorProvider>

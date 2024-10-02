@@ -43,6 +43,7 @@ export interface CreateRuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   returnUrl: string;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -57,6 +58,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
     returnUrl,
+    onSubmit,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
@@ -64,8 +66,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
-    onSuccess: ({ name }) => {
+    onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(

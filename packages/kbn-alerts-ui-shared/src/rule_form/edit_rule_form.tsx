@@ -31,10 +31,11 @@ export interface EditRuleFormProps {
   plugins: RuleFormPlugins;
   showMustacheAutocompleteSwitch?: boolean;
   returnUrl: string;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
-  const { id, plugins, returnUrl, showMustacheAutocompleteSwitch = false } = props;
+  const { id, plugins, returnUrl, showMustacheAutocompleteSwitch = false, onSubmit } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, i18n, theme, application } = plugins;
   const { toasts } = notifications;
 
@@ -42,6 +43,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     http,
     onSuccess: ({ name }) => {
       toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));
+      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(

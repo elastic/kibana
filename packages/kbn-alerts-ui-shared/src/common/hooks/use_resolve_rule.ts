@@ -40,6 +40,7 @@ export const useResolveRule = (props: UseResolveProps) => {
         ...(rule.notifyWhen ? { notifyWhen: rule.notifyWhen } : {}),
       };
     },
+    cacheTime: 0,
     refetchOnWindowFocus: false,
     retry: false,
   });

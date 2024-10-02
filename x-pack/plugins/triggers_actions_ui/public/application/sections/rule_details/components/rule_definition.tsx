@@ -16,9 +16,15 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  getEditRuleRoute,
+  getRuleDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { USE_NEW_RULE_FORM_FEATURE_FLAG } from '@kbn/alerts-ui-shared/src/common/constants/rule_form_flag';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
@@ -38,9 +44,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   onEditRule,
   hideEditButton = false,
   filteredRuleTypes = [],
+  useNewRuleForm = false,
 }) => {
   const {
-    application: { capabilities },
+    application: { capabilities, navigateToUrl },
   } = useKibana().services;
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
@@ -103,6 +110,18 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     return '';
   }, [rule, ruleTypeRegistry]);
 
+  const onEditRuleClick = () => {
+    if (USE_NEW_RULE_FORM_FEATURE_FLAG && useNewRuleForm) {
+      navigateToUrl(`${triggersActionsRoute}${getEditRuleRoute(rule.id)}`, {
+        state: {
+          returnUrl: `${triggersActionsRoute}/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
+    } else {
+      setEditFlyoutVisible(true);
+    }
+  };
+
   const ruleDefinitionList = [
     {
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.ruleType', {
@@ -153,7 +172,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         >
           <EuiFlexItem grow={false}>
             {hasEditButton ? (
-              <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
+              <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
                 <EuiText size="s">{getRuleConditionsWording()}</EuiText>
               </EuiButtonEmpty>
             ) : (
@@ -206,7 +225,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 <EuiButtonEmpty
                   data-test-subj="ruleDetailsEditButton"
                   iconType={'pencil'}
-                  onClick={() => setEditFlyoutVisible(true)}
+                  onClick={onEditRuleClick}
                 />
               </EuiFlexItem>
             )
