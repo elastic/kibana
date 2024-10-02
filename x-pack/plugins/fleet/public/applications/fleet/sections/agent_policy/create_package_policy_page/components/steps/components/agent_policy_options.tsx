@@ -127,34 +127,36 @@ export function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
   const agentPolicyMultiOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       packageInfo && !isOutputLoading && !isAgentPoliciesLoading && !isLoadingPackagePolicies
-        ? agentPolicies.map((policy) => {
-            const isLimitedPackageAlreadyInPolicy =
-              isPackageLimited(packageInfo!) &&
-              packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
+        ? agentPolicies
+            .filter((policy) => policy.supports_agentless !== true)
+            .map((policy) => {
+              const isLimitedPackageAlreadyInPolicy =
+                isPackageLimited(packageInfo!) &&
+                packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
 
-            const isAPMPackageAndDataOutputIsLogstash =
-              packageInfo?.name === FLEET_APM_PACKAGE &&
-              getDataOutputForPolicy(policy)?.type === outputType.Logstash;
+              const isAPMPackageAndDataOutputIsLogstash =
+                packageInfo?.name === FLEET_APM_PACKAGE &&
+                getDataOutputForPolicy(policy)?.type === outputType.Logstash;
 
-            return {
-              append: isAPMPackageAndDataOutputIsLogstash ? (
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                      defaultMessage="Logstash output for integrations is not supported with APM"
-                    />
-                  }
-                >
-                  <EuiIcon size="s" type="warningFilled" />
-                </EuiToolTip>
-              ) : null,
-              key: policy.id,
-              label: policy.name,
-              disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
-              'data-test-subj': 'agentPolicyMultiItem',
-            };
-          })
+              return {
+                append: isAPMPackageAndDataOutputIsLogstash ? (
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
+                        defaultMessage="Logstash output for integrations is not supported with APM"
+                      />
+                    }
+                  >
+                    <EuiIcon size="s" type="warningFilled" />
+                  </EuiToolTip>
+                ) : null,
+                key: policy.id,
+                label: policy.name,
+                disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
+                'data-test-subj': 'agentPolicyMultiItem',
+              };
+            })
         : [],
     [
       packageInfo,

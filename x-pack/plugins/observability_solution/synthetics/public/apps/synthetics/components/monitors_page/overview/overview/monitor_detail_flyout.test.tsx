@@ -35,6 +35,10 @@ describe('Monitor Detail Flyout', () => {
           status: 'up',
           type: 'http',
           check_group: 'check-group',
+          timespan: {
+            gte: 'now-15m',
+            lt: 'now',
+          },
         },
         url: {
           full: 'https://www.elastic.co',
