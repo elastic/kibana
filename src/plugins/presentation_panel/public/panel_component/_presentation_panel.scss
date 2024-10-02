@@ -189,7 +189,7 @@
 
   .embPanel__hoverActions {
     opacity: 0;
-    padding: $euiSizeXS;
+    padding: calc($euiSizeXS - 1px);
     display: flex;
     flex-wrap: nowrap;
     border: $euiBorderThin;
