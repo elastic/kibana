@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useSaveToLibrary } from './use_save_to_library';
