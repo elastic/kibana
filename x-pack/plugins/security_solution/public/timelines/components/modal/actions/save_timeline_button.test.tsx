@@ -62,6 +62,27 @@ describe('SaveTimelineButton', () => {
     expect(queryByTestId('save-timeline-modal')).not.toBeInTheDocument();
   });
 
+  it('should override the default text in the button', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+    mockGetState.mockReturnValue({
+      ...mockTimelineModel,
+      status: TimelineStatusEnum.active,
+      isSaving: false,
+    });
+    (useCreateTimeline as jest.Mock).mockReturnValue({});
+
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <SaveTimelineButton timelineId="timeline-1" buttonText={'TEST'} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Save')).not.toBeInTheDocument();
+    expect(getByText('TEST')).toBeInTheDocument();
+  });
+
   it('should open the timeline save modal', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
