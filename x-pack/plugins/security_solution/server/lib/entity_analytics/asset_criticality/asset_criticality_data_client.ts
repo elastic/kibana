@@ -22,6 +22,7 @@ import type { CriticalityValues } from './constants';
 import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getImplicitEntityFields } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -49,19 +50,12 @@ const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:
 
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
+
   /**
-   * It will create idex for asset criticality,
-   * or update mappings if index exists
+   * Initialize asset criticality resources.
    */
   public async init() {
-    await createOrUpdateIndex({
-      esClient: this.options.esClient,
-      logger: this.options.logger,
-      options: {
-        index: this.getIndex(),
-        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
-      },
-    });
+    await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
       message: 'User installed asset criticality Elasticsearch resources',
@@ -70,6 +64,20 @@ export class AssetCriticalityDataClient {
         category: AUDIT_CATEGORY.DATABASE,
         type: AUDIT_TYPE.CREATION,
         outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+  }
+
+  /**
+   * It will create idex for asset criticality or update mappings if index exists
+   */
+  public async createOrUpdateIndex() {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: this.getIndex(),
+        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
   }
@@ -131,7 +139,7 @@ export class AssetCriticalityDataClient {
     });
   }
 
-  private getIndex() {
+  public getIndex() {
     return getAssetCriticalityIndex(this.options.namespace);
   }
 
@@ -165,6 +173,12 @@ export class AssetCriticalityDataClient {
     };
   }
 
+  public getIndexMappings() {
+    return this.options.esClient.indices.getMapping({
+      index: this.getIndex(),
+    });
+  }
+
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
     const id = createId(idParts);
 
@@ -193,11 +207,15 @@ export class AssetCriticalityDataClient {
     refresh = 'wait_for' as const
   ): Promise<AssetCriticalityRecord> {
     const id = createId(record);
-    const doc = {
+    const doc: AssetCriticalityRecord = {
       id_field: record.idField,
       id_value: record.idValue,
       criticality_level: record.criticalityLevel,
       '@timestamp': new Date().toISOString(),
+      asset: {
+        criticality: record.criticalityLevel,
+      },
+      ...getImplicitEntityFields(record),
     };
 
     await this.options.esClient.update({
@@ -272,6 +290,10 @@ export class AssetCriticalityDataClient {
             id_field: record.idField,
             id_value: record.idValue,
             criticality_level: record.criticalityLevel,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+            ...getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,
@@ -316,7 +338,14 @@ export class AssetCriticalityDataClient {
         index: this.getIndex(),
         refresh: refresh ?? false,
         doc: {
-          criticality_level: 'deleted',
+          criticality_level: CRITICALITY_VALUES.DELETED,
+          asset: {
+            criticality: CRITICALITY_VALUES.DELETED,
+          },
+          ...getImplicitEntityFields({
+            ...idParts,
+            criticalityLevel: CRITICALITY_VALUES.DELETED,
+          }),
         },
       });
     } catch (err) {

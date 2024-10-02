@@ -37,6 +37,7 @@ const DEFAULTS_SETTINGS = {
     // port and aren't affected by the timing issues in test environment.
     port: 0,
     xsrf: { disableProtection: true },
+    restrictInternalApis: true,
   },
   logging: {
     root: {
@@ -149,6 +150,7 @@ export function createRootWithCorePlugins(
         console: { type: 'console', layout: { type: 'pattern' } },
       },
     },
+    server: { restrictInternalApis: true },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
     ...(cliArgs.oss === false
       ? {
