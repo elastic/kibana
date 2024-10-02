@@ -117,7 +117,7 @@ export interface PackageSpecConditions {
     version: string;
   };
   elastic?: {
-    subscription: string;
+    subscription?: string;
     capabilities?: string[];
   };
 }

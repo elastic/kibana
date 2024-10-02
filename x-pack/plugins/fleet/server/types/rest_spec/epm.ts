@@ -151,7 +151,7 @@ export const PackageInfoSchema = schema.object({
       kibana: schema.object({ version: schema.string() }),
       elastic: schema.maybe(
         schema.object({
-          subscription: schema.string(),
+          subscription: schema.maybe(schema.string()),
           capabilities: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
@@ -272,7 +272,7 @@ export const PackageMetadataSchema = schema.object({
 
 export const GetPackageInfoSchema = PackageInfoSchema.extends({
   latestVersion: schema.string(),
-  assets: schema.recordOf(schema.string(), schema.any()),
+  assets: schema.recordOf(schema.string(), schema.maybe(schema.any())),
   notice: schema.maybe(schema.string()),
   licensePath: schema.maybe(schema.string()),
   keepPoliciesUpToDate: schema.maybe(schema.boolean()),

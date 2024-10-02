@@ -292,6 +292,7 @@ export type RegistrySearchResult = Pick<
   | 'data_streams'
   | 'policy_templates'
   | 'categories'
+  | 'owner'
 >;
 
 // from /categories
@@ -317,9 +318,9 @@ export interface AssetParts {
 export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
-  KibanaAssetTypeToParts
+  KibanaAssetTypeToParts | undefined
 > &
-  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts | undefined>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;

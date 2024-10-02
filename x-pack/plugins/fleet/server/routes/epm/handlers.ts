@@ -233,7 +233,6 @@ export const getInfoHandler: FleetRequestHandler<
       prerelease,
     });
     const flattenedRes = soToInstallationInfo(res) as PackageInfo;
-
     let metadata: any;
     if (request.query.withMetadata) {
       const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
