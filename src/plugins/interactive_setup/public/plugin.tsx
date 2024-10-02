@@ -9,9 +9,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from '@kbn/react-dom';
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { App } from './app';

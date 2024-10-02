@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ReactDOM from '@kbn/react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -33,6 +32,7 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import ReactDOM from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';

@@ -14,7 +14,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { render, unmountComponentAtNode } from '@kbn/react-dom';
 
 import type {
   AnalyticsServiceStart,
@@ -25,6 +24,7 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const insecureClusterAlertTitle = i18n.translate(

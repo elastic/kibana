@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { useParams } from 'react-router-dom';
 
 import type { BuildFlavor } from '@kbn/config';
@@ -14,6 +13,7 @@ import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router } from '@kbn/shared-ux-router';
 

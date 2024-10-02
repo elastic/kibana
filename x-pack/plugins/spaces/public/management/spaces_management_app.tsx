@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
@@ -14,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { render, unmountComponentAtNode } from '@kbn/react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   PrivilegesAPIClientPublicContract,
