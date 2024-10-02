@@ -346,9 +346,9 @@ export class DashboardContainer
     this.savedObjectReferences = dashboardApi.references;
     this.setReferences = dashboardApi.setReferences;
     this.getSerializedStateForChild = dashboardApi.getSerializedStateForChild;
+    this.panels$ = dashboardApi.panels$;
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
-    this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -356,7 +356,7 @@ export class DashboardContainer
           this.useMargins$.next(state.explicitInput.useMargins);
         }
         if (this.panels$.value !== state.explicitInput.panels) {
-          this.panels$.next(state.explicitInput.panels);
+          dashboardApi.setPanels(state.explicitInput.panels);
         }
       })
     );
@@ -578,7 +578,7 @@ export class DashboardContainer
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;
   public animatePanelTransforms$: BehaviorSubject<boolean>;
-  public panels$: BehaviorSubject<DashboardPanelMap>;
+  public panels$: PublishingSubject<DashboardPanelMap>;
   public isEmbeddedExternally: boolean;
   public uuid$: BehaviorSubject<string>;
 
@@ -857,6 +857,7 @@ export class DashboardContainer
   }
 
   public setPanels = (panels: DashboardPanelMap) => {
+    // panels$ gets updated via subscription to input$
     this.dispatch.setPanels(panels);
   };
 
