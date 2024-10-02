@@ -10,6 +10,7 @@ import { AGENT_NAME, CLOUD_PROVIDER } from '@kbn/observability-shared-plugin/com
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ENTITY_TYPE } from '../../../common/es_fields/entities';
 import type { Entity } from '../../../common/entities';
 
@@ -19,11 +20,12 @@ interface EntityIconProps {
 
 export function EntityIcon({ entity }: EntityIconProps) {
   const entityType = entity[ENTITY_TYPE];
+  const defaultSizeIconPx = euiThemeVars.euiSizeL;
   const emptyIcon = (
     <div
       style={{
-        width: '24px',
-        height: '24px',
+        width: defaultSizeIconPx,
+        height: defaultSizeIconPx,
       }}
     />
   );
@@ -37,8 +39,8 @@ export function EntityIcon({ entity }: EntityIconProps) {
     return (
       <EuiFlexGroup
         style={{
-          width: '24px',
-          height: '24px',
+          width: defaultSizeIconPx,
+          height: defaultSizeIconPx,
         }}
         alignItems="center"
         justifyContent="center"
