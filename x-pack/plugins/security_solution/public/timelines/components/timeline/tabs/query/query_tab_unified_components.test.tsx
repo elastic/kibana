@@ -37,6 +37,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/com
 import * as timelineActions from '../../../../store/actions';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
+import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -100,8 +101,11 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
 
   const dispatch = useDispatch();
 
-  // populating timeline so that it is not blank
   useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
     dispatch(
       timelineActions.applyKqlFilterQuery({
         id: TimelineId.test,
@@ -1001,7 +1005,7 @@ describe('query tab with unified timeline', () => {
           fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
 
           await waitFor(() => {
-            expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
+            expect(screen.queryByTestId(OPEN_FLYOUT_BUTTON_TEST_ID)).not.toBeInTheDocument();
           });
         },
         SPECIAL_TEST_TIMEOUT
