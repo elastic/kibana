@@ -7,6 +7,7 @@
 import type { FC } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import { EuiFlexItem, EuiSelectable, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DropDownLabel } from './types';
@@ -16,7 +17,7 @@ import { OptionsListPopoverFooter } from './option_list_popover_footer';
 interface OptionsListPopoverProps {
   options: DropDownLabel[];
   renderOption: (option: DropDownLabel) => React.ReactNode;
-  singleSelection?: boolean;
+  singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
   onChange?: (newSuggestions: DropDownLabel[]) => void;
   setPopoverOpen: (open: boolean) => void;
   isLoading?: boolean;
@@ -25,7 +26,7 @@ interface OptionsListPopoverProps {
 interface OptionsListPopoverSuggestionsProps {
   options: DropDownLabel[];
   renderOption: (option: DropDownLabel) => React.ReactNode;
-  singleSelection?: boolean;
+  singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
   onChange?: (newSuggestions: DropDownLabel[]) => void;
   setPopoverOpen: (open: boolean) => void;
 }

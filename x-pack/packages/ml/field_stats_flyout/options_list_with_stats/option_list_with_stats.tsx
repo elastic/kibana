@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
+import type { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiFilterButton,
+  EuiFlexGroup,
   EuiFilterGroup,
   EuiInputPopover,
   htmlIdGenerator,
@@ -37,14 +39,11 @@ export const optionCss = css`
   }
 `;
 
-const FALLBACK_PLACEHOLDER = i18n.translate('xpack.plugins.ml.selectOption.placeholder', {
-  defaultMessage: 'Any',
-});
 interface OptionListWithFieldStatsProps {
   options: DropDownLabel[];
   placeholder?: string;
   'aria-label'?: string;
-  singleSelection?: boolean;
+  singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
   // renderOption: (option: DropDownLabel, searchValue: string) => React.ReactNode;
   onChange: (newSuggestions: DropDownLabel[]) => void;
   selectedOptions?: Array<{ label: string }>;
@@ -54,6 +53,18 @@ interface OptionListWithFieldStatsProps {
   isClearable?: boolean;
   isInvalid?: boolean;
 }
+
+const clearIconCss = css`
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  inline-size: 16px;
+  block-size: 16px;
+  transform: scale(0.5);
+  fill: rgb(29, 30, 36);
+  stroke: rgb(29, 30, 36);
+  stroke-width: 2px;
+`;
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   options,
   placeholder,
@@ -118,26 +129,33 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
         aria-controls={popoverId}
         role="combobox"
       >
-        <EuiFlexItem className="euiComboBox__inputWrap">
+        <EuiFlexGroup alignItems="center">
+          {hasSelections ? <EuiFlexItem>{selectionDisplayNode}</EuiFlexItem> : null}
           {hasSelections ? (
-            <EuiFlexItem css={css({ paddingLeft: 4 })}>{selectionDisplayNode}</EuiFlexItem>
-          ) : (
-            placeholder ?? FALLBACK_PLACEHOLDER
-          )}
-          {isClearable && hasSelections ? (
-            <button
-              style={{ marginLeft: euiThemeVars.euiSizeS }}
-              type="button"
-              className={'euiFormControlLayoutClearButton'}
-              onClick={() => onChange([])}
-              aria-label={i18n.translate('xpack.plugins.ml.controls.optionsList.clearButtonLabel', {
-                defaultMessage: 'Clear',
-              })}
-            >
-              <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
-            </button>
+            <EuiFlexItem css={css({ position: 'absolute', right: 24 })}>
+              <button
+                css={css({
+                  width: '16px',
+                  height: '16px',
+                  backgroundColor: 'rgb(152, 162, 179)',
+                  borderRadius: '50%',
+                  lineHeight: '0',
+                  pointerEvents: 'all',
+                })}
+                type="button"
+                onClick={() => onChange([])}
+                aria-label={i18n.translate(
+                  'xpack.plugins.ml.controls.optionsList.clearButtonLabel',
+                  {
+                    defaultMessage: 'Clear',
+                  }
+                )}
+              >
+                <EuiIcon type="cross" css={clearIconCss} />
+              </button>
+            </EuiFlexItem>
           ) : null}
-        </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFilterButton>
     </>
   );

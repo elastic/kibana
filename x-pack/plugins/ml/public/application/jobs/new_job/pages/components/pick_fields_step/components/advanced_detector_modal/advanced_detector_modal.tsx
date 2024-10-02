@@ -11,7 +11,6 @@ import React, { Fragment, useState, useContext, useEffect } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiComboBox,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlexGrid,
@@ -25,7 +24,7 @@ import {
   EVENT_RATE_FIELD_ID,
   mlCategory,
 } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
@@ -249,7 +248,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
             <AggDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
                 selectedOptions={createSelectedOptions(aggOption)}
@@ -261,7 +260,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedFieldSelect">
             <FieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={currentFieldOptions}
                 selectedOptions={createSelectedOptions(fieldOption)}
@@ -277,7 +276,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiFlexGrid columns={2}>
           <EuiFlexItem data-test-subj="mlAdvancedByFieldSelect">
             <ByFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(byFieldOption)}
@@ -290,7 +289,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedOverFieldSelect">
             <OverFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(overFieldOption)}
@@ -303,7 +302,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedPartitionFieldSelect">
             <PartitionFieldDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={splitFieldOptions}
                 selectedOptions={createSelectedOptions(partitionFieldOption)}
@@ -316,7 +315,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="mlAdvancedExcludeFrequentSelect">
             <ExcludeFrequentDescription>
-              <EuiComboBox
+              <OptionListWithFieldStats
                 singleSelection={{ asPlainText: true }}
                 options={excludeFrequentOptions}
                 selectedOptions={createSelectedOptions(excludeFrequentOption)}
