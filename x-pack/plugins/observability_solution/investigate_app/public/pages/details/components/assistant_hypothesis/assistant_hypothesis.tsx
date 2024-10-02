@@ -38,10 +38,12 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
   } = useKibana();
   const { data: entitiesData } = useFetchEntities({
     investigationId,
-    serviceName: `${alert?.['service.name']}`,
-    serviceEnvironment: `${alert?.['service.environment']}`,
-    hostName: `${alert?.['host.name']}`,
-    containerId: `${alert?.['container.id']}`,
+    serviceName: alert?.['service.name'] ? `${alert?.['service.name']}` : undefined,
+    serviceEnvironment: alert?.['service.environment']
+      ? `${alert?.['service.environment']}`
+      : undefined,
+    hostName: alert?.['host.name'] ? `${alert?.['host.name']}` : undefined,
+    containerId: alert?.['container.id'] ? `${alert?.['container.id']}` : undefined,
   });
 
   const getAlertContextMessages = useCallback(async () => {
@@ -56,8 +58,11 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       Alerts can optionally be associated with entities. Entities can be services, hosts, containers, or other resources. Entities can have metrics associated with them. 
       
       The alert that triggered this investigation is associated with the following entities: ${entities
-        .map((entity) => {
-          return formatEntityMetrics(entity);
+        .map((entity, index) => {
+          return dedent(`
+            ## Entity ${index + 1}:
+            ${formatEntityMetrics(entity)};
+          `);
         })
         .join('/n/n')}`
       : '';
@@ -75,9 +80,15 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
 
         ${entityContext}
 
-        Based on the alert details, suggest a root cause and next steps to mitigate the issue. I do not have the alert details in front of me, so be sure to repeat the alert reason (${
+        Based on the alert details, suggest a root cause and next steps to mitigate the issue. 
+        
+        I do not have the alert details or entity details in front of me, so be sure to repeat the alert reason (${
           alert[ALERT_REASON]
-        }) and when the alert was triggered (${alert[ALERT_START]}).
+        }), when the alert was triggered (${
+          alert[ALERT_START]
+        }), and the entity metrics in your response.
+
+        When displaying the entity metrics, please convert the metrics to a human-readable format. For example, convert "logRate" to "Log Rate" and "errorRate" to "Error Rate".
         `
       ),
     });
@@ -102,5 +113,10 @@ const formatEntityMetrics = (entity: EntityWithSource): string => {
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ');
   const entitySources = entity.sources.map((source) => source.dataStream).join(', ');
-  return `Entity name: ${entity.displayName}; Entity type: ${entity.type}; Entity metrics: ${entityMetrics}; Entity data streams: ${entitySources}`;
+  return dedent(`
+    Entity name: ${entity.displayName}; 
+    Entity type: ${entity.type}; 
+    Entity metrics: ${entityMetrics}; 
+    Entity data streams: ${entitySources}
+  `);
 };
