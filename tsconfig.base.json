@@ -1214,6 +1214,8 @@
       "@kbn/ml-date-utils/*": ["x-pack/packages/ml/date_utils/*"],
       "@kbn/ml-error-utils": ["x-pack/packages/ml/error_utils"],
       "@kbn/ml-error-utils/*": ["x-pack/packages/ml/error_utils/*"],
+      "@kbn/ml-field-stats-flyout": ["x-pack/packages/ml/field_stats_flyout"],
+      "@kbn/ml-field-stats-flyout/*": ["x-pack/packages/ml/field_stats_flyout/*"],
       "@kbn/ml-in-memory-table": ["x-pack/packages/ml/in_memory_table"],
       "@kbn/ml-in-memory-table/*": ["x-pack/packages/ml/in_memory_table/*"],
       "@kbn/ml-is-defined": ["x-pack/packages/ml/is_defined"],
@@ -1228,6 +1230,8 @@
       "@kbn/ml-nested-property/*": ["x-pack/packages/ml/nested_property/*"],
       "@kbn/ml-number-utils": ["x-pack/packages/ml/number_utils"],
       "@kbn/ml-number-utils/*": ["x-pack/packages/ml/number_utils/*"],
+      "@kbn/ml-parse-interval": ["x-pack/packages/ml/parse_interval"],
+      "@kbn/ml-parse-interval/*": ["x-pack/packages/ml/parse_interval/*"],
       "@kbn/ml-plugin": ["x-pack/plugins/ml"],
       "@kbn/ml-plugin/*": ["x-pack/plugins/ml/*"],
       "@kbn/ml-query-utils": ["x-pack/packages/ml/query_utils"],
@@ -1250,6 +1254,8 @@
       "@kbn/ml-ui-actions/*": ["x-pack/packages/ml/ui_actions/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
+      "@kbn/ml-validators": ["x-pack/packages/ml/validators"],
+      "@kbn/ml-validators/*": ["x-pack/packages/ml/validators/*"],
       "@kbn/mock-idp-plugin": ["packages/kbn-mock-idp-plugin"],
       "@kbn/mock-idp-plugin/*": ["packages/kbn-mock-idp-plugin/*"],
       "@kbn/mock-idp-utils": ["packages/kbn-mock-idp-utils"],
@@ -1302,6 +1308,8 @@
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability_solution/observability/*"],
       "@kbn/observability-shared-plugin": ["x-pack/plugins/observability_solution/observability_shared"],
       "@kbn/observability-shared-plugin/*": ["x-pack/plugins/observability_solution/observability_shared/*"],
+      "@kbn/observability-synthetics-test-data": ["x-pack/packages/observability/synthetics_test_data"],
+      "@kbn/observability-synthetics-test-data/*": ["x-pack/packages/observability/synthetics_test_data/*"],
       "@kbn/observability-utils": ["x-pack/packages/observability/observability_utils"],
       "@kbn/observability-utils/*": ["x-pack/packages/observability/observability_utils/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],
@@ -1494,6 +1502,10 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
       "@kbn/screenshotting-server": ["packages/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["packages/kbn-screenshotting-server/*"],
+      "@kbn/search-api-keys-components": ["packages/kbn-search-api-keys-components"],
+      "@kbn/search-api-keys-components/*": ["packages/kbn-search-api-keys-components/*"],
+      "@kbn/search-api-keys-server": ["packages/kbn-search-api-keys-server"],
+      "@kbn/search-api-keys-server/*": ["packages/kbn-search-api-keys-server/*"],
       "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-assistant": ["x-pack/plugins/search_assistant"],
@@ -1520,6 +1532,8 @@
       "@kbn/search-playground/*": ["x-pack/plugins/search_playground/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
       "@kbn/search-response-warnings/*": ["packages/kbn-search-response-warnings/*"],
+      "@kbn/search-shared-ui": ["x-pack/packages/search/shared_ui"],
+      "@kbn/search-shared-ui/*": ["x-pack/packages/search/shared_ui/*"],
       "@kbn/search-types": ["packages/kbn-search-types"],
       "@kbn/search-types/*": ["packages/kbn-search-types/*"],
       "@kbn/searchprofiler-plugin": ["x-pack/plugins/searchprofiler"],
@@ -1990,7 +2004,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

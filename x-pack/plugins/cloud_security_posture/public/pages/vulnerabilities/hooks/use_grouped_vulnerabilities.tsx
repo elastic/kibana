@@ -57,6 +57,7 @@ export type VulnerabilitiesRootGroupingAggregation =
 export const getGroupedVulnerabilitiesQuery = (query: GroupingQuery) => ({
   ...query,
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
   size: 0,
 });
 
