@@ -16,7 +16,6 @@ import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/sec
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteAllRiskScores,
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
@@ -24,7 +23,6 @@ import {
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
   enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
 } from '../../utils';
@@ -89,8 +87,10 @@ export default ({ getService }: FtrProviderContext): void => {
         index: 'ecs_compliant',
         log,
       });
+      const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
 
       before(async () => {
+        await riskEngineRoutesForNamespace.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -103,15 +103,12 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await cleanRiskEngine({ kibanaServer, es, log });
       });
 
       afterEach(async () => {
-        await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-
-        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutesForNamespace.cleanUp();
       });
 
       it('calculates and persists risk score for entity', async () => {

@@ -16,7 +16,6 @@ import {
   installLegacyRiskScore,
   getLegacyRiskScoreDashboards,
   clearLegacyDashboards,
-  cleanRiskEngine,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -29,12 +28,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/191637
   describe.skip('@ess @serverless @serverlessQA init_and_status_apis', () => {
-    beforeEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
+    const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
+
+    before(async () => {
+      await riskEngineRoutesForNamespace.cleanUp();
     });
 
     afterEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
+      await riskEngineRoutesForNamespace.cleanUp();
       await clearLegacyTransforms({ es, log });
       await clearLegacyDashboards({ supertest, log });
     });

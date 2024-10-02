@@ -135,27 +135,6 @@ export const getLatestRiskScoreIndexMapping: (
   )[riskScoreLatestIndex]?.mappings;
 };
 
-export const deleteRiskScoreIndices = async ({
-  log,
-  es,
-  namespace = 'default',
-}: {
-  log: ToolingLog;
-  es: Client;
-  namespace?: string;
-}) => {
-  try {
-    await Promise.allSettled([
-      es.indices.deleteDataStream({ name: [`risk-score.risk-score-${namespace}`] }),
-      es.indices.delete({
-        index: [`risk-score.risk-score-latest-${namespace}`],
-      }),
-    ]);
-  } catch (e) {
-    log.warning(`Error deleting risk score indices: ${e.message}`);
-  }
-};
-
 export const areRiskScoreIndicesEmpty = async ({
   es,
   namespace = 'default',
@@ -332,35 +311,6 @@ export const getRiskEngineTask = async ({
   return result.hits.hits[0]?._source;
 };
 
-export const deleteRiskEngineTask = async ({
-  es,
-  log,
-  index = ['.kibana_task_manager*'],
-}: {
-  es: Client;
-  log: ToolingLog;
-  index?: string[];
-}) => {
-  await countDownTest(
-    async () => {
-      await es.deleteByQuery({
-        index,
-        query: {
-          match: {
-            'task.taskType': 'risk_engine:risk_scoring',
-          },
-        },
-        conflicts: 'proceed',
-      });
-      return {
-        passed: true,
-      };
-    },
-    'deleteRiskEngineTask',
-    log
-  );
-};
-
 export const waitForRiskEngineTaskToBeGone = async ({
   es,
   log,
@@ -386,38 +336,6 @@ export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: Kb
   });
 
   return soResponse?.saved_objects?.[0];
-};
-
-export const cleanRiskEngineConfig = async ({
-  kibanaServer,
-}: {
-  kibanaServer: KbnClient;
-}): Promise<void> => {
-  const so = await getRiskEngineConfigSO({ kibanaServer });
-  if (so) {
-    await kibanaServer.savedObjects.delete({
-      type: riskEngineConfigurationTypeName,
-      id: so.id,
-    });
-  }
-};
-
-/**
- * General helper for cleaning up risk engine artifacts. This should be used before and after any risk engine tests so as not to pollute the test environment.
- */
-export const cleanRiskEngine = async ({
-  es,
-  kibanaServer,
-  log,
-}: {
-  es: Client;
-  kibanaServer: KbnClient;
-  log: ToolingLog;
-}): Promise<void> => {
-  await deleteRiskEngineTask({ es, log });
-  await cleanRiskEngineConfig({ kibanaServer });
-  await clearTransforms({ es, log });
-  await deleteRiskScoreIndices({ log, es });
 };
 
 export const updateRiskEngineConfigSO = async ({
@@ -448,23 +366,6 @@ export const legacyTransformIds = [
   'ml_userriskscore_pivot_transform_default',
   'ml_userriskscore_latest_transform_default',
 ];
-
-export const clearTransforms = async ({
-  es,
-  log,
-}: {
-  es: Client;
-  log: ToolingLog;
-}): Promise<void> => {
-  try {
-    await es.transform.deleteTransform({
-      transform_id: 'risk_score_latest_transform_default',
-      force: true,
-    });
-  } catch (e) {
-    log.warning(`Error deleting risk_score_latest_transform_default: ${e.message}`);
-  }
-};
 
 export const clearLegacyTransforms = async ({
   es,

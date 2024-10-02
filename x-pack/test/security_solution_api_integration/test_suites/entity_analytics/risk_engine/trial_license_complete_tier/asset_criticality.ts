@@ -11,7 +11,6 @@ import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api
 import _ from 'lodash';
 import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
-  cleanRiskEngine,
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,
   getAssetCriticalityDoc,
@@ -19,6 +18,7 @@ import {
   enableAssetCriticalityAdvancedSetting,
   disableAssetCriticalityAdvancedSetting,
   createAssetCriticalityRecords,
+  riskEngineRouteHelpersFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -30,14 +30,23 @@ export default ({ getService }: FtrProviderContext) => {
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
-    beforeEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
+    const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest);
+
+    before(async () => {
+      await riskEngineRoutesForNamespace.cleanUp();
       await cleanAssetCriticality({ log, es });
+    });
+
+    after(async () => {
+      await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+    });
+
+    beforeEach(async () => {
       await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
+      await riskEngineRoutesForNamespace.cleanUp();
       await cleanAssetCriticality({ log, es });
     });
 
@@ -197,10 +206,6 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const createRecords = () => createAssetCriticalityRecords(records, es);
-
-      before(async () => {
-        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
-      });
 
       it('@skipInServerless should return the first 10 asset criticality records if no args provided', async () => {
         await createRecords();
