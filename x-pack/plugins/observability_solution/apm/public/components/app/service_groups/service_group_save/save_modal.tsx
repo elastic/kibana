@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiModal } from '@elastic/eui';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -89,6 +89,8 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
     [savedServiceGroup?.id, notifications.toasts, onClose, isEdit, navigateToServiceGroups]
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const onDelete = useCallback(
     async function () {
       setIsLoading(true);
@@ -115,7 +117,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
   );
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       {modalView === 'group_details' && (
         <GroupDetails
           serviceGroup={stagedServiceGroup}
@@ -127,6 +129,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
           }}
           onDeleteGroup={onDelete}
           isLoading={isLoading}
+          titleId={modalTitleId}
         />
       )}
       {modalView === 'select_service' && stagedServiceGroup && (
@@ -139,6 +142,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
             setModalView('group_details');
           }}
           isLoading={isLoading}
+          titleId={modalTitleId}
         />
       )}
     </EuiModal>
