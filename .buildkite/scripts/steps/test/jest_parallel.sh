@@ -61,6 +61,11 @@ while read -r config; do
   # Node.js process-warning detected:
   # Warning: Closing file descriptor 24 on garbage collection
   cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+
+  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+      cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
+  fi
+
   echo "actual full command is:"
   echo "$cmd"
   echo ""
