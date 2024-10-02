@@ -78,15 +78,13 @@ export async function getEntitiesWithSource({
   };
 }
 
-async function fetchSources(indices: Record<string, IndicesIndexState>): Promise<EntitySource[]> {
-  return await Promise.all(
-    Object.values(indices).map(async (index) => {
-      return await getEntitySource({ index });
-    })
-  );
+function fetchSources(indices: Record<string, IndicesIndexState>): EntitySource[] {
+  return Object.values(indices).map((index) => {
+    return getEntitySource({ index });
+  });
 }
 
-const getEntitySource = async ({ index }: { index: IndicesIndexState }) => {
+const getEntitySource = ({ index }: { index: IndicesIndexState }) => {
   const dataStream = index.data_stream;
   const source = {
     dataStream,
