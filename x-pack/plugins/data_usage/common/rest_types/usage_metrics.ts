@@ -19,6 +19,8 @@ const METRIC_TYPE_VALUES = [
   'search_rate',
 ] as const;
 
+export type MetricTypes = (typeof METRIC_TYPE_VALUES)[number];
+
 // @ts-ignore
 const isValidMetricType = (value: string) => METRIC_TYPE_VALUES.includes(value);
 
@@ -62,7 +64,6 @@ export const UsageMetricsRequestSchema = {
       schema.oneOf([
         schema.arrayOf(schema.string(), {
           minSize: 1,
-          maxSize: 50, // TBD
           validate: (values) => {
             if (values.map((v) => v.trim()).some((v) => !v.length)) {
               return '[dataStreams] list can not contain empty values';
@@ -102,3 +103,5 @@ export const UsageMetricsResponseSchema = {
       ),
     }),
 };
+
+export type UsageMetricsResponseSchemaBody = TypeOf<typeof UsageMetricsResponseSchema.body>;
