@@ -75,7 +75,11 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
       privileges: [
         {
           requiredClusterPrivileges: ['manage_ilm'],
-          ui: [],
+          ui: ['save'],
+        },
+        {
+          requiredClusterPrivileges: ['read_ilm'],
+          ui: ['show'],
         },
       ],
     });

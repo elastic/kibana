@@ -26,6 +26,8 @@ properties:
     $ref: "objective.yaml"
   settings:
     $ref: "settings.yaml"
+  groupBy:
+    $ref: "group_by.yaml"
   tags:
     description: List of tags
     type: array

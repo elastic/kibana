@@ -7,14 +7,14 @@
 
 import expect from 'expect';
 import cspParser from 'content-security-policy-parser';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
+  const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('security/response_headers', function () {
     const baseCSP = `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'`;
@@ -27,16 +27,18 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultXFrameOptions = 'SAMEORIGIN';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-    });
+
     it('API endpoint response contains default security headers', async () => {
-      const { header } = await supertestWithoutAuth
+      const { header } = await supertestViewerWithCookieCredentials
         .get(`/internal/security/me`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();
@@ -52,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('redirect endpoint response contains default security headers', async () => {
       const { header } = await supertestWithoutAuth
         .get(`/logout`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();

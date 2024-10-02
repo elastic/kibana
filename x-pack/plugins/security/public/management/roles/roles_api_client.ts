@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { copyRole } from '../../../common/model';
@@ -29,6 +30,18 @@ export class RolesAPIClient {
     await this.http.put(`/api/security/role/${encodeURIComponent(role.name)}`, {
       body: JSON.stringify(this.transformRoleForSave(copyRole(role))),
       query: { createOnly },
+    });
+  };
+
+  public bulkUpdateRoles = async ({
+    rolesUpdate,
+  }: BulkUpdatePayload): Promise<BulkUpdateRoleResponse> => {
+    return await this.http.post('/api/security/roles', {
+      body: JSON.stringify({
+        roles: Object.fromEntries(
+          rolesUpdate.map((role) => [role.name, this.transformRoleForSave(copyRole(role))])
+        ),
+      }),
     });
   };
 

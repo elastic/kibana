@@ -606,10 +606,6 @@
                 "path": "src/plugins/home/public/plugin.ts"
               },
               {
-                "plugin": "savedObjects",
-                "path": "src/plugins/saved_objects/public/plugin.ts"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/types.ts"
               },

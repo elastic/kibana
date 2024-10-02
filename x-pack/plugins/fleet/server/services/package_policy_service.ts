@@ -164,7 +164,7 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -225,7 +225,11 @@ export interface PackagePolicyClient {
    * @param esClient
    * @param outputId
    */
-  removeOutputFromAll(esClient: ElasticsearchClient, outputId: string): Promise<void>;
+  removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ): Promise<void>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs

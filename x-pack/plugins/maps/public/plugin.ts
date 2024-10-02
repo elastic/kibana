@@ -88,7 +88,7 @@ import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_
 import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
-import { MapRendererLazy } from './react_embeddable/map_renderer_lazy';
+import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;

@@ -7,11 +7,9 @@
 import {
   Criteria,
   EuiAvatar,
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
@@ -22,6 +20,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
 import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
+import { InvestigationTag } from '../../../components/investigation_tag/investigation_tag';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useFetchUserProfiles } from '../../../hooks/use_fetch_user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -114,9 +113,7 @@ export function InvestigationList() {
         return (
           <EuiFlexGroup wrap gutterSize="xs">
             {value.map((tag) => (
-              <EuiFlexItem key={tag} grow={false}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
-              </EuiFlexItem>
+              <InvestigationTag key={tag} tag={tag} />
             ))}
           </EuiFlexGroup>
         );

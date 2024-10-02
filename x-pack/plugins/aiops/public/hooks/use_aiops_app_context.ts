@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, type FC, type PropsWithChildren, useContext } from 'react';
+import { createContext, useContext } from 'react';
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -24,13 +24,6 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import type {
-  FieldStatsProps,
-  FieldStatsServices,
-} from '@kbn/unified-field-list/src/components/field_stats';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
@@ -112,23 +105,6 @@ export interface AiopsAppDependencies {
    * Internationalisation service
    */
   i18n: CoreStart['i18n'];
-  /**
-   * Deps for unified fields stats.
-   */
-  fieldStats?: {
-    useFieldStatsTrigger: () => {
-      renderOption: EuiComboBoxProps<string>['renderOption'];
-      closeFlyout: () => void;
-    };
-    FieldStatsFlyoutProvider: FC<
-      PropsWithChildren<{
-        dataView: DataView;
-        fieldStatsServices: FieldStatsServices;
-        timeRangeMs?: TimeRangeMs;
-        dslQuery?: FieldStatsProps['dslQuery'];
-      }>
-    >;
-  };
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;
   cases?: CasesPublicStart;

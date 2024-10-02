@@ -8,19 +8,26 @@
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
-import { NodeEventsInCategory } from './node_events_of_type';
+import { NodeEventsInCategory, type NodeEventOnClick } from './node_events_of_type';
 import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
 import type { PanelViewAndParameters } from '../../types';
 import type { State } from '../../../common/store/types';
+
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 
 // eslint-disable-next-line react/display-name
-export const PanelRouter = memo(function ({ id }: { id: string }) {
+export const PanelRouter = memo(function ({
+  id,
+  nodeEventOnClick,
+}: {
+  id: string;
+  nodeEventOnClick?: NodeEventOnClick;
+}) {
   const params: PanelViewAndParameters = useSelector((state: State) =>
     selectors.panelViewAndParameters(state.analyzer[id])
   );
@@ -34,6 +41,7 @@ export const PanelRouter = memo(function ({ id }: { id: string }) {
         id={id}
         nodeID={params.panelParameters.nodeID}
         eventCategory={params.panelParameters.eventCategory}
+        nodeEventOnClick={nodeEventOnClick}
       />
     );
   } else if (params.panelView === 'eventDetail') {

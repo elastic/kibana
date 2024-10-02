@@ -23,72 +23,15 @@ describe('buffer_lines', () => {
     }).toThrow('bufferSize must be greater than zero');
   });
 
-  test('it can read a single line', (done) => {
-    const input = new TestReadable();
-    input.push('line one\n');
-    input.push(null);
-    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
-    let linesToTest: string[] = [];
-    bufferedLine.on('lines', (lines: string[]) => {
-      linesToTest = [...linesToTest, ...lines];
-    });
-    bufferedLine.on('close', () => {
-      expect(linesToTest).toEqual(['line one']);
-      done();
-    });
-  });
-
-  test('it can read a single line using a buffer size of 1', (done) => {
-    const input = new TestReadable();
-    input.push('line one\n');
-    input.push(null);
-    const bufferedLine = new BufferLines({ bufferSize: 1, input });
-    let linesToTest: string[] = [];
-    bufferedLine.on('lines', (lines: string[]) => {
-      linesToTest = [...linesToTest, ...lines];
-    });
-    bufferedLine.on('close', () => {
-      expect(linesToTest).toEqual(['line one']);
-      done();
-    });
-  });
-
-  test('it can read two lines', (done) => {
-    const input = new TestReadable();
-    input.push('line one\n');
-    input.push('line two\n');
-    input.push(null);
-    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
-    let linesToTest: string[] = [];
-    bufferedLine.on('lines', (lines: string[]) => {
-      linesToTest = [...linesToTest, ...lines];
-    });
-    bufferedLine.on('close', () => {
-      expect(linesToTest).toEqual(['line one', 'line two']);
-      done();
-    });
-  });
-
-  test('it can read two lines using a buffer size of 1', (done) => {
-    const input = new TestReadable();
-    input.push('line one\n');
-    input.push('line two\n');
-    input.push(null);
-    const bufferedLine = new BufferLines({ bufferSize: 1, input });
-    let linesToTest: string[] = [];
-    bufferedLine.on('lines', (lines: string[]) => {
-      linesToTest = [...linesToTest, ...lines];
-    });
-    bufferedLine.on('close', () => {
-      expect(linesToTest).toEqual(['line one', 'line two']);
-      done();
-    });
-  });
-
   test('two identical lines are collapsed into just one line without duplicates', (done) => {
     const input = new TestReadable();
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
     input.push('line one\n');
     input.push('line one\n');
+    input.push('--boundary--\n');
     input.push(null);
     const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];
@@ -118,9 +61,14 @@ describe('buffer_lines', () => {
   test('it can read 200 lines', (done) => {
     const input = new TestReadable();
     const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
     let linesToTest: string[] = [];
     const size200: string[] = new Array(200).fill(null).map((_, index) => `${index}\n`);
     size200.forEach((element) => input.push(element));
+    input.push('--boundary--\n');
     input.push(null);
     bufferedLine.on('lines', (lines: string[]) => {
       linesToTest = [...linesToTest, ...lines];
@@ -142,6 +90,30 @@ describe('buffer_lines', () => {
     input.push('127.0.0.3\n');
     input.push('\n');
     input.push('--boundary--\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
+    let linesToTest: string[] = [];
+    bufferedLine.on('lines', (lines: string[]) => {
+      linesToTest = [...linesToTest, ...lines];
+    });
+    bufferedLine.on('close', () => {
+      expect(linesToTest).toEqual(['127.0.0.1', '127.0.0.2', '127.0.0.3']);
+      done();
+    });
+  });
+
+  test('it does not create empty values for lines after the end boundary', (done) => {
+    const input = new TestReadable();
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
+    input.push('127.0.0.1\n');
+    input.push('127.0.0.2\n');
+    input.push('127.0.0.3\n');
+    input.push('\n');
+    input.push('--boundary--\n');
+    input.push('\n');
     input.push(null);
     const bufferedLine = new BufferLines({ bufferSize: IMPORT_BUFFER_SIZE, input });
     let linesToTest: string[] = [];

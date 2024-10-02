@@ -76,6 +76,20 @@ export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
 };
 
 /**
+ * Fetches all the notes for an array of saved object ids
+ */
+export const fetchNotesBySaveObjectIds = async (savedObjectIds: string[]) => {
+  const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
+    NOTE_URL,
+    {
+      query: { savedObjectIds },
+      version: '2023-10-31',
+    }
+  );
+  return response;
+};
+
+/**
  * Deletes multiple notes
  */
 export const deleteNotes = async (noteIds: string[]) => {

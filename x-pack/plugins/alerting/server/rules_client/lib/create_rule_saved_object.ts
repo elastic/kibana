@@ -57,7 +57,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     ruleAuditEvent({
       action: RuleAuditAction.CREATE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rawRule.name },
     })
   );
 

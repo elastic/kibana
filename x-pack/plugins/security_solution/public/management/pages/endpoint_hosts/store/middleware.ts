@@ -156,10 +156,6 @@ const getAgentAndPoliciesForEndpointsList = async (
     return;
   }
 
-  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
-  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
-  // exists.
   const policiesFound = (
     await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(

@@ -18,7 +18,13 @@ import { InternalRequestHeader } from './default_request_headers';
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
   apiKeyHeader: { Authorization: string };
-  cookieHeader: { Cookie: string };
+}
+
+export interface CookieCredentials {
+  Cookie: string;
+  // supertest.set() expects an object that matches IncomingHttpHeaders type, that needs to accept arbitrary key-value pairs as headers
+  // We extend the interface with an index signature to resolve this.
+  [header: string]: string;
 }
 
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
@@ -60,7 +66,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
-    async getM2MApiCredentialsWithRoleScope(role: string) {
+    async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
       return sessionManager.getApiCredentialsForRole(role);
     },
     async getEmail(role: string) {
@@ -76,7 +82,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       // Get admin credentials in order to create the API key
-      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
+      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
 
       // Get the role descrtiptor for the role
       let roleDescriptors = {};
@@ -110,9 +116,12 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
       log.debug(`Created api key for role: [${role}]`);
-      return { apiKey, apiKeyHeader, cookieHeader: adminCookieHeader };
+      return { apiKey, apiKeyHeader };
     },
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
+      // Get admin credentials in order to invalidate the API key
+      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
+
       const requestBody = {
         apiKeys: [
           {
@@ -126,7 +135,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
         .set(INTERNAL_REQUEST_HEADERS)
-        .set(roleCredentials.cookieHeader)
+        .set(adminCookieHeader)
         .send(requestBody);
 
       expect(status).to.be(200);

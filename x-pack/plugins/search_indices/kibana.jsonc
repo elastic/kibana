@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "share",
+      "indexManagement",
     ],
     "optionalPlugins": [
       "cloud",

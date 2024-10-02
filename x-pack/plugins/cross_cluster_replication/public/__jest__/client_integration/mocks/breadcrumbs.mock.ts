@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// TODO(jbudz): should be removed when upgrading to TS@4.8
-// this is a skip for the errors created when typechecking with isolatedModules
-export {};
-
 jest.mock('../../../app/services/breadcrumbs', () => {
   const original = jest.requireActual('../../../app/services/breadcrumbs');
 

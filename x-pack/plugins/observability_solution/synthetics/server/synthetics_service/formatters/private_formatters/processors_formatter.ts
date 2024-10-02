@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { ProcessorFields } from './format_synthetics_policy';
-import { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {
@@ -16,6 +17,7 @@ interface FieldProcessor {
 }
 
 export const processorsFormatter = (config: MonitorFields & ProcessorFields) => {
+  const labels = config[ConfigKey.LABELS] ?? {};
   const processors: FieldProcessor[] = [
     {
       add_fields: {
@@ -30,6 +32,7 @@ export const processorsFormatter = (config: MonitorFields & ProcessorFields) => 
           meta: {
             space_id: config.space_id,
           },
+          ...(isEmpty(labels) ? {} : { labels }),
         },
         target: '',
       },

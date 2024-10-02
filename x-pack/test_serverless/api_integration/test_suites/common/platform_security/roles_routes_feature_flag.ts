@@ -26,15 +26,22 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const platformSecurityUtils = getService('platformSecurityUtils');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestWithAdminScope: SupertestWithRoleScopeType;
+  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const es = getService('es');
 
   describe('security', function () {
     describe('Roles', () => {
       before(async () => {
-        supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'admin',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
+        supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
           withInternalHeaders: true,
-          withCustomHeaders: { 'kbn-xsrf': 'true' },
         });
       });
       after(async () => {
@@ -43,11 +50,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('Create Role', () => {
         it('should allow us to create an empty role', async () => {
-          await supertestWithAdminScope.put('/api/security/role/empty_role').send({}).expect(204);
+          await supertestAdminWithApiKey.put('/api/security/role/empty_role').send({}).expect(204);
         });
 
         it('should create a role with kibana and elasticsearch privileges', async () => {
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_with_privileges')
             .send({
               metadata: {
@@ -113,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it(`should create a role with kibana and FLS/DLS elasticsearch privileges`, async () => {
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_with_privileges_dls_fls')
             .send({
               metadata: {
@@ -139,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // serverless only (stateful will allow)
         it(`should not create a role with 'run as' privileges`, async () => {
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_with_privileges')
             .send({
               metadata: {
@@ -174,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // serverless only (stateful will allow)
         it(`should not create a role with remote cluster privileges`, async () => {
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_with_privileges')
             .send({
               metadata: {
@@ -214,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // serverless only (stateful will allow)
         it(`should not create a role with remote index privileges`, async () => {
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_with_privileges')
             .send({
               metadata: {
@@ -268,14 +275,14 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-            await supertestWithAdminScope
+            await supertestAdminWithApiKey
               .put('/api/security/role/test_role?createOnly=true')
               .send({})
               .expect(409);
           });
 
           it('should succeed when role does not exist', async () => {
-            await supertestWithAdminScope
+            await supertestAdminWithApiKey
               .put('/api/security/role/new_role?createOnly=true')
               .send({})
               .expect(204);
@@ -321,7 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope.get('/api/security/role/role_to_get').expect(200, {
+          await supertestAdminWithApiKey.get('/api/security/role/role_to_get').expect(200, {
             name: 'role_to_get',
             metadata: {
               foo: 'test-metadata',
@@ -413,7 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithCookieCredentials
             .get('/internal/security/roles/engineering')
             .expect(200)
             .expect((res: { body: Role[] }) => {
@@ -469,7 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_to_update')
             .send({
               metadata: {
@@ -553,7 +560,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_to_update_with_dls_fls')
             .send({
               elasticsearch: {
@@ -612,7 +619,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_to_update')
             .send({
               metadata: {
@@ -708,7 +715,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_to_update')
             .send({
               metadata: {
@@ -809,7 +816,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
 
-          await supertestWithAdminScope
+          await supertestAdminWithApiKey
             .put('/api/security/role/role_to_update')
             .send({
               metadata: {
@@ -911,7 +918,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           });
-          await supertestWithAdminScope.delete('/api/security/role/role_to_delete').expect(204);
+          await supertestAdminWithApiKey.delete('/api/security/role/role_to_delete').expect(204);
 
           const deletedRole = await es.security.getRole(
             { name: 'role_to_delete' },

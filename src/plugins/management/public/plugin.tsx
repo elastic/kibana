@@ -119,6 +119,7 @@ export class ManagementPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
+        const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
@@ -135,6 +136,7 @@ export class ManagementPlugin
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          chromeStyle$,
         });
       },
     });

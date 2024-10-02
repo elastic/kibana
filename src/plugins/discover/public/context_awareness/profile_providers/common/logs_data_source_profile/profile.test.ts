@@ -14,6 +14,8 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
+import { DataGridDensity } from '@kbn/unified-data-table';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -151,7 +153,13 @@ describe('logsDataSourceProfileProvider', () => {
   describe('getCellRenderers', () => {
     it('should return cell renderers for log level fields', () => {
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(() => ({}));
-      const cellRenderers = getCellRenderers?.();
+      const getCellRenderersParams = {
+        actions: { addFilter: jest.fn() },
+        dataView: dataViewWithTimefieldMock,
+        density: DataGridDensity.COMPACT,
+        rowHeight: 0,
+      };
+      const cellRenderers = getCellRenderers?.(getCellRenderersParams);
 
       expect(cellRenderers).toBeDefined();
       expect(cellRenderers?.['log.level']).toBeDefined();

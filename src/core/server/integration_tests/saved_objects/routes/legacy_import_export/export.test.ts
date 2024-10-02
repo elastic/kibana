@@ -62,6 +62,7 @@ describe('POST /api/dashboards/export', () => {
       kibanaVersion: 'mockversion',
       coreUsageData,
       logger: loggerMock.create(),
+      access: 'public',
     });
 
     handlerContext.savedObjects.client.bulkGet

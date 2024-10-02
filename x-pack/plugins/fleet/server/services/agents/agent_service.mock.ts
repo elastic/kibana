@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type { AgentClient, AgentService } from './agent_service';
 
 const createClientMock = (): jest.Mocked<AgentClient> => ({
@@ -15,7 +17,7 @@ const createClientMock = (): jest.Mocked<AgentClient> => ({
   getLatestAgentAvailableVersion: jest.fn(),
 });
 
-const createServiceMock = (): jest.Mocked<AgentService> => ({
+const createServiceMock = (): DeeplyMockedKeys<AgentService> => ({
   asInternalUser: createClientMock(),
   asScoped: jest.fn().mockReturnValue(createClientMock()),
 });

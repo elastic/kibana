@@ -105,6 +105,9 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
+            // Transform states that indicate the transform is running happily
+            const TRANSFORM_STARTED_STATES = ['started', 'indexing'];
+
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({
@@ -113,12 +116,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(transformStats.transforms.length).to.eql(1);
             const latestTransform = transformStats.transforms[0];
-            if (latestTransform.state !== 'started') {
-              log.error('Transform state is not started, logging the transform');
+            if (!TRANSFORM_STARTED_STATES.includes(latestTransform.state)) {
+              log.error('Transform state is not in the started states, logging the transform');
               log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
             }
 
-            expect(latestTransform.state).to.eql('started');
+            expect(TRANSFORM_STARTED_STATES).to.contain(latestTransform.state);
           });
 
           describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
@@ -279,6 +282,33 @@ export default ({ getService }: FtrProviderContext): void => {
                 category_1_score: 30.787478681462762,
               },
             ]);
+          });
+
+          it('filters out deleted asset criticality data when calculating score', async () => {
+            await assetCriticalityRoutes.upsert({
+              id_field: 'host.name',
+              id_value: 'host-2',
+              criticality_level: 'high_impact',
+            });
+            await assetCriticalityRoutes.delete('host.name', 'host-2');
+            await waitForAssetCriticalityToBePresent({ es, log });
+            await riskEngineRoutes.init();
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+            const riskScores = await readRiskScores(es);
+
+            expect(riskScores.length).to.be.greaterThan(0);
+            const assetCriticalityLevels = riskScores.map(
+              (riskScore) => riskScore.host?.risk.criticality_level
+            );
+            const assetCriticalityModifiers = riskScores.map(
+              (riskScore) => riskScore.host?.risk.criticality_modifier
+            );
+
+            expect(assetCriticalityLevels).to.not.contain('deleted');
+            expect(assetCriticalityModifiers).to.contain(2);
+
+            const scoreWithCriticality = riskScores.find((score) => score.host?.name === 'host-2');
+            expect(normalizeScores([scoreWithCriticality!])[0].criticality_level).to.be(undefined);
           });
         });
       });

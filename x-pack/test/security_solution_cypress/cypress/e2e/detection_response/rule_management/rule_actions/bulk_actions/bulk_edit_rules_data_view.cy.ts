@@ -59,7 +59,7 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     const TESTED_CUSTOM_QUERY_RULE_DATA = getNewRule({
       index: undefined,

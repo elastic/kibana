@@ -30,14 +30,7 @@ export const DownsampleField: React.FunctionComponent<Props> = ({ phase }) => {
 
   return (
     <ToggleFieldWithDescribedFormRow
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.downsampleTitle"
-            defaultMessage="Downsample"
-          />
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.downsampleLabel}</h3>}
       description={
         <EuiTextColor color="subdued">
           <FormattedMessage

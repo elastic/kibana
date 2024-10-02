@@ -573,6 +573,20 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        read_ilm: {
+          elasticsearch: {
+            cluster: ['read_ilm'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+
         index_management_user: {
           elasticsearch: {
             cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],

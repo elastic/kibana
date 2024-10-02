@@ -19,7 +19,7 @@ export const useOsqueryPolicies = () => {
   return useQuery(
     ['osqueryPolicies'],
     () =>
-      http.get<{ items: Array<{ policy_id: string; policy_ids: string[] }> }>(
+      http.get<{ items: Array<{ policy_ids: string[] }> }>(
         '/internal/osquery/fleet_wrapper/package_policies',
         { version: API_VERSIONS.internal.v1 }
       ),

@@ -40,14 +40,12 @@ export interface SortCaretPosition {
     | 'space3'
     | 'nulls'
     | 'space4';
-  order: string;
   nulls: string;
 }
 
 export const getSortPos = (query: string): SortCaretPosition => {
   const match = query.match(regex);
   let pos: SortCaretPosition['pos'] = 'none';
-  let order: SortCaretPosition['order'] = '';
   let nulls: SortCaretPosition['nulls'] = '';
 
   if (match?.groups?.space4) {
@@ -59,7 +57,6 @@ export const getSortPos = (query: string): SortCaretPosition => {
     pos = 'space3';
   } else if (match?.groups?.order) {
     pos = 'order';
-    order = match.groups.order.toUpperCase();
   } else if (match?.groups?.space2) {
     pos = 'space2';
   } else if (match?.groups?.column) {
@@ -78,7 +75,6 @@ export const getSortPos = (query: string): SortCaretPosition => {
 
   return {
     pos,
-    order,
     nulls,
   };
 };

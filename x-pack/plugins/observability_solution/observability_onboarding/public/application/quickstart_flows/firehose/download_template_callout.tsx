@@ -15,7 +15,7 @@ export function DownloadTemplateCallout() {
   return (
     <FormattedMessage
       id="xpack.observability_onboarding.firehosePanel.downloadTemplateDescription"
-      defaultMessage="If needed, you can {downloadLink} to use it as part of an existing IaC setup."
+      defaultMessage="{downloadLink} to review the default settings. If needed, you can modify the default settings and use the template with your existing IaC setup."
       values={{
         downloadLink: (
           <EuiLink
@@ -25,7 +25,7 @@ export function DownloadTemplateCallout() {
           >
             {i18n.translate(
               'xpack.observability_onboarding.firehosePanel.downloadCloudFormationTemplateButtonLabel',
-              { defaultMessage: 'download and modify the CloudFormation template' }
+              { defaultMessage: 'Download the CloudFormation template' }
             )}
           </EuiLink>
         ),

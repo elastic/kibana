@@ -199,6 +199,23 @@ export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
   };
 };
 
+/**
+ * Converts seconds to duration string, like "1h", "30m" or "15s"
+ */
+export const secondsToDurationString = (seconds: number): string => {
+  if (seconds === 0) {
+    return `0s`;
+  }
+
+  if (seconds % 3600 === 0) {
+    return `${seconds / 3600}h`;
+  } else if (seconds % 60 === 0) {
+    return `${seconds / 60}m`;
+  } else {
+    return `${seconds}s`;
+  }
+};
+
 export const getHumanizedDuration = (from: string, interval: string): string => {
   const fromValue = dateMath.parse(from) ?? moment();
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
@@ -208,17 +225,8 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   // Basing calculations off floored seconds count as moment durations weren't precise
   const intervalDuration = Math.floor(fromDuration.asSeconds());
   // For consistency of display value
-  if (intervalDuration === 0) {
-    return `0s`;
-  }
 
-  if (intervalDuration % 3600 === 0) {
-    return `${intervalDuration / 3600}h`;
-  } else if (intervalDuration % 60 === 0) {
-    return `${intervalDuration / 60}m`;
-  } else {
-    return `${intervalDuration}s`;
-  }
+  return secondsToDurationString(intervalDuration);
 };
 
 export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {

@@ -26,9 +26,12 @@ import type {
   RequestHandler,
   VersionedRouter,
   RouteRegistrar,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
+import type { RouteSecurityGetter } from '@kbn/core-http-server';
+import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -38,6 +41,8 @@ import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
 import { prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
+import { validRouteSecurity } from './security_route_config_validator';
+import { InternalRouteConfig } from './route';
 
 export type ContextEnhancer<
   P,
@@ -61,7 +66,7 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * undefined.
  */
 function routeSchemasFromRouteConfig<P, Q, B>(
-  route: RouteConfig<P, Q, B, typeof routeMethod>,
+  route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
   routeMethod: RouteMethod
 ) {
   // The type doesn't allow `validate` to be undefined, but it can still
@@ -93,7 +98,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
  */
 function validOptions(
   method: RouteMethod,
-  routeConfig: RouteConfig<unknown, unknown, unknown, typeof method>
+  routeConfig: InternalRouteConfig<unknown, unknown, unknown, typeof method>
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
@@ -144,10 +149,17 @@ export interface RouterOptions {
 export interface InternalRegistrarOptions {
   isVersioned: boolean;
 }
+/** @internal */
+export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
+  RouteConfig<P, Q, B, M>,
+  'security'
+> & {
+  security?: RouteSecurityGetter;
+};
 
 /** @internal */
 export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
-  route: RouteConfig<P, Q, B, M>,
+  route: InternalRouteConfig<P, Q, B, M>,
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
@@ -186,7 +198,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
-        route: RouteConfig<P, Q, B, Method>,
+        route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
@@ -204,6 +216,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
+          // For the versioned route security is validated in the versioned router
+          security: internalOptions.isVersioned
+            ? route.security
+            : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,
@@ -254,10 +270,21 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    handler: RequestHandlerEnhanced<
+      P,
+      Q,
+      B,
+      // request.method's type contains way more verbs than we currently support
+      typeof request.method extends RouteMethod ? typeof request.method : any
+    >;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
+    let kibanaRequest: KibanaRequest<
+      P,
+      Q,
+      B,
+      typeof request.method extends RouteMethod ? typeof request.method : any
+    >;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);

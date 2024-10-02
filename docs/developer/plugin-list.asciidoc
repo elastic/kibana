@@ -536,6 +536,10 @@ Plugin server-side only. Plugin has three main functions:
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/data_usage/README.md[dataUsage]
+|Serverless only plugin for users to view data usage
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
 |The data_visualizer plugin enables you to explore the fields in your data.
 

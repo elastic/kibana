@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 export const genericErrorResponse = () =>
   schema.object(
     {
-      statusCode: schema.number(),
-      error: schema.string(),
+      statusCode: schema.maybe(schema.number()),
+      error: schema.maybe(schema.string()),
       message: schema.string(),
     },
     {

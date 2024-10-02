@@ -14,7 +14,7 @@ import { resolve } from 'path';
 const mockConfig = {
   resolve: {
     alias: {
-      '@kbn/esql/public': resolve(__dirname, '../public/mocks/text_based_languages_editor.tsx'),
+      '@kbn/esql/public': resolve(__dirname, '../public/mocks/esql_editor.tsx'),
     },
   },
 };

@@ -38,7 +38,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -166,7 +165,6 @@ export interface VisualizationsStartDeps {
   application: ApplicationStart;
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;

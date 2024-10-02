@@ -89,6 +89,15 @@ export const commonMonitorStateI18: Array<{
     ),
   },
   {
+    name: 'locationNames',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationNames',
+      {
+        defaultMessage: 'Location names from which the checks are performed.',
+      }
+    ),
+  },
+  {
     name: 'locationId',
     description: i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationId',

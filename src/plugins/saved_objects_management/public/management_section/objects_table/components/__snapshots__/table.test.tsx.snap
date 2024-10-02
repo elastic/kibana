@@ -6,6 +6,12 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={
@@ -234,6 +240,12 @@ exports[`Table should render normally 1`] = `
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={

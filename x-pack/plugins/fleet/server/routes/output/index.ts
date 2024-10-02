@@ -12,12 +12,19 @@ import { API_VERSIONS } from '../../../common/constants';
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
+  DeleteOutputResponseSchema,
+  GenerateLogstashApiKeyResponseSchema,
   GetLatestOutputHealthRequestSchema,
+  GetLatestOutputHealthResponseSchema,
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
+  GetOutputsResponseSchema,
+  OutputResponseSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+
+import { genericErrorResponse } from '../schema/errors';
 
 import {
   deleteOutputHandler,
@@ -36,11 +43,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'List outputs',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOutputsRequestSchema },
+        validate: {
+          request: GetOutputsRequestSchema,
+          response: {
+            200: {
+              body: () => GetOutputsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getOutputsHandler
     );
@@ -50,11 +71,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'Get output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOneOutputRequestSchema },
+        validate: {
+          request: GetOneOutputRequestSchema,
+          response: {
+            200: {
+              body: () => OutputResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getOneOuputHandler
     );
@@ -64,11 +99,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Update output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PutOutputRequestSchema },
+        validate: {
+          request: PutOutputRequestSchema,
+          response: {
+            200: {
+              body: () => OutputResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       putOutputHandler
     );
@@ -79,11 +128,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Create output',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostOutputRequestSchema },
+        validate: {
+          request: PostOutputRequestSchema,
+          response: {
+            200: {
+              body: () => OutputResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postOutputHandler
     );
@@ -94,11 +157,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Delete output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeleteOutputRequestSchema },
+        validate: {
+          request: DeleteOutputRequestSchema,
+          response: {
+            200: {
+              body: () => DeleteOutputResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            404: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       deleteOutputHandler
     );
@@ -109,11 +189,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Generate Logstash API keyy',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => GenerateLogstashApiKeyResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postLogstashApiKeyHandler
     );
@@ -124,11 +218,25 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'Get latest output health',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetLatestOutputHealthRequestSchema },
+        validate: {
+          request: GetLatestOutputHealthRequestSchema,
+          response: {
+            200: {
+              body: () => GetLatestOutputHealthResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getLatestOutputHealth
     );

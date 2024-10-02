@@ -64,6 +64,7 @@ kibana_vars=(
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
+    elasticsearch.publicBaseUrl
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.serviceAccountToken

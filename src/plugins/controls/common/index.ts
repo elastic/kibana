@@ -8,7 +8,7 @@
  */
 
 export type {
-  ControlStyle,
+  ControlLabelPosition,
   ControlWidth,
   DefaultControlState,
   DefaultDataControlState,
@@ -18,7 +18,7 @@ export type {
 
 export {
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,

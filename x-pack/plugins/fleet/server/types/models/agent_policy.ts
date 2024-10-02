@@ -65,10 +65,10 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
-  data_output_id: schema.maybe(schema.nullable(schema.string())),
-  monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
-  download_source_id: schema.maybe(schema.nullable(schema.string())),
-  fleet_server_host_id: schema.maybe(schema.nullable(schema.string())),
+  data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  monitoring_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   agent_features: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -101,6 +101,32 @@ export const AgentPolicyBaseSchema = {
         validate: validateGlobalDataTagInput,
       }
     )
+  ),
+  monitoring_pprof_enabled: schema.maybe(schema.boolean()),
+  monitoring_http: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      host: schema.maybe(schema.string({ defaultValue: 'localhost' })),
+      port: schema.maybe(schema.number({ min: 0, max: 65353, defaultValue: 6791 })),
+      buffer: schema.maybe(schema.object({ enabled: schema.boolean({ defaultValue: false }) })),
+    })
+  ),
+  monitoring_diagnostics: schema.maybe(
+    schema.object({
+      limit: schema.maybe(
+        schema.object({
+          interval: schema.maybe(schema.string()),
+          burst: schema.maybe(schema.number()),
+        })
+      ),
+      uploader: schema.maybe(
+        schema.object({
+          max_retries: schema.maybe(schema.number()),
+          init_dur: schema.maybe(schema.string()),
+          max_dur: schema.maybe(schema.string()),
+        })
+      ),
+    })
   ),
 };
 

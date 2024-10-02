@@ -50,8 +50,8 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
-import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
+import type { TimelineResponse } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
@@ -69,7 +69,7 @@ import { TimelineEventsQueries } from '../../../../common/search_strategy/timeli
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import {
   omitTypenameInTimeline,
-  formatTimelineResultToModel,
+  formatTimelineResponseToModel,
 } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
@@ -983,11 +983,15 @@ export const sendAlertToTimelineAction = async ({
         ),
       ]);
 
-      const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
+      const resultingTimeline: TimelineResponse = getOr(
+        {},
+        'data.getOneTimeline',
+        responseTimeline
+      );
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
-        const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
-        const { timeline, notes } = formatTimelineResultToModel(
+        const timelineTemplate = omitTypenameInTimeline(resultingTimeline);
+        const { timeline, notes } = formatTimelineResponseToModel(
           timelineTemplate,
           true,
           timelineTemplate.timelineType ?? TimelineTypeEnum.default

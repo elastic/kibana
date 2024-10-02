@@ -1554,11 +1554,14 @@
           {
             "parentPluginId": "@kbn/ml-anomaly-utils",
             "id": "def-common.MlAnomaliesTableRecord.modelPlotEnabled",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "modelPlotEnabled",
             "description": [
               "\nReturns true if the job has the model plot enabled"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,

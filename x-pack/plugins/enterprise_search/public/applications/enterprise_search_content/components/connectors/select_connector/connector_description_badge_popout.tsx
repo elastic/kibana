@@ -105,10 +105,10 @@ export const ConnectorDescriptionBadge: React.FC<ConnectorDescriptionBadgeProps>
         >
           {isNative
             ? i18n.translate('xpack.enterpriseSearch.selectConnector.nativeBadgeLabel', {
-                defaultMessage: 'Native',
+                defaultMessage: 'Elastic managed',
               })
             : i18n.translate('xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel', {
-                defaultMessage: 'Connector client',
+                defaultMessage: 'Self-managed',
               })}
         </EuiBadge>
       }

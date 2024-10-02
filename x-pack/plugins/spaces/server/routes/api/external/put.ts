@@ -21,6 +21,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/space/{id}',
       options: {
+        access: isServerless ? 'internal' : 'public',
         description: `Update a space`,
       },
       validate: {

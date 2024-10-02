@@ -29,13 +29,12 @@ export async function retryIfDeleteByQueryConflicts(
     const operationResult = await operation();
 
     if (!operationResult.failures || operationResult.failures?.length === 0) {
-      logger.info(`${name} finished successfully`);
       return operationResult;
     }
 
     const failureCause = operationResult.failures.map((failure) => failure.cause).join(', ');
 
-    logger.warning(`Unable to delete by query ${name}. Caused by: "${failureCause}". Retrying ...`);
+    logger.error(`Unable to delete by query ${name}. Caused by: "${failureCause}". Retrying ...`);
 
     await waitBeforeNextRetry(retryDelay);
   }

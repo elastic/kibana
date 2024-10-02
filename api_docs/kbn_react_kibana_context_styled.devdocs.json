@@ -243,7 +243,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
@@ -302,7 +302,7 @@
           "StoryFnReactReturnType",
           ">, ",
           "Args",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": true,

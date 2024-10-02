@@ -54,7 +54,7 @@ describe('eql_executor', () => {
   describe('eqlExecutor', () => {
     describe('warning scenarios', () => {
       it('warns when exception list for eql rule contains value list exceptions', async () => {
-        const result = await eqlExecutor({
+        const { result } = await eqlExecutor({
           inputIndex: DEFAULT_INDEX_PATTERN,
           runtimeMappings: {},
           completeRule: eqlCompleteRule,
@@ -105,7 +105,7 @@ describe('eql_executor', () => {
           },
         });
 
-        const result = await eqlExecutor({
+        const { result } = await eqlExecutor({
           inputIndex: DEFAULT_INDEX_PATTERN,
           runtimeMappings: {},
           completeRule: ruleWithSequenceAndSuppression,
@@ -140,7 +140,7 @@ describe('eql_executor', () => {
         message:
           'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:1: Unknown column [event.category]',
       });
-      const result = await eqlExecutor({
+      const { result } = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
@@ -165,7 +165,7 @@ describe('eql_executor', () => {
     });
 
     it('should handle scheduleNotificationResponseActionsService call', async () => {
-      const result = await eqlExecutor({
+      const { result } = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,

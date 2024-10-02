@@ -10,7 +10,7 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../../common/constants/states';
 import { type MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';
@@ -32,13 +32,15 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
   ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen, maxNumberOfBuckets }) => {
     if (jobConfigs.length === 0) return null;
 
-    const alertIntervalInSeconds = parseInterval(alertInterval)!.asSeconds();
+    const alertIntervalInSeconds = parseInterval(alertInterval)?.asSeconds();
 
     const lookbackIntervalInSeconds =
       !!alertParams.lookbackInterval && parseInterval(alertParams.lookbackInterval)?.asSeconds();
 
     const isAlertIntervalTooHigh =
-      lookbackIntervalInSeconds && lookbackIntervalInSeconds < alertIntervalInSeconds;
+      lookbackIntervalInSeconds &&
+      alertIntervalInSeconds &&
+      lookbackIntervalInSeconds < alertIntervalInSeconds;
 
     const jobWithoutStartedDatafeed = jobConfigs
       .filter((job) => job.datafeed_config.state !== DATAFEED_STATE.STARTED)
@@ -49,6 +51,7 @@ export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
     const notifyWhenWarning =
       alertNotifyWhen === 'onActiveAlert' &&
       lookbackIntervalInSeconds &&
+      alertIntervalInSeconds &&
       alertIntervalInSeconds < lookbackIntervalInSeconds;
 
     const bucketSpanDuration = parseInterval(jobConfigs[0].analysis_config.bucket_span!);

@@ -7,13 +7,13 @@
 
 import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
 import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../../lib';
 import { useLoadNodes } from '../../../../../../services/api';
+import { i18nTexts } from '../../../../i18n_texts';
 import { DataTierAllocationType } from '../../../../types';
 
 import {
@@ -29,12 +29,6 @@ import {
 } from './components';
 
 import './_data_tier_allocation.scss';
-
-const i18nTexts = {
-  title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
-    defaultMessage: 'Data allocation',
-  }),
-};
 
 interface Props {
   phase: PhaseWithAllocation;
@@ -188,7 +182,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
 
   return (
     <EuiDescribedFormGroup
-      title={<h3>{i18nTexts.title}</h3>}
+      title={<h3>{i18nTexts.editPolicy.dataAllocationLabel}</h3>}
       description={
         <>
           {description}

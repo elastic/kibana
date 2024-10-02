@@ -33,5 +33,6 @@
     "@kbn/tooling-log",
     "@kbn/security-solution-serverless",
     "@kbn/dev-utils",
+    "@kbn/spaces-plugin",
   ]
 }

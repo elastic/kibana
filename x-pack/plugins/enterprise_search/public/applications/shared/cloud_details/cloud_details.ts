@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useEffect, useState } from 'react';
+
 import { useValues } from 'kea';
 
 import { KibanaLogic } from '../kibana';
@@ -18,10 +20,18 @@ export interface CloudDetails {
 
 export const useCloudDetails = (): CloudDetails => {
   const { cloud } = useValues(KibanaLogic);
+  const [elasticsearchUrl, setElasticsearchUrl] = useState<string | undefined>('');
+
+  useEffect(() => {
+    cloud?.fetchElasticsearchConfig().then((config) => {
+      setElasticsearchUrl(config.elasticsearchUrl);
+    });
+  }, [cloud]);
+
   return {
     cloudId: cloud?.cloudId,
     deploymentUrl: cloud?.deploymentUrl,
-    elasticsearchUrl: cloud?.elasticsearchUrl,
+    elasticsearchUrl,
     kibanaUrl: cloud?.kibanaUrl,
   };
 };

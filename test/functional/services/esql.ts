@@ -14,7 +14,7 @@ export class ESQLService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   public async getHistoryItems(): Promise<string[][]> {
-    const queryHistory = await this.testSubjects.find('TextBasedLangEditor-queryHistory');
+    const queryHistory = await this.testSubjects.find('ESQLEditor-queryHistory');
     const tableBody = await this.retry.try(async () => queryHistory.findByTagName('tbody'));
     const $ = await tableBody.parseDomContent();
     return $('tr')
@@ -38,7 +38,7 @@ export class ESQLService extends FtrService {
   }
 
   public async getHistoryItem(rowIndex = 0) {
-    const queryHistory = await this.testSubjects.find('TextBasedLangEditor-queryHistory');
+    const queryHistory = await this.testSubjects.find('ESQLEditor-queryHistory');
     const tableBody = await this.retry.try(async () => queryHistory.findByTagName('tbody'));
     const rows = await this.retry.try(async () => tableBody.findAllByTagName('tr'));
 
@@ -47,7 +47,26 @@ export class ESQLService extends FtrService {
 
   public async clickHistoryItem(rowIndex = 0) {
     const row = await this.getHistoryItem(rowIndex);
-    const toggle = await row.findByTestSubject('TextBasedLangEditor-queryHistory-runQuery-button');
+    const toggle = await row.findByTestSubject('ESQLEditor-queryHistory-runQuery-button');
     await toggle.click();
+  }
+
+  public async openHelpMenu() {
+    await this.testSubjects.click('esql-menu-button');
+    await this.retry.waitFor('popover to appear', async () => {
+      return await this.testSubjects.exists('esql-quick-reference');
+    });
+  }
+
+  public async isOpenQuickReferenceFlyout() {
+    return await this.testSubjects.exists('esqlInlineDocumentationFlyout');
+  }
+
+  public async openQuickReferenceFlyout() {
+    await this.openHelpMenu();
+    await this.testSubjects.click('esql-quick-reference');
+    await this.retry.waitFor('quick reference to appear', async () => {
+      return await this.isOpenQuickReferenceFlyout();
+    });
   }
 }

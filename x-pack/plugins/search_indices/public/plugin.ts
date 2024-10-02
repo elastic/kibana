@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+
+import { docLinks } from '../common/doc_links';
 import type {
   SearchIndicesAppPluginStartDependencies,
   SearchIndicesPluginSetup,
@@ -64,6 +66,7 @@ export class SearchIndicesPlugin
   }
 
   public start(core: CoreStart): SearchIndicesPluginStart {
+    docLinks.setDocLinks(core.docLinks.links);
     return {};
   }
 

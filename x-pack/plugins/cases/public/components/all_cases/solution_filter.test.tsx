@@ -41,7 +41,8 @@ describe('SolutionFilter ', () => {
       jest.clearAllMocks();
     });
 
-    it('renders options correctly', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/175239
+    it.skip('renders options correctly', async () => {
       appMockRender.render(
         <SolutionFilter
           onChange={onChange}

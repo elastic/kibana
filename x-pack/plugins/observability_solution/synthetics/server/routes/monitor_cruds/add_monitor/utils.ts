@@ -25,7 +25,7 @@ export const getPrivateLocationsForMonitor = async (
 export const parseMonitorLocations = (
   monitorPayload: CreateMonitorPayLoad,
   prevLocations?: MonitorFields['locations'],
-  ui: boolean = false
+  internal: boolean = false
 ) => {
   const { locations, private_locations: privateLocations } = monitorPayload;
 
@@ -37,11 +37,11 @@ export const parseMonitorLocations = (
   let pvtLocs = [...(privateLocations ?? []), ...extractPvtLocs]?.map((loc) =>
     typeof loc === 'string' ? loc : loc.id
   );
-  if (ui && !privateLocations && !locations && prevLocations) {
+  if (internal && !privateLocations && !locations && prevLocations) {
     locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
     pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
   } else {
-    if (prevLocations && !ui) {
+    if (prevLocations && !internal) {
       if (!locations && !privateLocations) {
         locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
         pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);

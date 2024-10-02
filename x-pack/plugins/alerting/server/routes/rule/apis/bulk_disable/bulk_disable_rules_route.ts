@@ -6,9 +6,9 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
 import {
   bulkDisableRulesRequestBodySchemaV1,
@@ -16,8 +16,8 @@ import {
   BulkDisableRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_disable';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { Rule } from '../../../../application/rule/types';
+import { transformRuleToRuleResponseV1 } from '../../transforms';
 
 export const bulkDisableRulesRoute = ({
   router,
@@ -29,6 +29,7 @@ export const bulkDisableRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_disable`,
+      options: { access: 'internal' },
       validate: {
         body: bulkDisableRulesRequestBodySchemaV1,
       },

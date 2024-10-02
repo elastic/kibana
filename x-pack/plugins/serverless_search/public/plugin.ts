@@ -72,18 +72,22 @@ export class ServerlessSearchPlugin
         },
       }),
     });
+
+    const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
+      defaultMessage: 'Home',
+    });
+
     if (useSearchHomepage) {
       core.application.register({
         id: 'serverlessHomeRedirect',
-        title: i18n.translate('xpack.serverlessSearch.app.home.title', {
-          defaultMessage: 'Home',
-        }),
+        title: homeTitle,
         appRoute: '/app/elasticsearch',
         euiIconType: 'logoElastic',
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
         visibleIn: [],
         async mount({}: AppMountParameters) {
           const [coreStart] = await core.getStartServices();
+          coreStart.chrome.docTitle.change(homeTitle);
           coreStart.application.navigateToApp('searchHomepage');
           return () => {};
         },
@@ -102,6 +106,7 @@ export class ServerlessSearchPlugin
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
+        coreStart.chrome.docTitle.change(homeTitle);
         let user: AuthenticatedUser | undefined;
         try {
           const response = await coreStart.security.authc.getCurrentUser();
@@ -114,11 +119,13 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+      defaultMessage: 'Connectors',
+    });
+
     core.application.register({
       id: 'serverlessConnectors',
-      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
-        defaultMessage: 'Connectors',
-      }),
+      title: connectorsTitle,
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -126,8 +133,9 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
-
+        coreStart.chrome.docTitle.change(connectorsTitle);
         docLinks.setDocLinks(coreStart.docLinks.links);
+
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });

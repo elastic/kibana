@@ -6,8 +6,6 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import type {
   UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
@@ -18,11 +16,13 @@ import {
   updateParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
-import { transformUpdateBodyV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
+import { transformUpdateBodyV1 } from './transforms';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,6 +45,18 @@ export const updateRuleRoute = (
           200: {
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
+          409: {
+            description: 'Indicates that the rule has already been updated by another user.',
           },
         },
       },

@@ -41,11 +41,7 @@ import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
-import {
-  API_KEY_PLACEHOLDER,
-  CLOUD_ID_PLACEHOLDER,
-  ELASTICSEARCH_URL_PLACEHOLDER,
-} from '../constants';
+import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
@@ -57,14 +53,16 @@ import { SelectClientCallouts } from './select_client_callouts';
 import { PipelineManageButton } from './pipeline_manage_button';
 import { OPTIONAL_LABEL } from '../../../common/i18n_string';
 import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
+import { useElasticsearchUrl } from '../hooks/use_elastisearch_url';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, user, share, console: consolePlugin } = useKibanaServices();
-  const { elasticsearchURL, cloudId } = useMemo(() => {
+  const { elasticsearchUrl } = useElasticsearchUrl();
+
+  const { cloudId } = useMemo(() => {
     return {
-      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
@@ -87,7 +85,7 @@ export const ElasticsearchOverview = () => {
   const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
+    url: elasticsearchUrl,
     apiKey: clientApiKey,
     cloudId,
     ingestPipeline: selectedPipeline,
@@ -167,7 +165,10 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="cloud-details-section"
       >
-        <CloudDetailsPanel cloudId={cloud.cloudId} elasticsearchUrl={cloud.elasticsearchUrl} />
+        <CloudDetailsPanel
+          cloudId={cloud.cloudId}
+          elasticsearchUrl={elasticsearchUrl || undefined}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"

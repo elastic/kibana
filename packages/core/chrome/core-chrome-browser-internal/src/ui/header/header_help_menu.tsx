@@ -81,6 +81,7 @@ interface Props {
   kibanaVersion: string;
   kibanaDocLink: string;
   docLinks: DocLinksStart;
+  isServerless: boolean;
 }
 
 interface State {
@@ -174,13 +175,19 @@ export class HeaderHelpMenu extends Component<Props, State> {
                 />
               </h2>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
-                defaultMessage="v {version}"
-                values={{ version: kibanaVersion }}
-              />
-            </EuiFlexItem>
+            {!this.props.isServerless && (
+              <EuiFlexItem
+                grow={false}
+                className="chrHeaderHelpMenu__version"
+                data-test-subj="kbnVersionString"
+              >
+                <FormattedMessage
+                  id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
+                  defaultMessage="v {version}"
+                  values={{ version: kibanaVersion }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
 

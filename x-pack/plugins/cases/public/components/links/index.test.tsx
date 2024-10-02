@@ -38,7 +38,8 @@ describe('Configuration button', () => {
     expect(configureButton).toHaveAttribute('aria-label', 'My label');
   });
 
-  it('renders the tooltip correctly when hovering the button', async () => {
+  // Flaky: https://github.com/elastic/kibana/issues/193209
+  it.skip('renders the tooltip correctly when hovering the button', async () => {
     jest.useFakeTimers();
 
     const user = userEvent.setup({

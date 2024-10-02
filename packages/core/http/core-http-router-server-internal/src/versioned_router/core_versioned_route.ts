@@ -23,6 +23,8 @@ import type {
   VersionedRouteConfig,
   IKibanaResponse,
   RouteConfigOptions,
+  RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method, VersionedRouterRoute } from './types';
@@ -37,9 +39,11 @@ import {
   removeQueryVersion,
 } from './route_version_utils';
 import { injectResponseHeaders } from './inject_response_headers';
+import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
+import type { RequestLike } from './route_version_utils';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -82,6 +86,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
   private enableQueryVersion: boolean;
+  private defaultSecurityConfig: RouteSecurity | undefined;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
@@ -91,12 +96,14 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
+    this.defaultSecurityConfig = validRouteSecurity(this.options.security, this.options.options);
     this.router.router[this.method](
       {
         path: this.path,
         validate: passThroughValidation,
         // @ts-expect-error upgrade typescript v5.1.6
         options: this.getRouteConfigOptions(),
+        security: this.getSecurity,
       },
       this.requestHandler,
       { isVersioned: true }
@@ -122,6 +129,18 @@ export class CoreVersionedRoute implements VersionedRoute {
     return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
+  private getVersion(req: RequestLike): ApiVersion | undefined {
+    let version;
+    const maybeVersion = readVersion(req, this.enableQueryVersion);
+    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
+      version = this.getDefaultVersion();
+    } else {
+      version = maybeVersion;
+    }
+
+    return version;
+  }
+
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
     originalReq: KibanaRequest,
@@ -134,14 +153,8 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
-    let version: undefined | ApiVersion;
+    const version = this.getVersion(req);
 
-    const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
-      version = this.getDefaultVersion();
-    } else {
-      version = maybeVersion;
-    }
     if (!version) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
@@ -247,6 +260,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
+
     this.handlers.set(options.version, {
       fn: handler,
       options,
@@ -257,4 +271,10 @@ export class CoreVersionedRoute implements VersionedRoute {
   public getHandlers(): Array<{ fn: RequestHandler; options: Options }> {
     return [...this.handlers.values()];
   }
+
+  public getSecurity: RouteSecurityGetter = (req: RequestLike) => {
+    const version = this.getVersion(req)!;
+
+    return this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;
+  };
 }

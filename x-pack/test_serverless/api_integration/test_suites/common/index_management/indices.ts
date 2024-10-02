@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
@@ -18,17 +19,22 @@ export default function ({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlIndicesApi = getService('svlIndicesApi');
   const svlIndicesHelpers = getService('svlIndicesHelpers');
-
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   describe('Indices', function () {
     let indexName: string;
 
     before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       log.debug(`Creating index: '${indexName}'`);
       try {
         indexName = await svlIndicesHelpers.createIndex();
@@ -76,10 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get index', () => {
       it('returns index details for the specified index name', async () => {
-        const { body: index } = await supertestWithoutAuth
+        const { body: index } = await supertestAdminWithCookieCredentials
           .get(`${INTERNAL_API_BASE_PATH}/indices/${indexName}`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(index).to.be.ok();
@@ -95,10 +99,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('throws 404 for a non-existent index', async () => {
-        await supertestWithoutAuth
+        await supertestAdminWithCookieCredentials
           .get(`${INTERNAL_API_BASE_PATH}/indices/non_existent`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(404);
       });
     });
@@ -118,19 +120,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('can create a new index', async () => {
-        await supertestWithoutAuth
+        await supertestAdminWithCookieCredentials
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             indexName: createIndexName,
           })
           .expect(200);
 
-        const { body: index } = await supertestWithoutAuth
+        const { body: index } = await supertestAdminWithCookieCredentials
           .get(`${INTERNAL_API_BASE_PATH}/indices/${createIndexName}`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(index).to.be.ok();
@@ -146,10 +144,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('fails to re-create the same index', async () => {
-        await supertestWithoutAuth
+        await supertestAdminWithCookieCredentials
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
           .send({
             indexName: createIndexName,
           })

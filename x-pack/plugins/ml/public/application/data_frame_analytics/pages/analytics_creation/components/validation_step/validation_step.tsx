@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 
-import type { CalloutMessage } from '../../../../../../../common/constants/validation';
+import type { CalloutMessage } from '@kbn/ml-validators';
+
 import { Callout } from '../../../../../components/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';

@@ -24,11 +24,13 @@ export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']
 export class NewsfeedPublicPlugin
   implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
 {
+  private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get();
     this.config = Object.freeze({
@@ -89,7 +91,11 @@ export class NewsfeedPublicPlugin
     const hasCustomBranding$ = core.customBranding.hasCustomBranding$;
     ReactDOM.render(
       <KibanaRenderContextProvider {...core}>
-        <NewsfeedNavButton newsfeedApi={api} hasCustomBranding$={hasCustomBranding$} />
+        <NewsfeedNavButton
+          newsfeedApi={api}
+          hasCustomBranding$={hasCustomBranding$}
+          isServerless={this.isServerless}
+        />
       </KibanaRenderContextProvider>,
       targetDomElement
     );

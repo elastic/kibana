@@ -26,10 +26,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestWithAdminScope: SupertestWithRoleScopeType;
+  // CRUD operations to become public APIs: https://github.com/elastic/kibana/issues/192153
+  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
   async function createSpace(id: string) {
-    await supertestWithAdminScope
+    await supertestAdminWithApiKey
       .post('/api/spaces/space')
       .send({
         id,
@@ -40,30 +42,38 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function deleteSpace(id: string) {
-    await supertestWithAdminScope.delete(`/api/spaces/space/${id}`).expect(204);
+    await supertestAdminWithApiKey.delete(`/api/spaces/space/${id}`).expect(204);
   }
 
   describe('spaces', function () {
     before(async () => {
-      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
-        withCustomHeaders: { 'kbn-xsrf': 'true' },
       });
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
     after(async () => {
       // delete any lingering spaces
-      const { body } = await supertestWithAdminScope.get('/api/spaces/space').send().expect(200);
+      const { body } = await supertestAdminWithApiKey.get('/api/spaces/space').send().expect(200);
 
       const toDelete = (body as Array<{ id: string }>).filter((f) => f.id !== 'default');
 
       await asyncForEach(toDelete, async (space) => {
         await deleteSpace(space.id);
       });
+
+      await supertestAdminWithApiKey.destroy();
     });
 
     describe('Create (POST /api/spaces/space)', () => {
       it('should allow us to create a space', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithApiKey
           .post('/api/spaces/space')
           .send({
             id: 'custom_space_1',
@@ -74,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow us to create a space with disabled features', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithApiKey
           .post('/api/spaces/space')
           .send({
             id: 'custom_space_2',
@@ -99,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow us to get a space', async () => {
-        await supertestWithAdminScope.get('/api/spaces/space/space_to_get_1').send().expect(200, {
+        await supertestAdminWithApiKey.get('/api/spaces/space/space_to_get_1').send().expect(200, {
           id: 'space_to_get_1',
           name: 'space_to_get_1',
           disabledFeatures: [],
@@ -107,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow us to get all spaces', async () => {
-        const { body } = await supertestWithAdminScope.get('/api/spaces/space').send().expect(200);
+        const { body } = await supertestAdminWithApiKey.get('/api/spaces/space').send().expect(200);
 
         expect(body).toEqual(
           expect.arrayContaining([
@@ -137,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow us to update a space', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithApiKey
           .put('/api/spaces/space/space_to_update')
           .send({
             id: 'space_to_update',
@@ -147,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await supertestWithAdminScope.get('/api/spaces/space/space_to_update').send().expect(200, {
+        await supertestAdminWithApiKey.get('/api/spaces/space/space_to_update').send().expect(200, {
           id: 'space_to_update',
           name: 'some new name',
           initials: 'SN',
@@ -156,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow us to update a space with disabled features', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithApiKey
           .put('/api/spaces/space/space_to_update')
           .send({
             id: 'space_to_update',
@@ -172,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow us to delete a space', async () => {
         await createSpace('space_to_delete');
 
-        await supertestWithAdminScope.delete(`/api/spaces/space/space_to_delete`).expect(204);
+        await supertestAdminWithApiKey.delete(`/api/spaces/space/space_to_delete`).expect(204);
       });
     });
 
@@ -186,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the default space', async () => {
-        const response = await supertestWithAdminScope
+        const response = await supertestAdminWithCookieCredentials
           .get('/internal/spaces/_active_space')
           .expect(200);
 
@@ -199,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the default space when explicitly referenced', async () => {
-        const response = await supertestWithAdminScope
+        const response = await supertestAdminWithCookieCredentials
           .get('/s/default/internal/spaces/_active_space')
           .expect(200);
 
@@ -212,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the foo space', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithCookieCredentials
           .get('/s/foo-space/internal/spaces/_active_space')
           .expect(200, {
             id: 'foo-space',
@@ -222,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns 404 when the space is not found', async () => {
-        await supertestWithAdminScope
+        await supertestAdminWithCookieCredentials
           .get('/s/not-found-space/internal/spaces/_active_space')
           .expect(404, {
             statusCode: 404,
@@ -237,25 +247,25 @@ export default function ({ getService }: FtrProviderContext) {
     // are enabled in production.
     describe(`Access`, () => {
       it('#copyToSpace', async () => {
-        const { body, status } = await supertestWithAdminScope.post(
+        const { body, status } = await supertestAdminWithApiKey.post(
           '/api/spaces/_copy_saved_objects'
         );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#resolveCopyToSpaceErrors', async () => {
-        const { body, status } = await supertestWithAdminScope.post(
+        const { body, status } = await supertestAdminWithApiKey.post(
           '/api/spaces/_resolve_copy_saved_objects_errors'
         );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#updateObjectsSpaces', async () => {
-        const { body, status } = await supertestWithAdminScope.post(
+        const { body, status } = await supertestAdminWithApiKey.post(
           '/api/spaces/_update_objects_spaces'
         );
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
       it('#getShareableReferences', async () => {
-        const { body, status } = await supertestWithAdminScope
+        const { body, status } = await supertestAdminWithApiKey
           .post('/api/spaces/_get_shareable_references')
           .send({
             objects: [{ type: 'a', id: 'a' }],
@@ -263,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
         svlCommonApi.assertResponseStatusCode(200, status, body);
       });
       it('#disableLegacyUrlAliases', async () => {
-        const { body, status } = await supertestWithAdminScope.post(
+        const { body, status } = await supertestAdminWithApiKey.post(
           '/api/spaces/_disable_legacy_url_aliases'
         );
         // without a request body we would normally a 400 bad request if the endpoint was registered

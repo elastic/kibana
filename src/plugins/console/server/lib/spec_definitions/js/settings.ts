@@ -52,6 +52,7 @@ export const settings = (specService: SpecDefinitionsService) => {
         tokenizer: {},
         filter: {},
         char_filter: {},
+        normalizer: {},
       },
       'cache.query.enable': BOOLEAN,
       shadow_replicas: BOOLEAN,

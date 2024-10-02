@@ -79,6 +79,7 @@ export interface RouteOptions {
   getAlertIndicesAlias?: GetAlertIndicesAlias;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
+  isServerless?: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {

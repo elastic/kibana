@@ -70,6 +70,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
       title={<h3>{i18n.TITLE}</h3>}
       description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="custom-fields-form-group"
+      css={{ alignItems: 'flex-start' }}
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {customFields.length ? (

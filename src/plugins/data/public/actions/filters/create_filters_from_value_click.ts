@@ -162,6 +162,7 @@ export const createFiltersFromValueClickAction = async ({
 export const appendFilterToESQLQueryFromValueClickAction = ({
   data,
   query,
+  negate,
 }: ValueClickDataContext) => {
   if (!query) {
     return;
@@ -183,6 +184,12 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
     if (value == null) {
       return;
     }
-    return appendWhereClauseToESQLQuery(query.esql, column.name, value, '+', column.meta?.type);
+    return appendWhereClauseToESQLQuery(
+      query.esql,
+      column.name,
+      value,
+      negate ? '-' : '+',
+      column.meta?.type
+    );
   }
 };

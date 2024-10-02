@@ -14,12 +14,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertHeaderBlock } from './alert_header_block';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
@@ -32,7 +32,8 @@ import { useBulkGetUserProfiles } from '../../../../common/components/user_profi
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
-  ASSIGNEES_HEADER_TEST_ID,
+  ASSIGNEES_EMPTY_TEST_ID,
+  ASSIGNEES_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
@@ -158,26 +159,19 @@ export const Assignees: FC<AssigneesProps> = memo(
     ]);
 
     return (
-      <EuiFlexGroup
-        data-test-subj={ASSIGNEES_HEADER_TEST_ID}
-        direction="column"
-        gutterSize="none"
-        responsive={false}
+      <AlertHeaderBlock
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.header.assignedTitle"
+            defaultMessage="Assignees"
+          />
+        }
+        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
       >
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs" data-test-subj={ASSIGNEES_TITLE_TEST_ID}>
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.header.assignedTitle"
-                defaultMessage="Assignees"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
         {isPreview ? (
-          getEmptyTagValue()
+          <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
         ) : (
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+          <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>
             {assignedUsers && (
               <EuiFlexItem grow={false}>
                 <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
@@ -186,7 +180,7 @@ export const Assignees: FC<AssigneesProps> = memo(
             <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </EuiFlexGroup>
+      </AlertHeaderBlock>
     );
   }
 );

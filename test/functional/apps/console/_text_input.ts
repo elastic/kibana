@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           const history = await PageObjects.console.getHistoryEntries();
-          expect(history).to.eql(['/_search?pretty\na few seconds ago']);
+          expect(history).to.eql(['GET /_search?pretty\na few seconds ago']);
         });
 
         await PageObjects.console.clickClearHistory();

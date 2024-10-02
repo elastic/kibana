@@ -13,12 +13,13 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService } = deps;
+  const { router, log, getSpacesService, isServerless } = deps;
 
   router.get(
     {
       path: '/api/spaces/space',
       options: {
+        access: isServerless ? 'internal' : 'public',
         description: `Get all spaces`,
       },
       validate: {

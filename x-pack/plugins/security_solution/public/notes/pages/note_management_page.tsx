@@ -7,8 +7,11 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
+import { Title } from '../../common/components/header_page/title';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
 import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
@@ -32,12 +35,11 @@ import type { NotesState } from '..';
 import { SearchRow } from '../components/search_row';
 import { NotesUtilityBar } from '../components/utility_bar';
 import { DeleteConfirmModal } from '../components/delete_confirm_modal';
-import * as i18n from '../components/translations';
-import type { OpenTimelineProps } from '../../timelines/components/open_timeline/types';
+import * as i18n from './translations';
 import { OpenEventInTimeline } from '../components/open_event_in_timeline';
 
 const columns: (
-  onOpenTimeline: OpenTimelineProps['onOpenTimeline']
+  onOpenTimeline: (timelineId: string) => void
 ) => Array<EuiBasicTableColumn<Note>> = (onOpenTimeline) => {
   return [
     {
@@ -61,9 +63,7 @@ const columns: (
       name: i18n.TIMELINE_ID_COLUMN,
       render: (timelineId: Note['timelineId']) =>
         timelineId ? (
-          <EuiLink onClick={() => onOpenTimeline({ timelineId, duplicate: false })}>
-            {i18n.OPEN_TIMELINE}
-          </EuiLink>
+          <EuiLink onClick={() => onOpenTimeline(timelineId)}>{i18n.OPEN_TIMELINE}</EuiLink>
         ) : null,
     },
     {
@@ -80,11 +80,7 @@ const pageSizeOptions = [10, 25, 50, 100];
  * This component uses the same slices of state as the notes functionality of the rest of the Security Solution applicaiton.
  * Therefore, changes made in this page (like fetching or deleting notes) will have an impact everywhere.
  */
-export const NoteManagementPage = ({
-  onOpenTimeline,
-}: {
-  onOpenTimeline: OpenTimelineProps['onOpenTimeline'];
-}) => {
+export const NoteManagementPage = () => {
   const dispatch = useDispatch();
   const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
@@ -152,6 +148,19 @@ export const NoteManagementPage = ({
     return item.noteId;
   }, []);
 
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
+  );
+  const queryTimelineById = useQueryTimelineById();
+  const openTimeline = useCallback(
+    (timelineId: string) =>
+      queryTimelineById({
+        timelineId,
+        unifiedComponentsInTimelineDisabled,
+      }),
+    [queryTimelineById, unifiedComponentsInTimelineDisabled]
+  );
+
   const columnWithActions = useMemo(() => {
     const actions: Array<DefaultItemAction<Note>> = [
       {
@@ -164,13 +173,13 @@ export const NoteManagementPage = ({
       },
     ];
     return [
-      ...columns(onOpenTimeline),
+      ...columns(openTimeline),
       {
         name: 'actions',
         actions,
       },
     ];
-  }, [selectRowForDeletion, onOpenTimeline]);
+  }, [selectRowForDeletion, openTimeline]);
 
   const currentPagination = useMemo(() => {
     return {
@@ -207,6 +216,8 @@ export const NoteManagementPage = ({
 
   return (
     <>
+      <Title title={i18n.NOTES} />
+      <EuiSpacer size="m" />
       <SearchRow />
       <NotesUtilityBar />
       <EuiBasicTable

@@ -14,7 +14,8 @@ import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_
 
 import { buildMockDashboard } from '../../../mocks';
 import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
+import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
+import { DashboardApi } from '../../../dashboard_api/types';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
@@ -44,14 +45,14 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
       explicitInput: { id: '2' },
     },
   };
-  const dashboardContainer = buildMockDashboard({ overrides: { panels } });
+  const dashboardApi = buildMockDashboard({ overrides: { panels } }) as DashboardApi;
 
   const component = mountWithIntl(
-    <DashboardContainerContext.Provider value={dashboardContainer}>
+    <DashboardContext.Provider value={dashboardApi}>
       <Item {...props} />
-    </DashboardContainerContext.Provider>
+    </DashboardContext.Provider>
   );
-  return { dashboardContainer, component };
+  return { dashboardApi, component };
 };
 
 test('renders Item', async () => {

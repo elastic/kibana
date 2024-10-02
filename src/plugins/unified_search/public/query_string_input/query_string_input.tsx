@@ -830,6 +830,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 disabled={this.props.isDisabled}
                 className={inputClassName}
                 fullWidth
+                resize="none"
                 rows={1}
                 id={this.textareaId}
                 autoFocus={

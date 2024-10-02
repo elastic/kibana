@@ -1996,12 +1996,24 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "monitoring_diagnostics": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
       },
+      "monitoring_http": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_output_id": {
         "type": "keyword"
+      },
+      "monitoring_pprof_enabled": {
+        "index": false,
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"

@@ -60,8 +60,6 @@ export interface SerializedActionWithAllocation {
   migrate?: MigrateAction;
 }
 
-export type SearchableSnapshotStorage = 'full_copy' | 'shared_cache';
-
 export interface SearchableSnapshotAction {
   snapshot_repository: string;
   /**
@@ -69,12 +67,6 @@ export interface SearchableSnapshotAction {
    * not suit the vast majority of cases.
    */
   force_merge_index?: boolean;
-  /**
-   * This configuration lets the user create full or partial searchable snapshots.
-   * Full searchable snapshots store primary data locally and store replica data in the snapshot.
-   * Partial searchable snapshots store no data locally.
-   */
-  storage?: SearchableSnapshotStorage;
 }
 
 export interface RolloverAction {
@@ -96,9 +88,7 @@ export interface SerializedHotPhase extends SerializedPhase {
     shrink?: ShrinkAction;
     downsample?: DownsampleAction;
 
-    set_priority?: {
-      priority: number | null;
-    };
+    set_priority?: SetPriorityAction;
     /**
      * Only available on enterprise license
      */
@@ -113,9 +103,7 @@ export interface SerializedWarmPhase extends SerializedPhase {
     forcemerge?: ForcemergeAction;
     readonly?: {};
     downsample?: DownsampleAction;
-    set_priority?: {
-      priority: number | null;
-    };
+    set_priority?: SetPriorityAction;
     migrate?: MigrateAction;
   };
 }
@@ -126,9 +114,7 @@ export interface SerializedColdPhase extends SerializedPhase {
     readonly?: {};
     downsample?: DownsampleAction;
     allocate?: AllocateAction;
-    set_priority?: {
-      priority: number | null;
-    };
+    set_priority?: SetPriorityAction;
     migrate?: MigrateAction;
     /**
      * Only available on enterprise license
@@ -139,11 +125,6 @@ export interface SerializedColdPhase extends SerializedPhase {
 
 export interface SerializedFrozenPhase extends SerializedPhase {
   actions: {
-    allocate?: AllocateAction;
-    set_priority?: {
-      priority: number | null;
-    };
-    migrate?: MigrateAction;
     /**
      * Only available on enterprise license
      */
@@ -187,11 +168,8 @@ export interface DownsampleAction {
   fixed_interval: string;
 }
 
-export interface LegacyPolicy {
-  name: string;
-  phases: {
-    delete: DeletePhase;
-  };
+export interface SetPriorityAction {
+  priority: number | null;
 }
 
 export interface CommonPhaseSettings {
@@ -203,44 +181,6 @@ export interface PhaseWithMinAge {
   selectedMinimumAgeUnits: string;
 }
 
-export interface PhaseWithIndexPriority {
-  phaseIndexPriority: string;
-}
-
-export interface PhaseWithForcemergeAction {
-  forceMergeEnabled: boolean;
-  selectedForceMergeSegments: string;
-  bestCompressionEnabled: boolean;
-}
-
 export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {
   waitForSnapshotPolicy: string;
-}
-
-export interface IndexLifecyclePolicy {
-  index: string;
-  managed: boolean;
-  action?: string;
-  action_time_millis?: number;
-  age?: string;
-  failed_step?: string;
-  failed_step_retry_count?: number;
-  is_auto_retryable_error?: boolean;
-  lifecycle_date_millis?: number;
-  phase?: string;
-  phase_execution?: {
-    policy: string;
-    modified_date_in_millis: number;
-    version: number;
-    phase_definition: SerializedPhase;
-  };
-  phase_time_millis?: number;
-  policy?: string;
-  step?: string;
-  step_info?: {
-    reason?: string;
-    type?: string;
-    message?: string;
-  };
-  step_time_millis?: number;
 }

@@ -119,10 +119,8 @@ describe.skip('Service inventory', () => {
       cy.loginAsEditorUser();
     });
 
-    it('Toggles fast filter when clicking on link', () => {
+    it('Uses the fast filter to search for services', () => {
       cy.visitKibana(serviceInventoryHref);
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
@@ -135,20 +133,6 @@ describe.skip('Service inventory', () => {
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
-      cy.contains('Disable fast filter').click();
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-    });
-  });
-
-  describe('Table search with viewer user', () => {
-    beforeEach(() => {
-      cy.loginAsViewerUser();
-    });
-
-    it('Should not be able to turn it on', () => {
-      cy.visitKibana(serviceInventoryHref);
-      cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.get('[data-test-subj="apmLink"]').should('be.disabled');
     });
   });
 

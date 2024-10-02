@@ -11,9 +11,8 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
-import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
+import { useFieldStatsTrigger, FieldStatsInfoButton } from '@kbn/ml-field-stats-flyout';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;

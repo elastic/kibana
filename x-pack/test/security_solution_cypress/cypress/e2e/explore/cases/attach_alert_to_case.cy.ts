@@ -25,7 +25,8 @@ const loadDetectionsPage = (role: SecurityRoleName) => {
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/191819
+describe.skip('Alerts timeline', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     // First we login as a privileged user to create alerts.
     deleteAlertsAndRules();

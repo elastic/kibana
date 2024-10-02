@@ -145,6 +145,15 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
+  usage: schema.maybe(
+    schema.object({
+      cert: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

@@ -4,64 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, CoreTheme } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { History } from 'history';
-import React, { useMemo } from 'react';
-import type { Observable } from 'rxjs';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { css } from '@emotion/css';
 import type { InventoryStartDependencies } from './types';
-import { inventoryRouter } from './routes/config';
-import { InventoryKibanaContext } from './hooks/use_kibana';
 import { InventoryServices } from './services/types';
-import { InventoryContextProvider } from './components/inventory_context_provider';
+import { AppRoot } from './components/app_root';
 
-function Application({
+export const renderApp = ({
   coreStart,
-  history,
   pluginsStart,
-  theme$,
   services,
+  appMountParameters,
 }: {
   coreStart: CoreStart;
-  history: History;
   pluginsStart: InventoryStartDependencies;
-  theme$: Observable<CoreTheme>;
   services: InventoryServices;
-}) {
-  const theme = useMemo(() => {
-    return { theme$ };
-  }, [theme$]);
+} & { appMountParameters: AppMountParameters }) => {
+  const { element } = appMountParameters;
 
-  const context: InventoryKibanaContext = useMemo(
-    () => ({
-      core: coreStart,
-      dependencies: {
-        start: pluginsStart,
-      },
-      services,
-    }),
-    [coreStart, pluginsStart, services]
+  const appWrapperClassName = css`
+    overflow: auto;
+  `;
+  const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
+  appWrapperElement.classList.add(appWrapperClassName);
+
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <AppRoot
+        appMountParameters={appMountParameters}
+        coreStart={coreStart}
+        pluginsStart={pluginsStart}
+        services={services}
+      />
+    </KibanaRenderContextProvider>,
+    element
   );
-
-  return (
-    <KibanaRenderContextProvider
-      theme={theme}
-      i18n={coreStart.i18n}
-      analytics={coreStart.analytics}
-    >
-      <InventoryContextProvider context={context}>
-        <RedirectAppLinks coreStart={coreStart}>
-          <coreStart.i18n.Context>
-            <RouterProvider history={history} router={inventoryRouter as any}>
-              <RouteRenderer />
-            </RouterProvider>
-          </coreStart.i18n.Context>
-        </RedirectAppLinks>
-      </InventoryContextProvider>
-    </KibanaRenderContextProvider>
-  );
-}
-
-export { Application };
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+    appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
+  };
+};

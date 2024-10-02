@@ -29,6 +29,7 @@ export class AuthorizationService {
         getRole: rolesAPIClient.getRole,
         deleteRole: rolesAPIClient.deleteRole,
         saveRole: rolesAPIClient.saveRole,
+        bulkUpdateRoles: rolesAPIClient.bulkUpdateRoles,
       },
       privileges: {
         getAll: privilegesAPIClient.getAll.bind(privilegesAPIClient),

@@ -12,11 +12,12 @@ import { NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
+import { i18nTexts } from '../../../i18n_texts';
 
 import { DescribedFormRow } from '../../described_form_row';
 
 interface Props {
-  phase: 'warm' | 'cold' | 'frozen';
+  phase: 'warm' | 'cold';
 }
 
 export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
@@ -24,13 +25,7 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
   const initialValue = policy.phases[phase]?.actions?.allocate?.number_of_replicas != null;
   return (
     <DescribedFormRow
-      title={
-        <h3>
-          {i18n.translate('xpack.indexLifecycleMgmt.numberOfReplicas.formRowTitle', {
-            defaultMessage: 'Replicas',
-          })}
-        </h3>
-      }
+      title={<h3>{i18nTexts.editPolicy.replicasLabel}</h3>}
       description={i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription',
         {

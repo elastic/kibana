@@ -29,11 +29,7 @@
   left: 0;
   bottom: 0;
   right: 0;
-}
-
-.consoleVariablesBottomBar {
-  // Give priority to the variables bar so that it doesn't get covered by the empty prompt when in vertical layout
-  z-index: $euiZLevel2;
+  overflow: hidden;
 }
 
 .conApp__editor {
@@ -123,6 +119,7 @@
   border-radius: $euiSizeXS;
   box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, .9);
   padding-top: $euiSize * .1;
+  overflow-y: auto;
 }
 
 .conApp__editorActions {

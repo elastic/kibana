@@ -62,7 +62,6 @@ export const useRiskEngineStatus = (
           isNewRiskScoreModuleAvailable,
           risk_engine_status: null,
           legacy_risk_engine_status: null,
-          is_max_amount_of_risk_engines_reached: false,
           risk_engine_task_status: null,
         };
       }

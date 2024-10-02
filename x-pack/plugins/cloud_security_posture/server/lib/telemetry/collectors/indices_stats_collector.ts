@@ -6,6 +6,7 @@
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { getCspStatus } from '../../../routes/status/status';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 
@@ -14,7 +15,6 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
 

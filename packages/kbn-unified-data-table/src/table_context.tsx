@@ -17,7 +17,7 @@ import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 export interface DataTableContext {
   expanded?: DataTableRecord | undefined;
   setExpanded?: (hit?: DataTableRecord) => void;
-  rows: DataTableRecord[];
+  getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
   dataView: DataView;
   isDarkMode: boolean;

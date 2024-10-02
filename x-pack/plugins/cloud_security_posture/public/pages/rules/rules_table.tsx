@@ -19,6 +19,11 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  CHANGE_RULE_STATE,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
@@ -281,6 +286,7 @@ const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
   };
   const changeCspRuleStateFn = async () => {
     if (rule?.metadata.benchmark.rule_number) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
       mutateRulesStates({
         newState: nextRuleState,
         ruleIds: [rulesObjectRequest],

@@ -18,18 +18,13 @@ import type { SearchItems } from '../../../../hooks/use_search_items';
 import type { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
-
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
-import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
   test('Minimal initialization', async () => {
     // Arrange
     const queryClient = new QueryClient();
-    const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
       dataView: {
@@ -78,9 +73,7 @@ describe('Transform: <DefinePivotSummary />', () => {
 
     const { queryByText } = render(
       <QueryClientProvider client={queryClient}>
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
-        </MlSharedContext.Provider>
+        <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
       </QueryClientProvider>
     );
 

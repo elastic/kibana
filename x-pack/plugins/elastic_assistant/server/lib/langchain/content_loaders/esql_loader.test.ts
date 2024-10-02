@@ -8,7 +8,6 @@
 import { Logger } from '@kbn/core/server';
 
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { loadESQL } from './esql_loader';
 import {
   mockEsqlDocsFromDirectoryLoader,
@@ -16,6 +15,7 @@ import {
   mockExampleQueryDocsFromDirectoryLoader,
 } from '../../../__mocks__/docs_from_directory_loader';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 
 let mockLoad = jest.fn();
 
@@ -29,9 +29,9 @@ jest.mock('langchain/document_loaders/fs/text', () => ({
   TextLoader: jest.fn().mockImplementation(() => ({})),
 }));
 
-const esStore = {
-  addDocuments: jest.fn().mockResolvedValue(['1', '2', '3', '4', '5']),
-} as unknown as ElasticsearchStore;
+const kbDataClient = {
+  addKnowledgeBaseDocuments: jest.fn().mockResolvedValue(['1', '2', '3', '4', '5']),
+} as unknown as AIAssistantKnowledgeBaseDataClient;
 
 const logger = {
   info: jest.fn(),
@@ -51,26 +51,29 @@ describe('loadESQL', () => {
 
   describe('loadESQL', () => {
     beforeEach(async () => {
-      await loadESQL(esStore, logger);
+      await loadESQL(kbDataClient, logger);
     });
 
     it('loads ES|QL docs, language files, and example queries into the Knowledge Base', async () => {
-      expect(esStore.addDocuments).toHaveBeenCalledWith([
-        ...addRequiredKbResourceMetadata({
-          docs: mockEsqlDocsFromDirectoryLoader,
-          kbResource: ESQL_RESOURCE,
-          required: false,
-        }),
-        ...addRequiredKbResourceMetadata({
-          docs: mockEsqlLanguageDocsFromDirectoryLoader,
-          kbResource: ESQL_RESOURCE,
-          required: false,
-        }),
-        ...addRequiredKbResourceMetadata({
-          docs: mockExampleQueryDocsFromDirectoryLoader,
-          kbResource: ESQL_RESOURCE,
-        }),
-      ]);
+      expect(kbDataClient.addKnowledgeBaseDocuments).toHaveBeenCalledWith({
+        documents: [
+          ...addRequiredKbResourceMetadata({
+            docs: mockEsqlDocsFromDirectoryLoader,
+            kbResource: ESQL_RESOURCE,
+            required: false,
+          }),
+          ...addRequiredKbResourceMetadata({
+            docs: mockEsqlLanguageDocsFromDirectoryLoader,
+            kbResource: ESQL_RESOURCE,
+            required: false,
+          }),
+          ...addRequiredKbResourceMetadata({
+            docs: mockExampleQueryDocsFromDirectoryLoader,
+            kbResource: ESQL_RESOURCE,
+          }),
+        ],
+        global: true,
+      });
     });
 
     it('logs the expected (distinct) counts for each category of documents', async () => {
@@ -91,26 +94,28 @@ describe('loadESQL', () => {
   });
 
   it('returns true if documents were loaded', async () => {
-    (esStore.addDocuments as jest.Mock).mockResolvedValueOnce(['this is a response']);
+    (kbDataClient.addKnowledgeBaseDocuments as jest.Mock).mockResolvedValueOnce([
+      'this is a response',
+    ]);
 
-    const result = await loadESQL(esStore, logger);
+    const result = await loadESQL(kbDataClient, logger);
 
     expect(result).toBe(true);
   });
 
   it('returns false if documents were NOT loaded', async () => {
-    (esStore.addDocuments as jest.Mock).mockResolvedValueOnce([]);
+    (kbDataClient.addKnowledgeBaseDocuments as jest.Mock).mockResolvedValueOnce([]);
 
-    const result = await loadESQL(esStore, logger);
+    const result = await loadESQL(kbDataClient, logger);
 
     expect(result).toBe(false);
   });
 
   it('logs the expected error if loading fails', async () => {
     const error = new Error('Failed to load documents');
-    (esStore.addDocuments as jest.Mock).mockRejectedValueOnce(error);
+    (kbDataClient.addKnowledgeBaseDocuments as jest.Mock).mockRejectedValueOnce(error);
 
-    await loadESQL(esStore, logger);
+    await loadESQL(kbDataClient, logger);
 
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to load ES|QL docs, language docs, and example queries into the Knowledge Base\nError: Failed to load documents'

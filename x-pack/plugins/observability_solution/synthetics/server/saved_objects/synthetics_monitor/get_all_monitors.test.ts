@@ -27,7 +27,7 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationMap: {
+      monitorLocationsMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
           'us_central_qa',
           'us_central',
@@ -63,7 +63,7 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationMap: {
+      monitorLocationsMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
           'us_central_qa',
           'us_central',
@@ -137,7 +137,7 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationMap: {
+      monitorLocationsMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': [
           'us_central_qa',
           'us_central',

@@ -21,6 +21,7 @@ import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
 import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
+import * as readOnlyHook from '../public/application/lib/use_is_read_only';
 
 initHttp(httpServiceMock.createSetupContract());
 initUiMetric(usageCollectionPluginMock.createSetupContract());
@@ -72,9 +73,16 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     createHref: jest.fn(),
+    location: {
+      search: '',
+    },
   }),
 }));
-
+const mockReactRouterNavigate = jest.fn();
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  reactRouterNavigate: () => mockReactRouterNavigate(),
+}));
 let component: ReactElement;
 
 const snapshot = (rendered: string[]) => {
@@ -129,6 +137,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
 };
 describe('policy table', () => {
   beforeEach(() => {
+    jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(false);
     component = <TestComponent testPolicies={policies} />;
     window.localStorage.removeItem('ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT');
   });
@@ -296,7 +305,9 @@ describe('policy table', () => {
   test('add index template modal shows when add policy to index template button is pressed', () => {
     const rendered = mountWithIntl(component);
     const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
-    const addPolicyToTemplateButton = findTestSubject(policyRow, 'addPolicyToTemplate');
+    const actionsButton = findTestSubject(policyRow, 'euiCollapsedItemActionsButton');
+    actionsButton.simulate('click');
+    const addPolicyToTemplateButton = findTestSubject(rendered, 'addPolicyToTemplate');
     addPolicyToTemplateButton.simulate('click');
     rendered.update();
     expect(findTestSubject(rendered, 'addPolicyToTemplateModal').exists()).toBeTruthy();
@@ -312,6 +323,10 @@ describe('policy table', () => {
     expect(policyIndices).toBe(`${testPolicy.indices.length}`);
     const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
     expect(policyModifiedDate).toBe(`${testDateFormatted}`);
+
+    const cells = firstRow.find('td');
+    // columns are name, linked index templates, linked indices, modified date, actions
+    expect(cells.length).toBe(5);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);
@@ -322,5 +337,26 @@ describe('policy table', () => {
     expect(flyoutTitle).toContain('testy0');
     const indexTemplatesLinks = findTestSubject(rendered, 'indexTemplateLink');
     expect(indexTemplatesLinks.length).toBe(testPolicy.indexTemplates.length);
+  });
+  test('opens a flyout to view policy by calling reactRouterNavigate', async () => {
+    const rendered = mountWithIntl(component);
+    const policyNameLink = findTestSubject(rendered, 'policyTablePolicyNameLink').at(0);
+    policyNameLink.simulate('click');
+    rendered.update();
+    expect(mockReactRouterNavigate).toHaveBeenCalled();
+  });
+
+  describe('read only view', () => {
+    beforeEach(() => {
+      jest.spyOn(readOnlyHook, 'useIsReadOnly').mockReturnValue(true);
+      component = <TestComponent testPolicies={policies} />;
+    });
+    it(`doesn't show actions column in the table`, () => {
+      const rendered = mountWithIntl(component);
+      const policyRow = findTestSubject(rendered, `policyTableRow-testy0`);
+      const cells = policyRow.find('td');
+      // columns are name, linked index templates, linked indices, modified date
+      expect(cells.length).toBe(4);
+    });
   });
 });

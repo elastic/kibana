@@ -18,6 +18,7 @@ import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
+import { defineRoutes } from './routes/elasticsearch_routes';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -201,6 +202,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     if (this.config.id) {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
+    const router = core.http.createRouter();
+    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
+    defineRoutes({ logger: this.logger, router, elasticsearchUrl });
 
     return {
       ...this.getCloudUrls(),
@@ -209,7 +213,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
-      elasticsearchUrl: core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl,
+      elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,

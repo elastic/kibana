@@ -39,7 +39,7 @@ describe('<Overview />', () => {
       });
     });
     const pathname = '/app/elasticsearch';
-    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+    (useLocation as jest.Mock).mockImplementation(() => ({
       pathname,
     }));
   });

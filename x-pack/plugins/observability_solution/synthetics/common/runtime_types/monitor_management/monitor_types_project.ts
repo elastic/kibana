@@ -62,6 +62,7 @@ export const ProjectMonitorCodec = t.intersection([
     hash: t.string,
     namespace: t.string,
     retestOnFailure: t.boolean,
+    fields: t.record(t.string, t.string),
   }),
 ]);
 
@@ -90,14 +91,10 @@ export const ProjectMonitorsResponseCodec = t.intersection([
   }),
 ]);
 
-export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
-
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
 
 export type LegacyProjectMonitorsRequest = t.TypeOf<typeof LegacyProjectMonitorsRequestCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
-
-export type ProjectMonitorsResponse = t.TypeOf<typeof ProjectMonitorsResponseCodec>;
 
 export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorMetaDataCodec>;

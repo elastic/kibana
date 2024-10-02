@@ -241,6 +241,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
+    policyIds: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
     kuery: schema.maybe(
       schema.string({
         validate: (value: string) => {

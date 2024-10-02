@@ -23,7 +23,6 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
 
-  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
   PINGS = '/internal/synthetics/pings',
   MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
   OVERVIEW_TRENDS = '/internal/synthetics/overview_trends',

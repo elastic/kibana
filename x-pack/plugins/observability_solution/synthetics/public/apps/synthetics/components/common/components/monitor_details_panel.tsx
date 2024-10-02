@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { isEmpty } from 'lodash';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -27,6 +28,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
@@ -35,7 +37,7 @@ export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitorWithId | EncryptedSyntheticsSavedMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;
@@ -57,6 +59,7 @@ export const MonitorDetailsPanel = ({
   }
 
   const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
+  const labels = monitor[ConfigKey.LABELS];
 
   return (
     <PanelWithTitle
@@ -145,6 +148,19 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>
           <TagsList tags={monitor[ConfigKey.TAGS]} />
         </EuiDescriptionListDescription>
+
+        {!isEmpty(labels) ? (
+          <>
+            <EuiDescriptionListTitle>{LABELS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {Object.entries(labels ?? {}).map(([key, value]) => (
+                <div key={key}>
+                  <strong>{key}</strong>: {value}
+                </div>
+              ))}
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
       </EuiDescriptionList>
     </PanelWithTitle>
   );
@@ -223,6 +239,10 @@ const URL_LABEL = i18n.translate('xpack.synthetics.management.monitorList.url', 
 
 const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags', {
   defaultMessage: 'Tags',
+});
+
+const LABELS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.labels', {
+  defaultMessage: 'Labels',
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {

@@ -121,6 +121,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
+        { link: 'inventory', spaceBefore: 'm' },
         {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {

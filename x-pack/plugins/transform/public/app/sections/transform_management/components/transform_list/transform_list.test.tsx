@@ -25,7 +25,6 @@ const useQueryMock = jest.spyOn(ReactQuery, 'useQuery').mockImplementation((quer
 
 const queryClient = new QueryClient();
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 describe('Transform: Transform List <TransformList />', () => {

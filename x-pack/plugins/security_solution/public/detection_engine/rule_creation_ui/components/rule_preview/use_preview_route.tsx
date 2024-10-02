@@ -24,6 +24,7 @@ interface PreviewRouteParams {
   scheduleRuleData?: ScheduleStepRule;
   exceptionsList?: List[];
   timeframeOptions: TimeframePreviewOptions;
+  enableLoggedRequests?: boolean;
 }
 
 export const usePreviewRoute = ({
@@ -32,6 +33,7 @@ export const usePreviewRoute = ({
   scheduleRuleData,
   exceptionsList,
   timeframeOptions,
+  enableLoggedRequests,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -41,6 +43,7 @@ export const usePreviewRoute = ({
 
   const { isLoading, response, rule, setRule } = usePreviewRule({
     timeframeOptions,
+    enableLoggedRequests,
   });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);

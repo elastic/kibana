@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const INFERENCE_ENDPOINT_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceEndpointsLabel',
   {
-    defaultMessage: 'Inference Endpoints',
+    defaultMessage: 'Inference endpoints',
   }
 );
 
@@ -21,7 +21,8 @@ export const CANCEL = i18n.translate('xpack.searchInferenceEndpoints.cancel', {
 export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
   'xpack.searchInferenceEndpoints.allInferenceEndpoints.description',
   {
-    defaultMessage: 'View and manage your deployed inference endpoints.',
+    defaultMessage:
+      'Inference endpoints streamline the deployment and management of machine\nlearning models in Elasticsearch. Set up and manage NLP tasks using unique\nendpoints, to build AI-powered search.',
   }
 );
 
@@ -69,9 +70,16 @@ export const SEMANTIC_SEARCH_WITH_E5_LINK = i18n.translate(
 );
 
 export const VIEW_YOUR_MODELS_LINK = i18n.translate(
-  'xpack.searchInferenceEndpoints.addEmptyPrompt.viewYourModels',
+  'xpack.searchInferenceEndpoints.viewYourModels',
   {
-    defaultMessage: 'View your models',
+    defaultMessage: 'ML Trained Models',
+  }
+);
+
+export const API_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.apiDocumentationLink',
+  {
+    defaultMessage: 'API Documentation',
   }
 );
 

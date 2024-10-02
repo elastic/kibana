@@ -92,34 +92,34 @@ unset FLEET_PACKAGE_REGISTRY_PORT
 
 ### Functional Tests
 
-### Stateful
-#### FTR Server
+#### Stateful
+##### FTR Server
 ```
 yarn test:ftr:server --config ./x-pack/test/functional/apps/dataset_quality/config.ts
 ```
 
-#### FTR Runner
+##### FTR Runner
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/index.ts
 ```
 
-#### Running Individual Tests
+##### Running Individual Tests
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/$1
 ```
 
-### Serverless
+#### Serverless
 
-#### Server
+##### Server
 ```
 yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
-#### Runner
+##### Runner
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
 ```
-#### Running Individual Tests
+##### Running Individual Tests
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```

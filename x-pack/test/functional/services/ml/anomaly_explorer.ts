@@ -30,6 +30,10 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.existOrFail('mlAnomalyExplorerInfluencerList');
     },
 
+    async assertInfluencerListDoesNotExist() {
+      await testSubjects.missingOrFail('mlAnomalyExplorerInfluencerList');
+    },
+
     async assertInfluencerFieldExists(influencerField: string) {
       await testSubjects.existOrFail(`mlInfluencerFieldName ${influencerField}`);
     },

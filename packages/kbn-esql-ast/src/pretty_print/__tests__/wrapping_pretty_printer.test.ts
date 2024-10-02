@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { parse } from '../../parser';
 import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
-  const { ast } = getAstAndSyntaxErrors(src);
-  const text = WrappingPrettyPrinter.print(ast, opts);
+  const { root } = parse(src);
+  const text = WrappingPrettyPrinter.print(root, opts);
 
   // console.log(JSON.stringify(ast, null, 2));
 
@@ -216,6 +216,20 @@ FROM index1, index2, index2, index3, index4, index5, index6
     METADATA _id, _source`);
     });
 
+    test("indents options such that they don't align with sub-commands", () => {
+      const query = `
+FROM index1, index2, index2, index3, index4, index5, index6  METADATA _id, _source
+| WHERE language == "javascript"
+| LIMIT 123`;
+      const text = reprint(query, { pipeTab: '  ' }).text;
+
+      expect('\n' + text).toBe(`
+FROM index1, index2, index2, index3, index4, index5, index6
+    METADATA _id, _source
+  | WHERE language == "javascript"
+  | LIMIT 123`);
+    });
+
     test('indents METADATA option differently than the LIMIT pipe', () => {
       const query = `
 FROM index1, index2, index2, index3, index4, index5, index6 METADATA _id, _source | LIMIT 10`;
@@ -346,6 +360,19 @@ FROM index
   | LIMIT 10`);
     });
 
+    test('single long function argument is broken by line', () => {
+      const query = `
+FROM index | STATS super_function("xxxx-xxxx-xxxxxxxxxxxx-xxxx-xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxx-xxxx-xxxxxxxx")
+`;
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM index
+  | STATS
+      SUPER_FUNCTION(
+        "xxxx-xxxx-xxxxxxxxxxxx-xxxx-xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxx-xxxx-xxxxxxxx")`);
+    });
+
     test('break by line function arguments, when wrapping is not enough', () => {
       const query = `
 FROM index
@@ -474,7 +501,7 @@ FROM index
       test('binary expressions of different precedence are not flattened', () => {
         const query = `
 FROM index
-| STATS super_function_name(0.123123123123123 + 888811112.232323123123 * 123123123123.123123123 + 23232323.23232323123 - 123 + 999)),
+| STATS fn(123456789 + 123456789 - 123456789 + 123456789 - 123456789 + 123456789 - 123456789)),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -482,12 +509,14 @@ FROM index
         expect('\n' + text).toBe(`
 FROM index
   | STATS
-      SUPER_FUNCTION_NAME(
-        0.123123123123123 +
-          888811112.2323232 * 123123123123.12312 +
-          23232323.232323233 -
-          123 +
-          999)`);
+      FN(
+        123456789 +
+          123456789 -
+          123456789 +
+          123456789 -
+          123456789 +
+          123456789 -
+          123456789)`);
       });
 
       test('binary expressions vertical flattening child function function argument wrapping', () => {
@@ -513,7 +542,7 @@ FROM index
       test('two binary expression lists of different precedence group', () => {
         const query = `
 FROM index
-| STATS super_function_name(11111111111111.111 + 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 + 11111111111111.111 + 11111111111111.111)),
+| STATS fn(11111111111111.111 + 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 + 11111111111111.111 + 11111111111111.111)),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -521,7 +550,7 @@ FROM index
         expect('\n' + text).toBe(`
 FROM index
   | STATS
-      SUPER_FUNCTION_NAME(
+      FN(
         11111111111111.111 +
           3333333333333.3335 *
             3333333333333.3335 *
@@ -565,3 +594,5 @@ ROW (asdf + asdf)::string, 1.2::string, "1234"::integer, (12321342134 + 23412341
     });
   });
 });
+
+test.todo('Idempotence on multiple times pretty printing');

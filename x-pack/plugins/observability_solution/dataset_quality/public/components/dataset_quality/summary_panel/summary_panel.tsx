@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSummaryPanelContext } from '../../../hooks';
 import { DatasetsQualityIndicators } from './datasets_quality_indicators';
 import { DatasetsActivity } from './datasets_activity';
 import { EstimatedData } from './estimated_data';
@@ -16,17 +15,15 @@ import { EstimatedData } from './estimated_data';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function SummaryPanel() {
-  const { isEstimatedDataDisabled } = useSummaryPanelContext();
   return (
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem>
         <DatasetsQualityIndicators />
       </EuiFlexItem>
-
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="m">
           <DatasetsActivity />
-          {!isEstimatedDataDisabled && <EstimatedData />}
+          <EstimatedData />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

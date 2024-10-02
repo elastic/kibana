@@ -56,7 +56,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      return synthtrace.index([
+      await synthtrace.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)

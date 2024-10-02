@@ -23,7 +23,11 @@ function renderUnit(value: number, unit: string) {
 
 export class ByteSizeValue {
   public static parse(text: string): ByteSizeValue {
-    const match = /([1-9][0-9]*)(b|kb|mb|gb)/i.exec(text);
+    if (text.length > 18) {
+      // Exit early on large input where <count> uses more than 16 digits and is therefore larger than Number.MAX_SAFE_INTEGER
+      throw new Error('Value in bytes is expected to be a safe positive integer.');
+    }
+    const match = /(^[1-9]\d*)(b|kb|mb|gb)$/i.exec(text);
     if (!match) {
       const number = Number(text);
       if (typeof number !== 'number' || isNaN(number)) {
