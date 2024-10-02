@@ -35,7 +35,7 @@
             "section": "def-common.AgentIconProps",
             "text": "AgentIconProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
         "deprecated": false,
@@ -82,7 +82,7 @@
             "section": "def-common.CloudProviderIconProps",
             "text": "CloudProviderIconProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
         "deprecated": false,

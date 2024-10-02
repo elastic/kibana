@@ -141,7 +141,7 @@
               "ObservabilitySharedStart",
               ") => { locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; registerSections: (sections$: ",
+              ") => React.JSX.Element; registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -243,7 +243,7 @@
         "label": "ActionMenu",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/action_menu/action_menu.tsx",
         "deprecated": false,
@@ -276,7 +276,7 @@
         "label": "ActionMenuDivider",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/action_menu/action_menu.tsx",
         "deprecated": false,
@@ -310,7 +310,7 @@
         "label": "BottomBarActions",
         "description": [],
         "signature": [
-          "({ isLoading, onDiscardChanges, onSave, unsavedChangesCount, saveLabel, appTestSubj, areChangesInvalid, }: Props) => JSX.Element"
+          "({ isLoading, onDiscardChanges, onSave, unsavedChangesCount, saveLabel, appTestSubj, areChangesInvalid, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
         "deprecated": false,
@@ -376,7 +376,7 @@
         "label": "EmbeddableFlamegraph",
         "description": [],
         "signature": [
-          "({ height, ...props }: Props) => JSX.Element"
+          "({ height, ...props }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
         "deprecated": false,
@@ -409,7 +409,7 @@
         "label": "EmbeddableFunctions",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_functions.tsx",
         "deprecated": false,
@@ -450,7 +450,7 @@
             "section": "def-public.EmbeddableProfilingSearchBarProps",
             "text": "EmbeddableProfilingSearchBarProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
         "deprecated": false,
@@ -489,7 +489,7 @@
         "label": "EmbeddableStackTraces",
         "description": [],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_stack_traces.tsx",
         "deprecated": false,
@@ -522,7 +522,7 @@
         "label": "FeatureFeedbackButton",
         "description": [],
         "signature": [
-          "({ formUrl, formConfig, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => JSX.Element"
+          "({ formUrl, formConfig, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
         "deprecated": false,
@@ -557,7 +557,7 @@
         "signature": [
           "(props: ",
           "FieldValueSelectionProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/index.tsx",
         "deprecated": false,
@@ -592,7 +592,7 @@
         "signature": [
           "(props: ",
           "FieldValueSuggestionsProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/index.tsx",
         "deprecated": false,
@@ -964,7 +964,7 @@
         "signature": [
           "(props: ",
           "HeaderMenuPortalProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/index.tsx",
         "deprecated": false,
@@ -997,7 +997,7 @@
         "label": "InspectorContextProvider",
         "description": [],
         "signature": [
-          "({ children }: { children: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/contexts/inspector/inspector_context.tsx",
         "deprecated": false,
@@ -1022,7 +1022,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/contexts/inspector/inspector_context.tsx",
                 "deprecated": false,
@@ -1044,7 +1044,7 @@
         "signature": [
           "(props: ",
           "LoadWhenInViewProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/load_when_in_view/get_load_when_in_view_lazy.tsx",
         "deprecated": false,
@@ -1077,7 +1077,7 @@
         "label": "NavigationWarningPromptProvider",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/navigation_warning_prompt/context.tsx",
         "deprecated": false,
@@ -1127,7 +1127,7 @@
         "label": "ProfilingEmptyState",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/profiling_empty_state.tsx",
         "deprecated": false,
@@ -1144,7 +1144,7 @@
         "label": "Prompt",
         "description": [],
         "signature": [
-          "({ prompt }: React.PropsWithChildren<Props>) => null"
+          "({ prompt }: Props) => null"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/navigation_warning_prompt/prompt.tsx",
         "deprecated": false,
@@ -1153,12 +1153,12 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-public.Prompt.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ prompt }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/public/components/navigation_warning_prompt/prompt.tsx",
             "deprecated": false,
@@ -1198,7 +1198,7 @@
         "signature": [
           "({ ...props }: ",
           "EuiListGroupItemProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -1237,7 +1237,7 @@
           "EuiListGroupItemProps",
           "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; maxWidth?: boolean | ",
           "Property",
-          ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => JSX.Element"
+          ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -1276,7 +1276,7 @@
         "label": "SectionSpacer",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -1293,7 +1293,7 @@
         "label": "SectionSubtitle",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -1318,7 +1318,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
                 "deprecated": false,
@@ -1338,7 +1338,7 @@
         "label": "SectionTitle",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
         "deprecated": false,
@@ -1363,7 +1363,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/components/section/section.tsx",
                 "deprecated": false,
@@ -1424,7 +1424,7 @@
             "section": "def-public.TagsListProps",
             "text": "TagsListProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/tags_list/tags_list_lazy.tsx",
         "deprecated": false,
@@ -1463,7 +1463,7 @@
         "label": "TechnicalPreviewBadge",
         "description": [],
         "signature": [
-          "({ icon = 'beaker', size, style }: Props) => JSX.Element"
+          "({ icon = 'beaker', size, style }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/technical_preview_badge/technical_preview_badge.tsx",
         "deprecated": false,
@@ -3400,13 +3400,11 @@
         "signature": [
           "Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; } & Pick<",
-          "EuiEmptyPromptProps",
-          ", \"paddingSize\">"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3471,13 +3469,11 @@
           "ObservabilityPageTemplateDependencies",
           ", \"isSidebarEnabled$\"> & Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; } & Pick<",
-          "EuiEmptyPromptProps",
-          ", \"paddingSize\">"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3519,7 +3515,7 @@
         "signature": [
           "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
           "WrappedPageTemplateProps",
-          ") => JSX.Element; registerSections: (sections$: ",
+          ") => React.JSX.Element; registerSections: (sections$: ",
           "Observable",
           "<",
           {
@@ -3633,7 +3629,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"rel\" | \"color\" | \"onClick\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
@@ -3942,6 +3938,76 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EntitiesInventoryLocatorDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "EntitiesInventoryLocatorDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.EntitiesInventoryLocatorDefinition",
+            "text": "EntitiesInventoryLocatorDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorDefinition",
+            "text": "LocatorDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.EntitiesInventoryLocatorDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ENTITY_INVENTORY_LOCATOR\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.EntitiesInventoryLocatorDefinition.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "() => Promise<{ app: string; path: string; state: {}; }>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -4514,7 +4580,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, serviceName, }: ",
+              "({ rangeFrom, rangeTo, serviceName, environment, }: ",
               {
                 "pluginId": "observabilityShared",
                 "scope": "common",
@@ -4533,7 +4599,7 @@
                 "id": "def-common.ServiceOverviewLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    serviceName,\n    environment,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -5868,6 +5934,20 @@
           },
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-common.ServiceOverviewParams.environment",
+            "type": "string",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/apm/service_overview_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-common.ServiceOverviewParams.rangeFrom",
             "type": "string",
             "tags": [],
@@ -6589,6 +6669,51 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITIES_INVENTORY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITIES_INVENTORY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"ENTITY_INVENTORY_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EntitiesInventoryLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "EntitiesInventoryLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/entity_inventory/entity_inventory_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ERROR_CULPRIT",
         "type": "string",
         "tags": [],
@@ -6806,6 +6931,21 @@
         "description": [],
         "signature": [
           "\"host.hostname\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HOST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_NAME",
+        "description": [],
+        "signature": [
+          "\"host.name\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
