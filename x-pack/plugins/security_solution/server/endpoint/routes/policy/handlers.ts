@@ -22,9 +22,9 @@ import { NotFoundError } from '../../errors';
 export const getHostPolicyResponseHandler = function (
   endpointAppContextServices: EndpointAppContextService
 ): RequestHandler<
-  undefined,
+  never,
   TypeOf<typeof GetPolicyResponseSchema.query>,
-  undefined,
+  never,
   SecuritySolutionRequestHandlerContext
 > {
   const logger = endpointAppContextServices.createLogger('endpointPolicyResponse');

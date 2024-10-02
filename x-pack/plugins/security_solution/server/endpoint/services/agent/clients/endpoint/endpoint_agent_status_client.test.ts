@@ -51,7 +51,7 @@ describe('EndpointAgentStatusClient', () => {
     };
     statusClient = new EndpointAgentStatusClient(constructorOptions);
 
-    // FIXME:PT need to remove the need for this mock
+    // FIXME:PT need to remove the need for this mock. It appears in several test files on our side.
     //  Its currently needed due to the direct use of Fleet's `buildAgentStatusRuntimeField()` in
     //  `x-pack/plugins/security_solution/server/endpoint/routes/metadata/query_builders.ts:239`
     (soClient.find as jest.Mock).mockResolvedValue({ saved_objects: [] });
