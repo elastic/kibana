@@ -56,6 +56,8 @@ describe('When using the Endpoint Details Actions Menu', () => {
     endpointHost.metadata.host.os.name = 'Windows';
     // @ts-expect-error TS2540
     endpointHost.metadata.agent.version = '7.14.0';
+    // @ts-expect-error TS2540
+    endpointHost.policy_info = { agent: { applied: { id: '123' } } };
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };
 
@@ -87,7 +89,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
     });
 
     render = async () => {
-      renderResult = mockedContext.render(<ActionsMenu hostMetadata={endpointHost?.metadata} />);
+      renderResult = mockedContext.render(<ActionsMenu hostInfo={endpointHost} />);
       const endpointDetailsActionsButton = renderResult.getByTestId('endpointDetailsActionsButton');
       endpointDetailsActionsButton.style.pointerEvents = 'all';
       await user.click(endpointDetailsActionsButton);

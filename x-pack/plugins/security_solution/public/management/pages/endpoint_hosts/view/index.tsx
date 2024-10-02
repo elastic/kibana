@@ -301,7 +301,7 @@ const getEndpointListColumns = ({
       actions: [
         {
           render: (item: HostInfo) => {
-            return <TableRowActions endpointMetadata={item.metadata} />;
+            return <TableRowActions endpointInfo={item} />;
           },
         },
       ],
