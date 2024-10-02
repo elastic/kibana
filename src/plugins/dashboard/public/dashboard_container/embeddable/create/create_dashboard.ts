@@ -264,7 +264,6 @@ export const initializeDashboard = async ({
   // Track references
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) => {
-    dashboard.savedObjectReferences = loadDashboardReturn?.references;
     dashboard.controlGroupInput = loadDashboardReturn?.dashboardInput?.controlGroupInput;
   });
 
