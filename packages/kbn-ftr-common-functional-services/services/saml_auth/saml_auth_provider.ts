@@ -27,9 +27,9 @@ export interface CookieCredentials {
   [header: string]: string;
 }
 
-export interface CustomRolePrivilliages {
+export interface RolePrivileges {
   kibana: any;
-  elasticsearch?: any;
+  elasticsearch: any;
 }
 
 const throwErrorIfCustomRoleIsNotSet = (
@@ -165,7 +165,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       expect(status).to.be(200);
     },
 
-    async setCustomRole(privileges: CustomRolePrivilliages) {
+    async setCustomRole(privileges: RolePrivileges) {
       log.debug(`updating role ${CUSTOM_ROLE}`);
       const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
 
