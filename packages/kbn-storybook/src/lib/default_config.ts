@@ -27,8 +27,8 @@ const IGNORE_GLOBS = [
   '**/node_modules/**',
   '!**/node_modules/@kbn/**',
   '!**/node_modules/@kbn/*/**',
-  '!**/node_modules/@kbn/*/!(node_modules)/**'
-]
+  '!**/node_modules/@kbn/*/!(node_modules)/**',
+];
 
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],

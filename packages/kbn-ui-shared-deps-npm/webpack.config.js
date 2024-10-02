@@ -152,6 +152,7 @@ module.exports = (_, argv) => {
     },
 
     optimization: {
+      moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
       chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
       minimize: false,
       emitOnErrors: false,

@@ -278,7 +278,7 @@ export function getWebpackConfig(
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.
         {
-          test: [/\.(html|md|txt|tmpl)$/],
+          test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
         {
