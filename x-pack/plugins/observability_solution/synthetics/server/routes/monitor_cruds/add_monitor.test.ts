@@ -6,7 +6,7 @@
  */
 
 import { ConfigKey, SyntheticsMonitor } from '../../../common/runtime_types';
-import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { UpsertMonitorAPI } from './add_monitor/add_monitor_api';
 
 describe('hydrateMonitorFields', () => {
   it('creates expected zip b64 project field value for inline browser monitor', async () => {
@@ -62,19 +62,16 @@ step('fail', () => {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
 
-    const api = new AddEditMonitorAPI(
-      {
-        request: {
-          query: {
-            preserve_namespace: true,
-          },
+    const api = new UpsertMonitorAPI({
+      request: {
+        query: {
+          preserve_namespace: true,
         },
-        server: {
-          logger: jest.fn(),
-        },
-      } as any,
-      {} as any
-    );
+      },
+      server: {
+        logger: jest.fn(),
+      },
+    } as any);
     const hydratedMonitor = await api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId: 'testMonitorId',
@@ -138,7 +135,7 @@ step('fail', () => {
       'ssl.verification_mode': 'full',
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
     };
-    const api = new AddEditMonitorAPI(routeContext as any, {} as any);
+    const api = new UpsertMonitorAPI(routeContext as any);
     const hydratedMonitor = await api.hydrateMonitorFields({
       normalizedMonitor,
       newMonitorId,

@@ -14,7 +14,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
 import { getPrivateLocationsForMonitor } from './add_monitor/utils';
-import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { UpsertMonitorAPI } from './add_monitor/add_monitor_api';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -65,7 +65,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     try {
       const newMonitorId = id ?? uuidV4();
 
-      const addMonitorAPI = new AddEditMonitorAPI(routeContext, server.logger);
+      const addMonitorAPI = new UpsertMonitorAPI(routeContext);
 
       const monitorWithNamespace = await addMonitorAPI.hydrateMonitorFields({
         normalizedMonitor,

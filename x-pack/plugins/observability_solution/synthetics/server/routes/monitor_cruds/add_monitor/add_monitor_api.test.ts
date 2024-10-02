@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
+import { UpsertMonitorAPI } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 
@@ -16,15 +16,12 @@ describe('AddNewMonitorsPublicAPI', () => {
         enabled: true,
       },
     } as any);
-    const api = new AddEditMonitorAPI(
-      {
-        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
-        request: {
-          body: {},
-        },
-      } as any,
-      {} as any
-    );
+    const api = new UpsertMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+      },
+    } as any);
     let result = await api.normalizeMonitor({ schedule: '3' } as any, {} as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
@@ -58,15 +55,12 @@ describe('AddNewMonitorsPublicAPI', () => {
     const syntheticsService = new SyntheticsService({
       config: {},
     } as any);
-    const api = new AddEditMonitorAPI(
-      {
-        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
-        request: {
-          body: {},
-        },
-      } as any,
-      {} as any
-    );
+    const api = new UpsertMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+      },
+    } as any);
     it('should normalize tcp', async () => {
       expect(
         await api.normalizeMonitor(
