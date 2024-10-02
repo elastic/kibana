@@ -34,7 +34,6 @@ export const useWorkpad = (
   getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
-  const workpadResolve = workpadService.resolve;
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
@@ -47,7 +46,7 @@ export const useWorkpad = (
         const {
           workpad: { assets, ...workpad },
           ...resolveProps
-        } = await workpadResolve(workpadId);
+        } = await workpadService.resolve(workpadId);
 
         setResolveInfo({ id: workpadId, ...resolveProps });
 
@@ -63,7 +62,7 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
+  }, [workpadId, dispatch, setError, loadPages, workpadService, storedWorkpad.id]);
 
   useEffect(() => {
     // If the resolved info is not for the current workpad id, bail out
