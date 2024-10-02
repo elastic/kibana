@@ -561,6 +561,7 @@ describe('MetricVisComponent', function () {
         componentWithSecondaryDimension
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -602,6 +603,7 @@ describe('MetricVisComponent', function () {
         componentWithExtraText
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
