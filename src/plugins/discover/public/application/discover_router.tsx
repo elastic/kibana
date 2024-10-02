@@ -15,6 +15,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { ExperimentalFeatures } from '../../server/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
@@ -23,7 +24,6 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
-import { DiscoverEBTPerformanceProvider } from '../services/telemetry';
 
 export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
   customizationContext$: Observable<DiscoverCustomizationContext>;
@@ -47,14 +47,14 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverEBTPerformanceProvider>
+          <PerformanceContextProvider>
             <DiscoverRoutes
               customizationContext={customizationContext}
               services={services}
               history={history}
               {...routeProps}
             />
-          </DiscoverEBTPerformanceProvider>
+          </PerformanceContextProvider>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>

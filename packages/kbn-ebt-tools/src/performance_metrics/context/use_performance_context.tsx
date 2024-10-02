@@ -20,10 +20,12 @@ export interface PerformanceApi {
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
-export function usePerformanceContext() {
+export function usePerformanceContext({
+  suppressMissingProvider,
+}: { suppressMissingProvider?: boolean } = {}) {
   const api = useContext(PerformanceContext);
 
-  if (!api) {
+  if (!api && !suppressMissingProvider) {
     throw new Error('Missing Performance API in context');
   }
 

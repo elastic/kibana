@@ -20,7 +20,7 @@ import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import { useDiscoverEBTPerformanceContext } from '../../../services/telemetry';
+import { useReportPageRenderComplete } from '../../../services/telemetry';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -31,7 +31,6 @@ export interface DocProps extends EsDocSearchProps {
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
-  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const services = useDiscoverServices();
   const { locator, chrome, docLinks, core, profilesManager } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
@@ -67,11 +66,9 @@ export function Doc(props: DocProps) {
     });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
-  useEffect(() => {
-    if (![ElasticRequestState.Loading, ElasticRequestState.Found].includes(reqState)) {
-      onSkipPluginRenderTime();
-    }
-  }, [onSkipPluginRenderTime, reqState]);
+  useReportPageRenderComplete(
+    ![ElasticRequestState.Loading, ElasticRequestState.Found].includes(reqState)
+  );
 
   return (
     <EuiPage>

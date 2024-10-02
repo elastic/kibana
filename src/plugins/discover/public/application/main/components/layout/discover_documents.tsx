@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -79,7 +79,7 @@ import {
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
-import { useDiscoverEBTPerformanceContext } from '../../../../services/telemetry';
+import { useReportPageRenderComplete } from '../../../../services/telemetry';
 
 const containerStyles = css`
   position: relative;
@@ -115,7 +115,6 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
-  const { onTrackPluginRenderTime, onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
@@ -406,11 +405,7 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
-  useEffect(() => {
-    if (isLegacy) {
-      onSkipPluginRenderTime();
-    }
-  }, [isLegacy, onSkipPluginRenderTime]);
+  const onInitialRenderComplete = useReportPageRenderComplete(isLegacy);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -527,7 +522,7 @@ function DiscoverDocumentsComponent({
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
-                onInitialRenderComplete={onTrackPluginRenderTime}
+                onInitialRenderComplete={onInitialRenderComplete}
               />
             </CellActionsProvider>
           </div>

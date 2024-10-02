@@ -42,7 +42,7 @@ import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inlin
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useRootProfile } from '../../context_awareness';
-import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -80,7 +80,6 @@ export function DiscoverMainRoute({
     customizationContext,
     stateStorageContainer,
   });
-  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,
@@ -345,11 +344,7 @@ export function DiscoverMainRoute({
   const { solutionNavId } = customizationContext;
   const { rootProfileLoading } = useRootProfile({ solutionNavId });
 
-  useEffect(() => {
-    if (showNoDataPage || error) {
-      onSkipPluginRenderTime();
-    }
-  }, [showNoDataPage, error, onSkipPluginRenderTime]);
+  useReportPageRenderComplete(showNoDataPage || Boolean(error));
 
   if (error) {
     return <DiscoverError error={error} />;

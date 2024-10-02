@@ -9,6 +9,6 @@
 
 export { DiscoverEBTManager } from './discover_ebt_manager';
 export {
-  DiscoverEBTPerformanceProvider,
-  useDiscoverEBTPerformanceContext,
-} from './discover_ebt_performance_provider';
+  useReportPageRenderComplete,
+  resetPageRenderCompleteReport,
+} from './use_report_page_render_complete';

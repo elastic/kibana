@@ -16,7 +16,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useDiscoverEBTPerformanceContext } from '../../services/telemetry';
+import { useReportPageRenderComplete } from '../../services/telemetry';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -24,7 +24,6 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const scopedHistory = useDiscoverServices().getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
     () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,
@@ -52,11 +51,7 @@ export function ContextAppRoute() {
 
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
 
-  useEffect(() => {
-    if (error) {
-      onSkipPluginRenderTime();
-    }
-  }, [error, onSkipPluginRenderTime]);
+  useReportPageRenderComplete(Boolean(error));
 
   if (error) {
     return (

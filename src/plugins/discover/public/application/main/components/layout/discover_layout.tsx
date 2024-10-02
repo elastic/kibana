@@ -58,7 +58,7 @@ import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDiscoverEBTPerformanceContext } from '../../../../services/telemetry';
+import { useReportPageRenderComplete } from '../../../../services/telemetry';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -82,7 +82,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
-  const { onSkipPluginRenderTime } = useDiscoverEBTPerformanceContext();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -367,14 +366,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
-  useEffect(() => {
-    if (
-      ![resultStatuses.LOADING, resultStatuses.READY].includes(resultState) ||
+  useReportPageRenderComplete(
+    ![resultStatuses.LOADING, resultStatuses.READY].includes(resultState) ||
       viewMode !== VIEW_MODE.DOCUMENT_LEVEL
-    ) {
-      onSkipPluginRenderTime();
-    }
-  }, [onSkipPluginRenderTime, resultState, viewMode]);
+  );
 
   return (
     <EuiPage

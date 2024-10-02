@@ -22,10 +22,20 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import {
-  DiscoverEBTPerformanceMockValue,
-  DiscoverEBTPerformanceProviderMock,
-} from '../../__mocks__/ebt_performance';
+
+const mockOnInitialRenderCompleteMock = jest.fn();
+const mockUseReportPageRenderComplete = jest.fn((isReady: boolean) => {
+  return mockOnInitialRenderCompleteMock;
+});
+jest.mock('../../services/telemetry', () => {
+  const originalModule = jest.requireActual('../../services/telemetry');
+  return {
+    ...originalModule,
+    useReportPageRenderComplete: (isReady: boolean) => {
+      return mockUseReportPageRenderComplete(isReady);
+    },
+  };
+});
 
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
@@ -87,9 +97,7 @@ describe('ContextAppContent test', () => {
 
     const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverEBTPerformanceProviderMock>
-          <ContextAppContent {...props} />
-        </DiscoverEBTPerformanceProviderMock>
+        <ContextAppContent {...props} />
       </KibanaContextProvider>
     );
     await act(async () => {
@@ -100,8 +108,8 @@ describe('ContextAppContent test', () => {
   };
 
   beforeEach(() => {
-    DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime.mockReset();
-    DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime.mockReset();
+    mockUseReportPageRenderComplete.mockClear();
+    mockOnInitialRenderCompleteMock.mockClear();
   });
 
   it('should render legacy table correctly', async () => {
@@ -110,23 +118,27 @@ describe('ContextAppContent test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
-    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   it('renders loading indicator', async () => {
-    const component = await mountComponent({ anchorStatus: LoadingStatus.LOADING });
+    const component = await mountComponent({
+      anchorStatus: LoadingStatus.LOADING,
+    });
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(component.find(DocTableWrapper).length).toBe(1);
     expect(loadingIndicator.length).toBe(1);
-    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).not.toHaveBeenCalled();
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(true);
+    expect(mockOnInitialRenderCompleteMock).not.toHaveBeenCalled();
   });
 
   it('should render discover grid correctly', async () => {
     const component = await mountComponent({ isLegacy: false });
     expect(component.find(UnifiedDataTable).length).toBe(1);
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
-    expect(DiscoverEBTPerformanceMockValue.onSkipPluginRenderTime).not.toHaveBeenCalled();
-    expect(DiscoverEBTPerformanceMockValue.onTrackPluginRenderTime).toHaveBeenCalled();
+    expect(mockUseReportPageRenderComplete).toHaveBeenLastCalledWith(false);
+    expect(mockOnInitialRenderCompleteMock).toHaveBeenCalled();
   });
 
   it('should not show display options button', async () => {
