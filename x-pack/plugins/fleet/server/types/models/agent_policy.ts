@@ -71,7 +71,7 @@ export const AgentPolicyBaseSchema = {
         defaultValue: false,
         meta: {
           description:
-            ' When set to true, monitoring will be enabled but logs/metrics collection will be disabled',
+            'When set to true, monitoring will be enabled but logs/metrics collection will be disabled',
         },
       }),
     ])
@@ -112,8 +112,7 @@ export const AgentPolicyBaseSchema = {
       schema.boolean({
         defaultValue: false,
         meta: {
-          description:
-            'Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment.',
+          description: 'Indicates whether the agent policy supports agentless integrations.',
         },
       }),
     ])
