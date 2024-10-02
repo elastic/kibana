@@ -96,6 +96,7 @@ interface CommonApiKeyFlyoutProps {
   http?: CoreStart['http'];
   currentUser?: AuthenticatedUser;
   isLoadingCurrentUser?: boolean;
+  defaultName?: string;
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
   defaultExpiration?: string;
@@ -172,6 +173,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   defaultExpiration,
   defaultMetadata,
   defaultRoleDescriptors,
+  defaultName,
   apiKey,
   canManageCrossClusterApiKeys = false,
   readOnly = false,
@@ -249,6 +251,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
       formik.setFieldValue('role_descriptors', defaultRoleDescriptors);
     }
   }, [defaultRoleDescriptors]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (defaultName && !apiKey) {
+      formik.setFieldValue('name', defaultName);
+    }
+  }, [defaultName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (defaultMetadata && !apiKey) {
