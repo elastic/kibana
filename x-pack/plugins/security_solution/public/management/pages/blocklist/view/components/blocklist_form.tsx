@@ -30,7 +30,10 @@ import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { OS_TITLES } from '../../../../common/translations';
-import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type {
+  ArtifactFormComponentOnChangeCallbackProps,
+  ArtifactFormComponentProps,
+} from '../../../../components/artifact_list_page';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -237,7 +240,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       return selectableFields;
     }, [selectedOs, getTestId]);
 
-    const operatorOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
+    const operatorOptions: Array<EuiSuperSelectOption<ListOperatorTypeEnum>> = useMemo(() => {
       return [
         {
           value: isOneOfOperator.type,
@@ -423,7 +426,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleOperatorUpdate = useCallback(
-      (newOperator) => {
+      (newOperator: ListOperatorTypeEnum) => {
         const nextItem = {
           ...item,
           entries: [
@@ -437,7 +440,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           isValid: isValid(errorsRef.current),
-          item: nextItem,
+          // Type ListOperatorTypeEnum is not assignable to type "wildcard"
+          item: nextItem as ArtifactFormComponentOnChangeCallbackProps['item'],
         });
       },
       [item, blocklistEntry, generateBlocklistEntryValue, onChange]
