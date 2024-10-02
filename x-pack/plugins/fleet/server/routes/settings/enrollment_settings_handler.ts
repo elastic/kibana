@@ -22,6 +22,7 @@ import { agentPolicyService, appContextService, downloadSourceService } from '..
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
 import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
+import { getDataOutputForAgentPolicy } from '../../services/agent_policies';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
   undefined,
@@ -46,6 +47,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       name: undefined,
       fleet_server_host_id: undefined,
       download_source_id: undefined,
+      data_output_id: undefined,
     };
     // Check if there is any active fleet server enrolled into the fleet server policies policies
     if (fleetServerPolicies) {
@@ -69,6 +71,19 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       settingsResponse.download_source = undefined;
     }
 
+    // Get download source proxy
+    // ignore errors if the download source proxy is not found
+    try {
+      if (settingsResponse.download_source?.proxy_id) {
+        settingsResponse.download_source_proxy = await getFleetProxy(
+          soClient,
+          settingsResponse.download_source.proxy_id
+        );
+      }
+    } catch (e) {
+      settingsResponse.download_source_proxy = undefined;
+    }
+
     // Get associated fleet server host, or default one if it doesn't exist
     // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
     try {
@@ -80,7 +95,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       settingsResponse.fleet_server.host = undefined;
     }
 
-    // if a fleet server host was found, get associated fleet server host proxy if any
+    // If a fleet server host was found, get associated fleet server host proxy if any
     // ignore errors if the proxy is not found
     try {
       if (settingsResponse.fleet_server.host?.proxy_id) {
@@ -91,6 +106,25 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       }
     } catch (e) {
       settingsResponse.fleet_server.host_proxy = undefined;
+    }
+
+    // Get associated output and proxy (if any) to use for Fleet Server enrollment
+    try {
+      if (settingsResponse.fleet_server.policies.length > 0) {
+        const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
+        if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
+          settingsResponse.fleet_server.es_output = dataOutput;
+          if (dataOutput.proxy_id) {
+            settingsResponse.fleet_server.es_output_proxy = await getFleetProxy(
+              soClient,
+              dataOutput.proxy_id
+            );
+          }
+        }
+      }
+    } catch (e) {
+      settingsResponse.fleet_server.es_output = undefined;
+      settingsResponse.fleet_server.es_output_proxy = undefined;
     }
 
     return response.ok({ body: settingsResponse });
@@ -115,6 +149,7 @@ export const getFleetServerOrAgentPolicies = async (
     fleet_server_host_id: policy.fleet_server_host_id,
     download_source_id: policy.download_source_id,
     space_ids: policy.space_ids,
+    data_output_id: policy.data_output_id,
   });
 
   // If an agent policy is specified, return only that policy
