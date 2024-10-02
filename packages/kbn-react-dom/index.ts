@@ -14,8 +14,11 @@ import { createRoot, Root } from 'react-dom/client';
 const elements = new WeakMap<Container, Root>();
 
 const render: Renderer = (element: any, container: any, cb: any) => {
-  const root = createRoot(container);
-  elements.set(container, root);
+  if (!elements.has(container)) {
+    const root = createRoot(container);
+    elements.set(container, root);
+  }
+  const root = elements.get(container)!;
   root.render(element);
   return element;
 };
@@ -24,6 +27,8 @@ const unmountComponentAtNode = (container: Container) => {
   const root = elements.get(container);
   if (root) {
     root.unmount();
+    elements.delete(container);
+
     return true;
   }
   return false;
