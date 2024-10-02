@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useDataViewsService } from '../../services';
+import { useDataViewsService } from '../../services/hooks';
 import {
   ESFieldsSelect as Component,
   ESFieldsSelectProps as Props,

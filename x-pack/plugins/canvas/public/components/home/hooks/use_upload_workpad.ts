@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SavedObject } from '@kbn/core/public';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
-import { useNotifyService } from '../../../services';
+import { useNotifyService } from '../../../services/hooks';
 import { getId } from '../../../lib/get_id';
 import { useImportWorkpad as useImportWorkpadHook } from './use_import_workpad';
 import type { CanvasWorkpad } from '../../../../types';

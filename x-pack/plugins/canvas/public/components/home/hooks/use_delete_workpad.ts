@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useWorkpadService } from '../../../services';
+import { useWorkpadService } from '../../../services/hooks';
 import { getCanvasNotifyService } from '../../../services/canvas_notify_service';
 
 export const useDeleteWorkpads = () => {

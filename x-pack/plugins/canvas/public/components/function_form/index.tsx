@@ -34,7 +34,7 @@ import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
 import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
-import { useWorkpadService } from '../../services';
+import { useWorkpadService } from '../../services/hooks';
 import { createAsset, notifyError } from '../../lib/assets';
 
 interface FunctionFormProps {

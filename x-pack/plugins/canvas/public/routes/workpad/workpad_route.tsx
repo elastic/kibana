@@ -14,7 +14,7 @@ import { ExportApp } from '../../components/export_app';
 import { CanvasLoading } from '../../components/canvas_loading';
 // @ts-expect-error
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { useNotifyService } from '../../services';
+import { useNotifyService } from '../../services/hooks';
 import { CanvasWorkpad } from '../../../types';
 import { ErrorStrings } from '../../../i18n';
 import { useWorkpad } from './hooks/use_workpad';

@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 
 import { isEqual } from 'lodash';
 
-import { useNotifyService } from '../../services';
+import { useNotifyService } from '../../services/hooks';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';

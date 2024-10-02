@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { CanvasWorkpad, State } from '../../../../types';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { canUserWrite } from '../../../state/selectors/app';
-import { useWorkpadService } from '../../../services';
+import { useWorkpadService } from '../../../services/hooks';
 import { notifyError } from '../../../lib/assets';
 
 export const useWorkpadPersist = () => {

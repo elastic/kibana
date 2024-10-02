@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWorkpadService } from '../../../services';
+import { useWorkpadService } from '../../../services/hooks';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error

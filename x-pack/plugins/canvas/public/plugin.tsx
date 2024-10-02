@@ -126,8 +126,6 @@ export class CanvasPlugin
 
         srcPlugin.start(coreStart, startPlugins);
 
-        setKibanaServices(coreStart, startPlugins, this.appUpdater, this.initContext);
-
         const { expressions, presentationUtil } = startPlugins;
         await presentationUtil.registerExpressionsLanguage(
           Object.values(expressions.getFunctions())
@@ -181,6 +179,7 @@ export class CanvasPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
+    setKibanaServices(coreStart, startPlugins, this.appUpdater, this.initContext);
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService, useWorkpadService } from '../../../services/hooks';
 
 import type { CanvasWorkpad } from '../../../../types';
 

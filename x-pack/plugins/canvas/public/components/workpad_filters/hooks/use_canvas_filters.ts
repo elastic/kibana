@@ -10,7 +10,7 @@ import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';
 import { adaptCanvasFilter } from '../../../lib/filter_adapters';
-import { useFiltersService } from '../../../services';
+import { useFiltersService } from '../../../services/hooks';
 
 const extractExpressionAST = (filters: string[]) => fromExpression(filters.join(' | '));
 

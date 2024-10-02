@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-import { useWorkpadService } from '../../../services';
+import { useWorkpadService } from '../../../services/hooks';
 
 export const useFindTemplates = () => {
   const workpadService = useWorkpadService();

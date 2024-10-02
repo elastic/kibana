@@ -12,7 +12,7 @@ import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/l
 import { ZIP } from '../../../../../../i18n/constants';
 
 import type { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
-import { useNotifyService, useWorkpadService } from '../../../../../services';
+import { useNotifyService, useWorkpadService } from '../../../../../services/hooks';
 import { coreServices } from '../../../../../services/kibana_services';
 
 const strings = {

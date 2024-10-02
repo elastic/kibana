@@ -8,7 +8,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
-import { useExpressionsService } from '../../services';
+import { useExpressionsService } from '../../services/hooks';
 import { ElementContent as Component, Props as ComponentProps } from './element_content';
 import { State } from '../../../types';
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useDataViewsService } from '../../services';
+import { useDataViewsService } from '../../services/hooks';
 import { ESFieldSelect as Component, ESFieldSelectProps as Props } from './es_field_select';
 
 type ESFieldSelectProps = Omit<Props, 'fields'>;

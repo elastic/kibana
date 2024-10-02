@@ -7,7 +7,7 @@
 
 import React, { FC, PropsWithChildren, useState } from 'react';
 
-import { useNotifyService } from '../../../services';
+import { useNotifyService } from '../../../services/hooks';
 import { ErrorStrings } from '../../../../i18n';
 import { useImportWorkpad } from '../hooks';
 
