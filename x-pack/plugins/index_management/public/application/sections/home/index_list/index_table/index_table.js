@@ -57,7 +57,9 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
+  application
 }) => {
+
   const columns = [
     {
       fieldName: 'name',
@@ -65,17 +67,26 @@ const getColumnConfigs = ({
         defaultMessage: 'Name',
       }),
       order: 10,
-      render: (index) => (
-        <>
-          <EuiLink
+      render: (index) => {
+
+    return(
+      <>
+      <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(index.name, location.search || ''))}
+            onClick={() => {
+              if(!extensionsService.indexDetailsPageRoute){
+                history.push(getIndexDetailsLink(index.name, location.search || ''))
+              }else{
+                const url = extensionsService.indexDetailsPageRoute.renderRoute({ index })
+                application.navigateToUrl(`${url}${index.name}`)
+              }}
+            }
           >
             {index.name}
           </EuiLink>
-          {renderBadges(index, extensionsService, filterChanged)}
-        </>
-      ),
+          {renderBadges(index, extensionsService, filterChanged)}</>
+        )
+      },
     },
     {
       fieldName: 'data_stream',
@@ -533,8 +544,9 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config }) => {
+        {({ services, config, core }) => {
           const { extensionsService } = services;
+          const { application } = core;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -542,6 +554,7 @@ export class IndexTable extends Component {
             filterChanged,
             history,
             location,
+            application
           });
           const columnsCount = columnConfigs.length + 1;
           return (

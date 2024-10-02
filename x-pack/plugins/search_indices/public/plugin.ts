@@ -59,14 +59,17 @@ export class SearchIndicesPlugin
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
-
     return {
       enabled: true,
     };
   }
 
-  public start(core: CoreStart): SearchIndicesPluginStart {
+  public start(core: CoreStart, deps: SearchIndicesAppPluginStartDependencies): SearchIndicesPluginStart {
+    const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
+    indexManagement?.extensionsService.setIndexDetailsPageRoute(
+      { renderRoute: () => { return "/app/elasticsearch/indices/index_details/"}}
+    );
     return {};
   }
 
