@@ -77,11 +77,15 @@ export function useSplitFieldCardinality(
             { fieldCount: AggregationsCardinalityAggregate }
           >;
         }
-      >(requestPayload).then((response) => {
-        if (response?.rawResponse.aggregations) {
-          setCardinality(response.rawResponse.aggregations.fieldCount.value);
-        }
-      });
+      >(requestPayload)
+        .then((response) => {
+          if (response?.rawResponse.aggregations) {
+            setCardinality(response.rawResponse.aggregations.fieldCount.value);
+          }
+        })
+        .catch((e) => {
+          // console.log(e);
+        });
     },
     [getSplitFieldCardinality, requestPayload, cancelRequest, splitField]
   );
