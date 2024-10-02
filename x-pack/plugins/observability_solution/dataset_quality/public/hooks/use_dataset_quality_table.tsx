@@ -39,7 +39,6 @@ export const useDatasetQualityTable = () => {
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
-  const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
   const canUserMonitorDataset = useSelector(
     service,
     (state) => state.context.datasetUserPrivileges.canMonitor
@@ -102,7 +101,6 @@ export const useDatasetQualityTable = () => {
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
-        isSizeStatsAvailable,
         isActiveDataset: isActive,
         timeRange,
         urlService: url,
@@ -114,7 +112,6 @@ export const useDatasetQualityTable = () => {
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
-      isSizeStatsAvailable,
       isActive,
       timeRange,
       url,
@@ -211,6 +208,5 @@ export const useDatasetQualityTable = () => {
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
-    isSizeStatsAvailable,
   };
 };

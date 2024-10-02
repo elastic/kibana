@@ -476,7 +476,7 @@
         "label": "replaceAnonymizedValuesWithOriginalValues",
         "description": [],
         "signature": [
-          "({ messageContent, replacements, }: { messageContent: string; replacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">; }) => string"
+          "({ messageContent, replacements, }: { messageContent: string; replacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | null | undefined; }) => string"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
         "deprecated": false,
@@ -512,7 +512,7 @@
                 "label": "replacements",
                 "description": [],
                 "signature": [
-                  "{} & { [k: string]: string; }"
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | null | undefined"
                 ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
                 "deprecated": false,
@@ -1244,7 +1244,7 @@
         "label": "ChatCompleteProps",
         "description": [],
         "signature": [
-          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -1259,7 +1259,7 @@
         "label": "ChatCompleteRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -1274,7 +1274,7 @@
         "label": "ChatCompleteRequestBodyInput",
         "description": [],
         "signature": [
-          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -1291,7 +1291,7 @@
           "\nAI assistant message."
         ],
         "signature": [
-          "{ role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }"
+          "{ role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -1372,7 +1372,7 @@
           "\nThe conversation confidence."
         ],
         "signature": [
-          "\"medium\" | \"low\" | \"high\""
+          "\"medium\" | \"high\" | \"low\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
@@ -1387,7 +1387,7 @@
         "label": "ConversationConfidenceEnum",
         "description": [],
         "signature": [
-          "{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"
+          "{ medium: \"medium\"; high: \"high\"; low: \"low\"; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
@@ -4175,7 +4175,7 @@
         "label": "ChatCompleteProps",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }>"
+          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -4190,7 +4190,7 @@
         "label": "ChatCompleteRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }>"
+          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -4205,7 +4205,7 @@
         "label": "ChatMessage",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }>"
+          "Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -4295,7 +4295,7 @@
         "label": "ConversationConfidenceEnum",
         "description": [],
         "signature": [
-          "{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"
+          "{ medium: \"medium\"; high: \"high\"; low: \"low\"; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
