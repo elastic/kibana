@@ -33,6 +33,7 @@ import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_critica
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
+import { AssetCriticalityEcsMigrationClient } from './lib/entity_analytics/asset_criticality/asset_criticality_migration_client';
 
 export interface IRequestContextFactory {
   create(
@@ -205,6 +206,11 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient,
             soClient,
             logger,
+          }),
+          assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
+            logger,
+            auditLogger: getAuditLogger(),
+            esClient,
           }),
         });
       }),

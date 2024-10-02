@@ -10,6 +10,12 @@ import type { AssetCriticalityRecord } from '../../../../common/api/entity_analy
 
 export type CriticalityValues = AssetCriticalityRecord['criticality_level'] | 'deleted';
 
+const assetCriticalityMapping = {
+  type: 'keyword',
+  array: false,
+  required: false,
+};
+
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -26,16 +32,29 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  criticality_level: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
+  criticality_level: assetCriticalityMapping,
   updated_at: {
     type: 'date',
     array: false,
     required: false,
   },
+  'asset.criticality': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'host.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.asset.criticality': assetCriticalityMapping,
+  'user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.asset.criticality': assetCriticalityMapping,
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {
