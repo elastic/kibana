@@ -50,18 +50,35 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
-  getSupportedRoleDescriptors(): Record<string, unknown> {
-    return readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>;
+  getSupportedRoleDescriptors() {
+    const roleDescriptors = new Map<string, any>(
+      Object.entries(
+        readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
+      )
+    );
+    if (this.projectType !== 'oblt') {
+      // no privilliages set by default
+      roleDescriptors.set(this.getCustomRole(), null);
+    }
+    return roleDescriptors;
   }
+
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);
   }
+
+  getCustomRole() {
+    return 'customRole';
+  }
+
   getRolesDefinitionPath(): string {
     return this.rolesDefinitionPath;
   }
+
   getCommonRequestHeader() {
     return COMMON_REQUEST_HEADERS;
   }
+
   getInternalRequestHeader() {
     return getServerlessInternalRequestHeaders();
   }

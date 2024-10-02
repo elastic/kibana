@@ -27,6 +27,23 @@ export interface CookieCredentials {
   [header: string]: string;
 }
 
+export interface CustomRolePrivilliages {
+  kibana: any;
+  elasticsearch?: any;
+}
+
+const throwErrorIfCustomRoleIsNotSet = (
+  currentRole: string,
+  customeRoleName: string,
+  roleDescriptors: Map<string, any>
+) => {
+  if (currentRole === customeRoleName && !roleDescriptors.get(customeRoleName)) {
+    throw new Error(
+      `Set privilliages for '${customeRoleName}' role using 'samlAuth.setCustomRole' before authentication`
+    );
+  }
+};
+
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
@@ -35,7 +52,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
   const authRoleProvider = getAuthProvider({ config });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
-  const supportedRoles = Object.keys(supportedRoleDescriptors);
+  const supportedRoles = Array.from(supportedRoleDescriptors.keys());
 
   const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
   const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
@@ -61,12 +78,15 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
   const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
+  const CUSTOM_ROLE = authRoleProvider.getCustomRole();
 
   return {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
+      throwErrorIfCustomRoleIsNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     async getM2MApiCookieCredentialsWithRoleScope(role: string): Promise<CookieCredentials> {
+      throwErrorIfCustomRoleIsNotSet(role, CUSTOM_ROLE, supportedRoleDescriptors);
       return sessionManager.getApiCredentialsForRole(role);
     },
     async getEmail(role: string) {
@@ -87,9 +107,13 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       // Get the role descrtiptor for the role
       let roleDescriptors = {};
       if (role !== 'admin') {
-        const roleDescriptor = supportedRoleDescriptors[role];
+        const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
-          throw new Error(`Cannot create API key for non-existent role "${role}"`);
+          throw new Error(
+            role === CUSTOM_ROLE
+              ? `Update privilliages for '${CUSTOM_ROLE}' role using 'samlAuth.setCustomRole' before creating API key`
+              : `Cannot create API key for non-existent role "${role}"`
+          );
         }
         log.debug(
           `Creating api key for ${role} role with the following privileges ${JSON.stringify(
@@ -140,6 +164,24 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       expect(status).to.be(200);
     },
+
+    async setCustomRole(privilliages: CustomRolePrivilliages) {
+      log.debug(`updating role ${CUSTOM_ROLE}`);
+      const adminCookieHeader = await this.getM2MApiCookieCredentialsWithRoleScope('admin');
+
+      const { status } = await supertestWithoutAuth
+        .put(`/api/security/role/${CUSTOM_ROLE}`)
+        .set(INTERNAL_REQUEST_HEADERS)
+        .set(adminCookieHeader)
+        .send({
+          kibana: privilliages.kibana,
+          elasticsearch: privilliages.elasticsearch,
+        });
+      expect(status).to.be(204);
+      // update descriptors for custome role
+      supportedRoleDescriptors.set(CUSTOM_ROLE, privilliages);
+    },
+
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
     },
@@ -148,5 +190,6 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return INTERNAL_REQUEST_HEADERS;
     },
     DEFAULT_ROLE,
+    CUSTOM_ROLE,
   };
 }

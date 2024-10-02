@@ -12,8 +12,9 @@ import { ServerlessAuthProvider } from './serverless/auth_provider';
 import { StatefulAuthProvider } from './stateful/auth_provider';
 
 export interface AuthProvider {
-  getSupportedRoleDescriptors(): Record<string, unknown>;
+  getSupportedRoleDescriptors(): Map<string, any>;
   getDefaultRole(): string;
+  getCustomRole(): string;
   getRolesDefinitionPath(): string;
   getCommonRequestHeader(): { [key: string]: string };
   getInternalRequestHeader(): { [key: string]: string };
