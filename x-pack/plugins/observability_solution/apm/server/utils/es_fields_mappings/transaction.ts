@@ -13,9 +13,6 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  SERVICE_NODE_NAME,
-  SERVICE_NAME,
-  SERVICE_FRAMEWORK_NAME,
   TRACE_ID,
   AGENT_NAME,
   AGENT_VERSION,
@@ -44,6 +41,7 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { isOptionalFieldDefined, normalizeValue } from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 import { linkedParentsOfSpanMapping } from './span_links';
+import { serviceMapping } from './service';
 
 export const transactionMapping = (fields: Fields) => {
   if (!fields) return { transaction: undefined };
@@ -60,18 +58,7 @@ export const transactionMapping = (fields: Fields) => {
       type: normalizeValue<string>(fields[TRANSACTION_TYPE]),
       name: normalizeValue<string>(fields[TRANSACTION_NAME]),
     },
-    service: {
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-      },
-    },
+    ...serviceMapping(fields),
     trace: {
       id: normalizeValue<string>(fields[TRACE_ID]),
     },

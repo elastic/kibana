@@ -15,8 +15,6 @@ import {
   SPAN_NAME,
   SPAN_DURATION,
   TRACE_ID,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   AGENT_NAME,
   EventOutcome,
   EVENT_OUTCOME,
@@ -25,6 +23,7 @@ import {
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Fields } from './types';
 import { normalizeValue } from './es_fields_mappings_helpers';
+import { serviceMapping } from './service';
 
 export const metadataForDependencyMapping = (fields: Fields) => {
   if (!fields) return undefined;
@@ -66,10 +65,7 @@ export const topDependencySpansMapping = (fields: Fields) => {
     trace: {
       id: normalizeValue<string>(fields[TRACE_ID]),
     },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-    },
+    ...serviceMapping(fields),
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
     },

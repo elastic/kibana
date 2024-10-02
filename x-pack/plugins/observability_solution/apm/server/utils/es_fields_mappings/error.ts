@@ -9,7 +9,6 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
   PARENT_ID,
-  SERVICE_NAME,
   ERROR_ID,
   ERROR_LOG_MESSAGE,
   ERROR_EXCEPTION,
@@ -24,8 +23,6 @@ import {
   OBSERVER_VERSION,
   OBSERVER_VERSION_MAJOR,
   AGENT_NAME,
-  SERVICE_NODE_NAME,
-  SERVICE_ENVIRONMENT,
   HOST_NAME,
   PROCESSOR_NAME,
   PROCESSOR_EVENT,
@@ -38,6 +35,7 @@ import type { Fields } from './types';
 import type { WaterfallError } from '../../../common/waterfall/typings';
 import type { Exception } from '../../../typings/es_schemas/raw/error_raw';
 import { normalizeValue } from './es_fields_mappings_helpers';
+import { serviceMapping } from './service';
 
 export const errorDocsMapping = (fields: Fields): WaterfallError | undefined => {
   if (!fields) return undefined;
@@ -55,9 +53,7 @@ export const errorDocsMapping = (fields: Fields): WaterfallError | undefined => 
     parent: {
       id: normalizeValue<string>(fields[PARENT_ID]),
     },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-    },
+    ...serviceMapping(fields),
     error: {
       id: normalizeValue<string>(fields[ERROR_ID]),
       log: {
@@ -112,13 +108,7 @@ export const errorSampleDetailsMapping = (fields: Fields): APMError | undefined 
       id: normalizeValue<string>(fields[TRACE_ID]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
-    service: {
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-    },
+    ...serviceMapping(fields),
     host: {
       name: normalizeValue<string>(fields[HOST_NAME]),
     },

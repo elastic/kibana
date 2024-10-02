@@ -15,8 +15,6 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TRANSACTION_DURATION,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   PROCESSOR_EVENT,
   AGENT_NAME,
   SPAN_LINKS_TRACE_ID,
@@ -26,6 +24,7 @@ import {
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Fields } from './types';
 import { normalizeValue } from './es_fields_mappings_helpers';
+import { serviceMapping } from './service';
 
 export const spanLinksDetailsMapping = (fields: Fields) => {
   if (!fields) return undefined;
@@ -50,10 +49,7 @@ export const spanLinksDetailsMapping = (fields: Fields) => {
         us: normalizeValue<string>(fields[TRANSACTION_DURATION]),
       },
     },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-    },
+    ...serviceMapping(fields),
     processor: {
       event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
     },

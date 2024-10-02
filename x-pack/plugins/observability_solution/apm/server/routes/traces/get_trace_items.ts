@@ -135,7 +135,9 @@ export async function getTraceItems({
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
 
-  const traceDocs = traceResponse.hits.map((hit) => traceDocMapping(hit.fields));
+  const traceDocs = traceResponse.hits.map((hit) =>
+    traceDocMapping(hit.fields, hit?._source?.span?.links)
+  );
   const errorDocs = errorResponse.hits.hits.map((hit) => errorDocsMapping(hit.fields));
 
   return {
@@ -229,6 +231,7 @@ async function getTraceDocsPerPage({
     track_total_hits: true,
     size,
     search_after: searchAfter,
+    _source: [SPAN_LINKS],
     query: {
       bool: {
         filter: [
@@ -261,7 +264,6 @@ async function getTraceDocsPerPage({
       SPAN_ACTION,
       SPAN_NAME,
       SPAN_DURATION,
-      SPAN_LINKS,
       SPAN_COMPOSITE_COUNT,
       SPAN_COMPOSITE_COMPRESSION_STRATEGY,
       SPAN_COMPOSITE_SUM,

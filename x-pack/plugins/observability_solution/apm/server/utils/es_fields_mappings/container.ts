@@ -6,7 +6,11 @@
  */
 
 import { CONTAINER_ID, CONTAINER_IMAGE, type Container } from '@kbn/apm-types';
-import { isOptionalFieldDefined, normalizeValue } from './es_fields_mappings_helpers';
+import {
+  cleanUndefinedFields,
+  isOptionalFieldDefined,
+  normalizeValue,
+} from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 
 export const containerMapping = (
@@ -14,10 +18,10 @@ export const containerMapping = (
 ): { container?: Container | undefined } | undefined => ({
   ...(isOptionalFieldDefined(fields, 'container.')
     ? {
-        container: {
+        container: cleanUndefinedFields({
           id: normalizeValue<string>(fields[CONTAINER_ID]),
           image: normalizeValue<string>(fields[CONTAINER_IMAGE]),
-        },
+        }),
       }
     : undefined),
 });

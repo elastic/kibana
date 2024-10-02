@@ -8,8 +8,6 @@
 import {
   TRACE_ID,
   PARENT_ID,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   AGENT_NAME,
   EventOutcome,
   EVENT_OUTCOME,
@@ -38,10 +36,11 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import type { WaterfallTransaction, WaterfallSpan } from '../../../common/waterfall/typings';
 import type { Fields } from './types';
-import { linkedParentsOfSpanMapping } from './span_links';
+import { serviceMapping } from './service';
 
 export const traceDocMapping = (
-  fields: Fields
+  fields: Fields,
+  spanLinkFromSource?: SpanLink[]
 ): WaterfallTransaction | WaterfallSpan | undefined => {
   if (!fields) return undefined;
 
@@ -55,10 +54,7 @@ export const traceDocMapping = (
     parent: {
       id: normalizeValue<string>(fields[PARENT_ID]),
     },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-    },
+    ...serviceMapping(fields),
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
     },
@@ -89,7 +85,7 @@ export const traceDocMapping = (
         us: normalizeValue<number>(fields[SPAN_DURATION]),
       },
       action: normalizeValue<string>(fields[SPAN_ACTION]),
-      links: linkedParentsOfSpanMapping(fields) as SpanLink[],
+      ...(spanLinkFromSource ? spanLinkFromSource : undefined),
       composite: {
         count: normalizeValue<number>(fields[SPAN_COMPOSITE_COUNT]),
         sum: {

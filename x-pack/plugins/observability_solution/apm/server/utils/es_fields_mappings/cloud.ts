@@ -20,18 +20,22 @@ import {
   CLOUD_SERVICE_NAME,
   type Cloud,
 } from '@kbn/apm-types';
-import { isOptionalFieldDefined, normalizeValue } from './es_fields_mappings_helpers';
+import {
+  isOptionalFieldDefined,
+  normalizeValue,
+  cleanUndefinedFields,
+} from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 
 export const cloudMapping = (fields: Fields): { cloud?: Cloud | undefined } | undefined => ({
   ...(isOptionalFieldDefined(fields, 'cloud.')
     ? {
-        cloud: {
+        cloud: cleanUndefinedFields({
           availability_zone: normalizeValue<string>(fields[CLOUD_AVAILABILITY_ZONE]),
-          instance: {
+          instance: cleanUndefinedFields({
             name: normalizeValue<string>(fields[CLOUD_INSTANCE_NAME]),
             id: normalizeValue<string>(fields[CLOUD_INSTANCE_ID]),
-          },
+          }),
           machine: {
             type: normalizeValue<string>(fields[CLOUD_MACHINE_TYPE]),
           },
@@ -41,17 +45,17 @@ export const cloudMapping = (fields: Fields): { cloud?: Cloud | undefined } | un
           },
           provider: normalizeValue<string>(fields[CLOUD_PROVIDER]),
           region: normalizeValue<string>(fields[CLOUD_REGION]),
-          account: {
+          account: cleanUndefinedFields({
             id: normalizeValue<string>(fields[CLOUD_ACCOUNT_ID]),
             name: normalizeValue<string>(fields[CLOUD_ACCOUNT_NAME]),
-          },
+          }),
           image: {
             id: normalizeValue<string>(fields[CLOUD_IMAGE_ID]),
           },
           service: {
             name: normalizeValue<string>(fields[CLOUD_SERVICE_NAME]),
           },
-        },
+        }),
       }
     : undefined),
 });

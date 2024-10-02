@@ -14,12 +14,6 @@ import {
   AGENT_VERSION,
   TRACE_ID,
   AT_TIMESTAMP,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_TARGET_NAME,
-  SERVICE_TARGET_TYPE,
   EventOutcome,
   EVENT_OUTCOME,
   EVENT_SUCCESS_COUNT,
@@ -42,6 +36,7 @@ import {
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import type { Fields } from './types';
+import { serviceMapping } from './service';
 
 export const spanMapping = (fields: Fields) => {
   if (!fields) return undefined;
@@ -63,18 +58,7 @@ export const spanMapping = (fields: Fields) => {
       id: normalizeValue<string>(fields[TRACE_ID]),
     },
     '@timestamp': normalizeValue<string>(fields[AT_TIMESTAMP]),
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
-      },
-      target: {
-        name: normalizeValue<string>(fields[SERVICE_TARGET_NAME]),
-        type: normalizeValue<string>(fields[SERVICE_TARGET_TYPE]),
-      },
-    },
+    ...serviceMapping(fields),
     event: {
       outcome: normalizeValue<EventOutcome>(fields[EVENT_OUTCOME]),
       success_count: normalizeValue<number>(fields[EVENT_SUCCESS_COUNT]),

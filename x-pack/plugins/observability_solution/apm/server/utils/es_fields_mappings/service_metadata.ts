@@ -6,16 +6,6 @@
  */
 
 import {
-  SERVICE_RUNTIME_NAME,
-  SERVICE_NAME,
-  SERVICE_VERSION,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_LANGUAGE_VERSION,
   AGENT_NAME,
   AGENT_VERSION,
   HOST_ARCHITECTURE,
@@ -29,6 +19,7 @@ import { AgentName } from '@kbn/elastic-agent-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 import { cloudMapping, containerMapping, kubernetesMapping } from '.';
+import { serviceMapping } from './service';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 type ServiceMetadataDetailsRaw = Pick<
@@ -40,32 +31,8 @@ export const serviceMetadataDetailsMapping = (
   fields: Fields
 ): ServiceMetadataDetailsRaw | undefined => {
   if (!fields) return undefined;
-  const serviceRuntimeName = normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]);
   return {
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      version: normalizeValue<string>(fields[SERVICE_VERSION]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
-      },
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      ...(serviceRuntimeName
-        ? {
-            runtime: {
-              name: serviceRuntimeName,
-              version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-            },
-          }
-        : undefined),
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
-      },
-    },
+    ...serviceMapping(fields),
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
       version: normalizeValue<AgentName>(fields[AGENT_VERSION]),

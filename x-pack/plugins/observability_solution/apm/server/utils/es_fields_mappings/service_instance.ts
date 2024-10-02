@@ -15,21 +15,12 @@ import {
   HOST_NAME,
   HOST_IP,
   HOST_OS_PLATFORM,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
-  SERVICE_FRAMEWORK_VERSION,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_NAME,
-  SERVICE_RUNTIME_VERSION,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_LANGUAGE_VERSION,
-  SERVICE_VERSION,
 } from '@kbn/apm-types';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import { Fields } from './types';
 import { cloudMapping, containerMapping, kubernetesMapping } from '.';
+import { serviceMapping } from './service';
 
 export const serviceInstanceMetadataDetailsMapping = (fields: Fields = {}) => {
   if (!fields) return undefined;
@@ -50,26 +41,7 @@ export const serviceInstanceMetadataDetailsMapping = (fields: Fields = {}) => {
         platform: normalizeValue<string>(fields[HOST_OS_PLATFORM]),
       },
     },
-    service: {
-      name: normalizeValue<string>(fields[SERVICE_NAME]),
-      environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
-      framework: {
-        name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
-        versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
-      },
-      node: {
-        name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
-      },
-      runtime: {
-        name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
-      },
-      language: {
-        name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
-        version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
-      },
-      version: normalizeValue<string>(fields[SERVICE_VERSION]),
-    },
+    ...serviceMapping(fields),
     ...containerMapping(fields),
     ...kubernetesMapping(fields),
     ...cloudMapping(fields),

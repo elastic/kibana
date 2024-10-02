@@ -11,13 +11,45 @@ import {
   OBSERVER_VERSION_MAJOR,
   AGENT_NAME,
   SERVICE_RUNTIME_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
+  SERVICE_FRAMEWORK_VERSION,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_LANGUAGE_VERSION,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Fields } from './types';
-import { normalizeValue } from './es_fields_mappings_helpers';
+import { cleanUndefinedFields, normalizeValue } from './es_fields_mappings_helpers';
 import { cloudMapping } from '.';
+
+export const serviceMapping = (fields: Fields) => ({
+  service: cleanUndefinedFields({
+    name: normalizeValue<string>(fields[SERVICE_NAME]),
+    environment: normalizeValue<string>(fields[SERVICE_ENVIRONMENT]),
+    framework: cleanUndefinedFields({
+      name: normalizeValue<string>(fields[SERVICE_FRAMEWORK_NAME]),
+      versions: normalizeValue<string>(fields[SERVICE_FRAMEWORK_VERSION]),
+    }),
+    node: {
+      name: normalizeValue<string>(fields[SERVICE_NODE_NAME]),
+    },
+    runtime: cleanUndefinedFields({
+      name: normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]),
+      version: normalizeValue<string>(fields[SERVICE_RUNTIME_VERSION]),
+    }),
+    language: cleanUndefinedFields({
+      name: normalizeValue<string>(fields[SERVICE_LANGUAGE_NAME]),
+      version: normalizeValue<string>(fields[SERVICE_LANGUAGE_VERSION]),
+    }),
+    version: normalizeValue<string>(fields[SERVICE_VERSION]),
+  }),
+});
 
 // todo: check https://github.com/jennypavlova/kibana/pull/6#discussion_r1771611817
 export const serviceVersionMapping = (
@@ -35,21 +67,12 @@ export const serviceVersionMapping = (
 
 export const serviceAgentNameMapping = (fields: Fields) => {
   if (!fields) return undefined;
-  const serviceRuntimeName = normalizeValue<string>(fields[SERVICE_RUNTIME_NAME]);
 
   return {
     agent: {
       name: normalizeValue<AgentName>(fields[AGENT_NAME]),
     },
-    service: {
-      ...(serviceRuntimeName
-        ? {
-            runtime: {
-              name: serviceRuntimeName,
-            },
-          }
-        : undefined),
-    },
+    service: serviceMapping(fields),
     ...cloudMapping(fields),
   };
 };

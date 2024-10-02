@@ -11,7 +11,11 @@ import {
   KUBERNETES_POD_UID,
   type Kubernetes,
 } from '@kbn/apm-types';
-import { isOptionalFieldDefined, normalizeValue } from './es_fields_mappings_helpers';
+import {
+  cleanUndefinedFields,
+  isOptionalFieldDefined,
+  normalizeValue,
+} from './es_fields_mappings_helpers';
 import type { Fields } from './types';
 import {
   KUBERNETES_REPLICASET_NAME,
@@ -26,21 +30,21 @@ export const kubernetesMapping = (
   ...(isOptionalFieldDefined(fields, 'kubernetes.')
     ? {
         kubernetes: {
-          pod: {
+          pod: cleanUndefinedFields({
             name: normalizeValue<string>(fields[KUBERNETES_POD_NAME]),
             uid: normalizeValue<string>(fields[KUBERNETES_POD_UID]),
-          },
+          }),
           namespace: normalizeValue<string>(fields[KUBERNETES_NAMESPACE]),
-          replicaset: {
+          replicaset: cleanUndefinedFields({
             name: normalizeValue<string>(fields[KUBERNETES_REPLICASET_NAME]),
-          },
-          deployment: {
+          }),
+          deployment: cleanUndefinedFields({
             name: normalizeValue<string>(fields[KUBERNETES_DEPLOYMENT_NAME]),
-          },
-          container: {
+          }),
+          container: cleanUndefinedFields({
             id: normalizeValue<string>(fields[KUBERNETES_CONTAINER_ID]),
             name: normalizeValue<string>(fields[KUBERNETES_CONTAINER_NAME]),
-          },
+          }),
         },
       }
     : undefined),
