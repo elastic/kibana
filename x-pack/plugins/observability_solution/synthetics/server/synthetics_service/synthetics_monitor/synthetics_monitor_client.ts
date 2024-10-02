@@ -284,7 +284,7 @@ export class SyntheticsMonitorClient {
       spaceId,
     });
 
-    for (const monitor of await monitors) {
+    for (const monitor of monitors) {
       const { publicLocations, privateLocations } = this.parseLocations(monitor);
       if (publicLocations.length > 0) {
         publicConfigs.push({ spaceId, monitor, configId: monitor.config_id, params: {} });
@@ -353,7 +353,7 @@ export class SyntheticsMonitorClient {
     return monitors;
   }
 
-  async mixParamsWithMonitors(
+  mixParamsWithMonitors(
     spaceId: string,
     monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
