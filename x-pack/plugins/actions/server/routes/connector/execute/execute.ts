@@ -6,29 +6,22 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
+import { ILicenseState } from '../../../lib';
 
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
-import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
-import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
-import { verifyAccessAndContext } from './verify_access_and_context';
-import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../../types';
+import { BASE_ACTION_API_PATH } from '../../../../common';
+import { asHttpRequestExecutionSource } from '../../../lib/action_execution_source';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import {
   executeConnectorRequestBodySchemaV1,
+  ExecuteConnectorRequestBodyV1,
   executeConnectorRequestParamsSchemaV1,
-} from '../../common/routes/connector/apis/execute';
+  ExecuteConnectorRequestParamsV1,
+} from '../../../../common/routes/connector/apis/execute';
+import { transformExecuteConnectorResponseV1 } from './transforms';
 
-const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = ({
-  actionId,
-  serviceMessage,
-  ...res
-}) => ({
-  ...res,
-  connector_id: actionId,
-  ...(serviceMessage ? { service_message: serviceMessage } : {}),
-});
-
-export const executeActionRoute = (
+export const executeConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -58,8 +51,8 @@ export const executeActionRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const { params } = req.body;
-        const { id } = req.params;
+        const { params }: ExecuteConnectorRequestBodyV1 = req.body;
+        const { id }: ExecuteConnectorRequestParamsV1 = req.params;
 
         if (actionsClient.isSystemAction(id)) {
           return res.badRequest({ body: 'Execution of system action is not allowed' });
@@ -74,7 +67,7 @@ export const executeActionRoute = (
 
         return body
           ? res.ok({
-              body: rewriteBodyRes(body),
+              body: transformExecuteConnectorResponseV1(body),
             })
           : res.noContent();
       })

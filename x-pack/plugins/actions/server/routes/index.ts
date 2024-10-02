@@ -15,7 +15,7 @@ import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
 import { deleteConnectorRoute } from './connector/delete';
-import { executeActionRoute } from './execute';
+import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateActionRoute } from './update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
@@ -42,7 +42,7 @@ export function defineRoutes(opts: RouteOptions) {
   getAllConnectorsRoute(router, licenseState);
   updateActionRoute(router, licenseState);
   listTypesRoute(router, licenseState);
-  executeActionRoute(router, licenseState);
+  executeConnectorRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
 

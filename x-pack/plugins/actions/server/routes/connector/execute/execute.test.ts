@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { executeActionRoute } from './execute';
+import { executeConnectorRoute } from './execute';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
-import { asHttpRequestExecutionSource } from '../lib';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
-import { ActionTypeExecutorResult } from '../types';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
+import { asHttpRequestExecutionSource } from '../../../lib';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { ActionTypeExecutorResult } from '../../../types';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-jest.mock('./verify_access_and_context', () => ({
+jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -23,7 +23,7 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('executeActionRoute', () => {
+describe('executeConnectorRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -55,7 +55,7 @@ describe('executeActionRoute', () => {
       status: 'ok',
     };
 
-    executeActionRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -95,7 +95,7 @@ describe('executeActionRoute', () => {
       ['noContent']
     );
 
-    executeActionRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -131,7 +131,7 @@ describe('executeActionRoute', () => {
       ['ok']
     );
 
-    executeActionRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -163,7 +163,7 @@ describe('executeActionRoute', () => {
       ['ok']
     );
 
-    executeActionRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -192,7 +192,7 @@ describe('executeActionRoute', () => {
       ['ok']
     );
 
-    executeActionRoute(router, licenseState);
+    executeConnectorRoute(router, licenseState);
 
     const [_, handler] = router.post.mock.calls[0];
 
