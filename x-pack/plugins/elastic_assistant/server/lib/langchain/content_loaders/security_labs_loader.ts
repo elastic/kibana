@@ -9,6 +9,8 @@ import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
+import { Document } from 'langchain/document';
+import { Metadata } from '@kbn/elastic-assistant-common';
 
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
@@ -36,7 +38,7 @@ export const loadSecurityLabs = async (
       docs: rawDocs,
       kbResource: SECURITY_LABS_RESOURCE,
       required: false,
-    });
+    }) as Array<Document<Metadata>>;
 
     logger.info(`Loading ${docs.length} Security Labs docs into the Knowledge Base`);
 
