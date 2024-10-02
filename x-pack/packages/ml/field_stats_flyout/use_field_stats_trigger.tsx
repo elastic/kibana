@@ -9,12 +9,23 @@ import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
-import { optionCss } from './eui_combo_box_with_field_stats';
+import { css } from '@emotion/react';
 import type { DropDownLabel } from '.';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
 import { FieldStatsInfoButton } from './field_stats_info_button';
 
+export const optionCss = css`
+  .euiComboBoxOption__enterBadge {
+    display: none;
+  }
+  .euiFlexGroup {
+    gap: 0px;
+  }
+  .euiComboBoxOption__content {
+    margin-left: 2px;
+  }
+`;
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }

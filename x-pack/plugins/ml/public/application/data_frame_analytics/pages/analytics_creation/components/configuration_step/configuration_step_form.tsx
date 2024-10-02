@@ -30,7 +30,7 @@ import {
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import {
-  EuiComboBoxWithFieldStats,
+  OptionListWithFieldStats,
   FieldStatsFlyoutProvider,
   type FieldForStats,
 } from '@kbn/ml-field-stats-flyout';
@@ -665,7 +665,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   : []),
               ]}
             >
-              <EuiComboBoxWithFieldStats
+              <OptionListWithFieldStats
                 fullWidth
                 aria-label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
