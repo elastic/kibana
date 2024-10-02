@@ -16,6 +16,7 @@ import {
   installElser,
   createChunkFiles,
   createArtifact,
+  cleanupFolders,
 } from './tasks';
 import type { TaskConfig } from './types';
 
@@ -62,6 +63,8 @@ export const buildArtifacts = async (config: TaskConfig) => {
   // log.info('Checking connectivity against clusters');
   // await checkConnectivity({ sourceClient, embeddingClient });
 
+  await cleanupFolders({ folders: [config.buildFolder] });
+
   log.info('Ensuring ELSER is installed on the embedding cluster');
   await installElser({ client: embeddingClient });
 
@@ -76,6 +79,8 @@ export const buildArtifacts = async (config: TaskConfig) => {
       log,
     });
   }
+
+  // await cleanupFolders({ folders: [config.buildFolder] });
 };
 
 const buildArtifact = async ({
@@ -95,9 +100,9 @@ const buildArtifact = async ({
   embeddingClient: Client;
   log: ToolingLog;
 }) => {
-  const targetIndex = `kb-test-${pseudoRandSuffix()}`;
-
   log.info(`Starting building artifact for product ${productName} and version ${stackVersion}`);
+
+  const targetIndex = `kb-test-${pseudoRandSuffix()}`;
 
   const documents = await extractDocumentation({
     client: sourceClient,
@@ -105,6 +110,7 @@ const buildArtifact = async ({
     productName,
     stackVersion,
   });
+  log.info(`Extracted ${documents.length} documents from the source cluster`);
 
   await createTargetIndex({
     client: embeddingClient,
@@ -123,14 +129,18 @@ const buildArtifact = async ({
     client: embeddingClient,
     productName,
     destFolder: Path.join(buildFolder, productName),
+    log,
   });
 
-  await createArtifact({
+  const artifactName = await createArtifact({
     buildFolder: Path.join(buildFolder, productName),
     targetFolder,
     productName,
     stackVersion,
+    log,
   });
+
+  log.info(`Artifact created: ${artifactName}`);
 };
 
 const pseudoRandSuffix = () => Math.random().toString(36).slice(2);

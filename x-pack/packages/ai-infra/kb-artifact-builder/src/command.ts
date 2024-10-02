@@ -10,19 +10,20 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import yargs from 'yargs';
 import type { TaskConfig } from './types';
 import { buildArtifacts } from './build_artifacts';
+import { sourceProductNames } from './artifact/product_name';
 
 function options(y: yargs.Argv) {
   return y
-    .option('productNames', {
+    .option('productName', {
       describe: 'name of products to generate documentation for',
       array: true,
-      choices: ['Kibana'], // TODO
-      default: ['Kibana'], // TODO
+      choices: sourceProductNames,
+      default: ['Kibana'],
     })
     .option('stackVersion', {
       describe: 'The stack version to generate documentation for',
       string: true,
-      default: '8.16', // TODO
+      default: '8.16', // TODO: master is on 9.0 now, not sure we can default to version in package.json?
     })
     .option('targetFolder', {
       describe: 'The folder to generate the artefacts in',
@@ -78,7 +79,7 @@ export function runScript() {
     .command('*', 'Build knowledge base artifacts', options, async (argv) => {
       // argv contains additional entries - let's keep our input clear
       const taskConfig: TaskConfig = {
-        productNames: argv.productNames,
+        productNames: argv.productName,
         stackVersion: argv.stackVersion,
         buildFolder: argv.buildFolder,
         targetFolder: argv.targetFolder,

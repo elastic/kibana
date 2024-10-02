@@ -7,6 +7,7 @@
 
 import Path from 'path';
 import AdmZip from 'adm-zip';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getArtifactMappings } from '../artifact/mappings';
 import { getArtifactManifest } from '../artifact/manifest';
 import { getArtifactName } from '../artifact/artifact_name';
@@ -16,11 +17,13 @@ export const createArtifact = async ({
   stackVersion,
   buildFolder,
   targetFolder,
+  log,
 }: {
   buildFolder: string;
   targetFolder: string;
   productName: string;
   stackVersion: string;
+  log: ToolingLog;
 }) => {
   const zip = new AdmZip();
 
@@ -39,4 +42,6 @@ export const createArtifact = async ({
     productVersion: stackVersion,
   });
   zip.writeZip(Path.join(targetFolder, artifactName));
+
+  return artifactName;
 };

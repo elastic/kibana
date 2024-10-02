@@ -43,6 +43,6 @@ export const indexDocuments = async ({
     );
 
     const duration = Date.now() - before;
-    log.info(`indexed ${i + 1} of ${chunks.length} chunks (took ${duration})`);
+    log.info(`indexed ${i + 1} of ${chunks.length} chunks (took ${duration}ms)`);
   }
 };

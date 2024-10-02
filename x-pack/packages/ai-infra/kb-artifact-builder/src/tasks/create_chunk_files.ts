@@ -8,6 +8,7 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const fileSizeLimit = 250_000;
 
@@ -16,11 +17,13 @@ export const createChunkFiles = async ({
   productName,
   destFolder,
   client,
+  log,
 }: {
   index: string;
   productName: string;
   destFolder: string;
   client: Client;
+  log: ToolingLog;
 }) => {
   const searchRes = await client.search({
     index,
