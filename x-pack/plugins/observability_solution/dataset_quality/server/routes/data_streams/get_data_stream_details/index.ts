@@ -116,7 +116,7 @@ export async function getDataStreamDetails({
 }
 
 async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream: string) {
-  const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, dataStream);
+  const indexSettings = await dataStreamService.getDataStreamIndexSettings(esClient, dataStream);
 
   const indexesList = Object.values(indexSettings);
 
