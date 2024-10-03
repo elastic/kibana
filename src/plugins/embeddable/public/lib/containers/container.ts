@@ -54,13 +54,9 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>, Omit<PresentationContainer, 'children$'>
 {
   public readonly isContainer: boolean = true;
-
-  public children$: BehaviorSubject<{ [key: string]: unknown }> = new BehaviorSubject<{
-    [key: string]: unknown;
-  }>({});
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
@@ -123,6 +119,14 @@ export abstract class Container<
     );
   }
 
+  protected getChildren(): { [key: string]: unknown } {
+    throw new Error('getChildren implemenation not provided')
+  }
+
+  protected setChildren(children: { [key: string]: unknown }): void {
+    throw new Error('getChildren implemenation not provided')
+  }
+
   public getPanelCount() {
     return Object.keys(this.getInput().panels).length;
   }
@@ -157,8 +161,8 @@ export abstract class Container<
       return;
     }
 
-    const currentChildren = this.children$.value;
-    this.children$.next({
+    const currentChildren = this.getChildren;
+    this.setChildren({
       ...currentChildren,
       [embeddable.id]: embeddable,
     });
@@ -193,7 +197,7 @@ export abstract class Container<
   }
 
   public reload() {
-    for (const child of Object.values(this.children$.value)) {
+    for (const child of Object.values(this.getChildren())) {
       (child as IEmbeddable)?.reload?.();
     }
   }
@@ -280,11 +284,11 @@ export abstract class Container<
   }
 
   public getChildIds(): string[] {
-    return Object.keys(this.children$.value);
+    return Object.keys(this.getChildren());
   }
 
   public getChild<E extends IEmbeddable>(id: string): E {
-    return this.children$.value[id] as E;
+    return this.getChildren()[id] as E;
   }
 
   public getInputForChild<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>(
@@ -325,7 +329,7 @@ export abstract class Container<
 
   public destroy() {
     super.destroy();
-    for (const child of Object.values(this.children$.value)) {
+    for (const child of Object.values(this.getChildren())) {
       (child as IEmbeddable)?.destroy?.();
     }
     this.subscription?.unsubscribe();
@@ -339,14 +343,14 @@ export abstract class Container<
     }
 
     if (this.output.embeddableLoaded[id]) {
-      return this.children$.value[id] as TEmbeddable;
+      return this.getChildren()[id] as TEmbeddable;
     }
 
     return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
-          resolve(this.children$.value[id] as TEmbeddable);
+          resolve(this.getChildren()[id] as TEmbeddable);
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
@@ -509,9 +513,9 @@ export abstract class Container<
       embeddable.destroy();
 
       // Remove references.
-      const nextChildren = this.children$.value;
+      const nextChildren = this.getChildren();
       delete nextChildren[id];
-      this.children$.next(nextChildren);
+      this.setChildren(nextChildren);
     }
 
     this.updateOutput({

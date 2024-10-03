@@ -347,17 +347,29 @@ export class DashboardContainer
     this.setRuntimeStateForChild = dashboardApi.setRuntimeStateForChild;
     this.canRemovePanels = dashboardApi.canRemovePanels;
     this.removePanel = dashboardApi.removePanel;
+    this.children$ = dashboardApi.children$;
+    this.getChildren = () => {
+      return { ...this.children$.value };
+    };
+    this.setChildren = dashboardApi.setChildren;
     this.dashboardApi = dashboardApi;
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.publishingSubscription.add(
-      this.onStateChange(() => {
-        const state = this.getState();
-        if (this.useMargins$.value !== state.explicitInput.useMargins) {
-          this.useMargins$.next(state.explicitInput.useMargins);
+      this.getInput$().subscribe((input) => {
+        if (this.useMargins$.value !== input.useMargins) {
+          this.useMargins$.next(input.useMargins);
         }
-        if (this.panels$.value !== state.explicitInput.panels) {
-          dashboardApi.setPanels(state.explicitInput.panels);
+        if (this.panels$.value !== input.panels) {
+          dashboardApi.setPanels(input.panels);
+        }
+      })
+    );
+
+    this.publishingSubscription.add(
+      this.panels$.subscribe((panels) => {
+        if (panels !== this.getInput().panels) {
+          this.updateInput({ panels: this.panels$.value })
         }
       })
     );
@@ -569,6 +581,7 @@ export class DashboardContainer
   public expandedPanelId: BehaviorSubject<string | undefined>;
   public focusedPanelId$: BehaviorSubject<string | undefined>;
   public managed$: BehaviorSubject<boolean>;
+  public children$: BehaviorSubject<{ [key: string]: unknown }>;
   public fullScreenMode$: BehaviorSubject<boolean>;
   public hasRunMigrations$: BehaviorSubject<boolean>;
   public hasUnsavedChanges$: BehaviorSubject<boolean>;

@@ -168,6 +168,7 @@ export function initializePanelsManager(
       }
       if (resetChangedPanelCount) children$.next(currentChildren);
     },
+    setChildren: (children: { [key: string]: unknown; }) => children$.next(children),
     setPanels: (panels: DashboardPanelMap) => {
       panels$.next(panels);
     },
