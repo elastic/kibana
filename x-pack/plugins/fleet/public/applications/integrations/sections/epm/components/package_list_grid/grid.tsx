@@ -28,6 +28,8 @@ interface GridColumnProps {
   isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
+  scrollElementId?: string;
+  emptyStateStyles?: Record<string, string>;
 }
 
 const VirtualizedRow: React.FC<{
@@ -61,6 +63,8 @@ export const GridColumn = ({
   showMissingIntegrationMessage = false,
   showCardLabels = false,
   isLoading,
+  scrollElementId,
+  emptyStateStyles,
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
   const listRef = useRef<List>(null);
@@ -86,7 +90,7 @@ export const GridColumn = ({
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -107,6 +111,7 @@ export const GridColumn = ({
       </EuiFlexGrid>
     );
   }
+
   return (
     <>
       <WindowScroller
@@ -115,12 +120,15 @@ export const GridColumn = ({
             listRef.current.scrollTo(scrollTop);
           }
         }}
+        scrollElement={
+          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+        }
       >
         {() => (
           <EuiAutoSizer disableHeight>
             {({ width }: { width: number }) => (
               <List
-                style={{ height: '100%' }}
+                style={{ height: '100%', overflow: 'visible' }}
                 ref={listRef}
                 layout="vertical"
                 itemCount={Math.ceil(list.length / 3)}

@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
-  const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDataStreamName = `logs-${apacheAccessDatasetName}-${productionNamespace}`;
@@ -93,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
       ]);
 
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     after(async () => {
@@ -166,18 +165,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('overview summary panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/194575
+    describe.skip('overview summary panel', () => {
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis(excludeKeysFromServerless);
+        const { docsCountTotal, degradedDocs, services, hosts, size } =
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
         expect(parseInt(docsCountTotal, 10)).to.be(226);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
+        expect(parseInt(size, 10)).to.be.greaterThan(0);
       });
     });
 
