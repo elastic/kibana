@@ -10,6 +10,11 @@
  */
 export const AIOPS_PLUGIN_ID = 'aiops';
 
+/**
+ * AIOPS_API_PLUGIN_ID is used as a unique identifier for the aiops API plugin for public APIs.
+ */
+export const AIOPS_API_PLUGIN_ID = 'aiops';
+
 export const AIOPS_API_ENDPOINT = {
   LOG_RATE_ANALYSIS_FIELD_CANDIDATES: '/internal/aiops/log_rate_analysis/field_candidates',
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',

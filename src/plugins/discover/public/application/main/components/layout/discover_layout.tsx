@@ -173,12 +173,38 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   );
 
   // The assistant is getting the state from the url correctly
-  // expect from the index pattern where we have only the dataview id
+  // except from the index pattern where we have only the dataview id.
   useEffect(() => {
+    const indexPattern = dataView?.getIndexPattern() || null;
+    const indexPatternTimeField = dataView?.getTimeField()?.spec.name || null;
+    const dataViewId = dataView?.id;
+
+    let indexPatternText =
+      'The current Elasticsearch index pattern could not be identified or the current page does not make use of an Elasticsearch index pattern.';
+
+    if (indexPattern !== null && indexPatternTimeField === null) {
+      indexPatternText = `The current Elasticsearch index is '${indexPattern}' and it has no time field specified.`;
+    } else if (indexPattern !== null && indexPatternTimeField !== null) {
+      indexPatternText = `The current Elasticsearch index is '${indexPattern}' and its time field is '${indexPatternTimeField}'.`;
+    }
+
+    const dataViewIdText = dataViewId ? ` The Kibana Data View Id is ${dataViewId}.` : '';
+
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
         isEsqlMode ? 'ES|QL' : 'dataView'
-      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+      } mode. ${indexPatternText}${dataViewIdText}`,
+      starterPrompts: [
+        {
+          title: i18n.translate('discover.aiAssistant.starterPrompts.logRateAnalysis.title', {
+            defaultMessage: 'Explain',
+          }),
+          prompt: i18n.translate('discover.aiAssistant.starterPrompts.logRateAnalysis.title', {
+            defaultMessage: 'Can you analyze the log rate?',
+          }),
+          icon: 'inspect',
+        },
+      ],
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 

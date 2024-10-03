@@ -14,7 +14,7 @@ import type {
   XYChartElementEvent,
   XYBrushEvent,
 } from '@elastic/charts';
-import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
+import { Chart, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
 import type {
   BarStyleAccessor,
   RectAnnotationSpec,
@@ -33,14 +33,22 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import { type BrushSelectionUpdatePayload } from '@kbn/aiops-log-rate-analysis/state';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 
+import { DocumentCountChartAxisX, DocumentCountChartAxisY } from './axis';
 import { BrushBadge } from './brush_badge';
+import {
+  DOCUMENT_COUNT_CHART_DEFFAULT_HEIGHT,
+  DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID,
+} from './constants';
+import {
+  documentCountChartOverallSeriesName,
+  documentCountChartOverallSeriesNameWithSplit,
+} from './i18n';
 
 declare global {
   interface Window {
@@ -82,7 +90,7 @@ type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
 /**
  * Brush selection update handler
  */
-type BrushSelectionUpdateHandler = (
+export type BrushSelectionUpdateHandler = (
   /** Payload for the brush selection update */
   d: BrushSelectionUpdatePayload
 ) => void;
@@ -137,8 +145,6 @@ export interface DocumentCountChartProps {
   /** Optional change point metadata */
   changePoint?: DocumentCountStatsChangePoint;
 }
-
-const SPEC_ID = 'document_count';
 
 const BADGE_HEIGHT = 20;
 const BADGE_WIDTH = 75;
@@ -198,20 +204,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
-
-  const overallSeriesName = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
-    {
-      defaultMessage: 'document count',
-    }
-  );
-
-  const overallSeriesNameWithSplit = i18n.translate(
-    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
-    {
-      defaultMessage: 'Other document count',
-    }
-  );
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -476,7 +468,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         <Chart
           size={{
             width: '100%',
-            height: height ?? 120,
+            height: height ?? DOCUMENT_COUNT_CHART_DEFFAULT_HEIGHT,
           }}
         >
           <Settings
@@ -491,20 +483,19 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             showLegend={false}
             locale={i18n.getLocale()}
           />
-          <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
-          <Axis
-            id="aiops-histogram-bottom-axis"
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convert(value)}
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+          <DocumentCountChartAxisX />
+          <DocumentCountChartAxisY
+            formatter={xAxisFormatter}
+            useLegacyTimeAxis={useLegacyTimeAxis}
           />
           {adjustedChartPoints?.length && (
             <HistogramBarSeries
-              id={SPEC_ID}
-              name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              id={DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID}
+              name={
+                chartPointsSplit
+                  ? documentCountChartOverallSeriesNameWithSplit
+                  : documentCountChartOverallSeriesName
+              }
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
@@ -519,7 +510,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           )}
           {adjustedChartPointsSplit?.length && (
             <HistogramBarSeries
-              id={`${SPEC_ID}_split`}
+              id={`${DOCUMENT_COUNT_CHART_OVERALL_SERIES_SPEC_ID}_split`}
               name={chartPointsSplitLabel}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}

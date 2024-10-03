@@ -10,6 +10,16 @@ export { ProgressControls } from './src/progress_controls';
 export {
   DocumentCountChart,
   DocumentCountChartRedux,
-  type BrushSettings,
+  SimpleDocumentCountChart,
+  getLogRateAnalysisBarStyleAccessor,
 } from './src/document_count_chart';
-export type { DocumentCountChartProps } from './src/document_count_chart';
+export type {
+  BrushSettings,
+  BrushSelectionUpdateHandler,
+  DocumentCountChartProps,
+} from './src/document_count_chart';
+export {
+  getFieldValueColumn,
+  SimpleAnalysisResultsTable,
+  NARROW_COLUMN_WIDTH,
+} from './src/results_table';

@@ -20,9 +20,10 @@ import {
   useAppDispatch,
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
-
 import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
+
 import { useEuiTheme } from '../../hooks/use_eui_theme';
+
 import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];

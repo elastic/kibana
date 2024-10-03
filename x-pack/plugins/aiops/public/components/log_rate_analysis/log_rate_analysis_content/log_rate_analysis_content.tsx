@@ -17,7 +17,6 @@ import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
   getSnappedWindowParameters,
-  LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
@@ -29,6 +28,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
+import { getLogRateAnalysisBarStyleAccessor } from '@kbn/aiops-components';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
@@ -123,24 +123,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     dispatch(clearAllRowState());
   }
 
-  const barStyle = {
-    rect: {
-      opacity: 1,
-      fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
-    },
-  };
-
   // Used to highlight an auto-detected change point in the date histogram.
   const barStyleAccessor: BarStyleAccessor | undefined =
     isBrushCleared && documentCountStats?.changePoint
-      ? (d, g) => {
-          return g.specId === 'document_count' &&
-            documentCountStats?.changePoint &&
-            Number(d.x) > documentCountStats.changePoint.startTs &&
-            Number(d.x) < documentCountStats.changePoint.endTs
-            ? barStyle
-            : null;
-        }
+      ? getLogRateAnalysisBarStyleAccessor(documentCountStats.changePoint)
       : undefined;
 
   const triggerAnalysisForManualSelection = useCallback(() => {
