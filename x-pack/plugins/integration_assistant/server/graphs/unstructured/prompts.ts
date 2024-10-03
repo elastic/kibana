@@ -39,6 +39,7 @@ export const GROK_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Make sure to map the remaining message part to \'message\' in grok pattern.
+ - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
@@ -89,6 +90,7 @@ Follow these steps to help improve the grok patterns and apply it step by step:
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Make sure to map the remaining message part to \'message\' in grok pattern.
+ - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
