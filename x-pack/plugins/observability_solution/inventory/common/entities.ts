@@ -7,6 +7,21 @@
 import * as t from 'io-ts';
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import { isRight } from 'fp-ts/lib/Either';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  CONTAINER_ID,
+  HOST_NAME,
+  AGENT_NAME,
+  CLOUD_PROVIDER,
+} from '@kbn/observability-shared-plugin/common';
+import {
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+} from './es_fields/entities';
 
 export const entityTypeRt = t.union([
   t.literal('service'),
@@ -57,3 +72,35 @@ export const entityTypesRt = new t.Type<EntityType[], string, unknown>(
   },
   (arr) => arr.join()
 );
+
+interface BaseEntity {
+  [ENTITY_LAST_SEEN]: string;
+  [ENTITY_ID]: string;
+  [ENTITY_TYPE]: EntityType;
+  [ENTITY_DISPLAY_NAME]: string;
+  [ENTITY_DEFINITION_ID]: string;
+}
+
+/**
+ * These types are based on service, host and container from the built in definition.
+ */
+interface ServiceEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'service';
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]?: string | null;
+  [AGENT_NAME]: string | string[] | null;
+}
+
+interface HostEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'host';
+  [HOST_NAME]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
+}
+
+interface ContainerEntity extends BaseEntity {
+  [ENTITY_TYPE]: 'container';
+  [CONTAINER_ID]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
+}
+
+export type Entity = ServiceEntity | HostEntity | ContainerEntity;

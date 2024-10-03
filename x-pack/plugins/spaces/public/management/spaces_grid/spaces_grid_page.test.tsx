@@ -95,7 +95,7 @@ describe('SpacesGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spaces);
     expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual({
       field: 'solution',
-      name: 'Solution View',
+      name: 'Solution view',
       sortable: true,
       render: expect.any(Function),
     });
@@ -155,7 +155,7 @@ describe('SpacesGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
     expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
       field: 'solution',
-      name: 'Solution View',
+      name: 'Solution view',
       sortable: true,
       render: expect.any(Function),
     });

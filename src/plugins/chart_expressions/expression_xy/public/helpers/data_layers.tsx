@@ -303,11 +303,15 @@ const getPointConfig: GetPointConfigFn = ({
   emphasizeFitting,
   showPoints,
   pointsRadius,
-}) => ({
-  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
-  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
-  fill: markSizeAccessor ? ColorVariant.Series : undefined,
-});
+}) => {
+  return {
+    visible: (showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined)
+      ? 'always'
+      : 'never',
+    radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
+    fill: markSizeAccessor ? ColorVariant.Series : undefined,
+  };
+};
 
 const getFitLineConfig = () => ({
   visible: true,
