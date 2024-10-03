@@ -6,17 +6,17 @@
  */
 
 import React, { FC, memo, useMemo } from 'react';
-import { EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 
+import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
 import { Actions } from '../../../../../../../../actions';
 import { LegacyHistoricalResult } from '../../../../../../../../types';
 import { IncompatibleCallout } from '../../../../incompatible_callout';
 import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt';
-import {
-  CHECK_IS_BASED_ON_LEGACY_FORMAT,
-  DEPRECATED_DATA_FORMAT,
-  TO_SEE_RUN_A_NEW_CHECK,
-} from './translations';
+import { CHECK_IS_BASED_ON_LEGACY_FORMAT, TO_SEE_RUN_A_NEW_CHECK } from './translations';
+import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
+import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
+import { HistoricalCheckFieldsTabs } from '../historical_check_fields_tabs';
 
 interface Props {
   indexName: string;
@@ -24,45 +24,66 @@ interface Props {
 }
 
 const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historicalResult }) => {
-  const { markdownComments, incompatibleFieldCount, ecsVersion } = historicalResult;
+  const { markdownComments, incompatibleFieldCount, ecsVersion, sameFamilyFieldCount } =
+    historicalResult;
 
   const markdownComment = useMemo(() => markdownComments.join('\n'), [markdownComments]);
   const tablesComment = useMemo(() => markdownComments.slice(4).join('\n'), [markdownComments]);
 
-  return (
-    <div data-test-subj="legacyHistoricalCheckFieldsComponent">
-      {incompatibleFieldCount > 0 ? (
-        <>
-          <EuiCallOut color="warning" size="s" title={DEPRECATED_DATA_FORMAT}>
-            <p>
-              <span>{CHECK_IS_BASED_ON_LEGACY_FORMAT}</span>
-              <br />
-              <span>{TO_SEE_RUN_A_NEW_CHECK}</span>
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-          <IncompatibleCallout
-            ecsVersion={ecsVersion}
-            incompatibleFieldCount={incompatibleFieldCount}
-          />
-          <EuiSpacer />
-          <EuiMarkdownFormat data-test-subj="incompatibleTablesMarkdown" textSize="s">
-            {tablesComment}
-          </EuiMarkdownFormat>
-          <EuiSpacer />
-          <Actions
-            indexName={indexName}
-            markdownComment={markdownComment}
-            showChatAction
-            showAddToNewCaseAction
-            showCopyToClipboardAction
-          />
-        </>
-      ) : (
-        <CheckSuccessEmptyPrompt />
-      )}
-    </div>
+  const tabs = useMemo(
+    () => [
+      {
+        id: INCOMPATIBLE_TAB_ID,
+        name: INCOMPATIBLE_FIELDS,
+        badgeColor: getIncompatibleStatBadgeColor(incompatibleFieldCount),
+        badgeCount: incompatibleFieldCount,
+        content: (
+          <div data-test-subj="legacyHistoricalCheckFieldsComponent">
+            {incompatibleFieldCount > 0 ? (
+              <>
+                <IncompatibleCallout
+                  ecsVersion={ecsVersion}
+                  incompatibleFieldCount={incompatibleFieldCount}
+                />
+                <EuiSpacer />
+                <EuiMarkdownFormat data-test-subj="incompatibleTablesMarkdown" textSize="s">
+                  {tablesComment}
+                </EuiMarkdownFormat>
+                <EuiSpacer />
+                <Actions
+                  indexName={indexName}
+                  markdownComment={markdownComment}
+                  showChatAction
+                  showAddToNewCaseAction
+                  showCopyToClipboardAction
+                />
+              </>
+            ) : (
+              <CheckSuccessEmptyPrompt />
+            )}
+          </div>
+        ),
+      },
+      {
+        id: SAME_FAMILY_TAB_ID,
+        name: SAME_FAMILY,
+        badgeColor: 'hollow',
+        badgeCount: sameFamilyFieldCount,
+        disabled: true,
+        disabledReason: `${CHECK_IS_BASED_ON_LEGACY_FORMAT}\n${TO_SEE_RUN_A_NEW_CHECK}`,
+      },
+    ],
+    [
+      ecsVersion,
+      incompatibleFieldCount,
+      indexName,
+      markdownComment,
+      sameFamilyFieldCount,
+      tablesComment,
+    ]
   );
+
+  return <HistoricalCheckFieldsTabs tabs={tabs} />;
 };
 
 LegacyHistoricalCheckFieldsComponent.displayName = 'LegacyHistoricalCheckFieldsComponent';

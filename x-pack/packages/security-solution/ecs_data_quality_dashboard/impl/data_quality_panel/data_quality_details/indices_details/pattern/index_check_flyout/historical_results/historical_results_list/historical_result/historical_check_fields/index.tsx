@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { useMemo } from 'react';
 
 import type { NonLegacyHistoricalResult } from '../../../../../../../../types';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
@@ -16,31 +14,7 @@ import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleAndSameFamilyFieldsFromHistoricalResult } from './utils/get_incompatible_and_same_family_fields_from_historical_result';
 import { IncompatibleTab } from '../../../../incompatible_tab';
 import { SameFamilyTab } from '../../../../same_family_tab';
-
-const StyledTabFlexGroup = styled(EuiFlexGroup)`
-  width: 100%;
-`;
-
-const StyledTabFlexItem = styled.div`
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-`;
-
-const StyledButtonGroup = styled(EuiButtonGroup)`
-  min-width: 50%;
-  button[data-test-subj='${INCOMPATIBLE_TAB_ID}'] {
-    flex-grow: 1;
-  }
-  button[data-test-subj='${SAME_FAMILY_TAB_ID}'] {
-    flex-grow: 1;
-  }
-`;
-
-const StyledBadge = styled(EuiBadge)`
-  text-align: right;
-  cursor: pointer;
-`;
+import { HistoricalCheckFieldsTabs } from '../historical_check_fields_tabs';
 
 export interface Props {
   indexName: string;
@@ -55,11 +29,11 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
     docsCount,
     ilmPhase,
     sizeInBytes,
-    incompatibleFieldCount: incompatibleFieldsCount,
-    sameFamilyFieldCount: sameFamilyFieldsCount,
-    ecsFieldCount: ecsCompliantFieldsCount,
-    customFieldCount: customFieldsCount,
-    totalFieldCount: allFieldsCount,
+    incompatibleFieldCount,
+    sameFamilyFieldCount,
+    ecsFieldCount,
+    customFieldCount,
+    totalFieldCount,
   } = historicalResult;
 
   const tabs = useMemo(
@@ -67,11 +41,8 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
       {
         id: INCOMPATIBLE_TAB_ID,
         name: INCOMPATIBLE_FIELDS,
-        append: (
-          <StyledBadge color={getIncompatibleStatBadgeColor(incompatibleFieldsCount)}>
-            {incompatibleFieldsCount}
-          </StyledBadge>
-        ),
+        badgeColor: getIncompatibleStatBadgeColor(incompatibleFieldCount),
+        badgeCount: incompatibleFieldCount,
         content: (
           <IncompatibleTab
             docsCount={docsCount}
@@ -79,10 +50,10 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
             indexName={indexName}
             incompatibleMappingsFields={incompatibleMappingsFields}
             incompatibleValuesFields={incompatibleValuesFields}
-            sameFamilyFieldsCount={sameFamilyFieldsCount}
-            ecsCompliantFieldsCount={ecsCompliantFieldsCount}
-            customFieldsCount={customFieldsCount}
-            allFieldsCount={allFieldsCount}
+            sameFamilyFieldsCount={sameFamilyFieldCount}
+            ecsCompliantFieldsCount={ecsFieldCount}
+            customFieldsCount={customFieldCount}
+            allFieldsCount={totalFieldCount}
             sizeInBytes={sizeInBytes}
             hasStickyActions={false}
           />
@@ -91,17 +62,18 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
       {
         id: SAME_FAMILY_TAB_ID,
         name: SAME_FAMILY,
-        append: <StyledBadge color="hollow">{sameFamilyFieldsCount}</StyledBadge>,
+        badgeColor: getIncompatibleStatBadgeColor(sameFamilyFieldCount),
+        badgeCount: sameFamilyFieldCount,
         content: (
           <SameFamilyTab
             docsCount={docsCount}
             ilmPhase={ilmPhase}
             indexName={indexName}
             sameFamilyFields={sameFamilyFields}
-            incompatibleFieldsCount={incompatibleFieldsCount}
-            ecsCompliantFieldsCount={ecsCompliantFieldsCount}
-            customFieldsCount={customFieldsCount}
-            allFieldsCount={allFieldsCount}
+            incompatibleFieldsCount={incompatibleFieldCount}
+            ecsCompliantFieldsCount={ecsFieldCount}
+            customFieldsCount={customFieldCount}
+            allFieldsCount={totalFieldCount}
             sizeInBytes={sizeInBytes}
             hasStickyActions={false}
           />
@@ -109,61 +81,24 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
       },
     ],
     [
-      allFieldsCount,
-      customFieldsCount,
+      customFieldCount,
       docsCount,
-      ecsCompliantFieldsCount,
+      ecsFieldCount,
       ilmPhase,
-      incompatibleFieldsCount,
+      incompatibleFieldCount,
       incompatibleMappingsFields,
       incompatibleValuesFields,
       indexName,
+      sameFamilyFieldCount,
       sameFamilyFields,
-      sameFamilyFieldsCount,
       sizeInBytes,
+      totalFieldCount,
     ]
   );
 
-  const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
-
-  const tabSelections = useMemo(
-    () =>
-      tabs.map((tab) => ({
-        id: tab.id,
-        label: (
-          <StyledTabFlexGroup
-            responsive={false}
-            justifyContent="center"
-            gutterSize="s"
-            alignItems="center"
-            title={tab.name}
-          >
-            <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
-            {tab.append}
-          </StyledTabFlexGroup>
-        ),
-        textProps: false as false,
-      })),
-    [tabs]
-  );
-
-  const handleSelectedTabId = useCallback((optionId: string) => {
-    setSelectedTabId(optionId);
-  }, []);
-
   return (
     <div data-test-subj="historicalCheckFields">
-      <StyledButtonGroup
-        legend="Index check field tab toggle"
-        options={tabSelections}
-        idSelected={selectedTabId}
-        onChange={handleSelectedTabId}
-        buttonSize="compressed"
-        color="primary"
-        isFullWidth={false}
-      />
-      <EuiSpacer />
-      {tabs.find((tab) => tab.id === selectedTabId)?.content}
+      <HistoricalCheckFieldsTabs tabs={tabs} />
     </div>
   );
 };
