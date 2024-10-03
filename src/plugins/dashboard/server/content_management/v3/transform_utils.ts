@@ -28,6 +28,7 @@ import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
+  DashboardOptions,
 } from './types';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type {
@@ -85,9 +86,22 @@ function kibanaSavedObjectMetaOut(
   };
 }
 
+function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
+  const { hidePanelTitles, useMargins, syncColors, syncTooltips, syncCursor } = JSON.parse(
+    optionsJSON
+  ) as DashboardOptions;
+  return {
+    hidePanelTitles,
+    useMargins,
+    syncColors,
+    syncTooltips,
+    syncCursor,
+  };
+}
+
 export function dashboardAttributesOut(
-  attributes: DashboardSavedObjectAttributes
-): DashboardAttributes {
+  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
+): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     description,
     controlGroupInput,
@@ -107,8 +121,8 @@ export function dashboardAttributesOut(
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: kibanaSavedObjectMetaOut(kibanaSavedObjectMeta),
     }),
-    options: JSON.parse(optionsJSON),
-    panels: JSON.parse(panelsJSON),
+    ...(optionsJSON && { options: optionsOut(optionsJSON) }),
+    ...(panelsJSON && { panels: JSON.parse(panelsJSON) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),

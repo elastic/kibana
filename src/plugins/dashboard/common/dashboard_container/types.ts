@@ -18,8 +18,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import type { GridData } from '../../server/content_management';
-import { DashboardOptions } from '../types';
+import type { DashboardOptions, GridData } from '../../server/content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;

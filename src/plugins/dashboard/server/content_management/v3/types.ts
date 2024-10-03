@@ -27,9 +27,11 @@ import {
   dashboardSearchOptionsSchema,
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
+  optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
+export type DashboardOptions = TypeOf<typeof optionsSchema>;
 export type DashboardPanel = TypeOf<typeof panelSchema>;
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;

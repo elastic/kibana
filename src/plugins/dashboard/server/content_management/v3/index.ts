@@ -24,6 +24,7 @@ export type {
   DashboardUpdateIn,
   DashboardUpdateOut,
   DashboardUpdateOptions,
+  DashboardOptions,
 } from './types';
 export {
   serviceDefinition,

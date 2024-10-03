@@ -12,14 +12,6 @@ import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
 import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
 
-export interface DashboardOptions {
-  hidePanelTitles: boolean;
-  useMargins: boolean;
-  syncColors: boolean;
-  syncTooltips: boolean;
-  syncCursor: boolean;
-}
-
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   saveQuery: boolean;

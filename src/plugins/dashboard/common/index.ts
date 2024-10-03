@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardOptions, DashboardCapabilities, SharedDashboardState } from './types';
+export type { DashboardCapabilities, SharedDashboardState } from './types';
 
 export type {
   DashboardPanelMap,

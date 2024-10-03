@@ -29,6 +29,7 @@ import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
+  DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
 import { getResultV3ToV2 } from './transform_utils';
 
@@ -300,32 +301,28 @@ export const panelSchema = schema.object({
   ),
 });
 
-const optionsSchema = schema.object(
-  {
-    hidePanelTitles: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Hide the panel titles in the dashboard.' },
-    }),
-    useMargins: schema.boolean({
-      defaultValue: true,
-      meta: { description: 'Show margins between panels in the dashboard layout.' },
-    }),
-    syncColors: schema.boolean({
-      defaultValue: true,
-      meta: { description: 'Synchronize colors between related panels in the dashboard.' },
-    }),
-    syncTooltips: schema.boolean({
-      defaultValue: true,
-      meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
-    }),
-    syncCursor: schema.boolean({
-      defaultValue: true,
-      meta: { description: 'Synchronize cursor position between related panels in the dashboard.' },
-    }),
-  },
-  // Ignore no longer supported options that may still exist in the saved object, e.g. darkTheme: false
-  { unknowns: 'ignore' }
-);
+export const optionsSchema = schema.object({
+  hidePanelTitles: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
+    meta: { description: 'Hide the panel titles in the dashboard.' },
+  }),
+  useMargins: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
+    meta: { description: 'Show margins between panels in the dashboard layout.' },
+  }),
+  syncColors: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
+    meta: { description: 'Synchronize colors between related panels in the dashboard.' },
+  }),
+  syncTooltips: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+    meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
+  }),
+  syncCursor: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+    meta: { description: 'Synchronize cursor position between related panels in the dashboard.' },
+  }),
+});
 
 // These are the attributes that are returned in search results
 export const searchResultsAttributesSchema = schema.object({

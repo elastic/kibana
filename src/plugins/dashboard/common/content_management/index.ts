@@ -13,6 +13,7 @@ export {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
+  DEFAULT_DASHBOARD_OPTIONS,
 } from './constants';
 
 export type { DashboardContentType } from './types';

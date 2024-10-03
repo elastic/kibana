@@ -12,8 +12,8 @@ import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public'
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import type { DashboardContainerInput, DashboardOptions } from '../../common';
-import type { DashboardPanel } from '../../server/content_management';
+import type { DashboardContainerInput } from '../../common';
+import type { DashboardOptions, DashboardPanel } from '../../server/content_management';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
