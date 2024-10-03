@@ -171,7 +171,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth={fullWidth} css={css({ width: '100%' })}>
+    <EuiFilterGroup fullWidth={fullWidth} css={css({ width: '100%' })} prepend={button}>
       <EuiInputPopover
         id={popoverId}
         ownFocus
