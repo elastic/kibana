@@ -28,6 +28,7 @@ import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_strea
 import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
 import { analyzeDegradedField } from './get_degraded_field_analysis';
+import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -52,6 +53,7 @@ const statsRoute = createDatasetQualityServerRoute({
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
 
     const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
@@ -64,7 +66,10 @@ const statsRoute = createDatasetQualityServerRoute({
     });
 
     const dataStreamsStats = isServerless
-      ? {}
+      ? await getDataStreamsMeteringStats({
+          esClient: esClientAsSecondaryAuthUser,
+          dataStreams: privilegedDataStreams.map((stream) => stream.name),
+        })
       : await getDataStreamsStats({
           esClient,
           dataStreams: privilegedDataStreams.map((stream) => stream.name),
@@ -273,8 +278,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const { start, end } = params.query;
     const coreContext = await context.core;
 
-    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClient = coreContext.elasticsearch.client;
 
     const isServerless = (await getEsCapabilities()).serverless;
     const dataStreamDetails = await getDataStreamDetails({

@@ -289,16 +289,16 @@ apply_elastic_agent_config() {
   local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
 
   # Verify that the downloaded archive contains the expected `elastic-agent.yml` file
-  tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' >/dev/null &&
+  tar --list --file "$elastic_agent_tmp_config_path" | grep "$(basename "$elastic_agent_config_path")" >/dev/null &&
     # Remove existing config file including `inputs.d` directory
     rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" &&
     # Extract new config files from downloaded archive
-    tar --extract --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' --directory "$(dirname "$elastic_agent_config_path")" &&
+    tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")" &&
     # Replace placeholder with the Ingest API key
-    sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    sed -i='' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
     printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
-    tar --list --file "$elastic_agent_tmp_config_path" --include 'elastic-agent.yml' --include 'inputs.d/*.yml' | while read -r file; do
+    tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$' | while read -r file; do
       echo "  - $(dirname "$elastic_agent_config_path")/$file"
     done
 

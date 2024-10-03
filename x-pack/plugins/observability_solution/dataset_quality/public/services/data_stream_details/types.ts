@@ -26,7 +26,7 @@ import { Dashboard, DegradedFieldAnalysis, DegradedFieldValues } from '../../../
 export type DataStreamDetailsServiceSetup = void;
 
 export interface DataStreamDetailsServiceStart {
-  client: IDataStreamDetailsClient;
+  getClient: () => Promise<IDataStreamDetailsClient>;
 }
 
 export interface DataStreamDetailsServiceStartDeps {

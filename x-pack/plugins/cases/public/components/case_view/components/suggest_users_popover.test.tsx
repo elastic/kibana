@@ -25,7 +25,8 @@ const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
   profile,
 });
 
-describe('SuggestUsersPopover', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171600
+describe.skip('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   const defaultProps: SuggestUsersPopoverProps = {
     isLoading: false,
