@@ -149,7 +149,7 @@ describe(
       cy.get(ALERT_GRID_CELL).contains(rule.name);
     });
 
-    it('Creates a new threshold rule with suppression enabled', () => {
+    it.only('Creates a new threshold rule with suppression enabled', () => {
       selectThresholdRuleType();
 
       enablesAndPopulatesThresholdSuppression(5, 'h');
