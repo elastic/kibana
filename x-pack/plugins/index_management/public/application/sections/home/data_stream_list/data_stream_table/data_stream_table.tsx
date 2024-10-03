@@ -16,6 +16,10 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiIconTip,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
@@ -47,6 +51,7 @@ interface Props {
   filters: string;
   viewFilters: Filters<DataStreamFilterName>;
   onViewFilterChange: (newFilter: Filters<DataStreamFilterName>) => void;
+  setIncludeStats: (includeStats: boolean) => void;
 }
 
 const INFINITE_AS_ICON = true;
@@ -58,6 +63,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   history,
   filters,
   includeStats,
+  setIncludeStats,
   onViewFilterChange,
   viewFilters,
 }) => {
@@ -288,6 +294,30 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         </EuiButton>
       ) : undefined,
     toolsRight: [
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel', {
+              defaultMessage: 'Include stats',
+            })}
+            checked={includeStats}
+            onChange={(e) => setIncludeStats(e.target.checked)}
+            data-test-subj="includeStatsSwitch"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate(
+              'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+              {
+                defaultMessage: 'Including stats can increase reload times',
+              }
+            )}
+            position="top"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>,
       <FilterListButton<DataStreamFilterName>
         filters={viewFilters}
         onChange={onViewFilterChange}

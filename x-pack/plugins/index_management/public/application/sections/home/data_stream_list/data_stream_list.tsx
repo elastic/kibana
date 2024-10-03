@@ -12,9 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
-  EuiIconTip,
   EuiSpacer,
   EuiPageSection,
   EuiEmptyPrompt,
@@ -164,36 +162,6 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             </EuiLink>
           </EuiFlexItem>
         )}
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                  {
-                    defaultMessage: 'Include stats',
-                  }
-                )}
-                checked={isIncludeStatsChecked}
-                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                data-test-subj="includeStatsSwitch"
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                  {
-                    defaultMessage: 'Including stats can increase reload times',
-                  }
-                )}
-                position="top"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -338,6 +306,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           onViewFilterChange={setFilters}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
+          setIncludeStats={setIsIncludeStatsChecked}
         />
       </EuiPageSection>
     );
