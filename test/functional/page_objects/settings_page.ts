@@ -1053,12 +1053,6 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async openEditFlyoutByRowNumber(rowNumber: number = 0) {
-    const editBtns = await this.testSubjects.findAll('editFieldFormat');
-    const editFlyoutBtn = editBtns[rowNumber];
-    await editFlyoutBtn.click();
-  }
-
   async changeAndValidateFieldFormat(name: string, fieldType: string) {
     await this.filterField(name);
     await this.setFieldTypeFilter(fieldType);
