@@ -14,6 +14,7 @@ import type {
   DataUsageSetupDependencies,
   DataUsageStartDependencies,
 } from './types';
+import { PLUGIN_ID } from '../common';
 
 export class DataUsagePlugin
   implements
@@ -28,7 +29,19 @@ export class DataUsagePlugin
   constructor(context: PluginInitializerContext<DataUsageConfig>) {
     this.logger = context.logger.get();
   }
-  setup(coreSetup: CoreSetup, pluginsSetup: DataUsageSetupDependencies): DataUsageServerSetup {
+  setup(coreSetup: CoreSetup, { features }: DataUsageSetupDependencies): DataUsageServerSetup {
+    features.registerElasticsearchFeature({
+      id: PLUGIN_ID,
+      management: {
+        data: [PLUGIN_ID],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['monitor'],
+          ui: [],
+        },
+      ],
+    });
     return {};
   }
 

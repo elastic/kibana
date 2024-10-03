@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
+export interface DataUsageSetupDependencies {
+  features: FeaturesPluginSetup;
+}
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
-
-export interface DataUsageSetupDependencies {}
-
 export interface DataUsageStartDependencies {}
 
 export interface DataUsageServerSetup {}
