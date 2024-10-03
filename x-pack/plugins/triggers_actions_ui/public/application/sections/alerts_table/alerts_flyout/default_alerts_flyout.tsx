@@ -30,7 +30,7 @@ export const DefaultAlertsFlyoutBody: FlyoutSectionRenderer = ({
   fieldFormats,
   columns,
 }) => {
-  const formatColumnValue = useMemo(() => getAlertFormatters(fieldFormats), [fieldFormats]); // TODO(@umbopepato) turn into component?
+  const formatColumnValue = useMemo(() => getAlertFormatters(fieldFormats), [fieldFormats]);
   const overviewTab = useMemo(
     () => ({
       id: 'overview',

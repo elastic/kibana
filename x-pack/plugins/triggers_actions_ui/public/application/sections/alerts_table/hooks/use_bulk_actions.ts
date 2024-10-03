@@ -34,7 +34,6 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
-  // TODO(@umbopepato) is this really necessary once we remove the registry?
   getBulkActions?: PublicAlertsDataGridProps['getBulkActions'];
   refresh: () => void;
   hideBulkActions?: boolean;

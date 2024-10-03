@@ -474,7 +474,6 @@ interface SelectedAlertWithLegacyFormats {
   ecsAlert: any;
 }
 
-// TODO(@umbopepato) rename columns to initialColumns?
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
   id: string;
