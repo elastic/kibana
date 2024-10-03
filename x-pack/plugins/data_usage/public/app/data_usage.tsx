@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText, EuiPageSection } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiPageSection,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Charts } from './components/charts';
