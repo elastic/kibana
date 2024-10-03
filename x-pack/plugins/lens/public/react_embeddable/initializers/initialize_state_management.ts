@@ -4,61 +4,80 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
+import type {
+  PublishesDataLoading,
+  PublishesDataViews,
+  PublishesSavedObjectId,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IntegrationCallbacks, LensRuntimeState } from '../types';
+import { BehaviorSubject } from 'rxjs';
+import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
 import { buildObservableVariable } from '../helper';
 
-export function createComparatorForStatePortion<K extends keyof LensRuntimeState>(
-  state$: BehaviorSubject<LensRuntimeState>,
-  portion: K
-): ComparatorDefinition<LensRuntimeState, K> {
-  // need to wrap it in a behaviour subject to make it happy
-  const portion$ = new BehaviorSubject<LensRuntimeState[K]>(state$.getValue()[portion]);
-  return [
-    portion$,
-    (newValue: LensRuntimeState[K]) => {
-      state$.next({ ...state$.getValue(), [portion]: newValue });
-    },
-    fastIsEqual,
-  ];
+export interface StateManagementConfig {
+  api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
+    PublishesSavedObjectId &
+    PublishesDataViews &
+    PublishesDataLoading;
+  serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
+  comparators: StateComparators<
+    Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'>
+  >;
+  cleanup: () => void;
 }
 
 /**
  * Due to inline editing we need something advanced to handle the state
  * management at the embeddable level, so here's the initializers for it
  */
-export function initializeStateManagement(initialState: LensRuntimeState): {
-  variables: {
-    state$: BehaviorSubject<LensRuntimeState>;
-    //
-    dataViews$: BehaviorSubject<DataView[] | undefined>;
-  };
-  api: Pick<IntegrationCallbacks, 'updateState'>;
-  serialize: () => LensRuntimeState;
-  comparators: StateComparators<Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>>;
-  cleanup: () => void;
-} {
-  const state$ = new BehaviorSubject<LensRuntimeState>(initialState);
-  const getCurrentState = () => state$.getValue();
-  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(undefined);
+export function initializeStateManagement(
+  initialState: LensRuntimeState,
+  internalApi: LensInternalApi
+): StateManagementConfig {
+  const [attributes$, attributesComparator] = buildObservableVariable<
+    LensRuntimeState['attributes']
+  >(internalApi.attributes$);
+
+  const [savedObjectId$, savedObjectIdComparator] = buildObservableVariable<
+    LensRuntimeState['savedObjectId']
+  >(initialState.savedObjectId);
+
+  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
+  const [dataLoading$] = buildObservableVariable<boolean | undefined>(undefined);
+  const [abortController$, abortControllerComparator] = buildObservableVariable<
+    AbortController | undefined
+  >(internalApi.expressionAbortController$);
   return {
-    variables: {
-      state$,
-      // export dataViews as variable to keep its BehaviorSubject type in order to be able to update it
-      // later on will add it to the API too but with a reduced PublishSubject type
-      dataViews$,
-    },
     api: {
-      updateState: (newState: LensRuntimeState) => state$.next(newState),
+      updateAttributes: internalApi.updateAttributes,
+      updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
+        savedObjectId$.next(newSavedObjectId),
+      savedObjectId: savedObjectId$,
+      dataViews: dataViews$,
+      dataLoading: dataLoading$,
     },
-    serialize: getCurrentState,
+    serialize: () => {
+      return {
+        attributes: attributes$.getValue(),
+        savedObjectId: savedObjectId$.getValue(),
+        abortController: abortController$.getValue(),
+      };
+    },
     comparators: {
-      attributes: createComparatorForStatePortion(state$, 'attributes'),
-      savedObjectId: createComparatorForStatePortion(state$, 'savedObjectId'),
+      // need to force cast this to make it pass the type check
+      // @TODO: workout why this is needed
+      attributes: attributesComparator as [
+        BehaviorSubject<LensRuntimeState['attributes']>,
+        (newValue: LensRuntimeState['attributes'] | undefined) => void,
+        (
+          a: LensRuntimeState['attributes'] | undefined,
+          b: LensRuntimeState['attributes'] | undefined
+        ) => boolean
+      ],
+      savedObjectId: savedObjectIdComparator,
+      abortController: abortControllerComparator,
     },
     cleanup: noop,
   };

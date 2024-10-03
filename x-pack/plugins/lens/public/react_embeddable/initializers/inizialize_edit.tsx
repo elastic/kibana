@@ -8,8 +8,8 @@
 import {
   HasEditCapabilities,
   HasSupportedTriggers,
+  PublishesViewMode,
   apiHasAppContext,
-  apiPublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
@@ -21,13 +21,14 @@ import {
   GetStateType,
   LensEmbeddableStartServices,
   LensInspectorAdapters,
+  LensInternalApi,
   LensRuntimeState,
 } from '../types';
 import { emptySerializer } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
-import { ReactiveConfigs } from './initialize_observables';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
+import { StateManagementConfig } from './initialize_state_management';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -50,13 +51,13 @@ export function initializeEditApi(
   uuid: string,
   initialState: LensRuntimeState,
   getState: GetStateType,
-  updateState: (newState: LensRuntimeState) => void,
-  isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
-  { viewMode$, dataLoading$ }: ReactiveConfigs['variables'],
-  startDependencies: LensEmbeddableStartServices,
+  internalApi: LensInternalApi,
+  stateApi: StateManagementConfig['api'],
+  { viewMode }: PublishesViewMode,
   inspectorApi: LensInspectorAdapters,
-  parentApi?: unknown,
-  savedObjectId?: string
+  isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
+  startDependencies: LensEmbeddableStartServices,
+  parentApi?: unknown
 ): {
   api: HasSupportedTriggers & HasEditCapabilities;
   comparators: {};
@@ -64,11 +65,6 @@ export function initializeEditApi(
   cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
-
-  // update view mode if necessary
-  if (apiPublishesViewMode(parentApi)) {
-    viewMode$.next(parentApi.viewMode.getValue());
-  }
 
   const inESQLModeEnabled = () => !uiSettings.get(ENABLE_ESQL);
 
@@ -83,7 +79,7 @@ export function initializeEditApi(
       const parentApiContext = parentApi.getAppContext();
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(savedObjectId),
+        path: getEditPath(currentState.savedObjectId),
         state: {
           embeddableId: uuid,
           valueInput: currentState,
@@ -99,13 +95,18 @@ export function initializeEditApi(
     canBeCreatedInline: isTextBasedLanguage(initialState),
   });
 
+  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
+    stateApi.updateAttributes(newState.attributes);
+    stateApi.updateSavedObjectId(newState.savedObjectId);
+  };
+
   const openInlineEditor = prepareInlineEditPanel(
     getState,
     updateState,
-    startDependencies,
-    dataLoading$,
+    internalApi,
     panelManagementApi,
     inspectorApi,
+    startDependencies,
     navigateToLensEditor,
     uuid
   );
@@ -116,7 +117,7 @@ export function initializeEditApi(
   const { uiSettings, capabilities, data } = startDependencies;
 
   const canEdit = () => {
-    if (viewMode$.getValue() !== 'edit') {
+    if (viewMode.getValue() !== 'edit') {
       return false;
     }
     // check if it's in ES|QL mode
@@ -164,7 +165,7 @@ export function initializeEditApi(
         }
         const currentState = getState();
         return getEditPath(
-          savedObjectId,
+          currentState.savedObjectId,
           currentState.timeRange,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()

@@ -10,6 +10,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import '../helpers.scss';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
@@ -54,15 +55,20 @@ export async function executeEditEmbeddableAction({
   }
 
   const uuid = generateId();
-  const panelManagementApi = setupPanelManagement(uuid);
+  const panelManagementApi = setupPanelManagement(uuid, container, {
+    canBeCreatedInline: false, // this is the edit action
+  });
   const openInlineEditor = prepareInlineEditPanel(
     () => ({
       attributes,
     }),
     (newState: LensRuntimeState) =>
       onUpdate(newState.attributes as TypedLensByValueInput['attributes']),
-    { coreStart: core, ...deps },
-    lensEvent?.dataLoading$,
+    {
+      dataLoading$:
+        lensEvent?.dataLoading$ ??
+        (new BehaviorSubject(undefined) as PublishingSubject<boolean | undefined>),
+    },
     panelManagementApi,
     {
       getInspectorAdapters: () => lensEvent?.adapters,
@@ -71,7 +77,8 @@ export async function executeEditEmbeddableAction({
       },
       closeInspector: asyncNoop,
       adapters$: new BehaviorSubject(lensEvent?.adapters),
-    }
+    },
+    { coreStart: core, ...deps }
   );
 
   const ConfigPanel = await openInlineEditor();

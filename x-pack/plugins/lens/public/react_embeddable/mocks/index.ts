@@ -16,7 +16,8 @@ import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mock
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { DOC_TYPE } from '../../../common/constants';
+import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
+import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import {
   LensApi,
   LensEmbeddableStartServices,
@@ -24,8 +25,7 @@ import {
   LensRuntimeState,
   LensSerializedState,
 } from '../types';
-import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
-import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
+import { DOC_TYPE } from '../../../common/constants';
 
 const LensApiMock: LensApi = {
   // Static props
@@ -68,7 +68,6 @@ const LensApiMock: LensApi = {
   snapshotRuntimeState: jest.fn(),
   saveToLibrary: jest.fn(async () => 'saved-id'),
   getByValueRuntimeSnapshot: jest.fn(),
-  updateState: jest.fn(),
   onEdit: jest.fn(),
   isEditingEnabled: jest.fn(() => true),
   getTypeDisplayName: jest.fn(() => 'Lens'),
@@ -84,6 +83,9 @@ const LensApiMock: LensApi = {
   libraryId$: new BehaviorSubject<string | undefined>(undefined),
   savedObjectId: new BehaviorSubject<string | undefined>(undefined),
   adapters$: new BehaviorSubject<Adapters>({}),
+  updateAttributes: jest.fn(),
+  updateSavedObjectId: jest.fn(),
+  updateOverrides: jest.fn(),
 };
 
 const LensSerializedStateMock: LensSerializedState = {

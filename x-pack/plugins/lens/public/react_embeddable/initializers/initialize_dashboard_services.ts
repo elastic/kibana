@@ -6,17 +6,14 @@
  */
 
 import { noop } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   HasInPlaceLibraryTransforms,
-  PublishesDataViews,
   PublishesPanelTitle,
-  PublishesSavedObjectId,
+  PublishesViewMode,
   PublishesWritablePanelTitle,
   SerializedTitles,
   StateComparators,
+  ViewMode,
   getUnchangingComparator,
   initializeTitles,
 } from '@kbn/presentation-publishing';
@@ -27,19 +24,27 @@ import type {
   LensPanelProps,
   LensRuntimeState,
   LensEmbeddableStartServices,
-  LensByReference,
   LensOverrides,
   LensSharedProps,
+  IntegrationCallbacks,
+  LensInternalApi,
 } from '../types';
-import { createComparatorForStatePortion } from './initialize_state_management';
 import { apiHasLensComponentProps } from '../type_guards';
+import { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
-type SerializedProps = SerializedTitles &
-  LensPanelProps &
-  LensByReference &
-  LensOverrides &
-  Omit<LensSharedProps, 'viewMode'>;
+type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
+
+export interface DashboardServicesConfig {
+  api: PublishesPanelTitle &
+    PublishesViewMode &
+    PublishesWritablePanelTitle &
+    HasInPlaceLibraryTransforms &
+    Pick<IntegrationCallbacks, 'updateOverrides'>;
+  serialize: () => SerializedProps;
+  comparators: StateComparators<SerializedProps>;
+  cleanup: () => void;
+}
 
 /**
  * Everything about panel and library services
@@ -47,47 +52,46 @@ type SerializedProps = SerializedTitles &
 export function initializeDashboardServices(
   initialState: LensRuntimeState,
   getLatestState: () => LensRuntimeState,
+  internalApi: LensInternalApi,
+  stateConfig: StateManagementConfig,
   parentApi: unknown,
-  {
-    variables,
-  }: {
-    variables: {
-      state$: BehaviorSubject<LensRuntimeState>;
-      dataViews$: BehaviorSubject<DataView[] | undefined>;
-    };
-  },
   { attributeService }: LensEmbeddableStartServices
-): {
-  api: PublishesPanelTitle &
-    PublishesDataViews &
-    PublishesWritablePanelTitle &
-    PublishesSavedObjectId &
-    HasInPlaceLibraryTransforms;
-  serialize: () => SerializedProps;
-  comparators: StateComparators<SerializedProps>;
-  cleanup: () => void;
-} {
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.savedObjectId);
+): DashboardServicesConfig {
   const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
+
+  const [viewMode$, viewModeComparator] = buildObservableVariable<ViewMode | undefined>(
+    internalApi.viewMode$
+  );
   const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
     initialState.title || initialState.attributes.title
   );
   const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
     initialState.description || initialState.attributes.description
   );
+  // The observable references here are the same to the internalApi,
+  // the buildObservableVariable re-uses the same observable when detected but it builds the right comparator
+  const [overrides$, overridesComparator] = buildObservableVariable<LensOverrides['overrides']>(
+    internalApi.overrides$
+  );
+  const [disableTriggers$, disabledTriggersComparator] = buildObservableVariable<
+    boolean | undefined
+  >(internalApi.disableTriggers$);
+
   return {
     api: {
       defaultPanelTitle: defaultPanelTitle$,
       ...titlesApi,
-      dataViews: variables.dataViews$,
-      savedObjectId: savedObjectId$,
-      libraryId$: savedObjectId$,
+      viewMode: viewMode$ as PublishesViewMode['viewMode'],
+      libraryId$: stateConfig.api.savedObjectId,
+      updateOverrides: internalApi.updateOverrides,
       saveToLibrary: async (title: string) => {
-        const state = getLatestState();
+        const attributes = getLatestState().attributes;
         const savedObjectId = await attributeService.saveToLibrary(
-          { ...state.attributes, title },
-          state.attributes.references
+          { ...attributes, title },
+          attributes.references
         );
+        // keep in sync the state
+        stateConfig.api.updateSavedObjectId(savedObjectId);
         return savedObjectId;
       },
       checkForDuplicateTitle: async (
@@ -109,7 +113,9 @@ export function initializeDashboardServices(
       canLinkToLibrary: async () => !getLatestState().savedObjectId,
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       unlinkFromLibrary: () => {
-        savedObjectId$.next(undefined);
+        // broadcast the change to the main state serializer
+        stateConfig.api.updateSavedObjectId(undefined);
+
         if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
           titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
         }
@@ -142,16 +148,15 @@ export function initializeDashboardServices(
         className,
         ...settings,
         palette: initialState.palette,
-        savedObjectId: savedObjectId$.getValue(),
+        overrides: overrides$.getValue(),
+        viewMode: viewMode$.getValue(),
+        disableTriggers: disableTriggers$.getValue(),
       };
     },
     comparators: {
       ...titleComparators,
       id: getUnchangingComparator<SerializedTitles & LensPanelProps, 'id'>(),
       palette: getUnchangingComparator<SerializedTitles & LensPanelProps, 'palette'>(),
-      savedObjectId: createComparatorForStatePortion(variables.state$, 'savedObjectId'),
-      disableTriggers: createComparatorForStatePortion(variables.state$, 'disableTriggers'),
-      overrides: createComparatorForStatePortion(variables.state$, 'overrides'),
       renderMode: getUnchangingComparator<SerializedTitles & LensPanelProps, 'renderMode'>(),
       syncColors: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncColors'>(),
       syncCursor: getUnchangingComparator<SerializedTitles & LensPanelProps, 'syncCursor'>(),
@@ -160,6 +165,9 @@ export function initializeDashboardServices(
       noPadding: getUnchangingComparator<LensSharedProps, 'noPadding'>(),
       style: getUnchangingComparator<LensSharedProps, 'style'>(),
       className: getUnchangingComparator<LensSharedProps, 'className'>(),
+      overrides: overridesComparator,
+      disableTriggers: disabledTriggersComparator,
+      viewMode: viewModeComparator,
     },
     cleanup: noop,
   };

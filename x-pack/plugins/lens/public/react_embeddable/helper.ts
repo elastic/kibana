@@ -34,7 +34,7 @@ export function NonNullable<T>(value: T): value is NonNullable<T> {
   return value != null;
 }
 
-type ComparatorType<T extends unknown> = [
+export type ComparatorType<T extends unknown> = [
   BehaviorSubject<T>,
   (newValue: T) => void,
   (a: T, b: T) => boolean
@@ -52,7 +52,7 @@ export function buildObservableVariable<T extends unknown>(
   variable: T | PublishingSubject<T>
 ): ObservableFactoryReturnType<T> {
   if (variable instanceof BehaviorSubject) {
-    return [variable, makeComparator(variable as BehaviorSubject<T>)];
+    return [variable, makeComparator(variable)];
   }
   const variable$ = new BehaviorSubject<T>(variable as T);
   return [variable$, makeComparator(variable$)];

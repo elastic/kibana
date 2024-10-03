@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import {
+  type AggregateQuery,
+  type Filter,
+  isOfAggregateQueryType,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import { NonNullable } from '../helper';
-import { LensRuntimeState } from '../types';
+import type { LensRuntimeState } from '../types';
 
 export interface MergedSearchContext {
   now: number;

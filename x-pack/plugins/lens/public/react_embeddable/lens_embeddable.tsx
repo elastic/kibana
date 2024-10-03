@@ -24,9 +24,8 @@ import { useMessages } from './user_messages/use_messages';
 import { initializeEditApi } from './initializers/inizialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
 import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
-import { initializeObservables } from './initializers/initialize_observables';
+import { initializeInternalApi } from './initializers/initialize_internal_api';
 import { initializeSearchContext } from './initializers/initialize_search_context';
-import { initializeData } from './initializers/initialize_data';
 import { initializeVisualizationContext } from './initializers/initialize_visualization_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
@@ -60,14 +59,10 @@ export const createLensEmbeddableFactory = (
      */
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       /**
-       * Observables declared here are the bridge between the outer world
-       * and the embeddable. They are updated within a subscribe callback
-       * and will trigger a re-render of the component
+       * Observables and functions declared here are used internally to store mutating state values
+       * This is an internal API not exposed outside of the embeddable.
        */
-      const observables = initializeObservables(parentApi);
-      // Build an helper to force a re-render for user messages
-      const updateRenderCount = () =>
-        observables.variables.renderCount$.next(observables.variables.renderCount$.getValue() + 1);
+      const internalApi = initializeInternalApi(initialState, parentApi);
 
       const visualizationContextHelper = initializeVisualizationContext();
 
@@ -83,30 +78,32 @@ export const createLensEmbeddableFactory = (
        * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
        * If there's something that should be immediately computed use the "initialState" deserialized variable.
        */
-      const stateConfig = initializeStateManagement(initialState);
+      const stateConfig = initializeStateManagement(initialState, internalApi);
+      const dashboardConfig = initializeDashboardServices(
+        initialState,
+        getState,
+        internalApi,
+        stateConfig,
+        parentApi,
+        services
+      );
+
       const inspectorConfig = initializeInspector(services);
+
       const editConfig = initializeEditApi(
         uuid,
         initialState,
         getState,
-        stateConfig.api.updateState,
-        isTextBasedLanguage,
-        observables.variables,
-        services,
+        internalApi,
+        stateConfig.api,
+        dashboardConfig.api,
         inspectorConfig.api,
-        parentApi,
-        initialState.savedObjectId
+        isTextBasedLanguage,
+        services,
+        parentApi
       );
 
-      const dashboardConfig = initializeDashboardServices(
-        initialState,
-        getState,
-        parentApi,
-        stateConfig,
-        services
-      );
       const searchContextConfig = initializeSearchContext(initialState, parentApi);
-      const dataConfig = initializeData(getState, observables.variables);
       const integrationsConfig = initializeIntegrations(getState);
       const actionsConfig = initializeActionApi(
         uuid,
@@ -129,7 +126,6 @@ export const createLensEmbeddableFactory = (
           ...inspectorConfig.serialize(),
           ...dashboardConfig.serialize(),
           ...searchContextConfig.serialize(),
-          ...dataConfig.serialize(),
           ...integrationsConfig.serialize(),
           ...stateConfig.serialize(),
         };
@@ -140,23 +136,23 @@ export const createLensEmbeddableFactory = (
        * provide access to the services for and by the outside world
        */
       const api: LensApi = buildApi(
+        // Note: the order matters here, so make sure to have the
+        // dashboardConfig who owns the savedObjectId after the
+        // stateConfig one who owns the inline editing
         {
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
-          ...dashboardConfig.api,
-          ...dataConfig.api,
           ...actionsConfig.api,
           ...integrationsConfig.api,
           ...stateConfig.api,
-          ...observables.api,
+          ...dashboardConfig.api,
         },
         {
           ...stateConfig.comparators,
           ...editConfig.comparators,
           ...inspectorConfig.comparators,
           ...searchContextConfig.comparators,
-          ...observables.comparators,
           ...actionsConfig.comparators,
           ...integrationsConfig.comparators,
           ...dashboardConfig.comparators,
@@ -171,10 +167,9 @@ export const createLensEmbeddableFactory = (
         getState,
         api,
         parentApi,
-        { ...observables.variables, ...stateConfig.variables },
+        internalApi,
         services,
-        visualizationContextHelper,
-        updateRenderCount
+        visualizationContextHelper
       );
 
       // the component is ready to load
@@ -185,19 +180,14 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => {
+          const { renderCount$, hasRenderCompleted$, expressionParams$, viewMode$ } = internalApi;
           // Pick up updated params from the observable
-          const expressionParams = useStateFromPublishingSubject(
-            observables.variables.expressionParams$
-          );
+          const expressionParams = useStateFromPublishingSubject(expressionParams$);
           // used for functional tests
-          const renderCount = useStateFromPublishingSubject(observables.variables.renderCount$);
+          const renderCount = useStateFromPublishingSubject(renderCount$);
           // used for reporting/functional tests
-          const hasRendered = useStateFromPublishingSubject(
-            observables.variables.hasRenderCompleted$
-          );
-          const canEdit = Boolean(
-            api.isEditingEnabled?.() && observables.variables.viewMode$.getValue() === 'edit'
-          );
+          const hasRendered = useStateFromPublishingSubject(hasRenderCompleted$);
+          const canEdit = Boolean(api.isEditingEnabled?.() && viewMode$.getValue() === 'edit');
 
           const [blockingErrors, warningOrErrors, infoMessages] = useMessages(
             getUserMessages,
@@ -210,7 +200,6 @@ export const createLensEmbeddableFactory = (
               editConfig.cleanup();
               inspectorConfig.cleanup();
               searchContextConfig.cleanup();
-              dataConfig.cleanup();
               expression.cleanup();
               actionsConfig.cleanup();
               integrationsConfig.cleanup();

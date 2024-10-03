@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { SavedObjectReference } from '@kbn/core/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { SavedObjectReference } from '@kbn/core/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';

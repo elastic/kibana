@@ -10,7 +10,7 @@ import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from 
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
-import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -22,7 +22,6 @@ import type {
   NavigateToLensContext,
   SeriesType,
 } from '@kbn/visualizations-plugin/common';
-import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,

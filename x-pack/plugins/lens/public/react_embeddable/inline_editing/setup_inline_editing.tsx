@@ -7,7 +7,6 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
@@ -16,6 +15,7 @@ import {
   GetStateType,
   LensEmbeddableStartServices,
   LensInspectorAdapters,
+  LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
 } from '../types';
@@ -24,7 +24,10 @@ import { getStateManagementForInlineEditing } from './state_management';
 
 export function prepareInlineEditPanel(
   getState: GetStateType,
-  updateState: (newState: LensRuntimeState) => void,
+  updateState: (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => void,
+  { dataLoading$ }: Pick<LensInternalApi, 'dataLoading$'>,
+  panelManagementApi: PanelManagementApi,
+  inspectorApi: LensInspectorAdapters,
   {
     coreStart,
     ...startDependencies
@@ -42,9 +45,6 @@ export function prepareInlineEditPanel(
     | 'uiSettings'
     | 'attributeService'
   >,
-  dataLoading$: PublishingSubject<boolean | undefined> | undefined,
-  panelManagementApi: PanelManagementApi,
-  inspectorApi: LensInspectorAdapters,
   navigateToLensEditor?: (
     stateTransfer: EmbeddableStateTransfer,
     skipAppLeave?: boolean
@@ -71,16 +71,9 @@ export function prepareInlineEditPanel(
       activeDatasourceId,
       () => getState().attributes as TypedLensSerializedState['attributes'],
       (attrs: TypedLensSerializedState['attributes'], resetId: boolean = false) => {
-        const prevState = getState();
         updateState({
-          ...prevState,
           attributes: attrs,
-          /**
-           * SavedObjectId is undefined for by value panels and defined for the by reference ones.
-           * Here we are converting the by reference panels to by value when user is inline editing
-           * @TODO: remove this in a follow up PR
-           */
-          ...(resetId ? { savedObjectId: undefined } : {}),
+          savedObjectId: resetId ? undefined : currentState.savedObjectId,
         });
       },
       visualizationMap,
@@ -89,7 +82,7 @@ export function prepareInlineEditPanel(
     );
 
     const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
-      updateState({ ...getState(), savedObjectId });
+      updateState({ attributes, savedObjectId });
     };
     const Component = await getEditLensConfiguration(
       coreStart,

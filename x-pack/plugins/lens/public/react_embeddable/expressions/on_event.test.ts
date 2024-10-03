@@ -68,7 +68,7 @@ describe('Embeddable interaction event handlers', () => {
       reSubmit: (newEvent: ExpressionRendererEvent) => handler(newEvent),
       callbacks,
       getTrigger: services.uiActions.getTrigger,
-      updateState: lensApi.updateState,
+      updateAttributes: lensApi.updateAttributes,
       onEditAction,
     };
   }
@@ -127,38 +127,38 @@ describe('Embeddable interaction event handlers', () => {
   });
 
   it('should reload on edit events', async () => {
-    const { reSubmit, onEditAction, updateState } = await submitEvent({
+    const { reSubmit, onEditAction, updateAttributes } = await submitEvent({
       name: 'edit',
       data: { action: LENS_EDIT_SORT_ACTION },
     });
 
     expect(onEditAction).toHaveBeenCalled();
-    expect(updateState).toHaveBeenCalled();
+    expect(updateAttributes).toHaveBeenCalled();
 
     await reSubmit({ name: 'edit', data: { action: LENS_EDIT_RESIZE_ACTION } });
 
     expect(onEditAction).toHaveBeenCalled();
-    expect(updateState).toHaveBeenCalled();
+    expect(updateAttributes).toHaveBeenCalled();
 
     await reSubmit({ name: 'edit', data: { action: LENS_TOGGLE_ACTION } });
 
     expect(onEditAction).toHaveBeenCalled();
-    expect(updateState).toHaveBeenCalled();
+    expect(updateAttributes).toHaveBeenCalled();
 
     await reSubmit({ name: 'edit', data: { action: LENS_EDIT_PAGESIZE_ACTION } });
 
     expect(onEditAction).toHaveBeenCalled();
-    expect(updateState).toHaveBeenCalled();
+    expect(updateAttributes).toHaveBeenCalled();
   });
 
   it('should not reload on non-edit events', async () => {
-    const { reSubmit, onEditAction, updateState } = await submitEvent({
+    const { reSubmit, onEditAction, updateAttributes } = await submitEvent({
       name: 'tableRowContextMenuClick',
       data: { rowIndex: 1, table: getTable() },
     });
 
     expect(onEditAction).not.toHaveBeenCalled();
-    expect(updateState).not.toHaveBeenCalled();
+    expect(updateAttributes).not.toHaveBeenCalled();
 
     await reSubmit({
       name: 'brush',
@@ -166,7 +166,7 @@ describe('Embeddable interaction event handlers', () => {
     });
 
     expect(onEditAction).not.toHaveBeenCalled();
-    expect(updateState).not.toHaveBeenCalled();
+    expect(updateAttributes).not.toHaveBeenCalled();
 
     await reSubmit({
       name: 'filter',
@@ -176,6 +176,6 @@ describe('Embeddable interaction event handlers', () => {
     });
 
     expect(onEditAction).not.toHaveBeenCalled();
-    expect(updateState).not.toHaveBeenCalled();
+    expect(updateAttributes).not.toHaveBeenCalled();
   });
 });

@@ -5,9 +5,15 @@
  * 2.0.
  */
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { AggregateQuery, ExecutionContextSearch, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
-import {
+import type {
+  AggregateQuery,
+  ExecutionContextSearch,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
+import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
   HasSupportedTriggers,
@@ -20,15 +26,15 @@ import {
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import {
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
-import { PaletteOutput } from '@kbn/coloring';
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
-import {
+import type { PaletteOutput } from '@kbn/coloring';
+import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type {
   Capabilities,
   CoreStart,
   HttpSetup,
@@ -37,30 +43,30 @@ import {
   OverlayRef,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import {
+import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
-import { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
-import { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { LegacyMetricState } from '../../common';
-import { LensDocument } from '../persistence';
-import { LensInspector } from '../lens_inspector_service';
-import { LensAttributesService } from '../lens_attribute_service';
-import {
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
+import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
+import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { LegacyMetricState } from '../../common';
+import type { LensDocument } from '../persistence';
+import type { LensInspector } from '../lens_inspector_service';
+import type { LensAttributesService } from '../lens_attribute_service';
+import type {
   DatatableVisualizationState,
   DocumentToExpressionReturnType,
   HeatmapVisualizationState,
   XYState,
 } from '../async_services';
-import {
+import type {
   AddUserMessages,
   Datasource,
   DatasourceMap,
@@ -72,13 +78,13 @@ import {
   Visualization,
   VisualizationMap,
 } from '../types';
-import { LensPluginStartDependencies } from '../plugin';
-import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { PieVisualizationState } from '../../common/types';
-import { FormBasedPersistedState } from '..';
-import { TextBasedPersistedState } from '../datasources/text_based/types';
-import { GaugeVisualizationState } from '../visualizations/gauge/constants';
-import { MetricVisualizationState } from '../visualizations/metric/types';
+import type { LensPluginStartDependencies } from '../plugin';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { PieVisualizationState } from '../../common/types';
+import type { FormBasedPersistedState } from '..';
+import type { TextBasedPersistedState } from '../datasources/text_based/types';
+import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
+import type { MetricVisualizationState } from '../visualizations/metric/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface LensApiProps {}
@@ -164,7 +170,7 @@ export interface LensByReference {
   savedObjectId?: string;
 }
 
-type LensPropsVariants = LensByValue & LensByReference;
+export type LensPropsVariants = LensByValue & LensByReference;
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData: () => Promise<boolean>;
@@ -176,7 +182,9 @@ export interface IntegrationCallbacks extends LensApiProps {
   getTextBasedLanguage: () => string | undefined;
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
   getFullAttributes: () => LensDocument | undefined;
-  updateState: (newState: LensRuntimeState) => void;
+  updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
+  updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
+  updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
 }
 
 export interface LensPublicCallbacks extends LensApiProps {
@@ -348,6 +356,30 @@ export type LensApi = Simplify<
     LensInspectorAdapters &
     LensRequestHandlersProps &
     LensApiCallbacks
+>;
+
+// This is an API only used internally to the embeddable but not exported elsewhere
+// there's some overlapping between this and the LensApi but they are shared references
+export type LensInternalApi = Simplify<
+  Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
+    PublishesDataViews & {
+      attributes$: PublishingSubject<LensRuntimeState['attributes']>;
+      overrides$: PublishingSubject<LensOverrides['overrides']>;
+      disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
+      dataLoading$: PublishingSubject<boolean | undefined>;
+      hasRenderCompleted$: PublishingSubject<boolean>;
+      dispatchRenderStart: () => void;
+      dispatchRenderComplete: () => void;
+      updateRenderCount: () => void;
+      updateDataLoading: (newDataLoading: boolean | undefined) => void;
+      expressionParams$: PublishingSubject<Partial<ExpressionWrapperProps>>;
+      updateExpressionParams: (newParams: Partial<ExpressionWrapperProps>) => void;
+      expressionAbortController$: PublishingSubject<AbortController | undefined>;
+      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      renderCount$: PublishingSubject<number>;
+      viewMode$: PublishingSubject<ViewMode | undefined>;
+      updateDataViews: (dataViews: DataView[] | undefined) => void;
+    }
 >;
 
 export interface ExpressionWrapperProps {

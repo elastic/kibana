@@ -12,12 +12,22 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import { noop } from 'lodash';
+import type { HasSerializableState } from '@kbn/presentation-containers';
 import { emptySerializer } from '../helper';
 import type { GetStateType } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
-  api: Omit<IntegrationCallbacks, 'updateState'>;
+  api: Omit<
+    IntegrationCallbacks,
+    | 'updateState'
+    | 'updateAttributes'
+    | 'updateDataViews'
+    | 'updateSavedObjectId'
+    | 'updateOverrides'
+    | 'updateDataLoading'
+  > &
+    HasSerializableState;
   cleanup: () => void;
   serialize: () => {};
   comparators: {};
@@ -28,6 +38,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
   };
   return {
     api: {
+      serializeState: () => ({ rawState: getLatestState(), references: [] }),
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,
       getSavedVis: () => getLatestState().attributes,

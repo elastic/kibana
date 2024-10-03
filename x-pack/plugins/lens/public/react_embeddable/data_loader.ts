@@ -11,18 +11,16 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { BehaviorSubject, type Subscription, distinctUntilChanged, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { getEditPath } from '../../common/constants';
 import type {
   ExpressionWrapperProps,
   GetStateType,
   LensApi,
+  LensInternalApi,
   LensPublicCallbacks,
-  LensRuntimeState,
   VisualizationContextHelper,
 } from './types';
 import { getExpressionRendererParams } from './expressions/expression_params';
-import type { ReactiveConfigs } from './initializers/initialize_observables';
 import type { LensEmbeddableStartServices } from './types';
 import { prepareCallbacks } from './expressions/callbacks';
 import { buildUserMessagesHelper } from './user_messages/methods';
@@ -41,26 +39,14 @@ export function loadEmbeddableData(
   getState: GetStateType,
   api: LensApi,
   parentApi: unknown,
-  {
-    expressionParams$,
-    expressionAbortController$,
-    viewMode$,
-    hasRenderCompleted$,
-    state$,
-    dataLoading$,
-    dataViews$,
-  }: ReactiveConfigs['variables'] & {
-    state$: BehaviorSubject<LensRuntimeState>;
-    dataViews$: BehaviorSubject<DataView[] | undefined>;
-  },
+  internalApi: LensInternalApi,
   services: LensEmbeddableStartServices,
   { getVisualizationContext, updateVisualizationContext }: VisualizationContextHelper,
-  updateRenderCount: () => void,
   metaInfo?: SharingSavedObjectProps
 ) {
   // reset the render on reload
-  hasRenderCompleted$.next(false);
-  const dispatchRenderComplete = () => hasRenderCompleted$.next(true);
+  internalApi.dispatchRenderStart();
+
   const { onLoad, onBeforeBadgesRender, ...callbacks } = apiHasLensComponentCallbacks(parentApi)
     ? parentApi
     : ({} as LensPublicCallbacks);
@@ -86,7 +72,7 @@ export function loadEmbeddableData(
   async function reload() {
     resetRuntimeMessages();
     // notify about data loading
-    dataLoading$.next(true);
+    internalApi.updateDataLoading(true);
 
     const currentState = getState();
 
@@ -120,10 +106,10 @@ export function loadEmbeddableData(
         activeData: adapters?.tables?.tables,
       });
       // data has loaded
-      dataLoading$.next(false);
+      internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, dataLoading$);
+      onLoad?.(false, adapters, api.dataLoading);
     };
 
     const { onRender, onData, handleEvent, disableTriggers } = prepareCallbacks(
@@ -133,7 +119,7 @@ export function loadEmbeddableData(
       services,
       getExecutionContext,
       onDataCallback,
-      dispatchRenderComplete,
+      internalApi.dispatchRenderComplete,
       callbacks
     );
 
@@ -150,7 +136,7 @@ export function loadEmbeddableData(
         renderMode: currentState.viewMode as RenderMode,
         services,
         searchSessionId,
-        abortController: expressionAbortController$.getValue(),
+        abortController: internalApi.expressionAbortController$.getValue(),
         getExecutionContext,
         logError: getLogError(getExecutionContext),
         addUserMessages,
@@ -167,17 +153,17 @@ export function loadEmbeddableData(
     ]);
 
     // Publish the used dataViews on the Lens API
-    dataViews$.next(dataViews);
+    internalApi.updateDataViews(dataViews);
 
     if (params?.expression != null) {
-      expressionParams$.next(params);
+      internalApi.updateExpressionParams(params);
     } else {
       // trigger a render complete on error
-      dispatchRenderComplete();
+      internalApi.dispatchRenderComplete();
     }
-    expressionAbortController$.next(abortController);
+    internalApi.updateAbortController(abortController);
 
-    updateRenderCount();
+    internalApi.updateRenderCount();
     updateVisualizationContext({
       doc: currentState.attributes,
       mergedSearchContext: params?.searchContext || {},
@@ -202,30 +188,13 @@ export function loadEmbeddableData(
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
-    state$
-      .pipe(
-        distinctUntilChanged((prevState, nextState) =>
-          fastIsEqual(
-            [
-              'attributes' in prevState && prevState.attributes,
-              'savedObjectId' in prevState && prevState.savedObjectId,
-              'overrides' in prevState && prevState.overrides,
-              'disableTriggers' in prevState && prevState.disableTriggers,
-            ],
-            [
-              'attributes' in nextState && nextState.attributes,
-              'savedObjectId' in nextState && nextState.savedObjectId,
-              'overrides' in nextState && nextState.overrides,
-              'disableTriggers' in nextState && nextState.disableTriggers,
-            ]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(reload),
+    internalApi.attributes$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
+    api.savedObjectId.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
+    internalApi.overrides$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
+    internalApi.disableTriggers$.pipe(distinctUntilChanged(fastIsEqual), skip(1)).subscribe(reload),
 
     // reload on view mode change only if drilldowns are set
-    viewMode$.subscribe(() => {
+    internalApi.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
       if (getState().enhancements?.dynamicActions) {
         reload();

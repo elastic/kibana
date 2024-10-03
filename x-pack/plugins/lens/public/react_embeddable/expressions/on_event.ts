@@ -100,14 +100,11 @@ export const prepareEventHandler =
     // No state changes made here with an edit action are persisted.
     if (isLensEditEvent(event) && onEditAction) {
       // updating the state would trigger a reload
-      api.updateState({
-        ...currentState,
-        attributes: {
-          ...currentState.attributes,
-          state: {
-            ...currentState.attributes.state,
-            visualization: onEditAction(currentState.attributes.state.visualization, event),
-          },
+      api.updateAttributes({
+        ...currentState.attributes,
+        state: {
+          ...currentState.attributes.state,
+          visualization: onEditAction(currentState.attributes.state.visualization, event),
         },
       });
     }
