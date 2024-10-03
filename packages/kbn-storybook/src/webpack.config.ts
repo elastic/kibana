@@ -10,6 +10,7 @@
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
@@ -137,7 +138,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
       ],
     },
-    plugins: [new IgnoreNotFoundExportPlugin()],
+    plugins: [
+      new NodePolyfillPlugin({
+        additionalAliases: ['process'],
+      }),
+      new IgnoreNotFoundExportPlugin()
+    ],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],

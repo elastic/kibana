@@ -16,7 +16,7 @@ export const canvasWebpack = {
       // Enable CSS Modules in Storybook (Shareable Runtime)
       {
         test: /\.module\.s(a|c)ss$/,
-        loader: [
+        use: [
           'style-loader',
           {
             loader: 'css-loader',
@@ -51,7 +51,7 @@ export const canvasWebpack = {
       // Exclude large-dependency, troublesome or irrelevant modules.
       [resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout')]: false,
       [resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public')]: false,
-    },
+    } as { [key: string]: string | false },
   },
 };
 
