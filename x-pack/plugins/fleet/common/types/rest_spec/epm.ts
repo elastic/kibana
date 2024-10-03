@@ -7,6 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
+import type { PackageSpecIcon } from '../models/package_spec';
 import type {
   AssetReference,
   CategorySummaryList,
@@ -61,6 +62,9 @@ export interface InstalledPackage {
     name: string;
     title: string;
   }>;
+  title?: string;
+  description?: string;
+  icons?: PackageSpecIcon[];
 }
 export interface GetInstalledPackagesResponse {
   items: InstalledPackage[];
@@ -160,7 +164,7 @@ export interface InstallResult {
   status?: InstallResultStatus;
   error?: Error;
   installType: InstallType;
-  installSource: InstallSource;
+  installSource?: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {

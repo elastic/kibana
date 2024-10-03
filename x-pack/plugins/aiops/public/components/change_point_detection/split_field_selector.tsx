@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
@@ -20,8 +20,7 @@ interface SplitFieldSelectorProps {
 
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
   ({ value, onChange, inline = true }) => {
-    const { fieldStats } = useAiopsAppContext();
-    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
+    const { renderOption, closeFlyout } = useFieldStatsTrigger();
 
     const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 

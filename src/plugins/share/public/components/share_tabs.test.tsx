@@ -53,7 +53,6 @@ const mockShareContext = {
   allowShortUrl: true,
   anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
   urlService: service,
-  isEmbedded: true,
   theme: themeServiceMock.createStartContract(),
   objectTypeMeta: { title: 'title' },
   objectType: 'type',
