@@ -128,7 +128,7 @@ export const GridColumn = ({
           <EuiAutoSizer disableHeight>
             {({ width }: { width: number }) => (
               <List
-                style={{ height: '100%' }}
+                style={{ height: '100%', overflow: 'visible' }}
                 ref={listRef}
                 layout="vertical"
                 itemCount={Math.ceil(list.length / 3)}

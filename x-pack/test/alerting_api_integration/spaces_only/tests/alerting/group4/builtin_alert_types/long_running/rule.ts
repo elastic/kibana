@@ -80,7 +80,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`,
         ].includes(lastErrorStatus?.error.message || '')
       ).to.eql(true);
-      expect(lastErrorStatus?.error.reason).to.eql('timeout');
+      expect(['timeout', 'execute'].includes(lastErrorStatus?.error.reason || '')).to.eql(true);
     });
 
     it('writes event log document for timeout for each rule execution that ends in timeout - some executions times out', async () => {

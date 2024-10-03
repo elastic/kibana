@@ -27,9 +27,7 @@ describe('Stats', () => {
   it('shows the count', async () => {
     const wrapper = mount(<StatusStats {...defaultProps} />);
 
-    expect(
-      wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__description`).first().text()
-    ).toBe('2');
+    expect(wrapper.find(`[data-test-subj="test-stats"] .euiStat__title`).first().text()).toBe('2');
   });
 
   it('shows the loading spinner', async () => {
@@ -39,29 +37,29 @@ describe('Stats', () => {
   });
 
   describe('Status title', () => {
-    it('shows the correct title for status open', async () => {
+    it('shows the correct description for status open', async () => {
       const wrapper = mount(<StatusStats {...defaultProps} />);
 
       expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
+        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
       ).toBe('Open cases');
     });
 
-    it('shows the correct title for status in-progress', async () => {
+    it('shows the correct description for status in-progress', async () => {
       const wrapper = mount(
         <StatusStats {...defaultProps} caseStatus={CaseStatuses['in-progress']} />
       );
 
       expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
+        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
       ).toBe('In progress cases');
     });
 
-    it('shows the correct title for status closed', async () => {
+    it('shows the correct description for status closed', async () => {
       const wrapper = mount(<StatusStats {...defaultProps} caseStatus={CaseStatuses.closed} />);
 
       expect(
-        wrapper.find(`[data-test-subj="test-stats"] .euiDescriptionList__title`).first().text()
+        wrapper.find(`[data-test-subj="test-stats"] .euiStat__description`).first().text()
       ).toBe('Closed cases');
     });
   });

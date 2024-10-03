@@ -310,6 +310,52 @@ describe('TaskPoller', () => {
     expect(handler).toHaveBeenCalledWith(asOk(3));
   });
 
+  test('continues polling if getCapacity throws error fails', async () => {
+    const pollInterval = 100;
+
+    const handler = jest.fn();
+    let callCount = 0;
+    const work = jest.fn(async () => callCount);
+    const poller = createTaskPoller<string, number>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work,
+      getCapacity: () => {
+        callCount++;
+        if (callCount === 2) {
+          throw new Error('error getting capacity');
+        }
+        return 2;
+      },
+    });
+    poller.events$.subscribe(handler);
+    poller.start();
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(handler).toHaveBeenCalledWith(asOk(1));
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    const expectedError = new PollingError<string>(
+      'Failed to poll for work: Error: error getting capacity',
+      PollingErrorType.WorkError,
+      none
+    );
+    expect(handler).toHaveBeenCalledWith(asErr(expectedError));
+    expect(handler.mock.calls[1][0].error.type).toEqual(PollingErrorType.WorkError);
+    expect(handler).not.toHaveBeenCalledWith(asOk(2));
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(handler).toHaveBeenCalledWith(asOk(3));
+  });
+
   test(`doesn't start polling until start is called`, async () => {
     const pollInterval = 100;
 
