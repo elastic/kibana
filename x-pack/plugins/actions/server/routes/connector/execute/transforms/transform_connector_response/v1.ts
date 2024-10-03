@@ -10,12 +10,12 @@ import { ActionTypeExecutorResult } from '../../../../../types';
 
 export const transformExecuteConnectorResponse = ({
   actionId,
-  serviceMessage,
   retry,
+  serviceMessage,
   ...res
 }: ActionTypeExecutorResult<unknown>): ConnectorExecuteResponseV1 => ({
   ...res,
   connector_id: actionId,
+  ...(retry && typeof retry === 'object' ? { retry: retry.toISOString() } : { retry }),
   ...(serviceMessage ? { service_message: serviceMessage } : {}),
-  ...(retry && typeof retry === 'object' ? { retry: retry.toISOString() } : {}),
 });

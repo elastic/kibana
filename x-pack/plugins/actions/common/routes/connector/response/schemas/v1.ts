@@ -131,13 +131,15 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
-  retry: schema.nullable(
-    schema.oneOf([schema.boolean(), schema.string()], {
-      meta: {
-        description:
-          'When the status is error, determines whether the connector execution will retry .',
-      },
-    })
+  retry: schema.maybe(
+    schema.nullable(
+      schema.oneOf([schema.boolean(), schema.string()], {
+        meta: {
+          description:
+            'When the status is error, determines whether the connector execution will retry .',
+        },
+      })
+    )
   ),
   errorSource: schema.maybe(
     schema.oneOf([schema.literal('user'), schema.literal('framework')], {
