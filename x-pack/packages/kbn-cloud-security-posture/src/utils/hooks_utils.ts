@@ -47,8 +47,6 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
   },
 });
 
-// export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-
 export const getMisconfigurationAggregationCount = (
   buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
 ) => {
