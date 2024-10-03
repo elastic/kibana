@@ -192,7 +192,7 @@ export const DataUsage = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <Charts data={response} />;
+        <Charts data={response} />
       </EuiPageSection>
     </DatePickerProvider>
   );
