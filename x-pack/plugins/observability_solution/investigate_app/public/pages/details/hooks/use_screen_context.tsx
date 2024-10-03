@@ -25,10 +25,10 @@ export function useScreenContext() {
   const { investigation } = useInvestigation();
   const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
   const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
-  const { data: alertDetails } = useFetchAlert({ id: alertId });
+  const { data: alertDetails, isLoading: isAlertDetailsLoading } = useFetchAlert({ id: alertId });
 
   useEffect(() => {
-    if (!investigation) {
+    if (!investigation || isAlertDetailsLoading) {
       return;
     }
 
@@ -53,7 +53,7 @@ export function useScreenContext() {
         },
       ],
     });
-  }, [observabilityAIAssistant, investigation, alertDetails]);
+  }, [observabilityAIAssistant, investigation, alertDetails, isAlertDetailsLoading]);
 }
 
 function getAlertDetailScreenContext(alertDetail: EcsFieldsResponse) {
