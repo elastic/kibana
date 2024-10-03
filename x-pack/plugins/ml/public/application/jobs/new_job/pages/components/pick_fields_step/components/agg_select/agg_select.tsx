@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { Field, AggFieldPair, Aggregation } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -20,7 +20,7 @@ import {
   useFieldStatsTrigger,
 } from '@kbn/ml-field-stats-flyout';
 import { JobCreatorContext } from '../../../job_creator_context';
-
+export type { DropDownLabel };
 export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionOption[];
 
 interface Props {
@@ -66,14 +66,14 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
             const label = `${a.title}(${f.name})`;
             if (removeLabels.includes(label) === true) return;
             if (a.dslName !== null) {
-              const agg: DropDownLabel = {
+              const agg = {
                 key: label,
                 isEmpty,
                 isGroupLabel: false,
                 label,
-                agg: omit(a, 'fields'),
-                field: omit(f, 'aggs'),
-              };
+                agg: omit(a, 'fields') as Aggregation,
+                field: omit(f, 'aggs') as Field,
+              } as DropDownLabel;
               opts.push(agg);
             }
           });

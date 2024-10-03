@@ -14,6 +14,7 @@ import type { DropDownLabel } from '.';
 import { useFieldStatsFlyoutContext } from '.';
 import type { FieldForStats } from './field_stats_info_button';
 import { FieldStatsInfoButton } from './field_stats_info_button';
+import { isSelectableOption } from './options_list_with_stats/types';
 
 export const optionCss = css`
   .euiComboBoxOption__enterBadge {
@@ -42,7 +43,7 @@ interface Option extends EuiComboBoxOptionOption<string> {
  *   - `optionCss`: CSS styles for the options in the combo box.
  *   - `populatedFields`: A set of populated fields.
  */
-export const useFieldStatsTrigger = () => {
+export function useFieldStatsTrigger<T = DropDownLabel>() {
   const { setIsFlyoutVisible, setFieldName, populatedFields } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
@@ -58,18 +59,20 @@ export const useFieldStatsTrigger = () => {
   );
 
   const renderOption = useCallback(
-    (option: DropDownLabel): ReactNode => {
-      const field = (option as Option).field;
-      return option.isGroupLabelOption || !field ? (
-        option.label
-      ) : (
-        <FieldStatsInfoButton
-          isEmpty={populatedFields && !populatedFields.has(field.id)}
-          field={field}
-          label={option.label}
-          onButtonClick={handleFieldStatsButtonClick}
-        />
-      );
+    (option: T): ReactNode => {
+      if (isSelectableOption(option)) {
+        const field = (option as Option).field;
+        return option.isGroupLabelOption || !field ? (
+          option.label
+        ) : (
+          <FieldStatsInfoButton
+            isEmpty={populatedFields && !populatedFields.has(field.id)}
+            field={field}
+            label={option.label}
+            onButtonClick={handleFieldStatsButtonClick}
+          />
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleFieldStatsButtonClick, populatedFields?.size]
@@ -83,4 +86,4 @@ export const useFieldStatsTrigger = () => {
     optionCss,
     populatedFields,
   };
-};
+}

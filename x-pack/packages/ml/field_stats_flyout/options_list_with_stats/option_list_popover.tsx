@@ -7,10 +7,14 @@
 import type { FC } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import type {
+  EuiComboBoxOptionOption,
+  EuiComboBoxSingleSelectionShape,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import { EuiFlexItem, EuiSelectable, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DropDownLabel } from './types';
+import { isSelectableOption, type DropDownLabel } from './types';
 import { useFieldStatsFlyoutContext } from '../use_field_stats_flyout_context';
 import { OptionsListPopoverFooter } from './option_list_popover_footer';
 
@@ -18,7 +22,11 @@ interface OptionsListPopoverProps {
   options: DropDownLabel[];
   renderOption: (option: DropDownLabel) => React.ReactNode;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
-  onChange?: (newSuggestions: DropDownLabel[]) => void;
+  onChange?:
+    | ((newSuggestions: DropDownLabel[]) => void)
+    | ((
+        newSuggestions: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>
+      ) => void);
   setPopoverOpen: (open: boolean) => void;
   isLoading?: boolean;
 }
@@ -27,7 +35,11 @@ interface OptionsListPopoverSuggestionsProps {
   options: DropDownLabel[];
   renderOption: (option: DropDownLabel) => React.ReactNode;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
-  onChange?: (newSuggestions: DropDownLabel[]) => void;
+  onChange?:
+    | ((newSuggestions: DropDownLabel[]) => void)
+    | ((
+        newSuggestions: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>
+      ) => void);
   setPopoverOpen: (open: boolean) => void;
 }
 const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
@@ -55,18 +67,19 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
     <EuiSelectable
       singleSelection={Boolean(singleSelection)}
       searchable
-      options={selectableOptions}
+      options={selectableOptions as Array<EuiSelectableOption<string>>}
       renderOption={renderOption}
       listProps={{ onFocusBadge: false }}
       onChange={(opts, _, changedOption) => {
+        const option = changedOption as DropDownLabel;
         if (singleSelection) {
           if (onChange) {
-            onChange([changedOption]);
+            onChange([option as EuiComboBoxOptionOption<string | number | string[] | undefined>]);
             setPopoverOpen(false);
           }
         } else {
           if (onChange) {
-            onChange([changedOption]);
+            onChange([option as EuiComboBoxOptionOption<string | number | string[] | undefined>]);
             setPopoverOpen(false);
           }
         }
@@ -99,14 +112,16 @@ export const OptionsListPopover = ({
     return showEmptyFields
       ? options
       : options.filter((option) => {
-          if (isDefined(option['data-is-empty'])) {
-            return !option['data-is-empty'];
-          }
-          if (option.isGroupLabel || option.isGroupLabelOption) {
-            return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
-          }
-          if (option.field) {
-            return populatedFields?.has(option.field.id);
+          if (isSelectableOption(option)) {
+            if (isDefined(option['data-is-empty'])) {
+              return !option['data-is-empty'];
+            }
+            if (option.isGroupLabel || option.isGroupLabelOption) {
+              return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
+            }
+            if (option.field) {
+              return populatedFields?.has(option.field.id);
+            }
           }
           return true;
         });

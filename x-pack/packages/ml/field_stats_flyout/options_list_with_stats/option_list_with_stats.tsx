@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFlexGroup,
@@ -44,7 +44,9 @@ interface OptionListWithFieldStatsProps {
   placeholder?: string;
   'aria-label'?: string;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
-  onChange: (newSuggestions: DropDownLabel[]) => void;
+  onChange:
+    | ((newSuggestions: DropDownLabel[]) => void)
+    | ((newSuggestions: EuiComboBoxOptionOption[]) => void);
   selectedOptions?: Array<{ label: string }>;
   fullWidth?: boolean;
   isDisabled?: boolean;
@@ -77,7 +79,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   isClearable = true,
   'aria-label': ariaLabel,
 }) => {
-  const { renderOption } = useFieldStatsTrigger();
+  const { renderOption } = useFieldStatsTrigger<DropDownLabel>();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const popoverId = useMemo(() => htmlIdGenerator()(), []);

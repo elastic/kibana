@@ -35,6 +35,7 @@ import {
   type FieldForStats,
 } from '@kbn/ml-field-stats-flyout';
 
+import type { DropDownLabel } from '../../../../../jobs/new_job/pages/components/pick_fields_step/components/agg_select';
 import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
@@ -694,7 +695,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                 singleSelection={true}
                 options={dependentVariableOptions}
                 selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-                onChange={(selectedOptions) => {
+                onChange={(selectedOptions: DropDownLabel[]) => {
                   setFormState({
                     dependentVariable: selectedOptions[0].label || '',
                   });

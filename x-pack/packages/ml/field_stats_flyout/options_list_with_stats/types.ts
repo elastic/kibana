@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import type { Field } from '@kbn/ml-anomaly-utils';
-
-export type DropDownLabel<T = string> = EuiSelectableOption<{
+import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
+import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
+export type SelectableOption<T> = EuiSelectableOption<{
   key?: string;
   label: string | React.ReactNode;
   isEmpty?: boolean;
@@ -19,3 +18,14 @@ export type DropDownLabel<T = string> = EuiSelectableOption<{
   field?: Field;
   agg?: T;
 }>;
+export type DropDownLabel<T = string> =
+  | (EuiComboBoxOptionOption & {
+      isEmpty?: boolean;
+      agg?: Aggregation | string;
+      field?: Field;
+    })
+  | SelectableOption<T>;
+
+export function isSelectableOption<T>(option: unknown): option is SelectableOption<T> {
+  return typeof option === 'object' && option !== null && Object.hasOwn(option, 'key');
+}
