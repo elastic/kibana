@@ -171,7 +171,7 @@ export const AnomalyDetectionSettings: FC = () => {
             <h3>
               <FormattedMessage
                 id="xpack.ml.settings.anomalyDetection.calendarsDstTitle"
-                defaultMessage="Calendars DST"
+                defaultMessage="DST Calendars"
               />
             </h3>
           </EuiTitle>
