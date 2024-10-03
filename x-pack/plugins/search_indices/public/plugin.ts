@@ -59,6 +59,7 @@ export class SearchIndicesPlugin
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
+
     return {
       enabled: true,
     };
