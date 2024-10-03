@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const injectAnalyzeWildcard = (query: QueryDslQueryContainer) => {
+export const injectAnalyzeWildcard = (query: QueryDslQueryContainer): void => {
   if (!query) {
     return;
   }
