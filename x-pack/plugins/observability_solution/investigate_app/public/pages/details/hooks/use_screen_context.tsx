@@ -9,7 +9,6 @@ import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_REASON, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import dedent from 'dedent';
-import { omit } from 'lodash';
 import { useEffect } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useInvestigation } from '../contexts/investigation_context';
