@@ -117,7 +117,9 @@ export class VisualizeChartPageObject extends FtrService {
   ) {
     const areas = (await this.getEsChartDebugState(selector))?.areas ?? [];
     const points = areas.find(({ name }) => name === dataLabel)?.lines.y1.points ?? [];
-    return shouldContainXAxisData ? points.map(({ x, y }) => [x, y]) : points.map(({ y }) => y);
+    return shouldContainXAxisData
+      ? points.sort((a, b) => a.x - b.x).map(({ x, y }) => [x, y])
+      : points.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
   /**
@@ -138,7 +140,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async getLineChartData(selector: string, dataLabel = 'Count') {
     const lines = (await this.getEsChartDebugState(selector))?.lines ?? [];
     const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
-    return points.map(({ y }) => y);
+    return points.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
   /**
@@ -148,7 +150,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async getBarChartData(selector: string, dataLabel = 'Count') {
     const bars = (await this.getEsChartDebugState(selector))?.bars ?? [];
     const values = bars.find(({ name }) => name === dataLabel)?.bars ?? [];
-    return values.map(({ y }) => y);
+    return values.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
   private async toggleLegend(force = false) {
