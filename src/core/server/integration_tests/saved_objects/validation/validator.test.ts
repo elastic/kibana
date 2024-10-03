@@ -57,6 +57,7 @@ function createRoot() {
           },
         ],
       },
+      restrictInternalApis: false,
     },
     {
       oss: true,
