@@ -9,7 +9,7 @@
 
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { createVegaVisualization } from '../vega_visualization';
@@ -28,7 +28,7 @@ interface VegaVisComponentProps {
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
 
-const THROTTLE_INTERVAL = 300;
+const DEBOUNCE_INTERVAL = 100;
 
 export const VegaVisComponent = ({
   visData,
@@ -66,13 +66,9 @@ export const VegaVisComponent = ({
 
   const resizeChart = useMemo(
     () =>
-      throttle(
-        (dimensions) => {
-          visController.current?.resize(dimensions);
-        },
-        THROTTLE_INTERVAL,
-        { leading: false, trailing: true }
-      ),
+      debounce((dimensions) => {
+        visController.current?.resize(dimensions);
+      }, DEBOUNCE_INTERVAL),
     []
   );
 
