@@ -119,7 +119,7 @@ export const AlertsSearchBar = ({
     displayStyle: 'inPage',
     showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated: onFiltersUpdated,
+    onFiltersUpdated,
     onRefresh,
     showDatePicker,
     showQueryInput: true,
