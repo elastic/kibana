@@ -656,6 +656,7 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
+x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/observability_utils @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
@@ -752,6 +753,8 @@ src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-screenshotting-server @elastic/appex-sharedux
+packages/kbn-search-api-keys-components @elastic/search-kibana
+packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 x-pack/plugins/search_assistant @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
@@ -765,6 +768,7 @@ x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+x-pack/packages/search/shared_ui @elastic/search-kibana
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1109,6 +1113,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability AI Assistant
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
+x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
 
 # Infra Monitoring
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -1239,6 +1244,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/functional/apps/canvas/ @elastic/kibana-presentation
 /x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
 /test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
+/x-pack/test/functional/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
@@ -1534,6 +1540,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
 
+/x-pack/plugins/security_solution/common/timelines @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
