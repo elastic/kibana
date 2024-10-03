@@ -64,7 +64,6 @@ export const setStubKibanaServices = () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       visualizations: visualizationsPluginMock.createStartContract(),
     },
-    new BehaviorSubject<AppUpdater>(() => ({})),
     coreMock.createPluginInitializerContext()
   );
 };
