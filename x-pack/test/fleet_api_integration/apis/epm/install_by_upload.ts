@@ -265,7 +265,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, description, title, format_version, owner."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, title, owner."}'
       );
     });
 
