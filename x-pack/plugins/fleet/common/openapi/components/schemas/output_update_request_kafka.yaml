@@ -132,3 +132,4 @@ properties:
     type: number
 required:
   - name
+  - type

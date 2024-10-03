@@ -58,3 +58,4 @@ properties:
         type: boolean
 required:
   - name
+  - type
