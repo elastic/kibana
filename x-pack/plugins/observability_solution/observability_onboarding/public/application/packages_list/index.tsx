@@ -9,7 +9,6 @@ import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
