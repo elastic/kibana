@@ -69,6 +69,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 import { applyRuleDefaults } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
 import { convertRuleResponseToAlertingRule } from '../../../rule_management/logic/detection_rules_client/converters/convert_rule_response_to_alerting_rule';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
@@ -88,6 +89,9 @@ export const previewRulesRoute = (
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
+      options: {
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)]
+      },
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
