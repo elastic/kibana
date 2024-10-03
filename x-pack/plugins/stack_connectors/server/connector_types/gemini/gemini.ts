@@ -63,7 +63,6 @@ interface Payload {
   generation_config: {
     temperature: number;
     maxOutputTokens: number;
-    topK: number;
   };
   tool_config?: {
     function_calling_config: {
@@ -395,7 +394,6 @@ const formatGeminiPayload = ({
     generation_config: {
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
-      topK: 40,
     },
     ...(systemInstruction
       ? { system_instruction: { role: 'system', parts: [{ text: systemInstruction }] } }
