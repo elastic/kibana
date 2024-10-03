@@ -33,7 +33,7 @@
             "label": "Provider",
             "description": [],
             "signature": [
-              "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+              "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
             ],
             "path": "src/plugins/presentation_util/public/services/create/provider.tsx",
             "deprecated": false,
@@ -651,7 +651,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -666,9 +666,9 @@
         "label": "FloatingActions",
         "description": [],
         "signature": [
-          "({ children, viewMode, isEnabled, api, className, disabledActions, }: React.PropsWithChildren<",
+          "({ children, viewMode, isEnabled, api, className, disabledActions, }: ",
           "FloatingActionsProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
         "deprecated": false,
@@ -677,14 +677,12 @@
           {
             "parentPluginId": "presentationUtil",
             "id": "def-public.FloatingActions.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  children,\n  viewMode,\n  isEnabled,\n  api,\n  className = '',\n  disabledActions,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "FloatingActionsProps",
-              ">"
+              "FloatingActionsProps"
             ],
             "path": "src/plugins/presentation_util/public/components/floating_actions/floating_actions.tsx",
             "deprecated": false,
@@ -720,11 +718,9 @@
         "label": "LazyDashboardPicker",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ isDisabled, onChange, idsToOmit }: ",
           "DashboardPickerProps",
-          "> & { readonly _result: ({ isDisabled, onChange, idsToOmit }: ",
-          "DashboardPickerProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -741,7 +737,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -756,7 +752,7 @@
         "label": "LazyDataViewPicker",
         "description": [],
         "signature": [
-          "React.ExoticComponent<{ dataViews: ",
+          "React.LazyExoticComponent<({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, ...other }: { dataViews: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -768,19 +764,7 @@
           "DataViewTriggerProps",
           "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
           "EuiSelectableProps",
-          "<{}>> | undefined; }> & { readonly _result: ({ dataViews, selectedDataViewId, onChangeDataViewId, trigger, selectableProps, ...other }: { dataViews: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewListItem",
-            "text": "DataViewListItem"
-          },
-          "[]; selectedDataViewId?: string | undefined; trigger: ",
-          "DataViewTriggerProps",
-          "; onChangeDataViewId: (newId: string) => void; selectableProps?: Partial<",
-          "EuiSelectableProps",
-          "<{}>> | undefined; }) => JSX.Element; }"
+          "<{}>> | undefined; }) => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -797,7 +781,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -814,7 +798,7 @@
           "\nA lazily-loaded ExpressionInput component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<(props: ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -822,15 +806,7 @@
             "section": "def-public.ExpressionInputProps",
             "text": "ExpressionInputProps"
           },
-          "> & { readonly _result: (props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ExpressionInputProps",
-            "text": "ExpressionInputProps"
-          },
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -847,7 +823,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -862,11 +838,9 @@
         "label": "LazyFieldPicker",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, ...other }: ",
           "FieldPickerProps",
-          "> & { readonly _result: ({ dataView, onSelectField, filterPredicate, selectedFieldName, selectableProps, ...other }: ",
-          "FieldPickerProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -883,7 +857,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -898,13 +872,9 @@
         "label": "LazyLabsBeakerButton",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
-          "EuiButtonProps",
-          " & Pick<",
+          "React.LazyExoticComponent<({ solutions, ...props }: ",
           "Props",
-          ", \"solutions\">> & { readonly _result: ({ solutions, ...props }: ",
-          "Props",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -921,7 +891,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -936,11 +906,9 @@
         "label": "LazyLabsFlyout",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<(props: ",
           "Props",
-          "> & { readonly _result: (props: ",
-          "Props",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -957,7 +925,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -997,7 +965,7 @@
         "label": "LazySavedObjectSaveModalDashboard",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<(props: ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -1005,15 +973,7 @@
             "section": "def-public.SaveModalDashboardProps",
             "text": "SaveModalDashboardProps"
           },
-          "> & { readonly _result: (props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.SaveModalDashboardProps",
-            "text": "SaveModalDashboardProps"
-          },
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -1030,7 +990,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1186,7 +1146,7 @@
             "section": "def-public.ExpressionInputProps",
             "text": "ExpressionInputProps"
           },
-          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
+          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"style\" | \"className\">"
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
@@ -1630,7 +1590,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -1652,7 +1612,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"canvas\" | \"dashboard\" | \"presentation\")[] | undefined"
+                  "(\"canvas\" | \"presentation\" | \"dashboard\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs/types.ts",
                 "deprecated": false,
@@ -2874,14 +2834,14 @@
             {
               "parentPluginId": "presentationUtil",
               "id": "def-public.PresentationUtilPluginStart.ContextProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -2895,7 +2855,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3467,7 +3427,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"canvas\" | \"dashboard\" | \"presentation\")[]"
+              "(\"canvas\" | \"presentation\" | \"dashboard\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -3646,7 +3606,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"canvas\" | \"dashboard\" | \"presentation\""
+          "\"canvas\" | \"presentation\" | \"dashboard\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
