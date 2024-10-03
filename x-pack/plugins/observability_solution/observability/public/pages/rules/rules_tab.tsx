@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { observabilityAlertFeatureIds } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
@@ -75,6 +76,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   return (
     <RuleList
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+      consumers={observabilityAlertFeatureIds}
       filteredRuleTypes={filteredRuleTypes}
       lastRunOutcomeFilter={stateLastResponse}
       refresh={stateRefresh}

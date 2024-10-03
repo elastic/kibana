@@ -16,15 +16,14 @@ import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 export async function loadRuleAggregationsWithKueryFilter({
   http,
   searchText,
-  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
   ruleTypeIds,
+  consumers,
 }: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filtersKueryNode = mapFiltersToKueryNode({
-    typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
@@ -39,6 +38,7 @@ export async function loadRuleAggregationsWithKueryFilter({
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         rule_type_ids: ruleTypeIds,
         default_search_operator: 'AND',
+        consumers,
       }),
     }
   );

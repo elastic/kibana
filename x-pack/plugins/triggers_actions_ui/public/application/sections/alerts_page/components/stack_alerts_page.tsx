@@ -78,7 +78,7 @@ const PageContent = () => {
   } = useKibana().services;
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
   const [ruleTypeIds, setRuleTypeIds] = useState<string[]>([]);
-  const ruleStats = useRuleStats();
+  const ruleStats = useRuleStats({ ruleTypeIds });
 
   const {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },

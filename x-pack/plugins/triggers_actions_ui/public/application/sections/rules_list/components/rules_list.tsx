@@ -116,6 +116,7 @@ const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
   ruleTypeIds?: string[];
+  consumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -157,6 +158,7 @@ const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
   ruleTypeIds,
+  consumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -294,6 +296,7 @@ export const RulesList = ({
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
       ruleTypeIds,
+      consumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,

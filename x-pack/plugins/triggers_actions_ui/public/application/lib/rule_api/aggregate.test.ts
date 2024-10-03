@@ -113,7 +113,7 @@ describe('loadRuleAggregations', () => {
     `);
   });
 
-  test('should call aggregate API with typesFilter', async () => {
+  test('should call aggregate API with ruleTypeIds', async () => {
     const resolvedValue = {
       rule_execution_status: {
         ok: 4,
@@ -127,7 +127,7 @@ describe('loadRuleAggregations', () => {
 
     const result = await loadRuleAggregations({
       http,
-      typesFilter: ['foo', 'bar'],
+      ruleTypeIds: ['foo', 'bar'],
     });
     expect(result).toEqual({
       ruleExecutionStatus: {
@@ -142,13 +142,13 @@ describe('loadRuleAggregations', () => {
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "body": "{\\"filter\\":\\"alert.attributes.alertTypeId:(foo or bar)\\",\\"default_search_operator\\":\\"AND\\"}",
+          "body": "{\\"default_search_operator\\":\\"AND\\",\\"rule_type_ids\\":[\\"foo\\",\\"bar\\"]}",
         },
       ]
     `);
   });
 
-  test('should call aggregate API with actionTypesFilter and typesFilter', async () => {
+  test('should call aggregate API with actionTypesFilter and ruleTypeIds', async () => {
     const resolvedValue = {
       rule_execution_status: {
         ok: 4,
@@ -164,7 +164,7 @@ describe('loadRuleAggregations', () => {
       http,
       searchText: 'baz',
       actionTypesFilter: ['action', 'type'],
-      typesFilter: ['foo', 'bar'],
+      ruleTypeIds: ['foo', 'bar'],
     });
     expect(result).toEqual({
       ruleExecutionStatus: {
@@ -179,7 +179,7 @@ describe('loadRuleAggregations', () => {
       Array [
         "/internal/alerting/rules/_aggregate",
         Object {
-          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"baz\\",\\"filter\\":\\"alert.attributes.alertTypeId:(foo or bar) and (alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })\\",\\"default_search_operator\\":\\"AND\\"}",
+          "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"baz\\",\\"filter\\":\\"(alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:type })\\",\\"default_search_operator\\":\\"AND\\",\\"rule_type_ids\\":[\\"foo\\",\\"bar\\"]}",
         },
       ]
     `);
@@ -320,40 +320,6 @@ describe('loadRuleAggregations', () => {
             "per_page": 30,
             "search": "test",
           },
-        },
-      ]
-    `);
-  });
-
-  test('should call aggregate API with ruleTypeIds', async () => {
-    const resolvedValue = {
-      rule_execution_status: {
-        ok: 4,
-        active: 2,
-        error: 1,
-        pending: 1,
-        unknown: 0,
-      },
-    };
-
-    http.post.mockResolvedValueOnce(resolvedValue);
-
-    const result = await loadRuleAggregations({ http, ruleTypeIds: ['foo'] });
-    expect(result).toEqual({
-      ruleExecutionStatus: {
-        ok: 4,
-        active: 2,
-        error: 1,
-        pending: 1,
-        unknown: 0,
-      },
-    });
-
-    expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "/internal/alerting/rules/_aggregate",
-        Object {
-          "body": "{\\"default_search_operator\\":\\"AND\\",\\"rule_type_ids\\":[\\"foo\\"]}",
         },
       ]
     `);
