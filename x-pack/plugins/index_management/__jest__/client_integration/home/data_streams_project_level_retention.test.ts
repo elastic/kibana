@@ -118,8 +118,8 @@ describe('Data Streams - Project level max retention', () => {
       name: 'dataStream1',
       lifecycle: {
         enabled: true,
-        data_retention: '7d',
-        effective_retention: '5d',
+        data_retention: '25d',
+        effective_retention: '25d',
         retention_determined_by: MAX_DATA_RETENTION,
         globalMaxRetention: '20d',
       },
@@ -145,17 +145,6 @@ describe('Data Streams - Project level max retention', () => {
     await actions.clickNameAt(0);
     actions.clickEditDataRetentionButton();
 
-    // set data retention value
-    testBed.form.setInputValue('dataRetentionValue', '25');
-    // Set data retention unit
-    testBed.find('show-filters-button').simulate('click');
-    testBed.find('filter-option-d').simulate('click');
-
-    await act(async () => {
-      testBed.find('saveButton').simulate('click');
-    });
-    testBed.component.update();
-
-    expect(testBed.find('saveButton').props().disabled).toEqual(true);
+    expect(testBed.form.getErrorsMessages().length).toBeGreaterThan(0);
   });
 });
