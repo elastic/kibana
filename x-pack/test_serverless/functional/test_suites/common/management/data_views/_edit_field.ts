@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
