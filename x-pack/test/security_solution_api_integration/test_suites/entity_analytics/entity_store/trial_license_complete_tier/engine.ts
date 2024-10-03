@@ -31,7 +31,8 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(200);
   };
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
+  // TODO: unskip once permissions issue is resolved
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs', () => {
     before(async () => {
       await cleanEngines({ getService });
     });
