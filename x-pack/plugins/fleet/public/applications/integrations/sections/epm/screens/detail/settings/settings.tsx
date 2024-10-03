@@ -244,7 +244,7 @@ export const SettingsPage: React.FC<Props> = memo(
         numOfAssets: Object.entries(packageInfo.assets).reduce(
           (acc, [serviceName, serviceNameValue]) =>
             acc +
-            Object.entries(serviceNameValue).reduce(
+            Object.entries(serviceNameValue || {}).reduce(
               (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
               0
             ),
