@@ -39,10 +39,19 @@ export const register = (deps: RouteDependencies): void => {
       const clusterNamesChunks = chunk(clusterNames, CLUSTER_STATUS_CHUNK_SIZE);
       const promises = clusterNamesChunks.map(async (clustersChunk) => {
         try {
-          return await clusterClient.asCurrentUser.indices.resolveCluster({
-            name: clustersChunk.map((cluster) => `${cluster}:*`),
-            filter_path: '*.connected',
-          });
+          return await clusterClient.asCurrentUser.indices.resolveCluster(
+            {
+              name: clustersChunk.map((cluster) => `${cluster}:*`),
+              filter_path: '*.connected',
+            },
+            {
+              // Set a longer timeout given that sometimes unresponsive clusters
+              // can take a while to respond.
+              // We should be able to be more aggresive with this timeout once
+              // https://github.com/elastic/elasticsearch/issues/114020 is resolved.
+              requestTimeout: '60s',
+            }
+          );
         } catch (error) {
           return Promise.resolve(null);
         }
