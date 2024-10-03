@@ -6,6 +6,10 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
+import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { TextLoader } from 'langchain/document_loaders/fs/text';
+import type { Document } from 'langchain/document';
+import { resolve } from 'path';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { ESQL_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
@@ -37,12 +41,33 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
       func: async (input) => {
+        const exampleQueriesLoader = new DirectoryLoader(
+          resolve(
+            __dirname,
+            '../../../../../elastic_assistant/server/knowledge_base/esql/example_queries'
+          ),
+          {
+            '.asciidoc': (path) => new TextLoader(path),
+          },
+          true
+        );
+        const rawExampleQueries = await exampleQueriesLoader.load();
+
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: ESQL_RESOURCE,
           query: input.question,
         });
 
-        return JSON.stringify(docs).substring(0, 20000);
+        let legacyDocs: Document[] = [];
+
+        if (!kbDataClient?.isV2KnowledgeBaseEnabled) {
+          legacyDocs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+            kbResource: 'unknown',
+            query: input.question,
+          });
+        }
+
+        return JSON.stringify([...rawExampleQueries, ...docs, ...legacyDocs]).substring(0, 50000);
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
