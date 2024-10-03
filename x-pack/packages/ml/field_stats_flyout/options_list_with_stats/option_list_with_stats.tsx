@@ -68,7 +68,7 @@ const clearIconCss = css`
 
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   options,
-  placeholder = '    ',
+  placeholder,
   singleSelection = false,
   onChange,
   selectedOptions,
