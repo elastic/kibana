@@ -346,7 +346,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      'Failed to poll for work: Error: error getting capacity',
+      'Failed to poll for work: error getting capacity',
       PollingErrorType.WorkError,
       none
     );
