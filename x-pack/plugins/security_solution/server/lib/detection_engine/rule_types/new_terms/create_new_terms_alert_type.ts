@@ -415,13 +415,11 @@ export const createNewTermsAlertType = (
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
 
-      if (scheduleNotificationResponseActionsService) {
-        scheduleNotificationResponseActionsService({
-          signals: result.createdSignals,
-          signalsCount: result.createdSignalsCount,
-          responseActions: completeRule.ruleParams.responseActions,
-        });
-      }
+      scheduleNotificationResponseActionsService({
+        signals: result.createdSignals,
+        signalsCount: result.createdSignalsCount,
+        responseActions: completeRule.ruleParams.responseActions,
+      });
 
       return { ...result, state };
     },

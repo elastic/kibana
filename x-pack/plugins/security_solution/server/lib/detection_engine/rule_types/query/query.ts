@@ -98,13 +98,11 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (scheduleNotificationResponseActionsService) {
-      scheduleNotificationResponseActionsService({
-        signals: result.createdSignals,
-        signalsCount: result.createdSignalsCount,
-        responseActions: completeRule.ruleParams.responseActions,
-      });
-    }
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
 
     return result;
   });

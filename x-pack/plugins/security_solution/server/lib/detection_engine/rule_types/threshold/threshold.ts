@@ -45,6 +45,7 @@ import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { CreateRuleOptions } from '../types';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -68,6 +69,7 @@ export const thresholdExecutor = async ({
   runOpts,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -90,6 +92,7 @@ export const thresholdExecutor = async ({
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -209,7 +212,11 @@ export const thresholdExecutor = async ({
     result.errors.push(...searchErrors);
     result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
-
+    scheduleNotificationResponseActionsService({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: completeRule.ruleParams.responseActions,
+    });
     return {
       ...result,
       state: {

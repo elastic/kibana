@@ -25,6 +25,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { CreateRuleOptions } from '../types';
 
 export const indicatorMatchExecutor = async ({
   inputIndex,
@@ -47,6 +48,7 @@ export const indicatorMatchExecutor = async ({
   runOpts,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -67,6 +69,7 @@ export const indicatorMatchExecutor = async ({
   wrapSuppressedHits: WrapSuppressedHits;
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   experimentalFeatures: ExperimentalFeatures;
 }) => {
   const ruleParams = completeRule.ruleParams;
@@ -107,6 +110,7 @@ export const indicatorMatchExecutor = async ({
       runOpts,
       licensing,
       experimentalFeatures,
+      scheduleNotificationResponseActionsService,
     });
   });
 };

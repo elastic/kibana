@@ -6,15 +6,8 @@
  */
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import type {
-  EqlRule,
-  EsqlRule,
-  NewTermsRule,
-  QueryRule,
-} from '../../../../../common/api/detection_engine';
 import {
   type ResponseAction,
   type RuleCreateProps,
@@ -26,16 +19,9 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { EqlRuleParams, EsqlRuleParams, NewTermsRuleParams } from '../../rule_schema';
-import {
-  hasValidRuleType,
-  type RuleAlertType,
-  type RuleParams,
-  type UnifiedQueryRuleParams,
-} from '../../rule_schema';
+import { hasValidRuleType, type RuleAlertType, type RuleParams } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
@@ -70,9 +56,9 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  if (!shouldShowResponseActions(ruleUpdate.type)) {
-    return;
-  }
+  // if (!shouldShowResponseActions(ruleUpdate.type)) {
+  //   return;
+  // }
 
   if (
     !rulePayloadContainsResponseActions(ruleUpdate) ||
@@ -117,14 +103,10 @@ export const validateResponseActionsPermissions = async (
   });
 };
 
-function rulePayloadContainsResponseActions(
-  rule: RuleCreateProps | RuleUpdateProps
-): rule is QueryRule | EsqlRule | EqlRule | NewTermsRule {
+function rulePayloadContainsResponseActions(rule: RuleCreateProps | RuleUpdateProps) {
   return 'response_actions' in rule;
 }
 
-function ruleObjectContainsResponseActions(
-  rule?: RuleAlertType
-): rule is Rule<UnifiedQueryRuleParams | EsqlRuleParams | EqlRuleParams | NewTermsRuleParams> {
+function ruleObjectContainsResponseActions(rule?: RuleAlertType) {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }

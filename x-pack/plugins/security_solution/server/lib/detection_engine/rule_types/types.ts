@@ -163,6 +163,7 @@ export interface CreateRuleOptions {
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: (params: ScheduleNotificationActions) => void;
 }
 
 export interface ScheduleNotificationActions {
@@ -171,11 +172,7 @@ export interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[] | undefined;
 }
 
-export interface CreateRuleAdditionalOptions {
-  scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
-}
-
-export interface CreateQueryRuleOptions extends CreateRuleOptions, CreateRuleAdditionalOptions {
+export interface CreateQueryRuleOptions extends CreateRuleOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }
