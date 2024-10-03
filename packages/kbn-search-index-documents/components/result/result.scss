@@ -23,12 +23,11 @@
   }
 }
 
-.ResultValue {
+.denseVectorFieldValue {
   position: absolute;
   right: 0;
-  top: 0;
+  top: $euiSizeS;
   background-color: $euiColorEmptyShade;
-  padding: $euiSizeS;
 }
 
 .resultExpandColumn {

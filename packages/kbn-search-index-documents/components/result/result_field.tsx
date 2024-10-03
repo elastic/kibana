@@ -83,37 +83,43 @@ const ResultValue: React.FC<{ fieldValue: string; fieldType?: string; isExpanded
   } else if (fieldType === 'dense_vector') {
     return (
       <>
-        <EuiText size="s">{fieldValue}</EuiText>
-        <div className="ResultValue">
-          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiBadge color="hollow">
-                {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
-                  defaultMessage: '{value} dims',
-                  values: {
-                    value: JSON.parse(fieldValue).length,
-                  },
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCopy textToCopy={fieldValue}>
-                {(copy) => (
-                  <EuiIcon
-                    type="copyClipboard"
-                    onClick={copy}
-                    aria-label={i18n.translate(
-                      'searchIndexDocuments.result.value.denseVector.copy',
-                      {
-                        defaultMessage: 'Copy vector',
-                      }
+        <EuiFlexGroup>
+          <EuiFlexItem grow={true}>
+            <EuiText size="s">{fieldValue}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div className={!isExpanded ? 'denseVectorFieldValue' : ''}>
+              <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
+                      defaultMessage: '{value} dims',
+                      values: {
+                        value: JSON.parse(fieldValue).length,
+                      },
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiCopy textToCopy={fieldValue}>
+                    {(copy) => (
+                      <EuiIcon
+                        type="copyClipboard"
+                        onClick={copy}
+                        aria-label={i18n.translate(
+                          'searchIndexDocuments.result.value.denseVector.copy',
+                          {
+                            defaultMessage: 'Copy vector',
+                          }
+                        )}
+                      />
                     )}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+                  </EuiCopy>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   } else {
