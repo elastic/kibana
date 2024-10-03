@@ -61,14 +61,15 @@ export function createTaskPoller<T, H>({
   async function runCycle() {
     timeoutId = null;
     const start = Date.now();
-    if (hasCapacity()) {
-      try {
+    try {
+      if (hasCapacity()) {
         const result = await work();
         subject.next(asOk(result));
-      } catch (e) {
-        subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
       }
+    } catch (e) {
+      subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
     }
+
     if (running) {
       // Set the next runCycle call
       timeoutId = setTimeout(
