@@ -201,6 +201,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // start polling for work
         this.poller.start();
       } else if (!areESAndSOAvailable) {
+        this.logger.info(
+          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
+        );
         this.poller.stop();
         this.pool.cancelRunningTasks(TaskCancellationReason.EsUnavailable);
       }
@@ -287,7 +290,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
                 mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
               );
             }
-            this.logger.error(error.message);
+            this.logger.error(error.message, { error: { stack_trace: error.stack } });
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy

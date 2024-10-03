@@ -79,7 +79,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   }, [cloud, http]);
 
   const onChangeView = useCallback(
-    (id) => {
+    (id: string) => {
       switch (id) {
         case CreateIndexView.UI:
           usageTracker.click(AnalyticsEvents.startPageShowCreateIndexUIClick);
@@ -197,6 +197,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
             <CreateIndexCodeView
               createIndexForm={formState}
               changeCodingLanguage={onChangeCodingLanguage}
+              canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
             />
           )}
         </EuiFlexGroup>
