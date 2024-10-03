@@ -18,7 +18,6 @@ const STORYBOOKS = [
   'canvas',
   'cases',
   'cell_actions',
-  'cloud_chat',
   'coloring',
   'chart_icons',
   'content_management_examples',
