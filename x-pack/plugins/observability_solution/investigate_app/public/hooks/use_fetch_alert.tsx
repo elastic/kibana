@@ -7,10 +7,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH, EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import { type GetInvestigationResponse, alertOriginSchema } from '@kbn/investigation-shared';
 import { useKibana } from './use_kibana';
 
-export interface AlertParams {
-  id?: string;
+export interface UseFetchAlertParams {
+  investigation?: GetInvestigationResponse;
 }
 
 export interface UseFetchAlertResponse {
@@ -22,20 +23,22 @@ export interface UseFetchAlertResponse {
   data: EcsFieldsResponse | undefined | null;
 }
 
-export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
+export function useFetchAlert({ investigation }: UseFetchAlertParams): UseFetchAlertResponse {
   const {
     core: {
       http,
       notifications: { toasts },
     },
   } = useKibana();
+  const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
+  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: ['fetchAlert', id],
+    queryKey: ['fetchAlert', investigation?.id],
     queryFn: async ({ signal }) => {
       return await http.get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
         query: {
-          id,
+          id: alertId,
         },
         signal,
       });
@@ -46,7 +49,7 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
         title: 'Something went wrong while fetching alert',
       });
     },
-    enabled: Boolean(id),
+    enabled: Boolean(alertId),
   });
 
   return {

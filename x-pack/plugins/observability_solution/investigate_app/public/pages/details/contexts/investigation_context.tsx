@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { alertOriginSchema } from '@kbn/investigation-shared';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
 import { isEqual } from 'lodash';
@@ -85,9 +84,7 @@ export function InvestigationProvider({
     id: initialInvestigation.id,
     initialInvestigation,
   });
-  const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
-  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
-  const { data: alert } = useFetchAlert({ id: alertId });
+  const { data: alert } = useFetchAlert({ investigation });
 
   const cache = useRef<
     Record<string, { globalParams: GlobalWidgetParameters; item: RenderedInvestigationItem }>
