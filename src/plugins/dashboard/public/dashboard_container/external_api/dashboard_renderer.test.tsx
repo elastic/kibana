@@ -18,10 +18,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerFactory } from '..';
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
+import { DASHBOARD_CONTAINER_TYPE, DashboardCreationOptions } from '../..';
 import { embeddableService } from '../../services/kibana_services';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
 import { DashboardRenderer } from './dashboard_renderer';
 
 describe('dashboard renderer', () => {

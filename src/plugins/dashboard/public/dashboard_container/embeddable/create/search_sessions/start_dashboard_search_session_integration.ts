@@ -13,7 +13,7 @@ import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public
 
 import { dataService } from '../../../../services/kibana_services';
 import { DashboardContainer } from '../../dashboard_container';
-import { DashboardCreationOptions } from '../../dashboard_container_factory';
+import type { DashboardApi, DashboardCreationOptions } from '../../../..';
 import { newSession$ } from './new_session';
 import { getDashboardCapabilities } from '../../../../utils/get_dashboard_capabilities';
 
@@ -33,7 +33,7 @@ export function startDashboardSearchSessionIntegration(
     createSessionRestorationDataProvider,
   } = searchSessionSettings;
 
-  dataService.search.session.enableStorage(createSessionRestorationDataProvider(this), {
+  dataService.search.session.enableStorage(createSessionRestorationDataProvider(this as DashboardApi), {
     isDisabled: () =>
       getDashboardCapabilities().storeSearchSession
         ? { disabled: false }
