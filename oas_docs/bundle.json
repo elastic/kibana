@@ -8082,7 +8082,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -8414,7 +8414,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -8533,7 +8533,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -8657,7 +8657,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -8783,7 +8783,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -8917,7 +8917,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -10695,10 +10695,11 @@
         "responses": {},
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       },
       "put": {
+        "deprecated": true,
         "operationId": "%2Fapi%2Ffleet%2Fagents%2F%7BagentId%7D%2Freassign#0",
         "parameters": [
           {
@@ -10860,7 +10861,7 @@
         },
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -10922,7 +10923,7 @@
         "responses": {},
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -10992,7 +10993,7 @@
         "responses": {},
         "summary": "",
         "tags": [
-          "Elastic Agents"
+          "Elastic Agent actions"
         ]
       }
     },
@@ -19758,7 +19759,9 @@
           }
         },
         "summary": "",
-        "tags": []
+        "tags": [
+          "Message Signing Service"
+        ]
       }
     },
     "/api/fleet/outputs": {
@@ -34396,6 +34399,9 @@
     },
     {
       "name": "Fleet uninstall tokens"
+    },
+    {
+      "name": "Message Signing Service"
     }
   ]
 }
