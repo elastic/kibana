@@ -7,37 +7,37 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { PageTitleContent as Component, PageTitleContentProps } from './page_title_content';
+import { StatusBar as Component, StatusBarProps } from './status_bar';
 import { alert } from '../mock/alert';
 
 export default {
   component: Component,
-  title: 'app/AlertDetails/PageTitleContent',
+  title: 'app/AlertDetails/StatusBar',
   alert,
 };
 
-const Template: ComponentStory<typeof Component> = (props: PageTitleContentProps) => (
-  <Component {...props} />
-);
-
-const TemplateWithPageTemplate: ComponentStory<typeof Component> = (
-  props: PageTitleContentProps
-) => (
-  <EuiPageTemplate>
-    <EuiPageTemplate.Header children={<Component {...props} />} bottomBorder={false} />
-  </EuiPageTemplate>
+const Template: ComponentStory<typeof Component> = (props: StatusBarProps) => (
+  <I18nProvider>
+    <KibanaContextProvider services={services}>
+      <Component {...props} />
+    </KibanaContextProvider>
+  </I18nProvider>
 );
 
 const defaultProps = {
   alert,
 };
 
-export const PageTitleContent = Template.bind({});
-PageTitleContent.args = defaultProps;
+export const StatusBar = Template.bind({});
+StatusBar.args = defaultProps;
 
-export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
-PageTitleUsedWithinPageTemplate.args = {
-  ...defaultProps,
+const services = {
+  http: {
+    basePath: {
+      prepend: () => 'http://test',
+    },
+  },
 };
