@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   Chart,
@@ -23,9 +24,12 @@ import {
   ScaleType,
   niceTimeFormatter,
   LegendActionProps,
+  DARK_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+
 import { MetricsResponse } from '../types';
 import { MetricKey } from '../../../common/types';
 interface ChartsProps {
@@ -46,6 +50,7 @@ export const chartKeyToTitleMap: Record<MetricKey, string> = {
 
 export const Charts: React.FC<ChartsProps> = ({ data }) => {
   const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
+  const theme = useEuiTheme();
 
   const togglePopover = (streamName: string) => {
     setPopoverOpen(popoverOpen === streamName ? null : streamName);
@@ -67,6 +72,7 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                 </EuiTitle>
                 <Chart size={{ height: 200 }}>
                   <Settings
+                    theme={theme.colorMode === 'DARK' ? DARK_THEME : LIGHT_THEME}
                     showLegend={true}
                     legendPosition="right"
                     xDomain={{ min: minTimestamp, max: maxTimestamp }}
