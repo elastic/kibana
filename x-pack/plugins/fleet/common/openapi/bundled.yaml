@@ -427,7 +427,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/bulk_install_packages_response'
+                $ref: '#/components/schemas/bulk_install_packages_response_body'
         '400':
           $ref: '#/components/responses/error'
       operationId: bulk-install-packages
@@ -1227,7 +1227,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_agents_response'
+                $ref: '#/components/schemas/get_agents_response_body'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agents
@@ -1968,7 +1968,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_agent_tags_response'
+                $ref: '#/components/schemas/get_agent_tags_response_body'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-tags
@@ -4174,7 +4174,7 @@ components:
             $ref: '#/components/schemas/search_result'
       required:
         - items
-    bulk_install_packages_response:
+    bulk_install_packages_response_body:
       title: Bulk install packages response
       type: object
       properties:
@@ -4505,7 +4505,7 @@ components:
         - enrolled_at
         - id
         - status
-    get_agents_response:
+    get_agents_response_body:
       title: Get Agent response
       type: object
       properties:
@@ -4661,7 +4661,7 @@ components:
         - filePath
         - actionId
         - status
-    get_agent_tags_response:
+    get_agent_tags_response_body:
       title: Get Agent Tags response
       type: object
       properties:

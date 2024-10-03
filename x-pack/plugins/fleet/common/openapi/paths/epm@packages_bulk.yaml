@@ -8,7 +8,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/bulk_install_packages_response.yaml
+            $ref: ../components/schemas/bulk_install_packages_response_body.yaml
     '400':
       $ref: ../components/responses/error.yaml
   operationId: bulk-install-packages

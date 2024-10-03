@@ -8,7 +8,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/get_agents_response.yaml
+            $ref: ../components/schemas/get_agents_response_body.yaml
     '400':
       $ref: ../components/responses/error.yaml
   operationId: get-agents
