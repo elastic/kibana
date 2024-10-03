@@ -91,6 +91,27 @@ ImageBelow.args = {
   },
 } as ComponentProps<typeof AddDataPanel>;
 
+export function WithoutImage(props: ComponentProps<typeof AddDataPanel>) {
+  return <AddDataPanel {...props} />;
+}
+
+WithoutImage.args = {
+  content: {
+    ...defaultContent().content,
+    img: undefined,
+  },
+  ...defaultFunctions,
+  actions: {
+    primary: defaultPrimaryAction,
+    secondary: {
+      href: 'https://secondary-action.com',
+    },
+    link: {
+      href: 'https://link-action.com',
+    },
+  },
+} as ComponentProps<typeof AddDataPanel>;
+
 export function CustomActionLabels(props: ComponentProps<typeof AddDataPanel>) {
   return <AddDataPanel {...props} />;
 }
@@ -106,6 +127,25 @@ CustomActionLabels.args = {
     },
     link: {
       label: 'Link Action',
+      href: 'https://link-action.com',
+    },
+  },
+} as ComponentProps<typeof AddDataPanel>;
+
+export function NotDismissable(props: ComponentProps<typeof AddDataPanel>) {
+  return <AddDataPanel {...props} />;
+}
+
+NotDismissable.args = {
+  ...defaultContent(),
+  ...defaultFunctions,
+  onDissmiss: undefined,
+  actions: {
+    primary: defaultPrimaryAction,
+    secondary: {
+      href: 'https://secondary-action.com',
+    },
+    link: {
       href: 'https://link-action.com',
     },
   },

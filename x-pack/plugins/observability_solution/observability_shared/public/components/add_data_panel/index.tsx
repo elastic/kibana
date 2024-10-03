@@ -27,7 +27,7 @@ import { useTheme } from '../../hooks/use_theme';
 interface AddDataPanelContent {
   title: string;
   content: string;
-  img: {
+  img?: {
     name: string;
     baseFolderPath: string;
     position: 'inside' | 'below';
@@ -78,8 +78,8 @@ export function AddDataPanel({
 }: AddDataPanelProps) {
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
-  const imgSrc = `${content.img.baseFolderPath}/${theme.darkMode ? 'dark' : 'light'}/${
-    content.img.name
+  const imgSrc = `${content.img?.baseFolderPath}/${theme.darkMode ? 'dark' : 'light'}/${
+    content.img?.name
   }`;
 
   return (
@@ -131,7 +131,7 @@ export function AddDataPanel({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {content.img?.position === 'inside' && (
+          {content.img && content.img?.position === 'inside' && (
             <EuiFlexItem
               style={{
                 maxHeight: `${euiTheme.base * 16}px`,
@@ -158,7 +158,7 @@ export function AddDataPanel({
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {content.img?.position === 'below' && (
+      {content.img && content.img?.position === 'below' && (
         <>
           <EuiSpacer size="l" />
           <EuiImage src={imgSrc} alt={content.content} size="fullWidth" style={{ opacity: 0.4 }} />
