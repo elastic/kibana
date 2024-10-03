@@ -1473,7 +1473,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
-/x-pack/test/functional/es_archives/cases/signals/duplicate_ids @elastic/security-solution @elastic/security-threat-hunting
+/x-pack/test/functional/es_archives/cases/signals/duplicate_ids @elastic/response-ops
 
 # Security Solution OpenAPI bundles
 /x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management
