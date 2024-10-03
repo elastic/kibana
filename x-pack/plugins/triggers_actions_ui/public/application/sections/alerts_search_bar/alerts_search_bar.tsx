@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { cloneDeep } from 'lodash';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
