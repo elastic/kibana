@@ -25,6 +25,15 @@ const buildMockCriticalityHit = (
     id_field: 'host.name',
     id_value: 'hostname',
     criticality_level: 'medium_impact',
+    asset: {
+      criticality: 'medium_impact',
+    },
+    host: {
+      name: 'hostname',
+      asset: {
+        criticality: 'medium_impact',
+      },
+    },
     ...overrides,
   },
 });

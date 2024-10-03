@@ -13,14 +13,14 @@ import { ThemeService } from './theme';
 export const MOCK_SPARKLINE_THEME: PartialTheme = {
   lineSeriesStyle: {
     point: {
-      visible: false,
+      visible: 'never',
       strokeWidth: 1,
       radius: 1,
     },
   },
   areaSeriesStyle: {
     point: {
-      visible: false,
+      visible: 'never',
       strokeWidth: 1,
       radius: 1,
     },

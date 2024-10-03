@@ -64,6 +64,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.security.authc.providers.saml.saml1.order=0',
         '--xpack.security.authc.providers.saml.saml1.realm=saml1',
         '--xpack.security.authc.providers.basic.basic1.order=1',
+        '--server.restrictInternalApis=false',
       ],
     },
     uiSettings: {
