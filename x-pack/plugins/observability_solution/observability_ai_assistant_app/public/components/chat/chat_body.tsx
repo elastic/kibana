@@ -122,7 +122,7 @@ export function ChatBody({
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
-  onClose: () => void;
+  onClose?: () => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
