@@ -11,21 +11,29 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   type ControlGroupChainingSystem,
   type ControlLabelPosition,
-  type ControlsPanels,
+  type ControlPanelsState,
+  type SerializedControlState,
   DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROL_WIDTH,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
+  DEFAULT_SHOW_APPLY_SELECTIONS,
 } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
-import { SavedObject } from '@kbn/core-saved-objects-api-server';
-import {
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type {
   ControlGroupAttributes,
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
 } from './types';
-import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { DashboardCrudTypes as DashboardCrudTypesV2 } from '../../../common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type {
+  ControlGroupAttributes as ControlGroupAttributesV2,
+  DashboardCrudTypes as DashboardCrudTypesV2,
+} from '../../../common/content_management/v2';
 
 function controlGroupInputOut(
   controlGroupInput?: DashboardSavedObjectAttributes['controlGroupInput']
@@ -33,24 +41,37 @@ function controlGroupInputOut(
   if (!controlGroupInput) {
     return;
   }
-  const { panelsJSON, ignoreParentSettingsJSON, controlStyle, chainingSystem, ...restInput } =
-    controlGroupInput;
+  const {
+    panelsJSON,
+    ignoreParentSettingsJSON,
+    controlStyle,
+    chainingSystem,
+    showApplySelections,
+  } = controlGroupInput;
   const panels = panelsJSON
-    ? Object.entries(JSON.parse(panelsJSON) as ControlsPanels).map(
-        ([id, { explicitInput, ...restPanel }]) => ({
+    ? Object.entries(JSON.parse(panelsJSON) as ControlPanelsState<SerializedControlState>).map(
+        ([id, { explicitInput, type, grow, width, order }]) => ({
           embeddableConfig: explicitInput,
+          grow: grow ?? DEFAULT_CONTROL_GROW,
           id,
-          ...restPanel,
+          order,
+          type,
+          width: width ?? DEFAULT_CONTROL_WIDTH,
         })
       )
     : [];
 
+  const ignoreParentSettings = ignoreParentSettingsJSON
+    ? JSON.parse(ignoreParentSettingsJSON)
+    : DEFAULT_IGNORE_PARENT_SETTINGS;
+
+  // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...restInput,
-    panels,
-    ...(ignoreParentSettingsJSON && { ignoreParentSettings: JSON.parse(ignoreParentSettingsJSON) }),
-    controlStyle: (controlStyle as ControlLabelPosition) ?? DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem: (chainingSystem as ControlGroupChainingSystem) ?? DEFAULT_CONTROL_CHAINING,
+    controlStyle: (controlStyle as ControlLabelPosition) ?? DEFAULT_CONTROL_LABEL_POSITION,
+    ignoreParentSettings,
+    panels,
+    showApplySelections: showApplySelections ?? DEFAULT_SHOW_APPLY_SELECTIONS,
   };
 }
 
@@ -67,18 +88,35 @@ function kibanaSavedObjectMetaOut(
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes
 ): DashboardAttributes {
-  const { controlGroupInput, panelsJSON, optionsJSON, kibanaSavedObjectMeta, ...rest } = attributes;
+  const {
+    description,
+    controlGroupInput,
+    kibanaSavedObjectMeta,
+    optionsJSON,
+    panelsJSON,
+    refreshInterval,
+    timeFrom,
+    timeRestore,
+    timeTo,
+    title,
+    version,
+  } = attributes;
   return {
-    ...rest,
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
-    ...(optionsJSON && { options: JSON.parse(optionsJSON) }),
-    ...(panelsJSON && {
-      panels: JSON.parse(panelsJSON),
-    }),
+    description,
     ...(kibanaSavedObjectMeta && {
       kibanaSavedObjectMeta: kibanaSavedObjectMetaOut(kibanaSavedObjectMeta),
     }),
-    ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
+    options: JSON.parse(optionsJSON),
+    panels: JSON.parse(panelsJSON),
+    ...(refreshInterval && {
+      refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
+    }),
+    timeFrom,
+    timeRestore: timeRestore ?? false,
+    timeTo,
+    title,
+    version,
   };
 }
 
@@ -88,7 +126,8 @@ function controlGroupInputIn(
   if (!controlGroupInput) {
     return;
   }
-  const { panels, ignoreParentSettings, ...restOfInput } = controlGroupInput;
+  const { panels, ignoreParentSettings, controlStyle, chainingSystem, showApplySelections } =
+    controlGroupInput;
   const updatedPanels = Object.fromEntries(
     panels.map(({ embeddableConfig, ...restOfPanel }) => {
       const id = embeddableConfig.id ?? uuidv4();
@@ -96,9 +135,11 @@ function controlGroupInputIn(
     })
   );
   return {
-    ...restOfInput,
+    chainingSystem,
+    controlStyle,
+    ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings),
     panelsJSON: JSON.stringify(updatedPanels),
-    ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings ?? {}),
+    showApplySelections,
   };
 }
 
@@ -129,17 +170,32 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   const { attributes, ...rest } = item;
   const {
     controlGroupInput,
+    description,
     kibanaSavedObjectMeta: { searchSource },
     options,
     panels,
-    ...restAttributes
+    refreshInterval,
+    timeFrom,
+    timeRestore,
+    timeTo,
+    title,
+    version,
   } = attributes;
+
   const v2Attributes = {
-    ...restAttributes,
-    ...(controlGroupInput && { controlGroupInput: controlGroupInputIn(controlGroupInput) }),
+    ...(controlGroupInput && {
+      controlGroupInput: controlGroupInputIn(controlGroupInput) as ControlGroupAttributesV2,
+    }),
+    description,
+    kibanaSavedObjectMeta: { searchSourceJSON: searchSource ? JSON.stringify(searchSource) : '{}' },
     ...(options && { optionsJSON: JSON.stringify(options) }),
     panelsJSON: panels ? panelsIn(panels) : '[]',
-    kibanaSavedObjectMeta: { searchSourceJSON: searchSource ? JSON.stringify(searchSource) : '{}' },
+    refreshInterval,
+    timeFrom,
+    timeRestore,
+    timeTo,
+    title,
+    version,
   };
   return {
     meta,

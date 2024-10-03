@@ -21,6 +21,7 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
@@ -97,19 +98,19 @@ export const controlGroupInputSchema = schema.object({
   ignoreParentSettings: schema.object({
     ignoreFilters: schema.boolean({
       meta: { description: 'Ignore global filters in controls.' },
-      defaultValue: false,
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
     }),
     ignoreQuery: schema.boolean({
       meta: { description: 'Ignore the global query bar in controls.' },
-      defaultValue: false,
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
     }),
     ignoreTimerange: schema.boolean({
       meta: { description: 'Ignore the global time range in controls.' },
-      defaultValue: false,
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
     }),
     ignoreValidations: schema.boolean({
       meta: { description: 'Ignore validations in controls.' },
-      defaultValue: false,
+      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
     }),
   }),
   showApplySelections: schema.boolean({
@@ -299,28 +300,32 @@ export const panelSchema = schema.object({
   ),
 });
 
-const optionsSchema = schema.object({
-  hidePanelTitles: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Hide the panel titles in the dashboard.' },
-  }),
-  useMargins: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Show margins between panels in the dashboard layout.' },
-  }),
-  syncColors: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Synchronize colors between related panels in the dashboard.' },
-  }),
-  syncTooltips: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
-  }),
-  syncCursor: schema.boolean({
-    defaultValue: true,
-    meta: { description: 'Synchronize cursor position between related panels in the dashboard.' },
-  }),
-});
+const optionsSchema = schema.object(
+  {
+    hidePanelTitles: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'Hide the panel titles in the dashboard.' },
+    }),
+    useMargins: schema.boolean({
+      defaultValue: true,
+      meta: { description: 'Show margins between panels in the dashboard layout.' },
+    }),
+    syncColors: schema.boolean({
+      defaultValue: true,
+      meta: { description: 'Synchronize colors between related panels in the dashboard.' },
+    }),
+    syncTooltips: schema.boolean({
+      defaultValue: true,
+      meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
+    }),
+    syncCursor: schema.boolean({
+      defaultValue: true,
+      meta: { description: 'Synchronize cursor position between related panels in the dashboard.' },
+    }),
+  },
+  // Ignore no longer supported options that may still exist in the saved object, e.g. darkTheme: false
+  { unknowns: 'ignore' }
+);
 
 // These are the attributes that are returned in search results
 export const searchResultsAttributesSchema = schema.object({

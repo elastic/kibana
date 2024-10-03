@@ -18,12 +18,12 @@ import {
   DashboardAttributes as DashboardAttributesV1,
 } from '../v1/types';
 
-type ControlGroupAttributesV2 = ControlGroupAttributesV1 & {
+export type ControlGroupAttributes = ControlGroupAttributesV1 & {
   showApplySelections?: boolean;
 };
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
-  controlGroupInput?: ControlGroupAttributesV2;
+  controlGroupInput?: ControlGroupAttributes;
 };
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<

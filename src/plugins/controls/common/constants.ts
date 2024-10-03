@@ -19,6 +19,13 @@ export const DEFAULT_CONTROL_LABEL_POSITION: ControlLabelPosition =
 export const DEFAULT_CONTROL_GROW: boolean = true;
 export const DEFAULT_CONTROL_CHAINING: ControlGroupChainingSystem =
   CONTROL_CHAINING_OPTIONS.HIERARCHICAL;
+export const DEFAULT_IGNORE_PARENT_SETTINGS = {
+  ignoreFilters: false,
+  ignoreQuery: false,
+  ignoreTimerange: false,
+  ignoreValidations: false,
+} as const;
+export const DEFAULT_SHOW_APPLY_SELECTIONS = false;
 
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';

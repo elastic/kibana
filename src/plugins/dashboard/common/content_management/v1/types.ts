@@ -64,10 +64,10 @@ export interface SavedDashboardPanel {
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ControlGroupAttributesV1 = {
-  chainingSystem: ControlGroupChainingSystem;
+  chainingSystem?: ControlGroupChainingSystem;
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
-  controlStyle: ControlLabelPosition;
+  controlStyle?: ControlLabelPosition;
 };
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
@@ -80,7 +80,7 @@ export type DashboardAttributes = {
   description: string;
   panelsJSON: string;
   timeFrom?: string;
-  version: number;
+  version?: number;
   timeTo?: string;
   title: string;
   kibanaSavedObjectMeta: {
