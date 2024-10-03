@@ -20,7 +20,12 @@ export const getTriggerIndicesMetadataTaskRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/trigger-indices-metadata-task',
+      path: '/api/trigger-indices-metadata-task',
+      options: {
+        tags: ['api'],
+        access: 'public',
+        summary: 'Trigger indices metadata task (for testing purposes)',
+      },
       validate: {
         query: schema.object({
           maxPrefixes: schema.maybe(schema.number()),
