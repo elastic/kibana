@@ -9,15 +9,30 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
+import * as consts from './const';
 
-const props = {
-  addAgentLink: '',
-  onAddAgentClick: jest.fn(),
-};
+interface MockedConsts {
+  AGENTLESS_LEARN_MORE_LINK: string | null;
+}
+jest.mock('./const');
 
 describe('AgentlessAvailableCallout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = 'https://www.elastic.co';
+  });
+
+  it('returns null if AGENTLESS_LEARN_MORE_LINK is null', () => {
+    jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = null;
+
+    const { container } = render(<AgentlessAvailableCallout />, {
+      wrapper: TestProviders,
+    });
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('renders the agentless available text', () => {
-    const { getByText, getByTestId } = render(<AgentlessAvailableCallout {...props} />, {
+    const { getByText, getByTestId } = render(<AgentlessAvailableCallout />, {
       wrapper: TestProviders,
     });
     expect(getByText('NEW')).toBeInTheDocument();

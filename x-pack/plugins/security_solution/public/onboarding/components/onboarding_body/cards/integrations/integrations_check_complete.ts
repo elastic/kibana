@@ -6,7 +6,7 @@
  */
 
 import type { GetPackagesResponse } from '@kbn/fleet-plugin/public';
-import { EPM_PACKAGES_MANY, installationStatuses } from '@kbn/fleet-plugin/public';
+import { EPM_API_ROUTES, installationStatuses } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
@@ -16,9 +16,12 @@ import type { StartServices } from '../../../../../types';
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async (
   services: StartServices
 ) => {
-  const packageData = await services.http.get<GetPackagesResponse>(EPM_PACKAGES_MANY, {
-    version: '2023-10-31',
-  });
+  const packageData = await services.http.get<GetPackagesResponse>(
+    EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
+    {
+      version: '2023-10-31',
+    }
+  );
 
   const agentsData = await lastValueFrom(
     services.data.search.search({

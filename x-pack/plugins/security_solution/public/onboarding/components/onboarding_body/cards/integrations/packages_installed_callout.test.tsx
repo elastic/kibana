@@ -11,21 +11,16 @@ import { useAddIntegrationsUrl } from '../../../../../common/hooks/use_add_integ
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
 jest.mock('../../../../../common/hooks/use_add_integrations_url');
-
+jest.mock('./agent_required_callout');
 const mockOnAddIntegrationsUrl = jest.fn();
-(useAddIntegrationsUrl as jest.Mock).mockReturnValue({
-  href: '/integrations',
-  onClick: mockOnAddIntegrationsUrl,
-});
-
-const props = {
-  addAgentLink: '',
-  onAddAgentClick: jest.fn(),
-};
 
 describe('PackageInstalledCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
+      href: '/integrations',
+      onClick: mockOnAddIntegrationsUrl,
+    });
   });
 
   it('renders the callout and available packages when integrations are installed', () => {
@@ -35,7 +30,7 @@ describe('PackageInstalledCallout', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <PackageInstalledCallout {...props} checkCompleteMetadata={mockMetadata} />,
+      <PackageInstalledCallout checkCompleteMetadata={mockMetadata} />,
       { wrapper: TestProviders }
     );
 
@@ -49,15 +44,12 @@ describe('PackageInstalledCallout', () => {
       agentStillRequired: true,
     };
 
-    const { getByTestId, getByText } = render(
-      <PackageInstalledCallout {...props} checkCompleteMetadata={mockMetadata} />,
+    const { getByTestId } = render(
+      <PackageInstalledCallout checkCompleteMetadata={mockMetadata} />,
       { wrapper: TestProviders }
     );
 
-    expect(
-      getByText('Elastic Agent is required for one or more of your integrations. Add Elastic Agent')
-    ).toBeInTheDocument();
-    expect(getByTestId('agentLink')).toBeInTheDocument();
+    expect(getByTestId('agentRequiredCallout')).toBeInTheDocument();
   });
 
   it('handles clicking on the Manage integrations link', () => {
@@ -67,7 +59,7 @@ describe('PackageInstalledCallout', () => {
     };
 
     const { getByTestId } = render(
-      <PackageInstalledCallout {...props} checkCompleteMetadata={mockMetadata} />,
+      <PackageInstalledCallout checkCompleteMetadata={mockMetadata} />,
       { wrapper: TestProviders }
     );
 

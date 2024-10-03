@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useObservable } from 'react-use';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { AvailablePackages } from './available_packages';
-import { useNavigation } from '../../../../../common/lib/kibana';
 import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { PackageInstalledCallout } from './packages_installed_callout';
+import { AGENTLESS_LEARN_MORE_LINK } from './const';
 
 export const IntegrationsCard: OnboardingCardComponent = ({
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
@@ -22,32 +22,20 @@ export const IntegrationsCard: OnboardingCardComponent = ({
 
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-  const { getAppUrl, navigateTo } = useNavigation();
-  const addAgentLink = getAppUrl({ appId: 'fleet', path: '/agents' });
-  const onAddAgentClick = useCallback(() => {
-    navigateTo({ appId: 'fleet', path: '/agents' }); // to be confirmed
-  }, [navigateTo]);
+  const showAgentlessCallout =
+    isAgentlessAvailable && AGENTLESS_LEARN_MORE_LINK && integrationsInstalled === 0;
+  const showInstalledCallout =
+    integrationsInstalled > 0 || checkCompleteMetadata?.agentStillRequired;
+
   return (
     <OnboardingCardContentPanel>
-      {isAgentlessAvailable && integrationsInstalled === 0 && (
-        <>
-          <AgentlessAvailableCallout
-            addAgentLink={addAgentLink}
-            onAddAgentClick={onAddAgentClick}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {(integrationsInstalled > 0 || checkCompleteMetadata?.agentStillRequired) && (
-        <>
-          <PackageInstalledCallout
-            addAgentLink={addAgentLink}
-            onAddAgentClick={onAddAgentClick}
-            checkCompleteMetadata={checkCompleteMetadata}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <>
+        {showAgentlessCallout && <AgentlessAvailableCallout />}
+        {showInstalledCallout && (
+          <PackageInstalledCallout checkCompleteMetadata={checkCompleteMetadata} />
+        )}
+        {(showAgentlessCallout || showInstalledCallout) && <EuiSpacer size="m" />}
+      </>
       <AvailablePackages />
     </OnboardingCardContentPanel>
   );

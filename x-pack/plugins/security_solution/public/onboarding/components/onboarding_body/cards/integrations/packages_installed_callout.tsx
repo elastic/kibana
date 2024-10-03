@@ -11,36 +11,30 @@ import { EuiIcon } from '@elastic/eui';
 import { useAddIntegrationsUrl } from '../../../../../common/hooks/use_add_integrations_url';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { CardCallOut } from '../common/card_callout';
+import { AgentRequiredCallout } from './agent_required_callout';
 
 export const PackageInstalledCallout = React.memo(
-  ({
-    addAgentLink,
-    checkCompleteMetadata,
-    onAddAgentClick,
-  }: {
-    addAgentLink: string;
-    checkCompleteMetadata: Record<string, unknown> | undefined;
-    onAddAgentClick: () => void;
-  }) => {
+  ({ checkCompleteMetadata }: { checkCompleteMetadata: Record<string, unknown> | undefined }) => {
     const { href: integrationUrl, onClick: onAddIntegrationClicked } = useAddIntegrationsUrl();
     const integrationsInstalled: number = checkCompleteMetadata?.integrationsInstalled as number;
 
-    return (
+    if (!checkCompleteMetadata?.integrationsInstalled) {
+      return null;
+    }
+
+    return checkCompleteMetadata?.agentStillRequired ? (
+      <AgentRequiredCallout />
+    ) : (
       <CardCallOut
-        color={checkCompleteMetadata?.agentStillRequired ? 'warning' : 'primary'}
+        color="primary"
         text={
           <FormattedMessage
             id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
             defaultMessage={`
-      {desc1} {desc2} {icon}
+      {desc} {link} {icon}
     `}
             values={{
-              desc1: checkCompleteMetadata?.agentStillRequired ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.onboarding.integrationsCard.agent.text"
-                  defaultMessage="Elastic Agent is required for one or more of your integrations. Add Elastic Agent"
-                />
-              ) : (
+              desc: (
                 <FormattedMessage
                   data-test-subj="integrationsCompleteText"
                   id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
@@ -48,18 +42,7 @@ export const PackageInstalledCallout = React.memo(
                   values={{ count: integrationsInstalled }}
                 />
               ),
-              desc2: checkCompleteMetadata?.agentStillRequired ? (
-                <LinkAnchor
-                  href={addAgentLink}
-                  onClick={onAddAgentClick}
-                  data-test-subj="agentLink"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.onboarding.integrationsCard.agent.link"
-                    defaultMessage="here"
-                  />
-                </LinkAnchor>
-              ) : (
+              link: (
                 <LinkAnchor
                   onClick={onAddIntegrationClicked}
                   href={integrationUrl}

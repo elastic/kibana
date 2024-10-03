@@ -6,8 +6,8 @@
  */
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { installationStatuses } from '@kbn/fleet-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { HttpSetup } from '@kbn/core/public';
+import type { StartServices } from '../../../../../types';
+
 import { lastValueFrom } from 'rxjs';
 
 jest.mock('rxjs', () => ({
@@ -18,20 +18,20 @@ jest.mock('rxjs', () => ({
 describe('checkIntegrationsCardComplete', () => {
   const mockHttpGet: jest.Mock = jest.fn();
   const mockSearch: jest.Mock = jest.fn();
+  const mockService = {
+    http: {
+      get: mockHttpGet,
+    },
+    data: {
+      search: {
+        search: mockSearch,
+      },
+    },
+  } as unknown as StartServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const mockDataPlugin = {
-    search: {
-      search: mockSearch,
-    },
-  } as unknown as DataPublicPluginStart;
-
-  const httpSetup = {
-    get: mockHttpGet,
-  } as unknown as HttpSetup;
 
   it('returns isComplete as false when no packages are installed', async () => {
     mockHttpGet.mockResolvedValue({
@@ -44,10 +44,7 @@ describe('checkIntegrationsCardComplete', () => {
       },
     });
 
-    const result = await checkIntegrationsCardComplete({
-      data: mockDataPlugin,
-      http: httpSetup,
-    });
+    const result = await checkIntegrationsCardComplete(mockService);
 
     expect(result).toEqual({
       isComplete: false,
@@ -69,10 +66,7 @@ describe('checkIntegrationsCardComplete', () => {
       },
     });
 
-    const result = await checkIntegrationsCardComplete({
-      data: mockDataPlugin,
-      http: httpSetup,
-    });
+    const result = await checkIntegrationsCardComplete(mockService);
 
     expect(result).toEqual({
       isComplete: true,
@@ -98,10 +92,7 @@ describe('checkIntegrationsCardComplete', () => {
       },
     });
 
-    const result = await checkIntegrationsCardComplete({
-      data: mockDataPlugin,
-      http: httpSetup,
-    });
+    const result = await checkIntegrationsCardComplete(mockService);
 
     expect(result).toEqual({
       isComplete: true,
