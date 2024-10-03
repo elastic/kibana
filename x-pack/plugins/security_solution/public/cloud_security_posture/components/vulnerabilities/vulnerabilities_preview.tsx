@@ -36,21 +36,21 @@ const getVulnerabilityStats = (
   high: number,
   medium: number,
   low: number,
-  unknown: number
+  none: number
 ): VulnerabilitiesDistributionBarProps[] => {
   const vulnPropsArray: VulnerabilitiesDistributionBarProps[] = [];
-  if (critical === 0 && high === 0 && medium === 0 && low === 0 && unknown === 0)
+  if (critical === 0 && high === 0 && medium === 0 && low === 0 && none === 0)
     return vulnPropsArray;
 
-  if (unknown > 0)
+  if (none > 0)
     vulnPropsArray.push({
       key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.unknownVulnerabilitiesText',
+        'xpack.securitySolution.flyout.right.insights.vulnerabilities.noneVulnerabilitiesText',
         {
-          defaultMessage: 'Unknown',
+          defaultMessage: 'None',
         }
       ),
-      count: unknown,
+      count: none,
       color: '#aaa',
     });
   if (low > 0)
@@ -171,9 +171,9 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
     pageSize: 1,
   });
 
-  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, UNKNOWN = 0 } = data?.count || {};
+  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
-  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + UNKNOWN;
+  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
   const { euiTheme } = useEuiTheme();
   const hasVulnerabilities = totalVulnerabilities > 0;
   return (
@@ -209,9 +209,7 @@ export const VulnerabilitiesPreview = ({ hostName }: { hostName: string }) => {
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar
-                stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)}
-              />
+              <DistributionBar stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, NONE)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
