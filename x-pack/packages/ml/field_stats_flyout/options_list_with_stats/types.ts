@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import type { Field } from '@kbn/ml-anomaly-utils';
+import type { EuiComboBoxOptionOption, EuiSelectableOption } from '@elastic/eui';
+import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 
-export type DropDownLabel<T = string> = EuiSelectableOption<{
+interface BaseOption<T> {
   key?: string;
   label: string | React.ReactNode;
   isEmpty?: boolean;
   'data-is-empty'?: boolean;
   isGroupLabelOption?: boolean;
   isGroupLabel?: boolean;
-  // @todo: refactor type to something generic
   field?: Field;
-  agg?: T;
-}>;
+  agg?: Aggregation;
+  searchableLabel?: string;
+}
+export type SelectableOption<T> = EuiSelectableOption<BaseOption<T>>;
+export type DropDownLabel<T = string> =
+  | (EuiComboBoxOptionOption & BaseOption<Aggregation>)
+  | SelectableOption<T>;
+
+export function isSelectableOption<T>(option: unknown): option is SelectableOption<T> {
+  return typeof option === 'object' && option !== null && Object.hasOwn(option, 'key');
+}

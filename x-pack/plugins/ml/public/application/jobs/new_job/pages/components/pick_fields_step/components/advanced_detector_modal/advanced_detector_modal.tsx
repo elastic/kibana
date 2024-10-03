@@ -103,7 +103,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
-  const { renderOption, optionCss } = useFieldStatsTrigger();
+  const { optionCss } = useFieldStatsTrigger();
 
   const aggOptions: EuiComboBoxOptionOption[] = aggs
     .filter((agg) => filterAggs(agg, usingScriptFields))
@@ -254,7 +254,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
-                renderOption={renderOption}
               />
             </AggDescription>
           </EuiFlexItem>
@@ -267,7 +266,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
-                renderOption={renderOption}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -283,7 +281,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </ByFieldDescription>
           </EuiFlexItem>
@@ -296,7 +293,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </OverFieldDescription>
           </EuiFlexItem>
@@ -309,7 +305,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
-                renderOption={renderOption}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
@@ -322,7 +317,6 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
-                renderOption={renderOption}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>
