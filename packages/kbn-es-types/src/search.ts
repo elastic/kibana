@@ -681,6 +681,7 @@ export interface ESQLSearchResponse {
   // while columns only the available ones (non nulls)
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
+  took?: number;
 }
 
 export interface ESQLSearchParams {
