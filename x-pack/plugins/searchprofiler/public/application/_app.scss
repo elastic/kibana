@@ -37,6 +37,7 @@ $bodyOffset: $euiSize * 3;
 
 .prfDevTool__main {
   height: 100%;
+  flex-grow: 1;
   order: 2;
   margin-left: $euiSize;
   display: flex;
@@ -48,8 +49,6 @@ $bodyOffset: $euiSize * 3;
     flex-shrink: 0;
   }
 }
-
-@include euiPanel('.prfDevTool__main');
 
 @include euiBreakpoint('xs', 's') {
   .prfDevTool__container {
