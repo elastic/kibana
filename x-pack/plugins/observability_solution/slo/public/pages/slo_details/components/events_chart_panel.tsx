@@ -42,7 +42,7 @@ import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
-import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { GoodBadEventsChart } from '../../../components/good_bad_events_chart/good_bad_events_chart';
 import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
@@ -173,10 +173,15 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
             <EuiFlexItem grow={0}>
               <EuiLink
                 color="text"
-                href={getDiscoverLink(discover, slo, {
-                  from: 'now-24h',
-                  to: 'now',
-                  mode: 'relative',
+                href={getDiscoverLink({
+                  slo,
+                  timeRange: {
+                    from: 'now-24h',
+                    to: 'now',
+                    mode: 'relative',
+                  },
+                  discover,
+                  uiSettings,
                 })}
                 data-test-subj="sloDetailDiscoverLink"
               >

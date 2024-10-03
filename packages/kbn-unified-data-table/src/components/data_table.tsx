@@ -66,7 +66,7 @@ import {
   getVisibleColumns,
   canPrependTimeFieldColumn,
 } from './data_table_columns';
-import { UnifiedDataTableContext } from '../table_context';
+import { DataTableContext, UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import {
   DataTableCompareToolbarBtn,
@@ -510,11 +510,11 @@ export const UnifiedDataTable = ({
     [displayedRows, dataView, fieldFormats]
   );
 
-  const unifiedDataTableContextValue = useMemo(
+  const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
       expanded: expandedDoc,
       setExpanded: setExpandedDoc,
-      rows: displayedRows,
+      getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
       isDarkMode: darkMode,

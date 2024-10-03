@@ -122,6 +122,19 @@ export interface KVState {
   ecsVersion: string;
 }
 
+export interface UnstructuredLogState {
+  lastExecutedChain: string;
+  packageName: string;
+  dataStreamName: string;
+  grokPatterns: string[];
+  logSamples: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  errors: object;
+  additionalProcessors: object[];
+  ecsVersion: string;
+}
+
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
