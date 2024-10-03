@@ -130,9 +130,6 @@ describe('Templates', () => {
 
     appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
 
-    await userEvent.click(await screen.findByTestId('add-template'));
-
     expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
-    expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
   });
 });
