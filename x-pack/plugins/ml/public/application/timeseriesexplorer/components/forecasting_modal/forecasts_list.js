@@ -12,15 +12,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiIconTip, EuiInMemoryTable, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlApi } from '../../../contexts/kibana';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
 
-function getColumns(viewForecast, deleteForecast) {
+function getColumns(viewForecast) {
   return [
     {
       field: 'forecast_create_timestamp',
@@ -74,91 +72,45 @@ function getColumns(viewForecast, deleteForecast) {
         );
       },
     },
-    {
-      width: '65px',
-      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          description: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastDescription',
-            {
-              defaultMessage: 'Delete forecast',
-            }
-          ),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          enabled: () => true,
-          onClick: (item) => {
-            deleteForecast(item.forecast_id);
-          },
-          'data-test-subj': 'mlForecastingModalDeleteAction',
-        },
-      ],
-    },
   ];
-}
+};
 
-// TODO - add in ml-info-icon to the h3 element,
-//        then remove tooltip and inline style.
-export function ForecastsList({ forecasts, viewForecast, jobId }) {
-  const mlApi = useMlApi();
-  const toastNotificationService = useToastNotificationService();
+export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
 
   const getRowProps = (item) => {
     return {
       'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
+      ...(item.forecast_id === selectedForecastId ? { style: {
+            backgroundColor: `${colors.lightShade}`,
+          }} : {}),
     };
-  };
-
-  const deleteForecast = async (forecastId) => {
-    try {
-      const resp = await mlApi.deleteForecast({ jobId, forecastId });
-      if (resp?.acknowledged === true) {
-        toastNotificationService.displaySuccessToast(
-          i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastSuccess', {
-            defaultMessage: 'Request to delete forecast was received.',
-          })
-        );
-      }
-    } catch (error) {
-      toastNotificationService.displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.deleteForecastSuccess', {
-          defaultMessage: 'Error deleting forecast.',
-          values: { jobId },
-        })
-      );
-    }
   };
 
   return (
     <EuiText>
       <h3
         aria-describedby="ml_aria_description_forecasting_modal_view_list"
-        style={{ display: 'inline', paddingRight: '5px' }}
       >
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
           defaultMessage="Previous forecasts"
         />
-      </h3>
-      <EuiToolTip
-        position="right"
-        content={
-          <FormattedMessage
+        &nbsp;
+        <EuiIconTip
+          size="s"
+          type="questionInCircle"
+          content={<FormattedMessage
             id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
             defaultMessage="Lists a maximum of five of the most recently run forecasts."
-          />
-        }
-      >
-        <EuiIcon type="questionInCircle" size="s" />
-      </EuiToolTip>
+          />}
+        />
+      </h3>
       <EuiInMemoryTable
         items={forecasts}
-        columns={getColumns(viewForecast, deleteForecast)}
+        columns={getColumns(viewForecast)}
         pagination={false}
         data-test-subj="mlModalForecastTable"
         rowProps={getRowProps}
@@ -170,4 +122,5 @@ export function ForecastsList({ forecasts, viewForecast, jobId }) {
 ForecastsList.propType = {
   forecasts: PropTypes.array,
   viewForecast: PropTypes.func.isRequired,
+  selectedForecastId: PropTypes.string,
 };

@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
-  EuiButtonIcon,
   EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -35,6 +35,39 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/
 
 const MAX_FORECASTS = 500;
 
+const DeleteForecastConfirm = ({ onCancel, onConfirm }) => (
+  <EuiConfirmModal
+    title={i18n.translate(
+      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.title',
+      {
+        defaultMessage: 'Delete the selected forecast?',
+      }
+    )}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={i18n.translate(
+      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.cancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    )}
+    confirmButtonText={i18n.translate(
+      'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.confirmButton',
+      {
+        defaultMessage: 'Confirm',
+      }
+    )}
+    defaultFocusedButton="confirm"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.text"
+        defaultMessage="This will delete the forecast from the job permanently."
+      />
+    </p>
+  </EuiConfirmModal>
+);
+
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
@@ -44,6 +77,7 @@ export class ForecastsTable extends Component {
     this.state = {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
+      isConfirmModalVisible: false,
     };
     this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
@@ -54,6 +88,10 @@ export class ForecastsTable extends Component {
   static contextType = context;
 
   componentDidMount() {
+    this.loadForecasts();
+  }
+
+  async loadForecasts() {
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.
@@ -161,6 +199,43 @@ export class ForecastsTable extends Component {
       recentlyAccessed
     );
     await navigateToUrl(singleMetricViewerForecastLink);
+  }
+
+  async deleteForecast(forecastId) {
+    const {
+      services: {
+        mlServices: { mlApi },
+        notifications: { toasts },
+      },
+    } = this.context;
+
+    this.setState({
+      isLoading: true,
+      isConfirmModalVisible: false,
+    });
+
+    try {
+      const resp = await mlApi.deleteForecast({ jobId: this.props.job.job_id, forecastId });
+      if (resp?.acknowledged === true) {
+        toasts.addSuccess(
+          i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastSuccess', {
+            defaultMessage: 'Request to delete forecast was received.',
+          })
+        );
+      }
+    } catch (error) {
+      this.setState({
+        isLoading: false,
+        errorMessage: i18n.translate(
+          'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastErrorMessage',
+          {
+            defaultMessage: 'An error occurred deleting the forecast.',
+          }
+        ),
+      });
+    }
+
+    this.loadForecasts();
   }
 
   render() {
@@ -302,48 +377,66 @@ export class ForecastsTable extends Component {
         textOnly: true,
       },
       {
-        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel', {
-          defaultMessage: 'View',
+        width: '70px',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.actionsLabel', {
+          defaultMessage: 'Actions',
         }),
-        width: '60px',
-        render: (forecast) => {
-          const viewForecastAriaLabel = i18n.translate(
-            'xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel',
-            {
-              defaultMessage: 'View forecast created at {createdDate}',
-              values: {
-                createdDate: timeFormatter(forecast.forecast_create_timestamp),
-              },
-            }
-          );
-
-          return (
-            <EuiButtonIcon
-              onClick={() => this.openSingleMetricView(forecast)}
-              isDisabled={
+        actions: [
+          {
+            description: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel', {
+              defaultMessage: 'View',
+            }),
+            type: 'icon',
+            icon: 'singleMetricViewer',
+            enabled: (forecast) =>
+              !(
                 this.props.job.blocked !== undefined ||
                 forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
+              ),
+            onClick: (forecast) => this.openSingleMetricView(forecast),
+            'data-test-subj': 'mlJobListForecastTabOpenSingleMetricViewButton',
+          },
+          {
+            description: i18n.translate(
+              'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastDescription',
+              {
+                defaultMessage: 'Delete forecast',
               }
-              iconType="singleMetricViewer"
-              aria-label={viewForecastAriaLabel}
-              data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
-            />
-          );
-        },
+            ),
+            type: 'icon',
+            icon: 'trash',
+            color: 'danger',
+            enabled: () => this.state.isLoading === false,
+            onClick: (item) => {
+              this.setState({ forecastIdToDelete: item.forecast_id, isConfirmModalVisible: true });
+            },
+            'data-test-subj': 'mlJobListForecastTabDeleteForecastButton',
+          },
+        ],
       },
     ];
 
     return (
-      <EuiInMemoryTable
-        data-test-subj="mlJobListForecastTable"
-        compressed={true}
-        items={forecasts}
-        columns={columns}
-        pagination={{
-          pageSizeOptions: [5, 10, 25],
-        }}
-        sorting={true}
-      />
+      <>
+        <EuiInMemoryTable
+          data-test-subj="mlJobListForecastTable"
+          compressed={true}
+          items={forecasts}
+          columns={columns}
+          pagination={{
+            pageSizeOptions: [5, 10, 25],
+          }}
+          sorting={true}
+        />
+        {this.state.isConfirmModalVisible === true ? (
+          <DeleteForecastConfirm
+            onCancel={() =>
+              this.setState({ isConfirmModalVisible: false, forecastIdToDelete: undefined })
+            }
+            onConfirm={() => this.deleteForecast(this.state.forecastIdToDelete)}
+          />
+        ) : null}
+      </>
     );
   }
 }

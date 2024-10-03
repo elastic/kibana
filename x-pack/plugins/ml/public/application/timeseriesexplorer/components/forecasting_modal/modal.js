@@ -73,7 +73,7 @@ export function Modal(props) {
             <ForecastsList
               forecasts={props.forecasts}
               viewForecast={props.viewForecast}
-              jobId={props.job.job_id}
+              selectedForecastId={props.selectedForecastId}
             />
             <EuiSpacer />
           </React.Fragment>
@@ -108,4 +108,5 @@ Modal.propType = {
   jobOpeningState: PropTypes.number,
   jobClosingState: PropTypes.number,
   messages: PropTypes.array,
+  selectedForecastId: PropTypes.string,
 };
