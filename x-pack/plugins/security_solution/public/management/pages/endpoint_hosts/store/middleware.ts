@@ -21,7 +21,7 @@ import type {
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
@@ -431,7 +431,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORMS_STATUS_ROUTE,
+      METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
       { version: '2023-10-31' }
     );
 

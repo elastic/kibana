@@ -64,7 +64,11 @@ export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
+
+/** @deprecated public route, use {@link METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE} internal route  */
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
+
+export const METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;

@@ -19,7 +19,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'get',
-        path: METADATA_TRANSFORMS_STATUS_ROUTE,
+        path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
         body: undefined,
       },
       {
