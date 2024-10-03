@@ -15,7 +15,8 @@ import type {
   MappingProperty,
   MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -25,7 +26,7 @@ export interface SearchIndicesPluginSetup {
 
 export interface SearchIndicesPluginStart {
   enabled: boolean;
-  startAppId: string;
+  startAppId: AppDeepLinkId;
   startRoute: string;
 }
 

@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-export const navigationTree = (): NavigationTreeDefinition => ({
+const gettingStartedItem: NodeDefinition<AppDeepLinkId, string, string> = {
+  id: 'gettingStarted',
+  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+    defaultMessage: 'Getting Started',
+  }),
+  link: 'serverlessElasticsearch',
+  spaceBefore: 'm',
+};
+
+export const navigationTree = (
+  homeLink: AppDeepLinkId = 'serverlessElasticsearch' as AppDeepLinkId,
+  showGettingStarted: boolean
+): NavigationTreeDefinition => ({
   body: [
     {
       type: 'navGroup',
@@ -25,7 +41,7 @@ export const navigationTree = (): NavigationTreeDefinition => ({
           title: i18n.translate('xpack.serverlessSearch.nav.home', {
             defaultMessage: 'Home',
           }),
-          link: 'serverlessElasticsearch',
+          link: homeLink,
           spaceBefore: 'm',
         },
         {
@@ -112,6 +128,7 @@ export const navigationTree = (): NavigationTreeDefinition => ({
             },
           ],
         },
+        ...(showGettingStarted ? [gettingStartedItem] : []),
       ],
     },
   ],
