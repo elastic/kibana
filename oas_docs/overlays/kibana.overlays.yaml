@@ -75,42 +75,6 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
-  - target: '$.tags[?(@.name=="Security AI Assistant API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security AI assistant"
-  - target: '$.tags[?(@.name=="Security Detections API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security detections"
-  - target: '$.tags[?(@.name=="Security Endpoint Exceptions API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security endpoint exceptions"
-  - target: '$.tags[?(@.name=="Security Endpoint Management API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security endpoint management"
-  - target: '$.tags[?(@.name=="Security Entity Analytics API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security entity analytics"
-  - target: '$.tags[?(@.name=="Security Exceptions API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security exceptions"
-  - target: '$.tags[?(@.name=="Security Lists API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security lists"    
-  - target: '$.tags[?(@.name=="Security Osquery API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security Osquery"
-  - target: '$.tags[?(@.name=="Security Timeline API")]'
-    description: Change displayName
-    update:
-      x-displayName: "Security timeline"
   # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
