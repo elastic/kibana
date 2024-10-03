@@ -18,6 +18,7 @@ import {
   EuiPanel,
   euiDragDropReorder,
 } from '@elastic/eui';
+import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import {
   getFieldValidityAndErrorMessage,
   type FieldHook,
@@ -67,7 +68,7 @@ const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
   });
 
   const onChangeOptionLabel = useCallback(
-    ({ key, label }) => {
+    ({ key, label }: OptionsFieldOption) => {
       setFreshOption(null);
       const newOptions = currentOptions.map((option) =>
         key === option.key ? { key, label } : option
@@ -83,7 +84,7 @@ const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
   }, []);
 
   const onRemoveOption = useCallback(
-    (key) => {
+    (key: string) => {
       const newOptions = currentOptions.filter((option) => option.key !== key);
       field.setValue(newOptions);
     },
@@ -99,7 +100,7 @@ const OptionsFieldComponent = ({ field, idAria, ...rest }: Props) => {
     [onChangeOptionLabel]
   );
 
-  const onDragEnd = useCallback(
+  const onDragEnd = useCallback<OnDragEndResponder>(
     ({ source, destination }) => {
       if (source && destination) {
         const newOptions = euiDragDropReorder(currentOptions, source.index, destination.index);
