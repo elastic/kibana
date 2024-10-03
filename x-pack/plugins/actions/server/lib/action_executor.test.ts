@@ -30,6 +30,7 @@ import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1417,7 +1418,11 @@ describe('Event log', () => {
       relatedSavedObjects: [],
       request: {} as KibanaRequest,
       actionExecutionId: '2',
+      reason: TaskCancellationReason.Timeout,
     });
+    expect(loggerMock.debug).toHaveBeenCalledWith(
+      `Cancelling action task for action with id action1 - execution cancelled due to timeout - exceeded default timeout of "5m"`
+    );
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
       event: {
@@ -1454,6 +1459,59 @@ describe('Event log', () => {
       },
       message:
         'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
+    });
+  });
+
+  test('writes to event log for execution cancelled due to shutdown', async () => {
+    setupActionExecutorMock();
+
+    await actionExecutor.logCancellation({
+      actionId: 'action1',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      relatedSavedObjects: [],
+      request: {} as KibanaRequest,
+      actionExecutionId: '2',
+      reason: TaskCancellationReason.Shutdown,
+    });
+    expect(loggerMock.debug).toHaveBeenCalledWith(
+      `Cancelling action task for action with id action1 - system shutdown`
+    );
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'execute-canceled',
+        kind: 'action',
+      },
+      kibana: {
+        action: {
+          execution: {
+            uuid: '2',
+          },
+          name: undefined,
+          id: 'action1',
+          type_id: 'test',
+        },
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: 'action1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: 'test',
+          },
+        ],
+        space_ids: ['some-namespace'],
+      },
+      message: "action: test:action1: 'action-1' system shutdown",
     });
   });
 
