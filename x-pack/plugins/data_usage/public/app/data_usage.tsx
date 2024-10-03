@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Charts } from './components/charts';
 import { DatePicker } from './components/date_picker';
 import { MetricsResponse } from './types';
@@ -169,13 +170,23 @@ export const DataUsage = () => {
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <Charts data={response} />;
+      <EuiPageSection paddingSize="none">
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.dataUsage.description"
+                defaultMessage="Monitor data ingested and retained by data streams."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <Charts data={response} />;
+      </EuiPageSection>
     </DatePickerProvider>
   );
 };
