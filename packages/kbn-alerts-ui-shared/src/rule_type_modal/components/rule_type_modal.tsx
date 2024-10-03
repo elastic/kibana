@@ -121,6 +121,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
           <EuiFlexItem
             style={{
               overflow: 'hidden',
+              marginTop: `-${euiTheme.size.base}`,
             }}
           >
             {ruleTypesLoading ? (
