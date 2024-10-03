@@ -76,9 +76,6 @@ export function createTaskPoller<T, H>({
       timeoutId = setTimeout(
         () =>
           runCycle().catch((e) => {
-            logger.error(`Error running a task polling cycle: ${e.message}`, {
-              error: { stack_trace: e.stack },
-            });
             subject.next(asPollingError(e, PollingErrorType.PollerError));
           }),
         Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0)
@@ -125,9 +122,6 @@ export function createTaskPoller<T, H>({
         logger.info('Starting the task poller');
         running = true;
         runCycle().catch((e) => {
-          logger.error(`Error when starting the task poller: ${e.message}`, {
-            error: { stack_trace: e.stack },
-          });
           subject.next(asPollingError(e, PollingErrorType.PollerError));
         });
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
