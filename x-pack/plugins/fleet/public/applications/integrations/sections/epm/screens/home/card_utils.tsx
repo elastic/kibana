@@ -41,6 +41,7 @@ import type { PackageListItem } from '../../../../types';
 export interface IntegrationCardItem {
   categories: string[];
   description: string;
+  // Security Solution uses this prop to determine how many lines the card description should be truncated
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
@@ -60,6 +61,7 @@ export interface IntegrationCardItem {
   showInstallationStatus?: boolean;
   showLabels?: boolean;
   title: string;
+  // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;
   url: string;
   version: string;

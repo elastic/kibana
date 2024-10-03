@@ -56,7 +56,7 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters, EPM_PACKAGES_MANY } from './constants';
+export { pagePathGetters, EPM_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';

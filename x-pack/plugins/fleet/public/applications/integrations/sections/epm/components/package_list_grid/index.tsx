@@ -71,6 +71,7 @@ export interface PackageListGridProps {
   showControls?: boolean;
   showSearchTools?: boolean;
   spacer?: boolean;
+  // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
 }
 
