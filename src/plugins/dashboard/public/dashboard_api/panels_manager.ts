@@ -13,6 +13,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import { getReferencesForPanelId } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -38,7 +39,7 @@ export function initializePanelsManager(
   }>({});
   const panels$ = new BehaviorSubject(initialPanels);
   let references: Reference[] = initialReferences;
-  const restoredRuntimeState: UnsavedPanelState = {};
+  let restoredRuntimeState: UnsavedPanelState = {};
 
   function setRuntimeStateForChild(childId: string, state: object) {
     restoredRuntimeState[childId] = state;
@@ -122,6 +123,7 @@ export function initializePanelsManager(
       }
       return await untilReactEmbeddableLoaded<ApiType>(newId);
     },
+    canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
     children$,
     getSerializedStateForChild: (childId: string) => {
       const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
@@ -138,6 +140,34 @@ export function initializePanelsManager(
     },
     panels$,
     references,
+    removePanel: (id: string) => {
+      const panels = { ...panels$.value };
+      if (panels[id]) {
+        delete panels[id];
+        panels$.next(panels);
+      }
+      const children = { ...children$.value };
+      if (children[id]) {
+        delete children[id];
+        children$.next(children);
+      }
+    },
+    resetAllReactEmbeddables: () => {
+      restoredRuntimeState = {};
+      let resetChangedPanelCount = false;
+      const currentChildren = children$.value;
+      for (const panelId of Object.keys(currentChildren)) {
+        if (panels$.value[panelId]) {
+          const child = currentChildren[panelId];
+          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        } else {
+          // if reset resulted in panel removal, we need to update the list of children
+          delete currentChildren[panelId];
+          resetChangedPanelCount = true;
+        }
+      }
+      if (resetChangedPanelCount) children$.next(currentChildren);
+    },
     setPanels: (panels: DashboardPanelMap) => {
       panels$.next(panels);
     },

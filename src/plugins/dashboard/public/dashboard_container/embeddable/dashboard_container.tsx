@@ -47,6 +47,7 @@ import {
   HasSaveNotification,
   HasSerializedChildState,
   PanelPackage,
+  PresentationContainer,
   TrackContentfulRender,
   TracksQueryPerformance,
   combineCompatibleChildrenApis,
@@ -166,6 +167,8 @@ export class DashboardContainer
   public getSerializedStateForChild: HasSerializedChildState['getSerializedStateForChild'];
   public getRuntimeStateForChild: HasRuntimeChildState['getRuntimeStateForChild'];
   public setRuntimeStateForChild: (childId: string, state: object) => void;
+  public canRemovePanels: PresentationContainer['canRemovePanels'];
+  public removePanel: PresentationContainer['removePanel'];
   private dashboardApi: ReturnType<typeof getDashboardApi>;
 
   public integrationSubscriptions: Subscription = new Subscription();
@@ -342,6 +345,8 @@ export class DashboardContainer
     this.getRuntimeStateForChild = dashboardApi.getRuntimeStateForChild;
     this.panels$ = dashboardApi.panels$;
     this.setRuntimeStateForChild = dashboardApi.setRuntimeStateForChild;
+    this.canRemovePanels = dashboardApi.canRemovePanels;
+    this.removePanel = dashboardApi.removePanel;
     this.dashboardApi = dashboardApi;
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
@@ -556,8 +561,6 @@ export class DashboardContainer
   public duplicatePanel(id: string) {
     duplicateDashboardPanel.bind(this)(id);
   }
-
-  public canRemovePanels = () => this.expandedPanelId.value === undefined;
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
   public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
@@ -850,15 +853,6 @@ export class DashboardContainer
   public getRuntimeStateForControlGroup = () => {
     return this.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
   };
-
-  public removePanel(id: string) {
-    const type = this.getInput().panels[id]?.type;
-    this.removeEmbeddable(id);
-    if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
-      const { [id]: childToRemove, ...otherChildren } = this.children$.value;
-      this.children$.next(otherChildren);
-    }
-  }
 
   public startAuditingReactEmbeddableChildren = () => {
     const auditChildren = () => {

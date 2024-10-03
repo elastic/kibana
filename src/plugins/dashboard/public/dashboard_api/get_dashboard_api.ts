@@ -39,7 +39,11 @@ export function getDashboardApi({
 
   return {
     ...trackPanel,
-    ...initializePanelsManager(initialInput.panels, savedObjectResult?.references ?? []),
+    ...initializePanelsManager(
+      initialInput.panels,
+      savedObjectResult?.references ?? [],
+      trackPanel
+    ),
     ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
     ...initializeUnsavedChanges(
       savedObjectResult?.anyMigrationRun ?? false,
