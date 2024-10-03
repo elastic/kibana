@@ -10,12 +10,14 @@ import { DocLinks } from '@kbn/doc-links';
 class SearchIndicesDocLinks {
   public apiReference: string = '';
   public setupSemanticSearch: string = '';
+  public analyzeLogs: string = '';
 
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
     this.apiReference = newDocLinks.apiReference;
     this.setupSemanticSearch = newDocLinks.enterpriseSearch.semanticSearch;
+    this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
   }
 }
 export const docLinks = new SearchIndicesDocLinks();

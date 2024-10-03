@@ -13,6 +13,7 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -21,6 +22,7 @@ export interface InventorySetupDependencies {
   entityManager: EntityManagerServerPluginSetup;
   inference: InferenceServerSetup;
   dataViews: DataViewsServerPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface InventoryStartDependencies {

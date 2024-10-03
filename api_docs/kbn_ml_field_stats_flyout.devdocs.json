@@ -15,7 +15,7 @@
           "\nReact component that wraps the EuiComboBox component and adds field statistics functionality.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -23,7 +23,7 @@
             "section": "def-public.EuiComboBoxWithFieldStatsProps",
             "text": "EuiComboBoxWithFieldStatsProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
         "deprecated": false,
@@ -39,15 +39,13 @@
               "- The component props."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.EuiComboBoxWithFieldStatsProps",
                 "text": "EuiComboBoxWithFieldStatsProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
             "deprecated": false,
@@ -68,7 +66,7 @@
           "\nRenders the content for the field statistics flyout."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -76,7 +74,7 @@
             "section": "def-public.FieldStatsFlyoutProps",
             "text": "FieldStatsFlyoutProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
         "deprecated": false,
@@ -85,22 +83,20 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsContent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The props for the FieldStatsContent component."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProps",
                 "text": "FieldStatsFlyoutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_content.tsx",
             "deprecated": false,
@@ -125,7 +121,7 @@
           "\nRenders a flyout component for displaying field statistics.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -133,7 +129,7 @@
             "section": "def-public.FieldStatsFlyoutProps",
             "text": "FieldStatsFlyoutProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
         "deprecated": false,
@@ -142,22 +138,20 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsFlyout.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The component props."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProps",
                 "text": "FieldStatsFlyoutProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout.tsx",
             "deprecated": false,
@@ -180,7 +174,7 @@
           "\nProvides field statistics in a flyout component.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -188,7 +182,7 @@
             "section": "def-public.FieldStatsFlyoutProviderProps",
             "text": "FieldStatsFlyoutProviderProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
         "deprecated": false,
@@ -204,15 +198,13 @@
               "- The component props."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsFlyoutProviderProps",
                 "text": "FieldStatsFlyoutProviderProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_flyout_provider.tsx",
             "deprecated": false,
@@ -235,7 +227,7 @@
           "\nRenders a button component for field statistics information.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-field-stats-flyout",
             "scope": "public",
@@ -243,7 +235,7 @@
             "section": "def-public.FieldStatsInfoButtonProps",
             "text": "FieldStatsInfoButtonProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
         "deprecated": false,
@@ -252,22 +244,20 @@
           {
             "parentPluginId": "@kbn/ml-field-stats-flyout",
             "id": "def-public.FieldStatsInfoButton.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- The props for the FieldStatsInfoButton component."
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
                 "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
                 "section": "def-public.FieldStatsInfoButtonProps",
                 "text": "FieldStatsInfoButtonProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/ml/field_stats_flyout/field_stats_info_button.tsx",
             "deprecated": false,
@@ -601,7 +591,7 @@
         "signature": [
           "Omit<",
           "_EuiComboBoxProps",
-          "<string | number | string[] | undefined>, \"options\" | \"selectedOptions\" | \"optionMatcher\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<string | number | string[] | undefined>>"
+          "<string | number | string[] | undefined>, \"options\" | \"prepend\" | \"append\" | \"async\" | \"isClearable\" | \"compressed\" | \"fullWidth\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<string | number | string[] | undefined>>"
         ],
         "path": "x-pack/packages/ml/field_stats_flyout/eui_combo_box_with_field_stats.tsx",
         "deprecated": false,
