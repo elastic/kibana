@@ -1827,7 +1827,7 @@
     "vinyl-fs": "^4.0.0",
     "watchpack": "^1.6.0",
     "web-streams-polyfill": "^4.0.0",
-    "webpack": "^5.94.0",
+    "webpack": "^5.95.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
