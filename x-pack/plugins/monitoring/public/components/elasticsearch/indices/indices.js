@@ -138,7 +138,7 @@ const getNoDataMessage = () => {
       <p>
         <FormattedMessage
           id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
-          defaultMessage="If you are looking for system indices (e.g., .kibana), try checking &lsquo;Show system indices&rsquo;."
+          defaultMessage="If you are looking for system indices (e.g., .kibana), try checking &lsquo;Filter for system indices&rsquo;."
         />
       </p>
     </div>
