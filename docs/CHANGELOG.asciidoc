@@ -7454,7 +7454,6 @@ To review the breaking changes in previous versions, refer to the following:
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
 [discrete]
-[[deprecation-120689]]
 .Renames the `autocreate` data view APM setting
 [%collapsible]
 ====
@@ -7466,7 +7465,6 @@ To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`
 ====
 
 [discrete]
-[[deprecation-119494]]
 .Updates Fleet API to improve consistency
 [%collapsible]
 ====
@@ -8481,7 +8479,6 @@ Use the environment variable `KBN_PATH_CONF` instead of `CONFIG_PATH`.  Use the 
 The following functionality is deprecated in 8.0.0, and will be removed in 9.0.0. Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
 
 [discrete]
-[[deprecation-74424]]
 .Removed support for SysV init
 [%collapsible]
 ====
@@ -8493,7 +8490,6 @@ If your system doesn't have `service` aliased to use kibana.service, use `system
 ====
 
 [discrete]
-[[deprecation-33603]]
 .Removed `xpack:defaultAdminEmail` setting
 [%collapsible]
 ====
