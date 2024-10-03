@@ -9,7 +9,11 @@ import { ExperimentalFeaturesService } from '../services';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../types';
 
 import { AGENTLESS_POLICY_ID } from '../../common/constants';
-import { isAgentlessIntegration as isAgentlessIntegrationFn } from '../../common/services/agentless_helper';
+import {
+  isAgentlessIntegration as isAgentlessIntegrationFn,
+  isOnlyAgentlessPolicyTemplate,
+  isOnlyAgentlessIntegration,
+} from '../../common/services/agentless_helper';
 
 import { useConfig } from './use_config';
 import { useStartServices } from './use_core';
@@ -52,5 +56,7 @@ export const useAgentless = () => {
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
     isAgentlessPackagePolicy,
+    isOnlyAgentlessIntegration,
+    isOnlyAgentlessPolicyTemplate,
   };
 };

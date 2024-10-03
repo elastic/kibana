@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import type { PackageInfo, RegistryPolicyTemplate } from '../types';
 
-export const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+export const isAgentlessIntegration = (
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+) => {
   if (
     packageInfo?.policy_templates &&
     packageInfo?.policy_templates.length > 0 &&
@@ -22,4 +24,29 @@ export const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => 
 
 export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyName: string) => {
   return `Agentless policy for ${packagePolicyName}`;
+};
+
+export const isOnlyAgentlessIntegration = (
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+) => {
+  if (
+    packageInfo?.policy_templates &&
+    packageInfo?.policy_templates.length > 0 &&
+    packageInfo?.policy_templates.every((policyTemplate) =>
+      isOnlyAgentlessPolicyTemplate(policyTemplate)
+    )
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const isOnlyAgentlessPolicyTemplate = (policyTemplate: {
+  deployment_modes?: RegistryPolicyTemplate['deployment_modes'];
+}) => {
+  return (
+    policyTemplate.deployment_modes?.agentless.enabled === true &&
+    (!policyTemplate.deployment_modes?.default ||
+      policyTemplate.deployment_modes?.default.enabled === false)
+  );
 };

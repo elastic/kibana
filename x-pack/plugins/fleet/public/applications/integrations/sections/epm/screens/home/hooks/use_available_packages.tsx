@@ -11,8 +11,10 @@ import { uniq } from 'lodash';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
+import { useAgentless } from '../../../../../../../hooks';
 import {
+  useGetPackagesQuery,
+  useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
 } from '../../../../../hooks';
@@ -113,6 +115,8 @@ export const useAvailablePackages = ({
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
+  const { isAgentlessEnabled, isOnlyAgentlessIntegration, isOnlyAgentlessPolicyTemplate } =
+    useAgentless();
 
   const {
     initialSelectedCategory,
@@ -146,10 +150,29 @@ export const useAvailablePackages = ({
     });
   }
 
-  const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.items || []),
-    [eprPackages]
-  );
+  const eprIntegrationList = useMemo(() => {
+    // Filter out agentless only packages and policy templates if agentless is not available
+    const packages = isAgentlessEnabled
+      ? eprPackages?.items
+      : eprPackages?.items
+          .filter((pkg) => {
+            return !isOnlyAgentlessIntegration(pkg);
+          })
+          .forEach((pkg) => {
+            pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
+              return !isOnlyAgentlessPolicyTemplate(policyTemplate);
+            });
+          });
+
+    const integrations = packageListToIntegrationsList(packages || []);
+    return integrations;
+  }, [
+    eprPackages?.items,
+    isAgentlessEnabled,
+    isOnlyAgentlessIntegration,
+    isOnlyAgentlessPolicyTemplate,
+  ]);
+
   const {
     data: replacementCustomIntegrations,
     isInitialLoading: isLoadingReplacmentCustomIntegrations,
