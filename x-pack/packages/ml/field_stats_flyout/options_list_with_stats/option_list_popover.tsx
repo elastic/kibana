@@ -119,7 +119,9 @@ export const OptionsListPopover = ({
             Object.hasOwn(option, 'isGroupLabel') ||
             Object.hasOwn(option, 'isGroupLabelOption')
           ) {
-            return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
+            const key = option.key ?? option.searchableLabel;
+            if (key) return populatedFields?.has(key);
+            return false;
           }
           if (option.field) {
             return populatedFields?.has(option.field.id);
