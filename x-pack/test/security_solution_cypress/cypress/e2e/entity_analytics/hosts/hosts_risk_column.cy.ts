@@ -32,7 +32,7 @@ describe('All hosts table', { tags: ['@ess'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
 
       cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
-      cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Low');
+      cy.get(TABLE_CELL).eq(4).should('have.text', 'Low');
     });
   });
 
@@ -55,7 +55,7 @@ describe('All hosts table', { tags: ['@ess'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
 
       cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
-      cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Critical');
+      cy.get(TABLE_CELL).eq(4).should('have.text', 'Critical');
     });
   });
 });
