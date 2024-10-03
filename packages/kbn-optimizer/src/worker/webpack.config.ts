@@ -317,6 +317,7 @@ export function getWebpackConfig(
       fallback: {
         child_process: false,
         fs: false,
+        path: require.resolve('path-browserify'),
       },
     },
 
