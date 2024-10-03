@@ -31,6 +31,7 @@ function createRoot(appenderConfig: any) {
         },
       ],
     },
+    server: { restrictInternalApis: false },
   });
 }
 
