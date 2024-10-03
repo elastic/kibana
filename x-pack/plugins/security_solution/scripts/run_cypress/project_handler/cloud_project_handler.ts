@@ -41,7 +41,7 @@ export class CloudHandler extends ProjectHandler {
     }
 
     const qualityGate =
-      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE !== '1';
+      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE == '1';
     const override = commit ?? process.env.KIBANA_MKI_IMAGE_COMMIT;
     if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
