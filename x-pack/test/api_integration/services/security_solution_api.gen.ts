@@ -103,6 +103,10 @@ import {
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import {
+  InternalGetEndpointSuggestionsRequestParamsInput,
+  InternalGetEndpointSuggestionsRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
@@ -1006,6 +1010,22 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    internalGetEndpointSuggestions(
+      props: InternalGetEndpointSuggestionsProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(
+          routeWithNamespace(
+            replaceParams('/internal/endpoint/suggestions/{suggestion_type}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/internal/asset_criticality/upload_csv', kibanaSpace))
@@ -1523,6 +1543,10 @@ export interface InitEntityEngineProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface InternalGetEndpointSuggestionsProps {
+  params: InternalGetEndpointSuggestionsRequestParamsInput;
+  body: InternalGetEndpointSuggestionsRequestBodyInput;
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;

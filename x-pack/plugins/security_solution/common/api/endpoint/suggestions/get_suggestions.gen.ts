@@ -41,3 +41,31 @@ export type GetEndpointSuggestionsRequestBodyInput = z.input<
 
 export type GetEndpointSuggestionsResponse = z.infer<typeof GetEndpointSuggestionsResponse>;
 export const GetEndpointSuggestionsResponse = SuccessResponse;
+
+export type InternalGetEndpointSuggestionsRequestParams = z.infer<
+  typeof InternalGetEndpointSuggestionsRequestParams
+>;
+export const InternalGetEndpointSuggestionsRequestParams = z.object({
+  suggestion_type: z.literal('eventFilters'),
+});
+export type InternalGetEndpointSuggestionsRequestParamsInput = z.input<
+  typeof InternalGetEndpointSuggestionsRequestParams
+>;
+
+export type InternalGetEndpointSuggestionsRequestBody = z.infer<
+  typeof InternalGetEndpointSuggestionsRequestBody
+>;
+export const InternalGetEndpointSuggestionsRequestBody = z.object({
+  field: z.string().optional(),
+  query: z.string().optional(),
+  filters: z.unknown(),
+  fieldMeta: z.unknown(),
+});
+export type InternalGetEndpointSuggestionsRequestBodyInput = z.input<
+  typeof InternalGetEndpointSuggestionsRequestBody
+>;
+
+export type InternalGetEndpointSuggestionsResponse = z.infer<
+  typeof InternalGetEndpointSuggestionsResponse
+>;
+export const InternalGetEndpointSuggestionsResponse = SuccessResponse;

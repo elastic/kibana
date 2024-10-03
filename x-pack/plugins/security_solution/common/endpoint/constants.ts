@@ -72,7 +72,9 @@ export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{package_policy_id}`;
 
 /** Suggestions routes */
+/** @deprecated public route, use {@link SUGGESTIONS_INTERNAL_ROUTE} internal route  */
 export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
+export const SUGGESTIONS_INTERNAL_ROUTE = `/internal/endpoint/suggestions/{suggestion_type}`;
 
 /**
  * Action Response Routes
