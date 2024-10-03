@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiFlexGrid,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -177,7 +178,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         {options.map((option) => (
           <EuiFlexItem
             key={option.id}
-            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
+            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`} // EuiCheckableCard does not forward `data-test-subj` prop so using parent element instead
           >
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
@@ -189,13 +190,26 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   </EuiText>
                   {/* The description and logo icons are passed into `label` prop instead of `children` to ensure they are clickable */}
                   <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="s">
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                    css={css`
+                      flex-grow: 1; // Allow the description to grow to fill the space
+                    `}
+                  >
                     {option.description}
                   </EuiText>
                   {(option.logos || option.showIntegrationsBadge) && (
                     <>
                       <EuiSpacer size="m" />
-                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                      <EuiFlexGroup
+                        gutterSize="m"
+                        responsive={false}
+                        css={css`
+                          flex-grow: 0; // Prevent the logos from growing to align to the bottom
+                        `}
+                        aria-hidden // Hide from screen readers as the logos are mainly decorative
+                      >
                         {option.logos?.map((logo) => (
                           <EuiFlexItem key={logo} grow={false}>
                             <LogoIcon logo={logo} size="l" />
@@ -240,7 +254,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   );
                 }
               }}
-              css={{ height: '100%' }}
+              css={css`
+                flex-grow: 1;
+
+                & > .euiPanel {
+                  display: flex;
+
+                  & > .euiCheckableCard__label {
+                    display: flex;
+                    flex-direction: column;
+                  }
+                }
+              `}
             />
           </EuiFlexItem>
         ))}

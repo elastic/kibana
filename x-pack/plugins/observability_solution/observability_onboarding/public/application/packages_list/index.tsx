@@ -89,23 +89,17 @@ const PackageListGridWrapper = ({
     <Suspense fallback={<Loading />}>
       <div ref={packageListRef}>
         {showSearchBar && (
-          <div
-            css={css`
-              max-width: 600px;
-            `}
-          >
-            <EuiSearchBar
-              box={{
-                incremental: true,
-              }}
-              onChange={({ queryText, error }) => {
-                if (error) return;
+          <EuiSearchBar
+            box={{
+              incremental: true,
+            }}
+            onChange={({ queryText, error }) => {
+              if (error) return;
 
-                setSearchQuery?.(queryText);
-              }}
-              query={searchQuery ?? ''}
-            />
-          </div>
+              setSearchQuery?.(queryText);
+            }}
+            query={searchQuery ?? ''}
+          />
         )}
         {showPackageList && (
           <PackageList
