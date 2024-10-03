@@ -84,7 +84,6 @@ export const getMockLensApi = (
   snapshotRuntimeState: jest.fn(),
   saveToLibrary: jest.fn(async () => 'saved-id'),
   getByValueRuntimeSnapshot: jest.fn(),
-  updateState: jest.fn(),
   onEdit: jest.fn(),
   isEditingEnabled: jest.fn(() => true),
   getTypeDisplayName: jest.fn(() => 'Lens'),
@@ -100,6 +99,9 @@ export const getMockLensApi = (
   libraryId$: new BehaviorSubject<string | undefined>(undefined),
   savedObjectId: new BehaviorSubject<string | undefined>(undefined),
   adapters$: new BehaviorSubject<Adapters>({}),
+  updateAttributes: jest.fn(),
+  updateSavedObjectId: jest.fn(),
+  updateOverrides: jest.fn(),
 });
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
