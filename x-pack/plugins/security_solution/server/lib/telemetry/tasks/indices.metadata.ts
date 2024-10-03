@@ -18,6 +18,7 @@ import {
   TELEMETRY_INDEX_STATS_EVENT,
 } from '../event_based/events';
 import type { QueryConfig } from '../collections_helpers';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryIndicesMetadataTaskConfig() {
   const taskType = 'security:indices-metadata-telemetry';
@@ -40,17 +41,20 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const log = newTelemetryLogger(logger.get('indices-metadata'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      // TODO: Taken from taskExecutionPeriod, just for testing purposes
-      const config: QueryConfig = {
-        maxPrefixes: Number(taskExecutionPeriod.last ?? '10'),
-        maxGroupSize: Number(taskExecutionPeriod.current ?? '100'),
+      const taskConfig = telemetryConfiguration.indices_metadata_config;
+
+      // TODO: not use taskExecutionPeriod, it's just to test the task using the temporary API
+      const queryConfig: QueryConfig = {
+        maxPrefixes: Number(taskExecutionPeriod.last ?? taskConfig.max_prefixes),
+        maxGroupSize: Number(taskExecutionPeriod.current ?? taskConfig.max_group_size),
       };
-      const streamLimit = 100;
-      const indicesLimit = 300;
 
       try {
         // 1. Get all data streams
-        const dataStreams = (await receiver.getDataStreams()).slice(0, streamLimit);
+        const dataStreams = (await receiver.getDataStreams()).slice(
+          0,
+          taskConfig.datastreams_threshold
+        );
 
         // and calculate index and ilm names
         const dsNames = dataStreams.map((stream) => stream.datastream_name);
@@ -59,7 +63,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             ds.indices?.filter((i) => i.ilm_policy !== undefined)?.map((i) => i.ilm_policy)
           )
           .flat()
-          .slice(0, indicesLimit) as string[];
+          .slice(0, taskConfig.indices_threshold) as string[];
         const indexNames = dataStreams
           .map((ds) => ds.indices?.map((i) => i.index_name) ?? [])
           .flat();
@@ -75,13 +79,13 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         let ilmsCount = 0;
         let dsCount = 0;
 
-        for await (const stat of receiver.getIndicesStats(dsNames, config)) {
+        for await (const stat of receiver.getIndicesStats(dsNames, queryConfig)) {
           sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT.eventType, stat);
           indicesCount++;
         }
         log.info(`Sent ${indicesCount} indices stats`, { indicesCount } as LogMeta);
 
-        for await (const stat of receiver.getIlmsStats(indexNames, config)) {
+        for await (const stat of receiver.getIlmsStats(indexNames, queryConfig)) {
           sender.reportEBT(TELEMETRY_ILM_STATS_EVENT.eventType, stat);
           ilmsCount++;
         }
@@ -93,7 +97,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
         }
         log.info(`Sent ${dsCount} data streams`, { dsCount } as LogMeta);
 
-        for await (const policy of receiver.getIlmsPolicies(ilmsNames, config)) {
+        for await (const policy of receiver.getIlmsPolicies(ilmsNames, queryConfig)) {
           sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT.eventType, policy);
           policyCount++;
         }

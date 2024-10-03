@@ -107,6 +107,11 @@ export function createTelemetryConfigurationTaskConfig() {
           _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
         }
 
+        if (configArtifact.indices_metadata_config) {
+          log.l('Updating indices metadata configuration');
+          telemetryConfiguration.indices_metadata_config = configArtifact.indices_metadata_config;
+        }
+
         await taskMetricsService.end(trace);
 
         log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });

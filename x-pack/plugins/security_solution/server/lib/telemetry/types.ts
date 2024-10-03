@@ -465,6 +465,14 @@ export interface TelemetryConfiguration {
     [key: string]: TelemetrySenderChannelConfiguration;
   };
   pagination_config?: PaginationConfiguration;
+  indices_metadata_config?: IndicesMetadataConfiguration;
+}
+
+export interface IndicesMetadataConfiguration {
+  indices_threshold: number;
+  datastreams_threshold: number;
+  max_prefixes: number;
+  max_group_size: number;
 }
 
 export interface PaginationConfiguration {
