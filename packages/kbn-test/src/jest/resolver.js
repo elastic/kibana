@@ -70,7 +70,7 @@ module.exports = (request, options) => {
   const reqExt = Path.extname(request);
   if (reqExt) {
     const pReqExt = parseRequestExtSuffix(reqExt);
-    const reqBasename = Path.basename(request, pReqExt);
+    const reqBasename = Path.basename(request.split('?')[0], pReqExt);
     if ((pReqExt === '.css' || pReqExt === '.scss') && reqBasename.endsWith('.module')) {
       return CSS_MODULE_MOCK;
     }
