@@ -18,7 +18,7 @@ spec:
       description: Kibana container image artifact builds
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main

@@ -45,7 +45,8 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
       );
     } else {
       validations[setting.api_field.name] = schema.maybe(
-        schema.nullable(
+        schema.oneOf([
+          schema.literal(null),
           schema.any({
             validate: (val: any) => {
               const res = setting.schema.safeParse(val);
@@ -53,8 +54,8 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
                 return stringifyZodError(res.error);
               }
             },
-          })
-        )
+          }),
+        ])
       );
     }
   });

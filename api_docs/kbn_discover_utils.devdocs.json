@@ -516,7 +516,7 @@
         "label": "createLogsContextService",
         "description": [],
         "signature": [
-          "({ logsDataAccessPlugin, }: ",
+          "({ logsDataAccess }: ",
           "LogsContextServiceDeps",
           ") => Promise<{ isLogsIndexPattern: (indexPattern: unknown) => boolean; }>"
         ],
@@ -529,7 +529,7 @@
             "id": "def-common.createLogsContextService.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  logsDataAccessPlugin,\n}",
+            "label": "{ logsDataAccess }",
             "description": [],
             "signature": [
               "LogsContextServiceDeps"
@@ -595,6 +595,131 @@
               "> | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/stacktrace_control.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.dismissAllFlyoutsExceptFor",
+        "type": "Function",
+        "tags": [],
+        "label": "dismissAllFlyoutsExceptFor",
+        "description": [],
+        "signature": [
+          "(excludedFlyout: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          ") => void"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissAllFlyoutsExceptFor.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "excludedFlyout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.dismissFlyouts",
+        "type": "Function",
+        "tags": [],
+        "label": "dismissFlyouts",
+        "description": [],
+        "signature": [
+          "(selectedFlyouts?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          "[], excludedFlyout?: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DiscoverFlyouts",
+            "text": "DiscoverFlyouts"
+          },
+          " | undefined) => void"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissFlyouts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedFlyouts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.dismissFlyouts.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludedFlyout",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DiscoverFlyouts",
+                "text": "DiscoverFlyouts"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1064,7 +1189,7 @@
         "label": "getFieldValue",
         "description": [],
         "signature": [
-          "(record: ",
+          "<TRecord extends ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -1072,7 +1197,7 @@
             "section": "def-common.DataTableRecord",
             "text": "DataTableRecord"
           },
-          ", field: string) => any"
+          ", TField extends string>(record: TRecord, field: TField & keyof TRecord[\"flattened\"]) => TRecord[\"flattened\"][TField]"
         ],
         "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
         "deprecated": false,
@@ -1081,18 +1206,12 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.getFieldValue.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "record",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              }
+              "TRecord"
             ],
             "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
             "deprecated": false,
@@ -1102,12 +1221,12 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.getFieldValue.$2",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "field",
             "description": [],
             "signature": [
-              "string"
+              "TField & keyof TRecord[\"flattened\"]"
             ],
             "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
             "deprecated": false,
@@ -1835,7 +1954,7 @@
         "signature": [
           "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
           "EuiBadgeProps",
-          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => JSX.Element"
+          ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
         "deprecated": false,
@@ -1851,7 +1970,7 @@
             "signature": [
               "Omit<",
               "EuiBadgeProps",
-              ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
+              ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
             ],
             "path": "packages/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
             "deprecated": false,
@@ -2789,7 +2908,7 @@
             "label": "tooltipContent",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
@@ -2845,6 +2964,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DiscoverFlyouts",
+        "type": "Enum",
+        "tags": [],
+        "label": "DiscoverFlyouts",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/utils/dismiss_flyouts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.IgnoredReason",
@@ -3119,14 +3250,14 @@
           {
             "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.RowControlComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3140,7 +3271,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

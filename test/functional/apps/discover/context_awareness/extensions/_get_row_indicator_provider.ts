@@ -128,6 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       anchorCell = await dataGrid.getCellElement(0, 0);
       anchorColorIndicator = await anchorCell.findByTestSubject(

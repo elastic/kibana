@@ -10,25 +10,26 @@ import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_c
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import { createQueryFilterClauses } from '../../../utils/build_query';
 import type {
-  InitEntityStoreRequestBody,
-  InitEntityStoreResponse,
+  InitEntityEngineRequestBody,
+  InitEntityEngineResponse,
 } from '../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+
 import type {
-  EngineDescriptor,
   EntityType,
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import { entityEngineDescriptorTypeName } from './saved_object';
+
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   entityClient: EntityClient;
+  assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
 }
@@ -44,20 +45,33 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
+
   constructor(private readonly options: EntityStoreClientOpts) {
-    this.engineClient = new EngineDescriptorClient(options.soClient);
+    this.engineClient = new EngineDescriptorClient({
+      soClient: options.soClient,
+      namespace: options.namespace,
+    });
   }
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '' }: InitEntityStoreRequestBody
-  ): Promise<InitEntityStoreResponse> {
-    const definition = getEntityDefinition(entityType);
+    { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
+  ): Promise<InitEntityEngineResponse> {
+    const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
+    const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
 
-    this.options.logger.info(`Initializing entity store for ${entityType}`);
+    if (requiresMigration) {
+      throw new Error(
+        'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
+      );
+    }
+
+    const definition = getEntityDefinition(entityType, this.options.namespace);
+
+    logger.info(`Initializing entity store for ${entityType}`);
 
     const descriptor = await this.engineClient.init(entityType, definition, filter);
-    await this.options.entityClient.createEntityDefinition({
+    await entityClient.createEntityDefinition({
       definition: {
         ...definition,
         filter,
@@ -72,7 +86,7 @@ export class EntityStoreDataClient {
   }
 
   public async start(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType);
+    const definition = getEntityDefinition(entityType, this.options.namespace);
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -89,7 +103,7 @@ export class EntityStoreDataClient {
   }
 
   public async stop(entityType: EntityType) {
-    const definition = getEntityDefinition(entityType);
+    const definition = getEntityDefinition(entityType, this.options.namespace);
 
     const descriptor = await this.engineClient.get(entityType);
 
@@ -110,18 +124,11 @@ export class EntityStoreDataClient {
   }
 
   public async list() {
-    return this.options.soClient
-      .find<EngineDescriptor>({
-        type: entityEngineDescriptorTypeName,
-      })
-      .then(({ saved_objects: engines }) => ({
-        engines: engines.map((engine) => engine.attributes),
-        count: engines.length,
-      }));
+    return this.engineClient.list();
   }
 
   public async delete(entityType: EntityType, deleteData: boolean) {
-    const { id } = getEntityDefinition(entityType);
+    const { id } = getEntityDefinition(entityType, this.options.namespace);
 
     this.options.logger.info(`Deleting entity store for ${entityType}`);
 
@@ -138,16 +145,10 @@ export class EntityStoreDataClient {
   }> {
     const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
 
-    const index = entityTypes.map(getEntitiesIndexName);
+    const index = entityTypes.map((type) => getEntitiesIndexName(type, this.options.namespace));
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-
-    const filter = [...createQueryFilterClauses(filterQuery)];
-    const query = {
-      bool: {
-        filter,
-      },
-    };
+    const query = filterQuery ? JSON.parse(filterQuery) : undefined;
 
     const response = await this.options.esClient.search<Entity>({
       index,
