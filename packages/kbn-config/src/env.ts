@@ -36,6 +36,7 @@ export interface CliArgs {
   cache: boolean;
   dist: boolean;
   serverless?: boolean;
+  retrictInternalApis?: boolean;
 }
 
 /** @internal */
