@@ -10,7 +10,7 @@ import { getState, getStore } from '../state/store';
 import { State } from '../../types';
 import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 // @ts-expect-error untyped local
-import { setFilter } from '../state/actions/elements';
+import { setFilter } from '../state/actions/filters';
 
 class FiltersService {
   constructor() {}
@@ -21,7 +21,7 @@ class FiltersService {
 
   updateFilter(filterId: string, filterExpression: string) {
     const { dispatch } = getStore();
-    dispatch(setFilter(filterExpression, filterId, true));
+    dispatch(setFilter(filterExpression, filterId));
   }
 
   getFiltersContext(state: State = getState()) {

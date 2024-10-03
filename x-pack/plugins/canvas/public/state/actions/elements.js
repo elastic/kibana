@@ -27,6 +27,7 @@ import { getCanvasExpressionService } from '../../services/canvas_expressions_se
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
+import { setFilter } from './filters';
 
 const { actionsElements: strings } = ErrorStrings;
 
@@ -263,18 +264,6 @@ export const removeElements = createThunk(
   }
 );
 
-export const setFilter = createThunk(
-  'setFilter',
-  ({ dispatch }, filter, elementId, doRender = true) => {
-    const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId }));
-
-    if (doRender === true) {
-      dispatch(fetchAllRenderables());
-    }
-  }
-);
-
 export const setExpression = createThunk('setExpression', setExpressionFn);
 function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
   // dispatch action to update the element in state
@@ -293,7 +282,11 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
     )
   ) {
     const filter = '';
-    dispatch(setFilter(filter, elementId, pageId, doRender));
+    dispatch(setFilter(filter, elementId, pageId));
+
+    if(doRender) {
+      dispatch(fetchAllRenderables(updatedElement));
+    }
     // setFilter will trigger a re-render so we can skip the fetch here
   } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));

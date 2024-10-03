@@ -10,27 +10,14 @@ import immutable from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as pageActions from '../actions/pages';
 import * as transientActions from '../actions/transient';
-import { removeElements } from '../actions/elements';
-import { setRefreshInterval, enableAutoplay, setAutoplayInterval } from '../actions/workpad';
 
-const { set, del } = immutable;
+const { set } = immutable;
 
 export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
     [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
-
-    [removeElements]: (transientState, { payload: { elementIds } }) => {
-      const { selectedToplevelNodes } = transientState;
-      return del(
-        {
-          ...transientState,
-          selectedToplevelNodes: selectedToplevelNodes.filter((n) => elementIds.indexOf(n) < 0),
-        },
-        ['resolvedArgs', elementIds]
-      );
-    },
 
     [transientActions.setFirstLoad]: (transientState, { payload }) => {
       return set(transientState, 'isFirstLoad', Boolean(payload));
@@ -70,15 +57,15 @@ export const transientReducer = handleActions(
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [setRefreshInterval]: (transientState, { payload }) => {
+    ['setRefreshInterval']: (transientState, { payload }) => {
       return { ...transientState, refresh: { interval: Number(payload) || 0 } };
     },
 
-    [enableAutoplay]: (transientState, { payload }) => {
+    ['enableAutoplay']: (transientState, { payload }) => {
       return set(transientState, 'autoplay.enabled', Boolean(payload) || false);
     },
 
-    [setAutoplayInterval]: (transientState, { payload }) => {
+    ['setAutoplayInterval']: (transientState, { payload }) => {
       return set(transientState, 'autoplay.interval', Number(payload) || 0);
     },
   },
