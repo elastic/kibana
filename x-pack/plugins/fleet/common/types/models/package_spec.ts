@@ -9,10 +9,10 @@ import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry }
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
-  format_version: string;
+  format_version?: string;
   name: string;
   title: string;
-  description: string;
+  description?: string;
   version: string;
   license?: 'basic';
   source?: {
@@ -26,7 +26,7 @@ export interface PackageSpecManifest {
   screenshots?: PackageSpecScreenshot[];
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
-  owner: { github: string; type?: 'elastic' | 'partner' | 'community' };
+  owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
     'index_template.settings' | 'index_template.mappings' | 'index_template.data_stream'
@@ -113,11 +113,12 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
-  kibana: {
-    version: string;
+  kibana?: {
+    version?: string;
   };
   elastic?: {
-    subscription: string;
+    subscription?: string;
+    capabilities?: string[];
   };
 }
 
@@ -126,6 +127,7 @@ export interface PackageSpecIcon {
   title?: string;
   size?: string;
   type?: string;
+  dark_mode?: boolean;
 }
 
 export interface PackageSpecScreenshot {

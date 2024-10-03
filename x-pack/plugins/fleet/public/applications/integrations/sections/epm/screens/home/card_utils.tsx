@@ -112,7 +112,7 @@ export const mapToCard = ({
 
   return {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
-    description: item.description,
+    description: item.description || '',
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,
