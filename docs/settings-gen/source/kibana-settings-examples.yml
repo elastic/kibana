@@ -9,10 +9,10 @@ page_description:
 
 groups:
   - group: Planetary settings
-    group_id: kibana-settings-schema-planetary
+    id: kibana-settings-schema-planetary
     description:
-     - "Planetary settings can be used to configure the planets. Currently only Mercury, Venus, and Earth are supported."
-     - "A group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions."
+      - "Planetary settings can be used to configure the planets. Currently only Mercury, Venus, and Earth are supported."
+      - "A group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions."
     settings:
       - setting: kibana.example.setting.mercury
         id: kibana-example-setting-mercury
@@ -23,7 +23,6 @@ groups:
         example: example-setting-example.asciidoc
         warning: "This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2."
         default: avoid
-        type: static
         options:
           - option: visit
             description: "Arrange a trip to this planet."
@@ -31,6 +30,7 @@ groups:
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
+        type: static
         platforms:
           - self-managed
           - cloud
@@ -43,7 +43,6 @@ groups:
         state: technical-preview
         important: "All visitors to Venus must have an inter-planetary passport that will be validtip for a minimum of six months beyond your date of return."
         default: visit
-        type: static.
         options:
           - option: visit
             # [Optional] Markdown format wrapped in single or double quotation marks.
@@ -52,6 +51,7 @@ groups:
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
+        type: static
         platforms:
           - self-managed
 
@@ -64,7 +64,6 @@ groups:
         state_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<kibana-example-setting-mercury,`kibana-example-setting-mercury`>> or <<kibana-example-setting-venus,`kibana-example-setting-venus`>> instead."
         tip: "To fully enjoy your trip we recommend bringing sunscreen and a hat."
         default: inhabit
-        type: static
         options:
           - option: visit
             # [Optional] Markdown format wrapped in single or double quotation marks.
@@ -73,14 +72,15 @@ groups:
             description: "Build a colony on this planet."
           - option: avoid
             description: "Don't visit this planet at all."
+        type: static
         platforms:
           - self-managed
 
   - group: Celestial settings
-    group_id: kibana-settings-schema-solar
+    id: kibana-settings-schema-solar
     description:
-     - "Celestial settings can be used to configure the Sun and other non-planetary objects. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it."
-     - "Your group description can include warnings, examples, etc., just like the settings descriptions."
+      - "Celestial settings can be used to configure the Sun and other non-planetary objects. Use these settings carefully as the Sun provides sustenance to <<kibana-example-setting-earth,Earth>> and all of the life that inhabits it."
+      - "Your group description can include warnings, examples, etc., just like the settings descriptions."
 
     settings:
       - setting: kibana.example.setting.sun

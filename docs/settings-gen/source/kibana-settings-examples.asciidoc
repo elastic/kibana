@@ -67,7 +67,7 @@ Options:
 * `avoid` - Don't visit this planet at all.
 
 Default: `visit` +
-Type: `static.` +
+Type: `static` +
 ====
 
 
@@ -75,9 +75,7 @@ Type: `static.` +
 .`kibana.example.setting.earth`
 [%collapsible]
 ====
-**Deprecated:** Starting in version 8.0.0 this setting is deprecated. Use <<kibana-example-setting-mercury,`kibana-example-setting-mercury`>> or <<kibana-example-setting-venus,`kibana-example-setting-venus`>> instead.
-
-Earth is the third planet from <<kibana-example-setting-sun,The Sun>> and the only astronomical object known to harbor life.
+**Deprecated:** Earth is the third planet from <<kibana-example-setting-sun,The Sun>> and the only astronomical object known to harbor life.
 
 This is enabled by Earth being an ocean world, the only one in the Solar System sustaining liquid surface water.
 

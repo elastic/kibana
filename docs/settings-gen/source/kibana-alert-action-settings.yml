@@ -6,7 +6,7 @@ product: Kibana
 
 groups:
   - group: General settings
-    group_id: general-alert-action-settings
+    id: general-alert-action-settings
     description:
      - "Something"
      - "Something else."
@@ -19,7 +19,6 @@ groups:
           - "If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn't the same on all instances of Kibana."
           - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,Kibana Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
         default: true
-        type: static
         options:
           - option: mercury
             description: "too close to the sun"
@@ -27,6 +26,7 @@ groups:
             description: "still a little close"
           - option: earth
             description: "just perfect"
+        type: static
         platforms:
           - self-managed
        
@@ -79,7 +79,7 @@ groups:
          - "A boolean value indicating whether to bypass server certificate validation."
          - "Overrides the general `xpack.actions.rejectUnauthorized` configuration for requests made for this hostname/port."
         state: Deprecated
-        state_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
+        deprecated_guidance: "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
        
       - setting: action-config-custom-host-verification-mode
         id: action-config-custom-host-verification-mode
@@ -118,7 +118,7 @@ groups:
           - cloud
 
   - group: Action settings
-    group_id: action-settings
+    id: action-settings
     description:
      - "Something"
      - "Something else."
@@ -138,7 +138,7 @@ groups:
           - self-managed
 
   - group: Preconfigured connector settings
-    group_id: preconfigured-connector-settings
+    id: preconfigured-connector-settings
     description:
      - "These settings vary depending on which type of preconfigured connector you're adding. For example:"
      - "Something else."
@@ -161,7 +161,7 @@ groups:
           - self-managed
 
   - group: Alerting settings
-    group_id: alert-settings
+    id: alert-settings
     description:
      - "Something"
      - "Something else."

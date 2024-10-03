@@ -26,7 +26,7 @@ exit;
 sub iteratefiles {
   $file = $_;
   # ignore any non-yaml files
-  if (!($file =~ /(\.yml)/)) {return;}
+  if (!($file =~ /\.yml$/)) {return;}
   print "\nParsed file: ".$file;
   my $testslice = parsefile($file);
 return;
@@ -74,7 +74,7 @@ sub parsefile {
   for my $group (@$groups) {
 
     # Grab the group name, description, and other properties
-    my $group_id = $group->{group_id};
+    my $group_id = $group->{id};
     my $group_name = $group->{group};
     my $group_description = $group->{description};
   
@@ -113,7 +113,10 @@ sub parsefile {
       my $setting_platforms = $setting->{platforms};
       my $setting_example = $setting->{example};
       my $setting_state = $setting->{state};
-      my $setting_state_guidance = $setting->{state_guidance};
+      my $deprecated_guidance = $setting->{deprecated_guidance};
+
+      # skip settings that are flagged as "hidden" 
+      if (($setting_state) && ($setting_state =~ /hidden/i)) {next;}
 
       # Get the setting options and option descriptions and build the string
       my $options = $setting->{options};
@@ -121,11 +124,11 @@ sub parsefile {
       for my $option (@$options) {
         my $option_name = $option->{option};
         # if ($option_name) {print "\nOPTION = ".$option_name;}
-        if ($option_name) {$setting_options_string .= '{nbsp} `'.$option_name.'`';}
+        if ($option_name) {$setting_options_string .= '* `'.$option_name.'`';}
         my $option_description = $option->{description};
         # if ($option_description) {print "\nDESCRIPTION = ".$option_description;}
         if ($option_description) {$setting_options_string .= ' - '.$option_description;}
-        $setting_options_string .= ' +'."\n";
+        $setting_options_string .= "\n";
       }
 
       # check if supported on Cloud (these settings are marked with a Cloud icon)
@@ -137,13 +140,13 @@ sub parsefile {
       # build the description paragraphs
       my $setting_description_string = "";
       for my $paragraph (@$setting_description) {
-        $setting_description_string .= $paragraph."\n".'+'."\n";
+        $setting_description_string .= $paragraph."\n\n";
       }
       # remove the + sign after the last paragraph of the description
-      if ($setting_description_string) {
-        $setting_description_string =~ s/\+$//;
-        chomp ($setting_description_string);
-      }
+      #if ($setting_description_string) {
+      #  $setting_description_string =~ s/\+$//;
+      #  chomp ($setting_description_string);
+      #}
   
       # build the list of supported platforms
       my $setting_platforms_string = "";
@@ -156,44 +159,57 @@ sub parsefile {
       # Add the settings info to the asciidoc file contents
       $asciidocoutput .= "\n";
       if ($setting_id) {
-        $asciidocoutput .= "\n".'[['.$setting_id.']] ';
+        $asciidocoutput .= "\n".'[['.$setting_id.']]'."\n";
       }
-      $asciidocoutput .= '`'.$setting_name.'`';
+      $asciidocoutput .= '.`'.$setting_name.'`';
       if ($supported_cloud) {
         $asciidocoutput .= ' {ess-icon}';
       }
-      $asciidocoutput .= '::'."\n";
+      $asciidocoutput .= "\n".'[%collapsible]'."\n====\n";
+
+      # Add a standard disclaimer for technical preview settings
       if ($setting_state) {
-        $asciidocoutput .= "+\n**".$setting_state.":** ";
-        if ($setting_state_guidance) {
-          $asciidocoutput .= $setting_state_guidance."\n+\n";
+        if ($setting_state =~ /technical-preview/i) 
+          {
+            $asciidocoutput .= "\n\npreview::[]\n\n";
+          }
+
+        # Mark deprecated settings and add guidance (such as when it was deprecated) if there is any
+        elsif ($setting_state =~ /deprecated/i) 
+          {
+            $asciidocoutput .= "**Deprecated:** ";
+            if ($deprecated_guidance) {
+            $asciidocoutput .= $deprecated_guidance."\n\n";
+          }
+          }
+        # known setting_states are 'technical-preview', 'deprecated' and 'hidden'. Anything else is ignored.
+        else {
+          print "\nUnknown setting state: ".$setting_state."\n";
         }
       }
-  
+
       if ($setting_description_string) {
         $asciidocoutput .= $setting_description_string;
       }
       if ($setting_note) {
-        $asciidocoutput .= "+\nNOTE: ".$setting_note."\n";
+        $asciidocoutput .= "\nNOTE: ".$setting_note."\n";
       }
       if ($setting_warning) {
-        $asciidocoutput .= "+\nWARNING: ".$setting_warning."\n";
+        $asciidocoutput .= "\nWARNING: ".$setting_warning."\n";
       }
       if ($setting_important) {
-        $asciidocoutput .= "+\nIMPORTANT: ".$setting_important."\n";
+        $asciidocoutput .= "\nIMPORTANT: ".$setting_important."\n";
       }
       if ($setting_tip) {
-        $asciidocoutput .= "+\nTIP: ".$setting_tip."\n";
+        $asciidocoutput .= "\nTIP: ".$setting_tip."\n";
       }
   
       # If any of these are defined (setting options, setting default value, settting type...) add those inside a box.
       # We put a " +" at the end of each line to to achieve single spacing inside the box.
   
       if (($setting_options_string) || ($setting_default) || ($setting_type)) {
-        $asciidocoutput .= "+\n====\n";
-  
         if ($setting_options_string) {
-          $asciidocoutput .= "Options: +\n".$setting_options_string;
+          $asciidocoutput .= "\nOptions:\n\n".$setting_options_string."\n";
         }
         if ($setting_default) {
           $asciidocoutput .= "Default: ".'`'.$setting_default.'`'.' +'."\n";
@@ -205,13 +221,13 @@ sub parsefile {
         if ($setting_type) {
           $asciidocoutput .= 'Type: `'.$setting_type.'` +'."\n";
         }
-        $asciidocoutput .= "====\n";
       }
   
       # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
       if ($setting_example) {
-        $asciidocoutput .= "+\n**Example**\n+\ninclude::../examples/".$setting_example."[]\n";
+        $asciidocoutput .= "\n**Example**\n\ninclude::../examples/".$setting_example."[]\n";
       }
+      $asciidocoutput .= "====\n";
     }
   }
 
