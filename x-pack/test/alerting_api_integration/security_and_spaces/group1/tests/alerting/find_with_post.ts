@@ -208,6 +208,7 @@ const findTestUtils = (
 
                 const secondResponse = await supertestWithoutAuth
                   .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                  .set('kbn-xsrf', 'kibana')
                   .auth(user.username, user.password)
                   .send({
                     per_page: perPage,

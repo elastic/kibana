@@ -342,6 +342,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'kibana')
         .send({
           filter: `alert.attributes.params.risk_score:40`,
         })

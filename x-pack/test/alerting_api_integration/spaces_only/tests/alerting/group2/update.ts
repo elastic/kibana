@@ -87,6 +87,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         response = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'kibana')
           .send({ filter: `alert.attributes.params.risk_score:40` });
 
         expect(response.body.data[0].mapped_params).to.eql({
