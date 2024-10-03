@@ -37,7 +37,7 @@ export function AlertSearchBar({
       });
     });
 
-    return sub.unsubscribe;
+    return () => sub.unsubscribe();
   }, [onChange, query]);
 
   return (
