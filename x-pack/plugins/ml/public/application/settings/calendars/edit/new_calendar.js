@@ -324,6 +324,12 @@ class NewCalendarUI extends Component {
     }));
   };
 
+  clearEvents = () => {
+    this.setState(() => ({
+      events: [],
+    }));
+  };
+
   addImportedEvents = (events) => {
     this.setState((prevState) => ({
       events: [...prevState.events, ...events],
@@ -395,6 +401,7 @@ class NewCalendarUI extends Component {
               isGlobalCalendar={isGlobalCalendar}
               onGlobalCalendarChange={this.onGlobalCalendarChange}
               addEvents={this.addEvents}
+              clearEvents={this.clearEvents}
               isDst={this.props.isDst}
             />
             {modal}

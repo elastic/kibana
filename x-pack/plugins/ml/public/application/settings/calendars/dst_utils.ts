@@ -140,3 +140,8 @@ export function separateCalendarsByType(allCalendars: MlCalendar[]) {
   });
   return { calendarsDst, calendars };
 }
+
+export function generateTimeZones() {
+  const zones = moment.tz.names();
+  return zones;
+}

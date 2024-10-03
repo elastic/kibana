@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -84,6 +84,7 @@ interface Props {
   isGlobalCalendar: boolean;
   onGlobalCalendarChange: (e: EuiSwitchEvent) => void;
   addEvents: (events: estypes.MlCalendarEvent[]) => void;
+  clearEvents: () => void;
   isDst: boolean;
 }
 
@@ -112,6 +113,7 @@ export const CalendarForm: FC<Props> = ({
   isGlobalCalendar,
   onGlobalCalendarChange,
   addEvents,
+  clearEvents,
   isDst,
 }) => {
   const [canCreateCalendar] = usePermissionCheck(['canCreateCalendar']);
@@ -131,6 +133,14 @@ export const CalendarForm: FC<Props> = ({
     loading === true;
   const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
     isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+  );
+
+  const addDstEvents = useCallback(
+    (events: estypes.MlCalendarEvent[]) => {
+      clearEvents();
+      addEvents(events);
+    },
+    [addEvents, clearEvents]
   );
 
   return (
@@ -271,21 +281,7 @@ export const CalendarForm: FC<Props> = ({
         fullWidth
       >
         <>
-          {isDst ? (
-            <>
-              <EuiFormRow
-                fullWidth
-                helpText={
-                  <FormattedMessage
-                    id="xpack.ml.calendarsEdit.calendarForm.dstEventsHelpText"
-                    defaultMessage="The selected time zone should match the time zone of the data."
-                  />
-                }
-              >
-                <DstEventGenerator addEvents={addEvents} setTimezone={setTimezone} />
-              </EuiFormRow>
-            </>
-          ) : null}
+          {isDst ? <DstEventGenerator addEvents={addDstEvents} setTimezone={setTimezone} /> : null}
           <EventsTable
             eventsList={eventsList}
             onDeleteClick={onEventDelete}

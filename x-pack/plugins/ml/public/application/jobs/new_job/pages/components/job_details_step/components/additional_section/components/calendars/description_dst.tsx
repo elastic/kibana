@@ -34,7 +34,7 @@ export const DescriptionDst: FC<PropsWithChildren<unknown>> = memo(({ children }
             learnMoreLink: (
               <EuiLink href={docsUrl} target="_blank">
                 <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.learnMoreLinkText"
+                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsDstSelection.learnMoreLinkText"
                   defaultMessage="Learn more"
                 />
               </EuiLink>

@@ -7,12 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiButton, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import moment from 'moment-timezone';
-import { createDstEvents } from '../../dst_utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { createDstEvents, generateTimeZones } from '../../dst_utils';
 
 interface Props {
   addEvents: (events: estypes.MlCalendarEvent[]) => void;
@@ -20,25 +26,25 @@ interface Props {
 }
 
 export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
-  const generateEvents = () => {
-    if (selectedTimeZones.length === 0) {
-      return;
-    }
-    const events = createDstEvents(selectedTimeZones[0].value!);
-    addEvents(events);
-  };
   const [selectedTimeZones, setSelectedTimeZones] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+  const [eventsCount, setEventsCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (selectedTimeZones.length > 0) {
       setTimezone(selectedTimeZones[0].value!);
+      const events = createDstEvents(selectedTimeZones[0].value!);
+      addEvents(events);
+      setEventsCount(events.length);
+    } else {
+      addEvents([]);
+      setEventsCount(null);
     }
-  }, [selectedTimeZones, setTimezone]);
+  }, [addEvents, selectedTimeZones, setTimezone]);
 
   const timeZoneOptions = useMemo(() => {
-    return moment.tz.names().map((tz) => {
+    return generateTimeZones().map((tz) => {
       return {
         label: tz,
         value: tz,
@@ -48,31 +54,52 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
 
   return (
     <>
-      <EuiFlexGroup wrap gutterSize="s">
-        <EuiFlexItem grow={false} css={{ width: '400px' }}>
-          <EuiComboBox
-            placeholder="Select time zone"
-            singleSelection={{ asPlainText: true }}
-            options={timeZoneOptions}
-            selectedOptions={selectedTimeZones}
-            onChange={setSelectedTimeZones}
+      <EuiFormRow
+        fullWidth
+        helpText={
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.dstEventsHelpText"
+            defaultMessage="The selected time zone should match the time zone of the data."
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            key="ml_import_event"
-            data-test-subj="mlCalendarDstGenerateEventsButton"
-            iconType="importAction"
-            onClick={generateEvents}
-            isDisabled={selectedTimeZones.length === 0}
-          >
-            <FormattedMessage
-              id="xpack.ml.calendarsEdit.eventsTable.generateDstEventsButtonLabel"
-              defaultMessage="Generate DST events"
+        }
+      >
+        <EuiFlexGroup wrap gutterSize="s">
+          <EuiFlexItem grow={false} css={{ width: '400px' }}>
+            <EuiComboBox
+              placeholder="Select time zone"
+              singleSelection={{ asPlainText: true }}
+              options={timeZoneOptions}
+              selectedOptions={selectedTimeZones}
+              onChange={setSelectedTimeZones}
             />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+
+      {eventsCount === 0 ? (
+        <>
+          <EuiSpacer size="s" />
+
+          <EuiCallOut
+            color="primary"
+            iconType="iInCircle"
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.dstEventGenerator.noTimeZonesAvailableTitle"
+                defaultMessage="No DST events available"
+              />
+            }
+          >
+            <div>
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.dstEventGenerator.noTimeZonesAvailableDescription"
+                defaultMessage="Some time zones do not observe daylight saving time."
+              />
+            </div>
+          </EuiCallOut>
+        </>
+      ) : null}
     </>
   );
 };
