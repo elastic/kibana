@@ -51,5 +51,5 @@ export interface ConnectorExecuteResponse {
   service_message?: ConnectorExecuteResponseSchemaType['service_message'];
   data?: ConnectorExecuteResponseSchemaType['data'];
   retry?: ConnectorExecuteResponseSchemaType['retry'];
-  error_source?: ConnectorExecuteResponseSchemaType['error_source'];
+  errorSource?: ConnectorExecuteResponseSchemaType['errorSource'];
 }

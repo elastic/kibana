@@ -139,7 +139,7 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
-  error_source: schema.maybe(
+  errorSource: schema.maybe(
     schema.oneOf([schema.literal('user'), schema.literal('framework')], {
       meta: {
         description:
