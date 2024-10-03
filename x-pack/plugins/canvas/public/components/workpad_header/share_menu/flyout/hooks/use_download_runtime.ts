@@ -12,8 +12,9 @@ import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/l
 import { ZIP } from '../../../../../../i18n/constants';
 
 import type { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
-import { useNotifyService, useWorkpadService } from '../../../../../services';
+import { useNotifyService } from '../../../../../services';
 import { coreServices } from '../../../../../services/kibana_services';
+import { getCanvasWorkpadService } from '../../../../../services/canvas_workpad_service';
 
 const strings = {
   getDownloadRuntimeFailureErrorMessage: () =>
@@ -52,11 +53,12 @@ export const useDownloadRuntime = () => {
 };
 
 export const useDownloadZippedRuntime = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
 
   const downloadZippedRuntime = useCallback(
     (workpad: CanvasRenderedWorkpad) => {
+      const workpadService = getCanvasWorkpadService();
+
       const downloadZip = async () => {
         try {
           let runtimeZipBlob: Blob | undefined;
@@ -80,7 +82,7 @@ export const useDownloadZippedRuntime = () => {
 
       downloadZip();
     },
-    [notifyService, workpadService]
+    [notifyService]
   );
   return downloadZippedRuntime;
 };

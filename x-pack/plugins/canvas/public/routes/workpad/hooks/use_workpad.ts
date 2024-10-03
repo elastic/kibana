@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWorkpadService } from '../../../services';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error
@@ -16,7 +15,10 @@ import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
 import { CanvasWorkpad } from '../../../../types';
-import { ResolveWorkpadResponse } from '../../../services/canvas_workpad_service';
+import {
+  ResolveWorkpadResponse,
+  getCanvasWorkpadService,
+} from '../../../services/canvas_workpad_service';
 import { spacesService } from '../../../services/kibana_services';
 
 const getWorkpadLabel = () =>
@@ -33,7 +35,6 @@ export const useWorkpad = (
   loadPages: boolean = true,
   getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
-  const workpadService = useWorkpadService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
@@ -46,14 +47,12 @@ export const useWorkpad = (
         const {
           workpad: { assets, ...workpad },
           ...resolveProps
-        } = await workpadService.resolve(workpadId);
-
+        } = await getCanvasWorkpadService().resolve(workpadId);
         setResolveInfo({ id: workpadId, ...resolveProps });
 
         // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
         if (storedWorkpad.id !== workpadId && resolveProps.outcome !== 'aliasMatch') {
           workpad.aliasId = resolveProps.aliasId;
-
           dispatch(setAssets(assets));
           dispatch(setWorkpad(workpad, { loadPages }));
           dispatch(setZoomScale(1));
@@ -62,7 +61,7 @@ export const useWorkpad = (
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService, storedWorkpad.id]);
+  }, [workpadId, dispatch, setError, loadPages, storedWorkpad.id]);
 
   useEffect(() => {
     // If the resolved info is not for the current workpad id, bail out

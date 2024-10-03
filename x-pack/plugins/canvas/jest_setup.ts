@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
+import { setStubKibanaServices } from './public/services/mocks';
 
-export const useFindTemplates = () => {
-  return useCallback(async () => await getCanvasWorkpadService().findTemplates(), []);
-};
+// Start the kibana services with stubs
+setStubKibanaServices();
