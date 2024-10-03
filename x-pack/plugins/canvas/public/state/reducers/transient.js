@@ -7,53 +7,61 @@
 
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { restoreHistory } from '../actions/history';
-import * as pageActions from '../actions/pages';
-import * as transientActions from '../actions/transient';
 
-const { set } = immutable;
+const { set, del } = immutable;
 
 export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
-    [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
+    ['restoreHistory']: (transientState) => set(transientState, 'resolvedArgs', {}),
 
-    [transientActions.setFirstLoad]: (transientState, { payload }) => {
+    ['removeElements']: (transientState, { payload: { elementIds } }) => {
+      const { selectedToplevelNodes } = transientState;
+      return del(
+        {
+          ...transientState,
+          selectedToplevelNodes: selectedToplevelNodes.filter((n) => elementIds.indexOf(n) < 0),
+        },
+        ['resolvedArgs', elementIds]
+      );
+    },
+
+    ['setFirstLoad']: (transientState, { payload }) => {
       return set(transientState, 'isFirstLoad', Boolean(payload));
     },
 
-    [transientActions.setFullscreen]: (transientState, { payload }) => {
+    ['setFullscreen']: (transientState, { payload }) => {
       return set(transientState, 'fullscreen', Boolean(payload));
     },
 
-    [transientActions.setElementStats]: (transientState, { payload }) => {
+    ['setElementStats']: (transientState, { payload }) => {
       return set(transientState, 'elementStats', payload);
     },
 
-    [transientActions.selectToplevelNodes]: (transientState, { payload }) => {
+    ['selectToplevelNodes']: (transientState, { payload }) => {
       return {
         ...transientState,
         selectedToplevelNodes: payload,
       };
     },
 
-    [transientActions.setZoomScale]: (transientState, { payload }) => {
+    ['setZoomScale']: (transientState, { payload }) => {
       return {
         ...transientState,
         zoomScale: payload || 1,
       };
     },
 
-    [pageActions.setPage]: (transientState) => {
+    ['setPage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.addPage]: (transientState) => {
+    ['addPage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.duplicatePage]: (transientState) => {
+    ['duplicatePage']: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 

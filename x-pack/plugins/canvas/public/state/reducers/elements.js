@@ -101,7 +101,6 @@ const getPageWithElementId = (workpad, elementId) => {
 
 export const elementsReducer = handleActions(
   {
-    // TODO: This takes the entire element, which is not necessary, it could just take the id.
     ['setExpression']: (workpadState, { payload }) => {
       const { expression, pageId, elementId } = payload;
       return assignNodeProperties(workpadState, pageId, elementId, { expression });

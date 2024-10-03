@@ -8,16 +8,6 @@
 import { handleActions } from 'redux-actions';
 import { coreServices } from '../../services/kibana_services';
 import { getDefaultWorkpad } from '../defaults';
-// import {
-//   setWorkpad,
-//   sizeWorkpad,
-//   setColors,
-//   setName,
-//   setWriteable,
-//   setWorkpadCSS,
-//   setWorkpadVariables,
-//   resetWorkpad,
-// } from '../actions/workpad';
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
