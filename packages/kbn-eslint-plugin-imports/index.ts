@@ -13,6 +13,7 @@ import { UniformImportsRule } from './src/rules/uniform_imports';
 import { ExportsMovedPackagesRule } from './src/rules/exports_moved_packages';
 import { NoUnusedImportsRule } from './src/rules/no_unused_imports';
 import { NoBoundaryCrossingRule } from './src/rules/no_boundary_crossing';
+import { NoGroupCrossingRule } from './src/rules/no_group_crossing';
 import { RequireImportRule } from './src/rules/require_import';
 
 /**
@@ -25,5 +26,6 @@ export const rules = {
   exports_moved_packages: ExportsMovedPackagesRule,
   no_unused_imports: NoUnusedImportsRule,
   no_boundary_crossing: NoBoundaryCrossingRule,
+  no_group_crossing: NoGroupCrossingRule,
   require_import: RequireImportRule,
 };
