@@ -57,7 +57,7 @@
                 "section": "def-common.KibanaFeatureScope",
                 "text": "KibanaFeatureScope"
               },
-              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
               {
                 "pluginId": "@kbn/core-application-common",
                 "scope": "common",
@@ -65,7 +65,7 @@
                 "section": "def-common.AppCategory",
                 "text": "AppCategory"
               },
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; privileges: { all: ",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; hidden?: boolean | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -170,7 +170,7 @@
             "section": "def-common.KibanaFeatureScope",
             "text": "KibanaFeatureScope"
           },
-          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -178,7 +178,7 @@
             "section": "def-common.AppCategory",
             "text": "AppCategory"
           },
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; privileges: { all: ",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; hidden?: boolean | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",

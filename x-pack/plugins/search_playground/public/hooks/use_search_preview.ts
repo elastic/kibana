@@ -8,6 +8,7 @@
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { APIRoutes, ChatForm, ChatFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
@@ -17,7 +18,7 @@ export interface FetchSearchResultsArgs {
   pagination: Pagination;
   indices: ChatForm[ChatFormFields.indices];
   elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery];
-  http: ReturnType<typeof useKibana>['services']['http'];
+  http: HttpSetup;
 }
 
 interface UseSearchPreviewData {
@@ -64,9 +65,10 @@ export const useSearchPreview = ({
   query: string;
   pagination: Pagination;
 }) => {
-  const { services } = useKibana();
+  const {
+    services: { http },
+  } = useKibana();
   const { getValues } = useFormContext();
-  const { http } = services;
   const indices = getValues(ChatFormFields.indices);
   const elasticsearchQuery = getValues(ChatFormFields.elasticsearchQuery);
 
