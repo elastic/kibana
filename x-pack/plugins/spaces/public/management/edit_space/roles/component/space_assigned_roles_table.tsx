@@ -78,6 +78,7 @@ const getTableColumns = ({
       name: i18n.translate('xpack.spaces.management.spaceDetails.rolesTable.column.name.title', {
         defaultMessage: 'Role',
       }),
+      width: '45%',
     },
     {
       field: 'privileges',
@@ -118,25 +119,25 @@ const getTableColumns = ({
         { defaultMessage: 'Role type' }
       ),
       render: (_value: Role['metadata']) => {
-        return React.createElement(EuiBadge, {
-          children: _value?._reserved
-            ? i18n.translate(
+        return _value?._reserved
+          ? React.createElement(EuiBadge, {
+              children: i18n.translate(
                 'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.reserved',
                 { defaultMessage: 'Reserved' }
-              )
-            : i18n.translate(
-                'xpack.spaces.management.spaceDetails.rolesTable.column.roleType.custom',
-                { defaultMessage: 'Custom' }
               ),
-          color: _value?._reserved ? undefined : 'success',
-        });
+              color: 'primary',
+            })
+          : null;
       },
     },
   ];
 
   if (!isReadOnly) {
     columns.push({
-      name: 'Actions',
+      name: i18n.translate(
+        'xpack.spaces.management.spaceDetails.rolesTable.column.actions.columnHeaderName',
+        { defaultMessage: 'Actions' }
+      ),
       actions: [
         {
           type: 'icon',
@@ -163,22 +164,22 @@ const getTableColumns = ({
               : i18n.translate(
                   'xpack.spaces.management.spaceDetails.rolesTable.column.actions.notEditableDescription.isAssignedToAll',
                   {
-                    defaultMessage: `Can't perform actions on a role that is assigned to all spaces`,
+                    defaultMessage: `You can't edit the access of a role that is assigned to all spaces.`,
                   }
                 ),
-          isPrimary: true,
+          showOnHover: true,
           enabled: () => false,
           available: (rowRecord) => !isEditableRole(rowRecord),
         },
         {
           type: 'icon',
           icon: 'pencil',
+          isPrimary: true,
           'data-test-subj': 'spaceRoleCellEditAction',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.title',
             { defaultMessage: 'Remove from space' }
           ),
-          isPrimary: true,
           description: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.description',
             {
@@ -186,15 +187,14 @@ const getTableColumns = ({
                 'Click this action to edit the role privileges of this user for this space.',
             }
           ),
-          showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
           onClick: onClickRowEditAction,
         },
         {
-          isPrimary: true,
           type: 'icon',
           icon: 'trash',
           color: 'danger',
+          isPrimary: true,
           'data-test-subj': 'spaceRoleCellDeleteAction',
           name: i18n.translate(
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.remove.title',
@@ -204,7 +204,6 @@ const getTableColumns = ({
             'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.description',
             { defaultMessage: 'Click this action to remove the user from this space.' }
           ),
-          showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
           onClick: onClickRowRemoveAction,
         },

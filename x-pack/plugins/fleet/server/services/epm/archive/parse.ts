@@ -110,9 +110,7 @@ type OptionalPackageProp = OptionalPropertyOf<ArchivePackage>;
 const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'name',
   'version',
-  'description',
   'title',
-  'format_version',
   'owner',
 ] as const;
 
@@ -130,6 +128,8 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'release',
   'agent',
   'elasticsearch',
+  'description',
+  'format_version',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);

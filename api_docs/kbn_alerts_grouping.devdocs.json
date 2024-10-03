@@ -29,7 +29,7 @@
             "section": "def-public.AlertsGroupingProps",
             "text": "AlertsGroupingProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
         "deprecated": false,

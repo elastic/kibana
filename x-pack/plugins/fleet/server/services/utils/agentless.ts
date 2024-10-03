@@ -28,6 +28,18 @@ const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 
 type AgentlessApiEndpoints = '/deployments' | `/deployments/${string}`;
 
+export interface AgentlessConfig {
+  enabled?: boolean;
+  api?: {
+    url?: string;
+    tls?: {
+      certificate?: string;
+      key?: string;
+      ca?: string;
+    };
+  };
+}
+
 export const prependAgentlessApiBasePathToEndpoint = (
   agentlessConfig: FleetConfigType['agentless'],
   endpoint: AgentlessApiEndpoints
@@ -37,4 +49,11 @@ export const prependAgentlessApiBasePathToEndpoint = (
     ? AGENTLESS_SERVERLESS_API_BASE_PATH
     : AGENTLESS_ESS_API_BASE_PATH;
   return `${agentlessConfig.api.url}${endpointPrefix}${endpoint}`;
+};
+
+export const getDeletionEndpointPath = (
+  agentlessConfig: FleetConfigType['agentless'],
+  endpoint: AgentlessApiEndpoints
+) => {
+  return `${agentlessConfig.api.url}${AGENTLESS_ESS_API_BASE_PATH}${endpoint}`;
 };
