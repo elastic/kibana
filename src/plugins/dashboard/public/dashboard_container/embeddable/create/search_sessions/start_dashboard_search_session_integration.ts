@@ -33,15 +33,18 @@ export function startDashboardSearchSessionIntegration(
     createSessionRestorationDataProvider,
   } = searchSessionSettings;
 
-  dataService.search.session.enableStorage(createSessionRestorationDataProvider(this as DashboardApi), {
-    isDisabled: () =>
-      getDashboardCapabilities().storeSearchSession
-        ? { disabled: false }
-        : {
-            disabled: true,
-            reasonText: noSearchSessionStorageCapabilityMessage,
-          },
-  });
+  dataService.search.session.enableStorage(
+    createSessionRestorationDataProvider(this as DashboardApi),
+    {
+      isDisabled: () =>
+        getDashboardCapabilities().storeSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
+  );
 
   // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
