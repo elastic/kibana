@@ -21,7 +21,7 @@ export const LogsOverviewErrorContent: React.FC<LogsOverviewErrorContentProps> =
       title={<h2>{logsOverviewErrorTitle}</h2>}
       body={
         <EuiCodeBlock className="eui-textLeft" whiteSpace="pre">
-          <p>{error?.stack ?? error ?? unknownErrorDescription}</p>
+          <p>{error?.stack ?? error?.toString() ?? unknownErrorDescription}</p>
         </EuiCodeBlock>
       }
       layout="vertical"
