@@ -79,7 +79,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   }, [cloud, http]);
 
   const onChangeView = useCallback(
-    (id) => {
+    (id: string) => {
       switch (id) {
         case CreateIndexView.UI:
           usageTracker.click(AnalyticsEvents.startPageShowCreateIndexUIClick);

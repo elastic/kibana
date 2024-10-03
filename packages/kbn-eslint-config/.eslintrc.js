@@ -171,6 +171,13 @@ module.exports = {
           from: 'rison-node',
           to: '@kbn/rison',
         },
+        {
+          from: 'react-dom/client',
+          to: 'react-dom',
+          exact: true,
+          disallowedMessage:
+            'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
+        },
       ],
     ],
 

@@ -92,6 +92,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: {
           title: 'Testing',
@@ -110,6 +111,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('calls upon savedObjectClient.update', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'Testing' },
         version: 'foo',
@@ -127,6 +129,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('returns with status 400 for types hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({
         attributes: { title: 'does not matter' },
       })
@@ -137,6 +140,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .put('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ attributes: { title: 'Logging test' }, version: 'log' })
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
