@@ -51,6 +51,15 @@ export function useScreenContext() {
           description: 'The investigation details, including metadata, notes and items.',
           value: investigation,
         },
+        ...(alertDetails
+          ? [
+              {
+                name: 'alert',
+                description: 'The alert details that triggered the investigation.',
+                value: alertDetails,
+              },
+            ]
+          : []),
       ],
     });
   }, [observabilityAIAssistant, investigation, alertDetails, isAlertDetailsLoading]);
@@ -67,25 +76,5 @@ function getAlertDetailScreenContext(alertDetail: EcsFieldsResponse) {
       ? `The reason given for the alert is ${alertDetail[ALERT_REASON]}.`
       : ''
   }
-
-  Use the following alert fields to understand the context of the alert:
-  ${Object.entries(getRelevantAlertFields(alertDetail))
-    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-    .join('\n')}
   `);
-}
-
-function getRelevantAlertFields(alertDetail: EcsFieldsResponse) {
-  return omit(alertDetail.fields, [
-    'kibana.alert.rule.revision',
-    'kibana.alert.rule.execution.uuid',
-    'kibana.alert.flapping_history',
-    'kibana.alert.uuid',
-    'kibana.alert.rule.uuid',
-    'event.action',
-    'event.kind',
-    'kibana.alert.rule.tags',
-    'kibana.alert.maintenance_window_ids',
-    'kibana.alert.consecutive_matches',
-  ]);
 }
