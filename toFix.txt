@@ -1,0 +1,34 @@
+node scripts/eslint --no-quiet src x-pack > eslint.log
+# extracted offending packages, removed duplicates
+
+@kbn/aiops-plugin
+@kbn/apm-ftr-e2e
+@kbn/dashboard-plugin
+@kbn/data-quality-plugin
+@kbn/discover-plugin
+@kbn/exploratory-view-example-plugin
+@kbn/infra-plugin
+@kbn/ingest-pipelines-plugin
+@kbn/inventory-plugin
+@kbn/investigate-app-plugin
+@kbn/investigate-plugin
+@kbn/logs-shared-plugin
+@kbn/metrics-data-access-plugin
+@kbn/ml-plugin
+@kbn/monitoring-plugin
+@kbn/observability-ai-assistant-app-plugin
+@kbn/observability-ai-assistant-management-plugin
+@kbn/observability-alerting-test-data
+@kbn/observability-onboarding-e2e
+@kbn/observability-plugin
+@kbn/osquery-plugin
+@kbn/resolver-test-plugin
+@kbn/screenshotting-example-plugin
+@kbn/search-assistant
+@kbn/security-solution-plugin
+@kbn/securitysolution-data-table
+@kbn/slo-plugin
+@kbn/synthetics-e2e
+@kbn/test-suites-serverless
+@kbn/test-suites-xpack
+@kbn/ui-actions-enhanced-examples-plugin
