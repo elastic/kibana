@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Space, User } from '../../../../common/types';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { Space1AllAtSpace1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -209,6 +209,134 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         });
       });
     }
+
+    describe('filtering', () => {
+      it('should return the correct rule stats when trying to exploit RBAC through the ruleTypeIds parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
+
+        const okAlertId = await createTestAlert(
+          {
+            rule_type_id: 'test.restricted-noop',
+            schedule: { interval: '24h' },
+            consumer: 'alertsRestrictedFixture',
+          },
+          SuperuserAtSpace1.space,
+          SuperuserAtSpace1.user
+        );
+
+        const activeAlertId = await createTestAlert(
+          {
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '24h' },
+            params: {
+              pattern: { instance: new Array(100).fill(true) },
+            },
+          },
+          SuperuserAtSpace1.space,
+          SuperuserAtSpace1.user
+        );
+
+        objectRemover.add(SuperuserAtSpace1.space.id, okAlertId, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, activeAlertId, 'rule', 'alerting');
+
+        await aggregate({
+          space,
+          user,
+          params: { rule_type_ids: ['test.restricted-noop', 'test.patternFiring'] },
+          expectedStatusCode: 200,
+          expectedResponse: {
+            rule_enabled_status: {
+              disabled: 0,
+              enabled: 1,
+            },
+            rule_execution_status: {
+              ok: 0,
+              active: 1,
+              error: 0,
+              pending: 0,
+              unknown: 0,
+              warning: 0,
+            },
+            rule_last_run_outcome: {
+              succeeded: 1,
+              warning: 0,
+              failed: 0,
+            },
+            rule_muted_status: {
+              muted: 0,
+              unmuted: 1,
+            },
+            rule_snoozed_status: {
+              snoozed: 0,
+            },
+            rule_tags: ['foo'],
+          },
+        });
+      });
+
+      it('should return the correct rule stats when trying to exploit RBAC through the consumer parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
+
+        const okAlertId = await createTestAlert(
+          {
+            rule_type_id: 'test.restricted-noop',
+            schedule: { interval: '24h' },
+            consumer: 'alertsRestrictedFixture',
+          },
+          SuperuserAtSpace1.space,
+          SuperuserAtSpace1.user
+        );
+
+        const activeAlertId = await createTestAlert(
+          {
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '24h' },
+            params: {
+              pattern: { instance: new Array(100).fill(true) },
+            },
+          },
+          SuperuserAtSpace1.space,
+          SuperuserAtSpace1.user
+        );
+
+        objectRemover.add(SuperuserAtSpace1.space.id, okAlertId, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, activeAlertId, 'rule', 'alerting');
+
+        await aggregate({
+          space,
+          user,
+          params: { consumers: ['alertsRestrictedFixture', 'alertsFixture'] },
+          expectedStatusCode: 200,
+          expectedResponse: {
+            rule_enabled_status: {
+              disabled: 0,
+              enabled: 1,
+            },
+            rule_execution_status: {
+              ok: 0,
+              active: 1,
+              error: 0,
+              pending: 0,
+              unknown: 0,
+              warning: 0,
+            },
+            rule_last_run_outcome: {
+              succeeded: 1,
+              warning: 0,
+              failed: 0,
+            },
+            rule_muted_status: {
+              muted: 0,
+              unmuted: 1,
+            },
+            rule_snoozed_status: {
+              snoozed: 0,
+            },
+            rule_tags: ['foo'],
+          },
+        });
+      });
+    });
   });
 
   async function createTestAlert(testAlertOverrides = {}, space: Space, user: User) {
@@ -227,18 +355,20 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
     user,
     expectedStatusCode,
     expectedResponse,
+    params = {},
   }: {
     space: Space;
     user: User;
     expectedStatusCode: number;
     expectedResponse: Record<string, unknown>;
+    params?: Record<string, unknown>;
   }) => {
     await retry.try(async () => {
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_aggregate`)
         .set('kbn-xsrf', 'foo')
         .auth(user.username, user.password)
-        .send({});
+        .send(params);
 
       expect(response.status).to.eql(expectedStatusCode);
       expect(response.body).to.eql(expectedResponse);

@@ -7,6 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import {
+  buildConsumersFilter,
   buildRuleTypeIdsFilter,
   combineFilterWithAuthorizationFilter,
   combineFilters,
@@ -26,7 +27,7 @@ export async function aggregateRules<T = Record<string, unknown>>(
   params: AggregateParams<T>
 ): Promise<T> {
   const { options = {}, aggs } = params;
-  const { filter, page = 1, perPage = 0, ruleTypeIds, ...restOptions } = options;
+  const { filter, page = 1, perPage = 0, ruleTypeIds, consumers, ...restOptions } = options;
 
   let authorizationTuple;
   try {
@@ -50,7 +51,8 @@ export async function aggregateRules<T = Record<string, unknown>>(
   const { filter: authorizationFilter } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(filter);
   const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
-  const combinedFilters = combineFilters([filterKueryNode, ruleTypeIdsFilter]);
+  const consumersFilter = buildConsumersFilter(consumers);
+  const combinedFilters = combineFilters([filterKueryNode, ruleTypeIdsFilter, consumersFilter]);
 
   const { aggregations } = await findRulesSo<T>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,

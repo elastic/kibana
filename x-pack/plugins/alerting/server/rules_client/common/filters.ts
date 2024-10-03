@@ -51,6 +51,14 @@ export const buildRuleTypeIdsFilter = (ruleTypeIds?: string[]) => {
   return buildFilter({ filters: ruleTypeIds, field: 'alertTypeId', operator: 'or' });
 };
 
+export const buildConsumersFilter = (consumers?: string[]) => {
+  if (!consumers || !consumers?.length) {
+    return;
+  }
+
+  return buildFilter({ filters: consumers, field: 'consumer', operator: 'or' });
+};
+
 /**
  * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined
  * filters and return a KueryNode with the filters combined using the specified operator which defaults to and if not defined.

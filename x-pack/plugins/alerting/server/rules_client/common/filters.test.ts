@@ -7,6 +7,7 @@
 
 import { nodeBuilder } from '@kbn/es-query';
 import {
+  buildConsumersFilter,
   buildFilter,
   buildRuleTypeIdsFilter,
   combineFilterWithAuthorizationFilter,
@@ -389,6 +390,59 @@ describe('filters', () => {
                   "isQuoted": false,
                   "type": "literal",
                   "value": "alert.attributes.alertTypeId",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "bar",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+  });
+
+  describe('buildConsumersFilter', () => {
+    it('returns undefined if ruleTypeIds is undefined', () => {
+      expect(buildConsumersFilter()).toBeUndefined();
+    });
+
+    it('returns undefined if ruleTypeIds is is an empty array', () => {
+      expect(buildConsumersFilter([])).toBeUndefined();
+    });
+
+    it('builds the filter correctly', () => {
+      expect(buildConsumersFilter(['foo', 'bar'])).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "foo",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert.attributes.consumer",
                 },
                 Object {
                   "isQuoted": false,
