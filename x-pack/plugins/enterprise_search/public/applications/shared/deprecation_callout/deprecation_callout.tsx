@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface DeprecationCalloutProps {
@@ -43,6 +43,11 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       <EuiButton href="#" color="warning" fill>
         CTA Link Button
       </EuiButton>
+      <EuiLink href="#" target="_blank" onClick={onDismissAction}>
+        {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
+          defaultMessage: 'dismiss',
+        })}
+      </EuiLink>
     </EuiCallOut>
   );
 };

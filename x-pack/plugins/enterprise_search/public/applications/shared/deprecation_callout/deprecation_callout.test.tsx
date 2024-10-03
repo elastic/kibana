@@ -20,4 +20,13 @@ describe('EnterpriseSearchDeprecationCallout', () => {
     wrapper.find('EuiCallOut').simulate('dismiss');
     expect(dismissFxn).toHaveBeenCalledTimes(1);
   });
+
+  it('dismisses via the link', () => {
+    const dismissFxn = jest.fn();
+    const wrapper = shallow(<EnterpriseSearchDeprecationCallout onDismissAction={dismissFxn} />);
+
+    expect(wrapper.find('EuiLink')).toHaveLength(1);
+    wrapper.find('EuiLink').simulate('click');
+    expect(dismissFxn).toHaveBeenCalledTimes(1);
+  });
 });
