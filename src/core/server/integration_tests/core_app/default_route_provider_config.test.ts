@@ -27,6 +27,7 @@ describe('default route provider', () => {
     root = createRootWithCorePlugins({
       server: {
         basePath: '/hello',
+        restrictInternalApis: false,
       },
     });
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { ApiKeyForm, useSearchApiKey } from '@kbn/search-api-keys-components';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
@@ -47,18 +48,48 @@ export const CreateIndexCodeView = ({
     [usageTracker, changeCodingLanguage]
   );
   const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+
   const codeParams = useMemo(() => {
     return {
       indexName: createIndexForm.indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [createIndexForm.indexName, elasticsearchUrl]);
+  }, [createIndexForm.indexName, elasticsearchUrl, apiKeyIsVisible, apiKey]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
+      <EuiFlexItem grow={true}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={true} color="plain">
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyTitle', {
+                    defaultMessage: 'Copy your API key',
+                  })}
+                </h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued">
+                <p>
+                  {i18n.translate('xpack.searchIndices.startPage.codeView.apiKeyDescription', {
+                    defaultMessage:
+                      'Make sure you keep it somewhere safe. You won’t be able to retrieve it later.',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <ApiKeyForm hasTitle={false} />
+        </EuiPanel>
+      </EuiFlexItem>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem css={{ maxWidth: '300px' }}>
           <LanguageSelector
@@ -94,6 +125,7 @@ export const CreateIndexCodeView = ({
         />
       )}
       <CodeSample
+        id="createIndex"
         title={i18n.translate('xpack.searchIndices.startPage.codeView.createIndex.title', {
           defaultMessage: 'Connect and create an index',
         })}

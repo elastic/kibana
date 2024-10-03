@@ -165,7 +165,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('overview summary panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/194575
+    describe.skip('overview summary panel', () => {
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,

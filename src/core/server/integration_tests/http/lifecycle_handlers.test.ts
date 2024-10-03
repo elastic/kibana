@@ -50,6 +50,7 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
     },
     xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+    restrictInternalApis: false,
   },
 };
 

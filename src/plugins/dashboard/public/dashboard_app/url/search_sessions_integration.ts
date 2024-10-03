@@ -70,9 +70,10 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const {
-    componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
   } = container.getState();
+
+  const savedObjectId = container.savedObjectId.value;
 
   return {
     viewMode,
@@ -80,7 +81,7 @@ function getLocatorParams({
     preserveSavedFilters: false,
     filters: dataService.query.filterManager.getFilters(),
     query: dataService.query.queryString.formatQuery(query) as Query,
-    dashboardId: container.getDashboardSavedObjectId(),
+    dashboardId: savedObjectId,
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
@@ -93,7 +94,7 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    panels: lastSavedId
+    panels: savedObjectId
       ? undefined
       : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
   };

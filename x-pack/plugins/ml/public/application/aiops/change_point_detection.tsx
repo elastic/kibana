@@ -13,7 +13,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
-import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
@@ -72,7 +71,6 @@ export const ChangePointDetectionPage: FC = () => {
               'unifiedSearch',
               'usageCollection',
             ]),
-            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}
         />
       ) : null}

@@ -23,11 +23,13 @@ import type {
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName, getEntityDefinition } from './utils/utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   entityClient: EntityClient;
+  assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
 }
@@ -43,6 +45,7 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
+
   constructor(private readonly options: EntityStoreClientOpts) {
     this.engineClient = new EngineDescriptorClient({
       soClient: options.soClient,
@@ -54,12 +57,21 @@ export class EntityStoreDataClient {
     entityType: EntityType,
     { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
+    const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
+    const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
+
+    if (requiresMigration) {
+      throw new Error(
+        'Asset criticality data migration is required before initializing entity store. If this error persists, please restart Kibana.'
+      );
+    }
+
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
-    this.options.logger.info(`Initializing entity store for ${entityType}`);
+    logger.info(`Initializing entity store for ${entityType}`);
 
     const descriptor = await this.engineClient.init(entityType, definition, filter);
-    await this.options.entityClient.createEntityDefinition({
+    await entityClient.createEntityDefinition({
       definition: {
         ...definition,
         filter,

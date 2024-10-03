@@ -21,7 +21,8 @@ export const useSaveToLibrary = ({
   attributes: LensAttributes | undefined | null;
 }) => {
   const startServices = useKibana().services;
-  const { SaveModalComponent, canUseEditor } = startServices.lens;
+  const canSaveVisualization = !!startServices.application.capabilities.visualize?.save;
+  const { SaveModalComponent } = startServices.lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({
     getSecuritySolutionUrl,
@@ -49,8 +50,8 @@ export const useSaveToLibrary = ({
   }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, redirectTo, startServices]);
 
   const disableVisualizations = useMemo(
-    () => !canUseEditor() || attributes == null,
-    [attributes, canUseEditor]
+    () => !canSaveVisualization || attributes == null,
+    [attributes, canSaveVisualization]
   );
 
   return { openSaveVisualizationFlyout, disableVisualizations };

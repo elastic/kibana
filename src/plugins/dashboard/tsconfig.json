@@ -79,6 +79,7 @@
     "@kbn/managed-content-badge",
     "@kbn/content-management-favorites-public",
     "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": ["target/**/*"]
 }

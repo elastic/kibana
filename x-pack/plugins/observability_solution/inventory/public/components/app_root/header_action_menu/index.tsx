@@ -8,10 +8,12 @@
 import React from 'react';
 import { EuiHeaderLinks } from '@elastic/eui';
 import { AddDataContextMenu } from './add_data_action_menu';
+import { ShareLink } from './share_link';
 
 export function HeaderActionMenuItems() {
   return (
     <EuiHeaderLinks gutterSize="xs">
+      <ShareLink />
       <AddDataContextMenu />
     </EuiHeaderLinks>
   );
