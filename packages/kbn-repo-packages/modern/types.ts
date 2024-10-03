@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
@@ -91,6 +92,14 @@ interface PackageManifestBaseFields {
    * @deprecated
    */
   serviceFolders?: string[];
+  /**
+   * Specifies the group to which this package belongs
+   */
+  group?: ModuleGroup;
+  /**
+   * Specifies the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
+   */
+  visibility?: ModuleVisibility;
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {
@@ -196,4 +205,8 @@ export interface PluginCategoryInfo {
   example: boolean;
   /** is this a test plugin? */
   testPlugin: boolean;
+  /** Specifies the group to which this plugin belongs */
+  group: ModuleGroup;
+  /** Specifies the plugin visibility, i.e. whether it can be accessed by everybody or only plugins in the same group */
+  visibility: ModuleVisibility;
 }

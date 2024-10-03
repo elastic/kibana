@@ -158,10 +158,41 @@ class Package {
     const oss = !dir.startsWith('x-pack/');
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
     const testPlugin = dir.startsWith('test/') || dir.startsWith('x-pack/test/');
+
+    /** @type {import('@kbn/repo-info/types').ModuleGroup} */
+    let group = 'common';
+    /** @type {import('@kbn/repo-info/types').ModuleVisibility} */
+    let visibility = 'shared';
+
+    if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
+      group = 'platform';
+      visibility =
+        /src\/platform\/[^\/]+\/shared/.test(dir) || /x-pack\/platform\/[^\/]+\/shared/.test(dir)
+          ? 'shared'
+          : 'private';
+    } else if (dir.startsWith('x-pack/solutions/search/')) {
+      group = 'search';
+      visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/security/')) {
+      group = 'security';
+      visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/observability/')) {
+      group = 'observability';
+      visibility = 'private';
+    } else {
+      group = this.manifest.group ?? 'common';
+      // if the group is 'private-only', enforce it
+      visibility = ['search', 'security', 'observability'].includes(group)
+        ? 'private'
+        : this.manifest.visibility ?? 'shared';
+    }
+
     return {
       oss,
       example,
       testPlugin,
+      group,
+      visibility,
     };
   }
 

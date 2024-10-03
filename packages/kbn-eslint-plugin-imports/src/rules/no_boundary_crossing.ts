@@ -12,13 +12,15 @@ import Path from 'path';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 import * as Bt from '@babel/types';
 import type { Rule } from 'eslint';
-import ESTree from 'estree';
-import { ModuleType } from '@kbn/repo-source-classifier';
+import type { Node } from 'estree';
+import type { ModuleType } from '@kbn/repo-source-classifier';
 
 import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
+import { formatSuggestions, toList } from '../helpers/report';
+import { isImportableFrom } from '../helpers/groups';
 
 const ANY = Symbol();
 
@@ -31,22 +33,6 @@ const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
   static: [],
   'tests or mocks': ANY,
   tooling: ANY,
-};
-
-const toList = (strings: string[]) => {
-  const items = strings.map((s) => `"${s}"`);
-  const list = items.slice(0, -1).join(', ');
-  const last = items.at(-1);
-  return !list.length ? last ?? '' : `${list} or ${last}`;
-};
-
-const formatSuggestions = (suggestions: string[]) => {
-  const s = suggestions.map((l) => l.trim()).filter(Boolean);
-  if (!s.length) {
-    return '';
-  }
-
-  return ` Suggestions:\n - ${s.join('\n - ')}`;
 };
 
 const isTypeOnlyImport = (importer: Importer) => {
@@ -90,6 +76,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
     },
     messages: {
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,
+      PLUGIN_GROUP_MISMATCH: `Plugins from "{{ownGroup}}" cannot import code from {{importedVisibility}} plugins in "{{importedGroup}}" group.\n{{suggestion}}\n`,
     },
   },
   create(context) {
@@ -125,7 +112,7 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
 
       if (!importable.includes(imported.type)) {
         context.report({
-          node: node as ESTree.Node,
+          node: node as Node,
           messageId: 'TYPE_MISMATCH',
           data: {
             ownType: self.type,
@@ -138,6 +125,30 @@ export const NoBoundaryCrossingRule: Rule.RuleModule = {
               importable.length > 0 ? `Limit your imports to ${toList(importable)} code.` : '',
               `Covert to a type-only import.`,
               `Reach out to #kibana-operations for help.`,
+            ]),
+          },
+        });
+        return;
+      }
+
+      if (
+        self.manifest?.type === 'plugin' &&
+        imported.manifest?.type === 'plugin' &&
+        !isImportableFrom(self.group, imported.group, imported.visibility)
+      ) {
+        context.report({
+          node: node as Node,
+          messageId: 'PLUGIN_GROUP_MISMATCH',
+          data: {
+            ownGroup: self.group,
+            importedGroup: imported.group,
+            importedVisibility: imported.visibility,
+            suggestion: formatSuggestions([
+              `Please review the dependencies in your plugin's manifest (kibana.jsonc).`,
+              `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
+              `Address the conflicting dependencies by refactoring the code and ...`,
+              `... extracting static code into shared packages.`,
+              `... moving services into a 'src/platform/plugins/shared' or 'x-pack/platform/plugins/shared' plugin.`,
             ]),
           },
         });
