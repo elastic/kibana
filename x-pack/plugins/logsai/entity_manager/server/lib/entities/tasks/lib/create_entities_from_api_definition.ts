@@ -5,22 +5,33 @@
  * 2.0.
  */
 
+import { TransportRequestParams } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { APIEntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
 import { set } from '@kbn/safer-lodash-set';
 import { evaluate } from '@kbn/tinymath';
 import { JsonObject } from '@kbn/utility-types';
-import { get, isArray } from 'lodash';
+import { get, isArray, isEmpty } from 'lodash';
 import * as mustache from 'mustache';
 
 export async function createEntitiesFromApiDefinition(
   esClient: ElasticsearchClient,
   definition: APIEntityDefinition
 ) {
-  const response = await esClient.transport.request({
+  const params: TransportRequestParams = {
     method: definition.source.method,
     path: definition.source.endpoint,
-  });
+  };
+
+  if (!isEmpty(definition.source.params.body)) {
+    params.body = definition.source.params.body;
+  }
+
+  if (!isEmpty(definition.source.params.query)) {
+    params.querystring = definition.source.params.query;
+  }
+
+  const response = await esClient.transport.request(params);
   return extractEntities(definition, response);
 }
 
