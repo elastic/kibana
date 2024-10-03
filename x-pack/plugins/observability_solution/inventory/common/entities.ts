@@ -7,12 +7,14 @@
 import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
 import {
   CONTAINER_ID,
+  HOST_NAME,
+  AGENT_NAME,
+  CLOUD_PROVIDER,
   ENTITY_DEFINITION_ID,
   ENTITY_DISPLAY_NAME,
   ENTITY_ID,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-  HOST_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
@@ -84,16 +86,19 @@ interface ServiceEntity extends BaseEntity {
   [ENTITY_TYPE]: 'service';
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]?: string | null;
+  [AGENT_NAME]: string | string[] | null;
 }
 
 interface HostEntity extends BaseEntity {
   [ENTITY_TYPE]: 'host';
   [HOST_NAME]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
 }
 
 interface ContainerEntity extends BaseEntity {
   [ENTITY_TYPE]: 'container';
   [CONTAINER_ID]: string;
+  [CLOUD_PROVIDER]: string | string[] | null;
 }
 
 export type Entity = ServiceEntity | HostEntity | ContainerEntity;
