@@ -21,7 +21,8 @@ const createStubInternalContract = (): CoreSecurityDelegateContract => {
   return Symbol('stubContract') as unknown as CoreSecurityDelegateContract;
 };
 
-describe('SecurityService', () => {
+describe('SecurityService', function () {
+  this.tags('skipFIPS');
   let coreContext: ReturnType<typeof mockCoreContext.create>;
   let service: SecurityService;
 

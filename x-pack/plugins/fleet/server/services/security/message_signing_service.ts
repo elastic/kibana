@@ -114,7 +114,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       ? message
       : Buffer.from(JSON.stringify(message), 'utf8');
 
-    const signer = createSign('sha3-512');
+    const signer = createSign('RSA-SHA512');
     signer.update(msgBuffer);
     signer.end();
 

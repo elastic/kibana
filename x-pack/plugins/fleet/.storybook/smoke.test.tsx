@@ -10,7 +10,8 @@ import { createElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import initStoryshots from '@storybook/addon-storyshots';
 
-describe('Fleet Storybook Smoke', () => {
+describe('Fleet Storybook Smoke', function () {
+  this.tags('skipFIPS');
   test('Init', async () => {
     await initStoryshots({
       configPath: __dirname,
