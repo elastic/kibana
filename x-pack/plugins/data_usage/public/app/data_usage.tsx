@@ -172,7 +172,7 @@ export const DataUsage = () => {
       <EuiTitle size="l">
         <h2>
           {i18n.translate('xpack.dataUsage.pageTitle', {
-            defaultMessage: 'Data usage stats',
+            defaultMessage: 'Data Usage',
           })}
         </h2>
       </EuiTitle>
