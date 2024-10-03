@@ -31,7 +31,7 @@ export interface IndexBadge {
   color: EuiBadgeProps['color'];
 }
 export interface IndexDetailsPageRoute {
-  renderRoute: () => string;
+  renderRoute: (indexName:string) => string;
 }
 
 export interface EmptyListContent {

@@ -75,8 +75,8 @@ const getColumnConfigs = ({
                 if (!extensionsService.indexDetailsPageRoute) {
                   history.push(getIndexDetailsLink(index.name, location.search || ''));
                 } else {
-                  const url = extensionsService.indexDetailsPageRoute.renderRoute({ index });
-                  application.navigateToUrl(`${url}${index.name}`);
+                  const route = extensionsService.indexDetailsPageRoute.renderRoute(index.name);
+                  application.navigateToUrl(route);
                 }
               }}
             >

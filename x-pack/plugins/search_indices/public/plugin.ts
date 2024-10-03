@@ -72,8 +72,8 @@ export class SearchIndicesPlugin
     const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
     indexManagement?.extensionsService.setIndexDetailsPageRoute({
-      renderRoute: () => {
-        return '/app/elasticsearch/indices/index_details/';
+      renderRoute: (indexName) => {
+        return `/app/elasticsearch/indices/index_details/${indexName}`;
       },
     });
     return {};
