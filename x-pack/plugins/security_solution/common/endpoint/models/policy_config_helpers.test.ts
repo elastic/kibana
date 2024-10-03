@@ -150,7 +150,7 @@ describe('Policy Config helpers', () => {
         isEnabled: jest.fn().mockReturnValue(true),
       } as unknown as ProductFeaturesService;
 
-      [{ type: 'cloud' }, undefined].forEach((cloudType) => {
+      [{ type: 'cloud' as const }, undefined].forEach((cloudType) => {
         const result = createDefaultPolicy(
           licenseService,
           cloudType,
