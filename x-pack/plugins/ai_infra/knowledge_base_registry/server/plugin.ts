@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import Path from 'path';
 import type { Logger } from '@kbn/logging';
+import { getDataPath } from '@kbn/utils';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import { knowledgeBaseProductDocInstallTypeName } from '../common/consts';
 import type { KnowledgeBaseRegistryConfig } from './config';
 import type {
   KnowledgeBaseRegistrySetupContract,
@@ -14,7 +18,9 @@ import type {
   KnowledgeBaseRegistrySetupDependencies,
   KnowledgeBaseRegistryStartDependencies,
 } from './types';
-import { knowledgeBaseEntrySavedObjectType } from './saved_objects';
+import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
+import { PackageInstaller } from './services/package_installer';
+import { ProductDocInstallClient } from './dao/product_doc_install';
 
 export class KnowledgeBaseRegistryPlugin
   implements
@@ -37,7 +43,8 @@ export class KnowledgeBaseRegistryPlugin
     >,
     pluginsSetup: KnowledgeBaseRegistrySetupDependencies
   ): KnowledgeBaseRegistrySetupContract {
-    coreSetup.savedObjects.registerType(knowledgeBaseEntrySavedObjectType);
+    coreSetup.savedObjects.registerType(knowledgeBaseProductDocInstallSavedObjectType);
+
     return {};
   }
 
@@ -45,6 +52,32 @@ export class KnowledgeBaseRegistryPlugin
     core: CoreStart,
     pluginsStart: KnowledgeBaseRegistryStartDependencies
   ): KnowledgeBaseRegistryStartContract {
+    const soClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository([knowledgeBaseProductDocInstallTypeName])
+    );
+    const productDocClient = new ProductDocInstallClient({ soClient });
+
+    const packageInstaller = new PackageInstaller({
+      esClient: core.elasticsearch.client.asInternalUser,
+      productDocClient,
+      artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
+      logger: this.logger.get('package-installer'),
+    });
+
+    delay(10)
+      .then(() => {
+        console.log('*** test installating package');
+        return packageInstaller.installPackage({
+          productName: 'Kibana',
+          productVersion: '8.15',
+        });
+      })
+      .catch((e) => {
+        console.log('*** ERROR', e);
+      });
+
     return {};
   }
 }
+
+const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));

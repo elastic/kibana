@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export {
-  knowledgeBaseProductDocInstallSavedObjectType,
-  type KnowledgeBaseProductDocInstallAttributes,
-} from './product_doc_install';
+export { downloadToDisk } from './download';
+export { openZipArchive, type ZipArchive } from './zip_archive';
+export { validateArtifactArchive } from './validate_artifact_archive';
+export { loadManifestFile, loadMappingFile } from './archive_accessors';

@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-/**
- * Represents the source of the KB entry, where the data it resolved from
- *
- * Only possible subtype for now is `index`
- */
-export type KnowledgeBaseEntrySource = KnowledgeBaseEntryIndexSource;
+export type ProductDocInstallStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
-export interface KnowledgeBaseEntryIndexSource {
-  type: 'index';
-  index_name: string;
-  syntactic_fields: string[];
-  semantic_fields: string[];
-}
-
-/**
- * Represents how the package was installed
- *
- * Only possible subtype for now is `package`
- */
-export type KnowledgeBaseEntryInstalledBy = KnowledgeBaseEntryInstalledByPackage;
-
-interface KnowledgeBaseEntryInstalledByPackage {
-  type: 'package';
+export interface ProducDocInstallDTO {
+  id: string;
   packageName: string;
-  version: string;
+  packageVersion: string;
+  productName: string;
+  installationStatus: ProductDocInstallStatus;
+  lastInstallationDate: Date | undefined;
+  indexName: string;
 }

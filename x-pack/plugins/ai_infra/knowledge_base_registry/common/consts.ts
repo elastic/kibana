@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const knowledgeBaseEntryTypeName = 'knowledge_base_entry';
+export const knowledgeBaseProductDocInstallTypeName = 'ai_kb_product_doc_installation';

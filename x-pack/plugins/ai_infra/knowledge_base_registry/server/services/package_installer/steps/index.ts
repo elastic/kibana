@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  knowledgeBaseProductDocInstallSavedObjectType,
-  type KnowledgeBaseProductDocInstallAttributes,
-} from './product_doc_install';
+export { createIndex } from './create_index';
+export { populateIndex } from './populate_index';

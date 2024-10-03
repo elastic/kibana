@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  knowledgeBaseProductDocInstallSavedObjectType,
-  type KnowledgeBaseProductDocInstallAttributes,
-} from './product_doc_install';
+export { ProductDocInstallClient } from './product_doc_install_service';
