@@ -13,4 +13,5 @@ export { createChunkFiles } from './create_chunk_files';
 export { performSemanticSearch } from './perform_semantic_search';
 export { checkConnectivity } from './check_connectivity';
 export { createArtifact } from './create_artifact';
-export { cleanupFolders } from './cleanup';
+export { cleanupFolders } from './cleanup_folders';
+export { deleteIndex } from './delete_index';

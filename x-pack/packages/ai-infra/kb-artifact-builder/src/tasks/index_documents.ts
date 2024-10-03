@@ -26,7 +26,7 @@ export const indexDocuments = async ({
 }) => {
   const chunks = toChunks(documents, indexingChunkSize);
 
-  log.info(`starting indexing process`);
+  log.info(`Starting indexing process`);
 
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
@@ -43,6 +43,8 @@ export const indexDocuments = async ({
     );
 
     const duration = Date.now() - before;
-    log.info(`indexed ${i + 1} of ${chunks.length} chunks (took ${duration}ms)`);
+    log.info(`Indexed ${i + 1} of ${chunks.length} chunks (took ${duration}ms)`);
   }
+
+  log.info(`Finished indexing process`);
 };

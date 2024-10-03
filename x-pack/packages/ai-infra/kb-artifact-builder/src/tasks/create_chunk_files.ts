@@ -25,6 +25,8 @@ export const createChunkFiles = async ({
   client: Client;
   log: ToolingLog;
 }) => {
+  log.info(`Starting to create chunk files in directory [${destFolder}]`);
+
   const searchRes = await client.search({
     index,
     size: 10000,
@@ -38,17 +40,22 @@ export const createChunkFiles = async ({
   await Fs.mkdir(destFolder, { recursive: true });
 
   let chunkNumber = 1;
+  let chunkDocCount = 0;
   let chunkContent: string = '';
 
   const writeCurrentChunk = async () => {
-    await Fs.writeFile(Path.join(destFolder, `content-${chunkNumber}.ndjson`), chunkContent);
+    const chunkFileName = `content-${chunkNumber}.ndjson`;
+    log.info(`Writing chunk file ${chunkFileName} containing ${chunkDocCount} docs`);
+    await Fs.writeFile(Path.join(destFolder, chunkFileName), chunkContent);
     chunkContent = '';
+    chunkDocCount = 0;
     chunkNumber++;
   };
 
   for (let i = 0; i < searchRes.hits.hits.length; i++) {
     const hit = searchRes.hits.hits[i];
     chunkContent += JSON.stringify(hit._source) + '\n';
+    chunkDocCount++;
     if (
       Buffer.byteLength(chunkContent, 'utf8') > fileSizeLimit ||
       i === searchRes.hits.hits.length - 1
@@ -56,4 +63,6 @@ export const createChunkFiles = async ({
       await writeCurrentChunk();
     }
   }
+
+  log.info(`Finished creating chunk files`);
 };

@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 /** the list of fields to import from the source cluster */
 const fields = [
@@ -59,12 +60,16 @@ export const extractDocumentation = async ({
   index,
   stackVersion,
   productName,
+  log,
 }: {
   client: Client;
   index: string;
   stackVersion: string;
   productName: string;
+  log: ToolingLog;
 }) => {
+  log.info(`Starting to extract documents from source cluster`);
+
   const response = await client.search({
     index,
     size: 10000,
@@ -79,6 +84,19 @@ export const extractDocumentation = async ({
     },
     fields,
   });
+
+  const totalHits =
+    typeof response.hits.total === 'number'
+      ? response.hits.total // This format is to be removed in 8.0
+      : response.hits.total?.value ?? response.hits.hits.length;
+
+  if (totalHits > 10_000) {
+    throw new Error('Found more than 10k documents to extract - aborting');
+  }
+
+  log.info(
+    `Finished extracting documents from source. ${response.hits.hits.length} documents were extracted`
+  );
 
   return response.hits.hits.map(convertHit);
 };

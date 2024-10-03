@@ -17,6 +17,7 @@ import {
   createChunkFiles,
   createArtifact,
   cleanupFolders,
+  deleteIndex,
 } from './tasks';
 import type { TaskConfig } from './types';
 
@@ -52,9 +53,9 @@ export const buildArtifacts = async (config: TaskConfig) => {
   });
 
   log.info(
-    `Starting building artifacts for version=${
+    `Starting building artifacts for version=[${
       config.stackVersion
-    } and products=[${config.productNames.join(',')}]`
+    }] and products=[${config.productNames.join(',')}]`
   );
 
   const sourceClient = getSourceClient(config);
@@ -80,7 +81,7 @@ export const buildArtifacts = async (config: TaskConfig) => {
     });
   }
 
-  // await cleanupFolders({ folders: [config.buildFolder] });
+  await cleanupFolders({ folders: [config.buildFolder] });
 };
 
 const buildArtifact = async ({
@@ -100,17 +101,17 @@ const buildArtifact = async ({
   embeddingClient: Client;
   log: ToolingLog;
 }) => {
-  log.info(`Starting building artifact for product ${productName} and version ${stackVersion}`);
+  log.info(`Starting building artifact for product [${productName}] and version [${stackVersion}]`);
 
-  const targetIndex = `kb-test-${pseudoRandSuffix()}`;
+  const targetIndex = getTargetIndexName({ productName, stackVersion });
 
   const documents = await extractDocumentation({
     client: sourceClient,
     index: 'search-docs-1',
+    log,
     productName,
     stackVersion,
   });
-  log.info(`Extracted ${documents.length} documents from the source cluster`);
 
   await createTargetIndex({
     client: embeddingClient,
@@ -132,7 +133,7 @@ const buildArtifact = async ({
     log,
   });
 
-  const artifactName = await createArtifact({
+  await createArtifact({
     buildFolder: Path.join(buildFolder, productName),
     targetFolder,
     productName,
@@ -140,7 +141,21 @@ const buildArtifact = async ({
     log,
   });
 
-  log.info(`Artifact created: ${artifactName}`);
+  await deleteIndex({
+    indexName: targetIndex,
+    client: embeddingClient,
+    log,
+  });
+
+  log.info(`Finished building artifact for product [${productName}] and version [${stackVersion}]`);
 };
 
-const pseudoRandSuffix = () => Math.random().toString(36).slice(2);
+const getTargetIndexName = ({
+  productName,
+  stackVersion,
+}: {
+  productName: string;
+  stackVersion: string;
+}) => {
+  return `kb-artifact-builder-${productName}-${stackVersion}`.toLowerCase();
+};

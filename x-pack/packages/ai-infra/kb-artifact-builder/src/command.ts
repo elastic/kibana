@@ -26,7 +26,7 @@ function options(y: yargs.Argv) {
       default: '8.16', // TODO: master is on 9.0 now, not sure we can default to version in package.json?
     })
     .option('targetFolder', {
-      describe: 'The folder to generate the artefacts in',
+      describe: 'The folder to generate the artifacts in',
       string: true,
       default: Path.join(REPO_ROOT, 'build', 'kb-artifacts'),
     })

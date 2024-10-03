@@ -25,6 +25,10 @@ export const createArtifact = async ({
   stackVersion: string;
   log: ToolingLog;
 }) => {
+  log.info(
+    `Starting to create artifact from build folder [${buildFolder}] into target [${targetFolder}]`
+  );
+
   const zip = new AdmZip();
 
   const mappings = getArtifactMappings('.default-elser');
@@ -43,5 +47,5 @@ export const createArtifact = async ({
   });
   zip.writeZip(Path.join(targetFolder, artifactName));
 
-  return artifactName;
+  log.info(`Finished creating artifact [${artifactName}]`);
 };
