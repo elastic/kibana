@@ -28,7 +28,7 @@ export const BETA_LABEL = i18n.translate('xpack.enterpriseSearch.betaLabel', {
 });
 
 export const NATIVE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeLabel', {
-  defaultMessage: 'Native',
+  defaultMessage: 'Elastic managed',
 });
 
 export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
@@ -50,7 +50,7 @@ export const LEARN_MORE_LINK = i18n.translate('xpack.enterpriseSearch.learnMore.
 export const CONNECTOR_CLIENT_LABEL = i18n.translate(
   'xpack.enterpriseSearch.connectorClientLabel',
   {
-    defaultMessage: 'Connector Client',
+    defaultMessage: 'Self-managed',
   }
 );
 
