@@ -29,9 +29,10 @@ import {
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-
+import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { MetricsResponse } from '../types';
 import { MetricKey } from '../../../common/types';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 interface ChartsProps {
   data: MetricsResponse;
 }
@@ -47,10 +48,41 @@ export const chartKeyToTitleMap: Record<MetricKey, string> = {
     defaultMessage: 'Data Retained in Storage',
   }),
 };
-
+function getDatasetFromDataStream(dataStreamName: string): string | null {
+  const parts = dataStreamName.split('-');
+  if (parts.length !== 3) {
+    return null;
+  }
+  return parts[1];
+}
 export const Charts: React.FC<ChartsProps> = ({ data }) => {
   const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
   const theme = useEuiTheme();
+  const {
+    services: {
+      share: {
+        url: { locators },
+      },
+      application: { capabilities },
+    },
+  } = useKibanaContextForPlugin();
+  const hasDataSetQualityFeature = capabilities.data_quality;
+  const onClickDataQuality = async ({ dataStreamName }: { dataStreamName: string }) => {
+    const dataQualityLocator = locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
+    const locatorParams: DataQualityLocatorParams = {
+      filters: {
+        // TODO: get time range from our page state
+        timeRange: { from: 'now-15m', to: 'now', refresh: { pause: true, value: 0 } },
+      },
+    };
+    const dataset = getDatasetFromDataStream(dataStreamName);
+    if (locatorParams?.filters && dataset) {
+      locatorParams.filters.query = dataset;
+    }
+    if (dataQualityLocator) {
+      await dataQualityLocator.navigate(locatorParams);
+    }
+  };
 
   const togglePopover = (streamName: string) => {
     setPopoverOpen(popoverOpen === streamName ? null : streamName);
@@ -64,7 +96,7 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
         const tickFormat = niceTimeFormatter([minTimestamp, maxTimestamp]);
 
         return (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={chart.key}>
             <EuiPanel key={idx} hasShadow={false} hasBorder={true}>
               <div key={idx}>
                 <EuiTitle size="xs">
@@ -77,7 +109,7 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                     legendPosition="right"
                     xDomain={{ min: minTimestamp, max: maxTimestamp }}
                     legendAction={({ label }: LegendActionProps) => {
-                      const streamName = `${idx}-${label}`;
+                      const uniqueStreamName = `${idx}-${label}`;
                       return (
                         <EuiFlexGroup gutterSize="s" alignItems="center">
                           <EuiPopover
@@ -87,12 +119,12 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                                   <EuiButtonIcon
                                     iconType="boxesHorizontal"
                                     aria-label="Open data stream actions"
-                                    onClick={() => togglePopover(streamName)}
+                                    onClick={() => togglePopover(uniqueStreamName)}
                                   />
                                 </EuiFlexItem>
                               </EuiFlexGroup>
                             }
-                            isOpen={popoverOpen === streamName}
+                            isOpen={popoverOpen === uniqueStreamName}
                             closePopover={() => setPopoverOpen(null)}
                             anchorPosition="downRight"
                           >
@@ -107,11 +139,16 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                                 label="Manage data stream"
                                 onClick={() => undefined}
                               />
-                              <EuiListGroupItem
-                                href="#"
-                                label="View data quality"
-                                onClick={() => undefined}
-                              />
+                              {hasDataSetQualityFeature && (
+                                <EuiListGroupItem
+                                  label="View data quality"
+                                  onClick={() =>
+                                    onClickDataQuality({
+                                      dataStreamName: label,
+                                    })
+                                  }
+                                />
+                              )}
                             </EuiListGroup>
                           </EuiPopover>
                         </EuiFlexGroup>
