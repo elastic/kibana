@@ -285,6 +285,11 @@ export function AddCisIntegrationFormPageProvider({
     );
     await agentOption.click();
   };
+
+  const showSetupTechnologyComponent = async () => {
+    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+  };
+
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
@@ -544,5 +549,7 @@ export function AddCisIntegrationFormPageProvider({
     getFirstCspmIntegrationPageAgent,
     getAgentBasedPolicyValue,
     showSuccessfulToast,
+    showSetupTechnologyComponent,
+    navigateToEditIntegrationPage,
   };
 }
