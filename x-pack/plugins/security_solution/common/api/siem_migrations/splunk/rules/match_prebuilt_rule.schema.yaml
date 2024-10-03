@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Splunk Migration Match Prebuilt Rule API endpoint
+  version: '1'
+paths:
+  /internal/migrations/splunk/rules/match_prebuilt_rule:
+    post:
+      summary: Matches Splunk Security rules to Elastic prebuilt detection rules
+      operationId: SplunkRuleMigrationMatchPrebuiltRule
+      x-codegen-enabled: true
+      description: Perform Elastic prebuilt rule matching from Splunk Security rule
+      tags:
+        - Splunk Rule Migration API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - splunkRule
+                - connectorId
+              properties:
+                splunkRule: 
+                  $ref: './splunk_rule.schema.yaml#/components/schemas/SplunkRule'
+                connectorId:
+                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
+                langSmithOptions:
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+      responses:
+        200:
+          description: Indicates a successful match with a prebuilt rule.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - rule
+                  - isInstalled
+                properties:
+                  rule:
+                    type: object
+                    description: The Elastic prebuilt rule information.
+                  isInstalled: 
+                    type: boolean
+                    description: Flag indicating if the rule is already installed.
+        204:
+          description: Indicates no prebuilt rule was matched.

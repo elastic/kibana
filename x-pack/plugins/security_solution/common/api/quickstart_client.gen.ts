@@ -293,6 +293,10 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  SplunkRuleMigrationMatchPrebuiltRuleRequestBodyInput,
+  SplunkRuleMigrationMatchPrebuiltRuleResponse,
+} from './siem_migrations/splunk/rules/match_prebuilt_rule.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -1899,6 +1903,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Perform Elastic prebuilt rule matching from Splunk Security rule
+   */
+  async splunkRuleMigrationMatchPrebuiltRule(props: SplunkRuleMigrationMatchPrebuiltRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SplunkRuleMigrationMatchPrebuiltRule`);
+    return this.kbnClient
+      .request<SplunkRuleMigrationMatchPrebuiltRuleResponse>({
+        path: '/internal/migrations/splunk/rules/match_prebuilt_rule',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async startEntityEngine(props: StartEntityEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API StartEntityEngine`);
     return this.kbnClient
@@ -2228,6 +2248,9 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SplunkRuleMigrationMatchPrebuiltRuleProps {
+  body: SplunkRuleMigrationMatchPrebuiltRuleRequestBodyInput;
 }
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
