@@ -13,13 +13,12 @@ import { installAssets } from './lib/install_assets';
 import { indexSchedule } from './lib/index_schedule';
 import { installIndexTemplate } from './lib/install_index_template';
 import { indices } from './lib/indices';
-// import { installDefaultIngestPipeline } from './lib/install_default_ingest_pipeline';
+import { installDefaultIngestPipeline } from './lib/install_default_ingest_pipeline';
 import { installDefaultComponentTemplate } from './lib/install_default_component_template';
 
 export async function run(config: Config, client: Client, logger: ToolingLog) {
   await installDefaultComponentTemplate(config, client, logger);
-  // Commented due to the discussion here - https://github.com/elastic/kibana/pull/192370/#issuecomment-2378969421
-  // await installDefaultIngestPipeline(config, client, logger);
+  await installDefaultIngestPipeline(config, client, logger);
   await installIndexTemplate(config, client, logger);
   if (config.elasticsearch.installKibanaUser) {
     await setupKibanaSystemUser(config, client, logger);
