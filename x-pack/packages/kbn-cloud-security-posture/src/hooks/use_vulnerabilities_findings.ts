@@ -44,6 +44,7 @@ export const getVulnerabilitiesQuery = (
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQueryVulnerabilities(),
+  ignore_unavailable: true,
   query: {
     ...query,
     bool: {
