@@ -34,6 +34,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
 
     MessageRole:
       type: string

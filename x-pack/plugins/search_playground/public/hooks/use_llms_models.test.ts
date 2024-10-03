@@ -18,6 +18,7 @@ const mockConnectors = [
   { id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai },
   { id: 'connectorId2', title: 'OpenAI Azure Connector', type: LLMs.openai_azure },
   { id: 'connectorId2', title: 'Bedrock Connector', type: LLMs.bedrock },
+  { id: 'connectorId3', title: 'OpenAI OSS Model Connector', type: LLMs.openai_other },
 ];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
@@ -105,6 +106,18 @@ describe('useLLMsModels Hook', () => {
         showConnectorName: false,
         value: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
         promptTokenLimit: 200000,
+      },
+      {
+        connectorId: 'connectorId3',
+        connectorName: undefined,
+        connectorType: LLMs.openai_other,
+        disabled: false,
+        icon: expect.any(Function),
+        id: 'connectorId3Other (OpenAI Compatible Service) ',
+        name: 'Other (OpenAI Compatible Service) ',
+        showConnectorName: false,
+        value: undefined,
+        promptTokenLimit: undefined,
       },
     ]);
   });

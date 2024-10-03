@@ -43,6 +43,17 @@ const mapLlmToModels: Record<
       },
     ],
   },
+  [LLMs.openai_other]: {
+    icon: OpenAILogo,
+    getModels: (connectorName, includeName) => [
+      {
+        label: i18n.translate('xpack.searchPlayground.otherOpenAIModel', {
+          defaultMessage: 'Other (OpenAI Compatible Service) {name}',
+          values: { name: includeName ? `(${connectorName})` : '' },
+        }),
+      },
+    ],
+  },
   [LLMs.bedrock]: {
     icon: BedrockLogo,
     getModels: () =>
