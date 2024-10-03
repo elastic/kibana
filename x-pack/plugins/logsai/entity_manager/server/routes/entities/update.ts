@@ -15,9 +15,9 @@ export const updateEntityRoute = createEntityManagerServerRoute({
     path: updateEntityPathSchema,
     body: z.record(z.string(), z.any()),
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ request, response, params, logger, getScopedEntityClient }) => {
     try {
-      const client = await getScopedClient({ request });
+      const client = await getScopedEntityClient({ request });
       await client.updateEntity({ ...params.path, doc: params.body });
       const entity = await client.findEntity({ ...params.path });
       return response.ok({ body: entity });

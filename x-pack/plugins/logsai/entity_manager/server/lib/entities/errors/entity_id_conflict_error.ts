@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { APIEntityDefinition, EntityDefinition } from '@kbn/entities-schema';
 
 export class EntityIdConflict extends Error {
-  public definition: EntityDefinition;
+  public definition: EntityDefinition | APIEntityDefinition;
 
-  constructor(message: string, def: EntityDefinition) {
+  constructor(message: string, def: EntityDefinition | APIEntityDefinition) {
     super(message);
     this.name = 'EntityIdConflict';
     this.definition = def;

@@ -17,3 +17,5 @@ export * from './src/rest_spec/definition/create';
 export * from './src/rest_spec/entities/find';
 export * from './src/rest_spec/enablement/check';
 export * from './src/rest_spec/entities/update';
+
+export * from './src/schema/api_entity_definition';

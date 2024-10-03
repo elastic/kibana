@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { APIEntityDefinition, EntityDefinition } from '@kbn/entities-schema';
 import { isBuiltinDefinition } from '../../lib/entities/helpers/is_builtin_definition';
 
-export const getCustomLatestTemplateComponents = (definition: EntityDefinition) => {
+export const getCustomLatestTemplateComponents = (
+  definition: EntityDefinition | APIEntityDefinition
+) => {
   if (isBuiltinDefinition(definition)) {
     return [];
   }

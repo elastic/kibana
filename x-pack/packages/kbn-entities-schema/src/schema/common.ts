@@ -23,7 +23,7 @@ export enum BasicAggregations {
 
 export const basicAggregationsSchema = z.nativeEnum(BasicAggregations);
 
-const metricNameSchema = z
+export const metricNameSchema = z
   .string()
   .length(1)
   .regex(/[a-zA-Z]/)

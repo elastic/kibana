@@ -6,6 +6,7 @@
  */
 
 export { entityDefinition, SO_ENTITY_DEFINITION_TYPE } from './entity_definition';
+export { apiEntityApiDefinition, SO_API_ENTITY_DEFINITION_TYPE } from './api_entity_definition';
 export {
   EntityDiscoveryApiKeyType,
   SO_ENTITY_DISCOVERY_API_KEY_TYPE,

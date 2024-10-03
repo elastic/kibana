@@ -7,15 +7,23 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityClient } from '../lib/entity_client';
 import { EntityManagerServer } from '../types';
 import { EntityMergeTask } from '../lib/entities/tasks/entity_merge_task';
+import { EntityElasticsearchApiTask } from '../lib/entities/tasks/entity_elasticsearch_api_task';
 
 export interface EntityManagerRouteDependencies {
   server: EntityManagerServer;
-  getScopedClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
+  getScopedEntityClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
+  getScopedClients: ({ request }: { request: KibanaRequest }) => Promise<{
+    scopedClusterClient: IScopedClusterClient;
+    soClient: SavedObjectsClientContract;
+  }>;
   tasks: {
     entityMergeTask: EntityMergeTask;
+    entityElasticsearchApiTask: EntityElasticsearchApiTask;
   };
 }
 

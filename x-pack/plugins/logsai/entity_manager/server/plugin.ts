@@ -25,7 +25,11 @@ import { EntityClient } from './lib/entity_client';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { entityManagerRouteRepository } from './routes';
 import { EntityManagerRouteDependencies } from './routes/types';
-import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
+import {
+  EntityDiscoveryApiKeyType,
+  apiEntityApiDefinition,
+  entityDefinition,
+} from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
@@ -33,6 +37,7 @@ import {
 } from './types';
 import { EntityMergeTask } from './lib/entities/tasks/entity_merge_task';
 import { readEntityDiscoveryAPIKey } from './lib/auth';
+import { EntityElasticsearchApiTask } from './lib/entities/tasks/entity_elasticsearch_api_task';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -68,6 +73,7 @@ export class EntityManagerServerPlugin
     core: CoreSetup,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
+    core.savedObjects.registerType(apiEntityApiDefinition);
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
 
@@ -83,6 +89,10 @@ export class EntityManagerServerPlugin
     } as EntityManagerServer;
 
     const entityMergeTask = new EntityMergeTask(plugins.taskManager, this.server);
+    const entityElasticsearchApiTask = new EntityElasticsearchApiTask(
+      plugins.taskManager,
+      this.server
+    );
 
     registerRoutes<EntityManagerRouteDependencies>({
       repository: entityManagerRouteRepository,
@@ -90,10 +100,17 @@ export class EntityManagerServerPlugin
         server: this.server,
         tasks: {
           entityMergeTask,
+          entityElasticsearchApiTask,
         },
-        getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+        getScopedEntityClient: async ({ request }: { request: KibanaRequest }) => {
           const [coreStart] = await core.getStartServices();
           return this.getScopedClient({ request, coreStart });
+        },
+        getScopedClients: async ({ request }: { request: KibanaRequest }) => {
+          const [coreStart] = await core.getStartServices();
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          return { scopedClusterClient, soClient };
         },
       },
       core,

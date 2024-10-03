@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { APIEntityDefinition, EntityDefinition } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from '../built_in';
 
-export function isBuiltinDefinition(definition: EntityDefinition) {
+export function isBuiltinDefinition(definition: EntityDefinition | APIEntityDefinition) {
   return definition.id.startsWith(BUILT_IN_ID_PREFIX);
 }

@@ -10,7 +10,11 @@ import {
   ENTITY_INTERNAL_INDICES_PATTERN,
   UNIFIED_ENTITY_INDEX,
 } from '../../../common/constants_entities';
-import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
+import {
+  SO_API_ENTITY_DEFINITION_TYPE,
+  SO_ENTITY_DEFINITION_TYPE,
+  SO_ENTITY_DISCOVERY_API_KEY_TYPE,
+} from '../../saved_objects';
 import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';
 
 export const canManageEntityDefinition = async (client: ElasticsearchClient) => {
@@ -74,6 +78,7 @@ export const entityDefinitionRuntimePrivileges = {
       application: 'kibana-.kibana',
       privileges: [
         `saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`,
+        `saved_object:${SO_API_ENTITY_DEFINITION_TYPE}/*`,
         'feature_stackAlerts.all',
         'feature_rulesSettings.all',
         'feature_logs.all',

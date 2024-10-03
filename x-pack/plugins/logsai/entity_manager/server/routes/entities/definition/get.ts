@@ -55,9 +55,9 @@ export const getEntityDefinitionRoute = createEntityManagerServerRoute({
     query: getEntityDefinitionQuerySchema,
     path: z.object({ id: z.optional(z.string()) }),
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ request, response, params, logger, getScopedEntityClient }) => {
     try {
-      const client = await getScopedClient({ request });
+      const client = await getScopedEntityClient({ request });
       const result = await client.getEntityDefinitions({
         id: params.path?.id,
         page: params.query.page,

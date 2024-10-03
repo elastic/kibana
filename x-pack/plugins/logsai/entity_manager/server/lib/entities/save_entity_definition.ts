@@ -6,14 +6,27 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
+import { APIEntityDefinition, EntityDefinition } from '@kbn/entities-schema';
+import { SO_API_ENTITY_DEFINITION_TYPE, SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 
 export async function saveEntityDefinition(
   soClient: SavedObjectsClientContract,
   definition: EntityDefinition
 ): Promise<EntityDefinition> {
   await soClient.create<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, definition, {
+    id: definition.id,
+    managed: definition.managed,
+    overwrite: true,
+  });
+
+  return definition;
+}
+
+export async function saveApiEntityDefinition(
+  soClient: SavedObjectsClientContract,
+  definition: APIEntityDefinition
+): Promise<APIEntityDefinition> {
+  await soClient.create<APIEntityDefinition>(SO_API_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
     managed: definition.managed,
     overwrite: true,
@@ -31,6 +44,20 @@ export async function entityDefinitionExists(
     page: 1,
     perPage: 1,
     filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
+  });
+
+  return response.total === 1;
+}
+
+export async function entityApiDefinitionExists(
+  soClient: SavedObjectsClientContract,
+  id: string
+): Promise<boolean> {
+  const response = await soClient.find<APIEntityDefinition>({
+    type: SO_API_ENTITY_DEFINITION_TYPE,
+    page: 1,
+    perPage: 1,
+    filter: `${SO_API_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
   });
 
   return response.total === 1;

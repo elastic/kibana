@@ -12,6 +12,7 @@ import {
   entitiesIndexPattern,
   ENTITY_INSTANCE,
   ENTITY_BASE_PREFIX,
+  APIEntityDefinition,
 } from '@kbn/entities-schema';
 import { generateInstanceIndexTemplateId } from '../helpers/generate_component_id';
 import {
@@ -22,7 +23,7 @@ import {
 import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
 export const generateEntitiesInstanceIndexTemplateConfig = (
-  definition: EntityDefinition
+  definition: EntityDefinition | APIEntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
   name: generateInstanceIndexTemplateId(definition),
   _meta: {
@@ -49,7 +50,7 @@ export const generateEntitiesInstanceIndexTemplateConfig = (
   priority: 200,
   template: {
     aliases: {
-      [ENTITY_BASE_PREFIX]: {},
+      [`.${ENTITY_BASE_PREFIX}`]: {},
     },
     mappings: {
       _meta: {

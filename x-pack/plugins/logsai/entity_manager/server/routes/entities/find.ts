@@ -13,9 +13,9 @@ export const findEntitiesRoute = createEntityManagerServerRoute({
   params: z.object({
     query: findEntitiesQuerySchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ request, response, params, logger, getScopedEntityClient }) => {
     try {
-      const client = await getScopedClient({ request });
+      const client = await getScopedEntityClient({ request });
       const body = await client.findEntities(params.query);
       return response.ok({ body });
     } catch (e) {

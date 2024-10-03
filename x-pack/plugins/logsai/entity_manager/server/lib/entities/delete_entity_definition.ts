@@ -6,16 +6,31 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
+import { APIEntityDefinition } from '@kbn/entities-schema';
+import { SO_API_ENTITY_DEFINITION_TYPE, SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 
 export async function deleteEntityDefinition(
   soClient: SavedObjectsClientContract,
-  definition: EntityDefinition
+  definition: APIEntityDefinition
 ) {
   try {
     await soClient.delete(SO_ENTITY_DEFINITION_TYPE, definition.id);
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw new EntityDefinitionNotFound(`Entity definition with [${definition.id}] not found.`);
+    }
+
+    throw err;
+  }
+}
+
+export async function deleteApiEntityDefinition(
+  soClient: SavedObjectsClientContract,
+  definition: APIEntityDefinition
+) {
+  try {
+    await soClient.delete(SO_API_ENTITY_DEFINITION_TYPE, definition.id);
   } catch (err) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
       throw new EntityDefinitionNotFound(`Entity definition with [${definition.id}] not found.`);

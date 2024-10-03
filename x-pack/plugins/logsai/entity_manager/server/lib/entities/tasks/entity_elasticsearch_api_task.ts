@@ -10,28 +10,31 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EntityDefinition } from '@kbn/entities-schema';
-import moment, { Moment } from 'moment';
+import { APIEntityDefinition, EntityLatestDoc } from '@kbn/entities-schema';
+import moment = require('moment');
 import { EntityManagerServer } from '../../../types';
 import { getClientsFromAPIKey } from '../../utils';
-import { readEntityDiscoveryAPIKey } from '../../auth';
 import { EntityDiscoveryAPIKey } from '../../auth/api_key/api_key';
-import { ENTITY_DISCOVERY_API_KEY_SO_ID } from '../../auth/api_key/saved_object';
-import { scrollEntities } from './lib/scroll_entities';
+import {
+  ENTITY_DISCOVERY_API_KEY_SO_ID,
+  readEntityDiscoveryAPIKey,
+} from '../../auth/api_key/saved_object';
 import { generateInstanceIndexName } from '../helpers/generate_component_id';
+import { findApiEntityDefinitionById } from '../find_entity_definition';
+import { EntityDefinitionNotFound } from '../errors/entity_not_found';
+import { createEntitiesFromApiDefinition } from './lib/create_entities_from_api_definition';
 
-export const TASK_TYPE = 'EEM:ENTITY-MERGE-TASK';
-const TASK_NAME = 'EntityMergeTask';
+export const TASK_TYPE = 'EEM:ENTITY-ELASTICSEARCH-API-TASK';
+const TASK_NAME = 'EntityElasticsearchApiTask';
 
-interface EntityMergeTaskState {
-  lastRunAt?: string;
+interface EntityElasticsearchApiTaskInstance extends ConcreteTaskInstance {
+  params: {
+    apiKeyId: string;
+    definitionId: string;
+  };
 }
 
-interface EntityMergeTaskInstance extends ConcreteTaskInstance {
-  state: EntityMergeTaskState;
-}
-
-export class EntityMergeTask {
+export class EntityElasticsearchApiTask {
   private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
@@ -46,7 +49,11 @@ export class EntityMergeTask {
         title: TASK_NAME,
         timeout: '1m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: EntityMergeTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+        }: {
+          taskInstance: EntityElasticsearchApiTaskInstance;
+        }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance);
@@ -54,7 +61,7 @@ export class EntityMergeTask {
 
             cancel: async () => {
               this.abortController.abort(
-                `[${taskInstance.params.definitonId}] EntityMergeTask timed out.`
+                `[${taskInstance.params.definitionId}] EntityMergeTask timed out.`
               );
             },
           };
@@ -63,75 +70,75 @@ export class EntityMergeTask {
     });
   }
 
-  private async runTask(taskInstance: EntityMergeTaskInstance) {
-    let latestEventIngested: Moment | undefined;
-    const { targetIndex, apiKeyId, definitionId } = taskInstance.params;
-    const { lastRunAt } = taskInstance.state;
-    const apiKey = await readEntityDiscoveryAPIKey(this.server, apiKeyId);
+  private async runTask(taskInstance: EntityElasticsearchApiTaskInstance) {
+    try {
+      this.logger.info(`Starting indexing`);
+      const start = Date.now();
 
-    const logPrefix = `[${definitionId}]`;
+      const { apiKeyId, definitionId } = taskInstance.params;
+      const apiKey = await readEntityDiscoveryAPIKey(this.server, apiKeyId);
 
-    if (!apiKey) {
-      throw new Error(`${logPrefix} to read ApiKey for ${apiKeyId}`);
-    }
+      if (!apiKey) {
+        throw new Error(`[${definitionId}] Unable to read ApiKey for ${apiKeyId}`);
+      }
 
-    const { esClient } = this.getScopedClients(apiKey);
-    this.logger.info(`${logPrefix} Starting indexing`);
-    const start = Date.now();
-    let entitiesProcessed = 0;
-    for await (const hits of scrollEntities(esClient.asCurrentUser, definitionId, lastRunAt)) {
+      const definition = await this.fetchDefintion(apiKey, definitionId);
+      const { esClient } = this.getScopedClients(apiKey);
+
+      const docs = await createEntitiesFromApiDefinition(esClient.asSecondaryAuthUser, definition);
       const now = moment();
-      const body = hits.reduce((acc, { _source: entityDoc }) => {
-        if (entityDoc) {
-          const eventIngested = entityDoc.event.ingested;
-          acc.push({ update: { _index: targetIndex, _id: entityDoc.entity.id } });
+      const targetIndex = generateInstanceIndexName(definition);
+      if (docs.length > 0) {
+        const body = docs.reduce((acc: any[], doc: EntityLatestDoc) => {
+          acc.push({ update: { _index: targetIndex, _id: doc.entity.id } });
           acc.push({
             doc: {
-              ...(entityDoc as object),
-              event: { ...entityDoc.event, ingested: now.toISOString() },
+              ...(doc as object),
+              event: { ingested: now.toISOString() },
             },
             doc_as_upsert: true,
           });
+          return acc;
+        }, []);
+        await esClient?.asCurrentUser.bulk({ body, refresh: false });
+      }
+      const end = Date.now();
+      this.logger.info(`Finished in ${end - start}ms – Processed ${docs.length} entities`);
 
-          if (!latestEventIngested || latestEventIngested.isBefore(eventIngested)) {
-            latestEventIngested = moment(eventIngested);
-          }
-        }
-
-        return acc;
-      }, [] as any[]);
-      await esClient?.asCurrentUser.bulk({ body, refresh: false });
-      entitiesProcessed += hits.length;
+      return {
+        state: {},
+      };
+    } catch (e) {
+      if (e instanceof EntityDefinitionNotFound) {
+        this.logger.error(`${e.message} – This task should have been deleted.`);
+        return {
+          state: {},
+        };
+      }
+      throw e;
     }
-    const end = Date.now();
-    this.logger.info(
-      `${logPrefix} Finished in ${
-        end - start
-      }ms – Processed ${entitiesProcessed} entities, last event ingested at ${latestEventIngested?.toISOString()}`
-    );
+  }
 
-    return {
-      state: {
-        lastRunAt: latestEventIngested?.toISOString(),
-      },
-    };
+  private async fetchDefintion(apiKey: EntityDiscoveryAPIKey, id: string) {
+    const { soClient } = this.getScopedClients(apiKey);
+    return findApiEntityDefinitionById({ id, soClient });
   }
 
   private getScopedClients(apiKey: EntityDiscoveryAPIKey) {
     return getClientsFromAPIKey({ apiKey, server: this.server });
   }
 
-  private createTaskId(definition: EntityDefinition) {
+  private createTaskId(definition: APIEntityDefinition) {
     return `${TASK_TYPE}:${definition.id}`;
   }
 
-  public async stop(definition: EntityDefinition) {
+  public async stop(definition: APIEntityDefinition) {
     await this.taskManager?.removeIfExists(this.createTaskId(definition));
     this.logger.info(`Deleting ${TASK_NAME} for ${definition.name} (${definition.id})`);
   }
 
   public async start(
-    definition: EntityDefinition,
+    definition: APIEntityDefinition,
     server: EntityManagerServer,
     isRetry = false
   ): Promise<string> {
@@ -140,6 +147,7 @@ export class EntityMergeTask {
     }
 
     try {
+      this.stop(definition);
       this.taskManager = server.taskManager;
       const taskId = this.createTaskId(definition);
       const apiKeyId = definition.apiKeyId || ENTITY_DISCOVERY_API_KEY_SO_ID;
@@ -157,7 +165,6 @@ export class EntityMergeTask {
         params: {
           apiKeyId,
           definitionId: definition.id,
-          targetIndex: generateInstanceIndexName(definition),
         },
       });
       return taskId;
@@ -166,7 +173,7 @@ export class EntityMergeTask {
         await this.taskManager?.removeIfExists(this.createTaskId(definition));
         return await this.start(definition, server);
       }
-      this.logger.info(`[EEM][${definition.id}]  ${e.message}`);
+      this.logger.error(`[EEM][${definition.id}]  ${e.message}`);
       throw e;
     }
   }

@@ -7,8 +7,12 @@
 
 import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { EntityDefinition, EntityDefinitionWithState } from '@kbn/entities-schema';
-import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
+import {
+  APIEntityDefinition,
+  EntityDefinition,
+  EntityDefinitionWithState,
+} from '@kbn/entities-schema';
+import { SO_API_ENTITY_DEFINITION_TYPE, SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateHistoryTransformId,
   generateHistoryBackfillTransformId,
@@ -21,6 +25,7 @@ import {
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { getEntityDefinitionStats } from './get_entity_definition_stats';
+import { EntityDefinitionNotFound } from './errors/entity_not_found';
 
 export async function findEntityDefinitions<TIncludeState extends boolean | undefined>({
   soClient,
@@ -68,6 +73,46 @@ export async function findEntityDefinitions<TIncludeState extends boolean | unde
       return { ...attributes, ...state, stats };
     })
   );
+}
+
+export async function findApiEntityDefinitions({
+  id,
+  soClient,
+  page,
+  perPage,
+}: {
+  id: string;
+  soClient: SavedObjectsClientContract;
+  page?: number;
+  perPage?: number;
+}) {
+  const response = await soClient.find<APIEntityDefinition>({
+    type: SO_API_ENTITY_DEFINITION_TYPE,
+    filter: `${SO_API_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
+    page,
+    perPage,
+  });
+
+  return response.saved_objects.map((so) => so.attributes);
+}
+
+export async function findApiEntityDefinitionById({
+  id,
+  soClient,
+}: {
+  id: string;
+  soClient: SavedObjectsClientContract;
+}) {
+  const response = await soClient.find<APIEntityDefinition>({
+    type: SO_API_ENTITY_DEFINITION_TYPE,
+    filter: `${SO_API_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
+  });
+
+  if (response.saved_objects.length === 0) {
+    throw new EntityDefinitionNotFound(`Unable to find API definition [${id}] `);
+  }
+
+  return response.saved_objects[0].attributes;
 }
 
 export async function findEntityDefinitionById<TIncludeState extends boolean | undefined>({

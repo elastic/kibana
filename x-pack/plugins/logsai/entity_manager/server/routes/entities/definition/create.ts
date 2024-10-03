@@ -65,11 +65,11 @@ export const createEntityDefinitionRoute = createEntityManagerServerRoute({
     params,
     logger,
     server,
-    getScopedClient,
+    getScopedEntityClient,
     tasks,
   }) => {
     try {
-      const client = await getScopedClient({ request });
+      const client = await getScopedEntityClient({ request });
       const apiKeyId = params.body.apiKeyId ?? v4();
       const definition = await client.createEntityDefinition({
         definition: { ...params.body, apiKeyId },

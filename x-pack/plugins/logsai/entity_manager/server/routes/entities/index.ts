@@ -14,6 +14,10 @@ import { getEntityDefinitionRoute } from './definition/get';
 import { findEntitiesRoute } from './find';
 import { updateEntityRoute } from './update';
 
+import { createEntityAPIDefinitionRoute } from './definition/api/create';
+import { deleteEntityApiDefinitionRoute } from './definition/api/delete';
+import { previewEntityApiDefinitionRoute } from './definition/api/preview';
+
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
   ...deleteEntityDefinitionRoute,
@@ -22,4 +26,7 @@ export const entitiesRoutes = {
   ...getEntityDefinitionRoute,
   ...findEntitiesRoute,
   ...updateEntityRoute,
+  ...createEntityAPIDefinitionRoute,
+  ...deleteEntityApiDefinitionRoute,
+  ...previewEntityApiDefinitionRoute,
 };

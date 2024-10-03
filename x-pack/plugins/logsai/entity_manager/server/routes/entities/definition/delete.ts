@@ -55,9 +55,9 @@ export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
     path: deleteEntityDefinitionParamsSchema,
     query: deleteEntityDefinitionQuerySchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient, tasks }) => {
+  handler: async ({ request, response, params, logger, getScopedEntityClient, tasks }) => {
     try {
-      const client = await getScopedClient({ request });
+      const client = await getScopedEntityClient({ request });
       const definition = await client.getEntityDefinition({ id: params.path.id });
       if (definition) {
         await client.deleteEntityDefinition({
