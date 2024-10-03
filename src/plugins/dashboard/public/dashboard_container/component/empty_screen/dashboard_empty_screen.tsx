@@ -21,33 +21,31 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
-import { pluginServices } from '../../../services/plugin_services';
+
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
+import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  usageCollectionService,
+  visualizationsService,
+} from '../../../services/kibana_services';
+import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 
 export function DashboardEmptyScreen() {
-  const {
-    settings: {
-      theme: { theme$ },
-    },
-    usageCollection,
-    data: { search },
-    http: { basePath },
-    embeddable: { getStateTransfer },
-    dashboardCapabilities: { showWriteControls },
-    visualizations: { getAliases: getVisTypeAliases },
-  } = pluginServices.getServices();
-
   const lensAlias = useMemo(
-    () => getVisTypeAliases().find(({ name }) => name === 'lens'),
-    [getVisTypeAliases]
+    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
+    []
   );
+  const { showWriteControls } = useMemo(() => {
+    return getDashboardCapabilities();
+  }, []);
 
   const dashboardApi = useDashboardApi();
-  const isDarkTheme = useObservable(theme$)?.darkMode;
+  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';
@@ -55,8 +53,8 @@ export function DashboardEmptyScreen() {
 
   const goToLens = useCallback(() => {
     if (!lensAlias || !lensAlias.alias) return;
-    const trackUiMetric = usageCollection.reportUiCounter?.bind(
-      usageCollection,
+    const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+      usageCollectionService,
       DASHBOARD_UI_METRIC_ID
     );
 
@@ -64,18 +62,18 @@ export function DashboardEmptyScreen() {
       trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
     }
     const appContext = dashboardApi.getAppContext();
-    getStateTransfer().navigateToEditor(lensAlias.alias.app, {
+    embeddableService.getStateTransfer().navigateToEditor(lensAlias.alias.app, {
       path: lensAlias.alias.path,
       state: {
         originatingApp: appContext?.currentAppId,
         originatingPath: appContext?.getCurrentPath?.() ?? '',
-        searchSessionId: search.session.getSessionId(),
+        searchSessionId: dataService.search.session.getSessionId(),
       },
     });
-  }, [getStateTransfer, lensAlias, dashboardApi, search.session, usageCollection]);
+  }, [lensAlias, dashboardApi]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
-  const imageUrl = basePath.prepend(
+  const imageUrl = coreServices.http.basePath.prepend(
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 

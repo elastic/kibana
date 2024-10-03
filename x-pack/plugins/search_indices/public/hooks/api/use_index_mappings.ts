@@ -12,7 +12,7 @@ import { Mappings } from '../../types';
 export const useIndexMapping = (indexName: string) => {
   const { http } = useKibana().services;
   const queryKey = ['fetchMapping', indexName];
-  const result = useQuery({
+  const result = useQuery<Mappings, { body: { message: string; error: string } }>({
     queryKey,
     refetchOnWindowFocus: 'always',
     queryFn: () =>

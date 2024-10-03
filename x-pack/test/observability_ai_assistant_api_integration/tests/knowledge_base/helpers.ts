@@ -21,8 +21,9 @@ export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
       field_names: ['text_field'],
     },
   };
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+  // necessary for MKI, check indices before importing model.  compatible with stateful
   await ml.api.assureMlStatsIndexExists();
+  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
 }
 
 export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {

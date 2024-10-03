@@ -1,4 +1,5 @@
-summary: The update rule API returns a JSON object that contains details about the rule.
+summary: Index threshold rule
+description: The response for successfully updating an index threshold rule.
 value:
   id: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   consumer: alerts

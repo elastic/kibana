@@ -39,12 +39,11 @@ exports[`GaugeComponent renders the chart 1`] = `
           },
           "isolatedPoint": Object {
             "enabled": true,
-            "fill": "white",
+            "fill": "__use__series__color__",
             "opacity": 1,
-            "radius": 2,
             "stroke": "__use__series__color__",
-            "strokeWidth": 1,
-            "visible": true,
+            "strokeWidth": 0,
+            "visible": "auto",
           },
           "line": Object {
             "opacity": 1,
@@ -52,13 +51,14 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": true,
           },
           "point": Object {
-            "fill": "#FFF",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 2,
-            "visible": false,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
+            "visible": "never",
           },
+          "pointVisibilityMinDistance": 20,
         },
         "axes": Object {
           "axisLine": Object {
@@ -185,11 +185,11 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "bubbleSeriesStyle": Object {
           "point": Object {
-            "fill": "white",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 2,
-            "strokeWidth": 1,
-            "visible": true,
+            "strokeWidth": 0,
+            "visible": "always",
           },
         },
         "bulletGraph": Object {
@@ -392,11 +392,11 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "highlighter": Object {
           "point": Object {
-            "fill": "__use__empty__color__",
-            "opacity": 1,
-            "radius": 10,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 4,
+            "fill": "__use__series__color__",
+            "opacity": 0.5,
+            "radius": 5,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
           },
         },
         "legend": Object {
@@ -429,12 +429,11 @@ exports[`GaugeComponent renders the chart 1`] = `
           },
           "isolatedPoint": Object {
             "enabled": true,
-            "fill": "white",
+            "fill": "__use__series__color__",
             "opacity": 1,
-            "radius": 2,
             "stroke": "__use__series__color__",
             "strokeWidth": 1,
-            "visible": true,
+            "visible": "auto",
           },
           "line": Object {
             "opacity": 1,
@@ -442,13 +441,14 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": true,
           },
           "point": Object {
-            "fill": "#FFF",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 2,
-            "visible": true,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
+            "visible": "auto",
           },
+          "pointVisibilityMinDistance": 40,
         },
         "metric": Object {
           "barBackground": "#EDF0F5",

@@ -29,7 +29,7 @@ import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
-} from '../../services/dashboard_content_management/types';
+} from '../../services/dashboard_content_management_service/types';
 import type { DashboardContainer } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
