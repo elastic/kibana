@@ -256,7 +256,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      `Failed to poll for work: failed to work`,
+      'Failed to poll for work: failed to work',
       PollingErrorType.WorkError,
       none
     );
@@ -296,7 +296,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      `Failed to poll for work: failed to work`,
+      'Failed to poll for work: failed to work',
       PollingErrorType.WorkError,
       none
     );
