@@ -39904,7 +39904,17 @@
         "requestBody": {
           "content": {
             "application/json; Elastic-Api-Version=2023-10-31": {
-              "schema": {}
+              "schema": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "remote": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
             }
           }
         },
