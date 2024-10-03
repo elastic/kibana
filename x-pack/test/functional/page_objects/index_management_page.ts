@@ -118,6 +118,20 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click(tab);
     },
 
+    async changeMappingsEditorTab(
+      tab: 'mappedFields' | 'runtimeFields' | 'dynamicTemplates' | 'advancedOptions'
+    ) {
+      const index = [
+        'mappedFields',
+        'runtimeFields',
+        'dynamicTemplates',
+        'advancedOptions',
+      ].indexOf(tab);
+
+      const tabs = await testSubjects.findAll('formTab');
+      await tabs[index].click();
+    },
+
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
