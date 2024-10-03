@@ -43,6 +43,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
     {
       path: '/api/security/roles',
       options: {
+        access: 'public',
         summary: 'Create or update roles',
       },
       validate: {

@@ -10,14 +10,11 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { ViewMode } from '@kbn/presentation-publishing';
-import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
-import { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
-import {
-  getMockedBuildApi,
-  getMockedControlGroupApi,
-} from '../react_controls/controls/mocks/control_mocks';
-import { DeleteControlAction } from './delete_control_action';
+import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
+import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { coreServices } from '../services/kibana_services';
+import { DeleteControlAction } from './delete_control_action';
 
 const dashboardApi = {
   viewMode: new BehaviorSubject<ViewMode>('view'),

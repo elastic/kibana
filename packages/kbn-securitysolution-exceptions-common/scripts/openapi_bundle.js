@@ -24,13 +24,13 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Exceptions API (Elastic Cloud Serverless)',
+          title: 'Security Exceptions API (Elastic Cloud Serverless)',
           description:
             "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
         },
         tags: [
           {
-            name: 'Security Solution Exceptions API',
+            name: 'Security Exceptions API',
             description:
               "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },
@@ -49,13 +49,13 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Exceptions API (Elastic Cloud and self-hosted)',
+          title: 'Security Exceptions API (Elastic Cloud and self-hosted)',
           description:
             "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
         },
         tags: [
           {
-            name: 'Security Solution Exceptions API',
+            name: 'Security Exceptions API',
             description:
               "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
           },

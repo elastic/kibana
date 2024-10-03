@@ -52,10 +52,12 @@ export function extractUnknownDocFailureReason(
   resolveMigrationFailuresUrl: string,
   unknownDocs: DocumentIdAndType[]
 ): string {
+  const typesSet = new Set(unknownDocs.map(({ type }) => type));
   return (
-    `Migration failed because some documents were found which use unknown saved object types:\n` +
-    unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
-    `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
+    `Migration failed because some documents were found which use unknown saved object types: ${Array.from(
+      typesSet.values()
+    )}\n` +
+    `To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
     `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }

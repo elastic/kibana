@@ -58,7 +58,11 @@ export const reducer = (state: State, action: Action): State => {
     case 'SET_HAS_CEL_INPUT':
       return { ...state, hasCelInput: action.payload };
     case 'SET_GENERATED_RESULT':
-      return { ...state, result: action.payload };
+      return {
+        ...state,
+        // keep original result as the samplesFormat is not always included in the payload
+        result: state.result ? { ...state.result, ...action.payload } : action.payload,
+      };
     case 'SET_CEL_INPUT_RESULT':
       return { ...state, celInputResult: action.payload };
     default:

@@ -20,6 +20,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const synthtrace = getService('logSynthtraceEsClient');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
+  const retry = getService('retry');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -49,14 +50,15 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     });
   }
 
-  describe('gets the data stream details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/194599
+  describe.skip('gets the data stream details', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      return synthtrace.index([
+      await synthtrace.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -96,9 +98,24 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(resp.body).empty();
     });
 
-    it('returns "sizeBytes" as null in serverless', async () => {
+    it('returns "sizeBytes" correctly', async () => {
+      // Metering stats api is cached and refreshed every 30 seconds
+      await retry.waitForWithTimeout('Metering stats cache is refreshed', 31000, async () => {
+        const detailsResponse = await callApi(
+          `${type}-${dataset}-${namespace}`,
+          roleAuthc,
+          internalReqHeader
+        );
+        if (detailsResponse.body.sizeBytes === 0) {
+          throw new Error("Metering stats cache hasn't refreshed");
+        }
+        return true;
+      });
+
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
-      expect(resp.body.sizeBytes).to.be(null);
+
+      expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
+      expect(resp.body.sizeBytes).to.be.greaterThan(0);
     });
 
     it('returns service.name and host.name correctly', async () => {

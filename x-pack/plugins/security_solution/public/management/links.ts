@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import IconFilebeatChart from '../app/solution_navigation/links/sections/icons/filebeat_chart';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -22,6 +23,7 @@ import {
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
+  NOTES_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
@@ -39,6 +41,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ASSET_CRITICALITY,
+  NOTES,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -84,6 +87,12 @@ const categories = [
       defaultMessage: 'Cloud Security',
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
+      defaultMessage: 'Investigations',
+    }),
+    linkIds: [SecurityPageName.notes],
   },
 ];
 
@@ -215,6 +224,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
+    {
+      id: SecurityPageName.notes,
+      title: NOTES,
+      description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
+        defaultMessage:
+          'Oversee, revise and revisit the annotations within each document and timeline.',
+      }),
+      landingIcon: IconFilebeatChart,
+      path: NOTES_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      experimentalKey: 'securitySolutionNotesEnabled',
+    },
   ],
 };
 

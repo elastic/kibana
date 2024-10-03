@@ -12,8 +12,6 @@ import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } fro
 import type { FunctionComponent } from 'react';
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
-import { TagDecoratedSavedObject } from './decorator';
 import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
@@ -51,11 +49,6 @@ export interface ITagsCache {
 }
 
 /**
- * @public
- */
-export type SavedObjectTagDecoratorTypeGuard = SavedObjectsTaggingApiUi['hasTagDecoration'];
-
-/**
  * React components and utility methods to use the SO tagging feature
  *
  * @public
@@ -71,13 +64,6 @@ export interface SavedObjectsTaggingApiUi {
    * Return a list of available tags
    */
   getTagList(): Tag[];
-
-  /**
-   * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.
-   *
-   * @param object
-   */
-  hasTagDecoration(object: SavedObjectClass): object is TagDecoratedSavedObject;
 
   /**
    * Return a filter that can be used to filter by tag with `EuiSearchBar` or EUI tables using `EuiSearchBar`.

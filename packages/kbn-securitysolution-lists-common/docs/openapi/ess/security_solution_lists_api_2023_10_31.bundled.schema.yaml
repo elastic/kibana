@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
-  title: Security Solution Lists API (Elastic Cloud and self-hosted)
+  title: Security Lists API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
@@ -78,7 +78,7 @@ paths:
           description: Internal server error response
       summary: Delete a list
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     get:
       description: Get the details of a list using the list ID.
       operationId: ReadList
@@ -130,7 +130,7 @@ paths:
           description: Internal server error response
       summary: Get list details
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     patch:
       description: Update specific fields of an existing list using the list ID.
       operationId: PatchList
@@ -198,7 +198,7 @@ paths:
           description: Internal server error response
       summary: Patch a list
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     post:
       description: Create a new list.
       operationId: CreateList
@@ -273,7 +273,7 @@ paths:
           description: Internal server error response
       summary: Create a list
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     put:
       description: >
         Update a list using the list ID. The original list is replaced, and all
@@ -349,7 +349,7 @@ paths:
           description: Internal server error response
       summary: Update a list
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/_find:
     get:
       description: >-
@@ -465,7 +465,7 @@ paths:
           description: Internal server error response
       summary: Get lists
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/index:
     delete:
       description: Delete the `.lists` and `.items` data streams.
@@ -516,7 +516,7 @@ paths:
           description: Internal server error response
       summary: Delete list data streams
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     get:
       description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
@@ -569,7 +569,7 @@ paths:
           description: Internal server error response
       summary: Get status of list data streams
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     post:
       description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
@@ -619,7 +619,7 @@ paths:
           description: Internal server error response
       summary: Create list data streams
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/items:
     delete:
       description: Delete a list item using its `id`, or its `list_id` and `value` fields.
@@ -701,7 +701,7 @@ paths:
           description: Internal server error response
       summary: Delete a list item
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     get:
       description: Get the details of a list item.
       operationId: ReadListItem
@@ -769,7 +769,7 @@ paths:
           description: Internal server error response
       summary: Get a list item
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     patch:
       description: Update specific fields of an existing list item using the list item ID.
       operationId: PatchListItem
@@ -841,7 +841,7 @@ paths:
           description: Internal server error response
       summary: Patch a list item
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     post:
       description: >
         Create a list item and associate it with the specified list.
@@ -923,7 +923,7 @@ paths:
           description: Internal server error response
       summary: Create a list item
       tags:
-        - Security Solution Lists API
+        - Security Lists API
     put:
       description: >
         Update a list item using the list item ID. The original list item is
@@ -993,7 +993,7 @@ paths:
           description: Internal server error response
       summary: Update a list item
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/items/_export:
     post:
       description: Export list item values from the specified list.
@@ -1048,7 +1048,7 @@ paths:
           description: Internal server error response
       summary: Export list items
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/items/_find:
     get:
       description: Get all list items in the specified list.
@@ -1168,7 +1168,7 @@ paths:
           description: Internal server error response
       summary: Get list items
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/items/_import:
     post:
       description: >
@@ -1275,7 +1275,7 @@ paths:
           description: Internal server error response
       summary: Import list items
       tags:
-        - Security Solution Lists API
+        - Security Lists API
   /api/lists/privileges:
     get:
       operationId: ReadListPrivileges
@@ -1325,7 +1325,7 @@ paths:
           description: Internal server error response
       summary: Get list privileges
       tags:
-        - Security Solution Lists API
+        - Security Lists API
 components:
   schemas:
     FindListItemsCursor:
@@ -1563,4 +1563,4 @@ security:
   - BasicAuth: []
 tags:
   - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
-    name: Security Solution Lists API
+    name: Security Lists API

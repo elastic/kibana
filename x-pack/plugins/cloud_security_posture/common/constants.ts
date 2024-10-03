@@ -6,12 +6,8 @@
  */
 
 import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import {
-  AwsCredentialsTypeFieldMap,
-  GcpCredentialsTypeFieldMap,
-  PostureTypes,
-  VulnSeverity,
-} from './types_old';
+import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
+import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
 export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 
@@ -60,14 +56,6 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
-
-export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
-  'logs-cloud_security_posture.vulnerabilities_latest-default';
-export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
-  'security_solution-*.vulnerability_latest';
-export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
-
-export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
