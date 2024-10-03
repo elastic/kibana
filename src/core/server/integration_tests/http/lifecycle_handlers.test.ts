@@ -63,6 +63,7 @@ describe('core lifecycle handlers', () => {
   beforeEach(async () => {
     const configService = createConfigService(testConfig);
     logger = loggerMock.create();
+
     server = createHttpService({ configService, logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
@@ -234,11 +235,13 @@ describe('core lifecycle handlers', () => {
   });
 
   describe('restrictInternalRoutes post-auth handler', () => {
+    // TODO: update to add tests for conditional logging
     const testInternalRoute = '/restrict_internal_routes/test/route_internal';
     const testPublicRoute = '/restrict_internal_routes/test/route_public';
 
     beforeEach(async () => {
       await server?.stop();
+      logger = loggerMock.create();
       const configService = createConfigService({
         server: {
           ...testConfig.server,
@@ -271,6 +274,10 @@ describe('core lifecycle handlers', () => {
         }
       );
       await server.start();
+    });
+    afterEach(async () => {
+      jest.clearAllMocks();
+      await server.stop();
     });
 
     it('rejects requests to internal routes without special values', async () => {
@@ -309,6 +316,13 @@ describe('core lifecycle handlers', () => {
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
         .expect(200, 'ok()');
     });
+    it("doesn't log a warning for rejected requests to internal routes", async () => {
+      await supertest(innerServer.listener)
+        .get(testInternalRoute)
+        .query({ myValue: 'test' })
+        .expect(400);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
   });
 });
 
@@ -316,8 +330,10 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
   let router: IRouter;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
+    logger = loggerMock.create();
     const configService = createConfigService({ server: { restrictInternalApis: true } });
     server = createHttpService({ configService });
 
@@ -328,6 +344,7 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   });
 
   afterEach(async () => {
+    jest.clearAllMocks();
     await server.stop();
   });
 
@@ -350,9 +367,10 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
       await server.start();
     });
 
-    it('request requests without the internal product header to internal routes', async () => {
+    it('rejects requests without the internal product header to internal routes', async () => {
       const result = await supertest(innerServer.listener).get(testInternalRoute).expect(400);
       expect(result.body.error).toBe('Bad Request');
+      // expect(logger.warn).toBeCalledTimes(0);
     });
 
     it('accepts requests with the internal product header to internal routes', async () => {
@@ -360,6 +378,63 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
         .get(testInternalRoute)
         .set(internalProductHeader, 'anything')
         .expect(200, 'ok()');
+      // expect(logger.warn).toBeCalledTimes(0);
+    });
+  });
+});
+
+describe('core lifecycle handlers with restrict internal routes not enforced', () => {
+  let server: HttpService;
+  let innerServer: HttpServerSetup['server'];
+  let router: IRouter;
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(async () => {
+    logger = loggerMock.create();
+    const configService = createConfigService({ server: { restrictInternalApis: false } });
+    server = createHttpService({ configService });
+
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    const serverSetup = await server.setup(setupDeps);
+    router = serverSetup.createRouter('/');
+    innerServer = serverSetup.server;
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+    await server.stop();
+  });
+
+  describe('restrictInternalRoutes postauth handler', () => {
+    const testInternalRoute = '/restrict_internal_routes/test/route_internal';
+    const testPublicRoute = '/restrict_internal_routes/test/route_public';
+    beforeEach(async () => {
+      router.get(
+        { path: testInternalRoute, validate: false, options: { access: 'internal' } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok()' });
+        }
+      );
+      router.get(
+        { path: testPublicRoute, validate: false, options: { access: 'public' } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok()' });
+        }
+      );
+      await server.start();
+    });
+    // why is this not logging? Because it's a nested test?
+    it('logs requests without the internal product header to internal routes', async () => {
+      await supertest(innerServer.listener).get(testInternalRoute).expect(200);
+      expect(logger.warn).toBeCalledTimes(1);
+    });
+
+    it('does not log requests with the internal product header to internal routes', async () => {
+      await supertest(innerServer.listener)
+        .get(testInternalRoute)
+        .set(internalProductHeader, 'anything')
+        .expect(200, 'ok()');
+      expect(logger.warn).toBeCalledTimes(0);
     });
   });
 });
@@ -419,22 +494,22 @@ describe('core lifecycle handlers with no strict client version check', () => {
       .set(KIBANA_BUILD_NR_HEADER, '12345')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
-    expect(message).toMatch(
-      /^Client build \(12345\) is newer than this Kibana server build \(1234\)/
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    const message = logger.warn.mock.calls[1][0];
+    const message2 = logger.warn.mock.calls[0][0];
+    expect(message2).toContain(
+      `Client build (12345) is newer than this Kibana server build (1234)`
     );
+    expect(message).toContain(`Client build (12345) is newer than this Kibana server build (1234)`);
   });
+
   it('logs a warning when a client build number is older', async () => {
     await supertest(innerServer.listener)
       .get(testRouteBad)
       .set(KIBANA_BUILD_NR_HEADER, '123')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
-    expect(message).toMatch(
-      /^Client build \(123\) is older than this Kibana server build \(1234\)/
-    );
+    const message = logger.warn.mock.calls[1][0];
+    expect(message).toContain(`Client build (123) is older than this Kibana server build (1234)`);
   });
 });

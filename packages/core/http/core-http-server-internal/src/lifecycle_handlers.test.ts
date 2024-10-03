@@ -303,9 +303,20 @@ describe('restrictInternal post-auth handler', () => {
       name: 'my-server-name',
       restrictInternalApis: true,
     });
+    let logger: jest.Mocked<Logger>;
+
+    beforeEach(() => {
+      logger = loggerMock.create();
+    });
+
+    it('injects a logger prefix', () => {
+      createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      expect(logger.get).toHaveBeenCalledTimes(1);
+      expect(logger.get).toHaveBeenCalledWith(`kbn-internal-api-restricted`);
+    });
 
     it('returns a bad request if called without internal origin header for internal API', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('internal');
 
       responseFactory.badRequest.mockReturnValue('badRequest' as any);
@@ -319,38 +330,105 @@ describe('restrictInternal post-auth handler', () => {
       expect(result).toBe('badRequest');
     });
 
-    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+    it("doesn't log a warning if called without internal origin header for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal');
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatchInlineSnapshot(
+        `"uri [/internal/some-path] with method [get] exists but is not available with the current configuration"`
+      );
+      expect(result).toBe('badRequest');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called without internal origin query parameter for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal');
+      responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+      const result = handler(request, responseFactory, toolkit);
+
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatchInlineSnapshot(
+        `"uri [/internal/some-path] with method [get] exists but is not available with the current configuration"`
+      );
+      expect(result).toBe('badRequest');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin header for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
       createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin header for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called without internal origin header for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin query param for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin query param for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called without internal origin query param for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
     });
 
     it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('public');
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called with internal origin query param for internal API', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
-      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
-      createForwardSuccess(handler, request);
-    });
-
-    it('forward the request to the next interceptor if called with internal origin query param for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called without internal origin query param for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('public');
       createForwardSuccess(handler, request);
     });
@@ -361,26 +439,93 @@ describe('restrictInternal post-auth handler', () => {
       name: 'my-server-name',
       restrictInternalApis: false,
     });
+    let logger: jest.Mocked<Logger>;
+
+    beforeEach(() => {
+      logger = loggerMock.create();
+    });
+    it('Logs a warning if called without internal origin header for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Access to uri [/internal/some-path] with method [get] is deprecated'
+      );
+    });
+
+    it('Logs a warning if called without internal origin query parameter for internal API', () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Access to uri [/internal/some-path] with method [get] is deprecated'
+      );
+    });
+
+    it("doesn't log a warning if called with internal origin header for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin header for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called without internal origin header for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin query param for internal API", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('internal', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called with internal origin query param for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public', undefined, { elasticInternalOrigin: 'true' });
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
+    it("doesn't log a warning if called without internal origin query param for public APIs", () => {
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
+      const request = createForgeRequest('public');
+      createForwardSuccess(handler, request);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+    });
+
     it('forward the request to the next interceptor if called without internal origin header for internal APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('internal');
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called with internal origin header for internal API', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('internal', { 'x-elastic-internal-origin': 'Kibana' });
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called without internal origin header for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('public');
       createForwardSuccess(handler, request);
     });
 
     it('forward the request to the next interceptor if called with internal origin header for public APIs', () => {
-      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
+      const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig, logger);
       const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
       createForwardSuccess(handler, request);
     });
