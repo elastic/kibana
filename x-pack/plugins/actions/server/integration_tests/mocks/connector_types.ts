@@ -27,12 +27,12 @@ export const connectorTypes: string[] = [
   '.gen-ai',
   '.bedrock',
   '.gemini',
-  '.inference',
   '.d3security',
   '.resilient',
   '.thehive',
   '.sentinelone',
   '.crowdstrike',
+  '.inference',
   '.cases',
   '.observability-ai-assistant',
 ];

@@ -43,13 +43,14 @@ import {
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ServiceProviderKeys } from '../../../common/inference/constants';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
 import { getTaskTypes } from './get_task_types';
 import * as i18n from './translations';
 import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from './constants';
 import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { SelectableProvider } from './providers/selectable';
-import { Config, Secrets, ServiceProviderKeys } from './types';
+import { Config, Secrets } from './types';
 import {
   generateInferenceEndpointId,
   getTaskTypeOptions,
@@ -369,7 +370,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           >
             <FormattedMessage
               id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
-              defaultMessage="Configure the inference task. These settings are specific to the task type you specified."
+              defaultMessage="Configure the inference task. These settings are specific to the service and model selected."
             />
           </div>
           <EuiSpacer size="m" />
@@ -398,17 +399,9 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                   }
                   isInvalid={isInvalid}
                   error={errorMessage}
-                  helpText={
-                    <FormattedMessage
-                      id="xpack.stackConnectors.components.inference.taskTypeSelectHelpLabel"
-                      defaultMessage="Configuration of AI Assistants requires a 'completion' task type."
-                    />
-                  }
                 >
                   {isEdit ? (
-                    <EuiButton href="#/navigation/button" isDisabled>
-                      {config?.taskType}
-                    </EuiButton>
+                    <EuiButton isDisabled>{config?.taskType}</EuiButton>
                   ) : (
                     <EuiButtonGroup
                       data-test-subj="taskTypeSelect"
