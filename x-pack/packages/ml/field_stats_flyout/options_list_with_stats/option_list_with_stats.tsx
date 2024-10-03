@@ -8,19 +8,9 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
-import {
-  EuiFilterButton,
-  EuiFlexGroup,
-  EuiFilterGroup,
-  EuiInputPopover,
-  htmlIdGenerator,
-  EuiIcon,
-  EuiBadge,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiInputPopover, htmlIdGenerator, EuiFormControlLayout, EuiFieldText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useFieldStatsTrigger } from '../use_field_stats_trigger';
 import { OptionsListPopover } from './option_list_popover';
 import type { DropDownLabel } from './types';
@@ -55,18 +45,6 @@ interface OptionListWithFieldStatsProps {
   isInvalid?: boolean;
 }
 
-const clearIconCss = css`
-  flex-shrink: 0;
-  display: inline-block;
-  vertical-align: middle;
-  inline-size: 16px;
-  block-size: 16px;
-  transform: scale(0.5);
-  fill: rgb(29, 30, 36);
-  stroke: rgb(29, 30, 36);
-  stroke-width: 2px;
-`;
-
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   options,
   placeholder,
@@ -87,6 +65,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
     () =>
       Array.isArray(options)
         ? options.map(({ isEmpty, ...o }) => ({
+            key: o.key,
             ...o,
             css: optionCss,
             // Change data-is-empty- because EUI is passing all props to dom element
@@ -97,112 +76,56 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
     [options]
   );
   const hasSelections = useMemo(() => selectedOptions?.length ?? 0 > 0, [selectedOptions]);
-  const id = useMemo(() => htmlIdGenerator()(), []);
-  const selectionDisplayNode = singleSelection
-    ? selectedOptions?.[0]?.label
-    : selectedOptions?.map((option) => (
-        <EuiFlexItem grow={false} key={`${id}-${option.label}`}>
-          <EuiBadge className="euiComboBoxPill eui-textTruncate" color="hollow">
-            {option.label}
-          </EuiBadge>
-        </EuiFlexItem>
-      ));
-
-  const button = (
-    <EuiFilterButton
-      isDisabled={isDisabled}
-      badgeColor="success"
-      iconType="arrowDown"
-      isLoading={isLoading}
-      grow
-      css={css({
-        width: '150px',
-        minWidth: '100%',
-        padding: euiThemeVars.euiSizeS,
-        height: euiThemeVars.euiButtonHeight,
-        fontWeight: euiThemeVars.euiFontWeightRegular,
-        color: hasSelections ? euiThemeVars.euiTextColor : euiThemeVars.euiTextSubduedColor,
-      })}
-      data-test-subj={`optionsList-control-${id}`}
-      onClick={() => setPopoverOpen(true)}
-      isSelected={isPopoverOpen}
-      textProps={{ className: 'optionsList--selectionText' }}
-      aria-label={ariaLabel}
-      aria-expanded={isPopoverOpen}
-      aria-controls={popoverId}
-      role="combobox"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        css={css({
-          width: '100%',
-        })}
-      >
-        {hasSelections ? <EuiFlexItem>{selectionDisplayNode}</EuiFlexItem> : placeholder ?? ''}
-        {isClearable ? (
-          <EuiFlexItem
-            css={css({
-              position: 'absolute',
-              right: euiThemeVars.euiSizeXL,
-              opacity: hasSelections ? 1 : 0,
-            })}
-          >
-            <button
-              // @ts-expect-error css is valid property for Kibana
-              css={css({
-                width: euiThemeVars.euiSize,
-                height: euiThemeVars.euiSize,
-                backgroundColor: euiThemeVars.euiColorMediumShade,
-                borderRadius: '50%',
-                lineHeight: '0',
-                pointerEvents: 'all',
-              })}
-              type="button"
-              onClick={onChange.bind(null, [])}
-              aria-label={i18n.translate('xpack.ml.controls.optionsList.clearButtonLabel', {
-                defaultMessage: 'Clear',
-              })}
-            >
-              <EuiIcon type="cross" css={clearIconCss} />
-            </button>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiFilterButton>
-  );
 
   return (
-    <EuiFilterGroup fullWidth={fullWidth} css={css({ width: '100%' })}>
-      <EuiInputPopover
-        id={popoverId}
-        ownFocus
-        input={button}
-        hasArrow={false}
-        repositionOnScroll
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        panelMinWidth={MIN_POPOVER_WIDTH}
-        fullWidth
-        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-        closePopover={setPopoverOpen.bind(null, false)}
-        panelProps={{
-          'aria-label': i18n.translate('xpack.ml.controls.optionsList.popover.ariaLabel', {
-            defaultMessage: 'Popover for {ariaLabel}',
-            values: { ariaLabel },
-          }),
-        }}
-      >
-        {isPopoverOpen ? (
-          <OptionsListPopover
-            options={comboBoxOptions}
-            renderOption={renderOption}
-            singleSelection={singleSelection}
-            onChange={onChange}
-            setPopoverOpen={setPopoverOpen}
-            isLoading={isLoading}
+    <EuiInputPopover
+      id={popoverId}
+      input={
+        <EuiFormControlLayout
+          clear={isClearable && hasSelections ? { onClick: onChange.bind(null, []) } : undefined}
+          isDropdown={true}
+        >
+          <EuiFieldText
+            onClick={setPopoverOpen.bind(null, true)}
+            type="text"
+            controlOnly
+            aria-label={i18n.translate(
+              'xpack.ml.controls.optionsList.popover.selectOptionAriaLabel',
+              {
+                defaultMessage: 'Select an option',
+              }
+            )}
+            onChange={() => {}}
+            value={
+              singleSelection && selectedOptions?.[0]?.label ? selectedOptions?.[0]?.label : ''
+            }
           />
-        ) : null}
-      </EuiInputPopover>
-    </EuiFilterGroup>
+        </EuiFormControlLayout>
+      }
+      hasArrow={false}
+      repositionOnScroll
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+      panelMinWidth={MIN_POPOVER_WIDTH}
+      initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+      closePopover={setPopoverOpen.bind(null, false)}
+      panelProps={{
+        'aria-label': i18n.translate('xpack.ml.controls.optionsList.popover.ariaLabel', {
+          defaultMessage: 'Popover for {ariaLabel}',
+          values: { ariaLabel },
+        }),
+      }}
+    >
+      {isPopoverOpen ? (
+        <OptionsListPopover
+          options={comboBoxOptions}
+          renderOption={renderOption}
+          singleSelection={singleSelection}
+          onChange={onChange}
+          setPopoverOpen={setPopoverOpen}
+          isLoading={isLoading}
+        />
+      ) : null}
+    </EuiInputPopover>
   );
 };
