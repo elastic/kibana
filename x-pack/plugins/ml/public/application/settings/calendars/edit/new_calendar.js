@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPageBody } from '@elastic/eui';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
-import { CalendarForm } from './calendar_form/calendar_form';
+import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
