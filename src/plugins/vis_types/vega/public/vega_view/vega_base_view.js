@@ -293,8 +293,8 @@ export class VegaBaseView {
   }
 
   updateVegaSize(view, dimensions) {
-    const width = Math.floor(Math.max(0, dimensions?.width ?? this._container.clientWidth));
-    const height = Math.floor(Math.max(0, dimensions?.height ?? this._container.clientHeight));
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._container.clientWidth - 1));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._container.clientHeight - 1));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
