@@ -40,8 +40,10 @@ export class CloudHandler extends ProjectHandler {
       body.product_types = productTypes;
     }
 
+    // The qualityGate variable has been added here to ensure that when the quality gate runs, there will be
+    // no kibana image override. The tests will be executed against the commit which is already promoted to QA.
     const qualityGate =
-      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE == '1';
+      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE === '1';
     const override = commit ?? process.env.KIBANA_MKI_IMAGE_COMMIT;
     if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
