@@ -94,7 +94,7 @@ const TemplatesComponent: React.FC<Props> = ({
             />
           </>
         ) : null}
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         {!templates.length ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false} data-test-subj="empty-templates">
@@ -124,7 +124,7 @@ const TemplatesComponent: React.FC<Props> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
