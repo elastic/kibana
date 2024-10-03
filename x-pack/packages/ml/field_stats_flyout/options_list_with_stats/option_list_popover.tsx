@@ -103,7 +103,7 @@ export const OptionsListPopover = ({
             return !option['data-is-empty'];
           }
           if (option.isGroupLabel || option.isGroupLabelOption) {
-            return populatedFields?.has(option.key ?? option.searchableLabel);
+            return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
           }
           if (option.field) {
             return populatedFields?.has(option.field.id);

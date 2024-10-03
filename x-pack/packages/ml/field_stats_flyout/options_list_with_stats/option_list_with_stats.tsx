@@ -65,8 +65,10 @@ const clearIconCss = css`
   stroke: rgb(29, 30, 36);
   stroke-width: 2px;
 `;
+
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   options,
+  placeholder = '    ',
   singleSelection = false,
   onChange,
   selectedOptions,
@@ -106,63 +108,70 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       ));
 
   const button = (
-    <>
-      <EuiFilterButton
-        isDisabled={isDisabled}
-        badgeColor="success"
-        iconType="arrowDown"
-        isLoading={isLoading}
-        grow
+    <EuiFilterButton
+      isDisabled={isDisabled}
+      badgeColor="success"
+      iconType="arrowDown"
+      isLoading={isLoading}
+      grow
+      css={css({
+        width: '150px',
+        minWidth: '100%',
+        padding: euiThemeVars.euiSizeS,
+        height: euiThemeVars.euiButtonHeight,
+        fontWeight: euiThemeVars.euiFontWeightRegular,
+        color: hasSelections ? euiThemeVars.euiTextColor : euiThemeVars.euiTextSubduedColor,
+      })}
+      data-test-subj={`optionsList-control-${id}`}
+      onClick={() => setPopoverOpen(true)}
+      isSelected={isPopoverOpen}
+      textProps={{ className: 'optionsList--selectionText' }}
+      aria-label={ariaLabel}
+      aria-expanded={isPopoverOpen}
+      aria-controls={popoverId}
+      role="combobox"
+    >
+      <EuiFlexGroup
+        alignItems="center"
         css={css({
           width: '100%',
-          padding: euiThemeVars.euiSizeS,
-          height: euiThemeVars.euiButtonHeight,
-          fontWeight: euiThemeVars.euiFontWeightRegular,
-          color: hasSelections ? euiThemeVars.euiTextColor : euiThemeVars.euiTextSubduedColor,
         })}
-        data-test-subj={`optionsList-control-${id}`}
-        onClick={() => setPopoverOpen(true)}
-        isSelected={isPopoverOpen}
-        textProps={{ className: 'optionsList--selectionText' }}
-        aria-label={ariaLabel}
-        aria-expanded={isPopoverOpen}
-        aria-controls={popoverId}
-        role="combobox"
       >
-        <EuiFlexGroup alignItems="center">
-          {hasSelections ? <EuiFlexItem>{selectionDisplayNode}</EuiFlexItem> : null}
-          {
-            <EuiFlexItem css={css({ position: 'absolute', right: euiThemeVars.euiSizeXL })}>
-              <button
-                css={css({
-                  width: '16px',
-                  height: '16px',
-                  backgroundColor: 'rgb(152, 162, 179)',
-                  borderRadius: '50%',
-                  lineHeight: '0',
-                  pointerEvents: 'all',
-                  opacity: hasSelections ? 1 : 0,
-                })}
-                type="button"
-                onClick={() => onChange([])}
-                aria-label={i18n.translate(
-                  'xpack.plugins.ml.controls.optionsList.clearButtonLabel',
-                  {
-                    defaultMessage: 'Clear',
-                  }
-                )}
-              >
-                <EuiIcon type="cross" css={clearIconCss} />
-              </button>
-            </EuiFlexItem>
-          }
-        </EuiFlexGroup>
-      </EuiFilterButton>
-    </>
+        {hasSelections ? <EuiFlexItem>{selectionDisplayNode}</EuiFlexItem> : placeholder ?? ''}
+        {isClearable ? (
+          <EuiFlexItem
+            css={css({
+              position: 'absolute',
+              right: euiThemeVars.euiSizeXL,
+              opacity: hasSelections ? 1 : 0,
+            })}
+          >
+            <button
+              // @ts-expect-error css is valid property for Kibana
+              css={css({
+                width: euiThemeVars.euiSize,
+                height: euiThemeVars.euiSize,
+                backgroundColor: euiThemeVars.euiColorMediumShade,
+                borderRadius: '50%',
+                lineHeight: '0',
+                pointerEvents: 'all',
+              })}
+              type="button"
+              onClick={onChange.bind(null, [])}
+              aria-label={i18n.translate('xpack.plugins.ml.controls.optionsList.clearButtonLabel', {
+                defaultMessage: 'Clear',
+              })}
+            >
+              <EuiIcon type="cross" css={clearIconCss} />
+            </button>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </EuiFilterButton>
   );
 
   return (
-    <EuiFilterGroup fullWidth={fullWidth}>
+    <EuiFilterGroup fullWidth={fullWidth} css={css({ width: '100%' })}>
       <EuiInputPopover
         id={popoverId}
         ownFocus

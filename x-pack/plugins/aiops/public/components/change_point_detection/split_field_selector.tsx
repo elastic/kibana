@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import { type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
@@ -60,7 +60,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
 
     return (
       <EuiFormRow fullWidth label={inline ? undefined : label}>
-        <EuiComboBox
+        <OptionListWithFieldStats
           fullWidth
           compressed
           prepend={inline ? label : undefined}
