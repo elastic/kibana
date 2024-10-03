@@ -68,13 +68,13 @@ import {
   SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
+import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
 import {
   EventCategoryOverride,
   TiebreakerField,
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
-import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
@@ -262,7 +262,6 @@ export const QueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
-
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -313,7 +312,6 @@ export const SavedQueryRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
-
   alert_suppression: AlertSuppression.optional(),
   query: RuleQuery.optional(),
 });
