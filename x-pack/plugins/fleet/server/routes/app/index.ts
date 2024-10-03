@@ -221,7 +221,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       description: `Check permissions`,
       options: {
-        tags: ['oas_tag:Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -266,7 +266,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       description: `Create a service token`,
       options: {
-        tags: ['oas_tag:Fleet service tokens'],
+        tags: ['oas-tag:Fleet service tokens'],
       },
     })
     .addVersion(
@@ -294,6 +294,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleet: { allAgents: true },
       },
       description: `Create a service token`,
+      deprecated: true,
     })
     .addVersion(
       {

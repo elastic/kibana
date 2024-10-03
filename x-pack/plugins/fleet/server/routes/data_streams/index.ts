@@ -54,7 +54,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List data streams`,
       options: {
-        tags: ['oas_tag:Data streams'],
+        tags: ['oas-tag:Data streams'],
       },
     })
     .addVersion(

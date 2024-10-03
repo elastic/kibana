@@ -45,7 +45,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'List outputs',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -73,7 +73,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Get output by ID',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -101,7 +101,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Update output by ID',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -130,7 +130,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Create output',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -159,7 +159,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Delete output by ID',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -191,7 +191,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Generate Logstash API keyy',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -220,7 +220,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: 'Get latest output health',
       options: {
-        tags: ['oas_tag:Fleet outputs'],
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
