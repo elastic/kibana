@@ -421,7 +421,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostAgentReassignRequestSchema, response: {} },
+        validate: {
+          request: PostAgentReassignRequestSchema,
+          response: {
+            200: {
+              body: () => schema.object({}),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postAgentReassignHandler
     );
@@ -662,7 +672,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostAgentUpgradeRequestSchema, response: {} },
+        validate: {
+          request: PostAgentUpgradeRequestSchema,
+          response: {
+            200: {
+              body: () => schema.object({}),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postAgentUpgradeHandler
     );
