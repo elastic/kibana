@@ -93,8 +93,9 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
+    this.useDefaultStrategyForPath =
+      this.isPublic || router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.defaultSecurityConfig = validRouteSecurity(this.options.security, this.options.options);
     this.router.router[this.method](
@@ -132,8 +133,14 @@ export class CoreVersionedRoute implements VersionedRoute {
   private getVersion(req: RequestLike): ApiVersion | undefined {
     let version;
     const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
-      version = this.getDefaultVersion();
+    if (!maybeVersion) {
+      if (this.useDefaultStrategyForPath) {
+        version = this.getDefaultVersion();
+      } else if (!this.router.isDev && !this.isPublic) {
+        // When in production, we default internal routes to v1 to allow
+        // gracefully onboarding of un-versioned to versioned routes
+        version = '1';
+      }
     } else {
       version = maybeVersion;
     }
