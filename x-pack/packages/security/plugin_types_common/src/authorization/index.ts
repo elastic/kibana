@@ -7,6 +7,8 @@
 
 export type { FeaturesPrivileges } from './features_privileges';
 export type {
+  QueryRolesRole,
+  QueryRolesResult,
   Role,
   RoleKibanaPrivilege,
   RoleIndexPrivilege,
