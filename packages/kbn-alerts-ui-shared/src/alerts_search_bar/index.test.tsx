@@ -167,7 +167,6 @@ describe('AlertsSearchBar', () => {
 
     await waitFor(() => {
       expect(onFiltersUpdatedMock).toHaveBeenCalledWith(filters);
-      expect(mockDataPlugin.query.filterManager.setFilters).toHaveBeenCalledWith(filters);
     });
   });
 });

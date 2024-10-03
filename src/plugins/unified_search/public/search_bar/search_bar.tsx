@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compact } from 'lodash';
+import { cloneDeep, compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
@@ -129,6 +129,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   suggestionsSize?: SuggestionsListSize;
   suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
+  shouldExecuteFilterManagerUpdate?: boolean;
 
   /**
    * Disables all inputs and interactive elements,
@@ -413,9 +414,19 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     });
   };
 
+  public onFiltersChange = (filters: Filter[]) => {
+    const mappedFilters = filters.map((filter) => cloneDeep(filter));
+
+    if (this.props.shouldExecuteFilterManagerUpdate) {
+      this.services.data.query.filterManager.setFilters(mappedFilters);
+    }
+
+    this.props.onFiltersUpdated?.(mappedFilters);
+  };
+
   public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
     // clean up all filters
-    this.props.onFiltersUpdated?.([]);
+    this.onFiltersChange?.([]);
     this.setState(
       {
         query: query as QT,
@@ -546,7 +557,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         saveFormComponent={saveQueryFormComponent}
         toggleFilterBarMenuPopover={this.toggleFilterBarMenuPopover}
         openQueryBarMenu={this.state.openQueryBarMenu}
-        onFiltersUpdated={this.props.onFiltersUpdated}
+        onFiltersUpdated={this.onFiltersChange}
         filters={this.props.filters}
         additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? {}}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -581,7 +592,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
-          onFiltersUpdated={this.props.onFiltersUpdated}
+          onFiltersUpdated={this.onFiltersChange}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
@@ -593,7 +604,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         <FilterBar
           afterQueryBar
           filters={this.props.filters!}
-          onFiltersUpdated={this.props.onFiltersUpdated}
+          onFiltersUpdated={this.onFiltersChange}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
@@ -647,7 +658,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           filters={this.props.filters!}
-          onFiltersUpdated={this.props.onFiltersUpdated}
+          onFiltersUpdated={this.onFiltersChange}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}

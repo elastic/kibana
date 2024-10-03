@@ -119,11 +119,7 @@ export const AlertsSearchBar = ({
     displayStyle: 'inPage',
     showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated: (newFilters) => {
-      // filterManager.setFilters populates filter.meta so filter pill has pretty title
-      dataService.query.filterManager.setFilters(newFilters);
-      onFiltersUpdated?.(newFilters);
-    },
+    onFiltersUpdated: onFiltersUpdated,
     onRefresh,
     showDatePicker,
     showQueryInput: true,
@@ -132,6 +128,7 @@ export const AlertsSearchBar = ({
     submitOnBlur,
     onQueryChange: onSearchQueryChange,
     suggestionsAbstraction: isSecurity ? undefined : SA_ALERTS,
+    shouldExecuteFilterManagerUpdate: true,
   });
 };
 
