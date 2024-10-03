@@ -284,7 +284,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
     const filter = '';
     dispatch(setFilter(filter, elementId, pageId));
 
-    if(doRender) {
+    if (doRender) {
       dispatch(fetchAllRenderables(updatedElement));
     }
     // setFilter will trigger a re-render so we can skip the fetch here
