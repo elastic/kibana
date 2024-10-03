@@ -214,7 +214,7 @@
         "label": "ConnectorConfigurationComponent",
         "description": [],
         "signature": [
-          "({ children, connector, hasPlatinumLicense, isLoading, saveConfig, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<React.PropsWithChildren<ConnectorConfigurationProps>>) => JSX.Element"
+          "({ children, connector, hasPlatinumLicense, isLoading, saveConfig, subscriptionLink, stackManagementLink, }: React.PropsWithChildren<ConnectorConfigurationProps>) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-connectors/components/configuration/connector_configuration.tsx",
         "deprecated": false,
@@ -228,7 +228,7 @@
             "label": "{\n  children,\n  connector,\n  hasPlatinumLicense,\n  isLoading,\n  saveConfig,\n  subscriptionLink,\n  stackManagementLink,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<ConnectorConfigurationProps>>"
+              "React.PropsWithChildren<ConnectorConfigurationProps>"
             ],
             "path": "packages/kbn-search-connectors/components/configuration/connector_configuration.tsx",
             "deprecated": false,
@@ -1764,7 +1764,7 @@
         "label": "SyncJobsTable",
         "description": [],
         "signature": [
-          "({ isLoading, onPaginate, pagination, syncJobs, type, cancelConfirmModalProps, }: React.PropsWithChildren<SyncJobHistoryTableProps>) => JSX.Element"
+          "({ isLoading, onPaginate, pagination, syncJobs, type, cancelConfirmModalProps, }: SyncJobHistoryTableProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-connectors/components/sync_jobs/sync_jobs_table.tsx",
         "deprecated": false,
@@ -1773,12 +1773,12 @@
           {
             "parentPluginId": "@kbn/search-connectors",
             "id": "def-common.SyncJobsTable.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  isLoading,\n  onPaginate,\n  pagination,\n  syncJobs,\n  type,\n  cancelConfirmModalProps = {\n    onConfirmCb: () => {},\n    isLoading: false,\n    setSyncJobIdToCancel: () => {},\n    syncJobIdToCancel: undefined,\n  },\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<SyncJobHistoryTableProps>"
+              "SyncJobHistoryTableProps"
             ],
             "path": "packages/kbn-search-connectors/components/sync_jobs/sync_jobs_table.tsx",
             "deprecated": false,
@@ -6685,7 +6685,7 @@
             "section": "def-common.SyncStatus",
             "text": "SyncStatus"
           },
-          "; created_at: string; metadata: Record<string, unknown>; job_type: ",
+          "; metadata: Record<string, unknown>; created_at: string; job_type: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -27,6 +27,7 @@ import {
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
@@ -39,6 +40,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
+import { asyncMap } from '@kbn/std';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
@@ -56,6 +58,7 @@ import {
   type DataControlFactory,
   type DataControlFieldRegistry,
 } from './types';
+import { ControlFactory } from '../types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -83,60 +86,89 @@ const CompatibleControlTypesComponent = ({
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
-  const dataControlFactories = useMemo(() => {
-    return getAllControlTypes()
-      .map((type) => getControlFactory(type))
-      .filter((factory) => isDataControlFactory(factory))
-      .sort(
-        (
-          { order: orderA = 0, getDisplayName: getDisplayNameA },
-          { order: orderB = 0, getDisplayName: getDisplayNameB }
-        ) => {
-          const orderComparison = orderB - orderA; // sort descending by order
-          return orderComparison === 0
-            ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
-            : orderComparison;
+  const [dataControlFactories, setDataControlFactories] = useState<
+    DataControlFactory[] | undefined
+  >(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    asyncMap<string, ControlFactory>(getAllControlTypes(), async (controlType) =>
+      getControlFactory(controlType)
+    )
+      .then((controlFactories) => {
+        if (!cancelled) {
+          setDataControlFactories(
+            controlFactories
+              .filter((factory) => isDataControlFactory(factory))
+              .sort(
+                (
+                  { order: orderA = 0, getDisplayName: getDisplayNameA },
+                  { order: orderB = 0, getDisplayName: getDisplayNameB }
+                ) => {
+                  const orderComparison = orderB - orderA; // sort descending by order
+                  return orderComparison === 0
+                    ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
+                    : orderComparison;
+                }
+              ) as unknown as DataControlFactory[]
+          );
         }
-      );
+      })
+      .catch(() => {
+        if (!cancelled) setDataControlFactories([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
-    <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
-      {dataControlFactories.map((factory) => {
-        const disabled =
-          fieldRegistry && selectedFieldName
-            ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
-            : true;
-        const keyPadMenuItem = (
-          <EuiKeyPadMenuItem
-            key={factory.type}
-            id={`create__${factory.type}`}
-            aria-label={factory.getDisplayName()}
-            data-test-subj={`create__${factory.type}`}
-            isSelected={factory.type === selectedControlType}
-            disabled={disabled}
-            onClick={() => setSelectedControlType(factory.type)}
-            label={factory.getDisplayName()}
-          >
-            <EuiIcon type={factory.getIconType()} size="l" />
-          </EuiKeyPadMenuItem>
-        );
+    <EuiSkeletonRectangle
+      isLoading={dataControlFactories === undefined}
+      width="100px"
+      height="100px"
+    >
+      <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
+        {(dataControlFactories ?? []).map((factory) => {
+          const disabled =
+            fieldRegistry && selectedFieldName
+              ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
+              : true;
+          const keyPadMenuItem = (
+            <EuiKeyPadMenuItem
+              key={factory.type}
+              id={`create__${factory.type}`}
+              aria-label={factory.getDisplayName()}
+              data-test-subj={`create__${factory.type}`}
+              isSelected={factory.type === selectedControlType}
+              disabled={disabled}
+              onClick={() => setSelectedControlType(factory.type)}
+              label={factory.getDisplayName()}
+            >
+              <EuiIcon type={factory.getIconType()} size="l" />
+            </EuiKeyPadMenuItem>
+          );
 
-        return disabled ? (
-          <EuiToolTip
-            key={`disabled__${factory.type}`}
-            content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage({
-              fieldSelected: Boolean(selectedFieldName),
-              controlType: factory.getDisplayName(),
-            })}
-          >
-            {keyPadMenuItem}
-          </EuiToolTip>
-        ) : (
-          keyPadMenuItem
-        );
-      })}
-    </EuiKeyPadMenu>
+          return disabled ? (
+            <EuiToolTip
+              key={`disabled__${factory.type}`}
+              content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
+                {
+                  fieldSelected: Boolean(selectedFieldName),
+                  controlType: factory.getDisplayName(),
+                }
+              )}
+            >
+              {keyPadMenuItem}
+            </EuiToolTip>
+          ) : (
+            keyPadMenuItem
+          );
+        })}
+      </EuiKeyPadMenu>
+    </EuiSkeletonRectangle>
   );
 };
 
@@ -186,9 +218,33 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     };
   }, [editorState.dataViewId]);
 
+  const [controlFactory, setControlFactory] = useState<DataControlFactory | undefined>(undefined);
+  useEffect(() => {
+    if (!selectedControlType) {
+      setControlFactory(undefined);
+      return;
+    }
+
+    let cancelled = false;
+    getControlFactory(selectedControlType)
+      .then((nextControlFactory) => {
+        if (!cancelled) {
+          setControlFactory(nextControlFactory as unknown as DataControlFactory);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setControlFactory(undefined);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedControlType]);
+
   const CustomSettingsComponent = useMemo(() => {
-    if (!selectedControlType || !editorState.fieldName || !fieldRegistry) return;
-    const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
+    if (!controlFactory || !editorState.fieldName || !fieldRegistry) return;
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
@@ -217,7 +273,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, initialState, editorState, controlGroupApi]);
+  }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
 
   return (
     <>

@@ -19,8 +19,8 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   profileId: 'security-root-profile',
   isExperimental: true,
   profile: {
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
+    getCellRenderers: (prev) => (params) => ({
+      ...prev(params),
       'host.name': (props) => {
         const CellRenderer = getDiscoverCellRenderer({
           fieldName: 'host.name',

@@ -10,7 +10,6 @@ import {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
@@ -19,17 +18,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import { EntityType } from '../../../common/entities';
+import type { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
 } from '../../../common/es_fields/entities';
-import { APIReturnType } from '../../api';
+import type { APIReturnType } from '../../api';
 import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
+import { EntityName } from './entity_name';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
+type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
 
 export type EntityColumnIds =
   | typeof ENTITY_DISPLAY_NAME
@@ -103,7 +104,7 @@ const columns: EuiDataGridColumn[] = [
 
 interface Props {
   loading: boolean;
-  entities: InventoryEntitiesAPIReturnType['entities'];
+  entities: LatestEntities;
   sortDirection: 'asc' | 'desc';
   sortField: string;
   pageIndex: number;
@@ -182,12 +183,7 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
-            <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
-              {entity[columnEntityTableId]}
-            </EuiLink>
-          );
+          return <EntityName entity={entity} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }

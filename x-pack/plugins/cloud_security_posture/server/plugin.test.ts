@@ -11,20 +11,13 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  createPackagePolicyServiceMock,
-  createArtifactsClientMock,
-  createMockPackageService,
-  createMockAgentService,
-  createMockAgentPolicyService,
-} from '@kbn/fleet-plugin/server/mocks';
+import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   Installation,
   ListResult,
@@ -32,15 +25,12 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
-  FleetStartContract,
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
-  ExternalCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import {
   ElasticsearchClient,
@@ -56,26 +46,9 @@ const mockRouteContext = {
   core: coreMock.createRequestHandlerContext(),
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 
-const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> => {
-  return {
-    authz: {
-      fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
-    },
-    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    // @ts-expect-error 2322
-    agentService: createMockAgentService(),
-    // @ts-expect-error 2322
-    packageService: createMockPackageService(),
-    agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((..._: ExternalCallback) => {}),
-    packagePolicyService: createPackagePolicyServiceMock(),
-    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-  };
-};
-
 describe('Cloud Security Posture Plugin', () => {
   describe('start()', () => {
-    const fleetMock = createMockFleetStartContract();
+    const fleetMock = createFleetStartContractMock();
     const mockPlugins: CspServerPluginStartDeps = {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),

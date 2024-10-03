@@ -72,6 +72,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -98,7 +99,12 @@ import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_obj
 import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type { AgentPolicyServiceInterface, AgentService, PackageService } from './services';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  ArtifactsClientInterface,
+  PackageService,
+} from './services';
 import {
   agentPolicyService,
   AgentServiceImpl,
@@ -236,7 +242,7 @@ export interface FleetStartContract {
    * Create a Fleet Artifact Client instance
    * @param packageName
    */
-  createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+  createArtifactsClient: (packageName: string) => ArtifactsClientInterface;
 
   /**
    * Create a Fleet Files client instance

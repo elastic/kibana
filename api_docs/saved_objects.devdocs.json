@@ -214,7 +214,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
@@ -420,7 +420,7 @@
             "section": "def-public.OriginSaveModalProps",
             "text": "OriginSaveModalProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
         "deprecated": false,
