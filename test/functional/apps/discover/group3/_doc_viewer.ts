@@ -151,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
           await browser.pressKeys(browser.keys.TAB);
+          await browser.pressKeys(browser.keys.TAB);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-2`);
         });
