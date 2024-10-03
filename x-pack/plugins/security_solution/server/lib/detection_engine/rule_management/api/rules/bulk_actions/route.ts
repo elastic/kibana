@@ -66,6 +66,7 @@ export const performBulkActionRoute = (
         },
       },
       options: {
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
