@@ -191,7 +191,7 @@
             "$ref": "#/components/parameters/from"
           },
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           },
           {
             "$ref": "#/components/parameters/page_index"
@@ -297,7 +297,7 @@
             "$ref": "#/components/parameters/alert_id"
           },
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           }
         ],
         "responses": {
@@ -354,7 +354,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           }
         ],
         "responses": {
@@ -572,7 +572,7 @@
       "post": {
         "summary": "Add case settings",
         "operationId": "setCaseConfigurationDefaultSpace",
-        "description": "Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.\n",
+        "description": "Case settings include external connection details, custom fields, and templates. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.\n",
         "tags": [
           "cases"
         ],
@@ -1055,7 +1055,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           }
         ],
         "responses": {
@@ -1128,7 +1128,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           }
         ],
         "responses": {
@@ -1176,7 +1176,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/components/parameters/owner"
+            "$ref": "#/components/parameters/owner_filter"
           }
         ],
         "responses": {
@@ -1904,10 +1904,10 @@
         "schema": {
           "oneOf": [
             {
-              "$ref": "#/components/schemas/assignee_filter"
+              "$ref": "#/components/schemas/string"
             },
             {
-              "$ref": "#/components/schemas/assignees_filter"
+              "$ref": "#/components/schemas/string_array"
             }
           ]
         }
@@ -1946,7 +1946,7 @@
           "example": "now-1d"
         }
       },
-      "owner": {
+      "owner_filter": {
         "in": "query",
         "name": "owner",
         "description": "A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.\n",
@@ -1957,12 +1957,6 @@
             },
             {
               "$ref": "#/components/schemas/owners"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/owners"
-              }
             }
           ]
         },
@@ -1996,14 +1990,10 @@
         "schema": {
           "oneOf": [
             {
-              "type": "string"
+              "$ref": "#/components/schemas/string"
             },
             {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "maxItems": 100
+              "$ref": "#/components/schemas/string_array"
             }
           ]
         },
@@ -2027,10 +2017,7 @@
               "$ref": "#/components/schemas/searchFieldsType"
             },
             {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/searchFieldsType"
-              }
+              "$ref": "#/components/schemas/searchFieldsTypeArray"
             }
           ]
         }
@@ -2103,14 +2090,10 @@
         "schema": {
           "oneOf": [
             {
-              "type": "string"
+              "$ref": "#/components/schemas/string"
             },
             {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "maxItems": 100
+              "$ref": "#/components/schemas/string_array"
             }
           ]
         },
@@ -3519,13 +3502,13 @@
           }
         }
       },
-      "assignee_filter": {
+      "string": {
         "type": "string"
       },
-      "assignees_filter": {
+      "string_array": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/assignee_filter"
+          "$ref": "#/components/schemas/string"
         },
         "maxItems": 100
       },
@@ -3549,6 +3532,12 @@
           "description",
           "title"
         ]
+      },
+      "searchFieldsTypeArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/searchFieldsType"
+        }
       },
       "closure_types": {
         "type": "string",
