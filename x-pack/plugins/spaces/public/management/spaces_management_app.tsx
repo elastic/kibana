@@ -36,6 +36,7 @@ interface CreateParams {
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
+  isServerless: boolean;
 }
 
 export const spacesManagementApp = Object.freeze({
@@ -48,6 +49,7 @@ export const spacesManagementApp = Object.freeze({
     eventTracker,
     getRolesAPIClient,
     getPrivilegesAPIClient,
+    isServerless,
   }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
@@ -92,6 +94,7 @@ export const spacesManagementApp = Object.freeze({
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
               allowSolutionVisibility={config.allowSolutionVisibility}
+              isServerless={isServerless}
             />
           );
         };
