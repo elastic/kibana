@@ -15,8 +15,8 @@ export { spanMapping } from './span';
 export { serviceInstanceMetadataDetailsMapping } from './service_instance';
 export { serviceMetadataDetailsMapping, serviceMetadataIconsMapping } from './service_metadata';
 export { serviceAgentNameMapping, serviceVersionMapping } from './service';
-export { spanLinksDetailsMapping, linkedParentsOfSpanMapping } from './span_links';
-export { traceDocMapping } from './trace';
+export { spanLinksDetailsMapping, spanLinkedChildrenMapping } from './span_links';
+export { traceWaterfallMapping } from './trace';
 export {
   errorDocsMapping,
   errorGroupMainStatisticsMapping,
@@ -25,3 +25,5 @@ export {
 export { cloudMapping } from './cloud';
 export { containerMapping } from './container';
 export { kubernetesMapping } from './kubernetes';
+
+export type { SpanLinkedChild, SpanLinksDetails } from './span_links';

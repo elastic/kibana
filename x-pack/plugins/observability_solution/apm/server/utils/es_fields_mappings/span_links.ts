@@ -17,14 +17,16 @@ import {
   TRANSACTION_DURATION,
   PROCESSOR_EVENT,
   AGENT_NAME,
-  SPAN_LINKS_TRACE_ID,
-  SPAN_LINKS_SPAN_ID,
-  type SpanLink,
+  Transaction,
+  Span,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { Fields } from './types';
 import { normalizeValue } from './es_fields_mappings_helpers';
 import { serviceMapping } from './service';
+
+export type SpanLinkedChild = ReturnType<typeof spanLinkedChildrenMapping>;
+export type SpanLinksDetails = ReturnType<typeof spanLinksDetailsMapping>;
 
 export const spanLinksDetailsMapping = (fields: Fields) => {
   if (!fields) return undefined;
@@ -46,7 +48,7 @@ export const spanLinksDetailsMapping = (fields: Fields) => {
       id: normalizeValue<string>(fields[TRANSACTION_ID]),
       name: normalizeValue<string>(fields[TRANSACTION_NAME]),
       duration: {
-        us: normalizeValue<string>(fields[TRANSACTION_DURATION]),
+        us: normalizeValue<number>(fields[TRANSACTION_DURATION]),
       },
     },
     ...serviceMapping(fields),
@@ -59,18 +61,28 @@ export const spanLinksDetailsMapping = (fields: Fields) => {
   };
 };
 
-// todo: pending #192337
-export const linkedParentsOfSpanMapping = (fields: Fields) => {
-  if (!fields ?? !fields[SPAN_LINKS_TRACE_ID]) return [];
+export const spanLinkedChildrenMapping = ({
+  fields,
+  _source,
+}: {
+  fields: Fields;
+  _source?: Transaction | Span;
+}) => {
+  if (!fields) return undefined;
 
-  return (fields[SPAN_LINKS_TRACE_ID] as string[])?.map((v, index) => {
-    return {
-      trace: {
-        id: v,
-      },
-      span: {
-        id: fields[SPAN_LINKS_SPAN_ID]?.[index] ?? '',
-      },
-    };
-  }) as SpanLink[];
+  return {
+    trace: {
+      id: normalizeValue<string>(fields[TRACE_ID]),
+    },
+    transaction: {
+      id: normalizeValue<string>(fields[TRANSACTION_ID]),
+    },
+    processor: {
+      event: normalizeValue<string>(fields[PROCESSOR_EVENT]),
+    },
+    span: {
+      id: normalizeValue<string>(fields[SPAN_ID]),
+      ...(_source?.span?.links ? { links: _source.span.links } : {}),
+    },
+  };
 };

@@ -7,7 +7,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
-import { spanLinksDetailsMapping } from '../../utils/es_fields_mappings';
+import { type SpanLinksDetails, spanLinksDetailsMapping } from '../../utils/es_fields_mappings';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -26,8 +26,6 @@ import {
 import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
-import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -53,21 +51,6 @@ async function fetchSpanLinksDetails({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    _source: [
-      TRACE_ID,
-      SPAN_ID,
-      TRANSACTION_ID,
-      SERVICE_NAME,
-      SPAN_NAME,
-      TRANSACTION_NAME,
-      TRANSACTION_DURATION,
-      SPAN_DURATION,
-      PROCESSOR_EVENT,
-      SPAN_SUBTYPE,
-      SPAN_TYPE,
-      AGENT_NAME,
-      SERVICE_ENVIRONMENT,
-    ],
     body: {
       fields: [
         TRACE_ID,
@@ -120,14 +103,17 @@ async function fetchSpanLinksDetails({
     },
   });
 
+  const spanLinksDetails = response.hits.hits
+    .map((hit) => spanLinksDetailsMapping(hit.fields))
+    .filter((hits): hits is NonNullable<SpanLinksDetails> => !!hits);
+
   const spanIdsMap = keyBy(spanLinks, 'span.id');
 
-  return response.hits.hits.filter(({ fields }) => {
+  return spanLinksDetails.filter((spanLink) => {
     // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
     // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
-    if (fields['processor.event']?.[0] === ProcessorEvent.span) {
-      const span = spanLinksDetailsMapping(fields);
-      const hasSpanId = spanIdsMap[span.span.id] || false;
+    if (spanLink?.processor.event === ProcessorEvent.span) {
+      const hasSpanId = spanIdsMap[spanLink.span.id] || false;
       return hasSpanId;
     }
     return true;
@@ -169,38 +155,36 @@ export async function getSpanLinksDetails({
 
   // Creates a map for all span links details found
   const spanLinksDetailsMap = linkedSpans.reduce<Record<string, SpanLinkDetails>>(
-    (acc, { _source: source }) => {
+    (acc, spanLink) => {
       const commonDetails = {
-        serviceName: source.service.name,
-        agentName: source.agent.name,
-        environment: source.service.environment as Environment,
-        transactionId: source.transaction?.id,
+        serviceName: spanLink.service.name,
+        agentName: spanLink.agent.name,
+        environment: spanLink.service.environment as Environment,
+        transactionId: spanLink.transaction?.id,
       };
 
-      if (source.processor.event === ProcessorEvent.transaction) {
-        const transaction = source as TransactionRaw;
-        const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+      if (spanLink.processor.event === ProcessorEvent.transaction) {
+        const key = `${spanLink.trace.id}:${spanLink.transaction.id}`;
         acc[key] = {
-          traceId: source.trace.id,
-          spanId: transaction.transaction.id,
+          traceId: spanLink.trace.id,
+          spanId: spanLink.transaction.id,
           details: {
             ...commonDetails,
-            spanName: transaction.transaction.name,
-            duration: transaction.transaction.duration.us,
+            spanName: spanLink.transaction.name,
+            duration: spanLink.transaction.duration.us,
           },
         };
       } else {
-        const span = source as SpanRaw;
-        const key = `${span.trace.id}:${span.span.id}`;
+        const key = `${spanLink.trace.id}:${spanLink.span.id}`;
         acc[key] = {
-          traceId: source.trace.id,
-          spanId: span.span.id,
+          traceId: spanLink.trace.id,
+          spanId: spanLink.span.id,
           details: {
             ...commonDetails,
-            spanName: span.span.name,
-            duration: span.span.duration.us,
-            spanSubtype: span.span.subtype,
-            spanType: span.span.type,
+            spanName: spanLink.span.name,
+            duration: spanLink.span.duration.us,
+            spanSubtype: spanLink.span.subtype,
+            spanType: spanLink.span.type,
           },
         };
       }

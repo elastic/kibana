@@ -16,10 +16,9 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
-import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { SpanLinkedChild, spanLinkedChildrenMapping } from '../../utils/es_fields_mappings';
 
 async function fetchLinkedChildrenOfSpan({
   traceId,
@@ -43,8 +42,9 @@ async function fetchLinkedChildrenOfSpan({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
+    _source: [SPAN_LINKS],
     body: {
+      fields: [TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
       track_total_hits: false,
       size: 1000,
       query: {
@@ -58,19 +58,23 @@ async function fetchLinkedChildrenOfSpan({
       },
     },
   });
+
+  const linkedChildren = response.hits.hits.map((hit) => spanLinkedChildrenMapping(hit));
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
-  return response.hits.hits.filter(({ _source: source }) => {
-    const spanLinks = source.span?.links?.filter((spanLink) => {
-      return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
-    });
-    return !isEmpty(spanLinks);
-  });
+  return linkedChildren
+    .filter((linkedChild) => {
+      const spanLinks = linkedChild?.span?.links?.filter((spanLink) => {
+        return spanLink.trace.id === traceId && (spanId ? spanLink.span.id === spanId : true);
+      });
+      return !isEmpty(spanLinks);
+    })
+    .filter((linkedChild): linkedChild is NonNullable<SpanLinkedChild> => !!linkedChild);
 }
 
-function getSpanId(source: TransactionRaw | SpanRaw) {
-  return source.processor.event === ProcessorEvent.span
-    ? (source as SpanRaw).span.id
-    : (source as TransactionRaw).transaction?.id;
+function getSpanId(linkedChild: NonNullable<SpanLinkedChild>) {
+  return linkedChild.processor.event === ProcessorEvent.span
+    ? linkedChild.span?.id
+    : linkedChild.transaction?.id;
 }
 
 export async function getSpanLinksCountById({
@@ -90,8 +94,9 @@ export async function getSpanLinksCountById({
     start,
     end,
   });
-  return linkedChildren.reduce<Record<string, number>>((acc, { _source: source }) => {
-    source.span?.links?.forEach((link) => {
+
+  return linkedChildren.reduce<Record<string, number>>((acc, item) => {
+    item.span?.links?.forEach((link) => {
       // Ignores span links that don't belong to this trace
       if (link.trace.id === traceId) {
         acc[link.span.id] = (acc[link.span.id] || 0) + 1;
@@ -122,10 +127,10 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return linkedChildren.map(({ _source: source }) => {
+  return linkedChildren.map((item) => {
     return {
-      trace: { id: source.trace.id },
-      span: { id: getSpanId(source) },
+      trace: { id: item.trace.id },
+      span: { id: getSpanId(item) },
     };
   });
 }

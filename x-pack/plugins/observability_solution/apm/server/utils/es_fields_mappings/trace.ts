@@ -24,13 +24,14 @@ import {
   SPAN_SUBTYPE,
   SPAN_DURATION,
   SPAN_ACTION,
-  SpanLink,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_SYNC,
   CHILD_ID,
   TIMESTAMP,
+  Transaction,
+  Span,
 } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { normalizeValue } from './es_fields_mappings_helpers';
@@ -38,10 +39,15 @@ import type { WaterfallTransaction, WaterfallSpan } from '../../../common/waterf
 import type { Fields } from './types';
 import { serviceMapping } from './service';
 
-export const traceDocMapping = (
-  fields: Fields,
-  spanLinkFromSource?: SpanLink[]
-): WaterfallTransaction | WaterfallSpan | undefined => {
+export type TraceWaterfallMapping = ReturnType<typeof traceWaterfallMapping>;
+
+export const traceWaterfallMapping = ({
+  fields,
+  _source,
+}: {
+  fields: Fields;
+  _source?: Transaction | Span;
+}): WaterfallTransaction | WaterfallSpan | undefined => {
   if (!fields) return undefined;
 
   return {
@@ -85,7 +91,7 @@ export const traceDocMapping = (
         us: normalizeValue<number>(fields[SPAN_DURATION]),
       },
       action: normalizeValue<string>(fields[SPAN_ACTION]),
-      ...(spanLinkFromSource ? spanLinkFromSource : undefined),
+      ...(_source?.span?.links ? { links: _source.span?.links } : undefined),
       composite: {
         count: normalizeValue<number>(fields[SPAN_COMPOSITE_COUNT]),
         sum: {

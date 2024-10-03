@@ -119,5 +119,5 @@ export async function getTransaction({
     },
   });
 
-  return transactionMapping(resp.hits.hits[0]?.fields);
+  return transactionMapping(resp.hits.hits[0]);
 }

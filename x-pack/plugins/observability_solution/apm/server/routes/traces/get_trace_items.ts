@@ -11,7 +11,7 @@ import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typ
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last } from 'lodash';
-import { errorDocsMapping, traceDocMapping } from '../../utils/es_fields_mappings';
+import { errorDocsMapping, traceWaterfallMapping } from '../../utils/es_fields_mappings';
 import { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -135,9 +135,7 @@ export async function getTraceItems({
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
 
-  const traceDocs = traceResponse.hits.map((hit) =>
-    traceDocMapping(hit.fields, hit?._source?.span?.links)
-  );
+  const traceDocs = traceResponse.hits.map((hit) => traceWaterfallMapping(hit));
   const errorDocs = errorResponse.hits.hits.map((hit) => errorDocsMapping(hit.fields));
 
   return {
