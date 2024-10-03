@@ -28,6 +28,7 @@ interface SetupDeps {
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
   logger: Logger;
+  isServerless: boolean;
 }
 
 export class ManagementService {
@@ -42,6 +43,7 @@ export class ManagementService {
     getRolesAPIClient,
     eventTracker,
     getPrivilegesAPIClient,
+    isServerless,
   }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
       spacesManagementApp.create({
@@ -52,6 +54,7 @@ export class ManagementService {
         getRolesAPIClient,
         eventTracker,
         getPrivilegesAPIClient,
+        isServerless,
       })
     );
   }
