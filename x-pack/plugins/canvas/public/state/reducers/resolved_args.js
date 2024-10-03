@@ -10,8 +10,6 @@ import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
-// import { flushContext, flushContextAfterIndex } from '../actions/elements';
-// import { setWorkpad } from '../actions/workpad';
 
 const { set, del } = immutable;
 /*
