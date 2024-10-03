@@ -8,22 +8,12 @@
 import { handleActions } from 'redux-actions';
 import { coreServices } from '../../services/kibana_services';
 import { getDefaultWorkpad } from '../defaults';
-import {
-  setWorkpad,
-  sizeWorkpad,
-  setColors,
-  setName,
-  setWriteable,
-  setWorkpadCSS,
-  setWorkpadVariables,
-  resetWorkpad,
-} from '../actions/workpad';
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export const workpadReducer = handleActions(
   {
-    [setWorkpad]: (workpadState, { payload }) => {
+    ['setWorkpad']: (workpadState, { payload }) => {
       coreServices.chrome.recentlyAccessed.add(
         `${APP_ROUTE_WORKPAD}/${payload.id}`,
         payload.name,
@@ -32,15 +22,15 @@ export const workpadReducer = handleActions(
       return payload;
     },
 
-    [sizeWorkpad]: (workpadState, { payload }) => {
+    ['sizeWorkpad']: (workpadState, { payload }) => {
       return { ...workpadState, ...payload };
     },
 
-    [setColors]: (workpadState, { payload }) => {
+    ['setColors']: (workpadState, { payload }) => {
       return { ...workpadState, colors: payload };
     },
 
-    [setName]: (workpadState, { payload }) => {
+    ['setName']: (workpadState, { payload }) => {
       coreServices.chrome.recentlyAccessed.add(
         `${APP_ROUTE_WORKPAD}/${workpadState.id}`,
         payload,
@@ -49,19 +39,19 @@ export const workpadReducer = handleActions(
       return { ...workpadState, name: payload };
     },
 
-    [setWriteable]: (workpadState, { payload }) => {
+    ['setWriteable']: (workpadState, { payload }) => {
       return { ...workpadState, isWriteable: Boolean(payload) };
     },
 
-    [setWorkpadCSS]: (workpadState, { payload }) => {
+    ['setWorkpadCSS']: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
     },
 
-    [setWorkpadVariables]: (workpadState, { payload }) => {
+    ['setWorkpadVariables']: (workpadState, { payload }) => {
       return { ...workpadState, variables: payload };
     },
 
-    [resetWorkpad]: () => ({ ...getDefaultWorkpad() }),
+    ['resetWorkpad']: () => ({ ...getDefaultWorkpad() }),
   },
   {}
 );

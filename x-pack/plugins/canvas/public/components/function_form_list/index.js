@@ -78,7 +78,7 @@ const componentFactory = ({
   parentPath,
   removable,
 }) => {
-  const { expressions } = getCanvasExpressionService();
+  const expressions = getCanvasExpressionService();
   return {
     args,
     nestedFunctionsArgs: argsWithExprFunctions,
