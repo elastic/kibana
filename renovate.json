@@ -109,8 +109,24 @@
       "enabled": true
     },
     {
+      "groupName": "RxJS",
+      "matchDepNames": ["rxjs"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/ebt",
       "matchDepNames": ["@elastic/ebt"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "lodash",
+      "matchDepNames": ["lodash", "@types/lodash"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
@@ -136,7 +152,7 @@
     },
     {
       "groupName": "HAPI ecosystem",
-      "matchDepNames": ["@hapi/**", "brok"],
+      "matchDepNames": ["@hapi/**", "brok", "joi"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:prev-minor"],

@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Filter by type panel', async () => {
       await testSubjects.click('toggleFieldFilterButton');
       await a11y.testAppSnapshot();
-      await testSubjects.click('typeFilter-string');
+      await testSubjects.click('typeFilter-keyword');
     });
 
     it('Options control panel & dashboard with options control', async () => {

@@ -24,7 +24,7 @@
    "source": [
     "## Create Elastic Cloud deployment\n",
     "\n",
-    "If you don't have an Elastic Cloud deployment, sign up [here](https://cloud.elastic.co/registration?utm_source=github&utm_content=elasticsearch-labs-notebook) for a free trial.\n",
+    "If you don't have an Elastic Cloud deployment, sign up [here](https://cloud.elastic.co/registration?onboarding_token=vectorsearch&utm_source=github&utm_content=elasticsearch-labs-notebook) for a free trial.\n",
     "\n",
     "Once logged in to your Elastic Cloud account, go to the [Create deployment](https://cloud.elastic.co/deployments/create) page and select **Create deployment**. Leave all settings with their default values."
    ]
@@ -53,7 +53,7 @@
    },
    "outputs": [],
    "source": [
-    "!pip install -qU elasticsearch sentence-transformers"
+    "!pip install -qU elasticsearch sentence-transformers==2.7.0"
    ]
   },
   {

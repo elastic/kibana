@@ -37,6 +37,7 @@ import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
+import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import type { ChangePointEmbeddableRuntimeState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
@@ -638,7 +639,7 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
 }) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
-  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
   const timefilter = useTimefilter();
   // required in order to trigger state updates
   useTimeRangeUpdates();
@@ -653,8 +654,6 @@ export const FieldsControls: FC<PropsWithChildren<FieldsControlsProps>> = ({
       charts,
     };
   }, [uiSettings, data, fieldFormats, charts]);
-
-  const FieldStatsFlyoutProvider = fieldStats!.FieldStatsFlyoutProvider;
 
   const onChangeFn = useCallback(
     (field: keyof FieldConfig, value: string) => {

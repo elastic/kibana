@@ -48,23 +48,23 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   TracksOverlays & {
     addFromLibrary: () => void;
-    animatePanelTransforms$: PublishingSubject<boolean | undefined>;
+    animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
-    embeddedExternally$: PublishingSubject<boolean | undefined>;
-    fullScreenMode$: PublishingSubject<boolean | undefined>;
+    fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
     getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
     getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
     getSettings: () => DashboardStateFromSettingsFlyout;
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
-    hasOverlays$: PublishingSubject<boolean | undefined>;
-    hasRunMigrations$: PublishingSubject<boolean | undefined>;
-    hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
+    hasOverlays$: PublishingSubject<boolean>;
+    hasRunMigrations$: PublishingSubject<boolean>;
+    hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
-    managed$: PublishingSubject<boolean | undefined>;
+    isEmbeddedExternally: boolean;
+    managed$: PublishingSubject<boolean>;
     panels$: PublishingSubject<DashboardPanelMap>;
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;

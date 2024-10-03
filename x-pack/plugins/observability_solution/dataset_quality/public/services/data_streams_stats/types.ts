@@ -19,7 +19,7 @@ import { NonAggregatableDatasets } from '../../../common/api_types';
 export type DataStreamsStatsServiceSetup = void;
 
 export interface DataStreamsStatsServiceStart {
-  client: IDataStreamsStatsClient;
+  getClient: () => Promise<IDataStreamsStatsClient>;
 }
 
 export interface DataStreamsStatsServiceStartDeps {

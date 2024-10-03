@@ -43,7 +43,7 @@ export const useDataVizChartTheme = (): PartialTheme => {
           visible: true,
         },
         point: {
-          visible: false,
+          visible: 'never',
           radius: 0,
           opacity: 0,
         },

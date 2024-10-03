@@ -17,6 +17,7 @@ describe('http auth', () => {
     root = createRoot({
       plugins: { initialize: false },
       elasticsearch: { skipStartupConnectionCheck: true },
+      server: { restrictInternalApis: false },
     });
     await root.preboot();
   });

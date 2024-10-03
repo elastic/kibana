@@ -172,44 +172,6 @@ export function defineRoutes({
     })
   );
 
-  router.post(
-    {
-      path: APIRoutes.POST_API_KEY,
-      validate: {
-        body: schema.object({
-          name: schema.string(),
-          expiresInDays: schema.number(),
-          indices: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    errorHandler(logger)(async (context, request, response) => {
-      const { name, expiresInDays, indices } = request.body;
-      const { client } = (await context.core).elasticsearch;
-
-      const apiKey = await client.asCurrentUser.security.createApiKey({
-        name,
-        expiration: `${expiresInDays}d`,
-        role_descriptors: {
-          [`playground-${name}-role`]: {
-            cluster: [],
-            indices: [
-              {
-                names: indices,
-                privileges: ['read'],
-              },
-            ],
-          },
-        },
-      });
-
-      return response.ok({
-        body: { apiKey },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
   // SECURITY: We don't apply any authorization tags to this route because all actions performed
   // on behalf of the user making the request and governed by the user's own cluster privileges.
   router.get(

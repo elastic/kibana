@@ -123,7 +123,7 @@ const getServerlessESClient = ({ port }: { port: number }) => {
 const getServerlessDefault = () => {
   return {
     server: {
-      restrictInternalApis: true,
+      restrictInternalApis: true, // has no effect, defaults to true
       versioned: {
         versionResolution: 'newest',
         strictClientVersionCheck: false,

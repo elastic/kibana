@@ -7432,12 +7432,16 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
-                "plugin": "searchIndices",
-                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
               {
-                "plugin": "searchPlayground",
-                "path": "x-pack/plugins/search_playground/server/routes.ts"
+                "plugin": "@kbn/search-api-keys-server",
+                "path": "packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
               },
               {
                 "plugin": "searchPlayground",
