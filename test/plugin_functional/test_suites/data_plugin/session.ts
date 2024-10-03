@@ -23,26 +23,33 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
     await sessionsBtn.click();
     const toast = await toasts.getElementByIndex(1);
     const sessionIds = await toast.getVisibleText();
+    await toasts.dismissAll();
     return sessionIds.split(',');
+  };
+
+  const clearSessionIds = async () => {
+    await testSubjects.click('clearSessionsButton');
+    await toasts.dismissAll();
   };
 
   describe('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
         await common.navigateToApp('discover');
-        await testSubjects.click('clearSessionsButton');
+        await clearSessionIds();
         await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {
-        await testSubjects.click('clearSessionsButton');
-        await toasts.dismissAll();
+        await clearSessionIds();
       });
 
       it('Starts on index pattern select', async () => {
@@ -91,8 +98,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       afterEach(async () => {
-        await testSubjects.click('clearSessionsButton');
-        await toasts.dismissAll();
+        await clearSessionIds();
       });
 
       after(async () => {
@@ -113,6 +119,19 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('starts a session on filter change', async () => {
+        // For some reason, when loading the dashboard, sometimes the filter doesn't show up, so we
+        // refresh until it shows up
+        await retry.try(
+          async () => {
+            const hasFilter = await filterBar.hasFilter('animal', 'dog');
+            if (!hasFilter) throw new Error('filter not found');
+          },
+          async () => {
+            await browser.refresh();
+            await header.waitUntilLoadingHasFinished();
+            await clearSessionIds();
+          }
+        );
         await filterBar.removeFilter('animal');
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);

@@ -12,8 +12,8 @@ import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_pat
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type { ConfigType } from '../../../../config';
 import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
-import { buildAlert, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { buildAlertFields, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { EqlSequence } from '../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from '../factories/utils/generate_building_block_ids';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
@@ -59,20 +59,21 @@ export const buildAlertGroupFromSequence = (
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
-      buildBulkBody(
+      transformHitToAlert({
         spaceId,
         completeRule,
-        event,
+        doc: event,
         mergeStrategy,
-        [],
-        false,
+        ignoreFields: {},
+        ignoreFieldsRegexes: [],
+        applyOverrides: false,
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
         ruleExecutionLogger,
-        'placeholder-alert-uuid', // This is overriden below
-        publicBaseUrl
-      )
+        alertUuid: 'placeholder-alert-uuid', // This is overriden below
+        publicBaseUrl,
+      })
     );
   } catch (error) {
     ruleExecutionLogger.error(error);
@@ -153,16 +154,16 @@ export const buildAlertRoot = (
     severity: completeRule.ruleParams.severity,
     mergedDoc: mergedAlerts as SignalSourceHit,
   });
-  const doc = buildAlert(
-    wrappedBuildingBlocks,
+  const doc = buildAlertFields({
+    docs: wrappedBuildingBlocks,
     completeRule,
     spaceId,
     reason,
     indicesToQuery,
-    'placeholder-uuid', // These will be overriden below
+    alertUuid: 'placeholder-uuid', // These will be overriden below
     publicBaseUrl, // Not necessary now, but when the ID is created ahead of time this can be passed
-    alertTimestampOverride
-  );
+    alertTimestampOverride,
+  });
   const alertId = generateAlertId(doc);
   const alertUrl = getAlertDetailsUrl({
     alertId,

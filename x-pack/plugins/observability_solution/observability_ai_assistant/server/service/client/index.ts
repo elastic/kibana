@@ -52,6 +52,7 @@ import {
   type KnowledgeBaseEntry,
   type Message,
   type AdHocInstruction,
+  AssistantScope,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantClient {
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scope: AssistantScope;
     }
   ) {}
 
@@ -162,7 +164,7 @@ export class ObservabilityAIAssistantClient {
   complete = ({
     functionClient,
     connectorId,
-    simulateFunctionCalling,
+    simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
@@ -215,11 +217,11 @@ export class ObservabilityAIAssistantClient {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                applicationInstructions: functionClient.getInstructions(),
+                applicationInstructions: functionClient.getInstructions(this.dependencies.scope),
                 userInstructions,
                 adHocInstructions,
                 availableFunctionNames: functionClient
-                  .getFunctions()
+                  .getFunctions({ scope: this.dependencies.scope })
                   .map((fn) => fn.definition.name),
               }),
               initialMessages
@@ -299,6 +301,8 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
+                scope: this.dependencies.scope,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
             );
           }),

@@ -85,7 +85,20 @@ describe('telemetry tasks', () => {
   beforeAll(async () => {
     await removeFile(logFilePath);
 
-    const servers = await setupTestServers(logFilePath);
+    const servers = await setupTestServers(logFilePath, {
+      xpack: {
+        fleet: {
+          internal: {
+            registry: {
+              // Since `endpoint` is not available in EPR yet for
+              // kibana 9 (e.g., https://epr.elastic.co/search?package=endpoint&kibana.version=9.0.0)
+              // we need to ignore version checks
+              kibanaVersionCheckEnabled: false,
+            },
+          },
+        },
+      },
+    });
     esServer = servers.esServer;
     kibanaServer = servers.kibanaServer;
 
@@ -311,9 +324,8 @@ describe('telemetry tasks', () => {
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
-      // expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
     });
 
     it('should manage runtime errors searching endpoint metrics', async () => {
@@ -509,8 +521,7 @@ describe('telemetry tasks', () => {
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
       expect(body.policy_response).toStrictEqual({});
 
       const requests = await getTaskMetricsRequests(task, started);
@@ -542,8 +553,7 @@ describe('telemetry tasks', () => {
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
       expect(body.policy_response).toStrictEqual({});
 
       const requests = await getTaskMetricsRequests(task, started);
@@ -579,9 +589,8 @@ describe('telemetry tasks', () => {
         ...endpointMetaTelemetryRequest.endpoint_meta,
         capabilities: [],
       });
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
-      // expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
 
       const requests = await getTaskMetricsRequests(task, started);
 
@@ -615,9 +624,8 @@ describe('telemetry tasks', () => {
         ...endpointMetaTelemetryRequest.endpoint_meta,
         capabilities: [],
       });
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
-      // expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
 
       const requests = await getTaskMetricsRequests(task, started);
 
@@ -661,9 +669,8 @@ describe('telemetry tasks', () => {
 
       expect(body.endpoint_metrics).toStrictEqual(endpointMetaTelemetryRequest.endpoint_metrics);
       expect(body.endpoint_meta).toStrictEqual(endpointMetaTelemetryRequest.endpoint_meta);
-      // TODO(szaffarano) Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-      // expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
-      // expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
+      expect(body.policy_config).toStrictEqual(endpointMetaTelemetryRequest.policy_config);
+      expect(body.policy_response).toStrictEqual(endpointMetaTelemetryRequest.policy_response);
 
       const requests = await getTaskMetricsRequests(task, started);
 

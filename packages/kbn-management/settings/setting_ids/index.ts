@@ -144,12 +144,11 @@ export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
 export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
-export const OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN_ID =
-  'observability:aiAssistantLogsIndexPattern';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
+export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -188,6 +187,8 @@ export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
+export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
+  'securitySolution:enableVisualizationsInFlyout' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

@@ -9,30 +9,25 @@
 
 import { useEffect } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DashboardApi } from '../..';
+import { getNewDashboardTitle } from '../_dashboard_app_strings';
+import { coreServices } from '../../services/kibana_services';
 
-import { pluginServices } from '../../services/plugin_services';
-import { DashboardAPI } from '../..';
-import { getDashboardTitle } from '../_dashboard_app_strings';
-
-export const DashboardTabTitleSetter = ({
-  dashboardContainer,
-}: {
-  dashboardContainer: DashboardAPI;
-}) => {
-  const {
-    chrome: { docTitle: chromeDocTitle },
-  } = pluginServices.getServices();
-  const title = dashboardContainer.select((state) => state.explicitInput.title);
-  const lastSavedId = dashboardContainer.select((state) => state.componentState.lastSavedId);
+export const DashboardTabTitleSetter = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+  const [title, lastSavedId] = useBatchedPublishingSubjects(
+    dashboardApi.panelTitle,
+    dashboardApi.savedObjectId
+  );
 
   /**
    * Set chrome tab title when dashboard's title changes
    */
   useEffect(() => {
-    /** We do not want the tab title to include the "Editing" prefix, so always send in view mode */
-    chromeDocTitle.change(getDashboardTitle(title, ViewMode.VIEW, !lastSavedId));
-  }, [title, chromeDocTitle, lastSavedId]);
+    coreServices.chrome.docTitle.change(
+      !lastSavedId ? getNewDashboardTitle() : title ?? lastSavedId
+    );
+  }, [title, lastSavedId]);
 
   return null;
 };

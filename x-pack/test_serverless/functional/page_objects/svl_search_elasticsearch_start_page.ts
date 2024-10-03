@@ -20,9 +20,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     },
     async expectToBeOnIndexDetailsPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        expect(await browser.getCurrentUrl()).contain(
-          '/app/management/data/index_management/indices/index_details'
-        );
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
       });
     },
     async expectToBeOnIndexListPage() {
@@ -30,6 +28,11 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         expect(await browser.getCurrentUrl()).contain(
           '/app/management/data/index_management/indices'
         );
+      });
+    },
+    async expectToBeOnMLFileUploadPage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/ml/filedatavisualizer');
       });
     },
     async expectIndexNameToExist() {
@@ -68,6 +71,30 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async clickCodeViewButton() {
       await testSubjects.existOrFail('createIndexCodeViewBtn');
       await testSubjects.click('createIndexCodeViewBtn');
+    },
+    async clickFileUploadLink() {
+      await testSubjects.existOrFail('uploadFileLink');
+      await testSubjects.click('uploadFileLink');
+    },
+    async expectAnalyzeLogsLink() {
+      await testSubjects.existOrFail('analyzeLogsBtn');
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
+        'https://docs.elastic.co/serverless/elasticsearch/ingest-your-data'
+      );
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
+    },
+    async expectO11yTrialLink() {
+      await testSubjects.existOrFail('startO11yTrialBtn');
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).equal(
+        'https://fake-cloud.elastic.co/projects/create/observability/start'
+      );
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
+    },
+    async expectAPIKeyVisibleInCodeBlock(apiKey: string) {
+      await testSubjects.existOrFail('createIndex-code-block');
+      await retry.try(async () => {
+        expect(await testSubjects.getVisibleText('createIndex-code-block')).to.contain(apiKey);
+      });
     },
   };
 }

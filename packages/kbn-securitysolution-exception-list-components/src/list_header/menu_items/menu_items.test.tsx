@@ -30,7 +30,7 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('LinkedRulesMenuItems')).toHaveTextContent('Linked to 1 rules');
     expect(wrapper.getByTestId('LinkRulesButton')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuActionsButtonIcon')).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.queryByTestId('LinkedRulesMenuItems')).not.toBeInTheDocument();
     expect(wrapper.getByTestId('noLinkedRules')).toBeInTheDocument();
   });
@@ -64,7 +64,7 @@ describe('MenuItems', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeEnabled();
@@ -83,7 +83,7 @@ describe('MenuItems', () => {
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
@@ -101,7 +101,7 @@ describe('MenuItems', () => {
         onManageRules={onManageRules}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.container).toMatchSnapshot();
     expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
   });
   it('should call onManageRules', () => {

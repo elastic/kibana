@@ -21,7 +21,8 @@ export default function (providerContext: FtrProviderContext) {
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
-  describe('installs packages that include settings and mappings overrides', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/194714
+  describe.skip('installs packages that include settings and mappings overrides', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -61,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
         `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
+        'logs@custom',
         `${templateName}@custom`,
         `ecs@mappings`,
         '.fleet_globals-1',

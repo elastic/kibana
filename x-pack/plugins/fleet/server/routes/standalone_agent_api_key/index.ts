@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
@@ -22,7 +21,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: CREATE_STANDALONE_AGENT_API_KEY_ROUTE,
       access: 'internal',
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { addAgents: true },
       },
     })
     .addVersion(
@@ -30,20 +29,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: PostStandaloneAgentAPIKeyRequestSchema,
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  item: schema.object({
-                    id: schema.string(),
-                    api_key: schema.string(),
-                    name: schema.string(),
-                    encoded: schema.string(),
-                    expiration: schema.maybe(schema.number()),
-                  }),
-                }),
-            },
-          },
         },
       },
       createStandaloneAgentApiKeyHandler
