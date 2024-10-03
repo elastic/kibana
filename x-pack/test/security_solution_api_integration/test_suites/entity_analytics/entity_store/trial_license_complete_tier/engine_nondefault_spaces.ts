@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
   const utils = EntityStoreUtils(getService, namespace);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Store Engine APIs in non-default space', () => {
+  describe('@ess Entity Store Engine APIs in non-default space', () => {
     before(async () => {
       await utils.cleanEngines();
       await spaces.create({

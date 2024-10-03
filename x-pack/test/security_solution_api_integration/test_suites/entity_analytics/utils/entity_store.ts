@@ -17,6 +17,8 @@ export const EntityStoreUtils = (
   const es = getService('es');
   const log = getService('log');
 
+  log.debug(`EntityStoreUtils namespace: ${namespace}`);
+
   const cleanEngines = async () => {
     const { body } = await api.listEntityEngines(namespace).expect(200);
 

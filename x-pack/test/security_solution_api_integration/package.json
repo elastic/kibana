@@ -63,7 +63,7 @@
     "nlp_cleanup_task:essentials:qa:serverless:release": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless qaEnv",
 
     "entity_analytics:server:serverless": "npm run initialize-server:ea:trial_complete risk_engine serverless",
-    "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv",
+    "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv --",
     "entity_analytics:qa:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless qaPeriodicEnv",
     "entity_analytics:qa:serverless:release": "npm run run-tests:ea:trial_complete risk_engine serverless qaEnv",
     "entity_analytics:server:ess": "npm run initialize-server:ea:trial_complete risk_engine ess",
