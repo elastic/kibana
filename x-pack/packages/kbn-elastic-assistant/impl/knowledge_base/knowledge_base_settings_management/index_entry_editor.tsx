@@ -76,15 +76,18 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(({ dataViews, entry,
     entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
   // Index
+  // TODO: For index field autocomplete
+  // const indexOptions = useMemo(() => {
+  //   const indices = await dataViews.getIndices({
+  //     pattern: e[0]?.value ?? '',
+  //     isRollupIndex: () => false,
+  //   });
+  // }, [dataViews]);
   const setIndex = useCallback(
     async (e: Array<EuiComboBoxOptionOption<string>>) => {
       setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
-      const indices = await dataViews.getIndices({
-        pattern: e[0]?.value ?? '',
-        isRollupIndex: () => false,
-      });
     },
-    [dataViews, setEntry]
+    [setEntry]
   );
 
   const onCreateOption = (searchValue: string) => {
