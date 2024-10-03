@@ -324,15 +324,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
     console.log(
-      'invokeAIRaw request',
-      JSON.stringify(
-        {
-          ...formatGeminiPayload({ messages, temperature, systemInstruction }),
-          tools,
-        },
-        null,
-        2
-      )
+      'formatGeminiPayload',
+      JSON.stringify(formatGeminiPayload({ messages, temperature, systemInstruction }), null, 2)
     );
     const res = await this.runApi(
       {
@@ -347,7 +340,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       },
       connectorUsageCollector
     );
-    console.log('invokeAIRaw response', JSON.stringify(res, null, 2));
 
     return res;
   }
