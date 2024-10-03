@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
+import { v4 as uuidV4 } from 'uuid';
 import type {
   GetPackagePoliciesResponse,
   AgentPolicy,
@@ -121,6 +122,7 @@ const getOrCreateFleetServerAgentPolicy = async (
       headers: { 'elastic-api-version': '2023-10-31' },
       body: {
         name: `Fleet Server policy (${Math.random().toString(32).substring(2)})`,
+        id: uuidV4(),
         description: `Created by CLI Tool via: ${__filename}`,
         namespace: 'default',
         monitoring_enabled: [],
