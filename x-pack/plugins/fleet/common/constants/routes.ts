@@ -20,7 +20,7 @@ export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
 // EPM API routes
-export const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
+const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_INSTALLED = `${EPM_API_ROOT}/packages/installed`;
 const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
 const EPM_PACKAGES_ONE_DEPRECATED = `${EPM_PACKAGES_MANY}/{pkgkey}`;

@@ -136,6 +136,9 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
+  /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+   ** to redirect back to the onboarding page after adding an integration
+   */
   const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
   const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
 
@@ -402,6 +405,9 @@ export function Detail() {
         pkgkey,
       });
 
+      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+       ** to redirect back to the onboarding page after adding an integration
+       */
       const navigateOptions: InstallPkgRouteOptions =
         onboardingAppId && onboardingLink
           ? [
