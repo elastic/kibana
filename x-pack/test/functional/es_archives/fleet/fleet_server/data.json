@@ -435,12 +435,11 @@
         "certificate_key": "",
         "is_preconfigured": false,
         "name": "my proxy",
-        "proxy_headers": null,
+        "proxy_headers": "{\"Accept-Language\":\"en-US,en;q=0.5\",\"Accept-Encoding\":\"gzip, deflate, br\"}",
         "url": "https://my-proxy"
       },
       "managed": false,
-      "references": [
-      ],
+      "references": [],
       "type": "fleet-proxy",
       "updated_at": "2024-04-22T22:07:16.226Z"
     }

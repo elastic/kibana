@@ -8,7 +8,7 @@
 import React from 'react';
 import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
-import { Result, resultToField, resultMetaData } from '@kbn/search-index-documents';
+import { Result, resultMetaData, resultToField } from '@kbn/search-index-documents';
 
 import { EuiSpacer } from '@elastic/eui';
 
