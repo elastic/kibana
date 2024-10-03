@@ -128,6 +128,12 @@ export function isDstCalendar(calendar: MlCalendar) {
   });
 }
 
+export function filterCalendarsForDst(calendars: MlCalendar[], isDst: boolean) {
+  return calendars.filter((calendar) => {
+    return isDstCalendar(calendar) === isDst;
+  });
+}
+
 export function separateCalendarsByType(allCalendars: MlCalendar[]) {
   const calendarsDst: MlCalendar[] = [];
   const calendars: MlCalendar[] = [];

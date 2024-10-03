@@ -130,7 +130,8 @@ export const CalendarForm: FC<Props> = ({
     saving ||
     !isNewCalendarIdValid ||
     calendarId === '' ||
-    loading === true;
+    loading === true ||
+    (isDst && eventsList.length === 0);
   const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
     isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
   );
@@ -281,7 +282,13 @@ export const CalendarForm: FC<Props> = ({
         fullWidth
       >
         <>
-          {isDst ? <DstEventGenerator addEvents={addDstEvents} setTimezone={setTimezone} /> : null}
+          {isDst ? (
+            <DstEventGenerator
+              addEvents={addDstEvents}
+              setTimezone={setTimezone}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
+            />
+          ) : null}
           <EventsTable
             eventsList={eventsList}
             onDeleteClick={onEventDelete}

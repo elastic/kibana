@@ -20,7 +20,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { separateCalendarsByType } from '../../../../../../../../../settings/calendars/dst_utils';
+import {
+  filterCalendarsForDst,
+  separateCalendarsByType,
+} from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
@@ -43,7 +46,9 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(jobCreator.calendars);
+  const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(
+    filterCalendarsForDst(jobCreator.calendars, isDst)
+  );
   const [selectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<MlCalendar>>
   >([]);
@@ -67,7 +72,9 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   }, []);
 
   useEffect(() => {
-    jobCreator.calendars = selectedCalendars;
+    const { calendars, calendarsDst } = separateCalendarsByType(jobCreator.calendars);
+    const otherCalendars = isDst ? calendars : calendarsDst;
+    jobCreator.calendars = [...selectedCalendars, ...otherCalendars];
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCalendars.join()]);

@@ -23,9 +23,10 @@ import { createDstEvents, generateTimeZones } from '../../dst_utils';
 interface Props {
   addEvents: (events: estypes.MlCalendarEvent[]) => void;
   setTimezone: (timezone: string) => void;
+  isDisabled?: boolean;
 }
 
-export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
+export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisabled }) => {
   const [selectedTimeZones, setSelectedTimeZones] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
@@ -71,6 +72,7 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone }) => {
               options={timeZoneOptions}
               selectedOptions={selectedTimeZones}
               onChange={setSelectedTimeZones}
+              isDisabled={isDisabled === true}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
