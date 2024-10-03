@@ -21,8 +21,12 @@ export type SelectableOption<T> = EuiSelectableOption<{
 export type DropDownLabel<T = string> =
   | (EuiComboBoxOptionOption & {
       isEmpty?: boolean;
-      agg?: Aggregation | string;
+      'data-is-empty'?: boolean;
+      isGroupLabelOption?: boolean;
+      isGroupLabel?: boolean;
+      // @todo: refactor type to something generic
       field?: Field;
+      agg?: Aggregation;
     })
   | SelectableOption<T>;
 

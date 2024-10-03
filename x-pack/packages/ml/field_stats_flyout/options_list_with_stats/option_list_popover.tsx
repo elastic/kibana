@@ -14,7 +14,7 @@ import type {
 } from '@elastic/eui';
 import { EuiFlexItem, EuiSelectable, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isSelectableOption, type DropDownLabel } from './types';
+import { type DropDownLabel } from './types';
 import { useFieldStatsFlyoutContext } from '../use_field_stats_flyout_context';
 import { OptionsListPopoverFooter } from './option_list_popover_footer';
 
@@ -112,21 +112,21 @@ export const OptionsListPopover = ({
     return showEmptyFields
       ? options
       : options.filter((option) => {
-          if (isSelectableOption(option)) {
-            if (isDefined(option['data-is-empty'])) {
-              return !option['data-is-empty'];
-            }
-            if (option.isGroupLabel || option.isGroupLabelOption) {
-              return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
-            }
-            if (option.field) {
-              return populatedFields?.has(option.field.id);
-            }
+          if (isDefined(option['data-is-empty'])) {
+            return !option['data-is-empty'];
+          }
+          if (
+            Object.hasOwn(option, 'isGroupLabel') ||
+            Object.hasOwn(option, 'isGroupLabelOption')
+          ) {
+            return populatedFields?.has(option.key ?? option.searchableLabel ?? '');
+          }
+          if (option.field) {
+            return populatedFields?.has(option.field.id);
           }
           return true;
         });
   }, [options, showEmptyFields, populatedFields]);
-
   return (
     <div
       id={`control-popover-${id}`}
