@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { DataStreamDetailsClient } from './data_stream_details_client';
 import {
   DataStreamDetailsServiceSetup,
   DataStreamDetailsServiceStartDeps,
   DataStreamDetailsServiceStart,
+  IDataStreamDetailsClient,
 } from './types';
 
 export class DataStreamDetailsService {
-  constructor() {}
+  private client?: IDataStreamDetailsClient;
 
   public setup(): DataStreamDetailsServiceSetup {}
 
   public start({ http }: DataStreamDetailsServiceStartDeps): DataStreamDetailsServiceStart {
-    const client = new DataStreamDetailsClient(http);
-
     return {
-      client,
+      getClient: () => this.getClient({ http }),
     };
+  }
+
+  private async getClient({ http }: DataStreamDetailsServiceStartDeps) {
+    if (!this.client) {
+      const { DataStreamDetailsClient } = await import('./data_stream_details_client');
+      const client = new DataStreamDetailsClient(http);
+      this.client = client;
+    }
+
+    return this.client;
   }
 }

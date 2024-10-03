@@ -128,6 +128,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
         {selectedPolicyId && (
           <AgentPolicyDeleteProvider
+            agentPolicy={selectedAgentPolicy as AgentPolicy}
             hasFleetServer={policyHasFleetServer(selectedAgentPolicy as AgentPolicy)}
           >
             {(deleteAgentPolicyPrompt) => {
