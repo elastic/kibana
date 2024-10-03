@@ -34,7 +34,7 @@ const STATIC_FILE_EXT =
  * @param {string} str
  * @returns
  */
-function parseRequestExtSuffix(str) {
+function parseRequestOrExtSuffix(str) {
   const rawSuffix = '?raw';
   if (str.endsWith(rawSuffix)) {
     return str.slice(0, -rawSuffix.length);
@@ -69,9 +69,9 @@ module.exports = (request, options) => {
 
   const reqExt = Path.extname(request);
   if (reqExt) {
-    const pReqExt = parseRequestExtSuffix(reqExt);
-    // const reqBasename = Path.basename(request.split('?')[0], pReqExt);
-    const reqBasename = Path.basename(request, pReqExt);
+    const pRequest = parseRequestOrExtSuffix(request);
+    const pReqExt = parseRequestOrExtSuffix(reqExt);
+    const reqBasename = Path.basename(pRequest, pReqExt);
     if ((pReqExt === '.css' || pReqExt === '.scss') && reqBasename.endsWith('.module')) {
       return CSS_MODULE_MOCK;
     }
