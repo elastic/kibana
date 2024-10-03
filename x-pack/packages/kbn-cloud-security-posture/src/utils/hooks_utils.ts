@@ -12,7 +12,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-import type { UseMisconfigurationOptions } from '../../type';
+import type { UseCspOptions } from '../../type';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
@@ -47,8 +47,6 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
   },
 });
 
-// export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-
 export const getMisconfigurationAggregationCount = (
   buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
 ) => {
@@ -74,7 +72,7 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseMisconfigurationOptions,
+  { query }: UseCspOptions,
   rulesStates: CspBenchmarkRulesStates,
   isPreview = false
 ) => {
@@ -91,7 +89,7 @@ export const buildMisconfigurationsFindingsQuery = (
 };
 
 const buildMisconfigurationsFindingsQueryWithFilters = (
-  query: UseMisconfigurationOptions['query'],
+  query: UseCspOptions['query'],
   mutedRulesFilterQuery: estypes.QueryDslQueryContainer[]
 ) => {
   return {

@@ -28,6 +28,7 @@ export const EntityInsight = <T,>({
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
   const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
   const insightContent: React.ReactElement[] = [];
+
   if (hasMisconfigurationFindings)
     insightContent.push(
       <>

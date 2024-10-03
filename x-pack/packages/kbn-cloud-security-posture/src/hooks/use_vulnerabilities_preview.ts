@@ -21,7 +21,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseMisconfigurationOptions } from '../../type';
+import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
 import { showErrorToast } from '../..';
 import {
   getFindingsCountAggQueryVulnerabilities,
@@ -37,13 +37,11 @@ interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getVulnerabilitiesQuery = (
-  { query }: UseMisconfigurationOptions,
-  isPreview = false
-) => ({
+const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQueryVulnerabilities(),
+  ignore_unavailable: true,
   query: {
     ...query,
     bool: {
@@ -63,7 +61,7 @@ export const getVulnerabilitiesQuery = (
   },
 });
 
-export const useVulnerabilitiesPreview = (options: UseMisconfigurationOptions) => {
+export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -74,16 +72,18 @@ export const useVulnerabilitiesPreview = (options: UseMisconfigurationOptions) =
    * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
+
   return useQuery(
     ['csp_vulnerabilities_preview', { params: options }],
-    async ({ pageParam }) => {
+    async () => {
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, pageParam),
+          params: getVulnerabilitiesQuery(options),
         })
       );
+
       return {
         count: getVulnerabilitiesAggregationCount(aggregations?.count?.buckets),
       };
