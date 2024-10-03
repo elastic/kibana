@@ -2009,7 +2009,7 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; visibleIn?: ",
+          " | undefined; tooltip?: string | undefined; visibleIn?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "public",
@@ -2017,7 +2017,7 @@
             "section": "def-public.AppDeepLinkLocations",
             "text": "AppDeepLinkLocations"
           },
-          "[] | undefined; tooltip?: string | undefined; deepLinks?: ",
+          "[] | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "public",
