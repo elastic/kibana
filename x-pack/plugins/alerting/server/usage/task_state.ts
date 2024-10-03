@@ -65,6 +65,9 @@ export const stateSchemaByVersion = {
       },
       count_rules_snoozed: state.count_rules_snoozed || 0,
       count_rules_muted: state.count_rules_muted || 0,
+      count_mw_total: state.count_mw_total || 0,
+      count_mw_with_repeat_toggle_on: state.count_mw_with_repeat_toggle_on || 0,
+      count_mw_with_filter_alert_toggle_on: state.count_mw_with_filter_alert_toggle_on || 0,
       count_rules_with_muted_alerts: state.count_rules_with_muted_alerts || 0,
       count_connector_types_by_consumers: state.count_connector_types_by_consumers || {},
       count_rules_namespaces: state.count_rules_namespaces || 0,
@@ -98,6 +101,8 @@ export const stateSchemaByVersion = {
         state.percentile_num_generated_actions_by_type_per_day || {},
       percentile_num_alerts_per_day: state.percentile_num_alerts_per_day || {},
       percentile_num_alerts_by_type_per_day: state.percentile_num_alerts_by_type_per_day || {},
+      count_alerts_total: state.count_alerts_total || 0,
+      count_alerts_by_rule_type: state.count_alerts_by_rule_type || {},
     }),
     schema: schema.object({
       has_errors: schema.boolean(),
