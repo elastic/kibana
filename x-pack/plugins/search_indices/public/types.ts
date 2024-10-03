@@ -19,9 +19,15 @@ import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
+  startAppId: string;
+  startRoute: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchIndicesPluginStart {}
+
+export interface SearchIndicesPluginStart {
+  enabled: boolean;
+  startAppId: string;
+  startRoute: string;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;

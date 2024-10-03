@@ -7,5 +7,7 @@
 
 export const PLUGIN_ID = 'searchIndices';
 export const PLUGIN_NAME = 'searchIndices';
+export const START_APP_ID = 'elasticsearchStart';
+export const INDICES_APP_ID = 'elasticsearchIndices';
 
 export type { IndicesStatusResponse, UserStartPrivilegesResponse } from './types';
