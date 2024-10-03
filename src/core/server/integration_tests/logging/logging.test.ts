@@ -39,6 +39,7 @@ function createRoot() {
         },
       ],
     },
+    server: { restrictInternalApis: false },
   });
 }
 
