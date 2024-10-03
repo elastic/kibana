@@ -65,12 +65,17 @@ export class SearchIndicesPlugin
     };
   }
 
-  public start(core: CoreStart, deps: SearchIndicesAppPluginStartDependencies): SearchIndicesPluginStart {
+  public start(
+    core: CoreStart,
+    deps: SearchIndicesAppPluginStartDependencies
+  ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
-    indexManagement?.extensionsService.setIndexDetailsPageRoute(
-      { renderRoute: () => { return "/app/elasticsearch/indices/index_details/"}}
-    );
+    indexManagement?.extensionsService.setIndexDetailsPageRoute({
+      renderRoute: () => {
+        return '/app/elasticsearch/indices/index_details/';
+      },
+    });
     return {};
   }
 

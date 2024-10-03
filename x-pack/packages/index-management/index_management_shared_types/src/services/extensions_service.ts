@@ -71,6 +71,6 @@ export interface ExtensionsSetup {
   setIndexOverviewContent(content: IndexContent): void;
   // sets content to render below the docs link on the mappings tab of the index page
   setIndexMappingsContent(content: IndexContent): void;
-  // sets url for index details page route
+  // sets index details page route
   setIndexDetailsPageRoute(route: IndexDetailsPageRoute): void;
 }

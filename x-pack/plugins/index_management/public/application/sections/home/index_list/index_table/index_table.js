@@ -57,9 +57,8 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
-  application
+  application,
 }) => {
-
   const columns = [
     {
       fieldName: 'name',
@@ -68,24 +67,24 @@ const getColumnConfigs = ({
       }),
       order: 10,
       render: (index) => {
-
-    return(
-      <>
-      <EuiLink
-            data-test-subj="indexTableIndexNameLink"
-            onClick={() => {
-              if(!extensionsService.indexDetailsPageRoute){
-                history.push(getIndexDetailsLink(index.name, location.search || ''))
-              }else{
-                const url = extensionsService.indexDetailsPageRoute.renderRoute({ index })
-                application.navigateToUrl(`${url}${index.name}`)
+        return (
+          <>
+            <EuiLink
+              data-test-subj="indexTableIndexNameLink"
+              onClick={() => {
+                if (!extensionsService.indexDetailsPageRoute) {
+                  history.push(getIndexDetailsLink(index.name, location.search || ''));
+                } else {
+                  const url = extensionsService.indexDetailsPageRoute.renderRoute({ index });
+                  application.navigateToUrl(`${url}${index.name}`);
+                }
               }}
-            }
-          >
-            {index.name}
-          </EuiLink>
-          {renderBadges(index, extensionsService, filterChanged)}</>
-        )
+            >
+              {index.name}
+            </EuiLink>
+            {renderBadges(index, extensionsService, filterChanged)}
+          </>
+        );
       },
     },
     {
@@ -554,7 +553,7 @@ export class IndexTable extends Component {
             filterChanged,
             history,
             location,
-            application
+            application,
           });
           const columnsCount = columnConfigs.length + 1;
           return (
