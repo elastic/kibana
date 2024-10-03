@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
-
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
@@ -19,7 +19,7 @@ import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/note
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
-export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: NOTE_URL,
@@ -35,11 +35,12 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<GetNotesResponse>> => {
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const documentIds = queryParams.documentIds ?? null;
+          const savedObjectIds = queryParams.savedObjectIds ?? null;
           if (documentIds != null) {
             if (Array.isArray(documentIds)) {
               const docIdSearchString = documentIds?.join(' | ');
@@ -57,6 +58,33 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 type: noteSavedObjectType,
                 search: documentIds,
                 page: 1,
+                perPage: MAX_UNASSOCIATED_NOTES,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
+              return response.ok({ body: res ?? {} });
+            }
+          } else if (savedObjectIds != null) {
+            if (Array.isArray(savedObjectIds)) {
+              const soIdSearchString = savedObjectIds?.join(' | ');
+              const options = {
+                type: noteSavedObjectType,
+                hasReference: {
+                  type: timelineSavedObjectType,
+                  id: soIdSearchString,
+                },
+                page: 1,
+                perPage: MAX_UNASSOCIATED_NOTES,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
+            } else {
+              const options = {
+                type: noteSavedObjectType,
+                hasReference: {
+                  type: timelineSavedObjectType,
+                  id: savedObjectIds,
+                },
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);

@@ -97,7 +97,7 @@ test('passes managed state from the saved object into the Dashboard component st
   });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
-  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.managed$.value).toBe(true);
 });
 
 test('pulls view mode from dashboard backup', async () => {
@@ -132,7 +132,7 @@ test('managed dashboards start in view mode', async () => {
   });
   const dashboard = await createDashboard({}, 0, 'what-an-id');
   expect(dashboard).toBeDefined();
-  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.managed$.value).toBe(true);
   expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.VIEW);
 });
 

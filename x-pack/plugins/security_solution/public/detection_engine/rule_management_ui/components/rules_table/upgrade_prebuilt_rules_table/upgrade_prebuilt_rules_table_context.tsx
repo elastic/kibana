@@ -9,7 +9,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { ThreeWayDiffTab } from '../../../../rule_management/components/rule_details/three_way_diff_tab';
+import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -140,7 +140,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filterOptions,
     rules: ruleUpgradeInfos,
   });
-  const { rulesUpgradeState, setFieldResolvedValue } =
+  const { rulesUpgradeState, setRuleFieldResolvedValue } =
     usePrebuiltRulesUpgradeState(filteredRuleUpgradeInfos);
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
@@ -225,7 +225,46 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         return [];
       }
 
-      const extraTabs = [
+      const jsonViewUpdates = {
+        id: 'jsonViewUpdates',
+        name: (
+          <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}>
+            <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+          </EuiToolTip>
+        ),
+        content: (
+          <TabContentPadding>
+            <RuleDiffTab
+              oldRule={ruleUpgradeState.current_rule}
+              newRule={ruleUpgradeState.target_rule}
+            />
+          </TabContentPadding>
+        ),
+      };
+
+      if (isPrebuiltRulesCustomizationEnabled) {
+        return [
+          {
+            id: 'updates',
+            name: (
+              <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
+                <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+              </EuiToolTip>
+            ),
+            content: (
+              <TabContentPadding>
+                <RuleUpgradeConflictsResolverTab
+                  ruleUpgradeState={ruleUpgradeState}
+                  setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+                />
+              </TabContentPadding>
+            ),
+          },
+          jsonViewUpdates,
+        ];
+      }
+
+      return [
         {
           id: 'updates',
           name: (
@@ -239,46 +278,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             </TabContentPadding>
           ),
         },
-        {
-          id: 'jsonViewUpdates',
-          name: (
-            <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}>
-              <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
-            </EuiToolTip>
-          ),
-          content: (
-            <TabContentPadding>
-              <RuleDiffTab
-                oldRule={ruleUpgradeState.current_rule}
-                newRule={ruleUpgradeState.target_rule}
-              />
-            </TabContentPadding>
-          ),
-        },
+        jsonViewUpdates,
       ];
-
-      if (isPrebuiltRulesCustomizationEnabled) {
-        extraTabs.unshift({
-          id: 'diff',
-          name: (
-            <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
-              <>{ruleDetailsI18n.DIFF_TAB_LABEL}</>
-            </EuiToolTip>
-          ),
-          content: (
-            <TabContentPadding>
-              <ThreeWayDiffTab
-                finalDiffableRule={ruleUpgradeState.finalRule}
-                setFieldResolvedValue={setFieldResolvedValue}
-              />
-            </TabContentPadding>
-          ),
-        });
-      }
-
-      return extraTabs;
     },
-    [rulesUpgradeState, setFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
+    [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
   );
   const filteredRules = useMemo(
     () => filteredRuleUpgradeInfos.map((rule) => rule.target_rule),

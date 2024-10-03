@@ -18,7 +18,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
@@ -64,7 +64,6 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   spaceId,
   runOpts,
   licensing,
@@ -87,7 +86,6 @@ export const thresholdExecutor = async ({
   aggregatableTimestampField: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
@@ -135,7 +133,7 @@ export const thresholdExecutor = async ({
       services,
       index: inputIndex,
       exceptionFilter,
-      fields: inputIndexFields,
+      loadFields: true,
     });
 
     // Look for new events over threshold

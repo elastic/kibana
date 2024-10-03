@@ -107,6 +107,7 @@ export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname';
+export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
