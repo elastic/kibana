@@ -34,7 +34,7 @@ import { delay, parseLogFile } from '../test_utils';
 import '../jest_matchers';
 import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
-const PARALLEL_MIGRATORS = 4;
+const PARALLEL_MIGRATORS = 3;
 type Job<T> = () => Promise<T>;
 
 const getLogFile = (node: number) => join(__dirname, `multiple_kb_nodes_${node}.log`);
