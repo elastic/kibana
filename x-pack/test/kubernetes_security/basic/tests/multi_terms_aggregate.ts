@@ -186,7 +186,7 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         page: 0,
         index: MOCK_INDEX,
       });
-      expect(response.status).to.be(500);
+      expect(response.status).to.be(400);
     });
   });
 }
