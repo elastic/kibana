@@ -26,6 +26,8 @@ import {
 import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { EntityName } from './entity_name';
+import { EntityType } from '../../../common/entities';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
@@ -145,7 +147,7 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId] as EntityType;
+          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
