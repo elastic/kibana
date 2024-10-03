@@ -6,24 +6,22 @@
  */
 
 export * from './legacy';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { dataViewsService } from './kibana_services';
+import { getCanvasNotifyService } from './canvas_notify_service';
+import { ErrorStrings } from '../../i18n';
 
-// export const useNotifyService = () => {
-//   const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
-//   return canvasNotifyService;
-// };
+export const useNotifyService = () => {
+  const canvasNotifyService = useMemo(() => getCanvasNotifyService(), []);
+  return canvasNotifyService;
+};
 
 export const useDataViewsService = () => {
-  // const notifyService = useNotifyService();
-
   const getDataViews = useCallback(async () => {
     try {
       return await dataViewsService.getIdsWithTitle();
     } catch (e) {
-      const { ErrorStrings } = await import('../../i18n');
-      const { getCanvasNotifyService } = await import('./canvas_notify_service');
       const { esService: strings } = ErrorStrings;
       getCanvasNotifyService().error(e, { title: strings.getIndicesFetchErrorMessage() });
     }
