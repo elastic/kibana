@@ -8,9 +8,10 @@
 import { resolve } from 'path';
 import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
+import { Configuration } from 'webpack';
 import { KIBANA_ROOT } from './constants';
 
-export const canvasWebpack = {
+export const canvasWebpack: Configuration = {
   module: {
     rules: [
       // Enable CSS Modules in Storybook (Shareable Runtime)
@@ -51,7 +52,7 @@ export const canvasWebpack = {
       // Exclude large-dependency, troublesome or irrelevant modules.
       [resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout')]: false,
       [resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public')]: false,
-    } as { [key: string]: string | false },
+    },
   },
 };
 
