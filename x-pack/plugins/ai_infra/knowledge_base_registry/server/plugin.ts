@@ -33,7 +33,7 @@ export class KnowledgeBaseRegistryPlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<KnowledgeBaseRegistryConfig>) {
+  constructor(private readonly context: PluginInitializerContext<KnowledgeBaseRegistryConfig>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -61,6 +61,7 @@ export class KnowledgeBaseRegistryPlugin
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
+      artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       logger: this.logger.get('package-installer'),
     });
 

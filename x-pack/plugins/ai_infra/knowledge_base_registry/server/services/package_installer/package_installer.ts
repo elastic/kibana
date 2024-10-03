@@ -21,28 +21,30 @@ import {
 } from './utils';
 import { createIndex, populateIndex } from './steps';
 
-const ARTIFACT_BUCKET_URL = 'http://34.120.162.240';
-
 export class PackageInstaller {
   private readonly logger: Logger;
   private readonly artifactsFolder: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
+  private readonly artifactRepositoryUrl: string;
 
   constructor({
     artifactsFolder,
     logger,
     esClient,
     productDocClient,
+    artifactRepositoryUrl,
   }: {
     artifactsFolder: string;
     logger: Logger;
     esClient: ElasticsearchClient;
     productDocClient: ProductDocInstallClient;
+    artifactRepositoryUrl: string;
   }) {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
+    this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.logger = logger;
   }
 
@@ -61,7 +63,7 @@ export class PackageInstaller {
     // TODO: ensure elser is installed
 
     const artifactFileName = getArtifactName({ productName, productVersion });
-    const artifactUrl = `${ARTIFACT_BUCKET_URL}/${artifactFileName}`;
+    const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
     console.log(`*** downloading ${artifactUrl} to ${artifactPath}`);

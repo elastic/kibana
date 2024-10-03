@@ -6,7 +6,16 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export const config = schema.object({});
+const configSchema = schema.object({
+  // TODO: use elastic.co subdomain once available
+  artifactRepositoryUrl: schema.string({ defaultValue: 'http://34.120.162.240' }),
+});
 
-export type KnowledgeBaseRegistryConfig = TypeOf<typeof config>;
+export const config: PluginConfigDescriptor<KnowledgeBaseRegistryConfig> = {
+  schema: configSchema,
+  exposeToBrowser: {},
+};
+
+export type KnowledgeBaseRegistryConfig = TypeOf<typeof configSchema>;

@@ -15,6 +15,8 @@ import type {
 } from './types';
 import { KnowledgeBaseRegistryPlugin } from './plugin';
 
+export { config } from './config';
+
 export type { KnowledgeBaseRegistrySetupContract, KnowledgeBaseRegistryStartContract };
 
 export const plugin: PluginInitializer<
