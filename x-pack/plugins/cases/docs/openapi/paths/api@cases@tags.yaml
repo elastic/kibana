@@ -7,7 +7,7 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: '../components/parameters/owner_filter.yaml'
   responses:
     '200':
       description: Indicates a successful call.

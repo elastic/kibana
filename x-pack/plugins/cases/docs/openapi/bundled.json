@@ -501,7 +501,7 @@
                         }
                       },
                       "owner": {
-                        "$ref": "#/components/schemas/owners"
+                        "$ref": "#/components/schemas/owner"
                       },
                       "templates": {
                         "$ref": "#/components/schemas/templates"
@@ -737,7 +737,7 @@
                       }
                     },
                     "owner": {
-                      "$ref": "#/components/schemas/owners"
+                      "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -977,7 +977,7 @@
                       }
                     },
                     "owner": {
-                      "$ref": "#/components/schemas/owners"
+                      "$ref": "#/components/schemas/owner"
                     },
                     "templates": {
                       "$ref": "#/components/schemas/templates"
@@ -1904,14 +1904,10 @@
         "schema": {
           "oneOf": [
             {
-              "type": "string"
+              "$ref": "#/components/schemas/assignee_filter"
             },
             {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "maxItems": 100
+              "$ref": "#/components/schemas/assignees_filter"
             }
           ]
         }
@@ -1923,15 +1919,10 @@
         "schema": {
           "oneOf": [
             {
-              "type": "string",
-              "example": "my-category"
+              "$ref": "#/components/schemas/case_category"
             },
             {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "maxItems": 100
+              "$ref": "#/components/schemas/case_categories"
             }
           ]
         }
@@ -1961,6 +1952,9 @@
         "description": "A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.\n",
         "schema": {
           "oneOf": [
+            {
+              "$ref": "#/components/schemas/owner"
+            },
             {
               "$ref": "#/components/schemas/owners"
             },
@@ -2612,7 +2606,7 @@
         "type": "string",
         "maxLength": 30000
       },
-      "owners": {
+      "owner": {
         "type": "string",
         "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
         "enum": [
@@ -2711,7 +2705,7 @@
             "$ref": "#/components/schemas/case_description"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
@@ -2863,7 +2857,7 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "pushed_at": {
             "type": "string",
@@ -2988,7 +2982,7 @@
             "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "pushed_at": {
             "type": "string",
@@ -3337,7 +3331,7 @@
             "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
@@ -3523,6 +3517,29 @@
               }
             }
           }
+        }
+      },
+      "assignee_filter": {
+        "type": "string"
+      },
+      "assignees_filter": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/assignee_filter"
+        },
+        "maxItems": 100
+      },
+      "case_categories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/case_category"
+        },
+        "maxItems": 100
+      },
+      "owners": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/owner"
         }
       },
       "searchFieldsType": {
@@ -3767,7 +3784,7 @@
             }
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "templates": {
             "$ref": "#/components/schemas/templates"
@@ -3911,7 +3928,7 @@
             "$ref": "#/components/schemas/alert_indices"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "rule": {
             "$ref": "#/components/schemas/rule"
@@ -3938,7 +3955,7 @@
             "example": "A new comment."
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "type": {
             "type": "string",
@@ -4053,7 +4070,7 @@
             "$ref": "#/components/schemas/alert_indices"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "rule": {
             "$ref": "#/components/schemas/rule"
@@ -4090,7 +4107,7 @@
             "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "type": {
             "type": "string",
@@ -4179,7 +4196,7 @@
                 ]
               },
               "owner": {
-                "$ref": "#/components/schemas/owners"
+                "$ref": "#/components/schemas/owner"
               },
               "rule": {
                 "type": "object",
@@ -4415,7 +4432,7 @@
             "type": "string"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
@@ -4517,7 +4534,7 @@
                 "type": "string"
               },
               "owner": {
-                "$ref": "#/components/schemas/owners"
+                "$ref": "#/components/schemas/owner"
               },
               "type": {
                 "type": "string",
@@ -4613,7 +4630,7 @@
             ]
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "payload": {
             "oneOf": [
@@ -4724,7 +4741,7 @@
             "example": "22fd3e30-03b1-11ed-920c-974bfa104448"
           },
           "owner": {
-            "$ref": "#/components/schemas/owners"
+            "$ref": "#/components/schemas/owner"
           },
           "payload": {
             "oneOf": [
