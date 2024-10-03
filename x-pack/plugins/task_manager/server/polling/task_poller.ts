@@ -161,5 +161,8 @@ export class PollingError<T> extends Error {
     this.type = type;
     this.data = data;
     this.source = TaskErrorSource.FRAMEWORK;
+    if (cause) {
+      this.stack = `${this.stack}\nCaused by:\n${cause.stack}`;
+    }
   }
 }
