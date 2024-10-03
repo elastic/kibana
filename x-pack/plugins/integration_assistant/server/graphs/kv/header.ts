@@ -21,6 +21,8 @@ export async function handleHeader({
 
   const pattern = await kvHeaderGraph.invoke({
     samples: state.logSamples,
+    packageName: state.packageName,
+    dataStreamName: state.dataStreamName,
     ex_answer: JSON.stringify(KV_HEADER_EXAMPLE_ANSWER, null, 2),
   });
 
