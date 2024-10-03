@@ -11,3 +11,5 @@ const SPLUNK_RULE_MIGRATIONS_PATH = `${SPLUNK_MIGRATIONS_PATH}/rules` as const;
 
 export const SPLUNK_MATCH_PREBUILT_RULE_PATH =
   `${SPLUNK_RULE_MIGRATIONS_PATH}/match_prebuilt_rule` as const;
+
+export const SPLUNK_TRANSLATE_RULE_PATH = `${SPLUNK_RULE_MIGRATIONS_PATH}/translate` as const;

@@ -19,19 +19,93 @@ import { z } from '@kbn/zod';
 export type SplunkRule = z.infer<typeof SplunkRule>;
 export const SplunkRule = z.object({
   /**
+   * The Splunk rule id.
+   */
+  id: z.string(),
+  /**
    * The Splunk rule name.
    */
-  title: z.string().min(1),
+  title: z.string(),
   /**
-   * The Splunk rule search query.
+   * The Splunk rule splSearch query.
    */
-  search: z.string().min(1),
+  splSearch: z.string(),
   /**
    * The Splunk rule description.
    */
-  description: z.string().min(1),
+  description: z.string(),
   /**
    * String array containing the rule Mitre Attack technique IDs.
    */
   mitreAttackIds: z.array(z.string()).optional(),
 });
+
+export type SplunkRuleMigration = z.infer<typeof SplunkRuleMigration>;
+export const SplunkRuleMigration = SplunkRule.merge(
+  z.object({
+    /**
+     * The Splunk rule migration document uuid.
+     */
+    uuid: z.string(),
+    /**
+     * The translated elastic query.
+     */
+    elasticQuery: z.string(),
+    /**
+     * The translated elastic query language.
+     */
+    elasticQueryLanguage: z.literal('esql').default('esql'),
+    /**
+     * The translation state.
+     */
+    translationState: z.enum([
+      'untranslated',
+      'matched',
+      'translated:complete',
+      'translated:partial',
+      'translated:missing',
+      'translated:failed',
+    ]),
+    /**
+     * The resources needed to complete the translation.
+     */
+    resources: z
+      .array(
+        z.object({
+          /**
+           * The resource type.
+           */
+          type: z.enum(['macro', 'lookup']).optional(),
+          /**
+           * The resource name.
+           */
+          name: z.string().optional(),
+          /**
+           * The resource value.
+           */
+          value: z.string().optional(),
+        })
+      )
+      .optional(),
+    /**
+     * The missing resources needed to complete the translation. The format is `<type>:<name>`. E.g. `macro:my_macro`.
+     */
+    missingResources: z.array(z.string()).optional(),
+    /**
+     * The status of the rule migration.
+     */
+    status: z.enum(['pending', 'processing', 'finished', 'error']).default('pending'),
+    /**
+     * The migrated Elastic rule id.
+     */
+    ruleId: z.string().optional(),
+    /**
+     * The summary of the migration in markdown.
+     */
+    summary: z.string().optional(),
+    /**
+     * The agent messages list from the migration.
+     */
+    messages: z.array(z.string()),
+  })
+);

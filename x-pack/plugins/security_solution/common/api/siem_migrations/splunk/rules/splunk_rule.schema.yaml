@@ -9,24 +9,104 @@ components:
     SplunkRule:
       type: object
       required:
+        - id
         - title
         - description
-        - search
+        - splSearch
       properties:
+        id:
+          type: string
+          description: The Splunk rule id.
         title:
           type: string
-          minLength: 1
           description: The Splunk rule name.
-        search:
+        splSearch:
           type: string
-          minLength: 1
-          description: The Splunk rule search query.
+          description: The Splunk rule splSearch query.
         description:
           type: string
-          minLength: 1
           description: The Splunk rule description.
         mitreAttackIds:
           type: array
           items:
             type: string
           description: String array containing the rule Mitre Attack technique IDs.
+
+    SplunkRuleMigration:
+      allOf: # Combines the SplunkRule and the inline model
+        - $ref: '#/components/schemas/SplunkRule'
+        - type: object
+          description: The Splunk rule migration document object.
+          required:
+            - uuid
+            - elasticQuery
+            - elasticQueryLanguage
+            - translationState
+            - status
+            - messages
+          properties:
+            uuid:
+              type: string
+              description: The Splunk rule migration document uuid.
+            elasticQuery:
+              type: string
+              description: The translated elastic query.
+            elasticQueryLanguage:
+              type: string
+              description: The translated elastic query language.
+              enum:
+                - esql
+              default: esql
+            translationState:
+              type: string
+              description: The translation state.
+              enum:
+                - untranslated
+                - matched
+                - translated:complete
+                - translated:partial
+                - translated:missing
+                - translated:failed
+            resources:
+              type: array
+              description: The resources needed to complete the translation.
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: The resource type.
+                    enum:
+                      - macro
+                      - lookup
+                  name:
+                    type: string
+                    description: The resource name.
+                  value:
+                    type: string
+                    description: The resource value.
+            missingResources:
+              type: array
+              description: The missing resources needed to complete the translation. The format is `<type>:<name>`. E.g. `macro:my_macro`.
+              items:
+                type: string
+            status:
+              type: string
+              description: The status of the rule migration.
+              enum:
+                - pending
+                - processing
+                - finished
+                - error
+              default: pending
+            ruleId:
+              type: string
+              description: The migrated Elastic rule id.
+            summary:
+              type: string
+              description: The summary of the migration in markdown.
+            messages:
+              type: array
+              description: The agent messages list from the migration.
+              items:
+                type: string

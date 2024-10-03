@@ -7,11 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { registerSplunkMatchPrebuiltRuleRoute } from './match_prebuilt_rule/api/match_prebuilt_rule';
+import { registerSplunkMatchPrebuiltRuleRoute } from './match_prebuilt_rule';
+import { registerSplunkTranslateRuleRoute } from './translate_rule';
 
 export const registerSplunkMigrationRoutes = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   registerSplunkMatchPrebuiltRuleRoute(router, logger);
+  registerSplunkTranslateRuleRoute(router, logger);
 };
