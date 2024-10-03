@@ -25,19 +25,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /api/endpoint/policy_response', () => {
-      let spaceAData: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
-      let spaceBData: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
+      let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
+      let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
 
       before(async () => {
         await Promise.all([
           ensureSpaceIdExists(kbnServer, 'space-a', { log }),
           ensureSpaceIdExists(kbnServer, 'space-b', { log }),
         ]);
-        spaceAData = await endpointTestresources.loadEndpointData({
+        dataSpaceA = await endpointTestresources.loadEndpointData({
           spaceId: 'space-a',
           generatorSeed: Math.random().toString(32),
         });
-        spaceBData = await endpointTestresources.loadEndpointData({
+        dataSpaceB = await endpointTestresources.loadEndpointData({
           spaceId: 'space-b',
           generatorSeed: Math.random().toString(32),
         });
@@ -46,20 +46,20 @@ export default function ({ getService }: FtrProviderContext) {
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
       after(async () => {
-        if (spaceAData) {
-          await spaceAData.unloadEndpointData();
+        if (dataSpaceA) {
+          await dataSpaceA.unloadEndpointData();
           // @ts-expect-error
-          spaceAData = undefined;
+          dataSpaceA = undefined;
         }
-        if (spaceBData) {
-          await spaceBData.unloadEndpointData();
+        if (dataSpaceB) {
+          await dataSpaceB.unloadEndpointData();
           // @ts-expect-error
-          spaceBData = undefined;
+          dataSpaceB = undefined;
         }
       });
 
       it('should return policy response in space', async () => {
-        const expectedAgentId = spaceAData.hosts[0].agent.id;
+        const expectedAgentId = dataSpaceA.hosts[0].agent.id;
         const { body } = await adminSupertest
           .get(
             addSpaceIdToPath(
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             addSpaceIdToPath(
               '/',
               'space-a',
-              `/api/endpoint/policy_response?agentId=${spaceAData.hosts[0].agent.id}`
+              `/api/endpoint/policy_response?agentId=${dataSpaceA.hosts[0].agent.id}`
             )
           )
           .send()
