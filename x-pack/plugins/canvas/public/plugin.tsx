@@ -146,7 +146,13 @@ export class CanvasPlugin
           this.appUpdater
         );
 
-        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore });
+        const unmount = renderApp({
+          coreStart,
+          startPlugins,
+          params,
+          canvasStore,
+          appUpdater: this.appUpdater,
+        });
 
         return () => {
           unmount();
@@ -182,7 +188,7 @@ export class CanvasPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
-    setKibanaServices(coreStart, startPlugins, this.appUpdater, this.initContext);
+    setKibanaServices(coreStart, startPlugins, this.initContext);
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

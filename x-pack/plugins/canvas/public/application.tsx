@@ -50,11 +50,13 @@ export const renderApp = ({
   startPlugins,
   params,
   canvasStore,
+  appUpdater,
 }: {
   coreStart: CoreStart;
   startPlugins: CanvasStartDeps;
   params: AppMountParameters;
   canvasStore: Store;
+  appUpdater: BehaviorSubject<AppUpdater>;
 }) => {
   const { presentationUtil } = startPlugins;
   const { element } = params;
@@ -67,7 +69,7 @@ export const renderApp = ({
         <LegacyServicesProvider providers={services}>
           <presentationUtil.ContextProvider>
             <Provider store={canvasStore}>
-              <App history={params.history} />
+              <App history={params.history} appUpdater={appUpdater} />
             </Provider>
           </presentationUtil.ContextProvider>
         </LegacyServicesProvider>

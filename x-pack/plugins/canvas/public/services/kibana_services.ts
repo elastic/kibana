@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { AppUpdater, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public/plugin';
@@ -19,13 +19,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
-import { SESSIONSTORAGE_LASTPATH } from '../../common/lib';
-import { getSessionStorage } from '../lib/storage';
-import { CanvasStartDeps } from '../plugin';
-
-export interface CanvasNavLinkService {
-  updatePath: (path: string) => void;
-}
+import type { CanvasStartDeps } from '../plugin';
 
 export let kibanaVersion: string;
 
@@ -41,14 +35,11 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let visualizationsService: VisualizationsStart;
 
-export let navLinksService: CanvasNavLinkService;
-
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (
   kibanaCore: CoreStart,
   deps: CanvasStartDeps,
-  appUpdater: BehaviorSubject<AppUpdater>,
   initContext: PluginInitializerContext
 ) => {
   kibanaVersion = initContext.env.packageInfo.version;
@@ -66,16 +57,6 @@ export const setKibanaServices = (
   spacesService = deps.spaces;
   uiActionsService = deps.uiActions;
   visualizationsService = deps.visualizations;
-
-  navLinksService = {
-    updatePath: (path: string) => {
-      appUpdater.next(() => ({
-        defaultPath: `${path}`,
-      }));
-
-      getSessionStorage().set(`${SESSIONSTORAGE_LASTPATH}:${kibanaCore.http.basePath.get()}`, path);
-    },
-  };
 
   servicesReady$.next(true);
 };
