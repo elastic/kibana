@@ -61,7 +61,6 @@ export interface DashboardCreationOptions {
     createSessionRestorationDataProvider: (dashboardApi: DashboardApi) => SearchSessionInfoProvider;
   };
 
-  useControlGroupIntegration?: boolean;
   useSessionStorageIntegration?: boolean;
 
   useUnifiedSearchIntegration?: boolean;
