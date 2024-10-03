@@ -20883,6 +20883,7 @@ components:
           type: string
       required:
         - name
+        - type
     Fleet_output_create_request_kafka:
       title: kafka
       type: object
@@ -21144,6 +21145,7 @@ components:
           type: string
       required:
         - name
+        - type
     Fleet_output_update_request:
       discriminator:
         mapping:
@@ -21372,6 +21374,7 @@ components:
           type: string
       required:
         - name
+        - type
     Fleet_output_update_request_logstash:
       title: logstash
       type: object
@@ -21434,6 +21437,7 @@ components:
           type: string
       required:
         - name
+        - type
     Fleet_package_info:
       title: Package information
       type: object
