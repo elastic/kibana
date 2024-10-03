@@ -37,9 +37,7 @@ export async function getDataStreamSettings({
     totalFieldLimit: indexSettings?.total_fields?.limit
       ? Number(indexSettings?.total_fields?.limit)
       : DEFAULT_FIELD_LIMIT,
-    ignoreDynamicBeyondLimit: indexSettings?.total_fields?.ignore_dynamic_beyond_limit
-      ? toBoolean(indexSettings?.total_fields?.ignore_dynamic_beyond_limit)
-      : true, // In serverless this is always true and hence not present
+    ignoreDynamicBeyondLimit: toBoolean(indexSettings?.total_fields?.ignore_dynamic_beyond_limit),
     ignoreMalformed: toBoolean(indexSettings?.ignore_malformed),
   };
 }
