@@ -90,7 +90,7 @@ export const previewRulesRoute = (
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
       options: {
-        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)]
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
       security: {
         authz: {
