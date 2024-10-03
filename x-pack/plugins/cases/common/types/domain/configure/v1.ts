@@ -8,7 +8,11 @@
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
 import { UserRt } from '../user/v1';
-import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
+import {
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+  CustomFieldNumberTypeRt,
+} from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -51,9 +55,20 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const NumberCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldNumberTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      defaultValue: rt.union([rt.number, rt.null]),
+    })
+  ),
+]);
+
 export const CustomFieldConfigurationRt = rt.union([
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
+  NumberCustomFieldConfigurationRt,
 ]);
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
