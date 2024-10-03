@@ -44,7 +44,6 @@ interface OptionListWithFieldStatsProps {
   placeholder?: string;
   'aria-label'?: string;
   singleSelection?: boolean | EuiComboBoxSingleSelectionShape;
-  // renderOption: (option: DropDownLabel, searchValue: string) => React.ReactNode;
   onChange: (newSuggestions: DropDownLabel[]) => void;
   selectedOptions?: Array<{ label: string }>;
   fullWidth?: boolean;
