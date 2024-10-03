@@ -20,16 +20,12 @@ import React, {
 
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiIconTip,
   EuiNotificationBadge,
   EuiPopover,
-  EuiSkeletonRectangle,
   EuiToolTip,
   IconType,
 } from '@elastic/eui';
@@ -93,11 +89,6 @@ const createClickHandler =
     } else action.execute(context);
   };
 
-interface HoverActionElement extends EuiButtonIconProps {
-  onClick: MouseEventHandler;
-  name: string;
-}
-
 export const PresentationPanelHoverActions = ({
   api,
   index,
@@ -117,12 +108,10 @@ export const PresentationPanelHoverActions = ({
   viewMode?: ViewMode;
   showNotifications?: boolean;
 }) => {
-  const [menuPanelsLoading, setMenuPanelsLoading] = useState(true);
-  const [contextMenuActions, setContextMenuActions] = useState<AnyApiAction[]>([]);
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
-  const [quickActionElements, setQuickActionElements] = useState<HoverActionElement[]>([]);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const hoverActionsRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -207,6 +196,7 @@ export const PresentationPanelHoverActions = ({
   useEffect(() => {
     if (!api) return;
     let canceled = false;
+
     const apiContext = { embeddable: api };
     const subscriptions = new Subscription();
     const handleActionCompatibilityChange = (
@@ -308,9 +298,20 @@ export const PresentationPanelHoverActions = ({
         ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
       );
 
-      setContextMenuActions(
-        compatibleActions.filter(({ id }) => !(quickActionIds as readonly string[]).includes(id))
+      const contextMenuActions = compatibleActions.filter(
+        ({ id }) => !(quickActionIds as readonly string[]).includes(id)
       );
+
+      const menuPanels = await buildContextMenuForActions({
+        actions: contextMenuActions.map((action) => ({
+          action,
+          context: apiContext,
+          trigger: contextMenuTrigger,
+        })) as ActionWithContext[],
+        closeMenu: () => setIsContextMenuOpen(false),
+      });
+      setContextMenuPanels(menuPanels);
+      setShowNotification(contextMenuActions.some((action) => action.showNotification));
       setQuickActions(
         compatibleActions.filter(({ id }) => (quickActionIds as readonly string[]).includes(id))
       );
@@ -321,57 +322,29 @@ export const PresentationPanelHoverActions = ({
     };
   }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode, quickActionIds]);
 
-  useEffect(() => {
-    if (!api) return;
-    setMenuPanelsLoading(true);
+  const quickActionElements = useMemo(() => {
+    if (!api || quickActions.length < 1) return [];
 
-    /**
-     *
-     * Build and update all actions
-     */
     const apiContext = { embeddable: api, trigger: contextMenuTrigger };
 
-    (async () => {
-      /**
-       * Build context menu panel from actions
-       */
-      const menuPanels = await buildContextMenuForActions({
-        actions: contextMenuActions.map((action) => ({
-          action,
-          context: apiContext,
-          trigger: contextMenuTrigger,
-        })) as ActionWithContext[],
-        closeMenu: () => setIsContextMenuOpen(false),
+    return quickActions
+      .sort(({ order: orderA }, { order: orderB }) => {
+        const orderComparison = (orderB || 0) - (orderA || 0);
+        return orderComparison;
+      })
+      .map((action) => {
+        const name = action.getDisplayName(apiContext);
+        const iconType = action.getIconType(apiContext) as IconType;
+        const id = action.id;
+        return {
+          iconType,
+          'data-test-subj': `embeddablePanelAction-${action.id}`,
+          onClick: createClickHandler(action, apiContext),
+          name,
+          id,
+        };
       });
-
-      const quickActionsElements = quickActions
-        .sort(({ order: orderA }, { order: orderB }) => {
-          const orderComparison = (orderB || 0) - (orderA || 0);
-          return orderComparison;
-        })
-        .map((action) => {
-          const name = action.getDisplayName(apiContext);
-          const iconType = action.getIconType(apiContext) as IconType;
-          const id = action.id;
-          return {
-            iconType,
-            'data-test-subj': `embeddablePanelAction-${action.id}`,
-            onClick: createClickHandler(action, apiContext),
-            name,
-            id,
-          };
-        });
-
-      setMenuPanelsLoading(false);
-      setContextMenuPanels(menuPanels);
-      setQuickActionElements(quickActionsElements);
-    })();
-  }, [api, contextMenuActions, quickActions]);
-
-  const showNotification = useMemo(
-    () => contextMenuActions.some((action) => action.showNotification),
-    [contextMenuActions]
-  );
+  }, [api, quickActions]);
 
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];
@@ -498,74 +471,61 @@ export const PresentationPanelHoverActions = ({
               ${borderStyles}
             `}
           >
-            {menuPanelsLoading ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiSkeletonRectangle width="24px" height="24px" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiSkeletonRectangle width="24px" height="24px" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <>
-                {viewMode === 'edit' && combineHoverActions && dragHandle}
-                {showNotifications && notificationElements}
-                {showDescription && (
-                  <EuiIconTip
-                    title={!hideTitle ? title || undefined : undefined}
-                    content={description}
-                    delay="regular"
-                    position="top"
-                    anchorClassName="embPanel__descriptionTooltipAnchor"
-                    data-test-subj="embeddablePanelDescriptionTooltip"
-                    type="iInCircle"
-                  />
-                )}
-                {quickActionElements.map(
-                  ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                    <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                      <EuiButtonIcon
-                        iconType={iconType}
-                        color="text"
-                        onClick={onClick as MouseEventHandler}
-                        data-test-subj={dataTestSubj}
-                        aria-label={name as string}
-                      />
-                    </EuiToolTip>
-                  )
-                )}
-                {contextMenuActions.length ? (
-                  <EuiPopover
-                    repositionOnScroll
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
-                    button={ContextMenuButton}
-                    isOpen={isContextMenuOpen}
-                    className={contextMenuClasses}
-                    closePopover={() => setIsContextMenuOpen(false)}
-                    data-test-subj={
-                      isContextMenuOpen
-                        ? 'embeddablePanelContextMenuOpen'
-                        : 'embeddablePanelContextMenuClosed'
-                    }
-                    focusTrapProps={{
-                      closeOnMouseup: true,
-                      clickOutsideDisables: false,
-                      onClickOutside: (e) => {
-                        setIsContextMenuOpen(false);
-                      },
-                    }}
-                  >
-                    <EuiContextMenu
-                      data-test-subj="presentationPanelContextMenuItems"
-                      initialPanelId={'mainMenu'}
-                      panels={contextMenuPanels}
-                    />
-                  </EuiPopover>
-                ) : null}
-              </>
+            {viewMode === 'edit' && combineHoverActions && dragHandle}
+            {showNotifications && notificationElements}
+            {showDescription && (
+              <EuiIconTip
+                title={!hideTitle ? title || undefined : undefined}
+                content={description}
+                delay="regular"
+                position="top"
+                anchorClassName="embPanel__descriptionTooltipAnchor"
+                data-test-subj="embeddablePanelDescriptionTooltip"
+                type="iInCircle"
+              />
             )}
+            {quickActionElements.map(
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                  <EuiButtonIcon
+                    iconType={iconType}
+                    color="text"
+                    onClick={onClick as MouseEventHandler}
+                    data-test-subj={dataTestSubj}
+                    aria-label={name as string}
+                  />
+                </EuiToolTip>
+              )
+            )}
+            {contextMenuPanels.length ? (
+              <EuiPopover
+                repositionOnScroll
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                button={ContextMenuButton}
+                isOpen={isContextMenuOpen}
+                className={contextMenuClasses}
+                closePopover={() => setIsContextMenuOpen(false)}
+                data-test-subj={
+                  isContextMenuOpen
+                    ? 'embeddablePanelContextMenuOpen'
+                    : 'embeddablePanelContextMenuClosed'
+                }
+                focusTrapProps={{
+                  closeOnMouseup: true,
+                  clickOutsideDisables: false,
+                  onClickOutside: (e) => {
+                    setIsContextMenuOpen(false);
+                  },
+                }}
+              >
+                <EuiContextMenu
+                  data-test-subj="presentationPanelContextMenuItems"
+                  initialPanelId={'mainMenu'}
+                  panels={contextMenuPanels}
+                />
+              </EuiPopover>
+            ) : null}
           </div>
         </div>
       ) : null}
