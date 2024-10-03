@@ -32,7 +32,7 @@ const pageConfigurations = {
       'xpack.infra.logsSettingsDeprecationCallout.p.theNewLogsExplorerLabel',
       {
         defaultMessage:
-          'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. These settings will not affect the Logs Explorer behaviour, and is now discouraged configuring them for the legacy Stream application.',
+          'These settings only apply to the legacy Logs Stream app, and we do not recommend configuring them. Instead, use Logs Explorer which makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.',
       }
     ),
   },
