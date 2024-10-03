@@ -8,15 +8,16 @@
 import { resolve } from 'path';
 import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
+import { Configuration } from 'webpack';
 import { KIBANA_ROOT } from './constants';
 
-export const canvasWebpack = {
+export const canvasWebpack: Configuration = {
   module: {
     rules: [
       // Enable CSS Modules in Storybook (Shareable Runtime)
       {
         test: /\.module\.s(a|c)ss$/,
-        loader: [
+        use: [
           'style-loader',
           {
             loader: 'css-loader',
