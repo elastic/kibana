@@ -157,7 +157,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
               })}
               type="button"
               onClick={onChange.bind(null, [])}
-              aria-label={i18n.translate('xpack.plugins.ml.controls.optionsList.clearButtonLabel', {
+              aria-label={i18n.translate('xpack.ml.controls.optionsList.clearButtonLabel', {
                 defaultMessage: 'Clear',
               })}
             >
@@ -184,7 +184,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
         initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         closePopover={setPopoverOpen.bind(null, false)}
         panelProps={{
-          'aria-label': i18n.translate('xpack.plugins.ml.controls.optionsList.popover.ariaLabel', {
+          'aria-label': i18n.translate('xpack.ml.controls.optionsList.popover.ariaLabel', {
             defaultMessage: 'Popover for {ariaLabel}',
             values: { ariaLabel },
           }),

@@ -39,12 +39,9 @@ export const OptionsListPopoverFooter: FC<{
         ) : null}
 
         <EuiSwitch
-          label={i18n.translate(
-            'xpack.plugins.ml.controls.optionsList.popover.includeEmptyFieldsLabel',
-            {
-              defaultMessage: 'Include empty fields',
-            }
-          )}
+          label={i18n.translate('xpack.ml.controls.optionsList.popover.includeEmptyFieldsLabel', {
+            defaultMessage: 'Include empty fields',
+          })}
           checked={showEmptyFields}
           onChange={(e) => setShowEmptyFields(e.target.checked)}
         />
