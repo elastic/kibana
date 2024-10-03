@@ -9184,7 +9184,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                $ref: '#/components/schemas/Fleet_get_agents_response'
+                $ref: '#/components/schemas/Fleet_get_agents_response_body'
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -10039,7 +10039,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                $ref: '#/components/schemas/Fleet_get_agent_tags_response'
+                $ref: '#/components/schemas/Fleet_get_agent_tags_response_body'
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -10535,7 +10535,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                $ref: '#/components/schemas/Fleet_bulk_install_packages_response'
+                $ref: '#/components/schemas/Fleet_bulk_install_packages_response_body'
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -19830,7 +19830,7 @@ components:
         - TEMPORARY
       title: Agent type
       type: string
-    Fleet_bulk_install_packages_response:
+    Fleet_bulk_install_packages_response_body:
       title: Bulk install packages response
       type: object
       properties:
@@ -20315,7 +20315,7 @@ components:
           packagePolicyName:
             type: string
       title: Full agent policy output permissions
-    Fleet_get_agent_tags_response:
+    Fleet_get_agent_tags_response_body:
       title: Get Agent Tags response
       type: object
       properties:
@@ -20323,7 +20323,7 @@ components:
           items:
             type: string
           type: array
-    Fleet_get_agents_response:
+    Fleet_get_agents_response_body:
       title: Get Agent response
       type: object
       properties:
