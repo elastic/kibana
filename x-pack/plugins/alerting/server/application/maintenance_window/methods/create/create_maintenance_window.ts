@@ -46,7 +46,13 @@ export async function createMaintenanceWindow(
           undefined,
           [{ query: scopedQuery.kql, language: 'kuery' }],
           scopedQuery.filters as Filter[],
-          esQueryConfig
+          {
+            ...esQueryConfig,
+            queryStringOptions: {
+              ...esQueryConfig?.queryStringOptions,
+              analyze_wildcard: true,
+            },
+          }
         )
       );
 
