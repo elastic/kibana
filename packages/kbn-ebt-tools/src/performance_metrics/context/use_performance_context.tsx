@@ -25,8 +25,13 @@ export function usePerformanceContext({
 }: { suppressMissingProvider?: boolean } = {}) {
   const api = useContext(PerformanceContext);
 
-  if (!api && !suppressMissingProvider) {
-    throw new Error('Missing Performance API in context');
+  if (!api) {
+    if (!suppressMissingProvider) {
+      // helpful for unit tests
+      return { onPageReady: () => {} };
+    } else {
+      throw new Error('No performance context provided');
+    }
   }
 
   return api;
