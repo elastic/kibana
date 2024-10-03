@@ -11,6 +11,7 @@ import {
   CaseSeverity,
   CaseStatuses,
   CustomFieldTypes,
+  CustomFieldsConfiguration,
 } from '@kbn/cases-plugin/common/types/domain';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -288,7 +289,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const caseTitle = 'matchme';
       let caseIds: string[] = [];
       const profiles: UserProfile[] = [];
-      const customFields = [
+      const customFields: CustomFieldsConfiguration = [
         {
           key: 'my_field_01',
           label: 'My field',
