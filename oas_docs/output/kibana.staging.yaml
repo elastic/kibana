@@ -18352,6 +18352,10 @@ paths:
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_DocumentIds'
         - in: query
+          name: savedObjectIds
+          schema:
+            $ref: '#/components/schemas/Security_Timeline_API_SavedObjectIds'
+        - in: query
           name: page
           schema:
             nullable: true
@@ -37718,6 +37722,8 @@ components:
       allOf:
         - $ref: >-
             #/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord
+        - $ref: >-
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts
         - type: object
           properties:
             '@timestamp':
@@ -37727,6 +37733,49 @@ components:
               type: string
           required:
             - '@timestamp'
+    Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     Security_Entity_Analytics_API_AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -39683,6 +39732,12 @@ components:
         - threat_match
         - zeek
       type: string
+    Security_Timeline_API_SavedObjectIds:
+      oneOf:
+        - items:
+            type: string
+          type: array
+        - type: string
     Security_Timeline_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
