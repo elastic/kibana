@@ -20,6 +20,7 @@ export function useVirtualSearchResults(): CustomCard[] {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const history = useHistory();
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const getUrlForApp = application?.getUrlForApp;
   const firehoseQuickstartCard: CustomCard = {
@@ -75,6 +76,23 @@ export function useVirtualSearchResults(): CustomCard[] {
       version: '',
       integration: '',
       isCollectionCard: false,
+    },
+    {
+      id: 'custom-logs',
+      type: 'virtual',
+      title: 'Stream log files',
+      description: 'Stream any logs into Elastic in a simple way and explore their data',
+      name: 'custom-logs-virtual',
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'eui',
+          src: 'filebeatApp',
+        },
+      ],
+      url: customLogsUrl,
+      version: '',
+      integration: '',
     },
     /**
      * The new Firehose card should only be visible on Cloud
