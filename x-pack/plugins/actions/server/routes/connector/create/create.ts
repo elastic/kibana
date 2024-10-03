@@ -6,37 +6,39 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import {
-  getConnectorParamsSchemaV1,
-  GetConnectorParamsV1,
-} from '../../../../common/routes/connector/apis/get';
-import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import { transformConnectorResponseV1 } from '../common_transforms';
+import { ActionsRequestHandlerContext } from '../../../types';
 import { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
+import { transformConnectorResponseV1 } from '../common_transforms';
+import {
+  createConnectorRequestParamsSchemaV1,
+  createConnectorRequestBodySchemaV1,
+} from '../../../../common/routes/connector/apis/create';
+import { transformCreateConnectorBodyV1 } from './transforms';
 
-export const getConnectorRoute = (
+export const createConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
       options: {
         access: 'public',
-        summary: `Get connector information`,
+        summary: 'Create a connector',
         tags: ['oas-tag:connectors'],
       },
       validate: {
         request: {
-          params: getConnectorParamsSchemaV1,
+          params: createConnectorRequestParamsSchemaV1,
+          body: createConnectorRequestBodySchemaV1,
         },
         response: {
           200: {
-            body: () => connectorResponseSchemaV1,
             description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
           },
         },
       },
@@ -44,9 +46,11 @@ export const getConnectorRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const { id }: GetConnectorParamsV1 = req.params;
+        const action = transformCreateConnectorBodyV1(req.body);
         return res.ok({
-          body: transformConnectorResponseV1(await actionsClient.get({ id })),
+          body: transformConnectorResponseV1(
+            await actionsClient.create({ action, options: req.params })
+          ),
         });
       })
     )
