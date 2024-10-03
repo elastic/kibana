@@ -288,7 +288,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
                 mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
               );
             }
-            this.logger.error(error.message);
+            this.logger.error(error.message, { error: { stack_trace: error.stack } });
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy

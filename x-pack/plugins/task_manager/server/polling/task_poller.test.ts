@@ -257,7 +257,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      `Failed to poll for work: ${errorToThrow.message}\n${errorToThrow.stack}`,
+      `Failed to poll for work: ${errorToThrow.message}`,
       PollingErrorType.WorkError,
       none
     );
@@ -270,7 +270,7 @@ describe('TaskPoller', () => {
 
     const handler = jest.fn();
     let callCount = 0;
-    const errorToThrow = new Error('failed to work')
+    const errorToThrow = new Error('failed to work');
     const work = jest.fn(async () => {
       callCount++;
       if (callCount === 2) {
@@ -298,7 +298,7 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
-      `Failed to poll for work: ${errorToThrow.message}\n${errorToThrow.stack}`,
+      `Failed to poll for work: ${errorToThrow.message}`,
       PollingErrorType.WorkError,
       none
     );
