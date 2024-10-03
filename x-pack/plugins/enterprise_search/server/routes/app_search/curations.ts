@@ -16,6 +16,12 @@ export function registerCurationsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/curations',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -34,6 +40,12 @@ export function registerCurationsRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{engineName}/curations',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -51,6 +63,12 @@ export function registerCurationsRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -66,6 +84,12 @@ export function registerCurationsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           skip_record_analytics: schema.string(),
@@ -84,6 +108,12 @@ export function registerCurationsRoutes({
   router.put(
     {
       path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           skip_record_analytics: schema.string(),
@@ -108,6 +138,12 @@ export function registerCurationsRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

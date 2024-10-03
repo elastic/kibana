@@ -27,6 +27,12 @@ export const disableAlertRoute = (
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_disable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramSchema,
       },

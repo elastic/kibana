@@ -25,6 +25,12 @@ export const findBackfillRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_BACKFILL_FIND_API_PATH}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: findQuerySchemaV1,
       },

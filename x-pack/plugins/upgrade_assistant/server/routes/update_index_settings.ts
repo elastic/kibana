@@ -14,6 +14,12 @@ export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
   router.post(
     {
       path: `${API_BASE_PATH}/{indexName}/index_settings`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

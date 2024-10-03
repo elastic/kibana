@@ -55,6 +55,12 @@ export function registerInternalValidateRoute(router: InternalUiSettingsRouter) 
   router.post(
     {
       path: '/internal/kibana/settings/{key}/validate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           key: schema.string(),

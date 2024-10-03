@@ -143,7 +143,17 @@ export class CoreAppsService {
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get(
-      { path: '/', validate: false, options: { access: 'public' } },
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+        options: { access: 'public' },
+      },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
         let defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });
@@ -365,8 +375,18 @@ export class CoreAppsService {
       }
     );
 
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
+    router.get(
+      {
+        path: '/core',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      async (context, req, res) => res.ok({ body: { version: '0.0.1' } })
     );
 
     registerBundleRoutes({

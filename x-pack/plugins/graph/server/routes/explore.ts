@@ -27,6 +27,12 @@ export function registerExploreRoute({
   router.post(
     {
       path: '/internal/graph/graphExplore',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index: schema.string(),

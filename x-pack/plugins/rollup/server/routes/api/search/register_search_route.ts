@@ -17,6 +17,12 @@ export const registerSearchRoute = ({
   router.post(
     {
       path: addBasePath('/search'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

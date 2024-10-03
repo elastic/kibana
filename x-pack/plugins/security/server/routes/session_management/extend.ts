@@ -14,6 +14,12 @@ export function defineSessionExtendRoutes({ router, basePath }: RouteDefinitionP
   router.post(
     {
       path: '/internal/security/session',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (_context, _request, response) => {

@@ -20,6 +20,12 @@ export function registerSearchRoute({
   router.post(
     {
       path: '/internal/graph/searchProxy',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index: schema.string(),

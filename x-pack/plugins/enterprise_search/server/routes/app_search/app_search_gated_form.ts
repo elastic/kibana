@@ -16,6 +16,12 @@ export function registerAppSearchGatedFormRoute({
   router.post(
     {
       path: '/internal/app_search/as_gate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           as_gate_data: schema.object({

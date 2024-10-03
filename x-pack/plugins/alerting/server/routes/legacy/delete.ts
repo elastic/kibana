@@ -26,6 +26,12 @@ export const deleteAlertRoute = (
   router.delete(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramSchema,
       },

@@ -30,6 +30,12 @@ export const registerResolveRoute = (
   router.get(
     {
       path: '/resolve/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Resolve a saved object`,
         tags: ['oas-tag:saved objects'],

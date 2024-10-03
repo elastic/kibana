@@ -34,6 +34,12 @@ export const registerBulkDeleteRoute = (
   router.post(
     {
       path: '/_bulk_delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Delete saved objects`,
         tags: ['oas-tag:saved objects'],

@@ -51,6 +51,12 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
@@ -72,6 +78,12 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_CHAT_MESSAGE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           data: schema.object({
@@ -177,6 +189,12 @@ export function defineRoutes({
   router.get(
     {
       path: APIRoutes.GET_INDICES,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           search_query: schema.maybe(schema.string()),
@@ -206,6 +224,12 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_SEARCH_QUERY,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           search_query: schema.string(),
@@ -270,6 +294,12 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.GET_INDEX_MAPPINGS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),

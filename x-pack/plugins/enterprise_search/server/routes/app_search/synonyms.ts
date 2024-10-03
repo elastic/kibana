@@ -17,6 +17,12 @@ export function registerSynonymsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/synonyms',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -64,6 +70,12 @@ export function registerSynonymsRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

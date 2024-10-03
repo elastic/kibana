@@ -29,6 +29,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: addBasePath('/auto_follow_patterns'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

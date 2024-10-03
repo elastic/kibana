@@ -18,6 +18,12 @@ export function registerSearchRelevanceSuggestionsRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -56,6 +62,12 @@ export function registerSearchRelevanceSuggestionsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/adaptive_relevance/settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -84,6 +96,12 @@ export function registerSearchRelevanceSuggestionsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/adaptive_relevance/suggestions/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

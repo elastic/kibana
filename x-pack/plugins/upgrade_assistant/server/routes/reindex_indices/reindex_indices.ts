@@ -34,6 +34,12 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Start or resume reindex`,
@@ -81,6 +87,12 @@ export function registerReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get reindex status`,
@@ -142,6 +154,12 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}/cancel`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Cancel reindex`,

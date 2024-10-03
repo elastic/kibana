@@ -78,6 +78,12 @@ export const plugin: PluginInitializer<
     router.get(
       {
         path: '/mock_idp/supported_roles',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { authRequired: false },
       },
@@ -101,6 +107,12 @@ export const plugin: PluginInitializer<
     router.post(
       {
         path: '/mock_idp/saml_response',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: createSAMLResponseSchema,
         },

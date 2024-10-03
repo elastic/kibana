@@ -116,7 +116,16 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
     includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
   });
   router.get(
-    { path: addBasePath('/data_streams'), validate: { query: querySchema } },
+    {
+      path: addBasePath('/data_streams'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { query: querySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
@@ -165,6 +174,12 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
   router.get(
     {
       path: addBasePath('/data_streams/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: paramsSchema },
     },
     async (context, request, response) => {

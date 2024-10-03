@@ -34,6 +34,12 @@ export const registerChatRoute = ({
   router.get(
     {
       path: GET_CHAT_USER_DATA_ROUTE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {

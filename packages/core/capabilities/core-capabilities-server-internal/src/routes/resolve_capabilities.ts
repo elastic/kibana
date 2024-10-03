@@ -17,6 +17,12 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
   router.post(
     {
       path: '/api/core/capabilities',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: 'optional',
       },

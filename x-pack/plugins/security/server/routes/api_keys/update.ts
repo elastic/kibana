@@ -34,6 +34,12 @@ export function defineUpdateApiKeyRoutes({
   router.put(
     {
       path: '/internal/security/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.oneOf([
           updateRestApiKeySchema,

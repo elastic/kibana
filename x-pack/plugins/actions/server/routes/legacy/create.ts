@@ -34,6 +34,12 @@ export const createActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Create a connector`,

@@ -14,6 +14,12 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
   router.get(
     {
       path: '/api/security/privileges',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           // We don't use `schema.boolean` here, because all query string parameters are treated as

@@ -34,6 +34,12 @@ export const registerBulkGetRoute = (
   router.post(
     {
       path: '/_bulk_get',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Get saved objects`,
         tags: ['oas-tag:saved objects'],

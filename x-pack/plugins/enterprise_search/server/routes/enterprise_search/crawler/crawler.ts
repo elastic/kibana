@@ -34,6 +34,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/crawler',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index_name: schema.string(),
@@ -133,6 +139,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/crawler/validate_url',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           checks: schema.arrayOf(schema.string()),
@@ -148,6 +160,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -162,6 +180,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           overrides: schema.maybe(
@@ -187,6 +211,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/cancel',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -201,6 +231,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{crawlRequestId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           crawlRequestId: schema.string(),
@@ -216,6 +252,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -234,6 +276,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           entry_points: schema.arrayOf(
@@ -256,6 +304,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           domainId: schema.string(),
@@ -271,6 +325,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           auth: schema.maybe(
@@ -308,6 +368,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           domainId: schema.string(),
@@ -323,6 +389,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domain_configs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -341,6 +413,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/process_crawls',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           domains: schema.maybe(schema.arrayOf(schema.string())),
@@ -358,6 +436,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -372,6 +456,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           frequency: schema.number(),
@@ -391,6 +481,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -405,6 +501,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/html_extraction',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           extract_full_html: schema.boolean(),
@@ -446,6 +548,12 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/connector',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

@@ -19,6 +19,12 @@ export const registerPermissionsRoute = ({
   router.get(
     {
       path: addBasePath('/permissions'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {

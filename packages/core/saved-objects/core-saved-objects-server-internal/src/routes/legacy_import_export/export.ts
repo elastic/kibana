@@ -32,6 +32,12 @@ export const registerLegacyExportRoute = (
   router.get(
     {
       path: '/api/kibana/dashboards/export',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           dashboard: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),

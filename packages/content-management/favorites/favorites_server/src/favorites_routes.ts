@@ -44,6 +44,12 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
   router.post(
     {
       path: '/internal/content_management/favorites/{type}/{id}/favorite',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -80,6 +86,12 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
   router.post(
     {
       path: '/internal/content_management/favorites/{type}/{id}/unfavorite',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -114,6 +126,12 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
   router.get(
     {
       path: '/internal/content_management/favorites/{type}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: typeSchema,

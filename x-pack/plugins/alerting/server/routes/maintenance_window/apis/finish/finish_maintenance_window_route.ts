@@ -28,6 +28,12 @@ export const finishMaintenanceWindowRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}/_finish`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: finishParamsSchemaV1,
       },

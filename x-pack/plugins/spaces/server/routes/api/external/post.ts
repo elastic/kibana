@@ -20,6 +20,12 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/space',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
         description: `Create a space`,

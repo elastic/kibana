@@ -16,6 +16,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -30,6 +36,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -44,6 +56,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -59,6 +77,12 @@ export function registerCrawlerRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -84,6 +108,12 @@ export function registerCrawlerRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_requests/cancel',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -98,6 +128,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -116,6 +152,12 @@ export function registerCrawlerRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -141,6 +183,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -156,6 +204,12 @@ export function registerCrawlerRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -174,6 +228,12 @@ export function registerCrawlerRoutes({
   router.put(
     {
       path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -201,6 +261,12 @@ export function registerCrawlerRoutes({
   router.post(
     {
       path: '/internal/app_search/crawler/validate_url',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           url: schema.string(),
@@ -216,6 +282,12 @@ export function registerCrawlerRoutes({
   router.post(
     {
       path: '/internal/app_search/engines/{name}/crawler/process_crawls',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -233,6 +305,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -247,6 +325,12 @@ export function registerCrawlerRoutes({
   router.put(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -265,6 +349,12 @@ export function registerCrawlerRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -279,6 +369,12 @@ export function registerCrawlerRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{name}/crawler/domain_configs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

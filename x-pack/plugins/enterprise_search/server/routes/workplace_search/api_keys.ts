@@ -16,6 +16,12 @@ export function registerApiKeysRoute({
   router.get(
     {
       path: '/internal/workplace_search/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -26,6 +32,12 @@ export function registerApiKeysRoute({
   router.post(
     {
       path: '/internal/workplace_search/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -40,6 +52,12 @@ export function registerApiKeysRoute({
   router.delete(
     {
       path: '/internal/workplace_search/api_keys/{tokenName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           tokenName: schema.string(),

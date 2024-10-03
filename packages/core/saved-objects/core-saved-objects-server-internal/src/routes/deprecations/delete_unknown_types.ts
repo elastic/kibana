@@ -23,6 +23,12 @@ export const registerDeleteUnknownTypesRoute = (
   router.post(
     {
       path: '/deprecations/_delete_unknown_types',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     catchAndReturnBoomErrors(async (context, req, res) => {

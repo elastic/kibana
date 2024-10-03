@@ -34,6 +34,12 @@ export const registerCreateRoute = (
   router.post(
     {
       path: '/{type}/{id?}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Create a saved object`,
         tags: ['oas-tag:saved objects'],

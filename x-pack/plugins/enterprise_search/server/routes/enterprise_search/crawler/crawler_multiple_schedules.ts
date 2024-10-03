@@ -21,6 +21,12 @@ export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDep
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/custom_scheduling',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -53,6 +59,12 @@ export function registerCrawlerMultipleSchedulesRoutes({ router, log }: RouteDep
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/custom_scheduling',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

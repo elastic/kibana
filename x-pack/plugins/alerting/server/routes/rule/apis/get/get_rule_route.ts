@@ -40,6 +40,12 @@ const buildGetRuleRoute = ({
   router.get(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options,
       validate: {
         request: {

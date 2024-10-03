@@ -17,6 +17,12 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
         description: `Get shareable references`,

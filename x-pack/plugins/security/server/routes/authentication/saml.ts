@@ -30,6 +30,12 @@ export function defineSAMLRoutes({
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object(
             { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },

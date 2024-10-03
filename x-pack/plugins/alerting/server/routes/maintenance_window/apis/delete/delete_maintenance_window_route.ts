@@ -26,6 +26,12 @@ export const deleteMaintenanceWindowRoute = (
   router.delete(
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: deleteParamsSchemaV1,
       },

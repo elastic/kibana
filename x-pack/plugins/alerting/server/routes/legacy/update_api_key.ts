@@ -28,6 +28,12 @@ export const updateApiKeyRoute = (
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_update_api_key`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramSchema,
       },

@@ -15,6 +15,12 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/{indexName}/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -44,6 +50,12 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {
@@ -75,6 +87,12 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/api_keys/{apiKeyId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           apiKeyId: schema.string(),
@@ -109,6 +127,12 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/api_keys',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.any(),
       },

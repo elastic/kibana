@@ -55,6 +55,12 @@ export const ruleTypesRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get the rule types`,

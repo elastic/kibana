@@ -26,6 +26,12 @@ export const getWellKnownEmailServiceRoute = (router: IRouter) => {
   router.get(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_email_config/{service}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramSchema,
       },

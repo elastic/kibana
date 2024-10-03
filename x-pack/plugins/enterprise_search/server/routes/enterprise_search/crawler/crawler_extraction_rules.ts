@@ -37,6 +37,12 @@ export function registerCrawlerExtractionRulesRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/extraction_rules',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: extractionRuleSchema,
         params: schema.object({
@@ -56,6 +62,12 @@ export function registerCrawlerExtractionRulesRoutes({
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/extraction_rules/{crawlRuleId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: extractionRuleSchema,
         params: schema.object({
@@ -76,6 +88,12 @@ export function registerCrawlerExtractionRulesRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/extraction_rules/{crawlRuleId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           crawlRuleId: schema.string(),
@@ -95,6 +113,12 @@ export function registerCrawlerExtractionRulesRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/extraction_rules/{crawlRuleId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           crawlRuleId: schema.string(),

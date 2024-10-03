@@ -25,6 +25,12 @@ export const getActiveMaintenanceWindowsRoute = (
   router.get(
     {
       path: INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

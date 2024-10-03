@@ -74,7 +74,16 @@ export function registerIndexRoutes({
   ml,
 }: RouteDependencies) {
   router.get(
-    { path: '/internal/enterprise_search/search_indices', validate: false },
+    {
+      path: '/internal/enterprise_search/search_indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       const patterns: AlwaysShowPattern = {
@@ -93,6 +102,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -148,6 +163,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -182,6 +203,12 @@ export function registerIndexRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -244,6 +271,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/exists',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -282,6 +315,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           is_native: schema.boolean(),
@@ -309,6 +348,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -331,6 +376,12 @@ export function registerIndexRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -352,6 +403,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -378,6 +435,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipeline_parameters',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -398,6 +461,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -430,6 +499,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -511,6 +586,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/attach',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           pipeline_name: schema.string(),
@@ -550,6 +631,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index_name: schema.string(),
@@ -626,6 +713,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           docs: schema.arrayOf(schema.any()),
@@ -688,6 +781,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           docs: schema.arrayOf(schema.any()),
@@ -769,6 +868,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -799,6 +904,12 @@ export function registerIndexRoutes({
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           description: schema.maybe(schema.string()),
@@ -857,6 +968,12 @@ export function registerIndexRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -916,6 +1033,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/history',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -943,6 +1066,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/pipelines/ml_inference',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -966,6 +1095,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           pipelineName: schema.string(),
@@ -1007,6 +1142,12 @@ export function registerIndexRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}/detach',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -1049,6 +1190,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),
@@ -1090,6 +1237,12 @@ export function registerIndexRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),
@@ -1131,6 +1284,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/ml/models',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -1153,6 +1312,12 @@ export function registerIndexRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),

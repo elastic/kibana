@@ -20,6 +20,12 @@ export const getQueryDelaySettingsRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_query_delay`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

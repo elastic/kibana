@@ -34,6 +34,12 @@ export const registerBulkResolveRoute = (
   router.post(
     {
       path: '/_bulk_resolve',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Resolve saved objects`,
         tags: ['oas-tag:saved objects'],

@@ -63,6 +63,12 @@ export const getOAuthAccessToken = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

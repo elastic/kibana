@@ -16,6 +16,12 @@ export function registerOAuthAuthorizeRoute({
   router.get(
     {
       path: '/internal/workplace_search/oauth/authorize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           access_type: schema.maybe(schema.string()),
@@ -43,6 +49,12 @@ export function registerOAuthAuthorizeAcceptRoute({
   router.post(
     {
       path: '/internal/workplace_search/oauth/authorize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           client_id: schema.string(),
@@ -66,6 +78,12 @@ export function registerOAuthAuthorizeDenyRoute({
   router.delete(
     {
       path: '/internal/workplace_search/oauth/authorize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           client_id: schema.string(),

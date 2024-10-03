@@ -16,6 +16,12 @@ export function registerSearchUIRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/search_ui/field_config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

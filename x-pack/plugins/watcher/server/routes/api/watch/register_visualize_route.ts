@@ -42,6 +42,12 @@ export function registerVisualizeRoute({
   router.post(
     {
       path: '/api/watcher/watch/visualize',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

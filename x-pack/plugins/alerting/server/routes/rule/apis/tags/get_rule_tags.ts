@@ -22,6 +22,12 @@ export const getRuleTagsRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         query: ruleTagsRequestQuerySchemaV1,

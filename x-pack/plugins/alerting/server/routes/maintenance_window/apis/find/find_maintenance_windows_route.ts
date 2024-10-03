@@ -24,6 +24,12 @@ export const findMaintenanceWindowsRoute = (
   router.get(
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_find`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

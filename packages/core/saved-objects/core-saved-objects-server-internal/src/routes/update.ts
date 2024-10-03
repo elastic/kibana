@@ -35,6 +35,12 @@ export const registerUpdateRoute = (
   router.put(
     {
       path: '/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Update a saved object`,
         tags: ['oas-tag:saved objects'],

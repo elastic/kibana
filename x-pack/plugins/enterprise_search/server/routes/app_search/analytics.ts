@@ -26,6 +26,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/analytics/queries',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -41,6 +47,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/analytics/queries/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

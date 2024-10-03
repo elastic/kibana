@@ -34,6 +34,12 @@ export const registerDeleteRoute = (
   router.delete(
     {
       path: '/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Delete a saved object`,
         tags: ['oas-tag:saved objects'],

@@ -15,6 +15,12 @@ export function defineEnableUserRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/users/{username}/_enable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
       },

@@ -41,6 +41,12 @@ export function registerExecuteRoute({
   router.put(
     {
       path: '/api/watcher/watch/execute',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

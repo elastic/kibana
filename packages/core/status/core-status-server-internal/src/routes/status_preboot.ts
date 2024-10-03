@@ -15,6 +15,12 @@ export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
   router.get(
     {
       path: '/api/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
         tags: ['api'],

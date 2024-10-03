@@ -19,6 +19,12 @@ export function registerStatsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/stats/sync_jobs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           isCrawler: schema.maybe(schema.boolean()),
@@ -35,6 +41,12 @@ export function registerStatsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/stats/cloud_health',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {

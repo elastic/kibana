@@ -16,6 +16,12 @@ export function registerSecurityRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/security',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -31,6 +37,12 @@ export function registerSecuritySourceRestrictionsRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/security/source_restrictions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({

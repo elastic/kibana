@@ -42,6 +42,12 @@ export function defineBulkCreateOrUpdateRolesRoutes({
   router.post(
     {
       path: '/api/security/roles',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: 'Create or update roles',

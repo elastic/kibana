@@ -23,6 +23,12 @@ export function definePutRolesRoutes({
   router.put(
     {
       path: '/api/security/role/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Create or update a role`,

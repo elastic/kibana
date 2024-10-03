@@ -36,6 +36,12 @@ export const getAlertInstanceSummaryRoute = (
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_instance_summary`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: paramSchema,
         query: querySchema,

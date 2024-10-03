@@ -40,6 +40,12 @@ export const healthRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/_health`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get the alerting framework health`,

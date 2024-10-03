@@ -34,6 +34,12 @@ export const registerBulkUpdateRoute = (
   router.put(
     {
       path: '/_bulk_update',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Update saved objects`,
         tags: ['oas-tag:saved objects'],

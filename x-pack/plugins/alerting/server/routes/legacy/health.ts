@@ -24,6 +24,12 @@ export function healthRoute(
   router.get(
     {
       path: '/api/alerts/_health',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: {
         access: isServerless ? 'internal' : 'public',

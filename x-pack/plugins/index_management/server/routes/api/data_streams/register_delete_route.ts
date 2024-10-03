@@ -18,6 +18,12 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
   router.post(
     {
       path: addBasePath('/delete_data_streams'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: bodySchema },
     },
     async (context, request, response) => {

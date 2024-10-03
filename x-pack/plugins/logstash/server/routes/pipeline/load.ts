@@ -16,6 +16,12 @@ export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipeline/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get a managed Logstash pipeline`,

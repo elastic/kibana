@@ -37,6 +37,12 @@ export const registerResolveImportErrorsRoute = (
   router.post(
     {
       path: '/_resolve_import_errors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Resolve import errors`,
         tags: ['oas-tag:saved objects'],

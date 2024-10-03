@@ -27,6 +27,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.get(
     {
       path: '/internal/serverless_search/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {
@@ -45,6 +51,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.get(
     {
       path: '/internal/serverless_search/connector/{connectorId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -69,6 +81,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {
@@ -98,6 +116,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/name',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -129,6 +153,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/description',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           description: schema.string(),
@@ -160,6 +190,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/index_name',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           index_name: schema.string(),
@@ -192,6 +228,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/service_type',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           service_type: schema.string(),
@@ -221,6 +263,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.delete(
     {
       path: '/internal/serverless_search/connectors/{connectorId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -242,6 +290,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/configuration',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           configuration: schema.recordOf(
@@ -272,6 +326,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -294,6 +354,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.get(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/sync_jobs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -324,6 +390,12 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
   router.post(
     {
       path: '/internal/serverless_search/connectors/{connectorId}/scheduling',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),

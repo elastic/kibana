@@ -16,6 +16,12 @@ export function registerCrawlerEntryPointRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/entry_points',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -37,6 +43,12 @@ export function registerCrawlerEntryPointRoutes({
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -59,6 +71,12 @@ export function registerCrawlerEntryPointRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

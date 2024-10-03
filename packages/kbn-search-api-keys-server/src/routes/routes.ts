@@ -22,6 +22,12 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: APIRoutes.API_KEY_VALIDITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           id: schema.string(),
@@ -62,6 +68,12 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: APIRoutes.API_KEYS,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

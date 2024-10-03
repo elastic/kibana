@@ -51,6 +51,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           query: schema.maybe(schema.string()),
@@ -76,6 +82,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -102,6 +114,12 @@ export function registerAnalyticsRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/analytics/collections/{name}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -128,6 +146,12 @@ export function registerAnalyticsRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/analytics/collections',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -173,6 +197,12 @@ export function registerAnalyticsRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/analytics/collections/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -196,6 +226,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collection/{name}/events/exist',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

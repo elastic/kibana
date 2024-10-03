@@ -19,6 +19,12 @@ export function defineShareSavedObjectPermissionRoutes({
   router.get(
     {
       path: '/internal/security/_share_saved_object_permissions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { query: schema.object({ type: schema.string() }) },
     },
     createLicensedRouteHandler(async (context, request, response) => {

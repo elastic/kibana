@@ -26,6 +26,12 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: RequestHandler.getValidation(),
         options: { tags: kibanaAccessControlTags, access: 'internal' },
       },

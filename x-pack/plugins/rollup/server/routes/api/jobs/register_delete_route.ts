@@ -17,6 +17,12 @@ export const registerDeleteRoute = ({
   router.post(
     {
       path: addBasePath('/delete'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           jobIds: schema.arrayOf(schema.string()),

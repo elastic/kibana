@@ -22,7 +22,16 @@ export function registerRestoreRoutes({
 }: RouteDependencies) {
   // GET all snapshot restores
   router.get(
-    { path: addBasePath('restores'), validate: false },
+    {
+      path: addBasePath('restores'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -96,6 +105,12 @@ export function registerRestoreRoutes({
   router.post(
     {
       path: addBasePath('restore/{repository}/{snapshot}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {

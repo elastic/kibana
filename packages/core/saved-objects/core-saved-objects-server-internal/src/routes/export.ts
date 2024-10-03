@@ -144,6 +144,12 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Export saved objects`,
         tags: ['oas-tag:saved objects'],

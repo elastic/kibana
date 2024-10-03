@@ -24,6 +24,12 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }: Route
   router.put(
     {
       path: '/internal/enterprise_search/stats',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           product: schema.oneOf([

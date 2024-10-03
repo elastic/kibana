@@ -21,7 +21,16 @@ export function registerPolicyRoutes({
 }: RouteDependencies) {
   // GET all policies
   router.get(
-    { path: addBasePath('policies'), validate: false },
+    {
+      path: addBasePath('policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -51,7 +60,16 @@ export function registerPolicyRoutes({
 
   // GET one policy
   router.get(
-    { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policy/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -78,7 +96,16 @@ export function registerPolicyRoutes({
 
   // Create policy
   router.post(
-    { path: addBasePath('policies'), validate: { body: policySchema } },
+    {
+      path: addBasePath('policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: policySchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -117,6 +144,12 @@ export function registerPolicyRoutes({
   router.put(
     {
       path: addBasePath('policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: nameParameterSchema, body: policySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -145,7 +178,16 @@ export function registerPolicyRoutes({
 
   // Delete policy
   router.delete(
-    { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policies/{name}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -176,7 +218,16 @@ export function registerPolicyRoutes({
 
   // Execute policy
   router.post(
-    { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
+    {
+      path: addBasePath('policy/{name}/run'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { params: nameParameterSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
@@ -195,7 +246,16 @@ export function registerPolicyRoutes({
 
   // Get policy indices
   router.get(
-    { path: addBasePath('policies/indices'), validate: false },
+    {
+      path: addBasePath('policies/indices'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -226,7 +286,16 @@ export function registerPolicyRoutes({
 
   // Get policy feature states
   router.get(
-    { path: addBasePath('policies/features'), validate: false },
+    {
+      path: addBasePath('policies/features'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -242,7 +311,16 @@ export function registerPolicyRoutes({
 
   // Get retention settings
   router.get(
-    { path: addBasePath('policies/retention_settings'), validate: false },
+    {
+      path: addBasePath('policies/retention_settings'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { persistent, transient, defaults } =
@@ -271,6 +349,12 @@ export function registerPolicyRoutes({
   router.put(
     {
       path: addBasePath('policies/retention_settings'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: retentionSettingsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -297,7 +381,16 @@ export function registerPolicyRoutes({
 
   // Execute retention
   router.post(
-    { path: addBasePath('policies/retention'), validate: false },
+    {
+      path: addBasePath('policies/retention'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
       const response = await clusterClient.asCurrentUser.slm.executeRetention();

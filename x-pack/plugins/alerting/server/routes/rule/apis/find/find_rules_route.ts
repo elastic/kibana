@@ -41,6 +41,12 @@ const buildFindRulesRoute = ({
   router.get(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: 'Get information about rules',
@@ -108,6 +114,12 @@ const buildFindRulesRoute = ({
     router.post(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         options: { access: 'internal' },
         validate: {
           body: findRulesRequestQuerySchemaV1,

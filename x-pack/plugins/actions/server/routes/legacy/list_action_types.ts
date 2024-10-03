@@ -24,6 +24,12 @@ export const listActionTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/list_action_types`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get connector types`,

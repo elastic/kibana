@@ -55,7 +55,17 @@ export function registerInternalSetManyRoute(router: InternalUiSettingsRouter) {
   };
 
   router.post(
-    { path: '/internal/kibana/settings', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+      options: { access: 'internal' },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await setManyFromRequest(uiSettingsClient, context, request, response);
@@ -63,7 +73,17 @@ export function registerInternalSetManyRoute(router: InternalUiSettingsRouter) {
   );
 
   router.post(
-    { path: '/internal/kibana/global_settings', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/global_settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+      options: { access: 'internal' },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

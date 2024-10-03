@@ -38,14 +38,32 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
     }
   };
   router.get(
-    { path: '/api/kibana/settings', validate: false },
+    {
+      path: '/api/kibana/settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.get(
-    { path: '/api/kibana/global_settings', validate: false },
+    {
+      path: '/api/kibana/global_settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await getFromRequest(uiSettingsClient, context, request, response);

@@ -21,6 +21,12 @@ export const deleteRuleRoute = (
   router.delete(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Delete a rule`,

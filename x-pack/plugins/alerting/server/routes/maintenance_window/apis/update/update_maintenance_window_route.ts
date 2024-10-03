@@ -31,6 +31,12 @@ export const updateMaintenanceWindowRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: updateBodySchemaV1,
         params: updateParamsSchemaV1,

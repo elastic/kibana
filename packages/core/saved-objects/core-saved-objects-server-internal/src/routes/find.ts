@@ -38,6 +38,12 @@ export const registerFindRoute = (
   router.get(
     {
       path: '/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Search for saved objects`,
         tags: ['oas-tag:saved objects'],

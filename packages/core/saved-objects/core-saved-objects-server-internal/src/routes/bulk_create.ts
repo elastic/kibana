@@ -34,6 +34,12 @@ export const registerBulkCreateRoute = (
   router.post(
     {
       path: '/_bulk_create',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Create saved objects`,
         tags: ['oas-tag:saved objects'],

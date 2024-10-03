@@ -53,13 +53,34 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
+  router.post(
+    {
+      path: '/api/kibana/settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+    },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
 
   router.post(
-    { path: '/api/kibana/global_settings', validate },
+    {
+      path: '/api/kibana/global_settings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate,
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

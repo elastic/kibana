@@ -23,6 +23,12 @@ export function registerEnableRoleMappingsRoute({
   router.post(
     {
       path: '/internal/app_search/role_mappings/enable_role_based_access',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -38,6 +44,12 @@ export function registerRoleMappingsRoute({
   router.get(
     {
       path: '/internal/app_search/role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -48,6 +60,12 @@ export function registerRoleMappingsRoute({
   router.post(
     {
       path: '/internal/app_search/role_mappings',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object(roleMappingBaseSchema),
       },
@@ -65,6 +83,12 @@ export function registerRoleMappingRoute({
   router.put(
     {
       path: '/internal/app_search/role_mappings/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object(roleMappingBaseSchema),
         params: schema.object({
@@ -80,6 +104,12 @@ export function registerRoleMappingRoute({
   router.delete(
     {
       path: '/internal/app_search/role_mappings/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -96,6 +126,12 @@ export function registerUserRoute({ router, enterpriseSearchRequestHandler }: Ro
   router.post(
     {
       path: '/internal/app_search/single_user_role_mapping',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           roleMapping: schema.object({

@@ -13,6 +13,12 @@ export const registerInfoRoute = (router: CustomBrandingRouter) => {
   router.get(
     {
       path: '/api/custom_branding/info',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: {
         authRequired: 'optional',

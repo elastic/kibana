@@ -16,6 +16,12 @@ export function registerCrawlerSitemapRoutes({
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/sitemaps',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -37,6 +43,12 @@ export function registerCrawlerSitemapRoutes({
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -59,6 +71,12 @@ export function registerCrawlerSitemapRoutes({
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

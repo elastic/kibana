@@ -20,6 +20,12 @@ export const listAlertTypesRoute = (
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: isServerless ? 'internal' : 'public',

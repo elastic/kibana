@@ -201,6 +201,12 @@ test('valid params', async () => {
   router.get(
     {
       path: '/{test}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           test: schema.string(),
@@ -231,6 +237,12 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/{test}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           test: schema.number(),
@@ -265,6 +277,12 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           bar: schema.string(),
@@ -296,6 +314,12 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           bar: schema.number(),
@@ -330,6 +354,12 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           bar: schema.string(),
@@ -365,6 +395,12 @@ test('valid body with validate function', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
@@ -414,6 +450,12 @@ test('not inline validation - specifying params', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodyValidation,
       },
@@ -457,6 +499,12 @@ test('not inline validation - specifying validation handler', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodyValidation,
       },
@@ -503,6 +551,12 @@ test('not inline handler - KibanaRequest', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
@@ -552,6 +606,12 @@ test('not inline handler - RequestHandler', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
@@ -588,6 +648,12 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           bar: schema.number(),
@@ -623,6 +689,12 @@ test('handles putting', async () => {
   router.put(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           key: schema.string(),
@@ -654,6 +726,12 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.number(),
@@ -690,9 +768,31 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    router.get(
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'value:/' })
+    );
+    router.get(
+      {
+        path: '/foo',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup({
@@ -747,9 +847,31 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ body: 'value:/foo' })
+    router.get(
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'value:/' })
+    );
+    router.get(
+      {
+        path: '/foo',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup({
@@ -799,7 +921,19 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 
 test('with defined `redirectHttpFromPort`', async () => {
   const router = new Router('/', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
+  router.get(
+    {
+      path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: 'value:/' })
+  );
 
   const { registerRouter } = await server.setup({ config$: configWithSSL$ });
   registerRouter(router);
@@ -829,11 +963,32 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/with-tags', validate: false, options: { tags } }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
+  router.get(
+    {
+      path: '/with-tags',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+      options: { tags },
+    },
+    (context, req, res) => res.ok({ body: { tags: req.route.options.tags } })
   );
-  router.get({ path: '/without-tags', validate: false }, (context, req, res) =>
-    res.ok({ body: { tags: req.route.options.tags } })
+  router.get(
+    {
+      path: '/without-tags',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { tags: req.route.options.tags } })
   );
   registerRouter(router);
 
@@ -848,11 +1003,32 @@ test('allows declaring route access to flag a route as public or internal', asyn
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/with-access', validate: false, options: { access } }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/with-access',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+      options: { access },
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/without-access', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/without-access',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
   registerRouter(router);
 
@@ -866,18 +1042,58 @@ test(`sets access flag to 'internal' if not defined`, async () => {
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/internal/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/internal/foo',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/random/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/random/foo',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
-  router.get({ path: '/random/internal/foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/random/internal/foo',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
 
-  router.get({ path: '/api/foo/internal/my-foo', validate: false }, (context, req, res) =>
-    res.ok({ body: { access: req.route.options.access } })
+  router.get(
+    {
+      path: '/api/foo/internal/my-foo',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: { access: req.route.options.access } })
   );
   registerRouter(router);
 
@@ -897,7 +1113,19 @@ test('exposes route details of incoming request to a route handler', async () =>
   const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
   const router = new Router('', logger, enhanceWithContext, routerOptions);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+  router.get(
+    {
+      path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
   registerRouter(router);
 
   await server.start();
@@ -927,7 +1155,19 @@ describe('conditional compression', () => {
       body: 'hello'.repeat(500),
       headers: { 'Content-Type': 'text/html; charset=UTF-8' },
     };
-    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
+    router.get(
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (_context, _req, res) => res.ok(largeRequest)
+    );
     registerRouter(router);
     await server.start();
     return innerServer.listener;
@@ -1032,7 +1272,19 @@ describe('response headers', () => {
     });
 
     const router = new Router('', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    router.get(
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
     registerRouter(router);
 
     await server.start();
@@ -1049,7 +1301,19 @@ describe('response headers', () => {
     const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
     const router = new Router('', logger, enhanceWithContext, routerOptions);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    router.get(
+      {
+        path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
     registerRouter(router);
 
     await server.start();
@@ -1074,6 +1338,12 @@ test('exposes route details of incoming request to a route handler (POST + paylo
   router.post(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ test: schema.number() }) },
       options: { body: { accepts: 'application/json' } },
     },
@@ -1114,6 +1384,12 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { accepts: 'multipart/form-data' } }, // supertest sends 'application/json'
       },
@@ -1136,6 +1412,12 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { maxBytes: 1 } },
       },
@@ -1158,6 +1440,12 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { body: schema.buffer() },
         options: { body: { parse: false } },
       },
@@ -1187,6 +1475,12 @@ describe('timeout options', () => {
       router.post(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: false,
           options: {
             timeout: {
@@ -1221,6 +1515,12 @@ describe('timeout options', () => {
       router.delete(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: false,
           options: {
             timeout: {
@@ -1254,6 +1554,12 @@ describe('timeout options', () => {
       router.put(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: false,
           options: {
             timeout: {
@@ -1327,6 +1633,12 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: schema.maybe(schema.any()) },
         },
         (context, req, res) => {
@@ -1362,6 +1674,12 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: schema.maybe(schema.any()) },
           options: { timeout: { idleSocket: 12000 } },
         },
@@ -1393,6 +1711,12 @@ describe('timeout options', () => {
       router.post(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: schema.any() },
           options: {
             timeout: {
@@ -1420,6 +1744,12 @@ test('should return a stream in the body', async () => {
   router.put(
     {
       path: '/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.stream() },
       options: { body: { output: 'stream' } },
     },
@@ -1447,11 +1777,35 @@ test('closes sockets on timeout', async () => {
   });
   const router = new Router('', logger, enhanceWithContext, routerOptions);
 
-  router.get({ path: '/a', validate: false }, async (context, req, res) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return res.ok({});
-  });
-  router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+  router.get(
+    {
+      path: '/a',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (context, req, res) => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return res.ok({});
+    }
+  );
+  router.get(
+    {
+      path: '/b',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    (context, req, res) => res.ok({})
+  );
 
   registerRouter(router);
 

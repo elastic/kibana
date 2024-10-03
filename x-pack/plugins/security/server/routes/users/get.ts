@@ -15,6 +15,12 @@ export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/users/{username}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
       },

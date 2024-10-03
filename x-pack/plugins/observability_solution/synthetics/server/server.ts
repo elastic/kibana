@@ -77,6 +77,12 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
+              security: {
+                authz: {
+                  enabled: false,
+                  reason: 'This route is opted out from authorization',
+                },
+              },
               validate: validation ?? false,
             },
             handler
@@ -94,6 +100,12 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
+              security: {
+                authz: {
+                  enabled: false,
+                  reason: 'This route is opted out from authorization',
+                },
+              },
               validate: validation ?? false,
             },
             handler
@@ -111,6 +123,12 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
+              security: {
+                authz: {
+                  enabled: false,
+                  reason: 'This route is opted out from authorization',
+                },
+              },
               validate: validation ?? false,
             },
             handler
@@ -128,6 +146,12 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
+              security: {
+                authz: {
+                  enabled: false,
+                  reason: 'This route is opted out from authorization',
+                },
+              },
               validate: validation ?? false,
             },
             handler

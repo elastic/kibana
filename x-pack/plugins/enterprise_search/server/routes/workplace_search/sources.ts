@@ -121,6 +121,12 @@ export function registerAccountSourcesRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -136,6 +142,12 @@ export function registerAccountSourcesStatusRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -151,6 +163,12 @@ export function registerAccountSourceRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -165,6 +183,12 @@ export function registerAccountSourceRoute({
   router.delete(
     {
       path: '/internal/workplace_search/account/sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -184,6 +208,12 @@ export function registerAccountCreateSourceRoute({
   router.post(
     {
       path: '/internal/workplace_search/account/create_source',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           service_type: schema.string(),
@@ -209,6 +239,12 @@ export function registerAccountSourceDocumentsRoute({
   router.post(
     {
       path: '/internal/workplace_search/account/sources/{id}/documents',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.string(),
@@ -232,6 +268,12 @@ export function registerAccountSourceFederatedSummaryRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{id}/federated_summary',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -251,6 +293,12 @@ export function registerAccountSourceReauthPrepareRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{id}/reauth_prepare',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -290,6 +338,12 @@ export function registerAccountSourceValidateIndexingRulesRoute({
   router.post(
     {
       path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: validateRulesSchema,
         params: schema.object({
@@ -310,6 +364,12 @@ export function registerAccountPreSourceRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/pre_sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -329,6 +389,12 @@ export function registerAccountPrepareSourcesRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{serviceType}/prepare',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -351,6 +417,12 @@ export function registerAccountSourceSearchableRoute({
   router.put(
     {
       path: '/internal/workplace_search/account/sources/{id}/searchable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           searchable: schema.boolean(),
@@ -373,6 +445,12 @@ export function registerAccountSourceDisplaySettingsConfig({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -387,6 +465,12 @@ export function registerAccountSourceDisplaySettingsConfig({
   router.post(
     {
       path: '/internal/workplace_search/account/sources/{id}/display_settings/config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: displaySettingsSchema,
         params: schema.object({
@@ -407,6 +491,12 @@ export function registerAccountSourceSchemasRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{id}/schemas',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -421,6 +511,12 @@ export function registerAccountSourceSchemasRoute({
   router.post(
     {
       path: '/internal/workplace_search/account/sources/{id}/schemas',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schemaValuesSchema,
         params: schema.object({
@@ -441,6 +537,12 @@ export function registerAccountSourceReindexJobRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -461,6 +563,12 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
   router.get(
     {
       path: '/internal/workplace_search/account/sources/{sourceId}/download_diagnostics',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -482,6 +590,12 @@ export function registerOrgSourcesRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -497,6 +611,12 @@ export function registerOrgSourcesStatusRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -512,6 +632,12 @@ export function registerOrgSourceRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -526,6 +652,12 @@ export function registerOrgSourceRoute({
   router.delete(
     {
       path: '/internal/workplace_search/org/sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -545,6 +677,12 @@ export function registerOrgCreateSourceRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/create_source',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           service_type: schema.string(),
@@ -573,6 +711,12 @@ export function registerOrgSourceDocumentsRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/sources/{id}/documents',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           query: schema.string(),
@@ -596,6 +740,12 @@ export function registerOrgSourceFederatedSummaryRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{id}/federated_summary',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -615,6 +765,12 @@ export function registerOrgSourceReauthPrepareRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{id}/reauth_prepare',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -654,6 +810,12 @@ export function registerOrgSourceValidateIndexingRulesRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: validateRulesSchema,
         params: schema.object({
@@ -674,6 +836,12 @@ export function registerOrgPreSourceRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/pre_sources/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -693,6 +861,12 @@ export function registerOrgPrepareSourcesRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{serviceType}/prepare',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -716,6 +890,12 @@ export function registerOrgSourceSearchableRoute({
   router.put(
     {
       path: '/internal/workplace_search/org/sources/{id}/searchable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           searchable: schema.boolean(),
@@ -738,6 +918,12 @@ export function registerOrgSourceDisplaySettingsConfig({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -752,6 +938,12 @@ export function registerOrgSourceDisplaySettingsConfig({
   router.post(
     {
       path: '/internal/workplace_search/org/sources/{id}/display_settings/config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: displaySettingsSchema,
         params: schema.object({
@@ -772,6 +964,12 @@ export function registerOrgSourceSchemasRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{id}/schemas',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -786,6 +984,12 @@ export function registerOrgSourceSchemasRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/sources/{id}/schemas',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schemaValuesSchema,
         params: schema.object({
@@ -806,6 +1010,12 @@ export function registerOrgSourceReindexJobRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -826,6 +1036,12 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/sources/{sourceId}/download_diagnostics',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           sourceId: schema.string(),
@@ -846,6 +1062,12 @@ export function registerOrgSourceOauthConfigurationsRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/settings/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -881,6 +1103,12 @@ export function registerOrgSourceOauthConfigurationRoute({
   router.get(
     {
       path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -923,6 +1151,12 @@ export function registerOrgSourceOauthConfigurationRoute({
   router.delete(
     {
       path: '/internal/workplace_search/org/settings/connectors/{serviceType}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           serviceType: schema.string(),
@@ -942,6 +1176,12 @@ export function registerOrgSourceSynchronizeRoute({
   router.post(
     {
       path: '/internal/workplace_search/org/sources/{id}/sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -962,6 +1202,12 @@ export function registerOauthConnectorParamsRoute({
   router.get(
     {
       path: '/internal/workplace_search/sources/create',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           code: schema.maybe(schema.string()),

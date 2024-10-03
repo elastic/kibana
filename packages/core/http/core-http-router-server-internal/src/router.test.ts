@@ -46,6 +46,12 @@ describe('Router', () => {
       router.post(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: validation, query: validation, params: validation },
           options: {
             deprecated: true,
@@ -80,6 +86,12 @@ describe('Router', () => {
       router.post(
         {
           path: '/versioned',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
@@ -88,6 +100,12 @@ describe('Router', () => {
       router.get(
         {
           path: '/unversioned',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok()
@@ -110,6 +128,12 @@ describe('Router', () => {
       router.post(
         {
           path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
           validate: staticOrLazy ? fooValidation : () => fooValidation,
         },
         (context, req, res) => res.ok()
@@ -148,6 +172,12 @@ describe('Router', () => {
     router.post(
       {
         path: '/',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: lazyValidation,
       },
       (context, req, res) => res.ok()
@@ -206,6 +236,12 @@ describe('Router', () => {
           // we use 'any' because validate requires valid Type or function usage
           {
             path: '/',
+            security: {
+              authz: {
+                enabled: false,
+                reason: 'This route is opted out from authorization',
+              },
+            },
             validate: { params: { validate: () => 'error' } } as any,
           },
           (context, req, res) => res.ok({})
@@ -222,6 +258,12 @@ describe('Router', () => {
           // we use 'any' because TS already checks we cannot provide this body.output
           {
             path: '/',
+            security: {
+              authz: {
+                enabled: false,
+                reason: 'This route is opted out from authorization',
+              },
+            },
             options: { body: { output: 'file' } } as any, // We explicitly don't support 'file'
             validate: { body: schema.object({}, { unknowns: 'allow' }) },
           },
@@ -275,7 +317,19 @@ describe('Router', () => {
 
     it('should default `output: "stream" and parse: false` when no body validation is required but not a GET', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
-      router.post({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
+      router.post(
+        {
+          path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
+          validate: {},
+        },
+        (context, req, res) => res.ok({})
+      );
       const [route] = router.getRoutes();
       expect(route.options).toEqual({ body: { output: 'stream', parse: false } });
     });
@@ -283,7 +337,17 @@ describe('Router', () => {
     it('should NOT default `output: "stream" and parse: false` when the user has specified body options (he cares about it)', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
-        { path: '/', options: { body: { maxBytes: 1 } }, validate: {} },
+        {
+          path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
+          options: { body: { maxBytes: 1 } },
+          validate: {},
+        },
         (context, req, res) => res.ok({})
       );
       const [route] = router.getRoutes();
@@ -292,7 +356,19 @@ describe('Router', () => {
 
     it('should NOT default `output: "stream" and parse: false` when no body validation is required and GET', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
-      router.get({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
+      router.get(
+        {
+          path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
+            },
+          },
+          validate: {},
+        },
+        (context, req, res) => res.ok({})
+      );
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});
     });

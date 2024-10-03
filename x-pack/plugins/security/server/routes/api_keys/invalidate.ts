@@ -21,6 +21,12 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
   router.post(
     {
       path: '/internal/security/api_key/invalidate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           apiKeys: schema.arrayOf(schema.object({ id: schema.string(), name: schema.string() })),

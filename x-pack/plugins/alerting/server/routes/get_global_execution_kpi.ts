@@ -37,6 +37,12 @@ export const getGlobalExecutionKPIRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_kpi`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'internal',
       },

@@ -37,6 +37,12 @@ export function registerDocumentRoutes({
   router.get(
     {
       path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -51,6 +57,12 @@ export function registerDocumentRoutes({
   router.delete(
     {
       path: '/internal/app_search/engines/{engineName}/documents/{documentId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           engineName: schema.string(),

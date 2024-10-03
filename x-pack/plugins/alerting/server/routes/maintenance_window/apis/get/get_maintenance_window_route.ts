@@ -28,6 +28,12 @@ export const getMaintenanceWindowRoute = (
   router.get(
     {
       path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: getParamsSchemaV1,
       },

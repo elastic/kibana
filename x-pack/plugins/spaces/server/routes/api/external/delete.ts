@@ -20,6 +20,12 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   router.delete(
     {
       path: '/api/spaces/space/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
         description: `Delete a space`,

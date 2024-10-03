@@ -25,6 +25,12 @@ export const snoozeRuleRoute = (
   router.post(
     {
       path: INTERNAL_ALERTING_SNOOZE_RULE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         params: snoozeParamsSchema,

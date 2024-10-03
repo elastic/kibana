@@ -11,6 +11,12 @@ export const registerIngestPipelineRoutes = ({ router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/ingest_pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (context, request, response) => {

@@ -36,6 +36,12 @@ export const registerImportRoute = (
   router.post(
     {
       path: '/_import',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         summary: `Import saved objects`,
         tags: ['oas-tag:saved objects'],

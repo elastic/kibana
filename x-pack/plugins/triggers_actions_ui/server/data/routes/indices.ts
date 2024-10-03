@@ -33,6 +33,12 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

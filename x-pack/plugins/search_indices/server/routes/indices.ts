@@ -18,6 +18,12 @@ export function registerIndicesRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: POST_CREATE_INDEX_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           indexName: schema.string(),

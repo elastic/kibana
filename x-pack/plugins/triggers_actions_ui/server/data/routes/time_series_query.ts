@@ -28,6 +28,12 @@ export function createTimeSeriesQueryRoute(
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: TimeSeriesQuerySchema,
       },

@@ -95,6 +95,12 @@ export const register = (deps: RouteDependencies): void => {
   router.post(
     {
       path: API_BASE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodyValidation,
       },

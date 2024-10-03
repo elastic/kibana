@@ -21,6 +21,12 @@ export function defineGetAllRolesRoutes({
   router.get(
     {
       path: '/api/security/role',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get all roles`,

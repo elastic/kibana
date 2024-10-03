@@ -37,6 +37,12 @@ export function initSetSolutionSpaceApi(deps: InternalRouteDeps) {
   router.put(
     {
       path: '/internal/spaces/space/{id}/solution',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         description: `Update solution for a space`,
       },

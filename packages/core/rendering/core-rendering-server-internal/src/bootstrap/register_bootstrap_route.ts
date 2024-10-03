@@ -20,6 +20,12 @@ export const registerBootstrapRoute = ({
   router.get(
     {
       path: '/bootstrap.js',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         tags: ['api'],
         access: 'public',
@@ -43,6 +49,12 @@ export const registerBootstrapRoute = ({
   router.get(
     {
       path: '/bootstrap-anonymous.js',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: 'optional',
         tags: ['api'],

@@ -32,6 +32,12 @@ export const registerLegacyImportRoute = (
   router.post(
     {
       path: '/api/kibana/dashboards/import',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),

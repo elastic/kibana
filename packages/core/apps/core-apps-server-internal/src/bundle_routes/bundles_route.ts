@@ -31,6 +31,12 @@ export function registerRouteForBundle(
   router.get(
     {
       path: `${routePath}{path*}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
         access: 'public',

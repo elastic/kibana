@@ -18,6 +18,12 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
   router.get(
     {
       path: '/internal/serverless_search/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -53,6 +59,12 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
   router.get(
     {
       path: '/internal/serverless_search/index_names',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           query: schema.maybe(schema.string()),
@@ -80,6 +92,12 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
   router.get(
     {
       path: '/internal/serverless_search/index/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -101,6 +119,12 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
   router.post(
     {
       path: '/internal/serverless_search/indices/{index_name}/search',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           searchQuery: schema.string({

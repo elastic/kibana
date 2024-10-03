@@ -17,7 +17,16 @@ const bodySchema = schema.object({
 
 export function registerClearCacheRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/indices/clear_cache'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/indices/clear_cache'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;
