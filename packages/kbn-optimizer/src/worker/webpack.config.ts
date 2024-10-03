@@ -159,6 +159,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.css$/,
+          resourceQuery: { not: /raw/ },
           include: /node_modules/,
           use: [
             {
@@ -255,6 +256,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.(js|tsx?)$/,
+          resourceQuery: { not: /raw/ },
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
@@ -279,11 +281,11 @@ export function getWebpackConfig(
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.
         {
-          test: /\.(html|md|txt|tmpl)$/,
+          resourceQuery: /raw/,
           type: 'asset/source',
         },
         {
-          resourceQuery: '?raw',
+          test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.

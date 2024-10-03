@@ -15,7 +15,8 @@
  * @returns {import('./types').KbnImportReq | undefined}
  */
 function parseKbnImportReq(importReq) {
-  if (!importReq.startsWith('@kbn/')) {
+  // TODO: evaluate if we want to keep excluding raw imports (as before) or just patch the bundle_remotes_plugin logic
+  if (!importReq.startsWith('@kbn/') || importReq.endsWith('?raw')) {
     return undefined;
   }
 
