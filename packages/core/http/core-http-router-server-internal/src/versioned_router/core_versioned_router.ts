@@ -74,10 +74,16 @@ export class CoreVersionedRouter implements VersionedRouter {
     (routeMethod: Method) =>
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
-        router: this,
+        router: this.router,
         method: routeMethod,
         path: options.path,
-        options,
+        options: {
+          ...options,
+          defaultHandlerResolutionStrategy: this.defaultHandlerResolutionStrategy,
+          useVersionResolutionStrategyForInternalPaths:
+            this.useVersionResolutionStrategyForInternalPaths,
+          isDev: this.isDev,
+        },
       });
       this.routes.add(route);
       return route;
