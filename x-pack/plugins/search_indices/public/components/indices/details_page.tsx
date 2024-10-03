@@ -9,11 +9,14 @@ import {
   EuiPageSection,
   EuiButton,
   EuiPageTemplate,
+  EuiPageHeaderSection,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -137,13 +140,13 @@ export const SearchIndexDetailsPage = () => {
     () =>
       isIndexError
         ? {
-            title: indexLoadingError ? indexLoadingError.body?.error : '',
-            message: indexLoadingError ? indexLoadingError.body?.message : '',
-          }
+          title: indexLoadingError ? indexLoadingError.body?.error : '',
+          message: indexLoadingError ? indexLoadingError.body?.message : '',
+        }
         : {
-            title: mappingsError ? mappingsError.body?.error : '',
-            message: mappingsError ? mappingsError.body?.message : '',
-          },
+          title: mappingsError ? mappingsError.body?.error : '',
+          message: mappingsError ? mappingsError.body?.message : '',
+        },
     [isIndexError, indexLoadingError, mappingsError]
   );
   const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
@@ -178,24 +181,32 @@ export const SearchIndexDetailsPage = () => {
         />
       ) : (
         <>
-          <EuiPageSection>
-            <EuiButton
-              data-test-subj="backToIndicesButton"
-              color="text"
-              iconType="arrowLeft"
-              onClick={() => navigateToIndexListPage()}
-            >
-              <FormattedMessage
-                id="xpack.searchIndices.backToIndicesButtonLabel"
-                defaultMessage="Back to indices"
-              />
-            </EuiButton>
-          </EuiPageSection>
           <EuiPageTemplate.Header
+            restrictWidth
             data-test-subj="searchIndexDetailsHeader"
+            breadcrumbs={[
+              {
+                text: (
+                  <>
+                    <EuiIcon size="s" type="arrowLeft" />{" "}
+                    <FormattedMessage
+                      id="xpack.searchIndices.backToIndicesButtonLabel"
+                      defaultMessage="View all indices"
+                    />
+
+                  </>
+                ),
+                color: "primary",
+                'aria-current': false,
+                href: '#',
+                "data-test-subj": "backToIndicesButtonLabel",
+                onClick: () => navigateToIndexListPage()
+              }
+            ]}
             pageTitle={index?.name}
+            bottomBorder={false}
             rightSideItems={[
-              <EuiFlexGroup gutterSize="none">
+              <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   {!isDocumentsExists ? (
                     <EuiButtonEmpty
@@ -238,24 +249,27 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>,
             ]}
-          />
-          <EuiPageTemplate.Section grow={false}>
+          >
+          </EuiPageTemplate.Header>
+          <EuiPageTemplate.Section grow={false} restrictWidth paddingSize='none' css={{ paddingBottom: "24px" }}>
             <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup css={{ overflow: 'auto' }}>
-                  <EuiFlexItem css={{ flexShrink: 0 }}>
-                    <ConnectionDetails />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={{ flexShrink: 0 }}>
-                    <ApiKeyForm />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <QuickStats index={index} mappings={mappings} />
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiFlexGroup css={{ overflow: 'auto' }}>
+                    <EuiFlexItem grow={false}>
+                      <ConnectionDetails />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ApiKeyForm />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <QuickStats index={index} mappings={mappings} />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTabbedContent
