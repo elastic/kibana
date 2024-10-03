@@ -174,11 +174,11 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
 
   const {
     application: {
-      capabilities: {
-        rulesSettings: { writeFlappingSettingsUI },
-      },
+      capabilities: { rulesSettings },
     },
   } = useKibana().services;
+
+  const { writeFlappingSettingsUI = false } = rulesSettings || {};
 
   const [isFlappingOffPopoverOpen, setIsFlappingOffPopoverOpen] = useState<boolean>(false);
   const [isFlappingTitlePopoverOpen, setIsFlappingTitlePopoverOpen] = useState<boolean>(false);
