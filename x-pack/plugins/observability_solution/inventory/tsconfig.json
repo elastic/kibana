@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/config-schema",
     "@kbn/observability-shared-plugin",
     "@kbn/server-route-repository",
     "@kbn/shared-ux-link-redirect-app",
@@ -40,7 +39,12 @@
     "@kbn/data-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/core-http-browser",
+    "@kbn/shared-svg",
+    "@kbn/features-plugin",
     "@kbn/es-query",
-    "@kbn/shared-svg"
+    "@kbn/config-schema",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons",
+    "@kbn/ui-theme"
   ]
 }
