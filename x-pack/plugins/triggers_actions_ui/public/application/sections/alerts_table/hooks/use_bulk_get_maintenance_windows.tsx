@@ -55,7 +55,7 @@ export const useBulkGetMaintenanceWindowsQuery = (
     },
   } = useKibana().services;
 
-  const { isAtLeastPlatinum } = useLicense(); // TODO(@umbopepato) move this logic outside of the hook
+  const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
   return useQuery({

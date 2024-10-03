@@ -44,7 +44,6 @@ export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext })
       // Show the previous alert while loading the next one
       alert: alert === undefined && prevAlert != null ? prevAlert : alert,
     }),
-    // TODO(@umbopepato) is this necessary?
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [alert, renderContext]
   );
