@@ -814,7 +814,7 @@
     "tempy": "^0.3.0",
     "terser": "^5.19.2",
     "terser-webpack-plugin": "^4.2.3",
-    "tough-cookie": "^4.1.4",
+    "tough-cookie": "^5.0.0",
     "ts-loader": "^7.0.5",
     "ts-morph": "^11.0.0",
     "tsd": "^0.20.0",
