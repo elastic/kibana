@@ -25,5 +25,5 @@ export type DropDownLabel<T = string> =
   | SelectableOption<T>;
 
 export function isSelectableOption<T>(option: unknown): option is SelectableOption<T> {
-  return typeof option === 'object' && option !== null && Object.hasOwn(option, 'key');
+  return typeof option === 'object' && option !== null && Object.hasOwn(option, 'label');
 }

@@ -16,6 +16,7 @@ import {
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiTextArea,
+  EuiComboBox,
 } from '@elastic/eui';
 
 import {
@@ -103,7 +104,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
-  const { optionCss } = useFieldStatsTrigger();
+  const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const aggOptions: EuiComboBoxOptionOption[] = aggs
     .filter((agg) => filterAggs(agg, usingScriptFields))
@@ -248,12 +249,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem data-test-subj="mlAdvancedFunctionSelect">
             <AggDescription>
-              <OptionListWithFieldStats
+              <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 options={aggOptions}
                 selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
+                renderOption={renderOption}
               />
             </AggDescription>
           </EuiFlexItem>
