@@ -40,6 +40,7 @@ export function useFetchAlert({ id }: AlertParams): UseFetchAlertResponse {
         signal,
       });
     },
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {
