@@ -129,6 +129,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           getRolesAPIClient,
           eventTracker: this.eventTracker,
           getPrivilegesAPIClient,
+          isServerless: this.isServerless,
         });
       }
 
