@@ -5,20 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "datasetQuality",
-        "id": "def-public.datasetQualityAppTitle",
-        "type": "string",
-        "tags": [],
-        "label": "datasetQualityAppTitle",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/dataset_quality/common/translations.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "datasetQuality",
