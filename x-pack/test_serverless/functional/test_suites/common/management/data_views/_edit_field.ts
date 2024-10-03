@@ -30,11 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show preview for fields in _source', async function () {
-        await PageObjects.settings.assertEditFlyoutByFieldType('extension', 'text');
+        await PageObjects.settings.changeAndValidateFieldFormat('extension', 'text');
       });
 
       it('should show preview for fields not in _source', async function () {
-        await PageObjects.settings.assertEditFlyoutByFieldType('extension.raw', 'keyword');
+        await PageObjects.settings.changeAndValidateFieldFormat('extension.raw', 'keyword');
       });
     });
   });

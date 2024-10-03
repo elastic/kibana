@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -384,7 +383,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async filterField(name: string) {
-    const input: WebElementWrapper = await this.testSubjects.find('indexPatternFieldFilter');
+    const input = await this.testSubjects.find('indexPatternFieldFilter');
     await input.clearValueWithKeyboard();
     await input.type(name);
     const value = await this.testSubjects.getAttribute('indexPatternFieldFilter', 'value');
@@ -1060,7 +1059,7 @@ export class SettingsPageObject extends FtrService {
     await editFlyoutBtn.click();
   }
 
-  async assertEditFlyoutByFieldType(name: string, fieldType: string) {
+  async changeAndValidateFieldFormat(name: string, fieldType: string) {
     await this.filterField(name);
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
