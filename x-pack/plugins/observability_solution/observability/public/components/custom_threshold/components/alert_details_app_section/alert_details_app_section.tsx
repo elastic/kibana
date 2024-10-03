@@ -38,7 +38,7 @@ import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertParams } from '../../types';
-import { Threshold } from '../custom_threshold';
+import { Threshold } from '../threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';

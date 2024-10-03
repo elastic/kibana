@@ -46,11 +46,15 @@ const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
+interface ChartSetting {
+  showLegend?: boolean;
+}
 interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  settings?: ChartSetting;
 }
 export function TimeseriesChart({
   id,
@@ -68,6 +72,7 @@ export function TimeseriesChart({
   offset,
   timeZone,
   annotations,
+  settings,
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
@@ -176,7 +181,7 @@ export function TimeseriesChart({
           externalPointerEvents={{
             tooltip: { visible: true },
           }}
-          showLegend
+          showLegend={settings?.showLegend ?? true}
           legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}

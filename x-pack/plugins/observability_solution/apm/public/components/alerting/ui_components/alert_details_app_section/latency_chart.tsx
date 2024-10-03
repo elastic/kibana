@@ -7,7 +7,7 @@
 
 import { Theme } from '@elastic/charts';
 import { RecursivePartial } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactElement } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BoolQuery } from '@kbn/es-query';
@@ -61,6 +61,7 @@ function LatencyChart({
   customAlertEvaluationThreshold,
   kuery = '',
   filters,
+  threshold,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -78,6 +79,7 @@ function LatencyChart({
   offset: string;
   timeZone: string;
   customAlertEvaluationThreshold?: number;
+  threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
 }) {
@@ -245,18 +247,28 @@ function LatencyChart({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <TimeseriesChart
-          id="latencyChart"
-          annotations={getLatencyChartAdditionalData()}
-          height={200}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-          fetchStatus={status}
-          customTheme={comparisonChartTheme}
-          timeseries={timeseriesLatency}
-          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          timeZone={timeZone}
-        />
+        <EuiFlexGroup direction="row" gutterSize="m">
+          {!!threshold && (
+            <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
+              {threshold}
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+            <TimeseriesChart
+              id="latencyChart"
+              annotations={getLatencyChartAdditionalData()}
+              height={200}
+              comparisonEnabled={comparisonEnabled}
+              offset={offset}
+              fetchStatus={status}
+              customTheme={comparisonChartTheme}
+              timeseries={timeseriesLatency}
+              yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+              timeZone={timeZone}
+              settings={{ showLegend: false }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
   );
