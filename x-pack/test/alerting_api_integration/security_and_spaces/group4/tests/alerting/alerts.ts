@@ -1304,7 +1304,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '1h' },
             },
             notifyWhen: 'onActiveAlert',
             throttle: null,
