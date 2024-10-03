@@ -38,7 +38,7 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { isLatencyThresholdRuleType } from './helpers';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { DEFAULT_DATE_FORMAT } from './constants';
+import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
 
@@ -265,7 +265,7 @@ function LatencyChart({
               timeseries={timeseriesLatency}
               yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
               timeZone={timeZone}
-              settings={{ showLegend: false }}
+              settings={CHART_SETTINGS}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

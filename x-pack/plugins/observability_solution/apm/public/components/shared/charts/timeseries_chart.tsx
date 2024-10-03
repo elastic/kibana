@@ -23,6 +23,7 @@ import {
   XYBrushEvent,
   XYChartSeriesIdentifier,
   Tooltip,
+  SettingsSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,15 +47,13 @@ const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
-interface ChartSetting {
-  showLegend?: boolean;
-}
+
 interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
-  settings?: ChartSetting;
+  settings?: Partial<SettingsSpec>;
 }
 export function TimeseriesChart({
   id,
@@ -181,7 +180,7 @@ export function TimeseriesChart({
           externalPointerEvents={{
             tooltip: { visible: true },
           }}
-          showLegend={settings?.showLegend ?? true}
+          showLegend
           legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
@@ -191,6 +190,7 @@ export function TimeseriesChart({
             }
           }}
           locale={i18n.getLocale()}
+          {...settings}
         />
         <Axis
           id="x-axis"
