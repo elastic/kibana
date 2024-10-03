@@ -30761,6 +30761,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
       type: string
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
