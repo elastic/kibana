@@ -293,16 +293,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent/rum_script')
     );
 

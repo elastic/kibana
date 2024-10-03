@@ -31,7 +31,7 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
-    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+    totalDocs: rt.number,
   }),
 ]);
 
@@ -132,7 +132,7 @@ export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   docsCount: rt.number,
-  sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+  sizeBytes: rt.number,
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
   userPrivileges: userPrivilegesRt,
@@ -158,7 +158,7 @@ export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
+  estimatedDataInBytes: rt.number,
 });
 
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
