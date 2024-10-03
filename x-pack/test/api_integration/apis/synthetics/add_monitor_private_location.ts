@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   ConfigKey,
   HTTPFields,
-  LocationStatus,
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -19,6 +18,7 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
+import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service/get_service_locations';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -79,15 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
-        {
-          id: 'dev',
-          label: 'Dev Service',
-          geo: { lat: 0, lon: 0 },
-          url: 'mockDevUrl',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-          isInvalid: false,
-        },
+        ...getDevLocation('mockDevUrl'),
         {
           id: testFleetPolicyID,
           isServiceManaged: false,

@@ -167,7 +167,8 @@ export const ConnectorDetailOverview: React.FC = () => {
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
               {
-                defaultMessage: 'Native connectors are no longer supported outside Elastic Cloud',
+                defaultMessage:
+                  'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
               }
             )}
           >
@@ -176,7 +177,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
-                  defaultMessage="Convert it to a {link}, to be self-managed on your own infrastructure. Native connectors are available only in your Elastic Cloud deployment."
+                  defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
                   values={{
                     link: (
                       <EuiLink
@@ -187,7 +188,7 @@ export const ConnectorDetailOverview: React.FC = () => {
                       >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'connector client' }
+                          { defaultMessage: 'self-managed connector' }
                         )}
                       </EuiLink>
                     ),
