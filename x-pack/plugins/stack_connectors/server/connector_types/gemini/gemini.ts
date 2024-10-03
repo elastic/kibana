@@ -323,10 +323,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
-    console.log(
-      'formatGeminiPayload',
-      JSON.stringify(formatGeminiPayload({ messages, temperature, systemInstruction }), null, 2)
-    );
     const res = await this.runApi(
       {
         body: JSON.stringify({
@@ -366,17 +362,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
-    console.log(
-      'formatGeminiPayload invokeStream',
-      JSON.stringify(
-        {
-          ...formatGeminiPayload({ messages, temperature, toolConfig, systemInstruction }),
-          tools,
-        },
-        null,
-        2
-      )
-    );
     return (await this.streamAPI(
       {
         body: JSON.stringify({

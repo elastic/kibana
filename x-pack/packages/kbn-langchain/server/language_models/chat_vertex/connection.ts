@@ -48,10 +48,8 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
       tools: unknown[];
       systemInstruction?: { parts: [{ text: string }] };
     },
-    options: { signal?: AbortSignal },
-    requestHeaders = {}
+    options: { signal?: AbortSignal }
   ) {
-    console.log('whatisdata?', JSON.stringify(data, null, 2));
     const systemInstruction = data?.systemInstruction?.parts?.[0]?.text.length
       ? { systemInstruction: data?.systemInstruction?.parts?.[0]?.text }
       : {};

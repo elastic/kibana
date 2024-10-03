@@ -78,20 +78,6 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     const parameters = this.invocationParams(options);
     const data = await this.connection.formatData(messages, parameters);
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
-      console.log(
-        'INVOKE STREAM???',
-        JSON.stringify(
-          {
-            messages,
-            options,
-            parameters,
-          },
-          null,
-          2
-        )
-      );
-
-      console.log('data STREAM????', JSON.stringify(data, null, 2));
       const systemPart: GeminiPartText | undefined = data?.systemInstruction
         ?.parts?.[0] as unknown as GeminiPartText;
       const systemInstruction = systemPart?.text.length
