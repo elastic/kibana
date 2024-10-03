@@ -76,6 +76,7 @@ export function fetchEsql({
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
+        let esqlQueryTime: number | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
@@ -85,6 +86,7 @@ export function fetchEsql({
             const rows = table?.rows ?? [];
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
+            esqlQueryTime = table.queryTime ?? undefined;
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
                 id: String(idx),
@@ -104,6 +106,7 @@ export function fetchEsql({
               records: finalData || [],
               esqlQueryColumns,
               esqlHeaderWarning,
+              esqlQueryTime,
             };
           }
         });
@@ -112,6 +115,7 @@ export function fetchEsql({
         records: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
+        esqlQueryTime: undefined,
       };
     })
     .catch((err) => {

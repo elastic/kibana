@@ -123,6 +123,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
+  esqlQueryTime?: number;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
@@ -651,6 +652,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
+          esqlQueryTime={this.props.esqlQueryTime}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}

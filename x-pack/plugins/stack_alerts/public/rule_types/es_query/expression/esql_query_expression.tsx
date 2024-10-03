@@ -64,6 +64,7 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryTime, setQueryTime] = useState<number | undefined>(undefined);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -125,6 +126,7 @@ export const EsqlQueryExpression: React.FC<
       const esqlTable = transformDatatableToEsqlTable(table);
       const hits = toEsQueryHits(esqlTable);
       setIsLoading(false);
+      setQueryTime(table.queryTime);
       return {
         testResults: parseAggregationResults({
           isCountAgg: true,
@@ -200,6 +202,7 @@ export const EsqlQueryExpression: React.FC<
           isLoading={isLoading}
           editorIsInline
           hasOutline
+          queryTime={queryTime}
         />
       </EuiFormRow>
       <EuiSpacer />

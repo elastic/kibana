@@ -60,7 +60,6 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
-  isInCompactMode?: boolean;
   displayDocumentationAsFlyout?: boolean;
 }
 
@@ -84,7 +83,6 @@ export const EditorFooter = memo(function EditorFooter({
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
   hideQueryHistory,
-  isInCompactMode,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,

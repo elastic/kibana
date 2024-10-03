@@ -117,57 +117,60 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
-        if (services.analytics) {
-          const duration = window.performance.now() - startTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAllRequestsOnly',
-            duration,
-            meta: { fetchType },
-          });
-        }
-
-        if (isEsqlQuery) {
-          dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.COMPLETE,
-            result: records.length,
-          });
-        } else {
-          const currentTotalHits = dataSubjects.totalHits$.getValue();
-          // If the total hits (or chart) query is still loading, emit a partial
-          // hit count that's at least our retrieved document count
-          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-            // trigger `partial` only for the first request (if no total hits value yet)
-            dataSubjects.totalHits$.next({
-              fetchStatus: FetchStatus.PARTIAL,
-              result: records.length,
+      .then(
+        ({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning, esqlQueryTime }) => {
+          if (services.analytics) {
+            const duration = window.performance.now() - startTime;
+            reportPerformanceMetricEvent(services.analytics, {
+              eventName: 'discoverFetchAllRequestsOnly',
+              duration,
+              meta: { fetchType },
             });
           }
+
+          if (isEsqlQuery) {
+            dataSubjects.totalHits$.next({
+              fetchStatus: FetchStatus.COMPLETE,
+              result: records.length,
+            });
+          } else {
+            const currentTotalHits = dataSubjects.totalHits$.getValue();
+            // If the total hits (or chart) query is still loading, emit a partial
+            // hit count that's at least our retrieved document count
+            if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+              // trigger `partial` only for the first request (if no total hits value yet)
+              dataSubjects.totalHits$.next({
+                fetchStatus: FetchStatus.PARTIAL,
+                result: records.length,
+              });
+            }
+          }
+
+          /**
+           * The partial state for ES|QL mode is necessary in case the query has changed
+           * In the follow up useEsqlMode hook in this case new columns are added to AppState
+           * So the data table shows the new columns of the table. The partial state was introduced to prevent
+           * To frequent change of state causing the table to re-render to often, which causes race conditions
+           * So it takes too long, a bad user experience, also a potential flakniess in tests
+           */
+          const fetchStatus =
+            isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
+              ? FetchStatus.PARTIAL
+              : FetchStatus.COMPLETE;
+
+          dataSubjects.documents$.next({
+            fetchStatus,
+            result: records,
+            esqlQueryColumns,
+            esqlHeaderWarning,
+            interceptedWarnings,
+            query,
+            esqlQueryTime,
+          });
+
+          checkHitCount(dataSubjects.main$, records.length);
         }
-
-        /**
-         * The partial state for ES|QL mode is necessary in case the query has changed
-         * In the follow up useEsqlMode hook in this case new columns are added to AppState
-         * So the data table shows the new columns of the table. The partial state was introduced to prevent
-         * To frequent change of state causing the table to re-render to often, which causes race conditions
-         * So it takes too long, a bad user experience, also a potential flakniess in tests
-         */
-        const fetchStatus =
-          isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
-            ? FetchStatus.PARTIAL
-            : FetchStatus.COMPLETE;
-
-        dataSubjects.documents$.next({
-          fetchStatus,
-          result: records,
-          esqlQueryColumns,
-          esqlHeaderWarning,
-          interceptedWarnings,
-          query,
-        });
-
-        checkHitCount(dataSubjects.main$, records.length);
-      })
+      )
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;

@@ -22,6 +22,7 @@ export interface QueryHistoryItem {
   startDateMilliseconds?: number;
   timeRan?: string;
   timeZone?: string;
+  duration?: string;
 }
 
 const MAX_QUERIES_NUMBER = 20;

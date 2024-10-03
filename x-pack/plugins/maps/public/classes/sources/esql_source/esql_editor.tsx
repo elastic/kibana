@@ -93,6 +93,7 @@ export function ESQLEditor(props: Props) {
         hideRunQueryText
         isLoading={isLoading}
         disableSubmitAction={isEqual(localQuery, props.esql)}
+        hideQueryHistory
       />
     </>
   );

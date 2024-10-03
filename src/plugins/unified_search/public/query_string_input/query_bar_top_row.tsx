@@ -168,6 +168,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
+  esqlQueryTime?: number;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -734,6 +735,7 @@ export const QueryBarTopRow = React.memo(
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
+            queryTime={props.esqlQueryTime}
             detectedTimestamp={detectedTimestamp}
             onTextLangQuerySubmit={async () =>
               onSubmit({

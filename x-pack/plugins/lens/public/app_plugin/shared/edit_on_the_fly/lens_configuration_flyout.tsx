@@ -138,7 +138,7 @@ export function LensEditConfigurationFlyout({
     const abortController = new AbortController();
     const getESQLGridAttrs = async () => {
       if (!dataGridAttrs && isOfAggregateQueryType(query)) {
-        const { dataView, columns, rows } = await getGridAttrs(
+        const { dataView, columns, rows, queryTime } = await getGridAttrs(
           query,
           adHocDataViews,
           startDependencies,
@@ -149,6 +149,7 @@ export function LensEditConfigurationFlyout({
           rows,
           dataView,
           columns,
+          queryTime,
         });
       }
     };
@@ -505,6 +506,7 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
+                queryTime={dataGridAttrs?.queryTime}
               />
             </EuiFlexItem>
           )}

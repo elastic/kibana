@@ -276,6 +276,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             hideRunQueryText={false}
             isLoading={queryHistoryStatus ?? false}
             displayDocumentationAsFlyout
+            hideQueryHistory
           />
         </EuiFlexItem>
 

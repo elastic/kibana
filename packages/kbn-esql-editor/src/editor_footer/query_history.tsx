@@ -188,6 +188,19 @@ export const getTableColumns = (
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
+      field: 'duration',
+      'data-test-subj': 'lastDuration',
+      name: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
+        {
+          defaultMessage: 'Last duration',
+        }
+      ),
+      sortable: false,
+      width: isOnReducedSpaceLayout ? 'auto' : '120px',
+      css: { justifyContent: 'flex-end' as const }, // right alignment
+    },
+    {
       name: '',
       actions,
       'data-test-subj': 'actions',
@@ -303,6 +316,9 @@ export function QueryHistory({
     .euiTableRowCell {
       vertical-align: top;
       border: none;
+    }
+    .euiTable th[data-test-subj='tableHeaderCell_duration_3'] span {
+      justify-content: flex-end;
     }
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
     border-top-left-radius: ${euiTheme.border.radius.medium};
