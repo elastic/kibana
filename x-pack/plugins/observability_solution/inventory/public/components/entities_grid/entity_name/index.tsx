@@ -11,10 +11,11 @@ import {
   AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
   ServiceOverviewParams,
+  ENTITY_TYPE,
+  ENTITY_DISPLAY_NAME,
 } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EntityIcon } from '../../entity_icon';
-import { ENTITY_DISPLAY_NAME, ENTITY_TYPE } from '../../../../common/es_fields/entities';
 import { Entity } from '../../../../common/entities';
 import { parseServiceParams } from '../../../utils/parse_service_params';
 
