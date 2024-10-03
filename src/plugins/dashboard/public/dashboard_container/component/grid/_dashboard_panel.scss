@@ -58,3 +58,7 @@
   // keeps outline from getting cut off by other panels without margins
   z-index: 999 !important;
 }
+
+.coreSystemRootDomElement {
+  overflow-y: auto !important;
+}
