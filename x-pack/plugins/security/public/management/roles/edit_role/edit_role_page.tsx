@@ -719,12 +719,21 @@ export const EditRolePage: FunctionComponent<Props> = ({
           ),
         });
       } else {
-        notifications.toasts.addSuccess(
-          i18n.translate(
-            'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
-            { defaultMessage: 'Saved role' }
-          )
-        );
+        if (isEditingExistingRole) {
+          notifications.toasts.addSuccess(
+            i18n.translate(
+              'xpack.security.management.editRole.roleSuccessfullyUpdatedNotificationMessage',
+              { defaultMessage: 'Updated role' }
+            )
+          );
+        } else {
+          notifications.toasts.addSuccess(
+            i18n.translate(
+              'xpack.security.management.editRole.roleSuccessfullyCreatedNotificationMessage',
+              { defaultMessage: 'Created role' }
+            )
+          );
+        }
       }
 
       backToRoleList();

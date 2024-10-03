@@ -11,8 +11,8 @@ import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
 import { createDatasetQualityDetailsControllerStateMachine } from '../../state_machines/dataset_quality_details_controller/state_machine';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
+import { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
 import { DatasetQualityStartDeps } from '../../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import { DatasetQualityDetailsController, DatasetQualityDetailsPublicStateUpdate } from './types';
@@ -20,18 +20,23 @@ import { DatasetQualityDetailsController, DatasetQualityDetailsPublicStateUpdate
 interface Dependencies {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
-  dataStreamStatsClient: IDataStreamsStatsClient;
-  dataStreamDetailsClient: IDataStreamDetailsClient;
+  dataStreamStatsService: DataStreamsStatsServiceStart;
+  dataStreamDetailsService: DataStreamDetailsServiceStart;
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({ core, plugins, dataStreamStatsClient, dataStreamDetailsClient }: Dependencies) =>
+  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
   }: {
     initialState: DatasetQualityDetailsPublicStateUpdate;
   }): Promise<DatasetQualityDetailsController> => {
     const initialContext = getContextFromPublicState(initialState);
+
+    const [dataStreamStatsClient, dataStreamDetailsClient] = await Promise.all([
+      dataStreamStatsService.getClient(),
+      dataStreamDetailsService.getClient(),
+    ]);
 
     const machine = createDatasetQualityDetailsControllerStateMachine({
       initialContext,
