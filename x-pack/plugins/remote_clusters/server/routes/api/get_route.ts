@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, chunk, assign } from 'lodash';
 
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
+
+const CLUSTER_STATUS_CHUNK_SIZE = 10;
 
 export const register = (deps: RouteDependencies): void => {
   const {
@@ -34,56 +36,54 @@ export const register = (deps: RouteDependencies): void => {
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
-      const body = await Promise.all(
-        clusterNames.map(async (clusterName: string): Promise<any> => {
-          const cluster = clustersByName[clusterName];
-          const isTransient = transientClusterNames.includes(clusterName);
-          const isPersistent = persistentClusterNames.includes(clusterName);
-          const { config } = deps;
+      const clusterNamesChunks = chunk(clusterNames, CLUSTER_STATUS_CHUNK_SIZE);
+      const promises = clusterNamesChunks.map(async (chunk) => {
+        try {
+          return await clusterClient.asCurrentUser.indices.resolveCluster({
+            name: chunk.map((cluster) => `${cluster}:*`),
+            filter_path: '*.connected',
+          });
+        } catch (error) {
+          return Promise.resolve(null);
+        }
+      });
 
-          // If the cluster hasn't been stored in the cluster state, then it's defined by the
-          // node's config file.
-          const isConfiguredByNode = !isTransient && !isPersistent;
+      const resolvedClusterStatus = await Promise.all(promises);
+      // Flatten the resolved cluster status and filter out any null values
+      const flattenedClusterStatus = resolvedClusterStatus.flat().filter(Boolean);
+      // Combine the resolved cluster status into a single object
+      const clusterStatus = assign({}, ...flattenedClusterStatus);
 
-          // Pre-7.6, ES supported an undocumented "proxy" field
-          // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
-          // This value is not available via the GET /_remote/info API, so we get it from the cluster settings
-          const deprecatedProxyAddress = isPersistent
-            ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
-            : undefined;
+      const body = clusterNames.map((clusterName: string): any => {
+        const cluster = clustersByName[clusterName];
+        const isTransient = transientClusterNames.includes(clusterName);
+        const isPersistent = persistentClusterNames.includes(clusterName);
+        const { config } = deps;
 
-          // Resolve cluster status
-          let clusterStatus;
+        // If the cluster hasn't been stored in the cluster state, then it's defined by the
+        // node's config file.
+        const isConfiguredByNode = !isTransient && !isPersistent;
 
-          try {
-            clusterStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
-              name: `${clusterName}:*`,
-              filter_path: '*.connected',
-            });
-          } catch (error) {
-            // If the cluster is not reachable, we'll get a TimeoutError.
-            // In this case, we'll set the cluster status to disconnected.
-            if (error.name === 'TimeoutError') {
-              clusterStatus = { [clusterName]: { connected: false } };
-            } else {
-              throw error;
-            }
-          }
+        // Pre-7.6, ES supported an undocumented "proxy" field
+        // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
+        // This value is not available via the GET /_remote/info API, so we get it from the cluster settings
+        const deprecatedProxyAddress = isPersistent
+          ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
+          : undefined;
 
-          return {
-            ...deserializeCluster(
-              clusterName,
-              cluster,
-              deprecatedProxyAddress,
-              config.isCloudEnabled
-            ),
-            isConfiguredByNode,
-            // We prioritize the cluster status from the resolve cluster API, and fallback to
-            // the cluster connected status in case it's not present.
-            isConnected: clusterStatus[clusterName]?.connected || cluster.connected,
-          };
-        })
-      );
+        return {
+          ...deserializeCluster(
+            clusterName,
+            cluster,
+            deprecatedProxyAddress,
+            config.isCloudEnabled
+          ),
+          isConfiguredByNode,
+          // We prioritize the cluster status from the resolve cluster API, and fallback to
+          // the cluster connected status in case it's not present.
+          isConnected: clusterStatus[clusterName]?.connected || cluster.connected,
+        };
+      });
 
       return response.ok({ body });
     } catch (error) {
