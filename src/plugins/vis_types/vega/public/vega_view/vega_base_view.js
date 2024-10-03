@@ -282,9 +282,9 @@ export class VegaBaseView {
     }
   }
 
-  async resize() {
+  async resize(dimensions) {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
+      this.updateVegaSize(this._view, dimensions);
       await this._view.runAsync();
 
       // The derived class should create this method
