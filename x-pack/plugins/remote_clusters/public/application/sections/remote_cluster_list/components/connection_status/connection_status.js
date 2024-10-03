@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
-import { EuiHealth, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 

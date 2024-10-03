@@ -37,10 +37,10 @@ export const register = (deps: RouteDependencies): void => {
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
       const clusterNamesChunks = chunk(clusterNames, CLUSTER_STATUS_CHUNK_SIZE);
-      const promises = clusterNamesChunks.map(async (chunk) => {
+      const promises = clusterNamesChunks.map(async (clustersChunk) => {
         try {
           return await clusterClient.asCurrentUser.indices.resolveCluster({
-            name: chunk.map((cluster) => `${cluster}:*`),
+            name: clustersChunk.map((cluster) => `${cluster}:*`),
             filter_path: '*.connected',
           });
         } catch (error) {
