@@ -9,9 +9,11 @@ import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { defineDeleteRolesRoutes } from './delete';
+import { API_VERSIONS } from '../../../../common/constants';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 interface TestOptions {
@@ -28,6 +30,8 @@ describe('DELETE role', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const versionedRouterMock = mockRouteDefinitionParams.router
+        .versioned as MockedVersionedRouter;
       const mockCoreContext = coreMock.createRequestHandlerContext();
       const mockLicensingContext = {
         license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
@@ -44,7 +48,9 @@ describe('DELETE role', () => {
       }
 
       defineDeleteRolesRoutes(mockRouteDefinitionParams);
-      const [[, handler]] = mockRouteDefinitionParams.router.delete.mock.calls;
+      const handler = versionedRouterMock.getRoute('delete', '/api/security/role/{name}').versions[
+        API_VERSIONS.roles.public.v1
+      ].handler;
 
       const headers = { authorization: 'foo' };
       const mockRequest = httpServerMock.createKibanaRequest({
