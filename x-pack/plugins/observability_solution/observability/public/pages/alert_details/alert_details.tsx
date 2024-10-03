@@ -31,6 +31,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
@@ -106,6 +107,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
 
+  const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [relatedAlertsKuery, setRelatedAlertsKuery] = useState<string>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -212,7 +214,7 @@ export function AlertDetails() {
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
-        <SourceBar alert={alertDetail.formatted} />
+        <SourceBar alert={alertDetail.formatted} sources={sources} />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="m" />
         {rule && alertDetail.formatted && (
@@ -221,6 +223,7 @@ export function AlertDetails() {
               alert={alertDetail.formatted}
               rule={rule}
               timeZone={timeZone}
+              setSources={setSources}
               setRelatedAlertsKuery={setRelatedAlertsKuery}
             />
             <EuiSpacer size="l" />

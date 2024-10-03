@@ -64,6 +64,8 @@ export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/al
 export * from './typings';
 import { TopAlert } from './typings/alerts';
 export type { TopAlert };
+import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';
+export type { AlertDetailsAppSectionProps };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';
 

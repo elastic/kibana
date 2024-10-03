@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
@@ -51,5 +52,19 @@ describe('Source bar', () => {
     expect(sourceBar.queryByText(groups[0].value)).toBeInTheDocument();
     expect(sourceBar.queryByText(groups[1].field, { exact: false })).toBeInTheDocument();
     expect(sourceBar.queryByText(groups[1].value)).toBeInTheDocument();
+  });
+
+  it('Should show passed sources', async () => {
+    const sources = [
+      { label: 'MyLabel', value: 'MyValue' },
+      { label: 'SLO', value: <EuiLink data-test-subj="SourceSloLink" href="href" /> },
+    ];
+    const sourceBar = render(<SourceBar alert={alertWithGroupsAndTags} sources={sources} />);
+
+    expect(sourceBar.queryByText('Source')).toBeInTheDocument();
+    expect(sourceBar.queryByText(sources[0].label, { exact: false })).toBeInTheDocument();
+    expect(sourceBar.queryByText(sources[0].value as string, { exact: false })).toBeInTheDocument();
+    expect(sourceBar.queryByText(sources[1].label, { exact: false })).toBeInTheDocument();
+    expect(sourceBar.queryByTestId('SourceSloLink')).toBeInTheDocument();
   });
 });
