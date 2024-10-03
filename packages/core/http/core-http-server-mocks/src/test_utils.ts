@@ -68,7 +68,7 @@ export const createConfigService = ({
             shutdownTimeout: moment.duration(30, 'seconds'),
             keepaliveTimeout: 120_000,
             socketTimeout: 120_000,
-            restrictInternalApis: false,
+            restrictInternalApis: false, // disable restriction for Kibana tests
             versioned: {
               versionResolution: 'oldest',
               strictClientVersionCheck: true,

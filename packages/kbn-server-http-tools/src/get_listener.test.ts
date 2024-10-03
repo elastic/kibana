@@ -39,7 +39,7 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
     enabled: false,
     ...parts.ssl,
   },
-  restrictInternalApis: false,
+  restrictInternalApis: true,
 });
 
 describe('getServerListener', () => {
