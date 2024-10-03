@@ -199,6 +199,10 @@ export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCri
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
+export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
+  'securitySolution:enableVisualizationsInFlyout' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './dataset_quality';
+export * from './src/form_info_field/form_info_field';
