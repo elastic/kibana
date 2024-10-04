@@ -137,6 +137,7 @@ export const MisconfigurationsPreview = ({
     sort: [],
     enabled: true,
     pageSize: 1,
+    ignore_unavailable: false,
   });
   const isUsingHostName = fieldName === 'host.name';
   const passedFindings = data?.count.passed || 0;

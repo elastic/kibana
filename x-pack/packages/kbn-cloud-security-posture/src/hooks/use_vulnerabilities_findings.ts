@@ -21,7 +21,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseMisconfigurationOptions } from '../../type';
+import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
 import { showErrorToast } from '../..';
 import {
   getFindingsCountAggQueryVulnerabilities,
@@ -37,10 +37,7 @@ interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getVulnerabilitiesQuery = (
-  { query }: UseMisconfigurationOptions,
-  isPreview = false
-) => ({
+export const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQueryVulnerabilities(),
@@ -64,7 +61,7 @@ export const getVulnerabilitiesQuery = (
   },
 });
 
-export const useVulnerabilitiesFindings = (options: UseMisconfigurationOptions) => {
+export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
   const {
     data,
     notifications: { toasts },
