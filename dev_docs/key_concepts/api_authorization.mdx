@@ -48,6 +48,19 @@ Adding an `access` tag to routes that leverage the Saved Objects Service would b
 `KibanaRouteOptions` provides a security configuration at the route definition level.
 It provides robust security configurations for both **Classic** and **Versioned** routes.
 
+Key features of the new security configuration:
+1. **Fine-grained control**: 
+  - Define the exact privileges required to access the route.
+  - Use `requiredPrivileges` to specify privileges with support for complex rules:
+    - **AND rules** using `allRequired`: Requires all specified privileges for access.
+    - **OR rules** using `anyRequired`: Allows access if any one of the specified privileges is met.
+    - **Complex Nested Rules**: Combine both `allRequired` and `anyRequired` for advanced access rules.
+2. **Explicit Opt-out**: Provide a reason for opting out of authorization to maintain transparency.
+3. **Versioned Routes**: Define security configurations for different versions of the same route.
+4. **Improved Documentation with OpenAPI (OAS)**: Automatically generated OAS documentation with the required privileges for each route.
+5. **AuthzResult Object in Route Handlers**: Access the authorization response in route handlers to see which privileges were met.
+
+
 ### Configuring Authorization on Routes
 **Before Migration:**
 ```ts
