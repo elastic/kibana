@@ -34,7 +34,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -52,6 +52,7 @@ import {
   DATE_1970_5_MIN,
   mockedRawRuleSO,
 } from './fixtures';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -118,6 +119,9 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
@@ -167,7 +171,6 @@ describe('Task Runner', () => {
     const services = alertsMock.createRuleExecutorServices();
     const actionsClient = actionsClientMock.create();
     const rulesSettingsService = rulesSettingsServiceMock.create();
-    const rulesClient = rulesClientMock.create();
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
     const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
     const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -207,7 +210,6 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient,
       eventLogger: eventLoggerMock.create(),
       executionContext: executionContextServiceMock.createInternalStartContract(),
-      getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
       kibanaBaseUrl: 'https://localhost:5601',
       logger,
       maintenanceWindowsService,
@@ -238,7 +240,6 @@ describe('Task Runner', () => {
           });
         savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
         elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-        taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
         taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
           actionsClient
         );
@@ -321,7 +322,7 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
@@ -433,7 +434,7 @@ describe('Task Runner', () => {
           inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
         const runnerResult = await taskRunner.run();
         expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
@@ -579,7 +580,7 @@ describe('Task Runner', () => {
           inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
         await taskRunner.run();
 
@@ -677,7 +678,7 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
@@ -771,7 +772,7 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
