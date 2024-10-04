@@ -69,7 +69,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
-  const mockedSetAlertSummaryFields = jest.fn();
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
@@ -77,7 +76,6 @@ describe('AlertDetailsAppSection', () => {
           <AlertDetailsAppSection
             alert={buildMetricThresholdAlert()}
             rule={buildMetricThresholdRule()}
-            setAlertSummaryFields={mockedSetAlertSummaryFields}
           />
         </QueryClientProvider>
       </IntlProvider>
