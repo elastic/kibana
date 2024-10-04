@@ -211,7 +211,6 @@ export const QuerySpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId.optional(),
   dataViewId: DataViewId.optional(),
-
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 
@@ -227,7 +226,6 @@ export const SavedQuerySpecificRuleParams = z.object({
   query: RuleQuery.optional(),
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId,
-
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 
