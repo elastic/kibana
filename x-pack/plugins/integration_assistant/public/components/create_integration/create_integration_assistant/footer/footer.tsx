@@ -12,6 +12,7 @@ import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
 import { useTelemetry } from '../../telemetry';
 import { useActions, type State } from '../state';
 import * as i18n from './translations';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 // Generation button for Step 3
 const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
@@ -54,6 +55,8 @@ export const Footer = React.memo<FooterProps>(
     const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
 
+    const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
+
     const onBack = useCallback(() => {
       if (currentStep === 1) {
         navigate(Page.landing);
@@ -75,18 +78,18 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 3) {
         return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 4 && !hasCelInput) {
+      if (currentStep === 4 && (!isGenerateCelEnabled || !hasCelInput)) {
         return i18n.ADD_TO_ELASTIC;
       }
-      if (currentStep === 5 && hasCelInput) {
+      if (currentStep === 5 && hasCelInput && isGenerateCelEnabled) {
         return <AnalyzeCelButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 6 && hasCelInput) {
+      if (currentStep === 6 && hasCelInput && isGenerateCelEnabled) {
         return i18n.ADD_TO_ELASTIC;
       }
-    }, [currentStep, isGenerating, hasCelInput]);
+    }, [currentStep, isGenerating, hasCelInput, isGenerateCelEnabled]);
 
-    if (currentStep === 7 || (currentStep === 5 && !hasCelInput)) {
+    if (currentStep === 7 || (currentStep === 5 && (!isGenerateCelEnabled || !hasCelInput))) {
       return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (

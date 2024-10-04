@@ -6,37 +6,32 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiTextArea } from '@elastic/eui';
-import type { CelInput } from '../../../../../../common';
+import { EuiFlexItem, EuiFlexGroup, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
+import { type State } from '../../state';
+import * as i18n from './translations';
 
 interface CelConfigFormProps {
-  celInputResult?: CelInput;
+  celInputResult: State['celInputResult'];
 }
 
 export const CelConfigForm = React.memo<CelConfigFormProps>(({ celInputResult }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={true}>
-        <EuiFormRow label="CEL program" hasChildLabel={false} isDisabled>
-          <EuiTextArea
-            aria-label="Use aria labels when no actual label is in use"
-            value={celInputResult?.program}
-            // onChange={(e) => onChange(e)}
-          />
+        <EuiFormRow title={i18n.PROGRAM} hasChildLabel={false} fullWidth>
+          <EuiCodeBlock language="c" fontSize="m" isCopyable>
+            {celInputResult?.program}
+          </EuiCodeBlock>
         </EuiFormRow>
-        <EuiFormRow label="Initial CEL evaluation state" hasChildLabel={false} isDisabled>
-          <EuiTextArea
-            aria-label="Use aria labels when no actual label is in use"
-            value={JSON.stringify(celInputResult?.stateSettings)}
-            // onChange={(e) => onChange(e)}
-          />
+        <EuiFormRow title={i18n.STATE} hasChildLabel={false} fullWidth>
+          <EuiCodeBlock language="json" fontSize="m" isCopyable>
+            {JSON.stringify(celInputResult?.stateSettings)}
+          </EuiCodeBlock>
         </EuiFormRow>
-        <EuiFormRow label="Settings" hasChildLabel={false} isDisabled>
-          <EuiTextArea
-            aria-label="Use aria labels when no actual label is in use"
-            value={celInputResult?.redactVars}
-            // onChange={(e) => onChange(e)}
-          />
+        <EuiFormRow title={i18n.REDACT_VARS} hasChildLabel={false} fullWidth>
+          <EuiCodeBlock language="json" fontSize="m" isCopyable>
+            {JSON.stringify(celInputResult?.redactVars)}
+          </EuiCodeBlock>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

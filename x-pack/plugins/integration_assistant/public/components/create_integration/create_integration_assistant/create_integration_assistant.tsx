@@ -19,9 +19,12 @@ import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
 import { isCelInputStepReady } from './steps/cel_input_step/is_step_ready';
 import { CelInputStep } from './steps/cel_input_step/cel_input_step';
+import { ExperimentalFeaturesService } from '../../../services';
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
 
   const telemetry = useTelemetry();
   useEffect(() => {
@@ -93,14 +96,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
               result={state.result}
             />
           )}
-          {/* {state.step === 5 && (
-            <DeployStep
-              integrationSettings={state.integrationSettings}
-              result={state.result}
-              connector={state.connector}
-            />
-          )} */}
-          {!state.hasCelInput && state.step === 5 && (
+          {(!isGenerateCelEnabled || !state.hasCelInput) && state.step === 5 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
@@ -108,21 +104,21 @@ export const CreateIntegrationAssistant = React.memo(() => {
             />
           )}
 
-          {state.hasCelInput && state.step === 5 && (
+          {isGenerateCelEnabled && state.hasCelInput && state.step === 5 && (
             <CelInputStep
               integrationSettings={state.integrationSettings}
               connector={state.connector}
               isGenerating={state.isGenerating}
             />
           )}
-          {state.hasCelInput && state.celInputResult && state.step === 6 && (
+          {isGenerateCelEnabled && state.hasCelInput && state.step === 6 && (
             <ReviewCelStep
               integrationSettings={state.integrationSettings}
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
             />
           )}
-          {state.hasCelInput && state.step === 7 && (
+          {isGenerateCelEnabled && state.hasCelInput && state.step === 7 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
