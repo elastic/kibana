@@ -156,19 +156,18 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
               title={rule.name}
               onClick={() => onSelectRuleType(rule.id)}
               description={rule.description}
-              footer={
-                <EuiText
-                  color="subdued"
-                  size="xs"
-                  style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
-                >
-                  {producerToDisplayName(rule.producer)}
-                </EuiText>
-              }
               style={{ marginRight: '8px', flexGrow: 0 }}
               data-test-subj={`${rule.id}-SelectOption`}
               isDisabled={rule.enabledInLicense === false}
-            />
+            >
+              <EuiText
+                color="subdued"
+                size="xs"
+                style={{ textTransform: 'uppercase', fontWeight: euiTheme.font.weight.bold }}
+              >
+                {producerToDisplayName(rule.producer)}
+              </EuiText>
+            </EuiCard>
             <EuiSpacer size="s" />
           </React.Fragment>
         ))}
