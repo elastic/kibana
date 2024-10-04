@@ -61,7 +61,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   const integrations = useQuery(['debug-integrations'], fetchInstalledIntegrations);
 
   const uninstallMutation = useMutation(async (integration: PackageListItem) => {
-    const response = await sendRemovePackage(integration.name, integration.version, true);
+    const response = await sendRemovePackage(integration.name, integration.version);
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
@@ -92,7 +92,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
   });
 
   const reinstallMutation = useMutation(async (integration: PackageListItem) => {
-    const uninstallResponse = await sendRemovePackage(integration.name, integration.version, true);
+    const uninstallResponse = await sendRemovePackage(integration.name, integration.version);
 
     if (uninstallResponse.error) {
       notifications.toasts.addError(uninstallResponse.error, {

@@ -270,14 +270,11 @@ export const sendBulkInstallPackages = (
   });
 };
 
-export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
+export const sendRemovePackage = (pkgName: string, pkgVersion: string) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,
-    body: {
-      force,
-    },
   });
 };
 
