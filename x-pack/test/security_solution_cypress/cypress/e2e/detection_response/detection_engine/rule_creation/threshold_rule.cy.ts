@@ -160,7 +160,7 @@ describe(
 
       // ensures duration displayed on define step in preview mode
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '6h');
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');
       });
 
       fillAboutRuleMinimumAndContinue(rule);
