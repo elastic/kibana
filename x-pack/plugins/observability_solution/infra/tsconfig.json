@@ -109,7 +109,10 @@
     "@kbn/core-analytics-browser",
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
-    "@kbn/shared-ux-page-no-data-types"
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/entityManager-plugin",
+    "@kbn/observability-utils",
+    "@kbn/entities-schema"
   ],
   "exclude": ["target/**/*"]
 }
