@@ -7,11 +7,9 @@
 
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ServiceProviderKeys } from '../../../../../common/inference/constants';
-import { InferenceProvider, useProviders } from '../get_providers';
 import {
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
@@ -26,31 +24,20 @@ import {
  * @returns {EuiSelectableOption[]} modified options
  */
 
-export interface GetSelectableOptions {
-  providers: InferenceProvider[];
-  searchProviderValue: string;
-}
-
 export interface SelectableProviderProps {
-  getSelectableOptions: ({
-    providers,
-    searchProviderValue,
-  }: GetSelectableOptions) => EuiSelectableOption[];
+  isLoading: boolean;
+  getSelectableOptions: (searchProviderValue?: string) => EuiSelectableOption[];
   onClosePopover: () => void;
-  onProviderChange: (provider?: InferenceProvider) => void;
+  onProviderChange: (provider?: string) => void;
 }
 
 const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
+  isLoading,
   getSelectableOptions,
   onClosePopover,
   onProviderChange,
 }) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
   const [searchProviderValue, setSearchProviderValue] = useState<string>('');
-  const { data, isLoading } = useProviders(http, toasts);
   const onSearchProvider = useCallback(
     (val: string) => {
       setSearchProviderValue(val);
@@ -96,11 +83,11 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
     (options) => {
       const selectedProvider = options.filter((option) => option.checked === 'on');
       if (selectedProvider != null && selectedProvider.length > 0) {
-        onProviderChange(data?.find((p) => p.provider === selectedProvider[0].label));
+        onProviderChange(selectedProvider[0].label);
       }
       onClosePopover();
     },
-    [data, onClosePopover, onProviderChange]
+    [onClosePopover, onProviderChange]
   );
 
   const EuiSelectableContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
@@ -133,16 +120,13 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
   return (
     <EuiSelectable
       data-test-subj="selectable-provider-input"
-      isLoading={isLoading && data == null}
+      isLoading={isLoading}
       renderOption={renderProviderOption}
       onChange={handleProviderChange}
       searchable
       searchProps={searchProps}
       singleSelection={true}
-      options={getSelectableOptions({
-        providers: data ?? [],
-        searchProviderValue,
-      })}
+      options={getSelectableOptions(searchProviderValue)}
     >
       {EuiSelectableContent}
     </EuiSelectable>

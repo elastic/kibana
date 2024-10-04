@@ -22,6 +22,41 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   })),
 }));
 
+const providerSchema = [
+  {
+    key: 'access_key',
+    display: DisplayType.TEXTBOX,
+    label: 'Access Key',
+    order: 1,
+    required: true,
+    sensitive: true,
+    tooltip: `A valid AWS access key that has permissions to use Amazon Bedrock.`,
+    type: FieldType.STRING,
+    validations: [],
+    value: null,
+    ui_restrictions: [],
+    default_value: null,
+    depends_on: [],
+  },
+];
+const taskTypeSchema = [
+  {
+    key: 'max_tokens',
+    display: DisplayType.NUMERIC,
+    label: 'Max tokens',
+    order: 1,
+    required: true,
+    sensitive: false,
+    tooltip: 'The maximum number of tokens to generate before stopping.',
+    type: FieldType.INTEGER,
+    validations: [],
+    value: null,
+    ui_restrictions: [],
+    default_value: null,
+    depends_on: [],
+  },
+];
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const openAiConnector = {
   actionTypeId: '.inference',
@@ -37,40 +72,6 @@ const openAiConnector = {
     taskTypeConfig: {
       max_tokens: 100,
     },
-    providerSchema: [
-      {
-        key: 'access_key',
-        display: DisplayType.TEXTBOX,
-        label: 'Access Key',
-        order: 1,
-        required: true,
-        sensitive: true,
-        tooltip: `A valid AWS access key that has permissions to use Amazon Bedrock.`,
-        type: FieldType.STRING,
-        validations: [],
-        value: null,
-        ui_restrictions: [],
-        default_value: null,
-        depends_on: [],
-      },
-    ],
-    taskTypeSchema: [
-      {
-        key: 'max_tokens',
-        display: DisplayType.NUMERIC,
-        label: 'Max tokens',
-        order: 1,
-        required: true,
-        sensitive: false,
-        tooltip: 'The maximum number of tokens to generate before stopping.',
-        type: FieldType.INTEGER,
-        validations: [],
-        value: null,
-        ui_restrictions: [],
-        default_value: null,
-        depends_on: [],
-      },
-    ],
   },
   secrets: {
     secretsConfig: {

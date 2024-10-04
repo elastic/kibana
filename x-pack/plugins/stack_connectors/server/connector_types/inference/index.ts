@@ -16,6 +16,7 @@ import {
 } from '@kbn/actions-plugin/common';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   INFERENCE_CONNECTOR_TITLE,
   INFERENCE_CONNECTOR_ID,
@@ -43,37 +44,35 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveEventHandler: async ({ config, secrets, logger, scopedClusterClient, isUpdate }) => {
-    const esClient = scopedClusterClient?.asInternalUser;
+    const esClient = scopedClusterClient?.asCurrentUser;
     try {
       const taskSettings = config?.taskTypeConfig
         ? {
-            task_settings: {
-              ...unflattenObject(config?.taskTypeConfig),
-            },
+            ...unflattenObject(config?.taskTypeConfig),
           }
         : {};
-      const settings = {
-        service: config?.provider,
-        service_settings: {
-          ...unflattenObject(config?.providerConfig ?? {}),
-          ...unflattenObject(secrets?.providerSecrets ?? {}),
-        },
-        ...taskSettings,
+      const serviceSettings = {
+        ...unflattenObject(config?.providerConfig ?? {}),
+        ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
-      if (isUpdate) {
+      if (isUpdate && config && config.provider) {
         // TODO: replace, when update API for inference endpoint exists
-        await esClient?.transport.request({
-          path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
-          method: 'DELETE',
+        await esClient?.inference.delete({
+          task_type: config.taskType as InferenceTaskType,
+          inference_id: config.inferenceId,
         });
         logger.info(
           `Inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId} was successfuly deleted`
         );
       }
-      await esClient?.transport.request({
-        path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
-        method: 'PUT',
-        body: settings,
+      await esClient?.inference.put({
+        inference_id: config?.inferenceId ?? '',
+        task_type: config?.taskType as InferenceTaskType,
+        inference_config: {
+          service: config!.provider,
+          service_settings: serviceSettings,
+          task_settings: taskSettings,
+        },
       });
       logger.info(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
@@ -92,10 +91,12 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   postDeleteEventHandler: async ({ config, logger, scopedClusterClient }) => {
     const esClient = scopedClusterClient?.asInternalUser;
     try {
-      await esClient?.transport.request({
-        path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
-        method: 'DELETE',
-      });
+      if (config) {
+        await esClient?.inference.delete({
+          task_type: config.taskType as InferenceTaskType,
+          inference_id: config.inferenceId,
+        });
+      }
       logger.info(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId} was successfuly deleted`
       );

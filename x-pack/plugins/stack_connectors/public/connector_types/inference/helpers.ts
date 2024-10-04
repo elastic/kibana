@@ -44,19 +44,19 @@ export const generateInferenceEndpointId = (
 };
 
 export const getNonEmptyValidator = (
-  schemaPath: string,
+  schema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
-    const [{ value, path, formData }] = args;
+    const [{ value, path }] = args;
     const newSchema: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (formData[schemaPath]) {
-      formData[schemaPath]
+    if (schema) {
+      schema
         .filter((f: ConfigEntryView) => f.required)
         .forEach((field: ConfigEntryView) => {
           // validate if submitting or on field edit - value is not default to null

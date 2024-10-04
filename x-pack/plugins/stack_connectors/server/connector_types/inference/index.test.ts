@@ -11,9 +11,21 @@ import { configValidator, getConnectorType } from '.';
 import { Config, Secrets } from '../../../common/inference/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from '../../../common/inference/constants';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { InferencePutResponse } from '@elastic/elasticsearch/lib/api/types';
 
 let connectorType: SubActionConnectorType<Config, Secrets>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+
+const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+
+const mockResponse: Promise<InferencePutResponse> = Promise.resolve({
+  inference_id: 'test',
+  service: 'openai',
+  service_settings: {},
+  task_settings: {},
+  task_type: 'completion',
+});
 
 describe('AI Connector', () => {
   beforeEach(() => {
@@ -21,6 +33,7 @@ describe('AI Connector', () => {
     connectorType = getConnectorType();
   });
   test('exposes the connector as `AI Connector` with id `.inference`', () => {
+    mockEsClient.inference.put.mockResolvedValue(mockResponse);
     expect(connectorType.id).toEqual('.inference');
     expect(connectorType.name).toEqual('AI Connector');
   });
@@ -33,8 +46,6 @@ describe('AI Connector', () => {
         provider: DEFAULT_PROVIDER,
         taskType: DEFAULT_TASK_TYPE,
         inferenceId: 'test',
-        providerSchema: [],
-        taskTypeSchema: [],
         taskTypeConfig: {},
       };
 
@@ -47,7 +58,6 @@ describe('AI Connector', () => {
         provider: 'openai',
         taskType: '',
         inferenceId: 'test',
-        providerSchema: [],
         taskTypeConfig: {},
       };
       expect(() => {
@@ -63,7 +73,6 @@ describe('AI Connector', () => {
         provider: '',
         taskType: DEFAULT_TASK_TYPE,
         inferenceId: 'test',
-        providerSchema: [],
         taskTypeConfig: {},
       };
       expect(() => {

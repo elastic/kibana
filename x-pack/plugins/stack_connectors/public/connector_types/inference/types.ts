@@ -14,7 +14,7 @@ import {
   SparseEmbeddingParams,
   TextEmbeddingParams,
 } from '../../../common/inference/types';
-import { ConfigEntryView, ConfigProperties } from '../lib/dynamic_config/types';
+import { ConfigProperties } from '../lib/dynamic_config/types';
 
 export interface InferenceActionParams {
   subAction:
@@ -29,12 +29,10 @@ export type FieldsConfiguration = Record<string, ConfigProperties>;
 
 export interface Config {
   taskType: string;
-  taskTypeSchema?: ConfigEntryView[];
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
   providerConfig?: Record<string, unknown>;
-  providerSchema: ConfigEntryView[];
 }
 
 export interface Secrets {
