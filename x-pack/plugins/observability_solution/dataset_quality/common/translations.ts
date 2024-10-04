@@ -50,12 +50,23 @@ export const openInLogsExplorerText = i18n.translate(
   }
 );
 
+export const logsExplorerAriaText = i18n.translate(
+  'xpack.datasetQuality.details.logsExplorerAriaText',
+  {
+    defaultMessage: 'Logs Explorer',
+  }
+);
+
 export const openInDiscoverText = i18n.translate(
   'xpack.datasetQuality.details.openInDiscoverText',
   {
     defaultMessage: 'Open in Discover',
   }
 );
+
+export const discoverAriaText = i18n.translate('xpack.datasetQuality.details.discoverAriaText', {
+  defaultMessage: 'Discover',
+});
 
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
@@ -329,6 +340,21 @@ export const overviewDegradedFieldsSectionTitle = i18n.translate(
   }
 );
 
+export const overviewDegradedFieldToggleSwitch = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldToggleSwitch',
+  {
+    defaultMessage: 'Current quality issues only',
+  }
+);
+
+export const overviewDegradedFieldToggleSwitchTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldToggleSwitchTooltip',
+  {
+    defaultMessage:
+      'Enable to only show issues detected in the most recent version of the data set. Disable to show all issues detected within the configured time range.',
+  }
+);
+
 export const overviewDegradedFieldsSectionTitleTooltip = i18n.translate(
   'xpack.datasetQuality.details.degradedFieldsSectionTooltip',
   {
@@ -400,5 +426,77 @@ export const fieldIgnoredText = i18n.translate(
   'xpack.datasetQuality.details.degradedField.fieldIgnored',
   {
     defaultMessage: 'field ignored',
+  }
+);
+
+export const degradedFieldPotentialCauseColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.potentialCause',
+  {
+    defaultMessage: 'Potential cause',
+  }
+);
+
+export const degradedFieldCurrentFieldLimitColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.currentFieldLimit',
+  {
+    defaultMessage: 'Field limit',
+  }
+);
+
+export const degradedFieldMaximumCharacterLimitColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.maximumCharacterLimit',
+  {
+    defaultMessage: 'Maximum character length',
+  }
+);
+
+export const degradedFieldCauseFieldLimitExceeded = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldLimitExceeded',
+  {
+    defaultMessage: 'field limit exceeded',
+  }
+);
+
+export const degradedFieldCauseFieldLimitExceededTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldLimitExceededTooltip',
+  {
+    defaultMessage: 'The number of fields in this index has exceeded the maximum allowed limit.',
+  }
+);
+
+export const degradedFieldCauseFieldIgnored = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldIgnored',
+  {
+    defaultMessage: 'field character limit exceeded',
+  }
+);
+
+export const degradedFieldCauseFieldIgnoredTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldIgnoredTooltip',
+  {
+    defaultMessage:
+      'One or more values for this field exceeded the maximum allowed character length. Characters above will be ignored.',
+  }
+);
+
+export const degradedFieldCauseFieldMalformed = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldMalformed',
+  {
+    defaultMessage: 'field malformed',
+  }
+);
+
+export const degradedFieldCauseFieldMalformedTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.cause.fieldMalformedTooltip',
+  {
+    defaultMessage: 'Data type for the field not set correctly.',
+  }
+);
+
+export const degradedFieldMessageIssueDoesNotExistInLatestIndex = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.message.issueDoesNotExistInLatestIndex',
+  {
+    defaultMessage:
+      'This issue was detected in an older version of the dataset, but not in the most recent version.',
   }
 );
