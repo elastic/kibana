@@ -13,7 +13,8 @@ import SearchBar from './search_bar';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
-
+import { waitFor } from '@testing-library/react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
@@ -22,6 +23,24 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
+
+const dataMock = dataPluginMock.createStartContract();
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...original,
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        value={props.value}
+        onChange={async (eve: any) => {
+          props.onChange(eve.target.value);
+        }}
+      />
+    ),
+  };
+});
 
 const mockTimeHistory = {
   get: () => {
@@ -68,6 +87,20 @@ const mockIndexPattern = {
     },
   ],
 } as DataView;
+
+const filters = [
+  {
+    meta: {
+      negate: false,
+      alias: null,
+      disabled: false,
+      type: 'custom',
+      key: 'query',
+    },
+    query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
+    $state: { store: 'appState' },
+  },
+];
 
 const kqlQuery = {
   query: 'response:200',
@@ -122,9 +155,7 @@ function wrapSearchBarInContext(testProps: any) {
         },
       },
       dataViewEditor: dataViewEditorMock,
-      dataViews: {
-        getIdsWithTitle: jest.fn(() => []),
-      },
+      dataViews: dataMock.dataViews,
     },
   };
 
@@ -366,5 +397,85 @@ describe('SearchBar', () => {
       // is not equal with props for dateRange which is undefined
       true
     );
+  });
+
+  it('renders filters', async () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        onFiltersUpdated: noop,
+        filters,
+      })
+    );
+
+    expect(component.find(FILTER_BAR).length).toBeTruthy();
+    expect(component.find('[data-test-subj="filter-items-group"]').length).toBeTruthy();
+    expect(
+      component.find(
+        '[data-test-subj="filter filter-enabled filter-key-query filter-value-warn filter-unpinned filter-id-0"]'
+      ).length
+    ).toBeTruthy();
+  });
+
+  it('changes filters', async () => {
+    const onFiltersUpdatedMock = jest.fn();
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        onFiltersUpdated: onFiltersUpdatedMock,
+        filters,
+      })
+    );
+
+    expect(component.find(FILTER_BAR).length).toBeTruthy();
+
+    const addFilterBtn = component.find('button[data-test-subj="addFilter"]');
+    addFilterBtn.simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('button[data-test-subj="editQueryDSL"]').length).toBeTruthy();
+    });
+
+    expect(component.find('button[data-test-subj="saveFilter"]').length).toBeTruthy();
+    component.find('button[data-test-subj="editQueryDSL"]').simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('[data-test-subj="customEditorInput"]').length).toBeTruthy();
+    });
+
+    component
+      .find('[data-test-subj="customEditorInput"]')
+      .last()
+      .simulate('change', {
+        target: { value: '{"something": "here"}' },
+      });
+
+    component.find('button[data-test-subj="saveFilter"]').simulate('click');
+
+    expect(onFiltersUpdatedMock).toBeCalledTimes(1);
+    expect(onFiltersUpdatedMock).toBeCalledWith([
+      ...filters,
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          index: '1234',
+          negate: false,
+          type: 'custom',
+        },
+        something: 'here',
+      },
+    ]);
   });
 });
