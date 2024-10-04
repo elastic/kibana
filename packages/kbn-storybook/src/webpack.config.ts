@@ -137,9 +137,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
       ],
     },
-    plugins: [
-      new IgnoreNotFoundExportPlugin(),
-    ],
+    plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
