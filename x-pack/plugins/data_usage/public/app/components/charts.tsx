@@ -13,6 +13,7 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
+  EuiSpacer,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -122,10 +123,13 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                           >
                             <EuiListGroup gutterSize="none">
                               <EuiListGroupItem
-                                href="#"
                                 label="Copy data stream name"
-                                onClick={() => undefined}
+                                onClick={() => {
+                                  navigator.clipboard.writeText(label);
+                                }}
                               />
+                              <EuiSpacer size="s" />
+
                               {hasIndexManagementFeature && (
                                 <EuiListGroupItem
                                   href="#"
