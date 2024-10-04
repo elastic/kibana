@@ -11,35 +11,6 @@
  * @param {string} path
  * @return {*}  {string}
  */
-export const convertPathToBracketNotation = (path: string): string => {
-  const [first, ...parts] = path.split('.');
-  return first + parts.map((part) => `['${part}']`).join('');
-};
 
-/**
- * Converts a dot notation path to a list of progressive paths
- * e.g "a.b.c" => ["a", "a['b']", "a['b']['c']"]
- * if the path is "ctx.a.b.c", it will not return a ctx element
- * because we will not need to check if ctx is null
- *
- * @param {string} path The path to convert
- * @return {*}  {string[]} The list of progressive paths
- */
-export const getProgressivePathsNoCtx = (path: string): string[] => {
-  // capture groups for the path and the bracket notation
-  // e.g "a['b']['c']" => ["a", "['b']", "['c']"]
-  const regex = /([^[\]]+)|(\['[^']+'\])/g;
-  const matches = [...path.matchAll(regex)];
-  let currentPath = '';
-  const paths: string[] = [];
-
-  matches.forEach((match) => {
-    currentPath += match[0];
-    // Skip the path if it is 'ctx'
-    if (currentPath !== 'ctx') {
-      paths.push(currentPath);
-    }
-  });
-
-  return paths;
-};
+// convert a path like a.b.c to a?.b?.c
+export const getConditionalPath = (path: string): string => path.split('.').join('?.');

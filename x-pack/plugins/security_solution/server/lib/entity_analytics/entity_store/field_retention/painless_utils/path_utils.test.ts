@@ -5,34 +5,24 @@
  * 2.0.
  */
 
-import { convertPathToBracketNotation, getProgressivePathsNoCtx } from './path_utils';
+import { getConditionalPath } from './path_utils';
 
 describe('painless path utils', () => {
-  describe('convertPathToBracketNotation', () => {
+  describe('getConditionalPath', () => {
     it('should do nothing with single value', () => {
       const path = 'a';
-      const result = convertPathToBracketNotation(path);
+      const result = getConditionalPath(path);
       expect(result).toEqual('a');
     });
-    it('should convert a path to bracket notation', () => {
-      const path = 'a.b.c';
-      const result = convertPathToBracketNotation(path);
-      expect(result).toEqual("a['b']['c']");
+    it('should conditionalise path length 2', () => {
+      const path = 'a.b';
+      const result = getConditionalPath(path);
+      expect(result).toEqual('a?.b');
     });
-  });
-
-  describe('getProgressivePathsNoCtx', () => {
-    it('should handle no brackets', () => {
-      const result = getProgressivePathsNoCtx('a');
-      expect(result).toEqual(['a']);
-    });
-    it('should get progressive paths for a path without ctx', () => {
-      const result = getProgressivePathsNoCtx("a['b']['c']");
-      expect(result).toEqual(['a', "a['b']", "a['b']['c']"]);
-    });
-    it('should get progressive paths for a path with ctx and omit ctx', () => {
-      const result = getProgressivePathsNoCtx("ctx['a']['b']['c']");
-      expect(result).toEqual(["ctx['a']", "ctx['a']['b']", "ctx['a']['b']['c']"]);
+    it('should conditionalise longer path', () => {
+      const path = 'a.b.c.d.e.f.g';
+      const result = getConditionalPath(path);
+      expect(result).toEqual('a?.b?.c?.d?.e?.f?.g');
     });
   });
 });
