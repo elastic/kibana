@@ -16241,6 +16241,214 @@ paths:
       tags:
         - Security AI Assistant API
         - Prompts API
+  /api/spaces/space:
+    get:
+      description: Get all spaces
+      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: purpose
+          required: false
+          schema:
+            enum:
+              - any
+              - copySavedObjectsIntoSpace
+              - shareSavedObjectsIntoSpace
+            type: string
+        - in: query
+          name: include_authorized_purposes
+          required: true
+          schema:
+            anyOf:
+              - items: {}
+                type: array
+              - type: boolean
+              - type: number
+              - type: object
+              - type: string
+            nullable: true
+            oneOf:
+              - enum:
+                  - false
+                type: boolean
+                x-oas-optional: true
+              - type: boolean
+                x-oas-optional: true
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    post:
+      description: Create a space
+      operationId: '%2Fapi%2Fspaces%2Fspace#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+  /api/spaces/space/{id}:
+    delete:
+      description: Delete a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    get:
+      description: Get a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    put:
+      description: Update a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
   /api/status:
     get:
       operationId: '%2Fapi%2Fstatus#0'
@@ -29713,6 +29921,8 @@ components:
       allOf:
         - $ref: >-
             #/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord
+        - $ref: >-
+            #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts
         - type: object
           properties:
             '@timestamp':
@@ -29722,6 +29932,49 @@ components:
               type: string
           required:
             - '@timestamp'
+    Security_Entity_Analytics_API_AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: >-
+                #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: >-
+                    #/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     Security_Entity_Analytics_API_AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -33249,33 +33502,43 @@ tags:
     x-displayName: Saved objects
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
+    x-displayName: Security AI assistant
   - description: >-
       You can create rules that automatically turn events and external alerts
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
     name: Security Detections API
+    x-displayName: Security detections
   - description: >-
       Endpoint Exceptions API allows you to manage detection rule endpoint
       exceptions to prevent a rule from generating an alert from incoming events
       even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
+    x-displayName: Security endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
+    x-displayName: Security endpoint management
   - description: ''
     name: Security Entity Analytics API
+    x-displayName: Security entity analytics
   - description: >-
       Exceptions API allows you to manage detection rule exceptions to prevent a
       rule from generating an alert from incoming events even when the rule's
       other criteria are met.
     name: Security Exceptions API
+    x-displayName: Security exceptions
   - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
     name: Security Lists API
+    x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
+    x-displayName: Security Osquery
   - description: >-
       You can create Timelines and Timeline templates via the API, as well as
       import new Timelines from an ndjson file.
     name: Security Timeline API
+    x-displayName: Security timeline
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
+  - name: spaces
   - name: system
