@@ -373,5 +373,62 @@ export default function (providerContext: FtrProviderContext) {
         expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(2);
       });
     });
+
+    describe('dynamic template dimension', () => {
+      const writeMetricDoc = (body: any = {}) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/metrics-prometheus.remote_write-default/_doc?refresh=true`,
+            body: {
+              '@timestamp': new Date().toISOString(),
+              prometheus: { labels: { test: 'label1' } },
+              agent: {
+                id: 'agent1',
+              },
+              cloud: {
+                account: {
+                  id: '1234',
+                },
+                availability_zone: 'eu',
+                instance: {
+                  id: '1234',
+                },
+                provider: 'aws',
+                region: 'eu',
+              },
+            },
+          },
+          { meta: true }
+        );
+
+      async function getMetricsDefaultBackingIndicesLength() {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/metrics-prometheus.remote_write-default`,
+          },
+          { meta: true }
+        );
+
+        return resLogsDatastream.body.data_streams[0].indices.length;
+      }
+
+      it('should rollover datastream if dynamic template dimension mappings changed', async () => {
+        await installPackage('prometheus', '1.16.0');
+        await writeMetricDoc();
+
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(1);
+
+        await installPackage('prometheus', '1.17.0');
+
+        await writeMetricDoc();
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(2);
+      });
+
+      afterEach(async () => {
+        await uninstallPackage('prometheus', '1.17.0');
+      });
+    });
   });
 }

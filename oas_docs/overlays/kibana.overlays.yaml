@@ -65,10 +65,6 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Machine learning"
-  - target: '$.tags[?(@.name=="saved objects")]'
-    description: Change displayName
-    update:
-      x-displayName: "Saved objects"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:

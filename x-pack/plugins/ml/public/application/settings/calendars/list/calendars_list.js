@@ -38,11 +38,11 @@ export class CalendarsListUI extends Component {
   }
 
   loadCalendars = async () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     this.setState({ loading: true });
 
     try {
-      const calendars = await ml.calendars();
+      const calendars = await mlApi.calendars();
 
       this.setState({
         calendars,
@@ -81,12 +81,12 @@ export class CalendarsListUI extends Component {
   };
 
   deleteCalendars = () => {
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const toasts = this.props.kibana.services.notifications.toasts;
     const { selectedForDeletion } = this.state;
 
     this.closeDestroyModal();
-    deleteCalendars(ml, toasts, selectedForDeletion, this.loadCalendars);
+    deleteCalendars(mlApi, toasts, selectedForDeletion, this.loadCalendars);
   };
 
   addRequiredFieldsToList = (calendarsList = []) => {

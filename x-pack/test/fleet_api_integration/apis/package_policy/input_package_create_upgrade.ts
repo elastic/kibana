@@ -174,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', async function () {
+  describe('Package Policy - input package behavior', function () {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -207,6 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         { id: 'logs-dataset1', type: 'index_template' },
         { id: 'logs-dataset1@package', type: 'component_template' },
         { id: 'logs-dataset1@custom', type: 'component_template' },
+        { id: 'logs@custom', type: 'component_template' },
       ]);
 
       // now check the package component template was created correctly

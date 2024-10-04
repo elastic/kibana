@@ -42,4 +42,4 @@ export const MAX_DEGRADED_FIELDS = 1000;
 export const MASKED_FIELD_PLACEHOLDER = '<custom field>';
 export const UNKOWN_FIELD_PLACEHOLDER = '<unkwon>';
 
-export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces'];
+export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces', 'synthetics'];

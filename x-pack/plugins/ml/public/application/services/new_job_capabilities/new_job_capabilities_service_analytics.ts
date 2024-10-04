@@ -25,9 +25,9 @@ import {
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-import type { MlApiServices } from '../ml_api_service';
+import type { MlApi } from '../ml_api_service';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {
@@ -61,9 +61,9 @@ export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPattern
 }
 
 export class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
-  private _mlApiService: MlApiServices;
+  private _mlApiService: MlApi;
 
-  constructor(mlApiService: MlApiServices) {
+  constructor(mlApiService: MlApi) {
     super();
     this._mlApiService = mlApiService;
   }
@@ -227,14 +227,14 @@ export class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
 
 // This is to retain the singleton behavior of the previous direct instantiation and export.
 let newJobCapsServiceAnalytics: NewJobCapsServiceAnalytics;
-export const mlJobCapsServiceAnalyticsFactory = (mlApiServices: MlApiServices) => {
+export const mlJobCapsServiceAnalyticsFactory = (mlApi: MlApi) => {
   if (newJobCapsServiceAnalytics) return newJobCapsServiceAnalytics;
 
-  newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics(mlApiServices);
+  newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics(mlApi);
   return newJobCapsServiceAnalytics;
 };
 
 export const useNewJobCapsServiceAnalytics = () => {
-  const mlApiServices = useMlApiContext();
-  return mlJobCapsServiceAnalyticsFactory(mlApiServices);
+  const mlApi = useMlApi();
+  return mlJobCapsServiceAnalyticsFactory(mlApi);
 };

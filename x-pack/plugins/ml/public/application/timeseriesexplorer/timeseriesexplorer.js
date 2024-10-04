@@ -143,7 +143,7 @@ export class TimeSeriesExplorer extends React.Component {
 
   dataViewsService;
   toastNotificationService;
-  mlApiServices;
+  mlApi;
   mlForecastService;
   mlIndexUtils;
   mlJobService;
@@ -157,19 +157,19 @@ export class TimeSeriesExplorer extends React.Component {
     this.toastNotificationService = toastNotificationServiceProvider(
       constructorContext.services.notifications.toasts
     );
-    this.mlApiServices = constructorContext.services.mlServices.mlApiServices;
-    this.mlForecastService = forecastServiceFactory(this.mlApiServices);
+    this.mlApi = constructorContext.services.mlServices.mlApi;
+    this.mlForecastService = forecastServiceFactory(this.mlApi);
     this.mlIndexUtils = indexServiceFactory(this.dataViewsService);
-    this.mlJobService = mlJobServiceFactory(this.toastNotificationService, this.mlApiServices);
-    this.mlResultsService = mlResultsServiceProvider(this.mlApiServices);
+    this.mlJobService = mlJobServiceFactory(this.mlApi);
+    this.mlResultsService = mlResultsServiceProvider(this.mlApi);
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
-      this.mlApiServices,
+      this.mlApi,
       this.mlResultsService
     );
     this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
       this.mlResultsService,
-      this.mlApiServices
+      this.mlApi
     );
   }
 
@@ -331,8 +331,8 @@ export class TimeSeriesExplorer extends React.Component {
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
-    const ml = this.mlApiServices;
-    return ml.results
+    const mlApi = this.mlApi;
+    return mlApi.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
         this.getCriteriaFields(selectedDetectorIndex, entityControls),

@@ -11,8 +11,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const securityService = getService('security');
+  const { common, settings, security } = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global data views all privileges', () => {
       before(async () => {
-        await security.role.create('global_index_patterns_all_role', {
+        await securityService.role.create('global_index_patterns_all_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -43,15 +43,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_index_patterns_all_user', {
+        await securityService.user.create('global_index_patterns_all_user', {
           password: 'global_index_patterns_all_user-password',
           roles: ['global_index_patterns_all_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
 
-        await PageObjects.security.login(
+        await security.login(
           'global_index_patterns_all_user',
           'global_index_patterns_all_user-password',
           {
@@ -60,15 +60,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await kibanaServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
+        await settings.navigateTo();
       });
 
       after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
         await Promise.all([
-          security.role.delete('global_index_patterns_all_role'),
-          security.user.delete('global_index_patterns_all_user'),
+          securityService.role.delete('global_index_patterns_all_role'),
+          securityService.user.delete('global_index_patterns_all_user'),
         ]);
       });
 
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`index pattern listing shows create button`, async () => {
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('createDataViewButton');
       });
 
@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global data views read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_index_patterns_read_role', {
+        await securityService.role.create('global_index_patterns_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -103,13 +103,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('global_index_patterns_read_user', {
+        await securityService.user.create('global_index_patterns_read_user', {
           password: 'global_index_patterns_read_user-password',
           roles: ['global_index_patterns_read_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'global_index_patterns_read_user',
           'global_index_patterns_read_user-password',
           {
@@ -118,12 +118,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await kibanaServer.uiSettings.replace({});
-        await PageObjects.settings.navigateTo();
+        await settings.navigateTo();
       });
 
       after(async () => {
-        await security.role.delete('global_index_patterns_read_role');
-        await security.user.delete('global_index_patterns_read_user');
+        await securityService.role.delete('global_index_patterns_read_role');
+        await securityService.user.delete('global_index_patterns_read_user');
       });
 
       it('shows management navlink', async () => {
@@ -132,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`index pattern listing doesn't show create button`, async () => {
-        await PageObjects.settings.clickKibanaIndexPatterns();
+        await settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('noDataViewsPrompt');
         await testSubjects.missingOrFail('createDataViewButton');
       });
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no data views privileges', () => {
       before(async () => {
-        await security.role.create('no_index_patterns_privileges_role', {
+        await securityService.role.create('no_index_patterns_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
@@ -158,13 +158,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_index_patterns_privileges_user', {
+        await securityService.user.create('no_index_patterns_privileges_user', {
           password: 'no_index_patterns_privileges_user-password',
           roles: ['no_index_patterns_privileges_role'],
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
+        await security.login(
           'no_index_patterns_privileges_user',
           'no_index_patterns_privileges_user-password',
           {
@@ -174,8 +174,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('no_index_patterns_privileges_role');
-        await security.user.delete('no_index_patterns_privileges_user');
+        await securityService.role.delete('no_index_patterns_privileges_role');
+        await securityService.user.delete('no_index_patterns_privileges_user');
       });
 
       it('does not show Management navlink', async () => {
@@ -184,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show Data Views in management side-nav`, async () => {
-        await PageObjects.common.navigateToActualUrl('management', '', {
+        await common.navigateToActualUrl('management', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

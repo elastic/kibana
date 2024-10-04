@@ -337,7 +337,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // If an auth block view is registered to the UI Extension context, we expect the registered component to return a React component when the PLI is not sufficient,
   // or simply a wrapper returning the children if the PLI is sufficient.
-  const PliAuthBlockWrapper: React.FC = useMemo(
+  const PliAuthBlockWrapper: React.FC<React.PropsWithChildren<{}>> = useMemo(
     () =>
       pliAuthBlockView?.Component && !isPackageInfoLoading
         ? pliAuthBlockView.Component

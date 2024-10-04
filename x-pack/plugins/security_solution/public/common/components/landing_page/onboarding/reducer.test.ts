@@ -35,7 +35,6 @@ import {
 } from './types';
 const onboardingSteps = [
   CreateProjectSteps.createFirstProject,
-  OverviewSteps.getToKnowElasticSecurity,
   AddIntegrationsSteps.connectToDataSources,
   ViewDashboardSteps.analyzeData,
   EnablePrebuiltRulesSteps.enablePrebuiltRules,
@@ -119,12 +118,6 @@ describe('reducer', () => {
           timeInMins: 0,
           stepsLeft: 0,
           activeStepIds: [CreateProjectSteps.createFirstProject],
-        },
-        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-          id: QuickStartSectionCardsId.watchTheOverviewVideo,
-          timeInMins: 0,
-          stepsLeft: 0,
-          activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
         },
       },
       [SectionId.addAndValidateYourData]: {
@@ -212,12 +205,6 @@ describe('getActiveSectionsInitialStates', () => {
           stepsLeft: 0,
           activeStepIds: [CreateProjectSteps.createFirstProject],
         },
-        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
-          id: QuickStartSectionCardsId.watchTheOverviewVideo,
-          timeInMins: 0,
-          stepsLeft: 1,
-          activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
-        },
       },
       [SectionId.addAndValidateYourData]: {
         [AddAndValidateYourDataCardsId.addIntegrations]: {
@@ -249,7 +236,7 @@ describe('getActiveSectionsInitialStates', () => {
       },
     });
 
-    expect(totalActiveSteps).toEqual(6);
-    expect(totalStepsLeft).toEqual(5);
+    expect(totalActiveSteps).toEqual(5);
+    expect(totalStepsLeft).toEqual(4);
   });
 });

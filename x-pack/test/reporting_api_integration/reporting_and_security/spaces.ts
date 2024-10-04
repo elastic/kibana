@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/pngV2`,
         {
-          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:png),objectType:dashboard,relativeUrl:'/s/non_default_space/app/dashboards#/view/3c9ee360-e7ee-11ea-a730-d58e9ea7581b?_g=(filters:!!(),refreshInterval:(pause:!!t,value:0),time:(from:!'2019-06-10T03:17:28.800Z!',to:!'2019-07-14T19:25:06.385Z!'))&_a=(description:!'!',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'!'),timeRestore:!!t,title:!'Ecom%20Dashboard%20Non%20Default%20Space!',viewMode:view)',title:'Ecom Dashboard Non Default Space')`,
+          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:png),locatorParams:(id:DASHBOARD_APP_LOCATOR,params:(dashboardId:e35742df-db88-5bd6-9d35-732b4b04a079,preserveSavedFilters:!t,timeRange:(from:'2019-06-10T03:17:28.800Z',to:'2019-07-14T19:25:06.385Z'),useHash:!f,viewMode:view)),objectType:dashboard,title:'Ecom Dashboard Non Default Space',version:'8.16.0')`,
         }
       );
 
@@ -168,9 +168,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should complete a job of PDF export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
-        `/s/non_default_space/api/reporting/generate/printablePdf`,
+        `/s/non_default_space/api/reporting/generate/printablePdfV2`,
         {
-          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:preserve_layout),objectType:dashboard,relativeUrls:!('/s/non_default_space/app/dashboards#/view/3c9ee360-e7ee-11ea-a730-d58e9ea7581b?_g=(filters:!!(),refreshInterval:(pause:!!t,value:0),time:(from:!'2019-06-10T03:17:28.800Z!',to:!'2019-07-14T19:25:06.385Z!'))&_a=(description:!'!',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'!'),timeRestore:!!t,title:!'Ecom%20Dashboard%20Non%20Default%20Space!',viewMode:view)'),title:'Ecom Dashboard Non Default Space')`,
+          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:preserve_layout),locatorParams:!((id:DASHBOARD_APP_LOCATOR,params:(dashboardId:e35742df-db88-5bd6-9d35-732b4b04a079,preserveSavedFilters:!t,timeRange:(from:'2019-06-10T03:17:28.800Z',to:'2019-07-14T19:25:06.385Z'),useHash:!f,viewMode:view))),objectType:dashboard,title:'Ecom Dashboard Non Default Space',version:'8.16.0')`,
         }
       );
 

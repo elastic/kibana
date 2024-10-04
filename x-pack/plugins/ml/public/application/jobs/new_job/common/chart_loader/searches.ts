@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface CategoryResults {
@@ -17,7 +17,7 @@ interface CategoryResults {
 }
 
 export function getCategoryFields(
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   indexPatternName: string,
   fieldName: string,
   size: number,
@@ -26,7 +26,7 @@ export function getCategoryFields(
   indicesOptions?: IndicesOptions
 ): Promise<CategoryResults> {
   return new Promise((resolve, reject) => {
-    mlApiServices
+    mlApi
       .esSearch({
         index: indexPatternName,
         size: 0,

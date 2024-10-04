@@ -25,11 +25,14 @@ import {
   AssetDetailsLocatorDefinition,
   HostsLocatorDefinition,
   InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
+  ServiceEntityLocatorDefinition,
+  TransactionDetailsByTraceIdLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
   type InventoryLocator,
@@ -39,6 +42,11 @@ import {
   type TopNFunctionsLocator,
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
+  type MetricsExplorerLocator,
+  type ServiceEntityLocator,
+  type TransactionDetailsByTraceIdLocator,
+  type EntitiesInventoryLocator,
+  EntitiesInventoryLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
@@ -63,6 +71,7 @@ interface ObservabilitySharedLocators {
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
     inventoryLocator: InventoryLocator;
+    metricsExplorerLocator: MetricsExplorerLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -72,7 +81,10 @@ interface ObservabilitySharedLocators {
   apm: {
     serviceOverview: ServiceOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
+    transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
+    serviceEntity: ServiceEntityLocator;
   };
+  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
@@ -133,6 +145,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
         inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
+        metricsExplorerLocator: urlService.locators.create(new MetricsExplorerLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
@@ -144,7 +157,12 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByName: urlService.locators.create(
           new TransactionDetailsByNameLocatorDefinition()
         ),
+        transactionDetailsByTraceId: urlService.locators.create(
+          new TransactionDetailsByTraceIdLocatorDefinition()
+        ),
+        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
+      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

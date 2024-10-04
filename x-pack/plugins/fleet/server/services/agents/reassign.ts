@@ -78,8 +78,7 @@ export async function reassignAgent(
     policy_revision: null,
   });
 
-  const currentNameSpace = getCurrentNamespace(soClient);
-  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+  const currentSpaceId = getCurrentNamespace(soClient);
 
   await createAgentAction(esClient, {
     agents: [agentId],
@@ -88,7 +87,7 @@ export async function reassignAgent(
     data: {
       policy_id: newAgentPolicyId,
     },
-    ...namespaces,
+    namespaces: [currentSpaceId],
   });
 }
 
@@ -103,7 +102,7 @@ export async function reassignAgents(
 ): Promise<{ actionId: string }> {
   await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
-  const currentNameSpace = getCurrentNamespace(soClient);
+  const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
   if ('agents' in options) {
@@ -121,7 +120,7 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
+    const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
@@ -138,7 +137,7 @@ export async function reassignAgents(
         soClient,
         {
           ...options,
-          spaceId: currentNameSpace,
+          spaceId: currentSpaceId,
           batchSize,
           total: res.total,
           newAgentPolicyId,
@@ -150,7 +149,7 @@ export async function reassignAgents(
 
   return await reassignBatch(
     esClient,
-    { newAgentPolicyId, spaceId: currentNameSpace },
+    { newAgentPolicyId, spaceId: currentSpaceId },
     givenAgents,
     outgoingErrors
   );

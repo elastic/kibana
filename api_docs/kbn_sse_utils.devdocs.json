@@ -1,0 +1,346 @@
+{
+  "id": "@kbn/sse-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.ServerSentEventError",
+        "type": "Class",
+        "tags": [],
+        "label": "ServerSentEventError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<TCode, TMeta> extends Error"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.ServerSentEventError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/sse-utils",
+                "id": "def-common.ServerSentEventError.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "TCode"
+                ],
+                "path": "packages/kbn-sse-utils/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils",
+                "id": "def-common.ServerSentEventError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-sse-utils/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils",
+                "id": "def-common.ServerSentEventError.Unnamed.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "TMeta"
+                ],
+                "path": "packages/kbn-sse-utils/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.ServerSentEventError.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => { error: { code: string; message: string; meta?: Record<string, any> | undefined; }; } & { type: ",
+              "ServerSentEventType",
+              ".error; }"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.createSSEInternalError",
+        "type": "Function",
+        "tags": [],
+        "label": "createSSEInternalError",
+        "description": [],
+        "signature": [
+          "(message: string) => ",
+          "ServerSentEventInternalError"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.createSSEInternalError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.createSSERequestError",
+        "type": "Function",
+        "tags": [],
+        "label": "createSSERequestError",
+        "description": [],
+        "signature": [
+          "(message: string, status: number) => ",
+          "ServerSentEventRequestError"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.createSSERequestError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.createSSERequestError.$2",
+            "type": "number",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.isSSEError",
+        "type": "Function",
+        "tags": [],
+        "label": "isSSEError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.isSSEError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.isSSEInternalError",
+        "type": "Function",
+        "tags": [],
+        "label": "isSSEInternalError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.isSSEInternalError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.isSSERequestError",
+        "type": "Function",
+        "tags": [],
+        "label": "isSSERequestError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-sse-utils/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils",
+            "id": "def-common.isSSERequestError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-sse-utils/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.ServerSentEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerSentEvent",
+        "description": [],
+        "signature": [
+          "Record<string, unknown> & { type: string; }"
+        ],
+        "path": "packages/kbn-sse-utils/src/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils",
+        "id": "def-common.ServerSentEventBase",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerSentEventBase",
+        "description": [],
+        "signature": [
+          "keyof TData extends \"type\" ? never : TData & { type: TEventType; }"
+        ],
+        "path": "packages/kbn-sse-utils/src/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

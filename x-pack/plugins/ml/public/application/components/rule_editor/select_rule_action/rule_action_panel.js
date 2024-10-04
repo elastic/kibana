@@ -43,7 +43,7 @@ export class RuleActionPanel extends Component {
   }
 
   componentDidMount() {
-    const ml = this.context.services.mlServices.mlApiServices;
+    const mlApi = this.context.services.mlServices.mlApi;
     // If the rule has a scope section with a single partitioning field key,
     // load the filter list to check whether to add a link to add the
     // anomaly partitioning field value to the filter list.
@@ -59,7 +59,7 @@ export class RuleActionPanel extends Component {
         partitionFieldValue[0].length > 0
       ) {
         const filterId = scope[partitionFieldName].filter_id;
-        ml.filters
+        mlApi.filters
           .filters({ filterId })
           .then((filter) => {
             const filterItems = filter.items;

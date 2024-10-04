@@ -35,7 +35,7 @@ const mockKibanaContext = {
   services: {
     docLinks: { links: { ml: { anomalyDetectionJobTips: 'https://anomalyDetectionJobTips' } } },
     notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
-    mlServices: { mlApiServices: { validateJob: mockValidateJob } },
+    mlServices: { mlApi: { validateJob: mockValidateJob } },
   },
 };
 

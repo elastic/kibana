@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
-import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import {
   ServiceInventoryFieldName,
@@ -182,9 +180,7 @@ function useServicesDetailedStatisticsFetcher({
 export function ApmServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
-
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
-
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
@@ -296,19 +292,9 @@ export function ApmServiceInventory() {
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
 
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings([
-    apmEnableServiceInventoryTableSearchBar,
-  ]);
-
-  const settingsField = fields[apmEnableServiceInventoryTableSearchBar];
-  const isTableSearchBarEnabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
-
   return (
     <>
-      {/* keep this div as we're collecting telemetry to track the usage of the table fast search vs KQL bar */}
-      <div data-fastSearch={isTableSearchBarEnabled ? 'enabled' : 'disabled'}>
-        <SearchBar showTimeComparison />
-      </div>
+      <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
@@ -328,11 +314,6 @@ export function ApmServiceInventory() {
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeRenderedItems={setRenderedItems}
-            isTableSearchBarEnabled={isTableSearchBarEnabled}
-            isSavingSetting={isSaving}
-            onChangeTableSearchBarVisibility={() => {
-              saveSingleSetting(apmEnableServiceInventoryTableSearchBar, !isTableSearchBarEnabled);
-            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

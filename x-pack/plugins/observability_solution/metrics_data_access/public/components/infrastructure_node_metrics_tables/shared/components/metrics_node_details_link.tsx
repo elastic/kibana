@@ -9,7 +9,7 @@ import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { useNodeDetailsRedirect } from '../../../../pages/link_to/use_node_details_redirect';
+import { useAssetDetailsRedirect } from '../../../../pages/link_to/use_asset_details_redirect';
 
 type ExtractStrict<T, U extends T> = Extract<T, U>;
 
@@ -26,11 +26,12 @@ export const MetricsNodeDetailsLink = ({
   nodeType,
   timerange,
 }: MetricsNodeDetailsLinkProps) => {
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
-  const linkProps = getNodeDetailUrl({
-    nodeType,
-    nodeId: id,
+  const { getAssetDetailUrl } = useAssetDetailsRedirect();
+  const linkProps = getAssetDetailUrl({
+    assetType: nodeType,
+    assetId: id,
     search: {
+      name: label,
       from: parse(timerange.from)?.valueOf(),
       to: parse(timerange.to)?.valueOf(),
     },

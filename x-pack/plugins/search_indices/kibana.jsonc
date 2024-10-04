@@ -12,12 +12,16 @@
     ],
     "requiredPlugins": [
       "share",
+      "indexManagement",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
       "usageCollection",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
   }
 }

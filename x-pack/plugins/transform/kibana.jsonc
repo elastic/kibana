@@ -40,7 +40,6 @@
       "discover",
       "kibanaUtils",
       "kibanaReact",
-      "ml"
     ],
     "extraPublicDirs": [
       "common"

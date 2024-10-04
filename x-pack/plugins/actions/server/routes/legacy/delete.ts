@@ -35,7 +35,14 @@ export const deleteActionRoute = (
         deprecated: true,
       },
       validate: {
-        params: paramSchema,
+        request: {
+          params: paramSchema,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

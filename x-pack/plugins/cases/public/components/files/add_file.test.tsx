@@ -130,7 +130,7 @@ describe('AddFile', () => {
   it('clicking button renders modal', async () => {
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
-    userEvent.click(await screen.findByTestId('cases-files-add'));
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
   });
@@ -138,11 +138,11 @@ describe('AddFile', () => {
   it('createAttachments called with right parameters', async () => {
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
-    userEvent.click(await screen.findByTestId('cases-files-add'));
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('testOnDone'));
+    await userEvent.click(await screen.findByTestId('testOnDone'));
 
     await waitFor(() =>
       expect(createAttachmentsMock).toBeCalledWith({
@@ -180,11 +180,11 @@ describe('AddFile', () => {
   it('failed upload displays error toast', async () => {
     appMockRender.render(<AddFile caseId={'foobar'} />);
 
-    userEvent.click(await screen.findByTestId('cases-files-add'));
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('testOnError'));
+    await userEvent.click(await screen.findByTestId('testOnError'));
 
     expect(errorMock).toHaveBeenCalledWith(
       { name: 'upload error name', message: 'upload error message' },
@@ -199,11 +199,11 @@ describe('AddFile', () => {
 
     appMockRender.render(<AddFile caseId={caseId} />);
 
-    userEvent.click(await screen.findByTestId('cases-files-add'));
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('testMetadata'));
+    await userEvent.click(await screen.findByTestId('testMetadata'));
 
     await waitFor(() =>
       expect(validateMetadata).toHaveBeenCalledWith({
@@ -222,11 +222,11 @@ describe('AddFile', () => {
 
     appMockRender.render(<AddFile caseId={basicCaseId} />);
 
-    userEvent.click(await screen.findByTestId('cases-files-add'));
+    await userEvent.click(await screen.findByTestId('cases-files-add'));
 
     expect(await screen.findByTestId('cases-files-add-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('testOnDone'));
+    await userEvent.click(await screen.findByTestId('testOnDone'));
 
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,

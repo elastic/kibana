@@ -55,9 +55,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
 
   // Run Details
   // Run Name
-  const [runName, setRunName] = useState();
+  const [runName, setRunName] = useState<string | undefined>();
   const onRunNameChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setRunName(e.target.value);
     },
     [setRunName]
@@ -65,19 +65,19 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
   const onApmUrlChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithProjectChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithApiKeyChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
     [setTraceOptions, traceOptions]
@@ -92,6 +92,20 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   const onDatasetOptionsChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedDatasetOptions(selectedOptions);
+    },
+    [setSelectedDatasetOptions]
+  );
+  const onDatasetCreateOption = useCallback(
+    (searchValue: string) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+      if (!normalizedSearchValue) {
+        return;
+      }
+      const newOption = {
+        label: searchValue,
+      };
+
+      setSelectedDatasetOptions([newOption]);
     },
     [setSelectedDatasetOptions]
   );
@@ -244,6 +258,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             options={datasetOptions}
             selectedOptions={selectedDatasetOptions}
             onChange={onDatasetOptionsChange}
+            onCreateOption={onDatasetCreateOption}
             compressed={true}
           />
         </EuiFormRow>

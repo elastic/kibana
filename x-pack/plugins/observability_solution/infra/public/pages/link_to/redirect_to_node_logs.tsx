@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
@@ -21,7 +21,7 @@ type RedirectToNodeLogsType = RouteComponentProps<{
 
 export const RedirectToNodeLogs = ({
   match: {
-    params: { nodeId, nodeType, logViewId = DEFAULT_LOG_VIEW.logViewId },
+    params: { nodeId, nodeType },
   },
   location,
 }: RedirectToNodeLogsType) => {
@@ -40,11 +40,10 @@ export const RedirectToNodeLogs = ({
         nodeId,
         time,
         filter,
-        logView: { type: 'log-view-reference', logViewId },
       },
       { replace: true }
     );
-  }, [filter, nodeLogsLocator, logViewId, nodeId, nodeType, time]);
+  }, [filter, nodeLogsLocator, nodeId, nodeType, time]);
 
   return null;
 };

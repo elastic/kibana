@@ -32,7 +32,7 @@ import {
 import { HyperParameters } from './hyper_parameters';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
-import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 import { fetchExplainData } from '../shared';
@@ -134,7 +134,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const classAucRocDocLink = docLinks.links.ml.classificationAucRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
@@ -207,7 +207,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     setFetchingAdvancedParamErrors(true);
     (async function () {
       const { success, errorMessage, errorReason, expectedMemory } = await fetchExplainData(
-        mlApiServices,
+        mlApi,
         form
       );
       const paramErrors: AdvancedParamErrors = {};

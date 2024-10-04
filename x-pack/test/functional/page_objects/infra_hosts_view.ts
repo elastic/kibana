@@ -29,19 +29,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
-    async getBetaBadgeExists() {
-      return testSubjects.exists('infra-beta-badge');
-    },
-
-    // Inventory UI
-    async clickTryHostViewLink() {
-      return testSubjects.click('inventory-hostsView-link');
-    },
-
-    async clickTryHostViewBadge() {
-      return testSubjects.click('inventory-hostsView-link-badge');
-    },
-
     // Table
 
     async getHostsTable() {

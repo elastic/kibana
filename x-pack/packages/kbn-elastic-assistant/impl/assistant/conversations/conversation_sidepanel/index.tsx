@@ -197,6 +197,7 @@ export const ConversationSidePanel = React.memo<Props>(
                       onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
                     }
                     label={conversation.title}
+                    data-test-subj={`conversation-select-${conversation.title}`}
                     isActive={
                       !isEmpty(conversation.id)
                         ? conversation.id === currentConversation?.id

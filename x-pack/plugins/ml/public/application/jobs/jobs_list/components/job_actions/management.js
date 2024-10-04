@@ -24,8 +24,7 @@ import { isManagedJob } from '../../../jobs_utils';
 export function actionsMenuContent(
   toastNotifications,
   application,
-  mlApiServices,
-  mlJobService,
+  mlApi,
   showEditJobFlyout,
   showDatafeedChartFlyout,
   showDeleteJobModal,
@@ -77,7 +76,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showStopDatafeedsConfirmModal([item]);
         } else {
-          stopDatafeeds(toastNotifications, mlJobService, [item], refreshJobs);
+          stopDatafeeds(toastNotifications, mlApi, [item], refreshJobs);
         }
 
         closeMenu(true);
@@ -114,7 +113,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showCloseJobsConfirmModal([item]);
         } else {
-          closeJobs(toastNotifications, mlJobService, [item], refreshJobs);
+          closeJobs(toastNotifications, mlApi, [item], refreshJobs);
         }
 
         closeMenu(true);
@@ -153,7 +152,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(toastNotifications, application, mlApiServices, mlJobService, item.id);
+        cloneJob(toastNotifications, application, mlApi, item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

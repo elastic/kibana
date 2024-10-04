@@ -488,21 +488,6 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.items).to.eql([]);
         });
 
-        it('should return nothing if searched for managed policy name', async () => {
-          const response = await supertest
-            .get(uninstallTokensRouteService.getListPath())
-            .query({
-              search: generatedManagedPolicyArray[0].name,
-            })
-            .expect(200);
-
-          const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(0);
-          expect(body.page).to.equal(1);
-          expect(body.perPage).to.equal(20);
-          expect(body.items).to.eql([]);
-        });
-
         describe('when searching from special characters', () => {
           specialCharactersForNameAndId.forEach((c) => {
             it(`should successfully search for ${c} both in name and id`, async () => {

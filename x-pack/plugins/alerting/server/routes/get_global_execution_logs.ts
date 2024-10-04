@@ -62,6 +62,9 @@ export const getGlobalExecutionLogRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         query: querySchema,
       },

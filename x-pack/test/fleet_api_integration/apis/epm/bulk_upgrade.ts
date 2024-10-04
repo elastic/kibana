@@ -25,14 +25,14 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('bulk package upgrade api', async () => {
+  describe('bulk package upgrade api', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
       await fleetAndAgents.setup();
     });
 
-    describe('bulk package upgrade with a package already installed', async () => {
+    describe('bulk package upgrade with a package already installed', () => {
       beforeEach(async () => {
         await supertest
           .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
@@ -108,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('bulk upgrade without package already installed', async () => {
+    describe('bulk upgrade without package already installed', () => {
       afterEach(async () => {
         await deletePackage('multiple_versions', '0.3.0');
       });

@@ -32,8 +32,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 import { isManagedJob } from '../../../jobs_utils';
-import { mlJobServiceFactory } from '../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -46,11 +44,7 @@ export class JobsListUI extends Component {
       itemIdToExpandedRowMap: {},
     };
 
-    this.mlApiServices = props.kibana.services.mlServices.mlApiServices;
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      this.mlApiServices
-    );
+    this.mlApi = props.kibana.services.mlServices.mlApi;
   }
 
   static getDerivedStateFromProps(props) {
@@ -340,8 +334,7 @@ export class JobsListUI extends Component {
         actions: actionsMenuContent(
           this.props.kibana.services.notifications.toasts,
           this.props.kibana.services.application,
-          this.mlApiServices,
-          this.mlJobService,
+          this.mlApi,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,

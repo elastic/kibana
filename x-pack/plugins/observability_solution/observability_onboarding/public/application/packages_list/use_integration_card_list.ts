@@ -80,10 +80,12 @@ function useFilteredCards(
   rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   integrationsList: IntegrationCardItem[],
   selectedCategory: string[],
+  excludePackageIdList: string[],
   customCards?: CustomCard[]
 ) {
   return useMemo(() => {
     const integrationCards = integrationsList
+      .filter((card) => !excludePackageIdList.includes(card.id))
       .filter((card) => card.categories.some((category) => selectedCategory.includes(category)))
       .map(rewriteUrl)
       .map(toCustomCard);
@@ -99,7 +101,7 @@ function useFilteredCards(
       ),
       integrationCards,
     };
-  }, [integrationsList, customCards, selectedCategory, rewriteUrl]);
+  }, [integrationsList, rewriteUrl, customCards, excludePackageIdList, selectedCategory]);
 }
 
 /**
@@ -113,6 +115,7 @@ function useFilteredCards(
 export function useIntegrationCardList(
   integrationsList: IntegrationCardItem[],
   selectedCategory: string[],
+  excludePackageIdList: string[],
   customCards?: CustomCard[],
   flowCategory?: string | null,
   flowSearch?: string,
@@ -123,6 +126,7 @@ export function useIntegrationCardList(
     rewriteUrl,
     integrationsList,
     selectedCategory,
+    excludePackageIdList,
     customCards
   );
 

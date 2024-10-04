@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ agentPolicyId });
   };
 
-  describe('input package policy rollback', async function () {
+  describe('input package policy rollback', function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;

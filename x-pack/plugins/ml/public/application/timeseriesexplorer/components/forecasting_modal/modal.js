@@ -34,19 +34,19 @@ export function Modal(props) {
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
   useEffect(
     function prepMlNodeCheck() {
-      getMlNodeCount(mlApiServices)
+      getMlNodeCount(mlApi)
         .then(({ count, lazyNodeCount }) => {
           setMlNodesAvailable(count !== 0 || lazyNodeCount !== 0);
         })
         .catch(console.error);
     },
-    [mlApiServices]
+    [mlApi]
   );
 
   return (

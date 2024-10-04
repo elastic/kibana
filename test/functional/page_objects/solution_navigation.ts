@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -58,7 +59,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     // side nav related actions
     sidenav: {
       async expectLinkExists(
-        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+        by:
+          | { deepLinkId: AppDeepLinkId }
+          | { navId: string }
+          | { text: string }
+          | { panelNavLinkId: string }
       ) {
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
@@ -66,6 +71,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         } else if ('navId' in by) {
           await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
+        } else if ('panelNavLinkId' in by) {
+          await testSubjects.existOrFail(`~panelNavItem-id-${by.panelNavLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
@@ -129,6 +138,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
+      async clickPanelLink(deepLinkId: string) {
+        await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
+      },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
@@ -185,14 +197,33 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           return false;
         }
       },
-      async openPanel(sectionId: NavigationId) {
+      async openPanel(
+        sectionId: NavigationId,
+        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
+      ) {
         log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
         if (isOpen) return;
 
         const panelOpenerBtn = await testSubjects.find(
-          `~panelOpener-id-${sectionId}`,
+          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
+          TIMEOUT_CHECK
+        );
+
+        await panelOpenerBtn.click();
+      },
+      async closePanel(
+        sectionId: NavigationId,
+        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
+      ) {
+        log.debug('SolutionNavigation.sidenav.closePanel', sectionId);
+
+        const isOpen = await this.isPanelOpen(sectionId);
+        if (!isOpen) return;
+
+        const panelOpenerBtn = await testSubjects.find(
+          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
           TIMEOUT_CHECK
         );
 

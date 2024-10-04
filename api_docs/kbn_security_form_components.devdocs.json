@@ -100,7 +100,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -135,7 +135,7 @@
             "section": "def-common.FormFieldProps",
             "text": "FormFieldProps"
           },
-          "<T>>) => JSX.Element"
+          "<T>>) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/form_components/src/form_field.tsx",
         "deprecated": false,
@@ -188,7 +188,7 @@
           "\nComponent that visually indicates whether a field value has changed.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<React.PropsWithChildren<",
+          "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-form-components",
             "scope": "common",
@@ -196,7 +196,7 @@
             "section": "def-common.FormLabelProps",
             "text": "FormLabelProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/form_components/src/form_label.tsx",
         "deprecated": false,
@@ -210,7 +210,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-form-components",
                 "scope": "common",
@@ -218,7 +218,7 @@
                 "section": "def-common.FormLabelProps",
                 "text": "FormLabelProps"
               },
-              ">>"
+              ">"
             ],
             "path": "x-pack/packages/security/form_components/src/form_label.tsx",
             "deprecated": false,
@@ -242,15 +242,15 @@
           "\nComponent that renders a form row with all error states for inline validation.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<((",
+          "(props: ((",
           "DisambiguateSet",
           "<LabelProps, LegendProps> & { labelType?: \"legend\" | undefined; } & ",
           "CommonProps",
-          " & { display?: \"center\" | \"row\" | \"rowCompressed\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
+          " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
           "DisambiguateSet",
           "<LegendProps, LabelProps> & { labelType?: \"label\" | undefined; } & ",
           "CommonProps",
-          " & { display?: \"center\" | \"row\" | \"rowCompressed\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
+          " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
           {
             "pluginId": "@kbn/security-form-components",
             "scope": "common",
@@ -258,7 +258,7 @@
             "section": "def-common.FormRowProps",
             "text": "FormRowProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/form_components/src/form_row.tsx",
         "deprecated": false,
@@ -272,23 +272,22 @@
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<((",
+              "((",
               "DisambiguateSet",
               "<LabelProps, LegendProps> & { labelType?: \"legend\" | undefined; } & ",
               "CommonProps",
-              " & { display?: \"center\" | \"row\" | \"rowCompressed\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
+              " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & Omit<React.HTMLAttributes<HTMLFieldSetElement>, \"disabled\">) | (",
               "DisambiguateSet",
               "<LegendProps, LabelProps> & { labelType?: \"label\" | undefined; } & ",
               "CommonProps",
-              " & { display?: \"center\" | \"row\" | \"rowCompressed\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
+              " & { display?: \"center\" | \"row\" | \"columnCompressed\" | \"centerCompressed\" | \"columnCompressedSwitch\" | \"rowCompressed\" | undefined; hasEmptyLabelSpace?: boolean | undefined; fullWidth?: boolean | undefined; describedByIds?: string[] | undefined; hasChildLabel?: boolean | undefined; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; label?: React.ReactNode; labelAppend?: any; id?: string | undefined; isInvalid?: boolean | undefined; error?: React.ReactNode | React.ReactNode[]; helpText?: React.ReactNode | React.ReactNode[]; isDisabled?: boolean | undefined; } & React.HTMLAttributes<HTMLDivElement>)) & ",
               {
                 "pluginId": "@kbn/security-form-components",
                 "scope": "common",
                 "docId": "kibKbnSecurityFormComponentsPluginApi",
                 "section": "def-common.FormRowProps",
                 "text": "FormRowProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/packages/security/form_components/src/form_row.tsx",
             "deprecated": false,
@@ -307,7 +306,7 @@
         "label": "OptionalText",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/packages/security/form_components/src/form_row.tsx",
         "deprecated": false,

@@ -201,18 +201,22 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async goToHost() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToHost');
     },
 
     async goToPods() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
+
       return testSubjects.click('goToPods');
     },
 
     async goToContainer() {
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       return testSubjects.click('goToContainer');
@@ -507,6 +511,20 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async ensureCustomMetricAddButtonIsDisabled() {
       const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
       expect(await button.getAttribute('disabled')).to.be('true');
+    },
+
+    async clickAnomalyActionMenuButton() {
+      await testSubjects.click('infraAnomalyActionMenuButton');
+    },
+
+    async clickShowAffectedHostsButton() {
+      await this.clickAnomalyActionMenuButton();
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
+    },
+
+    async getAnomalyHostName() {
+      const element = await testSubjects.find('nodeNameRow');
+      return await element.getVisibleText();
     },
   };
 }

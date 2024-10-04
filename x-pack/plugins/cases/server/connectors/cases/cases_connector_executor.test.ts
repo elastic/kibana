@@ -43,7 +43,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
 import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -81,6 +81,7 @@ describe('CasesConnectorExecutor', () => {
     timeWindow,
     reopenClosedCases,
     maximumCasesToOpen: 5,
+    templateId: null,
   };
 
   beforeEach(() => {
@@ -897,6 +898,256 @@ describe('CasesConnectorExecutor', () => {
               ],
             }
           `);
+        });
+
+        describe('Templates', () => {
+          const mockOwner = params.owner;
+          const mockConfiguration = [
+            {
+              owner: mockOwner,
+              customFields: [
+                {
+                  key: 'first_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 1',
+                  required: true,
+                  defaultValue: 'default value',
+                },
+                {
+                  key: 'second_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 2',
+                  required: false,
+                },
+                {
+                  key: 'third_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'text 3',
+                  required: true,
+                },
+                {
+                  key: 'fourth_key',
+                  type: CustomFieldTypes.TOGGLE,
+                  label: 'toggle 4',
+                  required: false,
+                  defaultValue: true,
+                },
+              ],
+              templates: [
+                {
+                  key: 'test_template_5',
+                  name: 'Fifth test template',
+                  description: 'This is a fifth test template',
+                  tags: ['foo', 'bar'],
+                  caseFields: {
+                    title: 'Case with sample template 5',
+                    description: 'case desc',
+                    severity: CaseSeverity.HIGH,
+                    category: 'my category',
+                    tags: ['sample-4'],
+                    assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+                    customFields: [
+                      {
+                        key: 'first_key',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'this is a text field value',
+                      },
+                      {
+                        key: 'second_key',
+                        type: CustomFieldTypes.TOGGLE,
+                        value: true,
+                      },
+                      {
+                        key: 'third_key',
+                        type: CustomFieldTypes.TEXT,
+                        value: null,
+                      },
+                      {
+                        key: 'fourth_key',
+                        type: CustomFieldTypes.TOGGLE,
+                        value: null,
+                      },
+                    ],
+                    settings: { syncAlerts: true },
+                    connector: {
+                      id: 'jira-1',
+                      name: 'Jira',
+                      type: ConnectorTypes.jira,
+                      fields: { issueType: 'Task', priority: 'Low', parent: null },
+                    },
+                  },
+                },
+              ],
+            },
+          ];
+
+          it('creates new case with template', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'test_template_5',
+              reopenClosedCases: false,
+            });
+
+            expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+              { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+            ]);
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "cases": Array [
+                  Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+                      },
+                    ],
+                    "category": "my category",
+                    "connector": Object {
+                      "fields": Object {
+                        "issueType": "Task",
+                        "parent": null,
+                        "priority": "Low",
+                      },
+                      "id": "jira-1",
+                      "name": "Jira",
+                      "type": ".jira",
+                    },
+                    "customFields": Array [
+                      Object {
+                        "key": "first_key",
+                        "type": "text",
+                        "value": "this is a text field value",
+                      },
+                      Object {
+                        "key": "second_key",
+                        "type": "toggle",
+                        "value": true,
+                      },
+                      Object {
+                        "key": "third_key",
+                        "type": "text",
+                        "value": "N/A",
+                      },
+                      Object {
+                        "key": "fourth_key",
+                        "type": "toggle",
+                        "value": null,
+                      },
+                    ],
+                    "description": "case desc",
+                    "id": "mock-id-4",
+                    "owner": "cases",
+                    "settings": Object {
+                      "syncAlerts": true,
+                    },
+                    "severity": "high",
+                    "tags": Array [
+                      "auto-generated",
+                      "rule:rule-test-id",
+                      "host.name",
+                      "host.name:A",
+                      "dest.ip",
+                      "dest.ip:0.0.0.1",
+                      "rule",
+                      "test",
+                      "sample-4",
+                    ],
+                    "title": "Case with sample template 5",
+                  },
+                ],
+              }
+            `);
+          });
+
+          it('creates a case with default values when template has required fields empty', async () => {
+            const newConfiguration = [
+              {
+                ...mockConfiguration[0],
+                customFields: [
+                  {
+                    ...mockConfiguration[0].customFields[0],
+                    defaultValue: null,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'test_template_5',
+                    name: 'Fifth test template',
+                    description: 'This is a fifth test template',
+                    tags: ['foo', 'bar'],
+                    caseFields: null,
+                  },
+                ],
+              },
+            ];
+
+            casesClientMock.configure.get = jest.fn().mockResolvedValue(newConfiguration);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'test_template_5',
+              reopenClosedCases: false,
+            });
+
+            expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+              { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+            ]);
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "cases": Array [
+                  Object {
+                    "connector": Object {
+                      "fields": null,
+                      "id": "none",
+                      "name": "none",
+                      "type": ".none",
+                    },
+                    "customFields": Array [
+                      Object {
+                        "key": "first_key",
+                        "type": "text",
+                        "value": "N/A",
+                      },
+                    ],
+                    "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                    "id": "mock-id-4",
+                    "owner": "cases",
+                    "settings": Object {
+                      "syncAlerts": false,
+                    },
+                    "tags": Array [
+                      "auto-generated",
+                      "rule:rule-test-id",
+                      "host.name",
+                      "host.name:A",
+                      "dest.ip",
+                      "dest.ip:0.0.0.1",
+                      "rule",
+                      "test",
+                    ],
+                    "title": "Test rule - Grouping by A & 0.0.0.1 (Auto-created)",
+                  },
+                ],
+              }
+            `);
+          });
         });
 
         describe('Custom Fields', () => {

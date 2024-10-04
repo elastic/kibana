@@ -21,14 +21,12 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_uninstall_token_privileges', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await generateNAgentPolicies(supertest, 2);
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-    before(async () => {
-      await generateNAgentPolicies(supertest, 2);
-      await fleetAndAgents.setup();
     });
 
     skipIfNoDockerRegistry(providerContext);
@@ -75,7 +73,6 @@ export default function (providerContext: FtrProviderContext) {
         scenarios: SCENARIOS,
       },
     ];
-    before(async () => {});
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

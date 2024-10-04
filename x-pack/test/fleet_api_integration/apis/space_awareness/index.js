@@ -10,6 +10,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./enrollment_api_keys'));
     loadTestFile(require.resolve('./uninstall_tokens'));
     loadTestFile(require.resolve('./agent_policies'));
+    loadTestFile(require.resolve('./agent_policies_side_effects'));
     loadTestFile(require.resolve('./agents'));
     loadTestFile(require.resolve('./enrollment_settings'));
     loadTestFile(require.resolve('./package_install'));

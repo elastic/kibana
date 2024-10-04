@@ -239,7 +239,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('optional parameters', async () => {
+        describe('optional parameters', () => {
           describe('responders', () => {
             it('should fail to create an alert when the responders is an invalid type', async () => {
               const { body } = await supertest

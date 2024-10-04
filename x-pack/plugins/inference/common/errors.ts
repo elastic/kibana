@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { InferenceTaskEventBase, InferenceTaskEventType } from './tasks';
+import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 export enum InferenceTaskErrorCode {
   internalError = 'internalError',
@@ -42,7 +42,7 @@ export type InferenceTaskErrorEvent = InferenceTaskEventBase<InferenceTaskEventT
 
 export type InferenceTaskInternalError = InferenceTaskError<
   InferenceTaskErrorCode.internalError,
-  {}
+  Record<string, any>
 >;
 
 export type InferenceTaskRequestError = InferenceTaskError<
@@ -53,9 +53,10 @@ export type InferenceTaskRequestError = InferenceTaskError<
 export function createInferenceInternalError(
   message: string = i18n.translate('xpack.inference.internalError', {
     defaultMessage: 'An internal error occurred',
-  })
+  }),
+  meta?: Record<string, any>
 ): InferenceTaskInternalError {
-  return new InferenceTaskError(InferenceTaskErrorCode.internalError, message, {});
+  return new InferenceTaskError(InferenceTaskErrorCode.internalError, message, meta ?? {});
 }
 
 export function createInferenceRequestError(

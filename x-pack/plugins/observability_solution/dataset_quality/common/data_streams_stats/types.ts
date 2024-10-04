@@ -35,6 +35,13 @@ export type GetDataStreamDegradedFieldsParams = GetDataStreamDegradedFieldsPathP
   GetDataStreamDegradedFieldsQueryParams;
 
 /*
+Types for Degraded Field Values inside a DataStream
+ */
+
+export type GetDataStreamDegradedFieldValuesPathParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values`>['params']['path'];
+
+/*
 Types for DataStream Settings
 */
 

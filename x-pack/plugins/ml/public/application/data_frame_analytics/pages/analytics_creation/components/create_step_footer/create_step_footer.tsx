@@ -16,7 +16,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
@@ -48,7 +48,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   const {
     services: { notifications },
   } = useMlKibana();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
 
   useEffect(() => {
     setInitialized(true);
@@ -59,7 +59,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
 
     const interval = setInterval(async () => {
       try {
-        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
           : undefined;

@@ -9,11 +9,9 @@ import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import {
-  CNVM_POLICY_TEMPLATE,
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CNVM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
 export const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat-*';
@@ -37,7 +35,7 @@ export const METERING_CONFIGS = {
     assets_identifier: 'agent.id',
   },
   [CNVM]: {
-    index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
     assets_identifier: 'cloud.instance.id',
   },
   [CLOUD_DEFEND]: {

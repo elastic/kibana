@@ -70,6 +70,7 @@ describe('createChatService', () => {
       apiClient: clientSpy,
       registrations: [],
       signal: new AbortController().signal,
+      scope: 'observability',
     });
   });
 
@@ -79,7 +80,12 @@ describe('createChatService', () => {
 
   describe('chat', () => {
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
-      return service.chat('my_test', { signal, messages: [], connectorId: '' });
+      return service.chat('my_test', {
+        signal,
+        messages: [],
+        connectorId: '',
+        scope: 'observability',
+      });
     }
 
     it('correctly parses a stream of JSON lines', async () => {

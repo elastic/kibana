@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import { last } from 'lodash';
 import { defer, switchMap, throwError } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
 import { createInferenceRequestError } from '../../common/errors';
 import type { InferenceStartDependencies } from '../types';
@@ -17,9 +19,11 @@ import { createInferenceExecutor, chunksIntoMessage } from './utils';
 export function createChatCompleteApi({
   request,
   actions,
+  logger,
 }: {
   request: KibanaRequest;
   actions: InferenceStartDependencies['actions'];
+  logger: Logger;
 }) {
   const chatCompleteAPI: ChatCompleteAPI = ({
     connectorId,
@@ -27,6 +31,7 @@ export function createChatCompleteApi({
     toolChoice,
     tools,
     system,
+    functionCalling,
   }): ChatCompletionResponse => {
     return defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -44,17 +49,25 @@ export function createChatCompleteApi({
           );
         }
 
+        logger.debug(() => `Sending request: ${JSON.stringify(last(messages))}`);
+        logger.trace(() => JSON.stringify({ messages, toolChoice, tools, system }));
+
         return inferenceAdapter.chatComplete({
           system,
           executor,
           messages,
           toolChoice,
           tools,
+          logger,
+          functionCalling,
         });
       }),
       chunksIntoMessage({
-        toolChoice,
-        tools,
+        toolOptions: {
+          toolChoice,
+          tools,
+        },
+        logger,
       })
     );
   };

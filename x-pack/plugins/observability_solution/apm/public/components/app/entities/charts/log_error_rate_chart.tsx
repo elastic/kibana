@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
-import { yLabelAsPercent } from '../../../../../common/utils/formatters';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from '../../service_inventory/multi_signal_inventory/table/tooltip_content';
 import { Popover } from '../../service_inventory/multi_signal_inventory/table/popover';
 import {
@@ -23,6 +24,8 @@ import {
   getMetricsFormula,
 } from '../../../shared/charts/helper/get_metrics_formulas';
 import { ExploreLogsButton } from '../../../shared/explore_logs_button/explore_logs_button';
+import { mergeKueries, toKueryFilterFormat } from '../../../../../common/utils/kuery_utils';
+import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../../../../common/es_fields/apm';
 
 type LogErrorRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
@@ -35,7 +38,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
     path: { serviceName },
-  } = useApmParams('/logs-services/{serviceName}');
+  } = useApmParams('/services/{serviceName}');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -69,10 +72,18 @@ export function LogErrorRateChart({ height }: { height: number }) {
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.logs.chart.logsErrorRate', {
-        defaultMessage: 'Log Error %',
+        defaultMessage: 'Log Error Rate',
       }),
     },
   ];
+
+  const errorLogKueryFormat = mergeKueries(
+    [
+      toKueryFilterFormat(LOG_LEVEL, ['error', 'ERROR']),
+      toKueryFilterFormat(ERROR_LOG_LEVEL, ['error', 'ERROR']),
+    ],
+    'OR'
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -87,15 +98,15 @@ export function LogErrorRateChart({ height }: { height: number }) {
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.logErrorRate', {
-                  defaultMessage: 'Log error %',
+                  defaultMessage: 'Log error rate',
                 })}{' '}
                 <Popover>
                   <TooltipContent
                     formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
                     description={
                       <FormattedMessage
-                        defaultMessage="% of logs where error detected for given {serviceName}."
-                        id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+                        defaultMessage="Rate of error logs per minute observed for given {serviceName}."
+                        id="xpack.apm.logErrorRate.tooltip.description"
                         values={{
                           serviceName: (
                             <code
@@ -123,7 +134,10 @@ export function LogErrorRateChart({ height }: { height: number }) {
             <ExploreLogsButton
               start={start}
               end={end}
-              kuery={`(log.level: error OR error.log.level: error) AND service.name: "${serviceName}"`}
+              kuery={mergeKueries([
+                `(${errorLogKueryFormat})`,
+                toKueryFilterFormat(SERVICE_NAME, [serviceName]),
+              ])}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -135,8 +149,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={yLabelAsPercent}
-        yDomain={{ min: 0, max: 1 }}
+        yLabelFormat={asInteger}
       />
     </EuiPanel>
   );

@@ -35,7 +35,7 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
 
-    describe('GET /fleet/enrollment_api_keys', async () => {
+    describe('GET /fleet/enrollment_api_keys', () => {
       it('should list existing api keys', async () => {
         const { body: apiResponse } = await supertest
           .get(`/api/fleet/enrollment_api_keys`)
@@ -84,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('GET /fleet/enrollment_api_keys/{id}', async () => {
+    describe('GET /fleet/enrollment_api_keys/{id}', () => {
       it('should allow to retrieve existing api keys', async () => {
         const { body: apiResponse } = await supertest
           .get(`/api/fleet/enrollment_api_keys/${ENROLLMENT_KEY_ID}`)
@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('DELETE /fleet/enrollment_api_keys/{id}', async () => {
+    describe('DELETE /fleet/enrollment_api_keys/{id}', () => {
       let keyId: string;
       let esApiKeyId: string;
       before(async () => {

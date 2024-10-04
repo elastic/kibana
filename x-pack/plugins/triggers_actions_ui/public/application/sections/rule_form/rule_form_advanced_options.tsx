@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -24,11 +24,17 @@ import {
   EuiSplitPanel,
   EuiLoadingSpinner,
   EuiLink,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_inputs';
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
+import { useKibana } from '../../../common/lib/kibana';
 
 const alertDelayFormRowLabel = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleForm.alertDelayLabel',
@@ -80,7 +86,7 @@ const flappingOffLabel = i18n.translate(
 const flappingOverrideLabel = i18n.translate(
   'xpack.triggersActionsUI.ruleFormAdvancedOptions.overrideLabel',
   {
-    defaultMessage: 'Override',
+    defaultMessage: 'Custom',
   }
 );
 
@@ -105,11 +111,38 @@ const flappingFormRowLabel = i18n.translate(
   }
 );
 
-const flappingIconTipDescription = i18n.translate(
-  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingIconTipDescription',
+const flappingOffContentRules = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingOffContentRules',
   {
-    defaultMessage:
-      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
+    defaultMessage: 'Rules',
+  }
+);
+
+const flappingOffContentSettings = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingOffContentSettings',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+const flappingTitlePopoverFlappingDetection = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopoverFlappingDetection',
+  {
+    defaultMessage: 'flapping detection',
+  }
+);
+
+const flappingTitlePopoverAlertStatus = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopoverAlertStatus',
+  {
+    defaultMessage: 'alert status change threshold',
+  }
+);
+
+const flappingTitlePopoverLookBack = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopoverLookBack',
+  {
+    defaultMessage: 'rule run look back window',
   }
 );
 
@@ -138,6 +171,17 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
     onAlertDelayChange,
     onFlappingChange,
   } = props;
+
+  const {
+    application: {
+      capabilities: { rulesSettings },
+    },
+  } = useKibana().services;
+
+  const { writeFlappingSettingsUI = false } = rulesSettings || {};
+
+  const [isFlappingOffPopoverOpen, setIsFlappingOffPopoverOpen] = useState<boolean>(false);
+  const [isFlappingTitlePopoverOpen, setIsFlappingTitlePopoverOpen] = useState<boolean>(false);
 
   const cachedFlappingSettings = useRef<RuleSpecificFlappingProperties>();
 
@@ -209,6 +253,123 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
     });
   }, [spaceFlappingSettings, flappingSettings, onFlappingChange]);
 
+  const flappingTitleTooltip = useMemo(() => {
+    return (
+      <EuiOutsideClickDetector onOutsideClick={() => setIsFlappingTitlePopoverOpen(false)}>
+        <EuiPopover
+          repositionOnScroll
+          isOpen={isFlappingTitlePopoverOpen}
+          anchorPosition="leftCenter"
+          panelStyle={{
+            width: 500,
+          }}
+          button={
+            <EuiButtonIcon
+              display="empty"
+              color="primary"
+              iconType="questionInCircle"
+              aria-label="Flapping title info"
+              onClick={() => setIsFlappingTitlePopoverOpen(!isFlappingTitlePopoverOpen)}
+            />
+          }
+        >
+          <EuiPopoverTitle>Alert flapping detection</EuiPopoverTitle>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover1"
+              defaultMessage="When {flappingDetection} is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced."
+              values={{
+                flappingDetection: <b>{flappingTitlePopoverFlappingDetection}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover2"
+              defaultMessage="The {alertStatus} defines a period (minimum number of runs) that is used in the detection algorithm. "
+              values={{
+                alertStatus: <b>{flappingTitlePopoverAlertStatus}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover3"
+              defaultMessage="The {lookBack} indicates the minimum number of times alerts must switch states within the threshold period to qualify as flapping alerts."
+              values={{
+                lookBack: <b>{flappingTitlePopoverLookBack}</b>,
+              }}
+            />
+          </EuiText>
+          <EuiSpacer />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingTitlePopover4"
+              defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
+              values={{
+                rules: <b>{flappingOffContentRules}</b>,
+                settings: <b>{flappingOffContentSettings}</b>,
+              }}
+            />
+          </EuiText>
+        </EuiPopover>
+      </EuiOutsideClickDetector>
+    );
+  }, [isFlappingTitlePopoverOpen]);
+
+  const flappingOffTooltip = useMemo(() => {
+    if (!spaceFlappingSettings) {
+      return null;
+    }
+    const { enabled } = spaceFlappingSettings;
+    if (enabled) {
+      return null;
+    }
+
+    if (writeFlappingSettingsUI) {
+      return (
+        <EuiOutsideClickDetector onOutsideClick={() => setIsFlappingOffPopoverOpen(false)}>
+          <EuiPopover
+            repositionOnScroll
+            isOpen={isFlappingOffPopoverOpen}
+            anchorPosition="leftCenter"
+            panelStyle={{
+              width: 250,
+            }}
+            button={
+              <EuiButtonIcon
+                display="empty"
+                color="primary"
+                iconType="questionInCircle"
+                aria-label="Flapping Off Info"
+                onClick={() => setIsFlappingOffPopoverOpen(!isFlappingOffPopoverOpen)}
+              />
+            }
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingOffPopoverContent"
+                defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
+                values={{
+                  rules: <b>{flappingOffContentRules}</b>,
+                  settings: <b>{flappingOffContentSettings}</b>,
+                }}
+              />
+            </EuiText>
+          </EuiPopover>
+        </EuiOutsideClickDetector>
+      );
+    }
+    // TODO: Add the external doc link here!
+    return (
+      <EuiLink href="" target="_blank">
+        {flappingExternalLinkLabel}
+      </EuiLink>
+    );
+  }, [writeFlappingSettingsUI, isFlappingOffPopoverOpen, spaceFlappingSettings]);
+
   const flappingFormHeader = useMemo(() => {
     if (!spaceFlappingSettings) {
       return null;
@@ -243,12 +404,7 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
                 onChange={onFlappingToggle}
               />
             )}
-            {!enabled && (
-              // TODO: Add the help link here
-              <EuiLink href="" target="_blank">
-                {flappingExternalLinkLabel}
-              </EuiLink>
-            )}
+            {flappingOffTooltip}
           </EuiFlexItem>
         </EuiFlexGroup>
         {flappingSettings && (
@@ -259,7 +415,14 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
         )}
       </EuiFlexItem>
     );
-  }, [isDesktop, euiTheme, spaceFlappingSettings, flappingSettings, onFlappingToggle]);
+  }, [
+    isDesktop,
+    euiTheme,
+    spaceFlappingSettings,
+    flappingSettings,
+    flappingOffTooltip,
+    onFlappingToggle,
+  ]);
 
   const flappingFormBody = useMemo(() => {
     if (!flappingSettings) {
@@ -332,11 +495,9 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
             <EuiFormRow
               fullWidth
               label={
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem>{flappingFormRowLabel}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={flappingIconTipDescription} position="top" />
-                  </EuiFlexItem>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={false}>{flappingFormRowLabel}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>{flappingTitleTooltip}</EuiFlexItem>
                 </EuiFlexGroup>
               }
               data-test-subj="alertFlappingFormRow"

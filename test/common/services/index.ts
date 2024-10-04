@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
@@ -15,7 +16,6 @@ const {
   esArchiver,
   kibanaServer,
   retry,
-  supertestWithoutAuth,
   deployment,
   randomness,
   esDeleteAllIndices,
@@ -23,6 +23,9 @@ const {
   indexPatterns,
   bsearch,
   console,
+  supertest,
+  esSupertest,
+  supertestWithoutAuth,
 } = commonFunctionalServices;
 
 // pick what was there previously
@@ -33,7 +36,6 @@ export const services = {
   esArchiver,
   kibanaServer,
   retry,
-  supertestWithoutAuth,
   deployment,
   randomness,
   security,
@@ -42,4 +44,7 @@ export const services = {
   indexPatterns,
   bsearch,
   console,
+  supertest,
+  esSupertest,
+  supertestWithoutAuth,
 };

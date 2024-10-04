@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Policy - update', async function () {
+  describe('Package Policy - update', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let managedAgentPolicyId: string;
@@ -70,12 +70,9 @@ export default function (providerContext: FtrProviderContext) {
 
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
-    before(async () => {
+    before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    before(async function () {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
@@ -274,9 +271,7 @@ export default function (providerContext: FtrProviderContext) {
         .delete(`/api/fleet/epm/packages/input_package/1.0.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
-    });
 
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -690,7 +685,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    describe('Simplified package policy', async () => {
+    describe('Simplified package policy', () => {
       it('should work with valid values', async function () {
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyId3}`)
@@ -953,6 +948,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset', type: 'index_template' },
           { id: 'logs-somedataset@package', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
+          { id: 'logs@custom', type: 'component_template' },
         ]);
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');

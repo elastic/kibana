@@ -107,6 +107,10 @@ export const moduleIdParamSchema = schema.object({
   moduleId: schema.string({ meta: { description: 'ID of the module' } }),
 });
 
+export const optionalSizeQuerySchema = schema.object({
+  size: schema.maybe(schema.number({ meta: { description: 'How many results to return' } })),
+});
+
 export const recognizeModulesSchema = schema.object({
   indexPatternTitle: schema.string({
     meta: {
@@ -138,11 +142,11 @@ const moduleSchema = schema.object({
   type: schema.string(),
   logo: schema.maybe(schema.any()),
   logoFile: schema.maybe(schema.string()),
-  defaultIndexPattern: schema.string(),
-  query: schema.any(),
+  defaultIndexPattern: schema.maybe(schema.string()),
+  query: schema.maybe(schema.any()),
   jobs: schema.arrayOf(schema.any()),
   datafeeds: schema.arrayOf(schema.any()),
-  kibana: schema.any(),
+  kibana: schema.maybe(schema.any()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -157,7 +161,7 @@ export const dataRecognizerConfigResponse = () =>
   schema.object({
     datafeeds: schema.arrayOf(schema.any()),
     jobs: schema.arrayOf(schema.any()),
-    kibana: schema.any(),
+    kibana: schema.maybe(schema.any()),
   });
 
 export const jobExistsResponse = () =>

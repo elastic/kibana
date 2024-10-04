@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { CodeActionOptions } from './types';
-import { ESQLRealField } from '../validation/types';
-import { FieldType } from '../definitions/types';
+import type { CodeActionOptions } from './types';
+import type { ESQLRealField } from '../validation/types';
+import type { FieldType } from '../definitions/types';
+import type { ESQLCallbacks, PartialFieldsMetadataClient } from '../shared/types';
 
-function getCallbackMocks() {
+function getCallbackMocks(): jest.Mocked<ESQLCallbacks> {
   return {
     getFieldsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
       if (/enrich/.test(query)) {
@@ -64,6 +66,11 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
+    getFieldsMetadata: jest.fn(async () => ({
+      find: jest.fn(async () => ({
+        fields: {},
+      })),
+    })) as unknown as Promise<PartialFieldsMetadataClient>,
   };
 }
 
@@ -394,6 +401,7 @@ describe('quick fixes logic', () => {
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
             ...callbackMocks,
             getFieldsFor: undefined,
+            getFieldsMetadata: undefined,
           });
           const actions = await getActions(
             statement,
@@ -402,7 +410,11 @@ describe('quick fixes logic', () => {
             {
               relaxOnMissingCallbacks: true,
             },
-            { ...callbackMocks, getFieldsFor: undefined }
+            {
+              ...callbackMocks,
+              getFieldsFor: undefined,
+              getFieldsMetadata: undefined,
+            }
           );
           const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
           expect(edits).toEqual(['`any#Char$Field`']);
@@ -451,6 +463,7 @@ describe('quick fixes logic', () => {
             getFieldsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
+            getFieldsMetadata: undefined,
           }
         );
       } catch {

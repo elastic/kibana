@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('hosts', async () => {
+  describe('hosts', () => {
     let supertest: TestAgent;
     let bsearch: BsearchService;
     before(async () => {

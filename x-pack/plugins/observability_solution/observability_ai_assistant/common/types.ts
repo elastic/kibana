@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { IconType } from '@elastic/eui';
+import type { ToolSchema } from '@kbn/inference-plugin/common';
 import type { ObservabilityAIAssistantChatService } from '../public';
-import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
+import type { FunctionResponse } from './functions/types';
 
 export enum MessageRole {
   System = 'system',
@@ -115,13 +116,14 @@ export enum KnowledgeBaseType {
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
+  starterPrompts?: StarterPrompt[];
   screenDescription?: string;
   data?: Array<{
     name: string;
     description: string;
     value: any;
   }>;
-  actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+  actions?: Array<{ name: string; description: string; parameters?: ToolSchema }>;
 }
 
 export type ScreenContextActionRespondFunction<TArguments> = ({}: {
@@ -135,7 +137,7 @@ export type ScreenContextActionRespondFunction<TArguments> = ({}: {
 export interface ScreenContextActionDefinition<TArguments = any> {
   name: string;
   description: string;
-  parameters?: CompatibleJSONSchema;
+  parameters?: ToolSchema;
   respond: ScreenContextActionRespondFunction<TArguments>;
 }
 
@@ -155,3 +157,5 @@ export interface ObservabilityAIAssistantScreenContext {
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }
+
+export type AssistantScope = 'observability' | 'search' | 'all';

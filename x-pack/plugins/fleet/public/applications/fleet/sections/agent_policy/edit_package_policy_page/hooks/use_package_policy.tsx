@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
@@ -74,7 +74,7 @@ export function usePackagePolicyWithRelatedData(
     description: '',
     namespace: '',
     policy_id: '',
-    policy_ids: [''],
+    policy_ids: [],
     enabled: true,
     inputs: [],
     version: '',
@@ -115,7 +115,7 @@ export function usePackagePolicyWithRelatedData(
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          load
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -314,7 +314,7 @@ export function usePackagePolicyWithRelatedData(
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
                 packageData.item,
-                safeLoad
+                load
               );
               setValidationResults(newValidationResults);
 

@@ -90,8 +90,11 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationId,
     http,
     promptContexts,
+    setCurrentUserAvatar,
     setLastConversationId,
   } = useAssistantContext();
+
+  setCurrentUserAvatar(currentUserAvatar);
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -125,7 +128,7 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const {
     currentConversation,
-    currentSystemPromptId,
+    currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
@@ -263,7 +266,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Add min-height to all codeblocks so timeline icon doesn't overflow
   const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
   // @ts-ignore-expect-error
-  codeBlockContainers.forEach((e) => (e.style.minHeight = '75px'));
+  codeBlockContainers.forEach((e) => (e.style.minHeight = '85px'));
   ////
 
   const onToggleShowAnonymizedValues = useCallback(() => {
@@ -272,34 +275,20 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared: onChatCleared,
+    handleOnChatCleared,
     handleChatSend,
     handleRegenerateResponse,
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
   } = useChatSend({
-    allSystemPrompts,
     currentConversation,
-    currentSystemPromptId,
     http,
     refetchCurrentUserConversations,
     selectedPromptContexts,
     setSelectedPromptContexts,
     setCurrentConversation,
   });
-
-  const handleOnChatCleared = useCallback(() => {
-    onChatCleared();
-    if (!currentSystemPromptId) {
-      setCurrentSystemPromptId(currentConversation?.apiConfig?.defaultSystemPromptId);
-    }
-  }, [
-    currentConversation?.apiConfig?.defaultSystemPromptId,
-    currentSystemPromptId,
-    onChatCleared,
-    setCurrentSystemPromptId,
-  ]);
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
@@ -389,6 +378,7 @@ const AssistantComponent: React.FC<Props> = ({
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
+            systemPromptContent: currentSystemPrompt?.content,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -415,6 +405,7 @@ const AssistantComponent: React.FC<Props> = ({
       isLoadingChatSend,
       setIsStreaming,
       currentUserAvatar,
+      currentSystemPrompt?.content,
       selectedPromptContextsCount,
     ]
   );
@@ -456,7 +447,7 @@ const AssistantComponent: React.FC<Props> = ({
           overflow: hidden;
         `}
       >
-        <CommentContainer>
+        <CommentContainer data-test-subj="assistantChat">
           <EuiFlexGroup
             css={css`
               overflow: hidden;
@@ -530,14 +521,13 @@ const AssistantComponent: React.FC<Props> = ({
                   allSystemPrompts={allSystemPrompts}
                   comments={comments}
                   currentConversation={currentConversation}
-                  currentSystemPromptId={currentSystemPromptId}
+                  currentSystemPromptId={currentSystemPrompt?.id}
                   handleOnConversationSelected={handleOnConversationSelected}
                   http={http}
                   isAssistantEnabled={isAssistantEnabled}
                   isLoading={isInitialLoad}
                   isSettingsModalVisible={isSettingsModalVisible}
                   isWelcomeSetup={isWelcomeSetup}
-                  refetchCurrentUserConversations={refetchCurrentUserConversations}
                   setCurrentSystemPromptId={setCurrentSystemPromptId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />

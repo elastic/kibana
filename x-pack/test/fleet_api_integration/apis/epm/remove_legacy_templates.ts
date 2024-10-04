@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Legacy component template removal', async () => {
+  describe('Legacy component template removal', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

@@ -11,7 +11,7 @@ import {
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import type { LangSmithOptions } from '../../../common/api/model/common_attributes';
+import type { LangSmithOptions } from '../../../common';
 
 const sessionStorage = new Storage(window.sessionStorage);
 

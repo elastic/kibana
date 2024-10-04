@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import querystring from 'querystring';
 import rison from '@kbn/rison';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
@@ -76,6 +78,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const euiSelectable = getService('selectable');
   const find = getService('find');
   const retry = getService('retry');
+  const es = getService('es');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -91,6 +94,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTable: 'datasetQualityTable',
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
+    datasetQualityDetailsDegradedFieldsExpandButton:
+      'datasetQualityDetailsDegradedFieldsExpandButton',
+    datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
     datasetQualityDetailsDegradedFieldTable: 'datasetQualityDetailsDegradedFieldTable',
@@ -116,7 +122,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsIntegrationRowVersion: 'datasetQualityDetailsFieldsList-version',
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
-    datasetQualityNoDataEmptyState: 'datasetQualityNoDataEmptyState',
+    datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
@@ -127,6 +133,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'unifiedHistogramBreakdownSelectorSelectorSearch',
     unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
     managementHome: 'managementHome',
+    euiFlyoutCloseButton: 'euiFlyoutCloseButton',
+    datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist:
+      'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
+    datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
+      'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
   };
 
   return {
@@ -191,6 +202,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
+    },
+
+    async waitUntilDegradedFieldFlyoutLoaded() {
+      await testSubjects.existOrFail(testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout);
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
@@ -282,7 +297,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, ['0', 'Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -396,6 +411,60 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         fieldText,
         fieldText
       );
+    },
+
+    async openDegradedFieldFlyout(fieldName: string) {
+      await this.waitUntilTableLoaded();
+      const cols = await this.parseDegradedFieldTable();
+      const fieldNameCol = cols.Field;
+      const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
+
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const fieldExpandButton = expandButtons[testDatasetRowIndex];
+
+      // Check if 'title' attribute is "Expand" or "Collapse"
+      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
+
+      // Open if collapsed
+      if (isCollapsed) {
+        await fieldExpandButton.click();
+      }
+
+      await this.waitUntilDegradedFieldFlyoutLoaded();
+    },
+
+    async closeFlyout() {
+      return testSubjects.click(testSubjectSelectors.euiFlyoutCloseButton);
+    },
+
+    async setDataStreamSettings(name: string, settings: IndicesIndexSettings) {
+      return es.indices.putSettings({
+        index: name,
+        settings,
+      });
+    },
+
+    async rolloverDataStream(name: string) {
+      return es.indices.rollover({
+        alias: name,
+      });
+    },
+
+    async getQualityIssueSwitchState() {
+      const isSelected = await testSubjects.getAttribute(
+        testSubjectSelectors.datasetQualityDetailsOverviewDegradedFieldToggleSwitch,
+        'aria-checked'
+      );
+      return isSelected === 'true';
     },
 
     async parseTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
@@ -46,7 +47,7 @@ export interface Props {
 }
 
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
-  const { activeNodes$ } = useNavigationService();
+  const { activeNodes$, selectedPanelNode, setSelectedPanelNode } = useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { body: [] });
@@ -78,7 +79,12 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   );
 
   return (
-    <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
+    <PanelProvider
+      activeNodes={activeNodes}
+      contentProvider={panelContentProvider}
+      selectedNode={selectedPanelNode}
+      setSelectedNode={setSelectedPanelNode}
+    >
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>

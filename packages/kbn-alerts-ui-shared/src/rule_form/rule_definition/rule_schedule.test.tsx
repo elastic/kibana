@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -65,7 +66,7 @@ describe('RuleSchedule', () => {
     });
   });
 
-  test('Should allow interval unit to be changed', () => {
+  test('Should allow interval unit to be changed', async () => {
     useRuleFormState.mockReturnValue({
       formData: {
         schedule: {
@@ -75,7 +76,7 @@ describe('RuleSchedule', () => {
     });
     render(<RuleSchedule />);
 
-    userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
+    await userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setSchedule',
       payload: {

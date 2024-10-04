@@ -220,7 +220,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             exceptionItemIndex,
             entry.entryIndex
           )}
-          isClearable={false}
+          isClearable={true}
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}

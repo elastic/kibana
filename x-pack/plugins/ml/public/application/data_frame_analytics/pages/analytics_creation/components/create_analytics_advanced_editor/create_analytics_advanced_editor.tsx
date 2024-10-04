@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useMlApiContext, useNotifications } from '../../../../../contexts/kibana';
+import { useMlApi, useNotifications } from '../../../../../contexts/kibana';
 import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
@@ -24,7 +24,7 @@ const EditorComponent = dynamic(async () => ({
 }));
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 
@@ -43,7 +43,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     () =>
       debounce(async () => {
         try {
-          const results = await ml.dataFrameAnalytics.jobsExist([jobId], true);
+          const results = await mlApi.dataFrameAnalytics.jobsExist([jobId], true);
           setFormState({ jobIdExists: results[jobId].exists });
         } catch (e) {
           toasts.addDanger(

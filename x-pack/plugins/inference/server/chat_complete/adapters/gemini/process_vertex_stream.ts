@@ -11,7 +11,7 @@ import {
   ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
 } from '../../../../common/chat_complete';
-import { generateFakeToolCallId } from '../../utils';
+import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
 
 export function processVertexStream() {

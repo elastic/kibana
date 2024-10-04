@@ -14,7 +14,7 @@ interface UiCounterEvent {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
 
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
@@ -38,10 +38,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('visualizations');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('visualizations');
+        await timePicker.setDefaultAbsoluteRange();
+        await dashboard.waitForRenderComplete();
 
         uiCounterEvents = await usageCollection.getUICounterEvents();
 
@@ -86,11 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let afterRefreshRenderCountMap: Record<string, number> = {};
 
       before(async function () {
-        const sharedItemsCount = Number(await PageObjects.dashboard.getSharedItemsCount());
+        const sharedItemsCount = Number(await dashboard.getSharedItemsCount());
         initialRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
 
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
         afterRefreshRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
       });

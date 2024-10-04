@@ -49,18 +49,18 @@ describe('ContextEditor', () => {
     expect(screen.getByTestId('selectAllFields')).toHaveTextContent('Select all 20 fields');
   });
 
-  it('updates the table selection when "Select all n fields" is clicked', () => {
+  it('updates the table selection when "Select all n fields" is clicked', async () => {
     // The table select all checkbox should only select the number of rows visible on the page
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    await userEvent.click(screen.getByTestId('checkboxSelectAll'));
     expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 10 fields');
 
     // The select all button should select all rows regardless of visibility
-    userEvent.click(screen.getByTestId('selectAllFields'));
+    await userEvent.click(screen.getByTestId('selectAllFields'));
     expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 20 fields');
   });
 
-  it('calls onListUpdated with the expected values when the update button is clicked', () => {
-    userEvent.click(screen.getAllByTestId('allowed')[0]);
+  it('calls onListUpdated with the expected values when the update button is clicked', async () => {
+    await userEvent.click(screen.getAllByTestId('allowed')[0]);
 
     expect(onListUpdated).toHaveBeenCalledWith([
       {

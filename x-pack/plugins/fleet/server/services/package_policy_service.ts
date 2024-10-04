@@ -164,7 +164,7 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -226,9 +226,9 @@ export interface PackagePolicyClient {
    * @param outputId
    */
   removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    outputId: string
+    outputId: string,
+    options?: { force?: boolean }
   ): Promise<void>;
 
   /**

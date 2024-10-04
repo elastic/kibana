@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -199,6 +201,10 @@ export interface UnifiedFieldListItemProps {
    * Item size
    */
   size: FieldItemButtonProps<DataViewField>['size'];
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 function UnifiedFieldListItemComponent({
@@ -222,6 +228,7 @@ function UnifiedFieldListItemComponent({
   groupIndex,
   itemIndex,
   size,
+  additionalFilters,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -287,6 +294,7 @@ function UnifiedFieldListItemComponent({
           multiFields={multiFields}
           dataView={dataView}
           onAddFilter={addFilterAndClosePopover}
+          additionalFilters={additionalFilters}
         />
 
         {searchMode === 'documents' && multiFields && (

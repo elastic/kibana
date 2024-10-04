@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -28,32 +28,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
     it('should show field list', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchDataPanelIndexPattern('epoch-millis*');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      const fieldList = await PageObjects.lens.findAllFields();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.switchDataPanelIndexPattern('epoch-millis*');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('lnsDatatable');
+      const fieldList = await lens.findAllFields();
       expect(fieldList).to.contain('@timestamp');
     });
 
     it('should able to configure a regular metric', async () => {
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
-      await PageObjects.lens.waitForVisualization('lnsSuggestion-countOfRecords');
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('1');
+      await lens.waitForVisualization('lnsSuggestion-countOfRecords');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('1');
     });
 
     it('should able to configure a shifted metric', async () => {
-      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      await PageObjects.lens.enableTimeShift();
-      await PageObjects.lens.setTimeShift('3d');
+      await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await lens.enableTimeShift();
+      await lens.setTimeShift('3d');
 
-      await PageObjects.lens.waitForVisualization('lnsSuggestion-countOfRecords3D');
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2');
+      await lens.waitForVisualization('lnsSuggestion-countOfRecords3D');
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('2');
     });
   });
 }

@@ -25,6 +25,7 @@ export const cloneRuleRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_clone/{newId?}`,
+      options: { access: 'internal' },
       validate: {
         params: cloneRuleRequestParamsSchemaV1,
       },

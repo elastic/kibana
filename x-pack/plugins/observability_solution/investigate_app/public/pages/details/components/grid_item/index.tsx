@@ -52,12 +52,12 @@ const panelContentClassName = css`
   }
 `;
 
-const headerClassName = css`
-  height: ${GRID_ITEM_HEADER_HEIGHT}px;
-`;
-
 export function GridItem({ id, title, children, onDelete, onCopy, loading }: GridItemProps) {
   const theme = useTheme();
+
+  const headerClassName = css`
+  padding: 0 ${theme.size.s} 0 ${theme.size.s}};
+`;
 
   const containerClassName = css`
     height: 100%;
@@ -71,58 +71,58 @@ export function GridItem({ id, title, children, onDelete, onCopy, loading }: Gri
   `;
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      className={containerClassName}
-      alignItems="stretch"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="m"
-          alignItems="center"
-          className={headerClassName}
-        >
-          <EuiFlexItem className={titleContainerClassName}>
-            <EuiText size="s" className={titleItemClassName}>
-              {title}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="gridItemControls">
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="xs"
-              alignItems="center"
-              justifyContent="flexEnd"
-            >
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType="copy"
-                  onClick={() => {
-                    onCopy();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType="trash"
-                  onClick={() => {
-                    onDelete();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow className={panelContainerClassName}>
-        <EuiPanel hasBorder hasShadow={false} className={panelClassName}>
+    <EuiPanel hasBorder hasShadow={false} className={panelClassName} paddingSize="none">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className={containerClassName}
+        alignItems="stretch"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="none"
+            alignItems="center"
+            className={headerClassName}
+          >
+            <EuiFlexItem className={titleContainerClassName}>
+              <EuiText size="s" className={titleItemClassName}>
+                <h5>{title}</h5>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="gridItemControls">
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                alignItems="center"
+                justifyContent="flexEnd"
+              >
+                <EuiFlexItem grow={false}>
+                  <InvestigateTextButton
+                    iconType="copy"
+                    onClick={() => {
+                      onCopy();
+                    }}
+                    disabled={loading}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InvestigateTextButton
+                    iconType="trash"
+                    onClick={() => {
+                      onDelete();
+                    }}
+                    disabled={loading}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow className={panelContainerClassName}>
           <div className={panelContentClassName}>{children}</div>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

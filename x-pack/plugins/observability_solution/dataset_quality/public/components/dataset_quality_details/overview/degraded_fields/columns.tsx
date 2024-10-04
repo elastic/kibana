@@ -6,37 +6,74 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
 import { DegradedField } from '../../../../../common/api_types';
-import { SparkPlot } from './spark_plot';
+import { SparkPlot } from '../../../common/spark_plot';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
+import {
+  countColumnName,
+  fieldColumnName,
+  lastOccurrenceColumnName,
+} from '../../../../../common/translations';
 
-const fieldColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.field', {
-  defaultMessage: 'Field',
-});
-
-const countColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.count', {
-  defaultMessage: 'Docs count',
-});
-
-const lastOccurrenceColumnName = i18n.translate(
-  'xpack.datasetQuality.details.degradedField.lastOccurrence',
+const expandDatasetAriaLabel = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldTable.expandLabel',
   {
-    defaultMessage: 'Last occurrence',
+    defaultMessage: 'Expand',
+  }
+);
+const collapseDatasetAriaLabel = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldTable.collapseLabel',
+  {
+    defaultMessage: 'Collapse',
   }
 );
 
 export const getDegradedFieldsColumns = ({
   dateFormatter,
   isLoading,
+  expandedDegradedField,
+  openDegradedFieldFlyout,
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
+  expandedDegradedField?: string;
+  openDegradedFieldFlyout: (name: string) => void;
 }): Array<EuiBasicTableColumn<DegradedField>> => [
+  {
+    name: '',
+    field: 'name',
+    render: (_, { name }) => {
+      const isExpanded = name === expandedDegradedField;
+
+      const onExpandClick = () => {
+        openDegradedFieldFlyout(name);
+      };
+
+      return (
+        <EuiButtonIcon
+          data-test-subj="datasetQualityDetailsDegradedFieldsExpandButton"
+          size="xs"
+          color="text"
+          onClick={onExpandClick}
+          iconType={isExpanded ? 'minimize' : 'expand'}
+          title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+        />
+      );
+    },
+    width: '40px',
+    css: css`
+      &.euiTableCellContent {
+        padding: 0;
+      }
+    `,
+  },
   {
     name: fieldColumnName,
     field: 'name',

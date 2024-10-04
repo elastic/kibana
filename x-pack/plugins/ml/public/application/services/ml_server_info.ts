@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
 
 export interface CloudInfo {
@@ -13,6 +13,8 @@ export interface CloudInfo {
   isCloud: boolean;
   isCloudTrial: boolean;
   deploymentId: string | null;
+  cloudUrl: string | null;
+  isMlAutoscalingEnabled: boolean;
 }
 
 let defaults: MlServerDefaults = {
@@ -26,11 +28,13 @@ const cloudInfo: CloudInfo = {
   isCloud: false,
   isCloudTrial: false,
   deploymentId: null,
+  cloudUrl: null,
+  isMlAutoscalingEnabled: false,
 };
 
-export async function loadMlServerInfo(mlApiServices: MlApiServices) {
+export async function loadMlServerInfo(mlApi: MlApi) {
   try {
-    const resp = await mlApiServices.mlInfo();
+    const resp = await mlApi.mlInfo();
     defaults = resp.defaults;
     limits = resp.limits;
     cloudInfo.cloudId = resp.cloudId ?? null;

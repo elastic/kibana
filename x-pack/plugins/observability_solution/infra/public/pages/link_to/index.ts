@@ -9,9 +9,3 @@ export { LinkToLogsPage } from './link_to_logs';
 export { LinkToMetricsPage } from './link_to_metrics';
 export { RedirectToNodeLogs } from './redirect_to_node_logs';
 export { RedirectToNodeDetail } from './redirect_to_node_detail';
-
-export { useNodeDetailsRedirect } from './use_node_details_redirect';
-export type {
-  AssetDetailsQueryParams,
-  MetricDetailsQueryParams,
-} from './use_node_details_redirect';

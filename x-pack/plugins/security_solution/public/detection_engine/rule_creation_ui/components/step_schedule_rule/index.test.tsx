@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow, mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { StepScheduleRule, StepScheduleRuleReadOnly } from '.';
@@ -40,7 +40,7 @@ describe('StepScheduleRule', () => {
   };
   it('renders correctly', () => {
     const wrapper = mount(<TestComp setFormRef={() => {}} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('Form[data-test-subj="stepScheduleRule"]')).toHaveLength(1);

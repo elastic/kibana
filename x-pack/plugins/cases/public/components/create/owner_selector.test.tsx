@@ -39,7 +39,7 @@ describe.skip('Case Owner Selection', () => {
 
     expect(await screen.findByTestId('caseOwnerSelector')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+    await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
 
     const options = await screen.findAllByRole('option');
     expect(options[0]).toHaveTextContent(OWNER_INFO[SECURITY_SOLUTION_OWNER].label);
@@ -60,7 +60,7 @@ describe.skip('Case Owner Selection', () => {
 
       expect(await screen.findByText(OWNER_INFO[available].label)).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+      await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
 
       expect((await screen.findAllByRole('option')).length).toBe(1);
     }
@@ -79,10 +79,8 @@ describe.skip('Case Owner Selection', () => {
     expect(await screen.findByText('Security')).toBeInTheDocument();
     expect(screen.queryByText('Observability')).not.toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
-    userEvent.click(await screen.findByText('Observability'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+    await userEvent.click(await screen.findByText('Observability'), { pointerEventsCheck: 0 });
 
     await waitFor(() => {
       // data, isValid

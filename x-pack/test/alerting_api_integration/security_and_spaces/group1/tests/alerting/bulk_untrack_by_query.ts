@@ -36,7 +36,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
     });
 
     for (const scenario of UserAtSpaceScenarios) {
-      describe(scenario.id, async () => {
+      describe(scenario.id, () => {
         it('should bulk mark alerts as untracked by query', async () => {
           const { body: createdRule1 } = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerting/rule`)

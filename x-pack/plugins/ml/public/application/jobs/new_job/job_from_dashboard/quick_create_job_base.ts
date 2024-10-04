@@ -12,7 +12,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  DashboardAPI,
+  DashboardApi,
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
@@ -21,8 +21,7 @@ import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { MlApiServices } from '../../../services/ml_api_service';
-import type { MlJobService } from '../../../services/job_service';
+import type { MlApi } from '../../../services/ml_api_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
@@ -57,8 +56,7 @@ export class QuickJobCreatorBase {
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
     protected readonly dashboardService: DashboardStart,
-    protected readonly mlApiServices: MlApiServices,
-    protected readonly mlJobService: MlJobService
+    protected readonly mlApi: MlApi
   ) {}
 
   protected async putJobAndDataFeed({
@@ -80,7 +78,7 @@ export class QuickJobCreatorBase {
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
-    dashboard?: DashboardAPI;
+    dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -110,7 +108,7 @@ export class QuickJobCreatorBase {
         datafeedConfig.indices.length > 0
       ) {
         const { modelMemoryLimit } = await firstValueFrom(
-          this.mlApiServices.calculateModelMemoryLimit$({
+          this.mlApi.calculateModelMemoryLimit$({
             datafeedConfig: datafeed,
             analysisConfig: job.analysis_config,
             indexPattern: datafeedConfig.indices[0],
@@ -133,7 +131,7 @@ export class QuickJobCreatorBase {
 
     // put job
     try {
-      await this.mlApiServices.addJob({ jobId: job.job_id, job });
+      await this.mlApi.addJob({ jobId: job.job_id, job });
     } catch (error) {
       result.jobCreated.error = error;
       return result;
@@ -142,7 +140,7 @@ export class QuickJobCreatorBase {
 
     // put datafeed
     try {
-      await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
+      await this.mlApi.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
       result.datafeedCreated.error = error;
       return result;
@@ -152,7 +150,7 @@ export class QuickJobCreatorBase {
     if (startJob) {
       // open job, ignore error if already open
       try {
-        await this.mlApiServices.openJob({ jobId });
+        await this.mlApi.openJob({ jobId });
       } catch (error) {
         // job may already be open, so ignore 409 error.
         if (error.body.statusCode !== 409) {
@@ -164,7 +162,7 @@ export class QuickJobCreatorBase {
 
       // start datafeed
       try {
-        await this.mlApiServices.startDatafeed({
+        await this.mlApi.startDatafeed({
           datafeedId,
           start,
           ...(runInRealTime ? {} : { end }),
@@ -227,7 +225,7 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  private async createDashboardLink(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+  private async createDashboardLink(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const savedObjectId = dashboard.savedObjectId?.value;
     if (!savedObjectId) {
       return null;
@@ -262,7 +260,7 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  private async getCustomUrls(dashboard: DashboardAPI, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: DashboardApi, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

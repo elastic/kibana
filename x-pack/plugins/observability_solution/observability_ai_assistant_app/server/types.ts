@@ -35,6 +35,8 @@ import type {
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
@@ -53,6 +55,8 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   cloud?: CloudStart;
   serverless?: ServerlessPluginStart;
+  inference: InferenceServerStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -68,4 +72,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observability: ObservabilityPluginSetup;
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
+  inference: InferenceServerSetup;
 }

@@ -19,7 +19,7 @@
         "label": "registerFavorites",
         "description": [],
         "signature": [
-          "({ logger, core }: { core: ",
+          "({\n  logger,\n  core,\n  usageCollection,\n}: { core: ",
           {
             "pluginId": "@kbn/core-lifecycle-server",
             "scope": "server",
@@ -35,7 +35,15 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => void"
+          "; usageCollection?: ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.UsageCollectionSetup",
+            "text": "UsageCollectionSetup"
+          },
+          " | undefined; }) => void"
         ],
         "path": "packages/content-management/favorites/favorites_server/src/index.ts",
         "deprecated": false,
@@ -46,7 +54,7 @@
             "id": "def-server.registerFavorites.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ logger, core }",
+            "label": "{\n  logger,\n  core,\n  usageCollection,\n}",
             "description": [],
             "path": "packages/content-management/favorites/favorites_server/src/index.ts",
             "deprecated": false,
@@ -88,6 +96,27 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   }
+                ],
+                "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-favorites-server",
+                "id": "def-server.registerFavorites.$1.usageCollection",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "usageCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageCollection",
+                    "scope": "server",
+                    "docId": "kibUsageCollectionPluginApi",
+                    "section": "def-server.UsageCollectionSetup",
+                    "text": "UsageCollectionSetup"
+                  },
+                  " | undefined"
                 ],
                 "path": "packages/content-management/favorites/favorites_server/src/index.ts",
                 "deprecated": false,

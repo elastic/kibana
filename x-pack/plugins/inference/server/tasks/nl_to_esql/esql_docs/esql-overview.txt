@@ -1,0 +1,102 @@
+## ES|QL Overview
+
+### ES|QL
+
+The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch. It is designed to be easy to learn and use by all types of end users.
+
+Users can author ES|QL queries to find specific events, perform statistical analysis, and generate visualizations. It supports a wide range of commands and functions that enable users to perform various data operations, such as filtering, aggregation, time-series analysis, and more.
+
+ES|QL makes use of "pipes" (`|`) to manipulate and transform data in a step-by-step fashion. This approach allows users to compose a series of operations, where the output of one operation becomes the input for the next, enabling complex data transformations and analysis.
+
+### Known Limitations
+
+#### Result Set Size Limit
+
+By default, an ES|QL query returns up to 1000 rows. You can increase the number of rows up to 10,000 using the `LIMIT` command. Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This limit only applies to the number of rows that are retrieved by the query. Queries and aggregations run on the full data set.
+
+To overcome this limitation:
+- Reduce the result set size by modifying the query to only return relevant data. Use `WHERE` to select a smaller subset of the data.
+- Shift any post-query processing to the query itself. You can use the ES|QL `STATS ... BY` command to aggregate data in the query.
+
+The default and maximum limits can be changed using these dynamic cluster settings:
+- `esql.query.result_truncation_default_size`
+- `esql.query.result_truncation_max_size`
+
+#### Field Types
+
+ES|QL currently supports the following field types:
+- `alias`
+- `boolean`
+- `date`
+- `double` (`float`, `half_float`, `scaled_float` are represented as `double`)
+- `ip`
+- `keyword` family including `keyword`, `constant_keyword`, and `wildcard`
+- `int` (`short` and `byte` are represented as `int`)
+- `long`
+- `null`
+- `text`
+- `unsigned_long` (preview)
+- `version`
+
+Spatial types:
+- `geo_point`
+- `geo_shape`
+- `point`
+- `shape`
+
+Unsupported types:
+- TSDB metrics: `counter`, `position`, `aggregate_metric_double`
+- Date/time: `date_nanos`, `date_range`
+- Other types: `binary`, `completion`, `dense_vector`, `double_range`, `flattened`, `float_range`, `histogram`, `integer_range`, `ip_range`, `long_range`, `nested`, `rank_feature`, `rank_features`, `search_as_you_type`
+
+Querying a column with an unsupported type returns an error. If a column with an unsupported type is not explicitly used in a query, it is returned with `null` values, with the exception of nested fields. Nested fields are not returned at all.
+
+#### _source Availability
+
+ES|QL does not support configurations where the `_source` field is disabled. ES|QL’s support for synthetic `_source` is currently experimental.
+
+#### Full-Text Search
+
+Because of the way ES|QL treats `text` values, full-text search is not yet supported. Queries on `text` fields are like queries on `keyword` fields: they are case-sensitive and need to match the full string.
+
+#### Time Series Data Streams
+
+ES|QL does not support querying time series data streams (TSDS).
+
+#### Date Math Limitations
+
+Date math expressions work well when the leftmost expression is a datetime. However, using parentheses or putting the datetime to the right is not always supported yet. Date math does not allow subtracting two datetimes.
+
+#### Timezone Support
+
+ES|QL only supports the UTC timezone.
+
+### Cross-Cluster Querying
+
+Using ES|QL across clusters allows you to execute a single query across multiple clusters. This feature is in technical preview and may be changed or removed in a future release.
+
+#### Prerequisites
+
+- Remote clusters must be configured.
+- The local coordinating node must have the `remote_cluster_client` node role.
+- Security privileges must be configured appropriately.
+
+#### Querying Across Clusters
+
+In the `FROM` command, specify data streams and indices on remote clusters using the format `<remote_cluster_name>:<target>`. For example:
+
+```esql
+FROM cluster_one:my-index-000001
+| LIMIT 10
+```
+
+### Using ES|QL in Kibana
+
+ES|QL can be used in Kibana to query and aggregate data, create visualizations, and set up alerts.
+
+#### Important Information
+
+- ES|QL is enabled by default in Kibana.
+- The query bar in Discover allows you to write and execute ES|QL queries.
+- The results table shows up to 10,000 rows, and Discover shows no more than 50 columns.
+- You can create visualizations and alerts based on ES|QL queries.

@@ -7,7 +7,7 @@
 
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional } from 'fp-ts/lib/Option';
+import { map as mapOptional, none } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
@@ -94,6 +94,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
+  private currentPollInterval: number;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -122,6 +123,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -194,6 +199,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // start polling for work
         poller.start();
       } else if (!areESAndSOAvailable) {
+        this.logger.info(
+          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
+        );
         poller.stop();
         this.pool.cancelRunningTasks();
       }
@@ -220,8 +228,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
-      eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
+      strategy: this.config.claim_strategy,
+      getPollInterval: () => this.currentPollInterval,
     });
   };
 
@@ -278,7 +288,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
                 mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
               );
             }
-            this.logger.error(error.message);
+            this.logger.error(error.message, { error: { stack_trace: error.stack } });
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy
@@ -312,7 +322,21 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         this.emitEvent(
           map(
             result,
-            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            ({ timing, ...event }) => {
+              const anyTaskErrors = event.stats?.tasksErrors ?? 0;
+              if (anyTaskErrors > 0) {
+                return asTaskPollingCycleEvent<string>(
+                  asErr(
+                    new PollingError<string>(
+                      'Partially failed to poll for work: some tasks could not be claimed.',
+                      PollingErrorType.WorkError,
+                      none
+                    )
+                  )
+                );
+              }
+              return asTaskPollingCycleEvent<string>(asOk(event), timing);
+            },
             (event) => asTaskPollingCycleEvent<string>(asErr(event))
           )
         );

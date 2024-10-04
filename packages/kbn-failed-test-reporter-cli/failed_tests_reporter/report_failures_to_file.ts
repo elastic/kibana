@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -126,7 +127,7 @@ export async function reportFailuresToFile(
   // Jest could, in theory, fail 1000s of tests and write 1000s of failures
   // So let's just write files for the first 20
   for (const failure of failures.slice(0, 20)) {
-    const hash = createHash('md5').update(failure.name).digest('hex');
+    const hash = createHash('md5').update(failure.name).digest('hex'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
     const filenameBase = `${
       process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
     }${hash}`;

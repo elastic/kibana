@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  SearchFilterConfig,
   EuiBadge,
   useEuiTheme,
   EuiButton,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SortDirection } from '../types';
@@ -35,7 +35,7 @@ import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintena
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 
 interface MaintenanceWindowsListProps {
-  loading: boolean;
+  isLoading: boolean;
   items: MaintenanceWindow[];
   readOnly: boolean;
   refreshData: () => void;
@@ -99,21 +99,9 @@ const rowProps = (item: MaintenanceWindow) => ({
 });
 
 export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
-  ({ loading, items, readOnly, refreshData }) => {
-    const search: { filters: SearchFilterConfig[]; toolsRight: ReactElement } = {
-      filters: [
-        {
-          type: 'custom_component',
-          component: StatusFilter,
-        },
-      ],
-      toolsRight: (
-        <EuiButton data-test-subj="refresh-button" iconType="refresh" onClick={refreshData}>
-          {i18n.REFRESH}
-        </EuiButton>
-      ),
-    };
+  ({ isLoading, items, readOnly, refreshData }) => {
     const { euiTheme } = useEuiTheme();
+
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
       (id) => navigateToEditMaintenanceWindows(id),
@@ -127,6 +115,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     );
     const { mutate: archiveMaintenanceWindow, isLoading: isLoadingArchive } =
       useArchiveMaintenanceWindow();
+
     const onArchive = useCallback(
       (id: string, archive: boolean) =>
         archiveMaintenanceWindow(
@@ -137,10 +126,15 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     );
     const { mutate: finishAndArchiveMaintenanceWindow, isLoading: isLoadingFinishAndArchive } =
       useFinishAndArchiveMaintenanceWindow();
+
     const onCancelAndArchive = useCallback(
       (id: string) => finishAndArchiveMaintenanceWindow(id, { onSuccess: () => refreshData() }),
       [finishAndArchiveMaintenanceWindow, refreshData]
     );
+
+    const isMutatingOrLoading = useMemo(() => {
+      return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
+    }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
 
     const tableCss = useMemo(() => {
       return css`
@@ -160,6 +154,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             return (
               <TableActionsPopover
                 id={id}
+                isLoading={isMutatingOrLoading}
                 status={status}
                 onEdit={onEdit}
                 onCancel={onCancel}
@@ -170,7 +165,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
           },
         },
       ],
-      [onArchive, onCancel, onCancelAndArchive, onEdit]
+      [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onEdit]
     );
 
     const columns = useMemo(
@@ -178,12 +173,35 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
+    const search: EuiSearchBarProps = useMemo(
+      () => ({
+        filters: [
+          {
+            type: 'custom_component',
+            component: StatusFilter,
+          },
+        ],
+        toolsRight: (
+          <EuiButton
+            data-test-subj="refresh-button"
+            iconType="refresh"
+            onClick={refreshData}
+            isLoading={isMutatingOrLoading}
+            isDisabled={isMutatingOrLoading}
+          >
+            {i18n.REFRESH}
+          </EuiButton>
+        ),
+      }),
+      [isMutatingOrLoading, refreshData]
+    );
+
     return (
       <EuiInMemoryTable
         data-test-subj="maintenance-windows-table"
         css={tableCss}
         itemId="id"
-        loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
+        loading={isMutatingOrLoading}
         tableCaption="Maintenance Windows List"
         items={items}
         columns={columns}

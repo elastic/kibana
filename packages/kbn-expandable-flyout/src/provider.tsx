@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -11,10 +12,10 @@ import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
-import { FlyoutState } from './state';
+import { FlyoutPanels } from './store/state';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
-import { Context, selectNeedsSync, store, useDispatch, useSelector } from './redux';
-import { urlChangedAction } from './actions';
+import { Context, selectNeedsSync, store, useDispatch, useSelector } from './store/redux';
+import { urlChangedAction } from './store/actions';
 
 /**
  * Dispatches actions when url state changes and initializes the state when the app is loaded with flyout url parameters
@@ -42,7 +43,7 @@ export const UrlSynchronizer = () => {
       return;
     }
 
-    const currentValue = urlStorage.get<FlyoutState>(urlKey);
+    const currentValue = urlStorage.get<FlyoutPanels>(urlKey);
 
     // Dispatch current value to redux store as it does not happen automatically
     if (currentValue) {
@@ -55,7 +56,7 @@ export const UrlSynchronizer = () => {
       );
     }
 
-    const subscription = urlStorage.change$<FlyoutState>(urlKey).subscribe((value) => {
+    const subscription = urlStorage.change$<FlyoutPanels>(urlKey).subscribe((value) => {
       dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
     });
 
