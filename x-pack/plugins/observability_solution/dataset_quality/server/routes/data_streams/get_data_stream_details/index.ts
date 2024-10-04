@@ -36,12 +36,15 @@ export async function getDataStreamSettings({
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
     datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
   ]);
+
   const integration = dataStreamInfo?._meta?.package?.name;
+  const lastBackingIndex = dataStreamInfo?.indices?.slice(-1)[0];
 
   return {
     createdOn,
     integration,
     datasetUserPrivileges,
+    lastBackingIndexName: lastBackingIndex?.index_name,
   };
 }
 
