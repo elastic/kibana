@@ -408,6 +408,7 @@ export function getDiscoverStateContainer({
   };
 
   const onDataViewEdited = async (editedDataView: DataView) => {
+    internalStateContainer.transitions.setIsLoading(true);
     const edited = editedDataView.id;
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
@@ -419,6 +420,7 @@ export function getDiscoverStateContainer({
     }
     await loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
+    internalStateContainer.transitions.setIsLoading(false);
     fetchData();
   };
 
