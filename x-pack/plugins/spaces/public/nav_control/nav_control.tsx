@@ -8,38 +8,71 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, from, of, switchMap } from 'rxjs';
+import { BehaviorSubject, defer, from, of, shareReplay, switchMap } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { SolutionView } from '../../common';
 import { SHOW_SPACE_SOLUTION_TOUR_SETTING } from '../../common/constants';
 import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
 
 function initTour(core: CoreStart, spacesManager: SpacesManager) {
-  const showTourUiSettingValue = core.settings.globalClient.get(
-    SHOW_SPACE_SOLUTION_TOUR_SETTING,
-    true
-  );
-  const showTour$ = new BehaviorSubject(showTourUiSettingValue);
+  const showTourUiSettingValue = core.settings.globalClient.get(SHOW_SPACE_SOLUTION_TOUR_SETTING);
+  const showTour$ = new BehaviorSubject(showTourUiSettingValue ?? true);
 
-  const showTourObservable$ = from(spacesManager.getSpaces()).pipe(
+  const allSpaces$ = defer(() => from(spacesManager.getSpaces())).pipe(shareReplay(1));
+
+  const hasOnlyOneSpace = (spaces: Array<{ solution?: SolutionView }>) => {
+    return spaces.length === 1;
+  };
+
+  const isDefaultSpaceOnClassic = (spaces: Array<{ id: string; solution?: SolutionView }>) => {
+    const defaultSpace = spaces.find((space) => space.id === 'default');
+
+    if (!defaultSpace) {
+      // Don't show the tour if the default space doesn't exist (this should never happen)
+      return true;
+    }
+
+    if (!defaultSpace.solution || defaultSpace.solution === 'classic') {
+      return true;
+    }
+  };
+
+  const showTourObservable$ = allSpaces$.pipe(
     switchMap((spaces) => {
-      if (spaces.length === 0 || spaces.length > 1) return of(false); // Don't show the tour if there are multiple spaces
-
-      const defaultSpace = spaces[0];
-      if (!defaultSpace.solution || defaultSpace.solution === 'classic') return of(false); // Don't show the tour if the default space is the classic solution
+      // Don't show the tour if there are multiple spaces or the default space is the classic solution
+      if (!hasOnlyOneSpace(spaces) || isDefaultSpaceOnClassic(spaces)) return of(false);
 
       return showTour$.asObservable();
     })
   );
 
-  const onFinishTour = () => {
+  const hideTourInGlobalSettings = () => {
     core.settings.globalClient.set(SHOW_SPACE_SOLUTION_TOUR_SETTING, false).catch(() => {
       // Silently swallow errors, the user will just see the tour again next time they load the page
     });
+  };
+
+  allSpaces$.subscribe((spaces) => {
+    if (
+      showTourUiSettingValue === undefined &&
+      hasOnlyOneSpace(spaces) &&
+      isDefaultSpaceOnClassic(spaces)
+    ) {
+      // We have only one space and it's the default space with the classic solution.
+      // We don't want to show the tour after the user edits the default space and sets a solution as
+      // that means that he already understood the concept of solutions.
+      // We then immediately hide the tour in the global settings.
+      hideTourInGlobalSettings();
+    }
+  });
+
+  const onFinishTour = () => {
+    hideTourInGlobalSettings();
     showTour$.next(false);
   };
 

@@ -17,7 +17,6 @@ export const getUiSettings = (): Record<string, UiSettingsParams> => {
   return {
     [SHOW_SPACE_SOLUTION_TOUR_SETTING]: {
       schema: schema.boolean(),
-      value: true,
       readonly: true,
       readonlyMode: 'ui',
     },
