@@ -1835,7 +1835,6 @@
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^6.0.1",
     "webpack-sources": "^3.2.3",
-    "webpack-visualizer-plugin2": "^1.1.0",
     "xml-crypto": "^6.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
