@@ -8,7 +8,6 @@
  */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DrilldownForm } from '.';
 import type { TriggerPickerProps } from '../trigger_picker';
@@ -31,34 +30,47 @@ const triggers: TriggerPickerProps = {
   onChange: () => {},
 };
 
-storiesOf('components/DrilldownForm', module)
-  .add('Default', () => {
-    return (
-      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
-        children...
-      </DrilldownForm>
-    );
-  })
-  .add('With license link', () => {
-    return (
-      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
-        children...
-      </DrilldownForm>
-    );
-  })
-  .add('No triggers', () => {
-    return (
-      <DrilldownForm
-        name={'...'}
-        triggers={{
-          items: [],
-          selected: ['RANGE_SELECT_TRIGGER'],
-          docs: 'http://example.com',
-          onChange: () => {},
-        }}
-        onNameChange={action('onNameChange')}
-      >
-        children...
-      </DrilldownForm>
-    );
-  });
+export default {
+  title: 'components/DrilldownForm',
+};
+
+export const Default = () => {
+  return (
+    <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
+      children...
+    </DrilldownForm>
+  );
+};
+
+export const WithLicenseLink = () => {
+  return (
+    <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
+      children...
+    </DrilldownForm>
+  );
+};
+
+WithLicenseLink.story = {
+  name: 'With license link',
+};
+
+export const NoTriggers = () => {
+  return (
+    <DrilldownForm
+      name={'...'}
+      triggers={{
+        items: [],
+        selected: ['RANGE_SELECT_TRIGGER'],
+        docs: 'http://example.com',
+        onChange: () => {},
+      }}
+      onNameChange={action('onNameChange')}
+    >
+      children...
+    </DrilldownForm>
+  );
+};
+
+NoTriggers.story = {
+  name: 'No triggers',
+};

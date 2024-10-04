@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
@@ -25,13 +24,30 @@ const url = urlFactory as unknown as ActionFactory<
   BaseActionFactoryContext
 >;
 
-storiesOf('components/ActionWizard', module)
-  .add('default', () => <Demo actionFactories={[dashboard, url]} />)
-  .add('Only one factory is available', () => (
-    // to make sure layout doesn't break
-    <Demo actionFactories={[dashboard]} />
-  ))
-  .add('Long list of action factories', () => (
-    // to make sure layout doesn't break
-    <Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />
-  ));
+export default {
+  title: 'components/ActionWizard',
+};
+
+export const Default = () => <Demo actionFactories={[dashboard, url]} />;
+
+Default.story = {
+  name: 'default',
+};
+
+export const OnlyOneFactoryIsAvailable = () => (
+  // to make sure layout doesn't break
+  <Demo actionFactories={[dashboard]} />
+);
+
+OnlyOneFactoryIsAvailable.story = {
+  name: 'Only one factory is available',
+};
+
+export const LongListOfActionFactories = () => (
+  // to make sure layout doesn't break
+  <Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />
+);
+
+LongListOfActionFactories.story = {
+  name: 'Long list of action factories',
+};

@@ -8,12 +8,15 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getProgressRenderer } from '../progress_renderer';
 import { Progress } from '../../../common';
 
-storiesOf('renderers/progress', module).add('default', () => {
+export default {
+  title: 'renderers/progress',
+};
+
+export const Default = () => {
   const config = {
     barColor: '#bc1234',
     barWeight: 20,
@@ -31,4 +34,8 @@ storiesOf('renderers/progress', module).add('default', () => {
   };
 
   return <Render renderer={getProgressRenderer()} config={config} />;
-});
+};
+
+Default.story = {
+  name: 'default',
+};

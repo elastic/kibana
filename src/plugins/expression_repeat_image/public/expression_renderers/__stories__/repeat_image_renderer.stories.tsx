@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
@@ -32,10 +31,15 @@ const Renderer = ({
   return <Render renderer={getRepeatImageRenderer()} config={config} width="400px" />;
 };
 
-storiesOf('enderers/repeatImage', module).add(
-  'default',
-  (_, props) => (
-    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
-  ),
-  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
+export default {
+  title: 'enderers/repeatImage',
+};
+
+export const Default = (_, props) => (
+  <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
 );
+
+Default.story = {
+  name: 'default',
+  decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
+};

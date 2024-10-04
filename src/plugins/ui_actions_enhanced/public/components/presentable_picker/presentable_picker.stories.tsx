@@ -8,147 +8,178 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { PresentablePicker } from './presentable_picker';
 
-storiesOf('components/PresentablePicker', module)
-  .add('One item', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'URL',
-          getDisplayName: () => 'Go to URL',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 10,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ))
-  .add('Items are sorted', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'item2',
-          getDisplayName: () => 'Item 2',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 1,
-          isCompatible: async (context?: object) => true,
-        },
-        {
-          id: 'item1',
-          getDisplayName: () => 'Item 1',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 2,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ))
-  .add('Items are sorted - 2', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'item1',
-          getDisplayName: () => 'Item 1',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 2,
-          isCompatible: async (context?: object) => true,
-        },
-        {
-          id: 'item2',
-          getDisplayName: () => 'Item 2',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 1,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ))
-  .add('Two items', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'URL',
-          getDisplayName: () => 'Go to URL',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 2,
-          isCompatible: async (context?: object) => true,
-        },
-        {
-          id: 'DASHBOARD',
-          getDisplayName: () => 'Go to Dashboard',
-          getIconType: () => 'dashboardApp',
-          getDisplayNameTooltip: () => '',
-          order: 1,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ))
-  .add('Beta badge', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'URL',
-          getDisplayName: () => 'Go to URL',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 2,
-          isCompatible: async (context?: object) => true,
-          isBeta: true,
-        },
-        {
-          id: 'DASHBOARD',
-          getDisplayName: () => 'Go to Dashboard',
-          getIconType: () => 'dashboardApp',
-          getDisplayNameTooltip: () => '',
-          order: 1,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ))
-  .add('Incompatible license', () => (
-    <PresentablePicker
-      items={[
-        {
-          id: 'URL',
-          getDisplayName: () => 'Go to URL',
-          getIconType: () => 'link',
-          getDisplayNameTooltip: () => '',
-          order: 2,
-          isCompatible: async (context?: object) => true,
-          isBeta: true,
-          isLicenseCompatible: false,
-        },
-        {
-          id: 'DASHBOARD',
-          getDisplayName: () => 'Go to Dashboard',
-          getIconType: () => 'dashboardApp',
-          getDisplayNameTooltip: () => '',
-          order: 1,
-          isCompatible: async (context?: object) => true,
-        },
-      ]}
-      context={{}}
-      onSelect={action('onSelect')}
-    />
-  ));
+export default {
+  title: 'components/PresentablePicker',
+};
+
+export const OneItem = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'URL',
+        getDisplayName: () => 'Go to URL',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 10,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+OneItem.story = {
+  name: 'One item',
+};
+
+export const ItemsAreSorted = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'item2',
+        getDisplayName: () => 'Item 2',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 1,
+        isCompatible: async (context?: object) => true,
+      },
+      {
+        id: 'item1',
+        getDisplayName: () => 'Item 1',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 2,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+ItemsAreSorted.story = {
+  name: 'Items are sorted',
+};
+
+export const ItemsAreSorted2 = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'item1',
+        getDisplayName: () => 'Item 1',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 2,
+        isCompatible: async (context?: object) => true,
+      },
+      {
+        id: 'item2',
+        getDisplayName: () => 'Item 2',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 1,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+ItemsAreSorted2.story = {
+  name: 'Items are sorted - 2',
+};
+
+export const TwoItems = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'URL',
+        getDisplayName: () => 'Go to URL',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 2,
+        isCompatible: async (context?: object) => true,
+      },
+      {
+        id: 'DASHBOARD',
+        getDisplayName: () => 'Go to Dashboard',
+        getIconType: () => 'dashboardApp',
+        getDisplayNameTooltip: () => '',
+        order: 1,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+TwoItems.story = {
+  name: 'Two items',
+};
+
+export const BetaBadge = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'URL',
+        getDisplayName: () => 'Go to URL',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 2,
+        isCompatible: async (context?: object) => true,
+        isBeta: true,
+      },
+      {
+        id: 'DASHBOARD',
+        getDisplayName: () => 'Go to Dashboard',
+        getIconType: () => 'dashboardApp',
+        getDisplayNameTooltip: () => '',
+        order: 1,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+BetaBadge.story = {
+  name: 'Beta badge',
+};
+
+export const IncompatibleLicense = () => (
+  <PresentablePicker
+    items={[
+      {
+        id: 'URL',
+        getDisplayName: () => 'Go to URL',
+        getIconType: () => 'link',
+        getDisplayNameTooltip: () => '',
+        order: 2,
+        isCompatible: async (context?: object) => true,
+        isBeta: true,
+        isLicenseCompatible: false,
+      },
+      {
+        id: 'DASHBOARD',
+        getDisplayName: () => 'Go to Dashboard',
+        getIconType: () => 'dashboardApp',
+        getDisplayNameTooltip: () => '',
+        order: 1,
+        isCompatible: async (context?: object) => true,
+      },
+    ]}
+    context={{}}
+    onSelect={action('onSelect')}
+  />
+);
+
+IncompatibleLicense.story = {
+  name: 'Incompatible license',
+};

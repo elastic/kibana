@@ -8,29 +8,37 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { DiscoverServicesProvider } from '../../__mocks__/__storybook_mocks__/with_discover_services';
 import { ErrorCallout } from './error_callout';
 
-storiesOf('components/common/ErrorCallout', module).add('Error Callout', () => {
+export default {
+  title: 'components/common/ErrorCallout',
+};
+
+export const _ErrorCallout = () => {
   const sampleError = new Error('This is a sample error message');
   return (
     <DiscoverServicesProvider>
       <ErrorCallout title="Sample Error Title" error={sampleError} />
     </DiscoverServicesProvider>
   );
-});
+};
 
-storiesOf('components/common/ErrorCallout', module).add(
-  'Error Callout with a very long error message without whitespace',
-  () => {
-    const sampleError = new Error(
-      'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
-    );
-    return (
-      <DiscoverServicesProvider>
-        <ErrorCallout title="Sample Error Title" error={sampleError} />
-      </DiscoverServicesProvider>
-    );
-  }
-);
+export default {
+  title: 'components/common/ErrorCallout',
+};
+
+export const ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace = () => {
+  const sampleError = new Error(
+    'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
+  );
+  return (
+    <DiscoverServicesProvider>
+      <ErrorCallout title="Sample Error Title" error={sampleError} />
+    </DiscoverServicesProvider>
+  );
+};
+
+ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace.story = {
+  name: 'Error Callout with a very long error message without whitespace',
+};
