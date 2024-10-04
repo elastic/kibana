@@ -13,7 +13,29 @@ export interface GenerationErrorBody {
   attributes: GenerationErrorAttributes;
 }
 
+export function isGenerationErrorBody(obj: unknown): obj is GenerationErrorBody {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'message' in obj &&
+    typeof obj.message === 'string' &&
+    'attributes' in obj &&
+    obj.attributes !== undefined &&
+    isGenerationErrorAttributes(obj.attributes)
+  );
+}
+
 export interface GenerationErrorAttributes {
   errorCode: GenerationErrorCode;
   underlyingMessages: string[] | undefined;
+}
+
+export function isGenerationErrorAttributes(obj: unknown): obj is GenerationErrorAttributes {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'errorCode' in obj &&
+    typeof obj.errorCode === 'string' &&
+    (!('underlyingMessages' in obj) || Array.isArray(obj.underlyingMessages))
+  );
 }

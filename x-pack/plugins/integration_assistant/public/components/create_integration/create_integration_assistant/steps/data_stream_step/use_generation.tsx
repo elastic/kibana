@@ -16,7 +16,7 @@ import {
   type EcsMappingRequestBody,
   type RelatedRequestBody,
 } from '../../../../../../common';
-import type { GenerationErrorBody } from '../../../../../../common/api/generation_error';
+import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {
   runCategorizationGraph,
   runEcsGraph,
@@ -44,6 +44,18 @@ interface RunGenerationProps {
   connector: AIConnector;
   deps: { http: HttpSetup; abortSignal: AbortSignal };
   setProgress: (progress: ProgressItem) => void;
+}
+
+// If the result is classified as a generation error, produce an error message
+// as defined in the i18n file. Otherwise, return undefined.
+function generationErrorMessage(body: unknown): string | undefined {
+  if (!isGenerationErrorBody(body)) {
+    return;
+  }
+
+  const errorCode = body.attributes.errorCode;
+  const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
+  return typeof translation === 'function' ? translation(body.attributes) : translation;
 }
 
 interface GenerationResults {
@@ -96,15 +108,7 @@ export const useGeneration = ({
           error: originalErrorMessage,
         });
 
-        let errorMessage = originalErrorMessage;
-        const body = e.body as GenerationErrorBody | undefined;
-        if (body != null) {
-          const errorCode = body.attributes.errorCode;
-          const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
-          errorMessage =
-            typeof translation === 'function' ? translation(body.attributes) : translation;
-        }
-        setError(errorMessage);
+        setError(generationErrorMessage(e.body) ?? originalErrorMessage);
       } finally {
         setIsRequesting(false);
       }
