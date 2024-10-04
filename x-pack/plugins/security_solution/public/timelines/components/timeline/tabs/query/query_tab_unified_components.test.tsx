@@ -1026,9 +1026,31 @@ describe('query tab with unified timeline', () => {
         );
       });
       it(
-        'should have the pin button with correct tooltip',
+        'should disable pinning when event has notes attached in timeline',
         async () => {
-          renderTestComponents();
+          const mockStateWithNoteInTimeline = {
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                  pinnedEventIds: { '1': true },
+                },
+              },
+            },
+          };
+
+          render(
+            <TestProviders
+              store={createMockStore({
+                ...structuredClone(mockStateWithNoteInTimeline),
+              })}
+            >
+              <TestComponent />
+            </TestProviders>
+          );
 
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -1041,7 +1063,7 @@ describe('query tab with unified timeline', () => {
           await waitFor(() => {
             expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
             expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
-              'This event cannot be unpinned because it has notes'
+              'This event cannot be unpinned because it has notes in Timeline'
             );
             /*
              * Above event is alert and not an event but `getEventType` in
@@ -1050,6 +1072,26 @@ describe('query tab with unified timeline', () => {
              * Need to see if it is okay
              *
              * */
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should allow pinning when event has notes but notes are not attached in current timeline',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getAllByTestId('pin')).toHaveLength(1);
+          expect(screen.getByTestId('pin')).not.toBeDisabled();
+
+          fireEvent.mouseOver(screen.getByTestId('pin'));
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+              'Pin event'
+            );
           });
         },
         SPECIAL_TEST_TIMEOUT

@@ -17,6 +17,7 @@ import { AddNote } from '../../../../notes/components/add_note';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { NOTES_LOADING_TEST_ID } from '../../../../notes/components/test_ids';
 import { NotesList } from '../../../../notes/components/notes_list';
+import { pinEvent } from '../../../../timelines/store/actions';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
@@ -63,6 +64,19 @@ export const NotesDetails = memo(() => {
     timelineSelectors.selectTimelineById(state, TimelineId.active)
   );
   const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
+
+  // Automatically pin an associated event if it's attached to a timeline and it's not pinned yet
+  const onNoteAddInTimeline = useCallback(() => {
+    const isEventPinned = eventId ? timeline?.pinnedEventIds[eventId] === true : false;
+    if (!isEventPinned && eventId && timelineSavedObjectId) {
+      dispatch(
+        pinEvent({
+          id: TimelineId.active,
+          eventId,
+        })
+      );
+    }
+  }, [dispatch, eventId, timelineSavedObjectId, timeline.pinnedEventIds]);
 
   const notes: Note[] = useSelector((state: State) =>
     selectSortedNotesByDocumentId(state, {
@@ -111,6 +125,7 @@ export const NotesDetails = memo(() => {
           <AddNote
             eventId={eventId}
             timelineId={isTimelineFlyout && attachToTimeline ? timelineSavedObjectId : ''}
+            onNoteAdd={isTimelineFlyout && attachToTimeline ? onNoteAddInTimeline : undefined}
           >
             {isTimelineFlyout && (
               <AttachToActiveTimeline
