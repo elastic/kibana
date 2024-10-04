@@ -6,6 +6,7 @@
  */
 
 import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
+import { isNativeCspFinding } from './is_native_csp_finding';
 
 export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
@@ -18,5 +19,5 @@ export const getVendorName = (finding: CspFinding | CspVulnerabilityFinding) => 
   const dataset = finding.data_stream?.dataset;
 
   if (dataset === WIZ_MISCONFIGURATIONS_DATASET || dataset === WIZ_VULN_DATASET) return 'Wiz';
-  if (dataset === CSP_MISCONFIGURATIONS_DATASET || dataset === CSP_VULN_DATASET) return 'Elastic';
+  if (isNativeCspFinding(finding)) return 'Elastic';
 };
