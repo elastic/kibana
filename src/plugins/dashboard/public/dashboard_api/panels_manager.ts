@@ -125,6 +125,9 @@ export function initializePanelsManager(
     },
     canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
     children$,
+    getPanelCount: () => {
+      return Object.keys(panels$.value).length;
+    },
     getSerializedStateForChild: (childId: string) => {
       const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
       const { id, ...serializedState } = rawState;

@@ -9,6 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { omit } from 'lodash';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChanges } from './unsaved_changes';
@@ -16,6 +17,7 @@ import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constant
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
 import { DASHBOARD_API_TYPE, DashboardCreationOptions, DashboardState } from './types';
+import { initializeDataViewsManager } from './data_views_manager';
 
 export function getDashboardApi({
   dashboardState,
@@ -31,6 +33,7 @@ export function getDashboardApi({
   savedObjectId?: string;
 }) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
+  const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(false);
   const managed$ = new BehaviorSubject(savedObjectResult?.managed ?? false);
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
@@ -43,11 +46,13 @@ export function getDashboardApi({
     trackPanel
   );
   untilEmbeddableLoaded = panelsManager.untilEmbeddableLoaded;
+  const dataViewsManager = initializeDataViewsManager(controlGroupApi$, panelsManager.children$);
 
   return {
     api: {
-      ...trackPanel,
+      ...dataViewsManager.api,
       ...panelsManager,
+      ...trackPanel,
       ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
       ...initializeUnsavedChanges(
         savedObjectResult?.anyMigrationRun ?? false,
@@ -74,6 +79,8 @@ export function getDashboardApi({
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
       type: DASHBOARD_API_TYPE as 'dashboard',
     },
-    cleanup: () => {},
+    cleanup: () => {
+      dataViewsManager.cleanup();
+    },
   };
 }
