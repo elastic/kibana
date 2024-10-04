@@ -35,6 +35,7 @@ import { SpacesClientService } from './spaces_client';
 import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
+import { getUiSettings } from './ui_settings';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
 import { SpacesLicenseService } from '../common/licensing';
@@ -149,6 +150,7 @@ export class SpacesPlugin
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
     this.onCloud$.next(plugins.cloud !== undefined && plugins.cloud.isCloudEnabled);
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
+    core.uiSettings.registerGlobal(getUiSettings());
 
     const spacesServiceSetup = this.spacesService.setup({
       basePath: core.http.basePath,
