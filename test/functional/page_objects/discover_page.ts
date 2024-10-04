@@ -32,6 +32,19 @@ export class DiscoverPageObject extends FtrService {
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  /** Ensures that navigation to discover has completed */
+  public async expectOnDiscover() {
+    await this.testSubjects.existOrFail('switch-to-dataviews'); // "Switch to Classic" app menu button
+    await this.testSubjects.existOrFail('discoverNewButton');
+    await this.testSubjects.existOrFail('discoverOpenButton');
+  }
+
+  /** Ensures that the ES|QL code editor is loaded with a given statement */
+  public async expectEsqlStatement(statement: string) {
+    const codeEditor = await this.testSubjects.find('kibanaCodeEditor');
+    expect(await codeEditor.getAttribute('innerText')).to.contain(statement);
+  }
+
   public async getChartTimespan() {
     return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }

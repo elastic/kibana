@@ -7,32 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { dashboard } = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['discover', 'dashboard']);
 
-  describe('dashboard from esql button on no-data-prompt', () => {
+  describe('No Data Views: Try ES|QL', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('enables user to create a dashboard with ES|QL from no-data-prompt', async () => {
-      await dashboard.navigateToApp();
+      await PageObjects.dashboard.navigateToApp();
 
       await testSubjects.existOrFail('noDataViewsPrompt');
       await testSubjects.click('tryESQLLink');
 
-      // ensure we have landed on Discover
-      await testSubjects.existOrFail('switch-to-dataviews'); // "Switch to Classic" app menu button
-      await testSubjects.existOrFail('discoverNewButton');
-      await testSubjects.existOrFail('discoverOpenButton');
-
-      const codeEditor = await testSubjects.find('kibanaCodeEditor');
-      expect(await codeEditor.getAttribute('innerText')).to.contain('FROM logs* | LIMIT 10');
+      await PageObjects.discover.expectOnDiscover();
+      await PageObjects.discover.expectEsqlStatement('FROM logs* | LIMIT 10');
     });
   });
 }
