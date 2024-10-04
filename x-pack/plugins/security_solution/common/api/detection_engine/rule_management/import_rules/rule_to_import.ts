@@ -18,7 +18,6 @@ import {
 /**
  * Differences from this and the createRulesSchema are
  *   - rule_id is required
- *   - version is required
  *   - id is optional (but ignored in the import code - rule_id is exclusively used for imports)
  *   - immutable is optional (but ignored in the import code)
  *   - created_at is optional (but ignored in the import code)
