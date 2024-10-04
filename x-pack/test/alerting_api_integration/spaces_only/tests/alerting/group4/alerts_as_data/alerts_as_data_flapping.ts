@@ -550,6 +550,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
     const searchResult = await es.search({
       index: alertsAsDataIndex,
       body: {
+        sort: [
+          {
+            '@timestamp': 'desc',
+          },
+        ],
         query: {
           bool: {
             must: {
