@@ -22,7 +22,7 @@ describe('server config', () => {
         },
         "payloadTimeout": 20000,
         "port": 3000,
-        "restrictInternalApis": false,
+        "restrictInternalApis": true,
         "shutdownTimeout": "PT30S",
         "socketTimeout": 120000,
         "ssl": Object {
@@ -193,10 +193,10 @@ describe('server config', () => {
   });
 
   describe('restrictInternalApis', () => {
-    test('is false by default', () => {
+    test('is true by default', () => {
       const configSchema = config.schema;
       const obj = {};
-      expect(new ServerConfig(configSchema.validate(obj)).restrictInternalApis).toBe(false);
+      expect(new ServerConfig(configSchema.validate(obj)).restrictInternalApis).toBe(true);
     });
 
     test('can specify retriction on access to internal APIs', () => {

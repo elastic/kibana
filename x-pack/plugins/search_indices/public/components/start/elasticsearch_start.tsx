@@ -197,6 +197,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
             <CreateIndexCodeView
               createIndexForm={formState}
               changeCodingLanguage={onChangeCodingLanguage}
+              canCreateApiKey={userPrivileges?.privileges.canCreateApiKeys}
             />
           )}
         </EuiFlexGroup>

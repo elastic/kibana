@@ -23,7 +23,7 @@ export const PINNED_WITH_NOTES = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip', {
     values: { isAlert },
     defaultMessage:
-      'This {isAlert, select, true{alert} other{event}} cannot be unpinned because it has notes',
+      'This {isAlert, select, true{alert} other{event}} cannot be unpinned because it has notes in Timeline',
   });
 
 export const SORTED_ASCENDING = i18n.translate(

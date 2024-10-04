@@ -63,6 +63,7 @@ describe('File HTTP API', () => {
         await request
           .put(root, `/api/files/files/${testHarness.fileKind}/${file.id}/blob`)
           .set('Content-Type', 'application/octet-stream')
+          .set('x-elastic-internal-origin', 'files-test')
           .send('hello world')
           .expect(200);
       }
@@ -79,6 +80,7 @@ describe('File HTTP API', () => {
     test('names', async () => {
       const result = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({ name: ['firstFile', 'secondFile'] })
         .expect(200);
       expect(result.body.files).toHaveLength(2);
@@ -88,6 +90,7 @@ describe('File HTTP API', () => {
       {
         const result = await request
           .post(root, `/api/files/find`)
+          .set('x-elastic-internal-origin', 'files-test')
           .send({ kind: 'non-existent' })
           .expect(200);
         expect(result.body.files).toHaveLength(0);
@@ -96,6 +99,7 @@ describe('File HTTP API', () => {
       {
         const result = await request
           .post(root, '/api/files/find')
+          .set('x-elastic-internal-origin', 'files-test')
           .send({ kind: testHarness.fileKind })
           .expect(200);
         expect(result.body.files).toHaveLength(3);
@@ -105,6 +109,7 @@ describe('File HTTP API', () => {
     test('status', async () => {
       const result = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           status: 'READY',
         })
@@ -115,6 +120,7 @@ describe('File HTTP API', () => {
     test('combination', async () => {
       const result = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           name: ['firstFile', 'secondFile'],
@@ -127,6 +133,7 @@ describe('File HTTP API', () => {
     test('extension', async () => {
       const result = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           extension: 'png',
@@ -137,6 +144,7 @@ describe('File HTTP API', () => {
 
       const result2 = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           extension: 'pdf',
@@ -147,6 +155,7 @@ describe('File HTTP API', () => {
 
       const result3 = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           extension: 'txt',
@@ -159,6 +168,7 @@ describe('File HTTP API', () => {
     test('mime type', async () => {
       const result = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           mimeType: 'image/png',
@@ -169,6 +179,7 @@ describe('File HTTP API', () => {
 
       const result2 = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           mimeType: 'application/pdf',
@@ -179,6 +190,7 @@ describe('File HTTP API', () => {
 
       const result3 = await request
         .post(root, '/api/files/find')
+        .set('x-elastic-internal-origin', 'files-test')
         .send({
           kind: testHarness.fileKind,
           mimeType: 'text/plain',
@@ -247,7 +259,10 @@ describe('File HTTP API', () => {
         .expect(200);
 
       {
-        const { body: metrics } = await request.get(root, '/api/files/metrics').expect(200);
+        const { body: metrics } = await request
+          .get(root, '/api/files/metrics')
+          .set('x-elastic-internal-origin', 'files-test')
+          .expect(200);
         expect(metrics).toEqual({
           countByExtension: {
             png: 3,
@@ -281,13 +296,18 @@ describe('File HTTP API', () => {
       {
         const { body: response } = await request
           .delete(root, `/api/files/blobs`)
+          .set('x-elastic-internal-origin', 'files-test')
           .send({ ids: [file1.id, 'unknown'] })
           .expect(200);
         expect(response.succeeded).toEqual([file1.id]);
         expect(response.failed).toEqual([['unknown', 'File not found']]);
       }
       {
-        const { body: response } = await request.post(root, `/api/files/find`).send({}).expect(200);
+        const { body: response } = await request
+          .post(root, `/api/files/find`)
+          .set('x-elastic-internal-origin', 'files-test')
+          .send({})
+          .expect(200);
         expect(response.files).toHaveLength(2);
         expect(response.files.find((file: FileJSON) => file.id === file1.id)).toBeUndefined();
       }
@@ -299,9 +319,13 @@ describe('File HTTP API', () => {
       await testHarness.cleanupAfterEach();
     });
     test('it returns 400 for an invalid token', async () => {
-      await request.get(root, `/api/files/public/blob/myfilename.pdf`).expect(400);
+      await request
+        .get(root, `/api/files/public/blob/myfilename.pdf`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .expect(400);
       const { body: response } = await request
         .get(root, `/api/files/public/blob/myfilename.pdf?token=notavalidtoken`)
+        .set('x-elastic-internal-origin', 'files-test')
         .expect(400);
 
       expect(response.message).toMatch('Invalid token');
@@ -312,22 +336,29 @@ describe('File HTTP API', () => {
 
       const {
         body: { token },
-      } = await request.post(root, `/api/files/shares/${fileKind}/${id}`).send({}).expect(200);
+      } = await request
+        .post(root, `/api/files/shares/${fileKind}/${id}`)
+        .set('x-elastic-internal-origin', 'files-test')
+        .send({})
+        .expect(200);
 
       await request
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
         .buffer()
         .expect(400);
 
       await request
         .put(root, `/api/files/files/${fileKind}/${id}/blob`)
         .set('Content-Type', 'application/octet-stream')
+        .set('x-elastic-internal-origin', 'files-test')
         .send('test')
         .expect(200);
 
       const { body: buffer, header } = await request
         // By providing a file name like "myfilename.pdf" we imply that we want a pdf
         .get(root, `/api/files/public/blob/myfilename.pdf?token=${token}`)
+        .set('x-elastic-internal-origin', 'files-test')
         .buffer()
         .expect(200);
 

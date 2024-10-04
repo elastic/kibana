@@ -13,7 +13,7 @@ describe('getAssistantTools', () => {
   });
 
   it('should return an array of applicable tools', () => {
-    const tools = getAssistantTools(true);
+    const tools = getAssistantTools({ naturalLanguageESQLToolEnabled: true });
 
     const minExpectedTools = 3; // 3 tools are currently implemented
 

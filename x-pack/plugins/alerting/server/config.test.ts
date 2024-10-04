@@ -114,4 +114,13 @@ describe('config validation', () => {
       );
     });
   });
+
+  test('maxScheduledPerMinute allows more than 32000', () => {
+    const config: Record<string, unknown> = {
+      rules: {
+        maxScheduledPerMinute: 50000,
+      },
+    };
+    expect(() => configSchema.validate(config)).not.toThrow();
+  });
 });

@@ -71,8 +71,37 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         description: 'This is the second test space',
         disabledFeatures: [],
       },
+      {
+        id: 'space_3',
+        name: 'Space 3',
+        description: 'This is the third test space',
+        solution: 'es',
+        disabledFeatures: [
+          // Disabled features are automatically added to the space when a solution is set
+          'apm',
+          'infrastructure',
+          'inventory',
+          'logs',
+          'observabilityAIAssistant',
+          'observabilityCases',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+          'securitySolutionCases',
+          'siem',
+          'slo',
+          'uptime',
+        ],
+      },
     ];
-    expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
+
+    const disabledFeatures = (resp.body.disabledFeatures ?? []).sort();
+
+    const expectedSpace = allSpaces.find((space) => space.id === spaceId);
+    if (expectedSpace) {
+      expectedSpace.disabledFeatures.sort();
+    }
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expectedSpace);
   };
 
   const makeGetTest =

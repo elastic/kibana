@@ -65,14 +65,32 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
-    expect(resp.body).to.eql({
+    const disabledFeatures = resp.body.disabledFeatures.sort();
+
+    const expected = {
       id: 'solution',
       name: 'space with solution',
       description: 'a description',
       color: '#5c5959',
-      disabledFeatures: [],
+      disabledFeatures: [
+        // Disabled features are automatically added to the space when a solution is set
+        'apm',
+        'infrastructure',
+        'inventory',
+        'logs',
+        'observabilityAIAssistant',
+        'observabilityCases',
+        'securitySolutionAssistant',
+        'securitySolutionAttackDiscovery',
+        'securitySolutionCases',
+        'siem',
+        'slo',
+        'uptime',
+      ],
       solution: 'es',
-    });
+    };
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expected);
   };
 
   const makeCreateTest =

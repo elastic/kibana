@@ -36,8 +36,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
-    const { chain, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && chain != null;
+    const { inference, connectorId, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && inference != null && connectorId != null;
   },
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;

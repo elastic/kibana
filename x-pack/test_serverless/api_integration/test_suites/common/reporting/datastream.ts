@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data Stream', function () {
+    const generatedReports = new Set<string>();
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -34,8 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
-      // for this test, we don't need to wait for the job to finish or verify the result
-      await reportingAPI.createReportJobInternal(
+      const { job } = await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
           browserTimezone: 'UTC',
@@ -51,10 +51,15 @@ export default function ({ getService }: FtrProviderContext) {
         roleAuthc,
         internalReqHeader
       );
+
+      generatedReports.add(job.id);
     });
 
     after(async () => {
-      await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
+      for (const reportId of generatedReports) {
+        await reportingAPI.deleteReport(reportId, roleAuthc, internalReqHeader);
+      }
+
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);

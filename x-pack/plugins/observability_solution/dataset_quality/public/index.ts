@@ -14,5 +14,3 @@ export type { DatasetQualityPluginSetup, DatasetQualityPluginStart } from './typ
 export function plugin(context: PluginInitializerContext<DatasetQualityConfig>) {
   return new DatasetQualityPlugin(context);
 }
-
-export { datasetQualityAppTitle } from '../common/translations';

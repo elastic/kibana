@@ -15,6 +15,7 @@ import {
   DegradedFieldResponse,
   DatasetUserPrivileges,
   DegradedFieldValues,
+  DegradedFieldAnalysis,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -26,6 +27,7 @@ import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
+import { analyzeDegradedField } from './get_degraded_field_analysis';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 
 const statsRoute = createDatasetQualityServerRoute({
@@ -291,6 +293,37 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
+  endpoint:
+    'GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/analyze',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+      degradedField: t.string,
+    }),
+    query: t.type({
+      lastBackingIndex: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DegradedFieldAnalysis> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const degradedFieldAnalysis = await analyzeDegradedField({
+      esClient,
+      dataStream: params.path.dataStream,
+      degradedField: params.path.degradedField,
+      lastBackingIndex: params.query.lastBackingIndex,
+    });
+
+    return degradedFieldAnalysis;
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
@@ -300,4 +333,5 @@ export const dataStreamsRouteRepository = {
   ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
+  ...analyzeDegradedFieldRoute,
 };

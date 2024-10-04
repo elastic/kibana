@@ -233,8 +233,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
         'xpack.cloud.trial_end_date (string?)',
-        'xpack.cloud_integrations.chat.chatURL (string?)',
-        'xpack.cloud_integrations.chat.trialBuffer (number?)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
@@ -275,6 +273,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean?)',
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
+        'xpack.integration_assistant.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */
