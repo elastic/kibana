@@ -146,7 +146,6 @@ export const CreateIndexForm = ({
                 color="primary"
                 iconSide="left"
                 iconType="sparkles"
-                data-telemetry-id="searchIndices-start-createIndexBtn"
                 data-test-subj="createIndexBtn"
                 disabled={indexNameHasError || isLoading}
                 isLoading={isLoading}
@@ -189,11 +188,7 @@ export const CreateIndexForm = ({
                   defaultMessage="Already have some data? {link}"
                   values={{
                     link: (
-                      <EuiLink
-                        data-telemetry-id="searchIndices-start-uploadFile"
-                        data-test-subj="uploadFileLink"
-                        onClick={onFileUpload}
-                      >
+                      <EuiLink data-test-subj="uploadFileLink" onClick={onFileUpload}>
                         {i18n.translate(
                           'xpack.searchIndices.startPage.createIndex.fileUpload.link',
                           {
