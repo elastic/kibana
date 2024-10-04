@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { camelCase, startCase } from 'lodash';
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
 
 interface FieldUpgradeConflictsResolverHeaderProps {
   fieldName: string;
@@ -21,8 +22,12 @@ export function FieldUpgradeConflictsResolverHeader({
   fieldUpgradeState,
 }: FieldUpgradeConflictsResolverHeaderProps): JSX.Element {
   return (
-    <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
-      <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
-    </EuiTitle>
+    <EuiFlexGroup direction="row" alignItems="center">
+      <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
+        <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
+      </EuiTitle>
+
+      <FieldUpgradeStateInfo state={fieldUpgradeState} />
+    </EuiFlexGroup>
   );
 }
