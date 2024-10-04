@@ -18,6 +18,7 @@ export type {
 
 export {
   STATS_WARNINGS_FILTER,
+  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
   isFailureStats,
   failedStatsToErrorMessage,
   getModulePath,

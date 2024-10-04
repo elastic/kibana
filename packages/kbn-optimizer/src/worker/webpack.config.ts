@@ -21,7 +21,10 @@ import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 // @ts-expect-error
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { STATS_WARNINGS_FILTER } from '@kbn/optimizer-webpack-helpers';
+import {
+  STATS_WARNINGS_FILTER,
+  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+} from '@kbn/optimizer-webpack-helpers';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -96,24 +99,23 @@ export function getWebpackConfig(
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
       ...(worker.profileWebpack
         ? [
             new EmitStatsPlugin(bundle),
-            new StatoscopeWebpackPlugin({
-              open: false,
-              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
-            }),
-            new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
             new BundleAnalyzerPlugin({
               analyzerMode: 'static',
               reportFilename: `${bundle.id}.analyzer.html`,
               openAnalyzer: false,
               logLevel: 'silent',
             }),
+            new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
+            new StatoscopeWebpackPlugin({
+              open: false,
+              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
+              statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+            }),
           ]
         : []),
-      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 

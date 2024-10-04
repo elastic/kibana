@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import webpack from 'webpack';
-
+import { STATS_OPTIONS_DEFAULT_USEFUL_FILTER } from '@kbn/optimizer-webpack-helpers';
 import { Bundle } from '../common';
 
 export class EmitStatsPlugin {
@@ -22,12 +22,12 @@ export class EmitStatsPlugin {
       {
         name: 'EmitStatsPlugin',
         // run at the very end, ensure that it's after clean-webpack-plugin
-        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+        // stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
       },
       (stats) => {
         Fs.writeFileSync(
           Path.resolve(this.bundle.outputDir, 'stats.json'),
-          JSON.stringify(stats.toJson(), null, 2)
+          JSON.stringify(stats.toJson(STATS_OPTIONS_DEFAULT_USEFUL_FILTER), null, 2)
         );
       }
     );

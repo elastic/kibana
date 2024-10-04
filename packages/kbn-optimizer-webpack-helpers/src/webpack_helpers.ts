@@ -41,6 +41,21 @@ export function failedStatsToErrorMessage(stats: webpack.Stats) {
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
 }
 
+export const STATS_OPTIONS_DEFAULT_USEFUL_FILTER = {
+  all: false,
+  hash: true,
+  version: true,
+  timings: true,
+  assets: true,
+  modules: true,
+  reasons: true,
+  chunks: true,
+  chunkModules: true,
+  errorDetails: false,
+  entrypoints: true,
+  ids: true,
+};
+
 export interface WebpackResolveData {
   /** compilation context */
   context: string;
