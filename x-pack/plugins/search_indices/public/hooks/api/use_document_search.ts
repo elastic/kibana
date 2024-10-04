@@ -11,7 +11,7 @@ import { pageToPagination, Paginate } from '@kbn/search-index-documents';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../use_kibana';
 
-interface IndexDocuments {
+export interface IndexDocuments {
   meta: Pagination;
   results: Paginate<SearchHit>;
 }
