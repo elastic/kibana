@@ -10,9 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { LinkAnchor } from '../../../../../common/components/links';
-import { CardCallOut } from '../common/card_callout';
-import { AGENTLESS_LEARN_MORE_LINK } from './const';
+import { LinkAnchor } from '../../../../../../common/components/links';
+import { CardCallOut } from '../../common/card_callout';
+import { AGENTLESS_LEARN_MORE_LINK } from '../constants';
 
 export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();

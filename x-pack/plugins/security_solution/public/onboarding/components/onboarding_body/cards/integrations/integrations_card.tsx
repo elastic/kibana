@@ -5,38 +5,33 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { useObservable } from 'react-use';
+
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { AvailablePackages } from './available_packages';
-import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
-import { AgentlessAvailableCallout } from './agentless_available_callout';
-import { PackageInstalledCallout } from './packages_installed_callout';
-import { AGENTLESS_LEARN_MORE_LINK } from './const';
+import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
+import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
+import type { IntegrationCardMetadata } from './types';
+import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
+
+const isCheckCompleteMetadata = (metadata?: unknown): metadata is IntegrationCardMetadata => {
+  return metadata !== undefined;
+};
 
 export const IntegrationsCard: OnboardingCardComponent = ({
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
 }) => {
-  const integrationsInstalled: number = checkCompleteMetadata?.integrationsInstalled as number;
-
-  const { isAgentlessAvailable$ } = useOnboardingService();
-  const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-  const showAgentlessCallout =
-    isAgentlessAvailable && AGENTLESS_LEARN_MORE_LINK && integrationsInstalled === 0;
-  const showInstalledCallout =
-    integrationsInstalled > 0 || checkCompleteMetadata?.agentStillRequired;
+  if (!isCheckCompleteMetadata(checkCompleteMetadata)) {
+    return <CenteredLoadingSpinner />;
+  }
+  const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
 
   return (
     <OnboardingCardContentPanel>
-      <>
-        {showAgentlessCallout && <AgentlessAvailableCallout />}
-        {showInstalledCallout && (
-          <PackageInstalledCallout checkCompleteMetadata={checkCompleteMetadata} />
-        )}
-        {(showAgentlessCallout || showInstalledCallout) && <EuiSpacer size="m" />}
-      </>
-      <AvailablePackages />
+      <IntegrationCardTopCallout
+        isAgentRequired={isAgentRequired}
+        installedIntegrationsCount={installedIntegrationsCount}
+      />
+      <IntegrationsCardGridTabs />
     </OnboardingCardContentPanel>
   );
 };

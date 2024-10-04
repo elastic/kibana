@@ -8,23 +8,19 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon } from '@elastic/eui';
 
-import { useAddIntegrationsUrl } from '../../../../../common/hooks/use_add_integrations_url';
-import { LinkAnchor } from '../../../../../common/components/links';
-import { CardCallOut } from '../common/card_callout';
-import { AgentRequiredCallout } from './agent_required_callout';
+import { LinkAnchor } from '../../../../../../common/components/links';
+import { CardCallOut } from '../../common/card_callout';
+import { useAddIntegrationsUrl } from '../../../../../../common/hooks/use_add_integrations_url';
 
-export const PackageInstalledCallout = React.memo(
-  ({ checkCompleteMetadata }: { checkCompleteMetadata: Record<string, unknown> | undefined }) => {
+export const ManageIntegrationsCallout = React.memo(
+  ({ installedIntegrationsCount }: { installedIntegrationsCount: number }) => {
     const { href: integrationUrl, onClick: onAddIntegrationClicked } = useAddIntegrationsUrl();
-    const integrationsInstalled: number = checkCompleteMetadata?.integrationsInstalled as number;
 
-    if (!checkCompleteMetadata?.integrationsInstalled) {
+    if (!installedIntegrationsCount) {
       return null;
     }
 
-    return checkCompleteMetadata?.agentStillRequired ? (
-      <AgentRequiredCallout />
-    ) : (
+    return (
       <CardCallOut
         color="primary"
         text={
@@ -39,7 +35,7 @@ export const PackageInstalledCallout = React.memo(
                   data-test-subj="integrationsCompleteText"
                   id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
                   defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
-                  values={{ count: integrationsInstalled }}
+                  values={{ count: installedIntegrationsCount }}
                 />
               ),
               link: (
@@ -63,4 +59,4 @@ export const PackageInstalledCallout = React.memo(
   }
 );
 
-PackageInstalledCallout.displayName = 'PackageInstalledCallout';
+ManageIntegrationsCallout.displayName = 'ManageIntegrationsCallout';

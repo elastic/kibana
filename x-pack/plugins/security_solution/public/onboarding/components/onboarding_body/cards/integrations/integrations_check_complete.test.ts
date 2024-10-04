@@ -49,8 +49,8 @@ describe('checkIntegrationsCardComplete', () => {
     expect(result).toEqual({
       isComplete: false,
       metadata: {
-        integrationsInstalled: 0,
-        agentStillRequired: false,
+        installedIntegrationsCount: 0,
+        isAgentRequired: false,
       },
     });
   });
@@ -72,13 +72,13 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '1 integration added',
       metadata: {
-        integrationsInstalled: 1,
-        agentStillRequired: true,
+        installedIntegrationsCount: 1,
+        isAgentRequired: true,
       },
     });
   });
 
-  it('returns isComplete as true and agentStillRequired as false when both packages and agent data are available', async () => {
+  it('returns isComplete as true and isAgentRequired as false when both packages and agent data are available', async () => {
     mockHttpGet.mockResolvedValue({
       items: [
         { status: installationStatuses.Installed },
@@ -98,8 +98,8 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '2 integrations added',
       metadata: {
-        integrationsInstalled: 2,
-        agentStillRequired: false,
+        installedIntegrationsCount: 2,
+        isAgentRequired: false,
       },
     });
   });

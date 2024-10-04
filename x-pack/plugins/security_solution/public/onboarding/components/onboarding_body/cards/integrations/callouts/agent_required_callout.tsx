@@ -8,16 +8,18 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon } from '@elastic/eui';
 
-import { LinkAnchor } from '../../../../../common/components/links';
-import { CardCallOut } from '../common/card_callout';
-import { useNavigation } from '../../../../../common/lib/kibana';
-import { FLEET_APP_ID, ADD_AGENT_PATH } from './const';
+import { LinkAnchor } from '../../../../../../common/components/links';
+import { CardCallOut } from '../../common/card_callout';
+import { useNavigation } from '../../../../../../common/lib/kibana';
+import { FLEET_APP_ID, ADD_AGENT_PATH } from '../constants';
+
+const fleetAgentLinkProps = { appId: FLEET_APP_ID, path: ADD_AGENT_PATH };
 
 export const AgentRequiredCallout = React.memo(() => {
   const { getAppUrl, navigateTo } = useNavigation();
-  const addAgentLink = getAppUrl({ appId: FLEET_APP_ID, path: ADD_AGENT_PATH });
+  const addAgentLink = getAppUrl(fleetAgentLinkProps);
   const onAddAgentClick = useCallback(() => {
-    navigateTo({ appId: FLEET_APP_ID, path: ADD_AGENT_PATH });
+    navigateTo(fleetAgentLinkProps);
   }, [navigateTo]);
 
   return (

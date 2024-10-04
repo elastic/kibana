@@ -7,14 +7,14 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../../common/mock/test_providers';
+import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
-import * as consts from './const';
+import * as consts from '../constants';
 
 interface MockedConsts {
   AGENTLESS_LEARN_MORE_LINK: string | null;
 }
-jest.mock('./const');
+jest.mock('../constants');
 
 describe('AgentlessAvailableCallout', () => {
   beforeEach(() => {

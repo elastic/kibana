@@ -7,6 +7,7 @@
 
 import { useLocalStorage } from 'react-use';
 import type { OnboardingCardId } from '../constants';
+import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
 
 const LocalStorageKey = {
   avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
@@ -50,8 +51,11 @@ export const useStoredExpandedCardId = (spaceId: string) =>
 /**
  * Stores the selected integration tab ID per space
  */
-export const useStoredIntegrationTabId = (spaceId: string, defaultSelectedTabId: string) =>
-  useDefinedLocalStorage<string>(
+export const useStoredIntegrationTabId = (
+  spaceId: string,
+  defaultSelectedTabId: IntegrationTabId
+) =>
+  useDefinedLocalStorage<IntegrationTabId>(
     `${LocalStorageKey.selectedIntegrationTabId}.${spaceId}`,
     defaultSelectedTabId
   );

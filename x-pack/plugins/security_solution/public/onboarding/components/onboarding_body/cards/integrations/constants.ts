@@ -6,6 +6,7 @@
  */
 
 import type { CategoryFacet } from '@kbn/fleet-plugin/public';
+import { INTEGRATION_TABS } from './integration_tabs_configs';
 import type { Tab } from './types';
 
 export const ADD_AGENT_PATH = `/agents`;
@@ -23,49 +24,4 @@ export const SCROLL_ELEMENT_ID = 'integrations-scroll-container';
 export const SEARCH_FILTER_CATEGORIES: CategoryFacet[] = [];
 export const WITH_SEARCH_BOX_HEIGHT = '517px';
 export const WITHOUT_SEARCH_BOX_HEIGHT = '462px';
-export const INTEGRATION_TABS: Tab[] = [
-  {
-    category: 'security',
-    iconType: 'starFilled',
-    id: 'recommended',
-    label: 'Recommended',
-    overflow: 'hidden',
-    showSearchTools: false,
-  },
-  {
-    category: 'security',
-    id: 'network',
-    label: 'Network',
-    subCategory: 'network_security',
-  },
-  {
-    category: 'security',
-    id: 'user',
-    label: 'User',
-    subCategory: 'iam',
-  },
-  {
-    category: 'security',
-    id: 'endpoint',
-    label: 'Endpoint',
-    subCategory: 'edr_xdr',
-  },
-  {
-    category: 'security',
-    id: 'cloud',
-    label: 'Cloud',
-    subCategory: 'cloudsecurity_cdr',
-  },
-  {
-    category: 'security',
-    id: 'threatIntel',
-    label: 'Threat Intel',
-    subCategory: 'threat_intel',
-  },
-  {
-    category: '',
-    id: 'all',
-    label: 'All',
-  },
-];
-export const DEFAULT_TAB = INTEGRATION_TABS[0];
+export const DEFAULT_TAB: Tab = INTEGRATION_TABS[0];

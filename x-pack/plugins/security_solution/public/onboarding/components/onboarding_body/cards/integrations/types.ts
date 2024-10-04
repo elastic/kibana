@@ -8,9 +8,24 @@ export interface Tab {
   category: string;
   customCardNames?: string[]; // custom card name e.g.: 1password
   iconType?: string;
-  id: string;
+  id: IntegrationTabId;
   label: string;
   overflow?: 'hidden' | 'scroll';
   showSearchTools?: boolean;
   subCategory?: string;
+}
+
+export enum IntegrationTabId {
+  recommended = 'recommended',
+  network = 'network',
+  user = 'user',
+  endpoint = 'endpoint',
+  cloud = 'cloud',
+  threatIntel = 'threatIntel',
+  all = 'all',
+}
+
+export interface IntegrationCardMetadata {
+  installedIntegrationsCount: number;
+  isAgentRequired: boolean;
 }

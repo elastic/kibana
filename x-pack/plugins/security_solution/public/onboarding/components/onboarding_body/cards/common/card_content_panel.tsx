@@ -6,12 +6,19 @@
  */
 import React, { type PropsWithChildren } from 'react';
 import { EuiPanel, type EuiPanelProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelProps>>(
   ({ children, ...panelProps }) => {
     return (
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-        <EuiPanel {...panelProps} hasShadow={false}>
+        <EuiPanel
+          {...panelProps}
+          hasShadow={false}
+          css={css`
+            padding-top: 0;
+          `}
+        >
           {children}
         </EuiPanel>
       </EuiPanel>

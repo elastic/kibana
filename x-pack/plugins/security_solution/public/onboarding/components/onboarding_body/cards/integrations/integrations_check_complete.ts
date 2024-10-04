@@ -10,7 +10,7 @@ import { EPM_API_ROUTES, installationStatuses } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { AGENT_INDEX } from './const';
+import { AGENT_INDEX } from './constants';
 import type { StartServices } from '../../../../../types';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async (
@@ -36,7 +36,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
   );
   const isComplete = installed && installed.length > 0;
   const agentsDataAvailable = !!agentsData?.rawResponse?.hits?.total;
-  const agentStillRequired = isComplete && !agentsDataAvailable;
+  const isAgentRequired = isComplete && !agentsDataAvailable;
 
   const completeBadgeText = i18n.translate(
     'xpack.securitySolution.onboarding.integrationsCard.badge.completeText',
@@ -50,8 +50,8 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
     return {
       isComplete,
       metadata: {
-        integrationsInstalled: 0,
-        agentStillRequired: false,
+        installedIntegrationsCount: 0,
+        isAgentRequired: false,
       },
     };
   }
@@ -60,8 +60,8 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async 
     isComplete,
     completeBadgeText,
     metadata: {
-      integrationsInstalled: installed.length,
-      agentStillRequired,
+      installedIntegrationsCount: installed.length,
+      isAgentRequired,
     },
   };
 };

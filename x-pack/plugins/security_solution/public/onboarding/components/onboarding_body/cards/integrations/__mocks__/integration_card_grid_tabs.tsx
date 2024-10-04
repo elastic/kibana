@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const PackageInstalledCallout = () => <div data-test-subj="packageInstalledCallout" />;
+export const IntegrationsCardGridTabs = () => <div data-test-subj="integrationsCardGridTabs" />;

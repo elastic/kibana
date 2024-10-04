@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import { AvailablePackages } from './available_packages';
+import { render, waitFor } from '@testing-library/react';
+import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
 import { useAsyncRetry } from 'react-use';
 import { fetchAvailablePackagesHook } from './utils';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -15,11 +15,9 @@ jest.mock('react-use/lib/useAsyncRetry');
 jest.mock('./utils', () => ({
   fetchAvailablePackagesHook: jest.fn(),
 }));
-jest.mock('./package_list_grid', () => ({
-  PackageListGrid: jest.fn(() => <div data-test-subj="package-list-grid" />),
-}));
+jest.mock('./package_list_grid');
 
-describe('AvailablePackages', () => {
+describe('IntegrationsCardGridTabs', () => {
   const mockRetry = jest.fn();
 
   beforeEach(() => {
@@ -33,24 +31,8 @@ describe('AvailablePackages', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(<AvailablePackages />, { wrapper: TestProviders });
+    const { getByTestId } = render(<IntegrationsCardGridTabs />, { wrapper: TestProviders });
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
-  });
-
-  it('shows error callout when there is an error loading data', () => {
-    (useAsyncRetry as jest.Mock).mockReturnValue({
-      error: new Error('Loading error'),
-      retry: mockRetry,
-      loading: false,
-    });
-
-    const { getByTestId } = render(<AvailablePackages />, { wrapper: TestProviders });
-
-    const retryButton = getByTestId('retryButton');
-    expect(retryButton).toBeInTheDocument();
-
-    fireEvent.click(retryButton);
-    expect(mockRetry).toHaveBeenCalled();
   });
 
   it('renders PackageListGrid when data is loaded successfully', async () => {
@@ -66,10 +48,10 @@ describe('AvailablePackages', () => {
       };
     });
 
-    const { getByTestId } = render(<AvailablePackages />, { wrapper: TestProviders });
+    const { getByTestId } = render(<IntegrationsCardGridTabs />, { wrapper: TestProviders });
 
     await waitFor(() => {
-      expect(getByTestId('package-list-grid')).toBeInTheDocument();
+      expect(getByTestId('packageListGrid')).toBeInTheDocument();
     });
   });
 });

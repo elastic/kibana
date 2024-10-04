@@ -11,15 +11,19 @@ import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
 } from '../../../../hooks/use_stored_state';
-import { useIntegrationCardList, useTabMetaData } from './hooks';
 import { PackageList } from './utils';
-import { DEFAULT_TAB } from './const';
+import { DEFAULT_TAB } from './constants';
 
 jest.mock('../../../onboarding_context');
 jest.mock('../../../../hooks/use_stored_state');
-jest.mock('./hooks');
 jest.mock('./utils', () => ({
   PackageList: jest.fn(() => <div data-test-subj="packageList" />),
+}));
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+    getAppUrl: jest.fn(),
+  }),
 }));
 
 describe('PackageListGrid', () => {
@@ -34,13 +38,6 @@ describe('PackageListGrid', () => {
     jest.clearAllMocks();
     (useStoredIntegrationTabId as jest.Mock).mockReturnValue([DEFAULT_TAB.id, jest.fn()]);
     (useStoredIntegrationSearchTerm as jest.Mock).mockReturnValue(['', jest.fn()]);
-    (useTabMetaData as jest.Mock).mockReturnValue({
-      showSearchTools: true,
-      customCardNames: {},
-      selectedCategory: 'security',
-      selectedSubCategory: 'network',
-    });
-    (useIntegrationCardList as jest.Mock).mockReturnValue([]);
   });
 
   it('renders loading skeleton when data is loading', () => {
@@ -62,7 +59,7 @@ describe('PackageListGrid', () => {
   it('renders the package list when data is available', () => {
     mockUseAvailablePackages.mockReturnValue({
       isLoading: false,
-      filteredCards: [{ id: 'card1', name: 'Card 1' }],
+      filteredCards: [{ id: 'card1', name: 'Card 1', url: 'https://mock-url' }],
       setCategory: mockSetCategory,
       setSelectedSubCategory: mockSetSelectedSubCategory,
       setSearchTerm: mockSetSearchTerm,
@@ -97,14 +94,6 @@ describe('PackageListGrid', () => {
   });
 
   it('renders no search tools when showSearchTools is false', () => {
-    (useTabMetaData as jest.Mock).mockReturnValue({
-      showSearchTools: false,
-      customCardNames: {},
-      selectedCategory: 'category1',
-      selectedSubCategory: 'subcategory1',
-      overflow: 'auto',
-    });
-
     mockUseAvailablePackages.mockReturnValue({
       isLoading: false,
       filteredCards: [],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -13,7 +13,6 @@ import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
 import { PackageList } from './utils';
-import { useIntegrationCardList, useTabMetaData } from './hooks';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
@@ -21,17 +20,23 @@ import {
 import { useOnboardingContext } from '../../../onboarding_context';
 import {
   DEFAULT_TAB,
-  INTEGRATION_TABS,
   LOADING_SKELETON_HEIGHT,
   SCROLL_ELEMENT_ID,
   SEARCH_FILTER_CATEGORIES,
   WITHOUT_SEARCH_BOX_HEIGHT,
   WITH_SEARCH_BOX_HEIGHT,
-} from './const';
+} from './constants';
+import { INTEGRATION_TABS, INTEGRATION_TABS_BY_ID } from './integration_tabs_configs';
+import { useIntegrationCardList } from './use_integration_card_list';
+import type { IntegrationTabId } from './types';
 
 interface WrapperProps {
   useAvailablePackages: AvailablePackagesHookType;
 }
+
+const isIntegrationTabId = (id: string): id is IntegrationTabId => {
+  return Object.keys(INTEGRATION_TABS_BY_ID).includes(id);
+};
 
 const emptyStateStyles = { paddingTop: '16px' };
 export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
@@ -41,10 +46,13 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     spaceId,
     DEFAULT_TAB.id
   );
+  const [toggleIdSelected, setToggleIdSelected] = useState<IntegrationTabId>(selectedTabId);
   const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
-  const [toggleIdSelected, setToggleIdSelected] = useState<string>(selectedTabId);
   const onTabChange = useCallback(
     (id: string) => {
+      if (!isIntegrationTabId(id)) {
+        return;
+      }
       scrollElement.current?.scrollTo?.(0, 0);
       setToggleIdSelected(id);
       setSelectedTabIdToStorage(id);
@@ -63,8 +71,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     prereleaseIntegrationsEnabled: false,
   });
 
-  const { showSearchTools, customCardNames, selectedCategory, selectedSubCategory, overflow } =
-    useTabMetaData(toggleIdSelected);
+  const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[selectedTabId], [selectedTabId]);
 
   const onSearchTermChanged = useCallback(
     (searchQuery: string) => {
@@ -75,31 +82,30 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
   );
 
   useEffect(() => {
-    setCategory(selectedCategory);
-    setSelectedSubCategory(selectedSubCategory);
-    if (!showSearchTools) {
+    setCategory(selectedTab.category ?? '');
+    setSelectedSubCategory(selectedTab.subCategory);
+    if (!selectedTab.showSearchTools) {
       // If search box are not shown, clear the search term to avoid unexpected filtering
       onSearchTermChanged('');
     }
 
-    if (showSearchTools && searchTermFromStorage) {
+    if (selectedTab.showSearchTools && searchTermFromStorage) {
       setSearchTerm(searchTermFromStorage);
     }
   }, [
     onSearchTermChanged,
     searchTermFromStorage,
-    selectedCategory,
-    selectedSubCategory,
+    selectedTab.category,
+    selectedTab.showSearchTools,
+    selectedTab.subCategory,
     setCategory,
     setSearchTerm,
     setSelectedSubCategory,
-    showSearchTools,
-    toggleIdSelected,
   ]);
 
   const list: IntegrationCardItem[] = useIntegrationCardList({
     integrationsList: filteredCards,
-    customCardNames,
+    customCardNames: selectedTab.customCardNames,
   });
 
   if (isLoading) {
@@ -116,9 +122,9 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     <EuiFlexGroup
       direction="column"
       className="step-paragraph"
-      gutterSize={showSearchTools ? 'm' : 'none'}
+      gutterSize={selectedTab.showSearchTools ? 'm' : 'none'}
       css={css`
-        height: ${showSearchTools ? WITH_SEARCH_BOX_HEIGHT : WITHOUT_SEARCH_BOX_HEIGHT};
+        height: ${selectedTab.showSearchTools ? WITH_SEARCH_BOX_HEIGHT : WITHOUT_SEARCH_BOX_HEIGHT};
       `}
     >
       <EuiFlexItem grow={false}>
@@ -135,7 +141,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          overflow-y: ${overflow};
+          overflow-y: ${selectedTab.overflow ?? 'auto'};
         `}
         grow={1}
         id={SCROLL_ELEMENT_ID}
@@ -148,15 +154,15 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
             list={list}
             scrollElementId={SCROLL_ELEMENT_ID}
             searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            selectedSubCategory={selectedSubCategory}
+            selectedCategory={selectedTab.category ?? ''}
+            selectedSubCategory={selectedTab.subCategory}
             setCategory={setCategory}
             setSearchTerm={onSearchTermChanged}
             setUrlandPushHistory={noop}
             setUrlandReplaceHistory={noop}
             showCardLabels={false}
             showControls={false}
-            showSearchTools={showSearchTools}
+            showSearchTools={selectedTab.showSearchTools ?? true}
             spacer={false}
           />
         </Suspense>
