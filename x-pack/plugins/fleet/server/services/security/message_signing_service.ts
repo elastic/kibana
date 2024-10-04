@@ -66,13 +66,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       namedCurve: 'P-256',
       privateKeyEncoding: {
         type: 'pkcs8',
-        format: 'der',
+        format: 'pem',
         cipher: 'aes-256-cbc',
         passphrase,
       },
       publicKeyEncoding: {
         type: 'spki',
-        format: 'der',
+        format: 'pem',
       },
     });
 
@@ -127,7 +127,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
     const privateKey = Buffer.from(serializedPrivateKey, 'base64');
     const signature = signer.sign(
-      { key: privateKey, passphrase, format: 'der', type: 'pkcs8' },
+      { key: privateKey, passphrase, format: 'pem', type: 'pkcs8' },
       'base64'
     );
     return {
