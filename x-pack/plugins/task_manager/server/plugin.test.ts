@@ -20,7 +20,6 @@ import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './pollin
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
-import { TaskCancellationReason } from './task_pool';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
