@@ -171,14 +171,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
-    let version: undefined | ApiVersion;
-
-    const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
-      version = this.getDefaultVersion();
-    } else {
-      version = maybeVersion;
-    }
+    const version = this.getVersion(req);
     if (!version) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
