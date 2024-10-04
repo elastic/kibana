@@ -5,7 +5,8 @@
   */
 
 .dshDashboardGrid__item {
-  scroll-margin-top: calc(var(--euiFixedHeadersOffset, 100)* 2);
+  scroll-margin-top: calc((var(--euiFixedHeadersOffset, 100) * 2) + $euiSizeS);
+  scroll-margin-bottom: $euiSizeS;
 }
 
 // LAYOUT MODES
