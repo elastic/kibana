@@ -408,14 +408,18 @@ export function getDiscoverStateContainer({
   };
 
   const onDataViewEdited = async (editedDataView: DataView) => {
+    const edited = editedDataView.id;
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
-      services.dataViews.clearInstanceCache(editedDataView.id);
+      services.dataViews.clearInstanceCache(edited);
       setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId();
+      const nextDataView = await updateAdHocDataViewId();
+      // eslint-disable-next-line no-console
+      console.log('onDataViewEdited', `${edited} -> ${nextDataView?.id}`);
     }
+    // maybe it's flaky because of this line
     loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
