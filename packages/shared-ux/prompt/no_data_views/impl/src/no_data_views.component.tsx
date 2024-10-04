@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
-import { i18n } from '@kbn/i18n';
 import { DocumentationLink } from './documentation_link';
 
 // max width value to use in pixels
@@ -158,11 +157,6 @@ const PromptTryEsql = ({
       hasBorder={true}
       data-test-subj="noDataViewsPromptTryEsql"
       display={emptyPromptColor}
-      betaBadgeProps={{
-        label: i18n.translate('sharedUXPackages.noDataViewsPrompt.esqlTechnicalPreviewBadge', {
-          defaultMessage: 'Technical preview ',
-        }),
-      }}
       {...{ icon, title, description, footer }}
     />
   );
