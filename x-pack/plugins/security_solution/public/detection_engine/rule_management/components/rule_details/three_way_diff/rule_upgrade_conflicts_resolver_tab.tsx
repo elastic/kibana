@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import type {
   RuleUpgradeState,
   SetRuleFieldResolvedValueFn,
-} from '../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
+} from '../../../model/prebuilt_rule_upgrade';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
 

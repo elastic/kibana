@@ -9,13 +9,16 @@ import React from 'react';
 import { camelCase, startCase } from 'lodash';
 import { EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
+import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 
 interface FieldUpgradeConflictsResolverHeaderProps {
   fieldName: string;
+  fieldUpgradeState: FieldUpgradeState;
 }
 
 export function FieldUpgradeConflictsResolverHeader({
   fieldName,
+  fieldUpgradeState,
 }: FieldUpgradeConflictsResolverHeaderProps): JSX.Element {
   return (
     <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
