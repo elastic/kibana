@@ -16,15 +16,19 @@ export class Role {
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { data, status, statusText } = await this.kibanaServer.request({
-      path: `/api/security/role/${name}`,
-      method: 'PUT',
-      body: {
-        kibana: role.kibana,
-        elasticsearch: role.elasticsearch,
-      },
-      retries: 0,
-    });
+    const { data, status, statusText } = await this.kibanaServer
+      .request({
+        path: `/api/security/role/${name}`,
+        method: 'PUT',
+        body: {
+          kibana: role.kibana,
+          elasticsearch: role.elasticsearch,
+        },
+        retries: 0,
+      })
+      .catch((e) => {
+        throw new Error(util.inspect(e.axiosError.response, true));
+      });
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
