@@ -13,7 +13,7 @@ import type {
   CspClientPluginStartDeps,
   LatestFindingsRequest,
   LatestFindingsResponse,
-  UseMisconfigurationOptions,
+  UseCspOptions,
 } from '../../type';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 import {
@@ -21,7 +21,7 @@ import {
   getMisconfigurationAggregationCount,
 } from '../utils/hooks_utils';
 
-export const useMisconfigurationPreview = (options: UseMisconfigurationOptions) => {
+export const useMisconfigurationPreview = (options: UseCspOptions) => {
   const {
     data,
     notifications: { toasts },
