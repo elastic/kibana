@@ -67,24 +67,6 @@ describe('IndexStatsPanel', () => {
     });
   });
 
-  describe('when sameFamilyFieldsCount is provided', () => {
-    it('renders same family fields count', () => {
-      render(
-        <TestExternalProviders>
-          <TestDataQualityProviders>
-            <IndexStatsPanel docsCount={123} sizeInBytes={789} sameFamilyFieldsCount={456} />
-          </TestDataQualityProviders>
-        </TestExternalProviders>
-      );
-
-      const container = screen.getByTestId('indexStatsPanel');
-
-      expect(container).toHaveTextContent('Docs123');
-      expect(container).toHaveTextContent('Size789');
-      expect(container).toHaveTextContent('Same family456');
-    });
-  });
-
   describe('when customFieldsCount is provided', () => {
     it('renders custom fields count', () => {
       render(
