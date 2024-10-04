@@ -26,6 +26,7 @@ import {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -132,6 +133,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesSavedObjectId &
   PublishesUnifiedSearch &
   PublishesViewMode &
+  PublishesWritableViewMode &
   TracksOverlays & {
     addFromLibrary: () => void;
     animatePanelTransforms$: PublishingSubject<boolean>;
@@ -163,7 +165,6 @@ export type DashboardApi = CanExpandPanels &
     setQuery: (query?: Query | undefined) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    setViewMode: (viewMode: ViewMode) => void;
     useMargins$: PublishingSubject<boolean | undefined>;
     // TODO replace with HasUniqueId once dashboard is refactored and navigateToDashboard is removed
     uuid$: PublishingSubject<string>;

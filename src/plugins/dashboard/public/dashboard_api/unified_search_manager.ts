@@ -81,8 +81,7 @@ export function initializeUnifiedSearchManager(
       filterManager,
       timefilter: { timefilter: timefilterService },
     } = dataService.query;
-    const { kbnUrlStateStorage } = creationOptions?.unifiedSearchSettings;
-
+    
     // Set unified search to dashboard state
     filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
     queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
@@ -94,7 +93,7 @@ export function initializeUnifiedSearchManager(
     // start syncing global query state with the URL.
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
       dataService.query,
-      kbnUrlStateStorage
+      creationOptions?.unifiedSearchSettings.kbnUrlStateStorage
     );
 
     const unifiedSearchFiltersSubscription = filterManager.getUpdates$().subscribe(() => {

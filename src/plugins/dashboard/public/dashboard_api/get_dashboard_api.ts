@@ -27,6 +27,7 @@ import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export function getDashboardApi({
   creationOptions,
@@ -45,6 +46,7 @@ export function getDashboardApi({
   const managed$ = new BehaviorSubject(savedObjectResult?.managed ?? false);
   const references: Reference[] = savedObjectResult?.references ?? [];
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
+  const viewMode$ = new BehaviorSubject<ViewMode>(initialState.viewMode);
 
   let breakCircularDepUntilEmbeddableLoaded: (id: string) => Promise<undefined> = async (
     id: string
@@ -101,7 +103,15 @@ export function getDashboardApi({
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
       setManaged: (managed: boolean) => managed$.next(managed),
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+      setViewMode: (viewMode: ViewMode) => {
+        // block the Dashboard from entering edit mode if this Dashboard is managed.
+        if (managed$.value && viewMode?.toLowerCase() === 'edit') {
+          return;
+        }
+        viewMode$.next(viewMode);
+      },
       type: DASHBOARD_API_TYPE as 'dashboard',
+      viewMode: viewMode$,
     },
     internalApi: {
       ...panelsManager.internalApi,
