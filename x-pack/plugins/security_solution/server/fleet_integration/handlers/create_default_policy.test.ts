@@ -23,6 +23,7 @@ import type {
 } from '../types';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import { set } from 'lodash';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -54,6 +55,7 @@ describe('Create Default Policy tests ', () => {
   describe('When no config is set', () => {
     it('Should return PolicyConfig for events only when license is at least platinum', async () => {
       const defaultPolicy = policyFactory();
+      set(defaultPolicy, 'linux.events.session_data', true);
 
       const policy = await createDefaultPolicyCallback(undefined);
 
@@ -81,6 +83,8 @@ describe('Create Default Policy tests ', () => {
 
     it('Should return PolicyConfig for events only without paid features when license is below platinum', async () => {
       const defaultPolicy = policyFactory();
+      set(defaultPolicy, 'linux.events.session_data', true);
+
       licenseEmitter.next(Gold);
 
       const policy = await createDefaultPolicyCallback(undefined);
