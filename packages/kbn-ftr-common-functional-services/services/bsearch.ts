@@ -70,16 +70,14 @@ export class BsearchService extends FtrService {
   /** Send method to send in your supertest, url, options, and strategy name */
   async send<T extends IEsSearchResponse>({ supertest, options, strategy, space }: SendOptions) {
     const spaceUrl = getSpaceUrlPrefix(space);
-    const makeRequest = async () => {
+    const { body } = await this.retry.try(async () => {
       return supertest
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'true')
         .send(options)
         .expect(200);
-    };
-
-    const { body } = await this.retry.try(makeRequest);
+    });
 
     if (!body.isRunning) {
       return body;
