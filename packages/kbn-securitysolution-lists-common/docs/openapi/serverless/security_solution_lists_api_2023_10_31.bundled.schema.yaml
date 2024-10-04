@@ -1564,3 +1564,4 @@ security:
 tags:
   - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
     name: Security Lists API
+    x-displayName: Security lists
