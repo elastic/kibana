@@ -208,9 +208,10 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
+          return canStartStopTrainedModels && !isLoading;
         },
-        available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
+        available: (item) =>
+          item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED,
         onClick: async (item) => {
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
             item,
@@ -344,6 +345,7 @@ export function useModelActions({
         available: (item) =>
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
+          // Deployment can be either started, starting, or exist in a failed state
           (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
           // Only show the action if there is at least one deployment that is not used by the inference service
           (!Array.isArray(item.inference_apis) ||
@@ -545,7 +547,7 @@ export function useModelActions({
         icon: 'inputOutput',
         type: 'icon',
         isPrimary: false,
-        available: isTestable,
+        available: (item) => isTestable(item, true),
         onClick: (item) => {
           if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
             onDfaTestAction(item);
@@ -554,7 +556,7 @@ export function useModelActions({
           }
         },
         enabled: (item) => {
-          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+          return canTestTrainedModels && !isLoading;
         },
       },
       {
