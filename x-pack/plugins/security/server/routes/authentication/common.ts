@@ -89,10 +89,11 @@ export function defineCommonRoutes({
     '/internal/security/me',
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
   ]) {
+    const deprecated = path === '/api/security/v1/me';
     router.get(
-      { path, validate: false },
+      { path, validate: false, options: { access: deprecated ? 'public' : 'internal' } },
       createLicensedRouteHandler(async (context, request, response) => {
-        if (path === '/api/security/v1/me') {
+        if (deprecated) {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
             { tags: ['deprecation'] }
