@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { internalElserInferenceId } from '../../../../common/consts';
 
 export const createIndex = async ({
   esClient,
@@ -23,10 +24,10 @@ export const createIndex = async ({
   log.debug(`Creating index ${indexName}`);
 
   // TODO: extract / do it right
-  mappings.properties.ai_questions_answered.inference_id = 'default-elser';
-  mappings.properties.ai_subtitle.inference_id = 'default-elser';
-  mappings.properties.ai_summary.inference_id = 'default-elser';
-  mappings.properties.content_body.inference_id = 'default-elser';
+  mappings.properties.ai_questions_answered.inference_id = internalElserInferenceId;
+  mappings.properties.ai_subtitle.inference_id = internalElserInferenceId;
+  mappings.properties.ai_summary.inference_id = internalElserInferenceId;
+  mappings.properties.content_body.inference_id = internalElserInferenceId;
 
   await esClient.indices.create({
     index: indexName,

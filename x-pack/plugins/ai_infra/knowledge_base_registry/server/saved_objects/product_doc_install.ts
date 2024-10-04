@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { knowledgeBaseProductDocInstallTypeName } from '../../common/consts';
-import type { ProductDocInstallStatus } from '../../common/saved_objects';
+import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
+import type { InstallationStatus } from '../../common/saved_objects';
 
 /**
  * Interface describing the raw attributes of the KB Entry SO type.
@@ -15,25 +15,24 @@ import type { ProductDocInstallStatus } from '../../common/saved_objects';
  * indexed fields.
  */
 export interface KnowledgeBaseProductDocInstallAttributes {
-  package_name: string;
-  package_version: string;
   product_name: string;
-  installation_status: ProductDocInstallStatus;
-  last_installation_date: number | undefined;
-  index_name: string;
+  product_version: string;
+  installation_status: InstallationStatus;
+  last_installation_date?: number;
+  last_installation_failure_reason?: string;
+  index_name?: string;
 }
 
 export const knowledgeBaseProductDocInstallSavedObjectType: SavedObjectsType<KnowledgeBaseProductDocInstallAttributes> =
   {
-    name: knowledgeBaseProductDocInstallTypeName,
+    name: productDocInstallStatusSavedObjectTypeName,
     hidden: true,
-    namespaceType: 'multiple',
+    namespaceType: 'agnostic',
     mappings: {
       dynamic: false,
       properties: {
-        package_name: { type: 'keyword' },
-        package_version: { type: 'keyword' },
         product_name: { type: 'keyword' },
+        product_version: { type: 'keyword' },
         installation_status: { type: 'keyword' },
         last_installation_date: { type: 'integer' },
         index_name: { type: 'keyword' },

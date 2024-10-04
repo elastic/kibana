@@ -6,21 +6,21 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ProducDocInstallDTO } from '../../../common/saved_objects';
+import type { ProductDocInstallStatus } from '../../../common/saved_objects';
 import type { KnowledgeBaseProductDocInstallAttributes } from '../../saved_objects';
 
-export const soToDto = (
+export const soToModel = (
   so: SavedObject<KnowledgeBaseProductDocInstallAttributes>
-): ProducDocInstallDTO => {
+): ProductDocInstallStatus => {
   return {
     id: so.id,
-    packageName: so.attributes.package_name,
-    packageVersion: so.attributes.package_version,
     productName: so.attributes.product_name,
+    productVersion: so.attributes.product_version,
     installationStatus: so.attributes.installation_status,
     indexName: so.attributes.index_name,
     lastInstallationDate: so.attributes.last_installation_date
       ? new Date(so.attributes.last_installation_date)
       : undefined,
+    lastInstallationFailureReason: so.attributes.last_installation_failure_reason,
   };
 };

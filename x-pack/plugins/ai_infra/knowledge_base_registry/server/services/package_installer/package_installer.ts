@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-import Fs from 'fs';
-import Path from 'path';
-import { getDataPath } from '@kbn/utils';
 import { Logger } from '@kbn/logging';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ProductDocInstallClient } from '../../dao/product_doc_install';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ProductDocInstallClient } from '../../dao/doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
 import {
   downloadToDisk,
@@ -19,6 +15,7 @@ import {
   validateArtifactArchive,
   loadManifestFile,
   loadMappingFile,
+  type ZipArchive,
 } from './utils';
 import { createIndex, populateIndex } from './steps';
 
@@ -32,7 +29,7 @@ interface PackageInstallerOpts {
 }
 
 export class PackageInstaller {
-  private readonly logger: Logger;
+  private readonly log: Logger;
   private readonly artifactsFolder: string;
   private readonly esClient: ElasticsearchClient;
   private readonly productDocClient: ProductDocInstallClient;
@@ -52,7 +49,7 @@ export class PackageInstaller {
     this.artifactsFolder = artifactsFolder;
     this.endpointManager = endpointManager;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
-    this.logger = logger;
+    this.log = logger;
   }
 
   async installPackage({
@@ -62,24 +59,35 @@ export class PackageInstaller {
     productName: string;
     productVersion: string;
   }) {
-    // TODO: uninstall previous/current if present
+    this.log.info(
+      `Starting pkg installation for product [${productName}] and version [${productVersion}]`
+    );
+
     await this.uninstallPackage({
       productName,
       productVersion,
     });
 
-    await this.endpointManager.ensureInternalElserInstalled();
-
-    const artifactFileName = getArtifactName({ productName, productVersion });
-    const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-    const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
-
-    console.log(`*** downloading ${artifactUrl} to ${artifactPath}`);
-
-    await downloadToDisk(artifactUrl, artifactPath);
-
-    const zipArchive = await openZipArchive(artifactPath);
+    let zipArchive: ZipArchive | undefined;
     try {
+      await this.productDocClient.setInstallationStarted({
+        productName,
+        productVersion,
+      });
+
+      await this.endpointManager.ensureInternalElserInstalled();
+
+      const artifactFileName = getArtifactName({ productName, productVersion });
+      const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
+      const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
+
+      this.log.debug(`Downloading from [${artifactUrl}] to [${artifactPath}]`);
+      await downloadToDisk(artifactUrl, artifactPath);
+
+      zipArchive = await openZipArchive(artifactPath);
+
+      validateArtifactArchive(zipArchive);
+
       const manifest = await loadManifestFile(zipArchive);
       const mappings = await loadMappingFile(zipArchive);
 
@@ -89,19 +97,31 @@ export class PackageInstaller {
         indexName,
         mappings,
         esClient: this.esClient,
-        log: this.logger,
+        log: this.log,
       });
 
       await populateIndex({
         indexName,
         archive: zipArchive,
         esClient: this.esClient,
-        log: this.logger,
+        log: this.log,
       });
+      await this.productDocClient.setInstallationSuccessful(productName, indexName);
 
-      // TODO: update the product_doc_install SO
+      this.log.info(
+        `Pkg installation successful for product [${productName}] and version [${productVersion}]`
+      );
+    } catch (e) {
+      this.log.error(
+        `Error during pkg installation of product [${productName}]/[${productVersion}] : ${e.message}`
+      );
+
+      await this.productDocClient.setInstallationFailed(productName, e.message);
+      throw e;
     } finally {
-      zipArchive.close();
+      if (zipArchive) {
+        zipArchive.close();
+      }
     }
   }
 
@@ -112,7 +132,7 @@ export class PackageInstaller {
     productName: string;
     productVersion: string;
   }) {
-    // TODO
+    // TODO: retrieve entry to check installed version instead
 
     const indexName = getIndexName({ productName, productVersion });
     await this.esClient.indices.delete(
@@ -121,6 +141,8 @@ export class PackageInstaller {
       },
       { ignore: [404] }
     );
+
+    await this.productDocClient.setUninstalled(productName);
   }
 }
 

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const knowledgeBaseProductDocInstallTypeName = 'ai_kb_product_doc_installation';
+export const productDocInstallStatusSavedObjectTypeName = 'kb_product_doc_install_status';
 
 export const internalElserInferenceId = 'kibana-internal-elser2';

@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { knowledgeBaseProductDocInstallTypeName } from '../common/consts';
+import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { KnowledgeBaseRegistryConfig } from './config';
 import type {
   KnowledgeBaseRegistrySetupContract,
@@ -21,7 +21,7 @@ import type {
 import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
-import { ProductDocInstallClient } from './dao/product_doc_install';
+import { ProductDocInstallClient } from './dao/doc_install_status';
 
 export class KnowledgeBaseRegistryPlugin
   implements
@@ -54,7 +54,7 @@ export class KnowledgeBaseRegistryPlugin
     pluginsStart: KnowledgeBaseRegistryStartDependencies
   ): KnowledgeBaseRegistryStartContract {
     const soClient = new SavedObjectsClient(
-      core.savedObjects.createInternalRepository([knowledgeBaseProductDocInstallTypeName])
+      core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
 
@@ -74,7 +74,6 @@ export class KnowledgeBaseRegistryPlugin
 
     delay(10)
       .then(() => {
-        return;
         console.log('*** test installating package');
         return packageInstaller.installPackage({
           productName: 'Kibana',

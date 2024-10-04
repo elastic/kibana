@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export type ProductDocInstallStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
+export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
-export interface ProducDocInstallDTO {
+export interface ProductDocInstallStatus {
   id: string;
-  packageName: string;
-  packageVersion: string;
   productName: string;
-  installationStatus: ProductDocInstallStatus;
+  productVersion: string;
+  installationStatus: InstallationStatus;
   lastInstallationDate: Date | undefined;
+  lastInstallationFailureReason: string | undefined;
   indexName: string;
 }

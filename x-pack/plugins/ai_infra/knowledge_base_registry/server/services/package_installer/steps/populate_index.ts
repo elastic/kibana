@@ -8,6 +8,7 @@
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { internalElserInferenceId } from '../../../../common/consts';
 import type { ZipArchive } from '../utils/zip_archive';
 
 // TODO: factorize with utils/validate_artifact_archive
@@ -58,7 +59,7 @@ const indexContentFile = async ({
     .map((line) => {
       return JSON.parse(line);
     })
-    .map((doc) => rewriteInferenceId(doc, 'default-elser'));
+    .map((doc) => rewriteInferenceId(doc, internalElserInferenceId));
 
   const operations = documents.reduce((ops, document) => {
     ops!.push(...[{ index: { _index: indexName } }, document]);
