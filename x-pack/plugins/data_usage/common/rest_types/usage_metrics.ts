@@ -21,8 +21,14 @@ const METRIC_TYPE_VALUES = [
 
 export type MetricTypes = (typeof METRIC_TYPE_VALUES)[number];
 
+// type guard for MetricTypes
+export const isMetricType = (type: string): type is MetricTypes =>
+  METRIC_TYPE_VALUES.includes(type as MetricTypes);
+
 // @ts-ignore
 const isValidMetricType = (value: string) => METRIC_TYPE_VALUES.includes(value);
+
+const DateSchema = schema.maybe(schema.string());
 
 const metricTypesSchema = {
   // @ts-expect-error TS2769: No overload matches this call
@@ -32,12 +38,8 @@ const metricTypesSchema = {
 
 export const UsageMetricsRequestSchema = {
   query: schema.object({
-    from: schema.string({
-      validate: (v) => (new Date(v).toString() === 'Invalid Date' ? 'Invalid date' : undefined),
-    }),
-    to: schema.string({
-      validate: (v) => (new Date(v).toString() === 'Invalid Date' ? 'Invalid date' : undefined),
-    }),
+    from: DateSchema,
+    to: DateSchema,
     size: schema.maybe(schema.number()), // should be same as dataStreams.length
     metricTypes: schema.oneOf([
       schema.arrayOf(schema.string(), {
