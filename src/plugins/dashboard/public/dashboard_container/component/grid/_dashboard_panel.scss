@@ -5,7 +5,7 @@
   */
 
 .dshDashboardGrid__item {
-  scroll-margin-top: calc(var(--euiFixedHeadersOffset, 100) * 4);
+  scroll-margin-top: calc(var(--euiFixedHeadersOffset, 100)* 2);
 }
 
 // LAYOUT MODES
@@ -59,6 +59,3 @@
   z-index: 999 !important;
 }
 
-.coreSystemRootDomElement {
-  overflow-y: auto !important;
-}
