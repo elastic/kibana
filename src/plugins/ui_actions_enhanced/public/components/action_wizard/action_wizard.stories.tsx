@@ -36,7 +36,7 @@ Default.story = {
 
 export const OnlyOneFactoryIsAvailable = () => (
   // to make sure layout doesn't break
-  <Demo actionFactories={[dashboard]} />
+  (<Demo actionFactories={[dashboard]} />)
 );
 
 OnlyOneFactoryIsAvailable.story = {
@@ -45,7 +45,7 @@ OnlyOneFactoryIsAvailable.story = {
 
 export const LongListOfActionFactories = () => (
   // to make sure layout doesn't break
-  <Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />
+  (<Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />)
 );
 
 LongListOfActionFactories.story = {
