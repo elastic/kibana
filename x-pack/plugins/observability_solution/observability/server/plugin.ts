@@ -105,7 +105,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
-    // TODO: third place cases perms are defined
+
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
