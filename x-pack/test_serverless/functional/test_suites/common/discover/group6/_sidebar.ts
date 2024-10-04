@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover sidebar', function describeIndexTests() {
     // see details: https://github.com/elastic/kibana/issues/195100
     this.tags(['failsOnMKI']);
-    
+
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.loginAsAdmin();
