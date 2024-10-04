@@ -63,7 +63,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
     const passphrase = providedPassphrase || this.generatePassphrase();
     const keyPair = generateKeyPairSync('ec', {
-      namedCurve: 'prime256v1',
+      namedCurve: 'P-256',
       privateKeyEncoding: {
         type: 'pkcs8',
         format: 'der',
@@ -114,7 +114,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       ? message
       : Buffer.from(JSON.stringify(message), 'utf8');
 
-    const signer = createSign('RSA-SHA512');
+    const signer = createSign('sha256');
     signer.update(msgBuffer);
     signer.end();
 
