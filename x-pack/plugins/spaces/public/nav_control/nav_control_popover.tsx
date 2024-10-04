@@ -149,10 +149,16 @@ class NavControlPopoverUI extends Component<Props, State> {
         title={tourTexts.title}
         anchorPosition="downCenter"
         footerAction={
-          <EuiButtonEmpty size="s" color="text" onClick={this.props.onFinishTour}>
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            onClick={this.props.onFinishTour}
+            data-test-subj="closeTourBtn"
+          >
             {tourTexts.closeBtn}
           </EuiButtonEmpty>
         }
+        data-test-subj="spaceSolutionTour"
       >
         <EuiPopover
           id="spcMenuPopover"
