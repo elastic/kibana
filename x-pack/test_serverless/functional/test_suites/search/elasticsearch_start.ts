@@ -100,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
         await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyPreGenerated();
         const refreshBrowserApiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         expect(refreshBrowserApiKeyUI).to.eql(apiKeyUI);
 
@@ -174,7 +175,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should not create an API key if the user only has viewer permissions', async () => {
           await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
           await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-          await pageObjects.svlApiKeys.expectNoPermissionsMessage();
+          await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyFormNotAvailable();
           const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
           expect(apiKey).to.be(null);
         });
