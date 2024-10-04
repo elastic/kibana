@@ -343,10 +343,6 @@ export const getNewTermsRule = (
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   new_terms_fields: ['host.name'],
   history_window_start: 'now-51000h',
@@ -627,6 +623,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
 
   return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };
+
 export const getEndpointRule = (): QueryRuleCreateProps => ({
   type: 'query',
   query: 'event.kind:alert and event.module:(endpoint and not endgame)',
