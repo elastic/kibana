@@ -261,7 +261,7 @@ export const syncEditedMonitor = async ({
       decryptedPreviousMonitor,
       server
     );
-    const formattedMonitor = formatSecrets(monitorWithId);
+    const formattedMonitor = formatSecrets(monitorWithId as MonitorFields);
 
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,

@@ -24,7 +24,6 @@ import {
   VerificationMode,
   BrowserSensitiveSimpleFields,
 } from '../../../../common/runtime_types';
-import { unzipFile } from '../../../common/unzip_project_code';
 import { inlineToProjectZip } from '../../../common/inline_to_zip';
 
 const testHTTPConfig: Partial<MonitorFields> = {

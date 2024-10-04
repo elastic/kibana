@@ -76,7 +76,7 @@ step('fail', () => {
       newMonitorId: 'testMonitorId',
     });
 
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeUndefined();
+    expect((hydratedMonitor as any)[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeUndefined();
   });
 
   it('does not add b64 zip data to lightweight monitors', () => {
@@ -138,6 +138,6 @@ step('fail', () => {
       newMonitorId,
     });
 
-    expect(hydratedMonitor[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeFalsy();
+    expect((hydratedMonitor as any)[ConfigKey.SOURCE_PROJECT_CONTENT]).toBeFalsy();
   });
 });
