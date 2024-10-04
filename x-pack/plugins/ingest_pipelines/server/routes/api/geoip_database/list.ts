@@ -65,7 +65,8 @@ export const registerListGeoipRoute = ({
 
       try {
         const data = await clusterClient.asCurrentUser.ingest.getGeoipDatabase();
-        const geoipDatabases = [...data.databases, ...mockedDatabases];
+        // const geoipDatabases = [...data.databases, ...mockedDatabases];
+        const geoipDatabases = data.databases;
 
         return res.ok({ body: geoipDatabases.map(deserializeGeoipDatabase) });
       } catch (error) {
