@@ -62,14 +62,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
 
     const passphrase = providedPassphrase || this.generatePassphrase();
-    const keyPair = generateKeyPairSync('ec', {
-      namedCurve: 'P-256',
+    const keyPair = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
       privateKeyEncoding: {
         type: 'pkcs8',
         format: 'der',
-        cipher: 'aes-256-gcm',
+        cipher: 'aes-256-cbc',
         passphrase,
-        iv: randomBytes(32),
       },
       publicKeyEncoding: {
         type: 'spki',
@@ -115,7 +114,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       ? message
       : Buffer.from(JSON.stringify(message), 'utf8');
 
-    const signer = createSign('sha256');
+    const signer = createSign('SHA256');
     signer.update(msgBuffer);
     signer.end();
 
