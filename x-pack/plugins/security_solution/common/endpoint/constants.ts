@@ -60,6 +60,7 @@ export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
+export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
 
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
@@ -74,7 +75,7 @@ export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_
 /** Suggestions routes */
 /** @deprecated public route, use {@link SUGGESTIONS_INTERNAL_ROUTE} internal route  */
 export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
-export const SUGGESTIONS_INTERNAL_ROUTE = `/internal/endpoint/suggestions/{suggestion_type}`;
+export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
 /**
  * Action Response Routes

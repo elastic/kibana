@@ -216,9 +216,6 @@ import type {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
   GetEndpointSuggestionsResponse,
-  InternalGetEndpointSuggestionsRequestParamsInput,
-  InternalGetEndpointSuggestionsRequestBodyInput,
-  InternalGetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
@@ -1515,19 +1512,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalGetEndpointSuggestions(props: InternalGetEndpointSuggestionsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InternalGetEndpointSuggestions`);
-    return this.kbnClient
-      .request<InternalGetEndpointSuggestionsResponse>({
-        path: replaceParams('/internal/endpoint/suggestions/{suggestion_type}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2191,10 +2175,6 @@ export interface InitEntityEngineProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
-}
-export interface InternalGetEndpointSuggestionsProps {
-  params: InternalGetEndpointSuggestionsRequestParamsInput;
-  body: InternalGetEndpointSuggestionsRequestBodyInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;

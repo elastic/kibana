@@ -187,7 +187,7 @@ describe('when calling the Suggestions route handler', () => {
           routerMock,
           'post',
           routePrefix,
-          '2023-10-31'
+          '1'
         );
 
         await routeHandler(ctx as unknown as RequestHandlerContext, mockRequest, mockResponse);
