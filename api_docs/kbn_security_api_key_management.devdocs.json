@@ -379,7 +379,7 @@
         "label": "ApiKeyFlyout",
         "description": [],
         "signature": [
-          "({ onSuccess, onCancel, defaultExpiration, defaultMetadata, defaultRoleDescriptors, apiKey, canManageCrossClusterApiKeys, readOnly, currentUser, isLoadingCurrentUser, }: (",
+          "({ onSuccess, onCancel, defaultExpiration, defaultMetadata, defaultRoleDescriptors, defaultName, apiKey, canManageCrossClusterApiKeys, readOnly, currentUser, isLoadingCurrentUser, }: (",
           "DisambiguateSet",
           "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
           "DisambiguateSet",
@@ -394,7 +394,7 @@
             "id": "def-public.ApiKeyFlyout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  onSuccess,\n  onCancel,\n  defaultExpiration,\n  defaultMetadata,\n  defaultRoleDescriptors,\n  apiKey,\n  canManageCrossClusterApiKeys = false,\n  readOnly = false,\n  currentUser,\n  isLoadingCurrentUser,\n}",
+            "label": "{\n  onSuccess,\n  onCancel,\n  defaultExpiration,\n  defaultMetadata,\n  defaultRoleDescriptors,\n  defaultName,\n  apiKey,\n  canManageCrossClusterApiKeys = false,\n  readOnly = false,\n  currentUser,\n  isLoadingCurrentUser,\n}",
             "description": [],
             "signature": [
               "(",
