@@ -12,15 +12,16 @@ const ACCESS_TAG_PREFIX = 'access:';
 
 const isStringLiteral = (el) => el.type === 'Literal' && typeof el.value === 'string';
 const isLiteralAccessTag = (el) => isStringLiteral(el) && el.value.startsWith(ACCESS_TAG_PREFIX);
-const isLiteralNonAccessTag = (el) =>
-  isStringLiteral(el) && !el.value.startsWith(ACCESS_TAG_PREFIX);
 
 const isTemplateLiteralAccessTag = (el) =>
   el.type === 'TemplateLiteral' && el.quasis[0].value.raw.startsWith(ACCESS_TAG_PREFIX);
-const isTemplateLiteralNonAccessTag = (el) =>
-  el.type === 'TemplateLiteral' && !el.quasis[0].value.raw.startsWith(ACCESS_TAG_PREFIX);
 
 const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = false) => {
+  // Allow disabling migration for routes that are opted out from authorization
+  if (process.env.MIGRATE_DISABLED_AUTHZ === 'false') {
+    return;
+  }
+
   const callee = node.callee;
   const isAddVersionCall =
     callee.type === 'MemberExpression' && callee.property.name === 'addVersion';
@@ -166,11 +167,11 @@ const handleRouteConfig = (node, context, isVersionedRoute = false) => {
 
       const accessTagsFilter = (el) => isLiteralAccessTag(el) || isTemplateLiteralAccessTag(el);
       const nonAccessTagsFilter = (el) =>
-        isLiteralNonAccessTag(el) || isTemplateLiteralNonAccessTag(el);
+        !isLiteralAccessTag(el) && !isTemplateLiteralAccessTag(el);
 
       const getAccessPrivilege = (el) => {
         if (el.type === 'Literal') {
-          return `'${el.value.split(':')[1]}'`;
+          return `'${el.value.split(ACCESS_TAG_PREFIX)[1]}'`;
         }
 
         if (el.type === 'TemplateLiteral') {
