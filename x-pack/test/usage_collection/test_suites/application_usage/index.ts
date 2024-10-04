@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       try {
         const enabledAppIds = Object.keys(applicationUsageSchema).filter(
           // Profiling is currently disabled by default as it's in closed beta
-          // last-used-logs-viewer is a only redirection wrapper for the logs apps and should not be tracked
-          (appId) => appId !== 'profiling' && appId !== 'last-used-logs-viewer'
+          (appId) => appId !== 'profiling'
         );
         expect(enabledAppIds.sort()).to.eql(appIds.sort());
       } catch (err) {
