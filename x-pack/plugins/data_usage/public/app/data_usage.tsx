@@ -5,42 +5,81 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiLoadingElastic,
   EuiPageSection,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { UsageMetricsRequestSchemaQueryParams } from '../../common/rest_types';
 import { Charts } from './components/charts';
-import { DatePicker } from './components/date_picker';
+import { UsageMetricsDateRangePicker } from './components/date_picker';
 import { useBreadcrumbs } from '../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { PLUGIN_NAME } from '../../common';
-import { DatePickerProvider } from './hooks/use_date_picker';
 import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
+import { useDateRangePicker } from './hooks/use_date_picker';
+import { useDataUsageMetricsUrlParams } from './hooks/use_charts_url_params';
 
 export const DataUsage = () => {
   const {
     services: { chrome, appParams },
   } = useKibanaContextForPlugin();
 
-  const { data, isFetching, isError } = useGetDataUsageMetrics({
+  const { metricTypes: metricTypesFromUrl, dataStreams: dataStreamsFromUrl } =
+    useDataUsageMetricsUrlParams();
+
+  const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
-    to: 1726908930000,
-    from: 1726858530000,
+    dataStreams: [],
   });
 
-  const isLoading = isFetching || !data;
+  useEffect(() => {
+    setQueryParams((prevState) => ({
+      ...prevState,
+      metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
+      dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
+    }));
+  }, [metricTypesFromUrl, dataStreamsFromUrl]);
+
+  const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
+
+  const {
+    error,
+    data,
+    isFetching,
+    isFetched,
+    refetch: refetchDataUsageMetrics,
+  } = useGetDataUsageMetrics(
+    {
+      ...queryParams,
+      from: dateRangePickerState.startDate,
+      to: dateRangePickerState.endDate,
+    },
+    {
+      retry: false,
+    }
+  );
+
+  const onRefresh = useCallback(() => {
+    refetchDataUsageMetrics();
+  }, [refetchDataUsageMetrics]);
 
   useBreadcrumbs([{ text: PLUGIN_NAME }], appParams, chrome);
 
+  // TODO: show a toast?
+  if (!isFetching && error?.body) {
+    return <div>{error.body.message}</div>;
+  }
+
   return (
-    <DatePickerProvider>
+    <>
       <EuiTitle size="l">
         <h2>
           {i18n.translate('xpack.dataUsage.pageTitle', {
@@ -60,12 +99,18 @@ export const DataUsage = () => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DatePicker />
+            <UsageMetricsDateRangePicker
+              dateRangePickerState={dateRangePickerState}
+              isDataLoading={isFetching}
+              onRefresh={onRefresh}
+              onRefreshChange={onRefreshChange}
+              onTimeChange={onTimeChange}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <Charts data={response} />
+        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
       </EuiPageSection>
-    </DatePickerProvider>
+    </>
   );
 };

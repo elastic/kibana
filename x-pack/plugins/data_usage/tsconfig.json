@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
+    "@kbn/data-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-render",

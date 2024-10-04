@@ -31,8 +31,8 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { MetricsResponse } from '../types';
-import { MetricKey } from '../../../common/types';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { MetricTypes } from '../../../common/rest_types';
 interface ChartsProps {
   data: MetricsResponse;
 }
@@ -40,7 +40,9 @@ const formatBytes = (bytes: number) => {
   return numeral(bytes).format('0.0 b');
 };
 
-export const chartKeyToTitleMap: Record<MetricTypes, string> = {
+// TODO: Remove this when we have a title for each metric type
+type ChartKey = Extract<MetricTypes, 'ingest_rate' | 'storage_retained'>;
+export const chartKeyToTitleMap: Record<ChartKey, string> = {
   ingest_rate: i18n.translate('xpack.dataUsage.charts.ingestedMax', {
     defaultMessage: 'Data Ingested',
   }),

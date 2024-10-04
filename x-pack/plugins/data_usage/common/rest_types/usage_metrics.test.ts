@@ -11,8 +11,6 @@ describe('usage_metrics schemas', () => {
   it('should accept valid request query', () => {
     expect(() =>
       UsageMetricsRequestSchema.query.validate({
-        from: new Date().toISOString(),
-        to: new Date().toISOString(),
         metricTypes: ['storage_retained'],
       })
     ).not.toThrow();
@@ -150,25 +148,5 @@ describe('usage_metrics schemas', () => {
     ).toThrow(
       '[metricTypes] must be one of storage_retained, ingest_rate, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
     );
-  });
-
-  it('should error if `from` is not valid', () => {
-    expect(() =>
-      UsageMetricsRequestSchema.query.validate({
-        from: 'bar',
-        to: new Date().toISOString(),
-        metricTypes: ['storage_retained'],
-      })
-    ).toThrow('[from]: Invalid date');
-  });
-
-  it('should error if `to` is not valid', () => {
-    expect(() =>
-      UsageMetricsRequestSchema.query.validate({
-        from: new Date().toISOString(),
-        to: 'foo',
-        metricTypes: ['storage_retained'],
-      })
-    ).toThrow('[to]: Invalid date');
   });
 });
