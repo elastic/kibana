@@ -4,44 +4,48 @@ exports[`NavControlPopover renders without crashing 1`] = `
 <body>
   <div>
     <div
-      class="euiPopover emotion-euiPopover-inline-block"
-      id="spcMenuPopover"
+      class="euiPopover euiTourAnchor emotion-euiPopover-inline-block"
     >
-      <button
-        aria-controls="headerSpacesMenuContent"
-        aria-describedby="spacesNavDetails"
-        aria-expanded="false"
-        aria-haspopup="true"
-        aria-label="Spaces navigation"
-        class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-        data-test-subj="spacesNavSelector"
-        title="loading spaces navigation"
-        type="button"
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="spcMenuPopover"
       >
-        <span
-          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+        <button
+          aria-controls="headerSpacesMenuContent"
+          aria-describedby="spacesNavDetails"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-label="Spaces navigation"
+          class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+          data-test-subj="spacesNavSelector"
+          title="loading spaces navigation"
+          type="button"
         >
           <span
-            class="eui-textTruncate euiButtonEmpty__text"
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+              class="eui-textTruncate euiButtonEmpty__text"
             >
               <span
-                aria-label="Loading"
-                class="euiLoadingSpinner eui-alignMiddle emotion-euiLoadingSpinner-m"
-                role="progressbar"
-              />
-              <p
-                hidden=""
-                id="spacesNavDetails"
+                class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
               >
-                loading spaces navigation is the currently selected space. Click this button to open a popover that allows you to select the active space.
-              </p>
+                <span
+                  aria-label="Loading"
+                  class="euiLoadingSpinner eui-alignMiddle emotion-euiLoadingSpinner-m"
+                  role="progressbar"
+                />
+                <p
+                  hidden=""
+                  id="spacesNavDetails"
+                >
+                  loading spaces navigation is the currently selected space. Click this button to open a popover that allows you to select the active space.
+                </p>
+              </span>
             </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </body>

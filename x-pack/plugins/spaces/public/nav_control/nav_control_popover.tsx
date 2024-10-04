@@ -34,7 +34,7 @@ const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
 
-interface Props {
+export interface Props {
   spacesManager: SpacesManager;
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
@@ -158,7 +158,9 @@ class NavControlPopoverUI extends Component<Props, State> {
             {tourTexts.closeBtn}
           </EuiButtonEmpty>
         }
-        data-test-subj="spaceSolutionTour"
+        panelProps={{
+          'data-test-subj': 'spaceSolutionTour',
+        }}
       >
         <EuiPopover
           id="spcMenuPopover"
@@ -170,6 +172,9 @@ class NavControlPopoverUI extends Component<Props, State> {
           repositionOnScroll
           ownFocus
           zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
+          panelProps={{
+            'data-test-subj': 'spaceMenuPopoverPanel',
+          }}
         >
           {element}
         </EuiPopover>
@@ -245,6 +250,7 @@ class NavControlPopoverUI extends Component<Props, State> {
 
   protected toggleSpaceSelector = () => {
     const isOpening = !this.state.showSpaceSelector;
+
     if (isOpening) {
       this.loadSpaces();
     }
