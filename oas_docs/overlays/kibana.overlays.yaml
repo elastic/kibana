@@ -70,8 +70,12 @@ actions:
     update:
       x-displayName: "Service level objectives"
   - target: '$.tags[?(@.name=="system")]'
-    description: Change displayName
+    description: Change displayName and description
     update:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
+  # Remove extra tags from operations
+  - target: "$.paths[*][*].tags[1:]"
+    description: Remove all but first tag from operations
+    remove: true

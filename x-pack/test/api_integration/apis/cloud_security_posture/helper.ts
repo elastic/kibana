@@ -29,6 +29,21 @@ export const deleteIndex = async (es: Client, indexToBeDeleted: string[]) => {
   ]);
 };
 
+export const bulkIndex = async <T>(es: Client, findingsMock: T[], indexName: string) => {
+  const operations = findingsMock.flatMap((finding) => [
+    { create: { _index: indexName } }, // Action description
+    {
+      ...finding,
+      '@timestamp': new Date().toISOString(),
+    }, // Data to index
+  ]);
+
+  await es.bulk({
+    body: operations, // Bulk API expects 'body' for operations
+    refresh: true,
+  });
+};
+
 export const addIndex = async <T>(es: Client, findingsMock: T[], indexName: string) => {
   await Promise.all([
     ...findingsMock.map((finding) =>
