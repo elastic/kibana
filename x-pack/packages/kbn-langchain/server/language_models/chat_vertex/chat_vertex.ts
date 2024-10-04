@@ -5,119 +5,69 @@
  * 2.0.
  */
 
-import {
-  Content,
-  EnhancedGenerateContentResponse,
-  GenerateContentRequest,
-  GenerateContentResult,
-} from '@google/generative-ai';
+import { EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { Logger } from '@kbn/logging';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { ChatVertexAI } from '@langchain/google-vertexai';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
+
+import { Logger } from '@kbn/logging';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiPartText } from '@langchain/google-common/dist/types';
 import {
-  convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
-} from '../utils/gemini';
-const DEFAULT_GEMINI_TEMPERATURE = 0;
+} from '../../utils/gemini';
+import { ActionsClientChatConnection } from './connection';
 
+const DEFAULT_GEMINI_TEMPERATURE = 0;
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   logger: Logger;
+  streaming: boolean;
   temperature?: number;
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
 }
 
-export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
+export class ActionsClientChatVertexAI extends ChatVertexAI {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
-  #temperature: number;
   #model?: string;
-
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
-      apiKey: 'asda',
       maxOutputTokens: props.maxTokens ?? 2048,
+      temperature: props.temperature ?? DEFAULT_GEMINI_TEMPERATURE,
     });
     // LangChain needs model to be defined for logging purposes
     this.model = props.model ?? this.model;
-    // If model is not specified by consumer, the connector will defin eit so do not pass
+    // If model is not specified by consumer, the connector will define it so do not pass
     // a LangChain default to the actionsClient
     this.#model = props.model;
-    this.#temperature = props.temperature ?? DEFAULT_GEMINI_TEMPERATURE;
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
+    const client = this.buildClient(props);
+    this.connection = new ActionsClientChatConnection(
+      {
+        ...this,
+      },
+      this.caller,
+      client,
+      false,
+      actionsClient,
+      connectorId
+    );
   }
 
-  async completionWithRetry(
-    request: GenerateContentRequest,
-    options?: this['ParsedCallOptions']
-  ): Promise<GenerateContentResult> {
-    return this.caller.callWithOptions({ signal: options?.signal }, async () => {
-      try {
-        const requestBody = {
-          actionId: this.#connectorId,
-          params: {
-            subAction: 'invokeAIRaw',
-            subActionParams: {
-              model: this.#model,
-              messages: request.contents,
-              tools: request.tools,
-              temperature: this.#temperature,
-            },
-          },
-        };
-
-        const actionResult = (await this.#actionsClient.execute(requestBody)) as {
-          status: string;
-          data: EnhancedGenerateContentResponse;
-          message?: string;
-          serviceMessage?: string;
-        };
-
-        if (actionResult.status === 'error') {
-          throw new Error(
-            `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-          );
-        }
-
-        if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
-          // handle bad finish reason
-          const errorMessage = convertResponseBadFinishReasonToErrorMsg(actionResult.data);
-          if (errorMessage != null) {
-            throw new Error(errorMessage);
-          }
-        }
-
-        return {
-          response: {
-            ...actionResult.data,
-            functionCalls: () =>
-              actionResult.data?.candidates?.[0]?.content?.parts[0].functionCall
-                ? [actionResult.data?.candidates?.[0]?.content.parts[0].functionCall]
-                : [],
-          },
-        };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (e: any) {
-        // TODO: Improve error handling
-        if (e.message?.includes('400 Bad Request')) {
-          e.status = 400;
-        }
-        throw e;
-      }
-    });
+  buildConnection() {
+    // prevent ChatVertexAI from overwriting our this.connection defined in super
   }
 
   async *_streamResponseChunks(
@@ -125,36 +75,24 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
-    const prompt = convertBaseMessagesToContent(messages, this._isMultimodalModel);
     const parameters = this.invocationParams(options);
-    const request = {
-      ...parameters,
-      contents: prompt,
-    };
-
+    const data = await this.connection.formatData(messages, parameters);
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
+      const systemPart: GeminiPartText | undefined = data?.systemInstruction
+        ?.parts?.[0] as unknown as GeminiPartText;
+      const systemInstruction = systemPart?.text.length
+        ? { systemInstruction: systemPart?.text }
+        : {};
       const requestBody = {
         actionId: this.#connectorId,
         params: {
           subAction: 'invokeStream',
           subActionParams: {
             model: this.#model,
-            messages: request.contents.reduce((acc: Content[], item) => {
-              if (!acc?.length) {
-                acc.push(item);
-                return acc;
-              }
-
-              if (acc[acc.length - 1].role === item.role) {
-                acc[acc.length - 1].parts = acc[acc.length - 1].parts.concat(item.parts);
-                return acc;
-              }
-
-              acc.push(item);
-              return acc;
-            }, []),
-            temperature: this.#temperature,
-            tools: request.tools,
+            messages: data?.contents,
+            tools: data?.tools,
+            temperature: this.temperature,
+            ...systemInstruction,
           },
         },
       };
@@ -163,7 +101,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
 
       if (actionResult.status === 'error') {
         throw new Error(
-          `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+          `ActionsClientChatVertexAI: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
         );
       }
 
@@ -174,13 +112,11 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       }
       return readable;
     });
-
     let usageMetadata: UsageMetadata | undefined;
     let index = 0;
     let partialStreamChunk = '';
     for await (const rawStreamChunk of stream) {
       const streamChunk = rawStreamChunk.toString();
-
       const nextChunk = `${partialStreamChunk + streamChunk}`;
 
       let parsedStreamChunk: EnhancedGenerateContentResponse | null = null;
