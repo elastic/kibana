@@ -43,7 +43,7 @@ describe('ruleActionsAlertsFilter', () => {
             SearchBar: {},
           },
         },
-        data: {},
+        dataViews: {},
       },
       formData: {
         actions: [],
