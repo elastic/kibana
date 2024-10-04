@@ -9,6 +9,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
@@ -39,6 +40,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const documentIds = queryParams.documentIds ?? null;
+          const savedObjectIds = queryParams.savedObjectIds ?? null;
           if (documentIds != null) {
             if (Array.isArray(documentIds)) {
               const docIdSearchString = documentIds?.join(' | ');
@@ -60,6 +62,34 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               return response.ok({ body: res ?? {} });
+            }
+          } else if (savedObjectIds != null) {
+            if (Array.isArray(savedObjectIds)) {
+              const soIdSearchString = savedObjectIds?.join(' | ');
+              const options = {
+                type: noteSavedObjectType,
+                hasReference: {
+                  type: timelineSavedObjectType,
+                  id: soIdSearchString,
+                },
+                page: 1,
+                perPage: MAX_UNASSOCIATED_NOTES,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
+            } else {
+              const options = {
+                type: noteSavedObjectType,
+                hasReference: {
+                  type: timelineSavedObjectType,
+                  id: savedObjectIds,
+                },
+                perPage: MAX_UNASSOCIATED_NOTES,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
+              const body: GetNotesResponse = res ?? {};
+              return response.ok({ body });
             }
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
