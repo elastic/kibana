@@ -298,20 +298,20 @@ describe('query tab with unified timeline', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/189791
-  describe.skip('pagination', () => {
+  describe.only('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
       useTimelineEventsMock = jest.fn(() => [
         false,
         {
-          events: structuredClone(mockTimelineData),
+          events: structuredClone(mockTimelineData.slice(0, 5)),
           pageInfo: {
             activePage: 0,
-            totalPages: 10,
+            totalPages: 5,
           },
           refreshedAt: Date.now(),
-          totalCount: 70,
+          totalCount: 5,
           loadPage: loadPageMock,
         },
       ]);
@@ -326,36 +326,88 @@ describe('query tab with unified timeline', () => {
     it(
       'should paginate correctly',
       async () => {
-        renderTestComponents();
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                itemsPerPage: 1,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
 
-        await waitFor(() => {
-          expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-            'Rows per page: 5'
-          );
-        });
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+          'Rows per page: 1'
+        );
 
         expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-        expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+        expect(screen.getByTestId('pagination-button-4')).toBeVisible();
+        expect(screen.queryByTestId('pagination-button-5')).toBeNull();
 
-        fireEvent.click(screen.getByTestId('pagination-button-6'));
+        fireEvent.click(screen.getByTestId('pagination-button-4'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-6')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-4')).toHaveAttribute('aria-current', 'true');
         });
       },
       SPECIAL_TEST_TIMEOUT
     );
 
-    it(
+    it.only(
       'should load more records according to sample size correctly',
       async () => {
-        renderTestComponents();
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                itemsPerPage: 1,
+                sampleSize: 4,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
+
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-          expect(screen.getByTestId('pagination-button-6')).toBeVisible();
+          expect(screen.getByTestId('pagination-button-3')).toBeVisible();
         });
         // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-6'));
+        fireEvent.click(screen.getByTestId('pagination-button-3'));
         await waitFor(() => {
           expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         });

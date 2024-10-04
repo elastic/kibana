@@ -64,6 +64,12 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
     return null;
   }
 
+  console.log({
+    rowCount,
+    sampleSize,
+    MAX_LOADED_GRID_ROWS,
+  });
+
   // allow to fetch more records for UnifiedDataTable
   if (onFetchMoreRecords && typeof isLoadingMore === 'boolean') {
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
