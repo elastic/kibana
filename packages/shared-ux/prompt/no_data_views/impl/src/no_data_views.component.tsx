@@ -16,16 +16,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTextAlign,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { DocumentationLink } from './documentation_link';
+import { DataViewIllustration } from './data_view_illustration';
+import { EsqlIllustration } from './esql_illustration';
 
 // max width value to use in pixels
 const MAX_WIDTH = 770;
@@ -39,17 +39,7 @@ const PromptAddDataViews = ({
   NoDataViewsPromptComponentProps,
   'onClickCreate' | 'canCreateNewDataView' | 'dataViewsDocLink' | 'emptyPromptColor'
 >) => {
-  // Load this illustration lazily
-  const Illustration = withSuspense(
-    React.lazy(() =>
-      import('./data_view_illustration').then(({ DataViewIllustration }) => {
-        return { default: DataViewIllustration };
-      })
-    ),
-    <EuiPanel color="subdued" style={{ width: 110, height: 100 }} />
-  );
-
-  const icon = <Illustration />;
+  const icon = <DataViewIllustration />;
 
   const title = (
     <FormattedMessage
@@ -113,17 +103,7 @@ const PromptTryEsql = ({
     return null;
   }
 
-  // Load this illustration lazily
-  const Illustration = withSuspense(
-    React.lazy(() =>
-      import('./esql_illustration').then(({ EsqlIllustration }) => {
-        return { default: EsqlIllustration };
-      })
-    ),
-    <EuiPanel color="subdued" style={{ width: 110, height: 100 }} />
-  );
-
-  const icon = <Illustration />;
+  const icon = <EsqlIllustration />;
 
   const title = (
     <FormattedMessage
