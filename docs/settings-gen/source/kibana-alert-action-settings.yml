@@ -7,7 +7,7 @@ collection: Alerting and action settings in {kib}
 groups:
   - group: General settings
     id: general-alert-action-settings
-    # description:
+    # description: ""
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
@@ -18,20 +18,24 @@ groups:
           - "If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}."
           - "Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>. Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>."
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
   - group: Action settings
     id: action-settings
-    # description:
+    # description: ""
     settings:
 
       - setting: xpack.actions.allowedHosts
@@ -40,1735 +44,2167 @@ groups:
           - 'A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `["*"]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.'
           - 'Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `["*"]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.'
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
-        # platforms
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings
         # id:
         description:
           - A list of custom host settings to override existing global settings.
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].url
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].smtp.ignoreTLS
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].smtp.requireTLS
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].ssl.rejectUnauthorized
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
         id: action-config-custom-host-verification-mode
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.email.domain_allowlist
         id: action-config-email-domain-allowlist
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.enableFooterInEmail
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.enabledActionTypes
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.microsoftExchangeUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.microsoftGraphApiUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.microsoftGraphApiScope
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.proxyUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.proxyBypassHosts
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.proxyOnlyHosts
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.proxyHeaders
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.proxyRejectUnauthorizedCertificates
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.ssl.proxyVerificationMode
         id: action-config-proxy-verification-mode
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.rejectUnauthorized
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.ssl.verificationMode
         id: action-config-verification-mode
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.maxResponseContentLength
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.responseTimeout
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.run.maxAttempts
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.run.connectorTypeOverrides
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.queued.max
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
   - group: Preconfigured connector settings
     id: preconfigured-connector-settings
-    # description:
+    # description: ""
     settings:
 
       - setting: xpack.actions.preconfiguredAlertHistoryEsIndex
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.actionTypeId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiProvider
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiUrl
         # id:
         description:
           - "A configuration URL that varies by connector:"
         # state:
-        # deprecated_guidance:
-        example: example-xpack-actions-preconfigured-connector-id-config-apiurl.asciidoc
+        # deprecation_details: ""
+        intro: intro-xpack-actions-preconfigured-connector-id-config-apiurl.asciidoc
         note: "If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts."
-        # tip:
-        # warning:
-        # important:
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.appId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.clientId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.configUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentJson
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentMethod
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentJson
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.defaultModel
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.executionTimeField
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.from
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform: 
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.hasAuth
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.headers
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.host
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.isOAuth
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.jwtKeyId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.method
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.orgId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.port
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.projectKey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.secure
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.service
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.tenantId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.url
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesBasic
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesTableApi
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.name
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.accessKey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apikey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.credentialsJSON
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiToken
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.clientSecret
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.email
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.password
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKey
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.token
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.user
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.username
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
   - group: Alerting settings
     id: alert-settings
-    # description:
+    # description: ""
     settings:
 
       - setting: xpack.alerting.maxEphemeralActionsPerAlert
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.cancelAlertsOnRuleTimeout
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
-        # id:
+        # id: 
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.value
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.enforce
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.run.actions.max
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.run.alerts.max
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.run.timeout
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.run.ruleTypeOverrides
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
       - setting: xpack.alerting.rules.run.actions.connectorTypeOverrides
         # id:
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc

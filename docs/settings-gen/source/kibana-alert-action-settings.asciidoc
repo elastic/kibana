@@ -283,7 +283,7 @@ A configuration URL that varies by connector:
 
 
 
-include::../examples/example-xpack-actions-preconfigured-connector-id-config-apiurl.asciidoc[]
+include::../embeds/intro-xpack-actions-preconfigured-connector-id-config-apiurl.asciidoc[]
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 ====

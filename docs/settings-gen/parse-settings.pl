@@ -100,7 +100,7 @@ sub parsefile {
 
     # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
     if ($group_example) {
-      $asciidocoutput .= "\n**Example**\n\ninclude::../examples/".$group_example."[]\n";
+      $asciidocoutput .= "\n**Example**\n\ninclude::../embeds/".$group_example."[]\n";
     }
     if ($group_description_string) {
       $asciidocoutput .= $group_description_string;
@@ -113,6 +113,7 @@ sub parsefile {
       my $setting_name = $setting->{setting};
       my $setting_id = $setting->{id};
       my $setting_description = $setting->{description};
+      my $setting_intro = $setting->{intro};      
       my $setting_note = $setting->{note};
       my $setting_warning = $setting->{warning};
       my $setting_important = $setting->{important};
@@ -123,7 +124,7 @@ sub parsefile {
       my $setting_platforms = $setting->{platforms};
       my $setting_example = $setting->{example};
       my $setting_state = $setting->{state};
-      my $deprecated_guidance = $setting->{deprecated_guidance};
+      my $deprecation_details = $setting->{deprecation_details};
 
       # skip settings that are flagged as "hidden" 
       if (($setting_state) && ($setting_state =~ /hidden/i)) {next;}
@@ -190,8 +191,8 @@ sub parsefile {
         elsif ($setting_state =~ /deprecated/i) 
           {
             $asciidocoutput .= "**Deprecated:** ";
-            if ($deprecated_guidance) {
-            $asciidocoutput .= $deprecated_guidance."\n\n";
+            if ($deprecation_details) {
+            $asciidocoutput .= $deprecation_details."\n\n";
           }
           }
         # known setting_states are 'technical-preview', 'deprecated' and 'hidden'. Anything else is ignored.
@@ -204,9 +205,9 @@ sub parsefile {
         $asciidocoutput .= $setting_description_string;
       }
 
-      # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
-      if ($setting_example) {
-        $asciidocoutput .= "\n\ninclude::../examples/".$setting_example."[]\n";
+      # Add an intro if there is one, like this:    include::../embeds/intro-logging-root-level.asciidoc[]
+      if ($setting_intro) {
+        $asciidocoutput .= "\n\ninclude::../embeds/".$setting_intro."[]\n";
       }
 
       if ($setting_note) {
@@ -239,6 +240,11 @@ sub parsefile {
         if ($setting_type) {
           $asciidocoutput .= 'Type: `'.$setting_type.'` +'."\n";
         }
+      }
+
+      # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
+      if ($setting_example) {
+        $asciidocoutput .= "\n\ninclude::../embeds/".$setting_example."[]\n";
       }
 
       $asciidocoutput .= "====\n";

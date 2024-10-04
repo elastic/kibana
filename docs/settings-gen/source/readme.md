@@ -2,7 +2,7 @@ Settings YAML file schema
 
 
 
-Schema with descriptions of each field
+Schema with descriptions
 
 ```
 product: <Required (string) - the Elastic product name, e.g. 'Elasticsearch', 'Kibana', 'Enterprise Search', 'Elasticsearch Service', 'Elastic Cloud Enterprise'>
@@ -11,37 +11,40 @@ page_description:
   - <"Optional (asciidoc) - A summary description that appears at the top of the settings page">
 
 groups:
-  - group: <Optional (string) - The section title on the settings page, e.g. 'General settings', 'Action settings', 'Preconfigured connector settings'>
-    group_id: <Optional (string) - An ID used for links from other sections of the docs, e.g., general-alert-action-settings>
+  - group: [Optional] (string) - Section title on the settings page, e.g. Preconfigured connector settings
+    group_id: [Optional] (string) - ID used for documentation links, e.g., general-alert-action-settings
     description:
-     - <Optional (asciidoc) - The description content that appears below the group title.>
-     - <Optional (asciidoc) - Paragraph 2>
-     - <Optional (asciidoc) - Paragraph 3, etc.>
+     - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
+     - [Optional] (asciidoc in quotes) - Paragraph 2
+     - [Optional] (asciidoc in quotes) - Paragraph 3
 
     settings:
-      - setting: <Required (string) - The setting name, e.g. xpack.encryptedSavedObjects.encryptionKey>
-        setting_id: <Optional (string) - An ID to used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey.>
+      - setting: [Required] (string) - Setting name, e.g. xpack.encryptedSavedObjects.encryptionKey
+        setting_id: <Optional (string) - ID to used for documentation links, e.g., xpack-encryptedsavedobjects-encryptionkey.>
         description:
-          - <Required (asciidoc) - A description of the setting>
-          - <Optional (asciidoc) - Paragraph 2>
-          - <Optional (asciidoc) - Paragraph 3, etc.>
-        state: <Optional - (one of 'deprecated', 'technical-preview', or 'hidden')>
-        deprecated_guidance: <Optional (asciidoc) - detail about a deprecated setting, e.g., "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
-        note: <Optional (asciidoc) - Text to display in a "Note" call-out box. e.g., "Feature Name is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.">
-        example: Any complex Asciidoc, such as a code example, table, list, image, or anything else. Add the source into the /settings-gen/examples folder and specify the filename with no path, e.g., example-xpack.actions.customHostSettings.asciidoc
-        tip: <Optional (asciidoc) - Text to display in a "Tip" call-out box>
-        warning: <Optional (asciidoc) - Text to display in a "Warning" call-out box>
-        important: <Optional (asciidoc) - Text to display in an "Important:" call-out box>
-        default: <Optional (string) - The default value for the setting.>
+          - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
+          - [Optional] (asciidoc in quotes) - Paragraph 2
+          - [Optional] (asciidoc in quotes) - Paragraph 3
+        state: [Optional] - 'deprecated', 'technical-preview', or 'hidden'
+        deprecation_details: [Optional] (asciidoc in quotes) - details about when it was deprecated and/or what setting to use instead
+
+        intro: Any complex Asciidoc such as tables, lists, code examples, etc.
+        note: [Optional] (asciidoc in quotes) - Text to display in a 'note' callout
+        tip: [Optional] (asciidoc in quotes) - Text to display in a 'tip' callout
+        warning: [Optional] (asciidoc in quotes) - Text to display in a 'warning' callout
+        important: [Optional] (asciidoc in quotes) - Text to display in an 'important' callout
+        default: [Optional] (string) - The setting's default value
         options:
-          - option: <Optional (string) - A setting option, e.g., zh-cn >
-            description: <Optional (asciidoc) - Text to describe the setting option.>
-          - option <Optional (string) - Another setting option, e.g., ja-jp >
-        type: <Optional (one of 'static' or 'dynamic') - Used for Elasticsearch settings only>
+          - option: [Optional] (string) - A setting option, e.g., zh-cn
+            description: [Optional] (asciidoc in quotes) - Description of the setting option
+          - option: [Optional] (string) - A setting option, e.g., ja-jp
+            description: [Optional] (asciidoc in quotes) - Description of the setting option
+        type: [Optional] One of 'static' or 'dynamic'
         platforms:
-          - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
-          - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
-          - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
+          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
+          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
+          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
+        example: Any complex Asciidoc such as tables, lists, code examples, etc.
 ```
 
 
@@ -54,38 +57,26 @@ collection: REQUIRED
 groups:
   - group: REQUIRED
     id: REQUIRED
-    # description:
+    # description: ""
     settings:
 
       - setting: REQUIRED
-        # id:
+        # id: 
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
-
-      - setting: REQUIRED
-        # id:
-        description:
-          - REQUIRED
-        # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
-        # default:
-        # options:
-        # type:
-        # platforms:
+        #   - platform:
+        # example: example.asciidoc
 ```

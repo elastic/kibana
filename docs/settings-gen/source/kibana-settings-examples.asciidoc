@@ -29,9 +29,6 @@ In English, it is named after the ancient Roman god Mercurius (Mercury), god of 
 Mercury is adjacent to the planet <<kibana-example-setting-venus,Venus>>
 
 
-
-include::../examples/example-setting-example.asciidoc[]
-
 WARNING: This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.
 
 Options:
@@ -42,6 +39,9 @@ Options:
 
 Default: `avoid` +
 Type: `static` +
+
+
+include::../embeds/example-setting-example.asciidoc[]
 ====
 
 

@@ -7,22 +7,26 @@ collection: REQUIRED
 groups:
   - group: REQUIRED
     id: REQUIRED
-    # description:
+    # description: ""
     settings:
 
       - setting: REQUIRED
-        # id:
+        # id: 
         description:
-          - REQUIRED
+          - "REQUIRED"
         # state:
-        # deprecated_guidance:
-        # example:
-        # note:
-        # tip:
-        # warning:
-        # important:
+        # deprecation_details: ""
+        # intro: intro.asciidoc
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
         # default:
         # options:
-        # type:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
         # platforms:
+        #   - platform:
+        # example: example.asciidoc
 
