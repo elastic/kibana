@@ -25,7 +25,7 @@ export const ATTACK_DISCOVERY_CARD_DESCRIPTION = i18n.translate(
 export const ATTACK_DISCOVERY_CARD_CALLOUT_INTEGRATIONS_TEXT = i18n.translate(
   'xpack.securitySolution.onboarding.attackDiscoveryCard.calloutIntegrationsText',
   {
-    defaultMessage: 'To view alerts add integrations first.',
+    defaultMessage: 'To use Attack Discovery add integrations first.',
   }
 );
 

@@ -23,6 +23,6 @@ export const GET_STARTED_DATA_INGESTION_HUB_SUBTITLE = i18n.translate(
 export const GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.description',
   {
-    defaultMessage: `Follow these steps to set up your workspace.`,
+    defaultMessage: `A SIEM with AI-driven security analytics, XDR and Cloud Security.`,
   }
 );

@@ -42,7 +42,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText data-test-subj="attackDiscoveryCardDescription" size="s" color="subdued">
             {i18n.ATTACK_DISCOVERY_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (
@@ -68,7 +68,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = ({
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem data-test-subj="attackDiscoveryCardButton" grow={false}>
           <SecuritySolutionLinkButton
             onClick={() => setComplete(true)}
             deepLinkId={SecurityPageName.attackDiscovery}

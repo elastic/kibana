@@ -49,6 +49,10 @@ export type OnboardingCardComponent = React.ComponentType<{
    */
   setComplete: SetComplete;
   /**
+   * Function to check the current card completion status again.
+   */
+  checkComplete: () => void;
+  /**
    * Function to check if a specific card is complete.
    */
   isCardComplete: IsCardComplete;

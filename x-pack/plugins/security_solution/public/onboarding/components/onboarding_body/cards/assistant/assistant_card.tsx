@@ -8,17 +8,22 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { ConfigureConnector } from './components/configure_connector/configure_connector';
+import { ConnectorCards } from './components/connector_cards/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 
-export const AsistantCard: OnboardingCardComponent = ({
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
+
+export const AssistantCard: OnboardingCardComponent = ({
   setComplete,
   isCardComplete,
   setExpandedCardId,
+  checkCompleteMetadata,
+  checkComplete,
 }) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
@@ -29,8 +34,10 @@ export const AsistantCard: OnboardingCardComponent = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
+  const aiConnectors = checkCompleteMetadata?.connectors as AIConnector[];
+
   return (
-    <OnboardingCardContentPanel>
+    <OnboardingCardContentPanel paddingSize="s">
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
@@ -39,7 +46,11 @@ export const AsistantCard: OnboardingCardComponent = ({
         </EuiFlexItem>
         <EuiFlexItem>
           {isIntegrationsCardComplete ? (
-            <ConfigureConnector setComplete={setComplete} />
+            <ConnectorCards
+              connectors={aiConnectors}
+              actionTypeIds={AllowedActionTypeIds}
+              onConnectorSaved={checkComplete}
+            />
           ) : (
             <EuiFlexItem
               className={css`
@@ -70,4 +81,4 @@ export const AsistantCard: OnboardingCardComponent = ({
 };
 
 // eslint-disable-next-line import/no-default-export
-export default AsistantCard;
+export default AssistantCard;

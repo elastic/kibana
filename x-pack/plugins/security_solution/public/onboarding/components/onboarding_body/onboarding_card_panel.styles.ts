@@ -57,5 +57,11 @@ export const useCardPanelStyles = () => {
         background-color: ${successBackgroundColor};
       }
     }
+    ${isDarkMode
+      ? `
+          background-color: ${euiTheme.colors.lightestShade};
+          border: 1px solid ${euiTheme.colors.mediumShade};
+        `
+      : ''}
   `;
 };

@@ -11,6 +11,6 @@ export enum OnboardingCardId {
   dashboards = 'dashboards',
   rules = 'rules',
   alerts = 'alerts',
-  asistant = 'asistant',
+  assistant = 'asistant',
   attackDiscovery = 'attack_discovery',
 }
