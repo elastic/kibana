@@ -188,7 +188,7 @@ export const VulnerabilitiesPreview = ({
 
   const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
 
-  const hasVulnerabilities = totalVulnerabilities > 0;
+  const hasVulnerabilitiesFindings = totalVulnerabilities > 0;
 
   const { euiTheme } = useEuiTheme();
 
@@ -222,12 +222,18 @@ export const VulnerabilitiesPreview = ({
         name,
         isRiskScoreExist,
         hasMisconfigurationFindings,
-        hasVulnerabilitiesFindings: hasVulnerabilities,
+        hasVulnerabilitiesFindings,
         path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
       },
       path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
     });
-  }, [hasMisconfigurationFindings, hasVulnerabilities, isRiskScoreExist, name, openLeftPanel]);
+  }, [
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    isRiskScoreExist,
+    name,
+    openLeftPanel,
+  ]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -246,7 +252,7 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilities ? 'arrowStart' : '',
+        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -265,7 +271,7 @@ export const VulnerabilitiesPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasVulnerabilities ? (
+        {hasVulnerabilitiesFindings ? (
           <VulnerabilitiesCount
             vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)}
             euiTheme={euiTheme}
