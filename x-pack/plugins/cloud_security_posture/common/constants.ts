@@ -125,14 +125,6 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
 };
 
-export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  CRITICAL: 'CRITICAL',
-  UNKNOWN: 'UNKNOWN',
-};
-
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
