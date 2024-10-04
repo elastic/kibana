@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -22,6 +23,8 @@ import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
+import { AddMetricsCallout } from '../../add_metrics_callout';
+import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -44,18 +47,39 @@ export const Overview = () => {
     />
   );
 
+  const addMetricsCalloutId: AddMetricsCalloutKey =
+    asset.type === 'host' ? 'hostOverview' : 'containerOverview';
+
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
+  );
+
+  const showAddMetricsCallout = true && !dismissedAddMetricsCallout && renderMode.mode === 'page'; // TODO integrate proper logic from #193701s
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <KPIGrid
-          assetId={asset.id}
-          assetType={asset.type}
-          dateRange={dateRange}
-          dataView={metrics.dataView}
-        />
-        {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
-      </EuiFlexItem>
-
+      {showAddMetricsCallout && (
+        <EuiFlexItem grow={false}>
+          <AddMetricsCallout
+            id={addMetricsCalloutId}
+            onDismiss={() => {
+              setDismissedAddMetricsCallout(true);
+            }}
+          />
+        </EuiFlexItem>
+      )}
+      {!showAddMetricsCallout && (
+        <EuiFlexItem grow={false}>
+          <KPIGrid
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={dateRange}
+            dataView={metrics.dataView}
+          />
+          {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
