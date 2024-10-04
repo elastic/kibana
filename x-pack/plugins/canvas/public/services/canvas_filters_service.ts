@@ -13,8 +13,6 @@ import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selector
 import { setFilter } from '../state/actions/filters';
 
 class FiltersService {
-  constructor() {}
-
   getFilters(state: State = getState()) {
     return getGlobalFilters(state);
   }

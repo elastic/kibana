@@ -68,7 +68,7 @@ const sanitizeWorkpad = function (workpad: CanvasWorkpad) {
 };
 
 class CanvasWorkpadService {
-  public apiPath = `${API_ROUTE_WORKPAD}`;
+  private apiPath = `${API_ROUTE_WORKPAD}`;
 
   public async get(id: string): Promise<CanvasWorkpad> {
     const workpad = await coreServices.http.get<any>(`${this.apiPath}/${id}`, { version: '1' });
