@@ -318,6 +318,18 @@ export const selectNotesBySavedObjectId = createSelector(
     savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
 );
 
+export const selectDocumentNotesBySavedObjectId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      { documentId, savedObjectId }: { documentId: string; savedObjectId: string }
+    ) => ({ documentId, savedObjectId }),
+  ],
+  (notes, { documentId, savedObjectId }) =>
+    notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+);
+
 export const selectSortedNotesByDocumentId = createSelector(
   [
     selectAllNotes,
