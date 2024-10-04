@@ -68,7 +68,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Threshold rules',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const rule = getNewThresholdRule();
