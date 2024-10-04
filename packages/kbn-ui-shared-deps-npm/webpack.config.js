@@ -9,7 +9,6 @@
 
 const Path = require('path');
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -143,7 +142,7 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      mainFields: ['browser', 'main'],
+      // mainFields: ['browser', 'main'],
       // conditionNames: ['require', 'default', 'node', 'module', 'import'],
       fallback: {
         child_process: false,
@@ -166,9 +165,6 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [

@@ -11,7 +11,6 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -86,9 +85,6 @@ export function getWebpackConfig(
     },
 
     plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -315,7 +311,12 @@ export function getWebpackConfig(
       },
       fallback: {
         child_process: false,
+        crypto: require.resolve('crypto-browserify'),
         fs: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
+        stream: require.resolve('stream-browserify'),
+        timers: require.resolve('timers-browserify'),
       },
     },
 

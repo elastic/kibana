@@ -10,7 +10,6 @@
 /* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
@@ -139,9 +138,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       ],
     },
     plugins: [
-      new NodePolyfillPlugin({
-        additionalAliases: ['process'],
-      }),
       new IgnoreNotFoundExportPlugin(),
     ],
     resolve: {
@@ -151,6 +147,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
+      },
+      fallback: {
+        constants: require.resolve('constants-browserify'),
+        stream: require.resolve('stream-browserify'),
+        timers: require.resolve('timers-browserify'),
       },
     },
     stats: 'errors-only',

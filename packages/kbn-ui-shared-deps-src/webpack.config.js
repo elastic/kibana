@@ -13,7 +13,6 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
@@ -139,9 +138,6 @@ module.exports = {
   },
 
   plugins: [
-    new NodePolyfillPlugin({
-      additionalAliases: ['process'],
-    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
