@@ -36,7 +36,7 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
         }
       });
     }
-  }, [fields, index, onChange, prevIndex, selected, getFields]);
+  }, [fields, index, onChange, prevIndex, selected]);
 
   useEffect(
     () => () => {
