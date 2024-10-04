@@ -18,8 +18,8 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
-// @ts-expect-error
-import VisualizerPlugin from 'webpack-visualizer-plugin2';
+// ts-expect-error
+// import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import {
   STATS_WARNINGS_FILTER,
