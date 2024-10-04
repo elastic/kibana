@@ -50,6 +50,17 @@ describe('Endpoint Policy Settings Form', () => {
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
+  it('should show the event merging banner for 8.16', () => {
+    render();
+    expect(renderResult.getByTestId('eventMergingCallout'));
+  });
+
+  it('should not show the event merging banner after it has been dismissed', () => {
+    render();
+    renderResult.getByTestId('euiDismissCalloutButton').click();
+    expect(renderResult.getByTestId('eventMergingCallout')).toBeTruthy();
+  });
+
   it.each([
     ['malware', testSubj.malware.card],
     ['ransomware', testSubj.ransomware.card],
