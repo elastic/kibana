@@ -49,6 +49,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         createdPipelineId = pipelineId;
       } else {
         createdIndex = index;
+        createdPipelineId = pipelineId;
       }
 
       let failures: ImportFailure[] = [];
