@@ -89,7 +89,7 @@ describe('AlertsSearchBar', () => {
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
-        dataService={mockDataPlugin}
+        dataViewsService={mockDataPlugin.dataViews}
       />
     );
     expect(await screen.findByTestId('querySubmitButton')).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('AlertsSearchBar', () => {
         unifiedSearchBar={unifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
-        dataService={mockDataPlugin}
+        dataViewsService={mockDataPlugin.dataViews}
         appName={'test'}
         featureIds={['observability', 'stackAlerts']}
       />
@@ -157,7 +157,7 @@ describe('AlertsSearchBar', () => {
         unifiedSearchBar={newUnifiedSearchBarMock}
         toasts={toastsMock}
         http={httpMock}
-        dataService={mockDataPlugin}
+        dataViewsService={mockDataPlugin.dataViews}
         appName={'test'}
         featureIds={['observability', 'stackAlerts']}
       />

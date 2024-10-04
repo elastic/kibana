@@ -41,14 +41,14 @@ export const AlertsSearchBar = ({
   http,
   toasts,
   unifiedSearchBar,
-  dataService,
+  dataViewsService,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
     toasts,
-    dataViewsService: dataService.dataViews,
+    dataViewsService,
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields({
     ruleTypeId,
