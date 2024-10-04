@@ -18,25 +18,31 @@ class CanvasCustomElementService {
   public apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
 
   public async create(customElement: CustomElement) {
-    coreServices.http.post(this.apiPath, { body: JSON.stringify(customElement), version: '1' });
+    await coreServices.http.post(this.apiPath, {
+      body: JSON.stringify(customElement),
+      version: '1',
+    });
   }
 
   public async get(customElementId: string): Promise<CustomElement> {
-    return coreServices.http
+    return await coreServices.http
       .get<{ data: CustomElement }>(`${this.apiPath}/${customElementId}`, { version: '1' })
       .then(({ data: element }) => element);
   }
 
   public async update(id: string, element: Partial<CustomElement>) {
-    coreServices.http.put(`${this.apiPath}/${id}`, { body: JSON.stringify(element), version: '1' });
+    await coreServices.http.put(`${this.apiPath}/${id}`, {
+      body: JSON.stringify(element),
+      version: '1',
+    });
   }
 
   public async remove(id: string) {
-    coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+    await coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
   }
 
   public async find(searchTerm: string): Promise<CustomElementFindResponse> {
-    return coreServices.http.get(`${this.apiPath}/find`, {
+    return await coreServices.http.get(`${this.apiPath}/find`, {
       query: {
         name: searchTerm,
         perPage: 10000,
