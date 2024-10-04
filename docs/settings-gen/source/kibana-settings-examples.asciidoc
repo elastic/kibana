@@ -17,8 +17,9 @@ Planetary settings can be used to configure the planets. Currently only Mercury,
 A group description, like this one, can include warnings, tips, code examples, etc., exactly the same as the settings descriptions.
 
 
+
 [[kibana-example-setting-mercury]]
-.`kibana.example.setting.mercury` {ess-icon}
+.`kibana.example.setting.mercury`
 [%collapsible]
 ====
 The first planet from from <<kibana-example-setting-sun,The Sun>> and the smallest in the Solar System.
@@ -27,6 +28,9 @@ In English, it is named after the ancient Roman god Mercurius (Mercury), god of 
 
 Mercury is adjacent to the planet <<kibana-example-setting-venus,Venus>>
 
+
+
+include::../examples/example-setting-example.asciidoc[]
 
 WARNING: This feature is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.
 
@@ -38,10 +42,6 @@ Options:
 
 Default: `avoid` +
 Type: `static` +
-
-**Example**
-
-include::../examples/example-setting-example.asciidoc[]
 ====
 
 
@@ -102,8 +102,9 @@ Celestial settings can be used to configure the Sun and other non-planetary obje
 Your group description can include warnings, examples, etc., just like the settings descriptions.
 
 
+
 [[kibana-example-setting-sun]]
-.`kibana.example.setting.sun` {ess-icon}
+.`kibana.example.setting.sun`
 [%collapsible]
 ====
 The Sun is the star at the center of the Solar System.
@@ -119,7 +120,7 @@ Type: `dynamic` +
 
 
 [[kibana-example-setting-arcturus]]
-.`kibana.example.setting.arcturus` {ess-icon}
+.`kibana.example.setting.arcturus`
 [%collapsible]
 ====
 Arcturus is the brightest star in the northern constellation of Bootes.

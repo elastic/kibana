@@ -28,7 +28,7 @@ groups:
         state: <Optional - (one of 'deprecated', 'technical-preview', or 'hidden')>
         deprecated_guidance: <Optional (asciidoc) - detail about a deprecated setting, e.g., "Starting in version 8.0.0 this setting is deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead."
         note: <Optional (asciidoc) - Text to display in a "Note" call-out box. e.g., "Feature Name is available in Kibana 7.17.4 and 8.3.0 onwards but is not supported in Kibana 8.0, 8.1 or 8.2.">
-        example: Any complex Asciidoc, such as a code example, table, image, or anything else. Add the source into the /settings-gen/examples folder and specify the filename with no path, e.g., example-xpack.actions.customHostSettings.asciidoc
+        example: Any complex Asciidoc, such as a code example, table, list, image, or anything else. Add the source into the /settings-gen/examples folder and specify the filename with no path, e.g., example-xpack.actions.customHostSettings.asciidoc
         tip: <Optional (asciidoc) - Text to display in a "Tip" call-out box>
         warning: <Optional (asciidoc) - Text to display in a "Warning" call-out box>
         important: <Optional (asciidoc) - Text to display in an "Important:" call-out box>
@@ -39,39 +39,53 @@ groups:
           - option <Optional (string) - Another setting option, e.g., ja-jp >
         type: <Optional (one of 'static' or 'dynamic') - Used for Elasticsearch settings only>
         platforms:
-          - <Optional (one of 'self-managed', 'cloud', or 'serverless') - List each environment where the setting is available. If there are any additional details, such as if the setting values are different on Cloud versus On-prem, that can be put in the setting description or the option-name details, above.>
+          - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
           - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
           - <Optional (one of 'self-managed', 'cloud', or 'serverless')>
 ```
 
 
-Blank schema without descriptions
+Blank schema
 
 ```
-product: <required>
-collection: <required>
-page_description:
-  - 
+product: REQUIRED
+collection: REQUIRED
 
 groups:
-  - group: 
-    id:
-    description:
-
+  - group: REQUIRED
+    id: REQUIRED
+    # description:
     settings:
-      - setting: <required>
-        id:
+
+      - setting: REQUIRED
+        # id:
         description:
-          - <required>
-        state:
-        deprecated_guidance:
-        note:
-        example:
-        tip:
-        warning:
-        important:
-        default:
-        options:
-        type:
-        platforms:
+          - REQUIRED
+        # state:
+        # deprecated_guidance:
+        # example:
+        # note:
+        # tip:
+        # warning:
+        # important:
+        # default:
+        # options:
+        # type:
+        # platforms:
+
+      - setting: REQUIRED
+        # id:
+        description:
+          - REQUIRED
+        # state:
+        # deprecated_guidance:
+        # example:
+        # note:
+        # tip:
+        # warning:
+        # important:
+        # default:
+        # options:
+        # type:
+        # platforms:
 ```

@@ -77,20 +77,30 @@ sub parsefile {
     my $group_id = $group->{id};
     my $group_name = $group->{group};
     my $group_description = $group->{description};
+    my $group_example = $group->{example};
   
     # Add the group info to the asciidoc file contents
     $asciidocoutput .= "\n\n";
-    $asciidocoutput .= "[float]\n[[".$group_id."]]\n=== ".$group_name."\n\n";
-  
+    if ($group_id) {
+      $asciidocoutput .= "[float]\n[[".$group_id."]]\n=== ".$group_name."\n\n";
+    }
+    else {
+      $asciidocoutput .= "[float]\n=== ".$group_name."\n\n";
+    } 
     # build the group preamble paragraphs
     my $group_description_string = "";
     for my $paragraph (@$group_description) {
       $group_description_string .= $paragraph."\n\n";
     }
     # remove the + sign after the last paragraph of the description
-    if ($group_description_string) {
-      $group_description_string =~ s/\+$//;
-      chomp ($group_description_string);
+    #if ($group_description_string) {
+    #  $group_description_string =~ s/\+$//;
+    #  chomp ($group_description_string);
+    #}
+
+    # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
+    if ($group_example) {
+      $asciidocoutput .= "\n**Example**\n\ninclude::../examples/".$group_example."[]\n";
     }
     if ($group_description_string) {
       $asciidocoutput .= $group_description_string;
@@ -121,6 +131,7 @@ sub parsefile {
       # Get the setting options and option descriptions and build the string
       my $options = $setting->{options};
       my $setting_options_string = "";
+      if ($options) {
       for my $option (@$options) {
         my $option_name = $option->{option};
         # if ($option_name) {print "\nOPTION = ".$option_name;}
@@ -130,12 +141,13 @@ sub parsefile {
         if ($option_description) {$setting_options_string .= ' - '.$option_description;}
         $setting_options_string .= "\n";
       }
+      }
 
       # check if supported on Cloud (these settings are marked with a Cloud icon)
       my $supported_cloud = 0;
-      for my $platform (@$setting_platforms) {
-        if ($platform =~ /cloud/) {$supported_cloud = 1;}
-      }
+      #for my $platform (@$setting_platforms) {
+      #  if ($platform =~ /cloud/) {$supported_cloud = 1;}
+      #}
   
       # build the description paragraphs
       my $setting_description_string = "";
@@ -149,12 +161,12 @@ sub parsefile {
       #}
   
       # build the list of supported platforms
-      my $setting_platforms_string = "";
-      for my $platform (@$setting_platforms) {
-        $setting_platforms_string .= '`'.$platform.'`, ';
-      }
-      # remove the comma after the last platform in the list
-      if ($setting_platforms_string) {$setting_platforms_string =~ s/, $//;}
+      #my $setting_platforms_string = "";
+      #for my $platform (@$setting_platforms) {
+      #  $setting_platforms_string .= '`'.$platform.'`, ';
+      #}
+      ## remove the comma after the last platform in the list
+      #if ($setting_platforms_string) {$setting_platforms_string =~ s/, $//;}
   
       # Add the settings info to the asciidoc file contents
       $asciidocoutput .= "\n";
@@ -191,6 +203,12 @@ sub parsefile {
       if ($setting_description_string) {
         $asciidocoutput .= $setting_description_string;
       }
+
+      # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
+      if ($setting_example) {
+        $asciidocoutput .= "\n\ninclude::../examples/".$setting_example."[]\n";
+      }
+
       if ($setting_note) {
         $asciidocoutput .= "\nNOTE: ".$setting_note."\n";
       }
@@ -222,11 +240,7 @@ sub parsefile {
           $asciidocoutput .= 'Type: `'.$setting_type.'` +'."\n";
         }
       }
-  
-      # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
-      if ($setting_example) {
-        $asciidocoutput .= "\n**Example**\n\ninclude::../examples/".$setting_example."[]\n";
-      }
+
       $asciidocoutput .= "====\n";
     }
   }

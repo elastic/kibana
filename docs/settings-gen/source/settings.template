@@ -1,0 +1,28 @@
+---
+# This file is used to generate a set of configuration settings in the product docs
+
+product: REQUIRED
+collection: REQUIRED
+
+groups:
+  - group: REQUIRED
+    id: REQUIRED
+    # description:
+    settings:
+
+      - setting: REQUIRED
+        # id:
+        description:
+          - REQUIRED
+        # state:
+        # deprecated_guidance:
+        # example:
+        # note:
+        # tip:
+        # warning:
+        # important:
+        # default:
+        # options:
+        # type:
+        # platforms:
+
