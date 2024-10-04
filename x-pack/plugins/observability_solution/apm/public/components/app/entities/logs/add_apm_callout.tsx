@@ -20,8 +20,6 @@ import {
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../context/kibana_context/use_kibana';
-import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { AddApmData } from '../../../shared/add_data_buttons/buttons';
 
 interface Props {
@@ -30,13 +28,6 @@ interface Props {
 
 export function AddAPMCallOut({ onClose }: Props) {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-
-  function handleClick() {
-    services.telemetry.reportEntityInventoryAddData({
-      view: 'add_apm_cta',
-    });
-  }
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
@@ -95,7 +86,7 @@ export function AddAPMCallOut({ onClose }: Props) {
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <div>
-            <AddApmData data-test-subj="apmAddDataLogOnlyCallout" onClick={handleClick} />
+            <AddApmData data-test-subj="apmAddDataLogOnlyCallout" />
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

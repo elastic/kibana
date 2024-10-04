@@ -6,14 +6,8 @@
  */
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import React, { createContext } from 'react';
-import {
-  SERVICE_INVENTORY_STORAGE_KEY,
-  serviceInventoryViewType$,
-} from '../../analytics/register_service_inventory_view_type_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
-import { ApmPluginStartDeps, ApmServices } from '../../plugin';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
-import { useKibana } from '../kibana_context/use_kibana';
 import { ENTITY_FETCH_STATUS, useEntityManager } from './use_entity_manager';
 
 export interface EntityManagerEnablementContextValue {
@@ -23,8 +17,6 @@ export interface EntityManagerEnablementContextValue {
   serviceInventoryViewLocalStorageSetting: ServiceInventoryView;
   setServiceInventoryViewLocalStorageSetting: (view: ServiceInventoryView) => void;
   isEntityCentricExperienceViewEnabled: boolean;
-  tourState: TourState;
-  updateTourState: (newState: Partial<TourState>) => void;
 }
 
 export enum ServiceInventoryView {
@@ -36,14 +28,7 @@ export const EntityManagerEnablementContext = createContext(
   {} as EntityManagerEnablementContextValue
 );
 
-interface TourState {
-  isModalVisible?: boolean;
-  isTourActive: boolean;
-}
-const TOUR_INITIAL_STATE: TourState = {
-  isModalVisible: undefined,
-  isTourActive: false,
-};
+const SERVICE_INVENTORY_STORAGE_KEY = 'apm.service.inventory.view';
 
 export function EntityManagerEnablementContextProvider({
   children,
@@ -51,9 +36,7 @@ export function EntityManagerEnablementContextProvider({
   children: React.ReactChild;
 }) {
   const { core } = useApmPluginContext();
-  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { isEnabled: isEntityManagerEnabled, status, refetch } = useEntityManager();
-  const [tourState, setTourState] = useLocalStorage('apm.serviceEcoTour', TOUR_INITIAL_STATE);
   const [serviceInventoryViewLocalStorageSetting, setServiceInventoryViewLocalStorageSetting] =
     useLocalStorage(SERVICE_INVENTORY_STORAGE_KEY, ServiceInventoryView.classic);
 
@@ -64,15 +47,6 @@ export function EntityManagerEnablementContextProvider({
 
   function handleServiceInventoryViewChange(nextView: ServiceInventoryView) {
     setServiceInventoryViewLocalStorageSetting(nextView);
-    // Updates the telemetry context variable every time the user switches views
-    serviceInventoryViewType$.next({ serviceInventoryViewType: nextView });
-    services.telemetry.reportEntityExperienceStatusChange({
-      status: nextView === ServiceInventoryView.entity ? 'enabled' : 'disabled',
-    });
-  }
-
-  function handleTourStateUpdate(newTourState: Partial<TourState>) {
-    setTourState({ ...tourState, ...newTourState });
   }
 
   return (
@@ -84,8 +58,6 @@ export function EntityManagerEnablementContextProvider({
         serviceInventoryViewLocalStorageSetting,
         setServiceInventoryViewLocalStorageSetting: handleServiceInventoryViewChange,
         isEntityCentricExperienceViewEnabled: isEntityCentricExperienceSettingEnabled,
-        tourState,
-        updateTourState: handleTourStateUpdate,
       }}
     >
       {children}
