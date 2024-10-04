@@ -59,7 +59,7 @@ export interface KibanaNoDataPageProps {
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
   /** Set to true if the kibana is customly branded */
-  /** **/
+  /** If the cluster has data, the user can be prompted to try ES|QL. This click handler customizes the action **/
   onTryESQL?: () => void;
   showPlainSpinner: boolean;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
