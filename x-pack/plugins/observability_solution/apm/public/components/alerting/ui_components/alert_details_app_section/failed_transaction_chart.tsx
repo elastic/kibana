@@ -24,7 +24,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { Theme } from '@elastic/charts';
 import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DEFAULT_DATE_FORMAT } from './constants';
+import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
@@ -226,6 +226,7 @@ function FailedTransactionChart({
           comparisonEnabled={false}
           customTheme={comparisonChartTheme}
           timeZone={timeZone}
+          settings={CHART_SETTINGS}
         />
       </EuiPanel>
     </EuiFlexItem>
