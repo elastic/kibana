@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './use_ai_assistant_app_service';
-export * from './use_ai_assistant_chat_service';
-export * from './use_knowledge_base';
-export * from './use_scope';
+export * from './types';
+export * from './utils';

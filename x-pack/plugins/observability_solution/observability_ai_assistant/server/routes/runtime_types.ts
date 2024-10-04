@@ -138,6 +138,7 @@ export const starterPromptRt: t.Type<StarterPrompt> = t.type({
   title: t.string,
   prompt: t.string,
   icon: t.any,
+  scopes: t.union([t.undefined, t.array(assistantScopeType)]),
 });
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({

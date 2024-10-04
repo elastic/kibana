@@ -9,7 +9,13 @@ import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
 import { useAIAssistantAppService } from '@kbn/ai-assistant';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import { useKibana } from './use_kibana';
+
+const scopeUrlLookup: Record<string, AssistantScope> = {
+  observability: 'observability',
+  enterprise_search: 'search',
+};
 
 export function useNavControlScreenContext() {
   const service = useAIAssistantAppService();
@@ -66,4 +72,11 @@ export function useNavControlScreenContext() {
       screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,
     });
   }, [service, from, to, href]);
+
+  useEffect(() => {
+    const newScope = Object.entries(scopeUrlLookup).find(([url]) =>
+      window.location.href.includes(url)
+    )?.[1];
+    if (newScope && newScope !== service.getScope()) service.setScope(newScope);
+  });
 }
