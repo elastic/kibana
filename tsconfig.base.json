@@ -108,8 +108,6 @@
       "@kbn/babel-transform/*": ["packages/kbn-babel-transform/*"],
       "@kbn/banners-plugin": ["x-pack/plugins/banners"],
       "@kbn/banners-plugin/*": ["x-pack/plugins/banners/*"],
-      "@kbn/bazel-runner": ["packages/kbn-bazel-runner"],
-      "@kbn/bazel-runner/*": ["packages/kbn-bazel-runner/*"],
       "@kbn/bfetch-error": ["packages/kbn-bfetch-error"],
       "@kbn/bfetch-error/*": ["packages/kbn-bfetch-error/*"],
       "@kbn/bfetch-explorer-plugin": ["examples/bfetch_explorer"],

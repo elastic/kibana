@@ -10,7 +10,6 @@
 import Path from 'path';
 import * as Fsp from 'fs/promises';
 
-import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
@@ -18,6 +17,10 @@ import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
 
+import { ToolingLog } from '@kbn/tooling-log';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import execa from 'execa';
 import { Task, scanCopy, write, deleteAll } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
@@ -106,19 +109,7 @@ export const BuildPackages: Task = {
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building Bazel artifacts which are necessary for the build`);
-    await runBazel(
-      [
-        'build',
-        '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-        '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-        '//packages/kbn-monaco:target_workers',
-        '--show_result=1',
-        '--define=dist=true',
-      ],
-      {
-        logPrefix: '   │     ',
-      }
-    );
+    await buildWebpackBundles(log, { quiet: false });
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
@@ -313,3 +304,21 @@ export const BuildPackages: Task = {
     });
   },
 };
+
+export async function buildWebpackBundles(log: ToolingLog, { quiet }: { quiet: boolean }) {
+  async function buildPackage(packageName: string) {
+    const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
+      ? ['ignore', 'pipe', 'pipe']
+      : ['inherit', 'inherit', 'inherit'];
+    await execa('yarn', ['build'], {
+      cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+      stdio: stdioOptions,
+    });
+  }
+
+  const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+  for (const packageName of packageNames) {
+    log.info(`building ${packageName}`);
+    await buildPackage(packageName);
+  }
+}

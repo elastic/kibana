@@ -39,7 +39,6 @@
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "bazel": "bazel",
     "build": "node scripts/build --all-platforms",
     "build:apidocs": "node scripts/build_api_docs",
     "checkLicenses": "node scripts/check_licenses --dev",
@@ -79,7 +78,6 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "16.6.0",
     "**/@langchain/core": "^0.2.18",
     "**/@types/node": "20.10.5",
@@ -97,6 +95,9 @@
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "globby/fast-glob": "^3.2.11"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
     "@aws-crypto/sha256-js": "^5.2.0",
@@ -1305,9 +1306,6 @@
     "@babel/preset-typescript": "^7.24.7",
     "@babel/register": "^7.24.6",
     "@babel/traverse": "^7.24.7",
-    "@babel/types": "7.21.2",
-    "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "4.6.2",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.1",
@@ -1338,7 +1336,6 @@
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/babel-register": "link:packages/kbn-babel-register",
     "@kbn/babel-transform": "link:packages/kbn-babel-transform",
-    "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
     "@kbn/check-mappings-update-cli": "link:packages/kbn-check-mappings-update-cli",
     "@kbn/check-prod-native-modules-cli": "link:packages/kbn-check-prod-native-modules-cli",

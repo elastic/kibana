@@ -12,7 +12,6 @@ import Path from 'path';
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import * as Bazel from '../lib/bazel.mjs';
 import { findPluginCleanPaths, readCleanPatterns } from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
@@ -42,10 +41,10 @@ export const command = {
       ...(await findPluginCleanPaths(log)),
     ]);
 
-    if (await Bazel.isInstalled(log)) {
-      const quiet = args.getBooleanValue('quiet');
-      await Bazel.expungeCache(log, { quiet });
-      await Bazel.cleanDiskCache(log);
-    }
+    // if (await Bazel.isInstalled(log)) {
+    //   const quiet = args.getBooleanValue('quiet');
+    //   await Bazel.expungeCache(log, { quiet });
+    //   await Bazel.cleanDiskCache(log);
+    // }
   },
 };

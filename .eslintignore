@@ -40,6 +40,3 @@ snapshots.js
 /packages/kbn-flot-charts/lib
 /packages/kbn-monaco/src/**/antlr
 /packages/kbn-esql-ast/src/**/antlr
-
-# Bazel
-/bazel-*

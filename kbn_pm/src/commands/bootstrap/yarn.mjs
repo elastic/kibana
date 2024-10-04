@@ -34,16 +34,8 @@ async function areNodeModulesPresent() {
   return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
 }
 
-async function haveBazelFoldersBeenCreatedBefore() {
-  return (
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-bin/packages'))) ||
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-kibana/packages'))) ||
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-out/host')))
-  );
-}
-
 export async function haveNodeModulesBeenManuallyDeleted() {
-  return !(await areNodeModulesPresent()) && (await haveBazelFoldersBeenCreatedBefore());
+  return !(await areNodeModulesPresent());
 }
 
 /**
@@ -59,7 +51,7 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (quiet) args.push('--silent');
   await run('yarn', args, { cwd: process.cwd(), pipe: true });
 
-  await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
+  // await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
 
-  log.success('Playwright browsers installed');
+  // log.success('Playwright browsers installed');
 }
