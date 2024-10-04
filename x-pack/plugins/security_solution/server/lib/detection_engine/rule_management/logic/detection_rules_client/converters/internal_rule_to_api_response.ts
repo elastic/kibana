@@ -7,7 +7,6 @@
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RequiredOptional } from '@kbn/zod-helpers';
-import snakecaseKeys from 'snakecase-keys';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   transformAlertToRuleAction,
@@ -20,7 +19,7 @@ import {
   transformToActionFrequency,
 } from '../../../normalization/rule_actions';
 import { typeSpecificCamelToSnake } from './type_specific_camel_to_snake';
-import { commonParamsCamelToSnake } from './common_params_camel_to_snake';
+import { normalizedCommonParamsCamelToSnake } from './common_params_camel_to_snake';
 import { normalizeRuleParams } from './normalize_rule_params';
 
 export const internalRuleToAPIResponse = (
@@ -59,7 +58,7 @@ export const internalRuleToAPIResponse = (
     enabled: rule.enabled,
     revision: rule.revision,
     // Security solution shared rule params
-    ...commonParamsCamelToSnake(normalizedRuleParams),
+    ...normalizedCommonParamsCamelToSnake(normalizedRuleParams),
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
@@ -67,6 +66,5 @@ export const internalRuleToAPIResponse = (
     actions: [...actions, ...(systemActions ?? [])],
     // Execution summary
     execution_summary: executionSummary ?? undefined,
-    rule_source: snakecaseKeys(normalizedRuleParams.ruleSource, { deep: true }),
   };
 };
