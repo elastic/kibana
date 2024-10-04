@@ -32,6 +32,7 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 const MAX_FORECASTS = 500;
 
@@ -89,6 +90,7 @@ export class ForecastsTable extends Component {
 
   componentDidMount() {
     this.loadForecasts();
+    this.canDeleteJobForecast = checkPermission('canForecastJob');
   }
 
   async loadForecasts() {
@@ -205,7 +207,6 @@ export class ForecastsTable extends Component {
     const {
       services: {
         mlServices: { mlApi },
-        notifications: { toasts },
       },
     } = this.context;
 
@@ -215,14 +216,7 @@ export class ForecastsTable extends Component {
     });
 
     try {
-      const resp = await mlApi.deleteForecast({ jobId: this.props.job.job_id, forecastId });
-      if (resp?.acknowledged === true) {
-        toasts.addSuccess(
-          i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastSuccess', {
-            defaultMessage: 'Request to delete forecast was received.',
-          })
-        );
-      }
+      await mlApi.deleteForecast({ jobId: this.props.job.job_id, forecastId });
     } catch (error) {
       this.setState({
         isLoading: false,
@@ -396,22 +390,29 @@ export class ForecastsTable extends Component {
             onClick: (forecast) => this.openSingleMetricView(forecast),
             'data-test-subj': 'mlJobListForecastTabOpenSingleMetricViewButton',
           },
-          {
-            description: i18n.translate(
-              'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastDescription',
-              {
-                defaultMessage: 'Delete forecast',
-              }
-            ),
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            enabled: () => this.state.isLoading === false,
-            onClick: (item) => {
-              this.setState({ forecastIdToDelete: item.forecast_id, isConfirmModalVisible: true });
-            },
-            'data-test-subj': 'mlJobListForecastTabDeleteForecastButton',
-          },
+          ...(this.canDeleteJobForecast
+            ? [
+                {
+                  description: i18n.translate(
+                    'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastDescription',
+                    {
+                      defaultMessage: 'Delete forecast',
+                    }
+                  ),
+                  type: 'icon',
+                  icon: 'trash',
+                  color: 'danger',
+                  enabled: () => this.state.isLoading === false,
+                  onClick: (item) => {
+                    this.setState({
+                      forecastIdToDelete: item.forecast_id,
+                      isConfirmModalVisible: true,
+                    });
+                  },
+                  'data-test-subj': 'mlJobListForecastTabDeleteForecastButton',
+                },
+              ]
+            : []),
         ],
       },
     ];
