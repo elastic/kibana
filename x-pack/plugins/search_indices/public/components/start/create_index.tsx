@@ -56,13 +56,17 @@ export const CreateIndexForm = ({
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
   const { createIndex, isLoading } = useCreateIndex();
-  const onCreateIndex = useCallback(() => {
-    if (!isValidIndexName(formState.indexName)) {
-      return;
-    }
-    usageTracker.click(AnalyticsEvents.startCreateIndexClick);
-    createIndex({ indexName: formState.indexName });
-  }, [usageTracker, createIndex, formState.indexName]);
+  const onCreateIndex = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!isValidIndexName(formState.indexName)) {
+        return;
+      }
+      usageTracker.click(AnalyticsEvents.startCreateIndexClick);
+      createIndex({ indexName: formState.indexName });
+    },
+    [usageTracker, createIndex, formState.indexName]
+  );
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIndexName = e.target.value;
     setFormState({ ...formState, indexName: e.target.value });
@@ -78,7 +82,12 @@ export const CreateIndexForm = ({
 
   return (
     <>
-      <EuiForm data-test-subj="createIndexUIView" fullWidth component="form">
+      <EuiForm
+        data-test-subj="createIndexUIView"
+        fullWidth
+        component="form"
+        onSubmit={onCreateIndex}
+      >
         <EuiFormRow
           label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
             defaultMessage: 'Name your index',
@@ -141,7 +150,6 @@ export const CreateIndexForm = ({
                 data-test-subj="createIndexBtn"
                 disabled={indexNameHasError || isLoading}
                 isLoading={isLoading}
-                onClick={onCreateIndex}
                 type="submit"
               >
                 {CREATE_INDEX_CONTENT}
