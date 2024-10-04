@@ -69,7 +69,7 @@ actions:
     description: Change displayName and description
     update:
       x-displayName: "Roles"
-      description: Manage the roles that grant Kibana privileges.
+      description: Manage the roles that grant Elasticsearch and Kibana privileges.
       externalDocs:
         description: Kibana role management
         url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
