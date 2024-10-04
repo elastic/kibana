@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public/components/add_data_panel';
 
-export type AddDataCalloutKey =
+export type AddMetricsCalloutKey =
   | 'hostOverview'
   | 'hostMetrics'
   | 'hostProcesses'
@@ -55,8 +55,8 @@ const containerDefaultActions = {
   },
 };
 
-export const addDataCalloutDefinitions: Record<
-  AddDataCalloutKey,
+export const addMetricsCalloutDefinitions: Record<
+  AddMetricsCalloutKey,
   Omit<AddDataPanelProps, 'onDismiss' | 'onAddData' | 'onLearnMore' | 'onTryIt'>
 > = {
   hostOverview: {
