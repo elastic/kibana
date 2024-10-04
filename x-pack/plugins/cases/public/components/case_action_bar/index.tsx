@@ -101,7 +101,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
           </EuiFlexItem>
         ) : null}
 
-        {(permissions.update || permissions.reopenCases) && isSyncAlertsEnabled ? (
+        {permissions.update && isSyncAlertsEnabled ? (
           <EuiFlexItem grow={false}>
             <ActionBarStatusItem
               title={

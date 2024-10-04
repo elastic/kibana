@@ -18,6 +18,8 @@ import type { CasesFeatureParams } from './types';
 export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
   CasesSubFeatureId.casesSettings,
+  CasesSubFeatureId.addComment,
+  CasesSubFeatureId.reopenCases,
 ];
 
 /**
@@ -29,7 +31,6 @@ export const getCasesSubFeaturesMap = ({
   apiTags,
   savedObjects,
 }: CasesFeatureParams) => {
-  // TODO: second place cases perms are defined
   const deleteCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate('securitySolutionPackages.features.featureRegistry.deleteSubFeatureName', {
       defaultMessage: 'Delete',
@@ -96,8 +97,79 @@ export const getCasesSubFeaturesMap = ({
     ],
   };
 
+  const casesAddCommentsCasesSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureName',
+      {
+        defaultMessage: 'Add comments',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            api: apiTags.all,
+            id: 'create_comment',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureDetails',
+              {
+                defaultMessage: 'Add comments to cases',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            cases: {
+              createComment: [APP_ID],
+            },
+            ui: uiCapabilities.createComment,
+          },
+        ],
+      },
+    ],
+  };
+  const casesReopenCasesSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.reopenCasesSubFeatureName',
+      {
+        defaultMessage: 'Reopen Closed Cases',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            api: apiTags.all,
+            id: 'reopen_cases',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.reopenCasesSubFeatureDetails',
+              {
+                defaultMessage: 'Reopen closed cases',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            cases: {
+              reopenCases: [APP_ID],
+            },
+            ui: uiCapabilities.reopenCases,
+          },
+        ],
+      },
+    ],
+  };
+
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
     [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
+    [CasesSubFeatureId.addComment, casesAddCommentsCasesSubFeature],
+    [CasesSubFeatureId.reopenCases, casesReopenCasesSubFeature],
   ]);
 };
