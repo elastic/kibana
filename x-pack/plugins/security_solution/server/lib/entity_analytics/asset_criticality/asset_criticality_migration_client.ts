@@ -77,7 +77,7 @@ export class AssetCriticalityEcsMigrationClient {
         conflicts: 'proceed',
         ignore_unavailable: true,
         allow_no_indices: true,
-        scroll_size: 1000,
+        scroll_size: 10000,
         body: {
           query: ECS_MAPPINGS_MIGRATION_QUERY,
           script: {
@@ -87,6 +87,7 @@ export class AssetCriticalityEcsMigrationClient {
         },
       },
       {
+        requestTimeout: '5m',
         retryOnTimeout: true,
         maxRetries: 2,
         signal: abortSignal,
