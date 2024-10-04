@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertPathToBracketNotation, getProgressivePathsNoCtx } from './path_utils';
+import { getConditionalPath } from './path_utils';
 
 /**
  * Given a field, returns a painless script that checks if the field is missing or empty.
@@ -14,13 +14,12 @@ import { convertPathToBracketNotation, getProgressivePathsNoCtx } from './path_u
  * @return {*}  {string} The painless script that checks if the field is missing or empty
  */
 export const isFieldMissingOrEmpty = (field: string): string => {
-  const progressivePaths = getProgressivePathsNoCtx(convertPathToBracketNotation(field));
-  const lastPath = progressivePaths.at(-1);
+  const conditionalPath = getConditionalPath(field);
 
-  const classesWithEmptyCheck = ['List', 'String', 'Map', 'Set'];
+  const classesWithEmptyCheck = ['Collection', 'String', 'Map'];
   const emptyCheck = `((${classesWithEmptyCheck
-    .map((c) => `${lastPath} instanceof ${c}`)
-    .join(' || ')}) && ${lastPath}.isEmpty())`;
+    .map((c) => `${field} instanceof ${c}`)
+    .join(' || ')}) && ${field}.isEmpty())`;
 
-  return [...progressivePaths.map((path) => `${path} == null`), emptyCheck].join(' || ');
+  return `${conditionalPath} == null || ${emptyCheck}`;
 };

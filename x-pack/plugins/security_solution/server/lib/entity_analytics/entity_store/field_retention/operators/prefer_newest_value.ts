@@ -20,14 +20,15 @@ export const preferNewestValueProcessor: FieldRetentionOperatorBuilder<PreferNew
   { field },
   { enrichField }
 ) => {
-  const fullEnrichField = `${enrichField}.${field}`;
+  const latestField = `ctx.${field}`;
+  const historicalField = `${enrichField}.${field}`;
   return {
     set: {
-      if: `${isFieldMissingOrEmpty(`ctx.${field}`)} && !(${isFieldMissingOrEmpty(
-        `ctx.${fullEnrichField}`
+      if: `(${isFieldMissingOrEmpty(latestField)}) && !(${isFieldMissingOrEmpty(
+        `ctx.${historicalField}`
       )})`,
       field,
-      value: `{{${fullEnrichField}}}`,
+      value: `{{${historicalField}}}`,
     },
   };
 };
