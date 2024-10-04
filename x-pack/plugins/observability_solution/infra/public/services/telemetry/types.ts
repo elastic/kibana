@@ -98,7 +98,7 @@ export interface ITelemetryClient {
     meta: Record<string, unknown>
   ): void;
   reportAssetDashboardLoaded(params: AssetDashboardLoadedParams): void;
-  reportAddMetricsCalloutAddDataClick(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutAddMetricsClick(params: AddMetricsCalloutEventParams): void;
   reportAddMetricsCalloutTryItClick(params: AddMetricsCalloutEventParams): void;
   reportAddMetricsCalloutLearnMoreClick(params: AddMetricsCalloutEventParams): void;
   reportAddMetricsCalloutDismissClick(params: AddMetricsCalloutEventParams): void;

@@ -93,7 +93,7 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
-  public reportAddMetricsCalloutAddDataClick = (params: AddMetricsCalloutEventParams) => {
+  public reportAddMetricsCalloutAddMetricsClick = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(
       InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED,
       params
