@@ -31,12 +31,14 @@ import { ROLE } from '../../../../config/services/security_solution_edr_workflow
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const utils = getService('securitySolutionUtils');
+  const samlAuth = getService('samlAuth');
 
   interface ApiCallsInterface {
     method: keyof Pick<TestAgent, 'post' | 'get'>;
     path: string;
     version?: string;
     body: Record<string, unknown> | (() => Record<string, unknown>) | undefined;
+    internal?: boolean;
   }
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
@@ -73,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
         version: '1',
         body: undefined,
+        internal: true,
       },
       {
         method: 'get',
@@ -215,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',
               apiListItem.version || '2023-10-31'
             )
+            .set(apiListItem.internal ? samlAuth.getInternalRequestHeader() : 'bar', 'foo')
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -255,6 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',
               apiListItem.version || '2023-10-31'
             )
+            .set(apiListItem.internal ? samlAuth.getInternalRequestHeader() : 'bar', 'foo')
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -296,6 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',
               apiListItem.version || '2023-10-31'
             )
+            .set(apiListItem.internal ? samlAuth.getInternalRequestHeader() : 'bar', 'foo')
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(200);
@@ -321,6 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',
               apiListItem.version || '2023-10-31'
             )
+            .set(apiListItem.internal ? samlAuth.getInternalRequestHeader() : 'bar', 'foo')
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
