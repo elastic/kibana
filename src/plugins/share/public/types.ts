@@ -138,7 +138,7 @@ export interface ShareMenuProviderV2 {
   readonly id: string;
   getShareMenuItems: (context: ShareContext) => Array<Omit<ShareMenuItemV2, 'intl'>>;
 }
-interface ShareMenuProviderLegacy {
+export interface ShareMenuProviderLegacy {
   readonly id: string;
   getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
 }
