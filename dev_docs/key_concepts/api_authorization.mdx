@@ -9,7 +9,15 @@ tags: ['kibana', 'dev', 'contributor', 'security']
 
 Security is everyone's responsibility. This is inclusive of design, product, and engineering. The purpose of this guide is to give a high-level overview of security constructs and expectations.
 
-This guide specifically focuses on API authorization.
+This guide specifically focuses on API authorization:
+- [[Deprecated] Adding API Authorization with `access` Tags](#deprecated-adding-api-authorization-with-access-tags)
+- [Configuring Authorization on Routes](#configuring-authorization-on-routes)
+- [Opting Out of Authorization for Specific Routes](#opting-out-of-authorization-for-specific-routes)
+- [Classic Router Security Configuration Examples](#classic-router-security-configuration-examples)
+- [Versioned Router Security Configuration Examples](#versioned-router-security-configuration-examples)
+- [Authorization Response in Route Handlers](#authorization-response-available-in-route-handlers)
+- [OpenAPI Specification (OAS) documentation](#openapi-specification-oas-documentation)
+- [Migrating from `access` Tags to `security` Configuration](#migrating-from-access-tags-to-security-configuration)
 
 ## API authorization
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
@@ -26,6 +34,7 @@ If your endpoint is not a CRUD interface to Saved Objects, then your route ensur
 
 ## [Deprecated] Adding API authorization with `access` tags
 `access` tags are used to restrict access to API routes. They are used to ensure that only users with the required privileges can access the route.
+
 Example configuration:
 ```ts
 router.get({
@@ -45,8 +54,7 @@ Adding an `access` tag to routes that leverage the Saved Objects Service would b
 
 
 ## Adding API authorization with `security` configuration
-`KibanaRouteOptions` provides a security configuration at the route definition level.
-It provides robust security configurations for both **Classic** and **Versioned** routes.
+`KibanaRouteOptions` provides a security configuration at the route definition level, offering robust security configurations for both **Classic** and **Versioned** routes.
 
 Key features of the new security configuration:
 1. **Fine-grained control**: 
@@ -64,7 +72,6 @@ Key features of the new security configuration:
 ### Configuring Authorization on Routes
 **Before Migration:**
 ```ts
-// Before
 router.get({
   path: '/api/path',
   options: {
@@ -112,7 +119,7 @@ router.get({
 
 ### Classic Router Security Configuration Examples
 
-**Example1: All Privileges Required**
+**Example 1: All Privileges Required**
 Requires `privilege_1` AND both `privilege_2` to access the route.
 ```ts
 router.get({
@@ -156,9 +163,10 @@ router.get({
 
 ### Versioned Router Security Configuration Examples
 Versioned router allows different security configurations registered per version, giving flexibility when evolving API security over time.
+
 **Example 1: Default and Custom Version Security**
 
-1. **Default Configuration (applies to versions without specific authorization)**: Requires `<privilege_1>`.
+1. **Default Configuration**: Applies to versions without specific authorization, requires `<privilege_1>`.
 
 2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
 
@@ -192,7 +200,7 @@ router.versioned
 ```
 
 **Example 2: Multiple Versions with Different Security Requirements**
-1. **Default Configuration (applies to versions without specific authorization)**: Requires `<privilege_1>`.
+1. **Default Configuration**: Applies to versions without specific authorization, requires `<privilege_1>`.
 
 2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
 
