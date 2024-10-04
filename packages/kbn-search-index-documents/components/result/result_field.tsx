@@ -65,7 +65,7 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'questionInCircle';
 
-const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector'];
+const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector', 'sparse_vector'];
 
 const ResultValue: React.FC<{ fieldValue: string; fieldType: string; isExpanded?: boolean }> = ({
   fieldValue,
@@ -86,36 +86,38 @@ const ResultValue: React.FC<{ fieldValue: string; fieldType: string; isExpanded?
     return (
       <>
         <EuiText size="s">{fieldValue}</EuiText>
-        <div className={'denseVectorFieldValue'}>
-          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiBadge color="hollow">
-                {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
-                  defaultMessage: '{value} dims',
-                  values: {
-                    value: JSON.parse(fieldValue).length,
-                  },
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiCopy textToCopy={fieldValue}>
-                {(copy) => (
-                  <EuiIcon
-                    type="copyClipboard"
-                    onClick={copy}
-                    aria-label={i18n.translate(
-                      'searchIndexDocuments.result.value.denseVector.copy',
-                      {
-                        defaultMessage: 'Copy vector',
-                      }
-                    )}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        {fieldType === 'dense_vector' && (
+          <div className={'denseVectorFieldValue'}>
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiBadge color="hollow">
+                  {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
+                    defaultMessage: '{value} dims',
+                    values: {
+                      value: JSON.parse(fieldValue).length,
+                    },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCopy textToCopy={fieldValue}>
+                  {(copy) => (
+                    <EuiIcon
+                      type="copyClipboard"
+                      onClick={copy}
+                      aria-label={i18n.translate(
+                        'searchIndexDocuments.result.value.denseVector.copy',
+                        {
+                          defaultMessage: 'Copy vector',
+                        }
+                      )}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        )}
       </>
     );
   } else {
