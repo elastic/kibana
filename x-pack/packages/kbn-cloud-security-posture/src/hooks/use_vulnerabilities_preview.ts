@@ -17,7 +17,6 @@ import {
 import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-  MAX_FINDINGS_TO_LOAD,
 } from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
