@@ -93,18 +93,18 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
-  public reportAddMetricsCalloutAddMetricsClick = (params: AddMetricsCalloutEventParams) => {
+  public reportAddMetricsCalloutAddMetricsClicked = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(
       InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED,
       params
     );
   };
 
-  public reportAddMetricsCalloutTryItClick = (params: AddMetricsCalloutEventParams) => {
+  public reportAddMetricsCalloutTryItClicked = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED, params);
   };
 
-  public reportAddMetricsCalloutLearnMoreClick = (params: AddMetricsCalloutEventParams) => {
+  public reportAddMetricsCalloutLearnMoreClicked = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(
       InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED,
       params
