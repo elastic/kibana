@@ -274,7 +274,8 @@ export class FilterBarService extends FtrService {
       return;
     }
 
-    return await filterValueInput.type(filter.value);
+    await filterValueInput.type(filter.value);
+    await filterValueInput.type(this.browser.keys.ENTER); // why worked before???
   }
 
   private isFilterNode(filter: Filter): filter is FilterNode {
