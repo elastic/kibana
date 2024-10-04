@@ -10,7 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface TooltipContentProps extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
+interface TooltipContentProps extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
   description: ReactElement | string;
   formula?: string;
 }
