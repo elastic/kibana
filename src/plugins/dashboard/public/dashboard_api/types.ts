@@ -56,6 +56,8 @@ import {
 } from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
 
+export const DASHBOARD_API_TYPE = 'dashboard';
+
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState>;
 
@@ -125,7 +127,7 @@ export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasRuntimeChildState &
   HasSerializedChildState &
-  HasType<'dashboard'> &
+  HasType<typeof DASHBOARD_API_TYPE> &
   PresentationContainer &
   PublishesDataViews &
   PublishesPanelDescription &

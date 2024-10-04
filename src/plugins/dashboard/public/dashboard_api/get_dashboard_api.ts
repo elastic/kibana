@@ -12,10 +12,10 @@ import { omit } from 'lodash';
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChanges } from './unsaved_changes';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DASHBOARD_APP_ID, DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializePanelsManager } from './panels_manager';
-import { DashboardCreationOptions, DashboardState } from './types';
+import { DASHBOARD_API_TYPE, DashboardCreationOptions, DashboardState } from './types';
 
 export function getDashboardApi({
   dashboardState,
@@ -72,6 +72,7 @@ export function getDashboardApi({
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
       setManaged: (managed: boolean) => managed$.next(managed),
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+      type: DASHBOARD_API_TYPE,
     },
     cleanup: () => {},
   };
