@@ -38,11 +38,11 @@ import type {
   WrapSuppressedHits,
   OverrideBodyQuery,
   RunOpts,
+  CreateRuleOptions,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ExperimentalFeatures } from '../../../../../../common';
-import type { CreateRuleOptions } from '../../types';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

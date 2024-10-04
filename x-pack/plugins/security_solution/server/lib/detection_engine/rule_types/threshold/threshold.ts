@@ -33,6 +33,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   RunOpts,
+  CreateRuleOptions,
 } from '../types';
 import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
@@ -45,7 +46,6 @@ import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { CreateRuleOptions } from '../types';
 
 export const thresholdExecutor = async ({
   inputIndex,
