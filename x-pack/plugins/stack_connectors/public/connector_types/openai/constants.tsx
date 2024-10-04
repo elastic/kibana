@@ -92,7 +92,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
   },
 ];
 
-export const otherAiConfig: ConfigFieldSchema[] = [
+export const otherOpenAiConfig: ConfigFieldSchema[] = [
   {
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
@@ -100,7 +100,7 @@ export const otherAiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
-        id="xpack.stackConnectors.components.genAi.otherAiDocumentation"
+        id="xpack.stackConnectors.components.genAi.otherOpenAiDocumentation"
         values={{
           genAiAPIUrlDocs: (
             <EuiLink
@@ -108,7 +108,7 @@ export const otherAiConfig: ConfigFieldSchema[] = [
               href="https://www.elastic.co/guide/en/security/current/connect-to-byo-llm.html"
               target="_blank"
             >
-              {`${i18n.OTHER_AI} ${i18n.DOCUMENTATION}`}
+              {`${i18n.OTHER_OPENAI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
         }}
@@ -121,7 +121,7 @@ export const otherAiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="If a request does not include a model, it uses the default."
-        id="xpack.stackConnectors.components.genAi.otherAiDocumentationModel"
+        id="xpack.stackConnectors.components.genAi.otherOpenAiDocumentationModel"
       />
     ),
   },
@@ -177,7 +177,7 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
-export const otherAiSecrets: SecretsFieldSchema[] = [
+export const otherOpenAiSecrets: SecretsFieldSchema[] = [
   {
     id: 'apiKey',
     label: i18n.API_KEY_LABEL,
@@ -185,7 +185,7 @@ export const otherAiSecrets: SecretsFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) API key for HTTP Basic authentication. For more details about generating Other model API keys, refer to the {genAiAPIKeyDocs}."
-        id="xpack.stackConnectors.components.genAi.otherAiApiKeyDocumentation"
+        id="xpack.stackConnectors.components.genAi.otherOpenAiApiKeyDocumentation"
         values={{
           genAiAPIKeyDocs: (
             <EuiLink
@@ -193,7 +193,7 @@ export const otherAiSecrets: SecretsFieldSchema[] = [
               href="https://www.elastic.co/guide/en/security/current/connect-to-byo-llm.html"
               target="_blank"
             >
-              {`${i18n.OTHER_AI} ${i18n.DOCUMENTATION}`}
+              {`${i18n.OTHER_OPENAI} ${i18n.DOCUMENTATION}`}
             </EuiLink>
           ),
         }}
@@ -215,7 +215,7 @@ export const providerOptions = [
   },
   {
     value: OpenAiProviderType.Other,
-    text: i18n.OTHER_AI,
-    label: i18n.OTHER_AI,
+    text: i18n.OTHER_OPENAI,
+    label: i18n.OTHER_OPENAI,
   },
 ];

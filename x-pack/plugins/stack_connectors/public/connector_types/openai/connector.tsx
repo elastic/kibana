@@ -24,8 +24,8 @@ import * as i18n from './translations';
 import {
   azureAiConfig,
   azureAiSecrets,
-  otherAiConfig,
-  otherAiSecrets,
+  otherOpenAiConfig,
+  otherOpenAiSecrets,
   openAiConfig,
   openAiSecrets,
   providerOptions,
@@ -91,8 +91,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         <SimpleConnectorForm
           isEdit={isEdit}
           readOnly={readOnly}
-          configFormSchema={otherAiConfig}
-          secretsFormSchema={otherAiSecrets}
+          configFormSchema={otherOpenAiConfig}
+          secretsFormSchema={otherOpenAiSecrets}
         />
       )}
       {isEdit && (
