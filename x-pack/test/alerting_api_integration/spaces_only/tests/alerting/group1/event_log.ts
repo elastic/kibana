@@ -1166,6 +1166,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               status_change_threshold: 4,
             })
             .expect(200);
+
+          // wait so cache expires
+          await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
