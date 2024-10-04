@@ -145,6 +145,7 @@ module.exports = (_, argv) => {
       // mainFields: ['browser', 'main'],
       // conditionNames: ['require', 'default', 'node', 'module', 'import'],
       fallback: {
+        buffer: require.resolve('buffer/'),
         child_process: false,
         fs: false,
       },
@@ -165,6 +166,9 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: [require.resolve('buffer/'), 'Buffer'],
+      }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
