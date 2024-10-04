@@ -163,6 +163,28 @@ ruleTester.run('no_deprecated_authz_config', rule, {
         router.get({
           path: '/some/path',
           options: {
+            tags: ['access:ml:someTag', 'access:prefix:someTag'],
+          },
+        });
+      `,
+      errors: [{ message: "Move 'access' tags to security.authz.requiredPrivileges." }],
+      output: `
+        router.get({
+          path: '/some/path',
+          security: {
+                authz: {
+                  requiredPrivileges: ['ml:someTag', 'prefix:someTag'],
+                },
+              },
+        });
+      `,
+      name: 'invalid: access tags have multiple prefixes, move to security.authz.requiredPrivileges',
+    },
+    {
+      code: `
+        router.get({
+          path: '/some/path',
+          options: {
             tags: [\`access:\${APP_ID}-entity-analytics\`],
           },
         });
@@ -179,6 +201,30 @@ ruleTester.run('no_deprecated_authz_config', rule, {
         });
       `,
       name: 'invalid: access tags are template literals, move to security.authz.requiredPrivileges',
+    },
+    {
+      code: `
+        router.get({
+          path: '/some/path',
+          options: {
+            tags: ['access:securitySolution', routeTagHelper('someTag')],
+          },
+        });
+      `,
+      errors: [{ message: "Move 'access' tags to security.authz.requiredPrivileges." }],
+      output: `
+        router.get({
+          path: '/some/path',
+          security: {
+                authz: {
+                  requiredPrivileges: ['securitySolution'],
+                },
+              },options: {
+            tags: [routeTagHelper('someTag')],
+          },
+        });
+      `,
+      name: 'invalid: access tags and tags made with helper function, only access tags are moved to security.authz.requiredPrivileges',
     },
     {
       code: `
