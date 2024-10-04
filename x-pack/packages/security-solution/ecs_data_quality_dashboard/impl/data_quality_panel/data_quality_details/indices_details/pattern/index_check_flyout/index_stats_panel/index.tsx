@@ -16,7 +16,6 @@ import {
   DOCS,
   ECS_COMPLIANT_FIELDS,
   ILM_PHASE,
-  SAME_FAMILY,
   SIZE,
 } from '../../../../../translations';
 import { Stat } from '../../../../../stat';
@@ -86,13 +85,6 @@ export const IndexStatsPanelComponent: React.FC<Props> = ({
           <EuiSpacer />
           {formatBytes(sizeInBytes ?? 0)}
         </StyledFlexItem>
-        {sameFamilyFieldsCount != null && (
-          <StyledFlexItem>
-            <strong>{SAME_FAMILY}</strong>
-            <EuiSpacer />
-            {formatNumber(sameFamilyFieldsCount)}
-          </StyledFlexItem>
-        )}
         {customFieldsCount != null && (
           <StyledFlexItem>
             <strong>{CUSTOM_FIELDS}</strong>

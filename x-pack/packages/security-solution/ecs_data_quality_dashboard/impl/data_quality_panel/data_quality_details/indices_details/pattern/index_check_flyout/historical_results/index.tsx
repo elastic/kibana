@@ -58,7 +58,7 @@ export interface Props {
 }
 
 export const HistoricalResultsComponent: FC<Props> = ({ indexName, latestCheckExists }) => {
-  const { formatNumber, isILMAvailable } = useDataQualityContext();
+  const { formatNumber } = useDataQualityContext();
 
   // Manages state for the fetch historical results query object
   // used by the fetchHistoricalResults function
@@ -147,8 +147,6 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName, latestCheckEx
             start={fetchHistoricalResultsQueryState.startDate}
             end={fetchHistoricalResultsQueryState.endDate}
             onTimeChange={handleTimeChange}
-            showUpdateButton={isILMAvailable}
-            isDisabled={!isILMAvailable}
             data-test-subj="historicalResultsDatePicker"
           />
         </EuiFlexItem>

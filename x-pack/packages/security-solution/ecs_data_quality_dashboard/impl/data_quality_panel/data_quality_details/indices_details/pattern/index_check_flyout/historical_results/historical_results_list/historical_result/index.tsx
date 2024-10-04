@@ -28,7 +28,6 @@ const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResul
     ilmPhase,
     ecsFieldCount,
     totalFieldCount,
-    sameFamilyFieldCount,
     customFieldCount,
     checkedAt,
   } = historicalResult;
@@ -36,33 +35,19 @@ const HistoricalResultComponent: React.FC<Props> = ({ indexName, historicalResul
   return (
     <div data-test-subj={`historicalResult-${checkedAt}`}>
       <EuiSpacer />
+      <IndexStatsPanel
+        docsCount={docsCount}
+        sizeInBytes={sizeInBytes ?? 0}
+        ilmPhase={ilmPhase}
+        ecsCompliantFieldsCount={ecsFieldCount}
+        customFieldsCount={customFieldCount}
+        allFieldsCount={totalFieldCount}
+      />
+      <EuiSpacer />
       {isNonLegacyHistoricalResult(historicalResult) ? (
-        <>
-          <IndexStatsPanel
-            docsCount={docsCount}
-            sizeInBytes={sizeInBytes ?? 0}
-            ilmPhase={ilmPhase}
-            ecsCompliantFieldsCount={ecsFieldCount}
-            customFieldsCount={customFieldCount}
-            allFieldsCount={totalFieldCount}
-          />
-          <EuiSpacer />
-          <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
-        </>
+        <HistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
       ) : (
-        <>
-          <IndexStatsPanel
-            docsCount={docsCount}
-            sizeInBytes={sizeInBytes ?? 0}
-            ilmPhase={ilmPhase}
-            sameFamilyFieldsCount={sameFamilyFieldCount}
-            ecsCompliantFieldsCount={ecsFieldCount}
-            customFieldsCount={customFieldCount}
-            allFieldsCount={totalFieldCount}
-          />
-          <EuiSpacer />
-          <LegacyHistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
-        </>
+        <LegacyHistoricalCheckFields indexName={indexName} historicalResult={historicalResult} />
       )}
       <EuiSpacer size="m" />
     </div>
