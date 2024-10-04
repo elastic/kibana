@@ -14,6 +14,7 @@ import {
   BLOCKLIST,
   RESPONSE_ACTIONS_HISTORY,
   PROTECTION_UPDATES,
+  NOTES,
 } from '../../app/translations';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
@@ -25,6 +26,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.blocklist]: BLOCKLIST,
   [AdministrationSubTab.responseActionsHistory]: RESPONSE_ACTIONS_HISTORY,
   [AdministrationSubTab.protectionUpdates]: PROTECTION_UPDATES,
+  [AdministrationSubTab.notes]: NOTES,
 };
 
 export function getTrailingBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {

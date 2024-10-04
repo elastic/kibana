@@ -150,7 +150,13 @@ export class TaskRunnerFactory {
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (executorResult.status === 'error') {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
-          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
+
+          let message = executorResult.message;
+          if (executorResult.serviceMessage) {
+            message = `${message}: ${executorResult.serviceMessage}`;
+          }
+          logger.error(`Action '${actionId}' failed: ${message}`);
+
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw throwRetryableError(

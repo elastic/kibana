@@ -890,6 +890,54 @@ describe('Task Runner Factory', () => {
     expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
+  test(`will throw an error and log the error message with the serviceMessage`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [
+        {
+          id: '2',
+          name: 'actionRef',
+          type: 'action',
+        },
+      ],
+    });
+    mockedActionExecutor.execute.mockResolvedValueOnce({
+      status: 'error',
+      actionId: '2',
+      message: 'Error message',
+      serviceMessage: 'Service message',
+      data: { foo: true },
+      retry: false,
+      errorSource: TaskErrorSource.FRAMEWORK,
+    });
+
+    let err;
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err).toBeDefined();
+    expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+      `Action '2' failed: Error message: Service message`
+    );
+  });
+
   test(`fallbacks to FRAMEWORK error if ActionExecutor does not return any type of source'`, async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: {

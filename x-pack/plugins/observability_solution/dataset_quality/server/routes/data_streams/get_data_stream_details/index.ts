@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import {
   findInventoryFields,
   InventoryItemType,
@@ -20,6 +20,7 @@ import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_ty
 import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '../get_data_streams';
+import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
 
 export async function getDataStreamSettings({
   esClient,
@@ -51,7 +52,7 @@ export async function getDataStreamDetails({
   end,
   isServerless,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   dataStream: string;
   start: number;
   end: number;
@@ -59,14 +60,22 @@ export async function getDataStreamDetails({
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+  const esClientAsCurrentUser = esClient.asCurrentUser;
+  const esClientAsSecondaryAuthUser = esClient.asSecondaryAuthUser;
+
   const hasAccessToDataStream = (
-    await datasetQualityPrivileges.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
+    await datasetQualityPrivileges.getHasIndexPrivileges(
+      esClientAsCurrentUser,
+      [dataStream],
+      ['monitor']
+    )
   )[dataStream];
 
   const esDataStream = hasAccessToDataStream
     ? (
         await getDataStreams({
-          esClient,
+          esClient: esClientAsCurrentUser,
           datasetQuery: dataStream,
         })
       ).dataStreams[0]
@@ -74,18 +83,19 @@ export async function getDataStreamDetails({
 
   try {
     const dataStreamSummaryStats = await getDataStreamSummaryStats(
-      esClient,
+      esClientAsCurrentUser,
       dataStream,
       start,
       end
     );
 
-    const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
-    const avgDocSizeInBytes = isServerless
-      ? whenSizeStatsNotAvailable
-      : hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
-      ? await getAvgDocSizeInBytes(esClient, dataStream)
-      : 0;
+    const avgDocSizeInBytes =
+      hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
+        ? isServerless
+          ? await getMeteringAvgDocSizeInBytes(esClientAsSecondaryAuthUser, dataStream)
+          : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
+        : 0;
+
     const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
 
     return {
@@ -170,6 +180,18 @@ async function getDataStreamSummaryStats(
     services: getTermsFromAgg(serviceNamesAgg, response.aggregations),
     hosts: getTermsFromAgg(hostsAgg, response.aggregations),
   };
+}
+
+async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
+  const meteringStats = await getDataStreamsMeteringStats({
+    esClient,
+    dataStreams: [index],
+  });
+
+  const docCount = meteringStats[index].totalDocs ?? 0;
+  const sizeInBytes = meteringStats[index].sizeBytes ?? 0;
+
+  return docCount ? sizeInBytes / docCount : 0;
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
