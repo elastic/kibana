@@ -16,7 +16,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
-  EuiButtonIcon
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,7 +55,6 @@ export const GeoipList: React.FunctionComponent = () => {
         defaultMessage="Add database"
       />
     </EuiButton>
-
   );
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
     'data-test-subj': 'geoipDatabaseList',
@@ -92,7 +91,12 @@ export const GeoipList: React.FunctionComponent = () => {
           return (
             <EuiButtonIcon
               name="Delete"
-              aria-label="Delete this database"
+              aria-label={i18n.translate(
+                'xpack.ingestPipelines.manageProcessors.geoip.list.actionIconLabel',
+                {
+                  defaultMessage: 'Delete this database',
+                }
+              )}
               iconType="trash"
               color="danger"
               onClick={() => onDatabaseDelete(item)}
