@@ -165,7 +165,7 @@ export class SecurityUsageReportingTask {
 
         usageReportResponse = await usageReportingService.reportUsage(
           usageRecords,
-          this.config.usageReportingApiUrl
+          this.config.usageApi?.url
         );
 
         if (!usageReportResponse.ok) {
