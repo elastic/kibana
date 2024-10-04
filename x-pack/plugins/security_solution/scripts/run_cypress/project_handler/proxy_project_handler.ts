@@ -40,8 +40,12 @@ export class ProxyHandler extends ProjectHandler {
       body.product_types = productTypes;
     }
 
-    if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
-      const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
+    // The qualityGate variable has been added here to ensure that when the quality gate runs, there will be
+    // no kibana image override. The tests will be executed against the commit which is already promoted to QA.
+    const qualityGate =
+      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE === '1';
+    const override = commit ?? process.env.KIBANA_MKI_IMAGE_COMMIT;
+    if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
