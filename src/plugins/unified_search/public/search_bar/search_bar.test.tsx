@@ -23,6 +23,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiSuperDatePicker, EuiSuperUpdateButton, EuiThemeProvider } from '@elastic/eui';
 import { FilterItems } from '../filter_bar';
 import { DataViewPicker } from '..';
+import { unifiedSearchPluginMock } from '../mocks';
 
 const dataMock = dataPluginMock.createStartContract();
 jest.mock('@kbn/code-editor', () => {
@@ -132,6 +133,7 @@ function wrapSearchBarInContext(testProps: any) {
     storage: createMockStorage(),
     data: {
       query: {
+        filterManager: dataMock.query.filterManager,
         savedQueries: {
           findSavedQueries: () =>
             Promise.resolve({
@@ -156,6 +158,9 @@ function wrapSearchBarInContext(testProps: any) {
       },
       dataViewEditor: dataViewEditorMock,
       dataViews: dataMock.dataViews,
+    },
+    unifiedSearch: {
+      autocomplete: unifiedSearchPluginMock.createStartContract().autocomplete,
     },
   };
 
@@ -420,7 +425,7 @@ describe('SearchBar', () => {
     ).toBeTruthy();
   });
 
-  it('changes filters', async () => {
+  it('updates filters correctly', async () => {
     const onFiltersUpdatedMock = jest.fn();
     const component = mount(
       wrapSearchBarInContext({
@@ -460,6 +465,84 @@ describe('SearchBar', () => {
 
     component.find('button[data-test-subj="saveFilter"]').simulate('click');
 
+    expect(onFiltersUpdatedMock).toBeCalledTimes(1);
+    expect(onFiltersUpdatedMock).toBeCalledWith([
+      ...filters,
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          index: '1234',
+          negate: false,
+          type: 'custom',
+        },
+        something: 'here',
+      },
+    ]);
+    expect(dataMock.query.filterManager.setFilters).not.toHaveBeenCalled();
+  });
+
+  it('sets filterManager filters correctly', async () => {
+    const onFiltersUpdatedMock = jest.fn();
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        shouldExecuteFilterManagerUpdate: true,
+        onFiltersUpdated: onFiltersUpdatedMock,
+        filters,
+      })
+    );
+
+    expect(component.find(FILTER_BAR).length).toBeTruthy();
+
+    const addFilterBtn = component.find('button[data-test-subj="addFilter"]');
+    addFilterBtn.simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('button[data-test-subj="editQueryDSL"]').length).toBeTruthy();
+    });
+
+    expect(component.find('button[data-test-subj="saveFilter"]').length).toBeTruthy();
+    component.find('button[data-test-subj="editQueryDSL"]').simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find('[data-test-subj="customEditorInput"]').length).toBeTruthy();
+    });
+
+    component
+      .find('[data-test-subj="customEditorInput"]')
+      .last()
+      .simulate('change', {
+        target: { value: '{"something": "here"}' },
+      });
+
+    component.find('button[data-test-subj="saveFilter"]').simulate('click');
+
+    expect(dataMock.query.filterManager.setFilters).toBeCalledTimes(1);
+    expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([
+      ...filters,
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          index: '1234',
+          negate: false,
+          type: 'custom',
+        },
+        something: 'here',
+      },
+    ]);
     expect(onFiltersUpdatedMock).toBeCalledTimes(1);
     expect(onFiltersUpdatedMock).toBeCalledWith([
       ...filters,
