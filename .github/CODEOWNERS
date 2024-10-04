@@ -656,6 +656,7 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
+x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/observability_utils @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
@@ -752,6 +753,8 @@ src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
 packages/kbn-screenshotting-server @elastic/appex-sharedux
+packages/kbn-search-api-keys-components @elastic/search-kibana
+packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 x-pack/plugins/search_assistant @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
@@ -765,6 +768,7 @@ x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
+x-pack/packages/search/shared_ui @elastic/search-kibana
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1463,6 +1467,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
+/x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
+/x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
+
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution OpenAPI bundles
@@ -1593,6 +1600,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
+
+/x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-explore
+/x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
+
+/x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
 
 ## Generative AI owner connectors
 # OpenAI

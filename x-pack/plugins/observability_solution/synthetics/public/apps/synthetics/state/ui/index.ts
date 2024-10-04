@@ -22,7 +22,8 @@ import {
 } from './actions';
 
 export interface UiState {
-  alertFlyoutVisible: typeof SYNTHETICS_TLS_RULE | typeof SYNTHETICS_STATUS_RULE | null;
+  ruleFlyoutVisible: typeof SYNTHETICS_TLS_RULE | typeof SYNTHETICS_STATUS_RULE | null;
+  isNewRuleFlyout?: boolean | null;
   basePath: string;
   esKuery: string;
   searchText: string;
@@ -31,7 +32,8 @@ export interface UiState {
 }
 
 const initialState: UiState = {
-  alertFlyoutVisible: null,
+  isNewRuleFlyout: false,
+  ruleFlyoutVisible: null,
   basePath: '',
   esKuery: '',
   searchText: '',
@@ -45,7 +47,8 @@ export const uiReducer = createReducer(initialState, (builder) => {
       state.integrationsPopoverOpen = action.payload;
     })
     .addCase(setAlertFlyoutVisible, (state, action) => {
-      state.alertFlyoutVisible = action.payload;
+      state.ruleFlyoutVisible = action.payload?.id ?? null;
+      state.isNewRuleFlyout = action.payload?.isNewRuleFlyout ?? null;
     })
     .addCase(setBasePath, (state, action) => {
       state.basePath = action.payload;

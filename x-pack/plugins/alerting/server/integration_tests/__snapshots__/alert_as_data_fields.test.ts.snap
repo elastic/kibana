@@ -9852,10 +9852,12 @@ Object {
       "type": "keyword",
     },
     "location.id": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "location.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9864,6 +9866,10 @@ Object {
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
     },
@@ -9877,6 +9883,12 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9972,10 +9984,12 @@ Object {
       "type": "keyword",
     },
     "location.id": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "location.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9984,6 +9998,10 @@ Object {
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
     },
@@ -9997,6 +10015,12 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10092,10 +10116,12 @@ Object {
       "type": "keyword",
     },
     "location.id": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "location.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10104,6 +10130,10 @@ Object {
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10117,6 +10147,12 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10212,10 +10248,12 @@ Object {
       "type": "keyword",
     },
     "location.id": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "location.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10224,6 +10262,10 @@ Object {
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10237,6 +10279,12 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10338,10 +10386,12 @@ Object {
       "type": "keyword",
     },
     "location.id": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
     "location.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -10350,6 +10400,10 @@ Object {
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
     },
@@ -10363,6 +10417,12 @@ Object {
       "type": "keyword",
     },
     "observer.geo.name": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "observer.name": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
