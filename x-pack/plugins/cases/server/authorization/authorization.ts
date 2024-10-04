@@ -202,9 +202,9 @@ export class Authorization {
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
 
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const requiredPrivileges: string[] = owners.map((owner) => {
-        return securityAuth.actions.cases.get(owner, operation.name);
-      });
+      const requiredPrivileges: string[] = owners.map((owner) =>
+        securityAuth.actions.cases.get(owner, operation.name)
+      );
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges({

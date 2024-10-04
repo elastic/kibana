@@ -31,7 +31,7 @@ const FEATURE_ORDER = 3100;
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
   const capabilities = createUICapabilities();
   const apiTags = getApiTags(APP_ID);
-  // TODO: first place cases perms are defined
+
   return {
     id: FEATURE_ID,
     name: i18n.translate('xpack.cases.features.casesFeatureName', {
