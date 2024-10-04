@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import { CaseMetricsFeature } from '../../../common/types/api';
 import { ActionBarStatusItem } from './action_bar_status_item';
@@ -23,6 +23,7 @@ import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_pa
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
+import { useUserPermissions } from '../user_actions/use_user_permissions';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -66,20 +67,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       }),
     [caseData.settings, onUpdateField]
   );
-  const disableStatusMenu = useMemo(() => {
-    // User has full permissions
-    if (permissions.update && permissions.reopenCases) {
-      return false;
-    } else {
-      // When true, we only want to block if the case is closed
-      if (caseData.status === CaseStatuses.closed) {
-        return !permissions.reopenCases;
-      } else {
-        // Allow the update permission to disable as before
-        return !permissions.update;
-      }
-    }
-  }, [caseData.status, permissions.update, permissions.reopenCases]);
+
+  const { canChangeStatus: disableStatusMenu } = useUserPermissions({ status: caseData.status });
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">

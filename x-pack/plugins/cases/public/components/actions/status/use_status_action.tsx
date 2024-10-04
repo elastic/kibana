@@ -14,7 +14,7 @@ import { CaseStatuses } from '../../../../common/types/domain';
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';
 import { statuses } from '../../status';
-import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useUserPermissions } from '../../user_actions/use_user_permissions';
 
 const getStatusToasterMessage = (status: CaseStatuses, cases: CasesUI): string => {
   const totalCases = cases.length;
@@ -45,9 +45,8 @@ export const useStatusAction = ({
   selectedStatus,
 }: UseStatusActionProps) => {
   const { mutate: updateCases } = useUpdateCases();
-  const { permissions } = useCasesContext();
-  const canUpdateStatus = permissions.update || permissions.reopenCases;
-  const isActionDisabled = isDisabled || !canUpdateStatus;
+  const { canChangeStatus } = useUserPermissions({ status: selectedStatus });
+  const isActionDisabled = isDisabled || !canChangeStatus;
   const handleUpdateCaseStatus = useCallback(
     (selectedCases: CasesUI, status: CaseStatuses) => {
       onAction();
@@ -101,7 +100,7 @@ export const useStatusAction = ({
     ];
   };
 
-  return { getActions, canUpdateStatus };
+  return { getActions, canUpdateStatus: canChangeStatus };
 };
 
 export type UseStatusAction = ReturnType<typeof useStatusAction>;
