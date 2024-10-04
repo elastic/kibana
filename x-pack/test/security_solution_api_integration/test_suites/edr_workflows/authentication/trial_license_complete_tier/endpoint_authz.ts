@@ -71,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'get',
         path: METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
+        version: '1',
         body: undefined,
       },
       {
@@ -210,6 +211,10 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await t1AnalystSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -246,6 +251,10 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
@@ -283,6 +292,10 @@ export default function ({ getService }: FtrProviderContext) {
           await endpointOperationsAnalystSupertest[apiListItem.method](
             replacePathIds(apiListItem.path)
           )
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(200);
@@ -304,6 +317,10 @@ export default function ({ getService }: FtrProviderContext) {
         }]`, async () => {
           await adminSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
+            .set(
+              apiListItem.version ? 'Elastic-Api-Version' : 'foo',
+              apiListItem.version || '2023-10-31'
+            )
             .send(getBodyPayload(apiListItem))
             .expect(200);
         });
