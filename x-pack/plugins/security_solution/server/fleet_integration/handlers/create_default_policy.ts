@@ -49,13 +49,20 @@ export const createDefaultPolicy = (
     cloud?.isServerlessEnabled
   );
 
-  // config won't be defined if inputs is an empty array, this happens on managed cloud onboarding.
-  const useCloudConfig =
-    config?.type === 'cloud' || (!config && cloud?.isCloudEnabled && !cloud?.isServerlessEnabled);
+  const getDefaultPolicy = (): PolicyConfig => {
+    // Cloud workload protection
+    if (config?.type === 'cloud') {
+      return getCloudPolicyConfig(factoryPolicy);
+    }
+    // Traditional endpoint protection
+    if (config?.type === 'endpoint') {
+      return getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+    }
+    // In case config is not defined (i.e. on managed cloud onboarding), defaults to Cloud Policy Config
+    return getCloudPolicyConfig(factoryPolicy);
+  };
 
-  let defaultPolicyPerType: PolicyConfig = useCloudConfig
-    ? getCloudPolicyConfig(factoryPolicy)
-    : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
+  let defaultPolicyPerType = getDefaultPolicy();
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);

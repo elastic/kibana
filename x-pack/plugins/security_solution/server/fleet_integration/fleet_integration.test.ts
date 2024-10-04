@@ -12,10 +12,7 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import {
-  createNewPackagePolicyMock,
-  deletePackagePolicyMock,
-} from '@kbn/fleet-plugin/common/mocks';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
@@ -77,6 +74,7 @@ import type {
 } from '@kbn/fleet-plugin/server/types';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
+import { set } from 'lodash';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -140,27 +138,29 @@ describe('ingest_integration tests ', () => {
       clusterUuid = '',
       clusterName = '',
       isServerlessEnabled = cloudService.isServerlessEnabled
-    ) => ({
-      type: 'endpoint',
-      enabled: true,
-      streams: [],
-      config: {
-        integration_config: {},
-        policy: {
-          value: disableProtections(
-            policyFactory(
-              license,
-              cloud,
-              licenseUuid,
-              clusterUuid,
-              clusterName,
-              isServerlessEnabled
-            )
-          ),
+    ) => {
+      const createCloudConfigPolicyValue = (): PolicyConfig => {
+        const policy = disableProtections(
+          policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName, isServerlessEnabled)
+        );
+        set(policy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.sync);
+        set(policy, 'linux.events.session_data', true);
+        return policy;
+      };
+
+      return {
+        type: 'endpoint',
+        enabled: true,
+        streams: [],
+        config: {
+          integration_config: {},
+          policy: {
+            value: createCloudConfigPolicyValue(),
+          },
+          artifact_manifest: { value: manifest },
         },
-        artifact_manifest: { value: manifest },
-      },
-    });
+      };
+    };
 
     const invokeCallback = async (manifestManager: ManifestManager): Promise<NewPackagePolicy> => {
       const callback = getPackagePolicyCreateCallback(
@@ -175,7 +175,7 @@ describe('ingest_integration tests ', () => {
       );
 
       return callback(
-        createNewPackagePolicyMock(),
+        createPackagePolicyMock(),
         soClient,
         esClient,
         requestContextMock.convertContext(ctx),
