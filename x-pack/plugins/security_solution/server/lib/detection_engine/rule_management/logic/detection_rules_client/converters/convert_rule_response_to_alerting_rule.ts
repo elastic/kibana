@@ -162,7 +162,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
