@@ -28,7 +28,11 @@ import {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   DefaultEmbeddableApi,
@@ -37,18 +41,23 @@ import {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Observable } from 'rxjs';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DashboardPanelMap, DashboardPanelState } from '../../common';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import {
+  DashboardAttributes,
+  DashboardOptions,
+  DashboardPanelMap,
+  DashboardPanelState,
+} from '../../common';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
-  SavedDashboardInput,
 } from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<SavedDashboardInput>;
+  getInitialInput?: () => Partial<DashboardState>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
@@ -71,6 +80,45 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
+}
+
+export interface DashboardState {
+  // filter context to be passed to children
+  query: Query;
+  filters: Filter[];
+  timeRestore: boolean;
+  timeRange?: TimeRange;
+  timeslice?: [number, number];
+  refreshInterval?: RefreshInterval;
+
+  // dashboard meta info
+  title: string;
+  tags: string[];
+  viewMode: ViewMode;
+  description?: string;
+  executionContext: KibanaExecutionContext;
+
+  // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
+  hidePanelTitles: DashboardOptions['hidePanelTitles'];
+  syncTooltips: DashboardOptions['syncTooltips'];
+  useMargins: DashboardOptions['useMargins'];
+  syncColors: DashboardOptions['syncColors'];
+  syncCursor: DashboardOptions['syncCursor'];
+
+  // dashboard contents
+  panels: DashboardPanelMap;
+
+  /**
+   * Serialized control group state.
+   * Contains state loaded from dashboard saved object
+   */
+  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
+  /**
+   * Runtime control group state.
+   * Contains state passed from dashboard locator
+   * Use runtime state when building input for portable dashboards
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState>;
 }
 
 export type DashboardApi = CanExpandPanels &

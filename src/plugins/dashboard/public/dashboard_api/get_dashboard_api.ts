@@ -8,45 +8,71 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardContainerInput } from '../../common';
+import { omit } from 'lodash';
 import { initializeTrackPanel } from './track_panel';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeUnsavedChanges } from './unsaved_changes';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { initializePanelsManager } from './panels_manager';
+import { DashboardCreationOptions, DashboardState } from './types';
 
-export interface InitialComponentState {
-  anyMigrationRun: boolean;
-  isEmbeddedExternally: boolean;
-  lastSavedInput: DashboardContainerInput;
-  lastSavedId: string | undefined;
-  managed: boolean;
-}
-
-export function getDashboardApi(
-  initialComponentState: InitialComponentState,
-  untilEmbeddableLoaded: (id: string) => Promise<unknown>
-) {
+export function getDashboardApi({
+  dashboardState,
+  getEmbeddableAppContext,
+  isEmbeddedExternally,
+  savedObjectResult,
+  savedObjectId,
+}: {
+  dashboardState: DashboardState;
+  getEmbeddableAppContext?: DashboardCreationOptions['getEmbeddableAppContext'];
+  isEmbeddedExternally?: boolean;
+  savedObjectResult?: LoadDashboardReturn;
+  savedObjectId?: string;
+}) {
   const animatePanelTransforms$ = new BehaviorSubject(false); // set panel transforms to false initially to avoid panels animating on initial render.
   const fullScreenMode$ = new BehaviorSubject(false);
-  const managed$ = new BehaviorSubject(initialComponentState.managed);
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(initialComponentState.lastSavedId);
+  const managed$ = new BehaviorSubject(savedObjectResult?.managed ?? false);
+  const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
 
+  let untilEmbeddableLoaded: (id: string) => Promise<undefined> = async (id: string) => undefined;
   const trackPanel = initializeTrackPanel(untilEmbeddableLoaded);
+  const panelsManager = initializePanelsManager(
+    dashboardState.panels,
+    savedObjectResult?.references ?? [],
+    trackPanel
+  );
+  untilEmbeddableLoaded = panelsManager.untilEmbeddableLoaded;
 
   return {
-    ...trackPanel,
-    ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
-    ...initializeUnsavedChanges(
-      initialComponentState.anyMigrationRun,
-      initialComponentState.lastSavedInput
-    ),
-    animatePanelTransforms$,
-    fullScreenMode$,
-    isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
-    managed$,
-    savedObjectId: savedObjectId$,
-    setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
-    setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
-    setManaged: (managed: boolean) => managed$.next(managed),
-    setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+    api: {
+      ...trackPanel,
+      ...panelsManager,
+      ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
+      ...initializeUnsavedChanges(
+        savedObjectResult?.anyMigrationRun ?? false,
+        omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
+          ...DEFAULT_DASHBOARD_INPUT,
+          id: input.id,
+        }
+      ),
+      animatePanelTransforms$,
+      fullScreenMode$,
+      getAppContext: () => {
+        const embeddableAppContext = getEmbeddableAppContext?.(savedObjectId$.value);
+        return {
+          ...embeddableAppContext,
+          currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
+        };
+      },
+      isEmbeddedExternally: isEmbeddedExternally ?? false,
+      managed$,
+      savedObjectId: savedObjectId$,
+      setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
+      setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
+      setManaged: (managed: boolean) => managed$.next(managed),
+      setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
+    },
+    cleanup: () => {},
   };
 }
