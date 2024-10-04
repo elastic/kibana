@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const knowledgeBaseProductDocInstallTypeName = 'ai_kb_product_doc_installation';
-
-export const internalElserInferenceId = 'kibana-internal-elser2';
+export { waitUntilModelDeployed } from './wait_until_model_deployed';
+export { getModelInstallStatus } from './get_model_install_status';
+export { installElser } from './install_elser';

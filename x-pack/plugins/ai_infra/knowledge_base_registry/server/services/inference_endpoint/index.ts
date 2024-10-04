@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const knowledgeBaseProductDocInstallTypeName = 'ai_kb_product_doc_installation';
-
-export const internalElserInferenceId = 'kibana-internal-elser2';
+export { InferenceEndpointManager } from './endpoint_manager';

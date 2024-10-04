@@ -20,6 +20,7 @@ import type {
 } from './types';
 import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
+import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './dao/product_doc_install';
 
 export class KnowledgeBaseRegistryPlugin
@@ -57,9 +58,15 @@ export class KnowledgeBaseRegistryPlugin
     );
     const productDocClient = new ProductDocInstallClient({ soClient });
 
+    const endpointManager = new InferenceEndpointManager({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger.get('endpoint-manager'),
+    });
+
     const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
+      endpointManager,
       artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       logger: this.logger.get('package-installer'),
@@ -67,6 +74,7 @@ export class KnowledgeBaseRegistryPlugin
 
     delay(10)
       .then(() => {
+        return;
         console.log('*** test installating package');
         return packageInstaller.installPackage({
           productName: 'Kibana',
