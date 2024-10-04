@@ -53,7 +53,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     this.#log = logger;
   }
 
-  public async import({
+  public import({
     readStream,
     createNewCopies,
     namespace,
@@ -63,29 +63,23 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Starting the import process');
-    try {
-      const result = await importSavedObjectsFromStream({
-        readStream,
-        createNewCopies,
-        namespace,
-        overwrite,
-        refresh,
-        compatibilityMode,
-        objectLimit: this.#importSizeLimit,
-        savedObjectsClient: this.#savedObjectsClient,
-        typeRegistry: this.#typeRegistry,
-        importHooks: this.#importHooks,
-        managed,
-      });
-      this.#log.info(`Successfully imported ${result.successCount} objects`);
-      return result;
-    } catch (error) {
-      this.#log.error('Import failed', error);
-      throw error;
-    }
+    const result = importSavedObjectsFromStream({
+      readStream,
+      createNewCopies,
+      namespace,
+      overwrite,
+      refresh,
+      compatibilityMode,
+      objectLimit: this.#importSizeLimit,
+      savedObjectsClient: this.#savedObjectsClient,
+      typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
+      managed,
+    });
+    return result;
   }
 
-  public async resolveImportErrors({
+  public resolveImportErrors({
     readStream,
     createNewCopies,
     compatibilityMode,
@@ -94,24 +88,18 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Resolving import errors');
-    try {
-      const result = await resolveSavedObjectsImportErrors({
-        readStream,
-        createNewCopies,
-        compatibilityMode,
-        namespace,
-        retries,
-        objectLimit: this.#importSizeLimit,
-        savedObjectsClient: this.#savedObjectsClient,
-        typeRegistry: this.#typeRegistry,
-        importHooks: this.#importHooks,
-        managed,
-      });
-      this.#log.info(`Resolved errors for ${result.successCount} objects`);
-      return result;
-    } catch (error) {
-      this.#log.error('Error resolving import errors', error);
-      throw error;
-    }
+    const result = resolveSavedObjectsImportErrors({
+      readStream,
+      createNewCopies,
+      compatibilityMode,
+      namespace,
+      retries,
+      objectLimit: this.#importSizeLimit,
+      savedObjectsClient: this.#savedObjectsClient,
+      typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
+      managed,
+    });
+    return result;
   }
 }
