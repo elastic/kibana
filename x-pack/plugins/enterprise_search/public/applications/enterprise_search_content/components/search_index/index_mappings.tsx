@@ -69,13 +69,13 @@ export const SearchIndexIndexMappings: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {shouldShowAccessControlSwitch && (
               <EuiFlexItem grow={false} className="enterpriseSearchMappingsSelector">
                 <AccessControlIndexSelector
+                  fullWidth
                   onChange={setSelectedIndexType}
                   valueOfSelected={selectedIndexType}
                 />

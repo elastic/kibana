@@ -56,7 +56,6 @@ export const ConnectorSyncRules: React.FC = () => {
           setIsEditing={setIsEditing}
         />
       )}
-      <EuiSpacer />
       <EuiFlexGroup direction="column">
         {hasDraft && (
           <EuiFlexItem>
@@ -71,18 +70,6 @@ export const ConnectorSyncRules: React.FC = () => {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h2>
-                      {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
-                        defaultMessage: 'Sync rules ',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
               <EuiText size="s">
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.description', {
