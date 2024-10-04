@@ -6,7 +6,8 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { BrowserSimpleFields, ConfigKey } from '../../../common/runtime_types';
+import { omit } from 'lodash';
+import { BrowserSimpleFields, ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { inlineToProjectZip } from '../../common/inline_to_zip';
 
 interface MapInlineToProjectFieldsArgs {
@@ -48,3 +49,21 @@ export async function mapInlineToProjectFields({
     [ConfigKey.SOURCE_INLINE]: inlineScript,
   };
 }
+
+/**
+ * We don't transmit the inline script in `source.inline.script` field anymore, because JS parsing on the backend
+ * can break on certain characters. The procedure for handling project content (the default behavior in the absence
+ * of the inline script data) is not susceptible to this issue.
+ *
+ * See https://github.com/elastic/kibana/issues/169963 for more information.
+ */
+export const dropInlineScriptForTransmission = (monitor: MonitorFields) => {
+  return (
+    monitor[ConfigKey.MONITOR_TYPE] === 'browser' &&
+    monitor[ConfigKey.MONITOR_SOURCE_TYPE] === 'ui' &&
+    !!(monitor as MonitorFields)[ConfigKey.SOURCE_INLINE] &&
+    !!(monitor as MonitorFields)[ConfigKey.SOURCE_PROJECT_CONTENT]
+      ? omit(monitor, ConfigKey.SOURCE_INLINE)
+      : monitor
+  ) as MonitorFields;
+};

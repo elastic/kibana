@@ -14,6 +14,7 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { mapInlineToProjectFields } from '../../synthetics_service/utils/map_inline_to_project_fields';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -86,7 +87,16 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
-      const normalizedMonitor = validationResult.decodedMonitor;
+      const normalizedMonitor = Object.assign(
+        {},
+        validationResult.decodedMonitor,
+        await mapInlineToProjectFields({
+          monitorType: validationResult.decodedMonitor?.type,
+          monitor: validationResult?.decodedMonitor,
+          logger: server.logger,
+          includeInlineScript: false,
+        })
+      );
 
       const err = await validatePermissions(routeContext, normalizedMonitor.locations);
       if (err) {

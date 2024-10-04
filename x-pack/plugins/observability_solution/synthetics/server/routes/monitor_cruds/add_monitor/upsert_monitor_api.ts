@@ -10,7 +10,6 @@ import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/logging';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
@@ -41,7 +40,6 @@ import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monit
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
-import { mapInlineToProjectFields } from '../../../synthetics_service/utils/map_inline_to_project_fields';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;

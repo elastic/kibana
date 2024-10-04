@@ -32,7 +32,7 @@ export async function inlineToProjectZip(
       mWriter.on('close', resolve);
       archive.pipe(mWriter);
       archive.append(wrapInlineInProject(inlineJourney), {
-        name: `${monitorId}.journey.ts`,
+        name: 'inline.journey.ts',
       });
       return archive.finalize();
     });

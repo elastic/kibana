@@ -6,10 +6,70 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { unzipFile } from '../../common/unzip_project_code';
-import { mapInlineToProjectFields } from './map_inline_to_project_fields';
+import {
+  dropInlineScriptForTransmission,
+  mapInlineToProjectFields,
+} from './map_inline_to_project_fields';
 import * as inlineToZip from '../../common/inline_to_zip';
+
+describe('dropInlineScriptForTransmission', () => {
+  it('omits the inline script if there is project content available', () => {
+    expect(
+      dropInlineScriptForTransmission({
+        [ConfigKey.SOURCE_INLINE]: 'this monitor has project content',
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: 'so we should remove the inline script',
+        [ConfigKey.MONITOR_TYPE]: 'browser',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+      } as MonitorFields)
+    ).toEqual({
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: 'so we should remove the inline script',
+      [ConfigKey.MONITOR_TYPE]: 'browser',
+      [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+    });
+  });
+
+  it('returns the original monitor if there is no project content', () => {
+    expect(
+      dropInlineScriptForTransmission({
+        [ConfigKey.SOURCE_INLINE]: 'this is an old monitor that has no zip content',
+        [ConfigKey.MONITOR_TYPE]: 'browser',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+      } as MonitorFields)
+    ).toEqual({
+      [ConfigKey.SOURCE_INLINE]: 'this is an old monitor that has no zip content',
+      [ConfigKey.MONITOR_TYPE]: 'browser',
+      [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+    });
+  });
+
+  it('returns the original monitor if it is not of type `browser`', () => {
+    expect(
+      dropInlineScriptForTransmission({
+        [ConfigKey.MONITOR_TYPE]: 'http',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+      } as MonitorFields)
+    ).toEqual({
+      [ConfigKey.MONITOR_TYPE]: 'http',
+      [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
+    });
+  });
+
+  it('returns the original monitor if it is not a UI monitor', () => {
+    expect(
+      dropInlineScriptForTransmission({
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: 'so we should remove the inline script',
+        [ConfigKey.MONITOR_TYPE]: 'browser',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: 'project',
+      } as MonitorFields)
+    ).toEqual({
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: 'so we should remove the inline script',
+      [ConfigKey.MONITOR_TYPE]: 'browser',
+      [ConfigKey.MONITOR_SOURCE_TYPE]: 'project',
+    });
+  });
+});
 
 describe('mapInlineToProjectFields', () => {
   let logger: Logger;

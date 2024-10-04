@@ -16,8 +16,8 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import pMap from 'p-map';
 import moment from 'moment';
+import pMap from 'p-map';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
@@ -46,6 +46,7 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+import { dropInlineScriptForTransmission } from './utils/map_inline_to_project_fields';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -420,7 +421,7 @@ export class SyntheticsService {
             );
 
             const syncErrors = await this.apiClient.syncMonitors({
-              monitors: locMonitors,
+              monitors: locMonitors.map(dropInlineScriptForTransmission),
               output,
               license,
               location,
