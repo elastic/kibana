@@ -259,13 +259,7 @@ export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  const columnName = getQuotedColumnName(column);
-  return (
-    getColumnByName(columnName, { fields, variables }) ||
-    // It's possible columnName has backticks "`fieldName`"
-    // so we need to access the original name as well
-    getColumnByName(column.name, { fields, variables })
-  );
+  return getColumnByName(column.parts.join('.'), { fields, variables });
 }
 
 /**
@@ -553,16 +547,6 @@ export function hasCCSSource(name: string) {
 }
 
 /**
- * This will return the name without any quotes.
- *
- * E.g. "`bytes`" will become "bytes"
- *
- * @param column
- * @returns
- */
-export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
-
-/**
  * This returns the name with any quotes that were present.
  *
  * E.g. "`bytes`" will be "`bytes`"
@@ -580,17 +564,16 @@ export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+  const columnName = column.parts.join('.');
+  if (fields.has(columnName) || variables.has(columnName)) {
+    return true;
+  }
 
-  for (const name of namesToCheck) {
-    if (fields.has(name) || variables.has(name)) {
-      return true;
-    }
-
-    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
-    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
-      return true;
-    }
+  // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+  if (
+    Boolean(fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, variables.keys()))
+  ) {
+    return true;
   }
 
   return false;
