@@ -18,6 +18,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
@@ -43,33 +44,29 @@ export function initializeUnifiedSearchManager(
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
 
   // --------------------------------------------------------------------------------------
-  // Control group subscriptions
+  // Set up control group integration
   // --------------------------------------------------------------------------------------
   const controlGroupFilters$ = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
   );
-
-  // Set filters$ to include unified search filters and control group filters
+  const controlGroupTimeslice$ = controlGroupApi$.pipe(
+    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
+  );
   const filtersSubscription = combineLatest([
     unifiedSearchFilters$,
     controlGroupFilters$,
   ]).subscribe(([unifiedSearchFilters, controlGroupFilters]) => {
     filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
   });
-
-  // when control group outputs filters, force a refresh!
-  const controlGroupFiltersSubscription = controlGroupFilters$.subscribe(() =>
-    panelsReload$.next()
-  ); // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
-
-  // when control group outputs timeslice, update timeslice
-  const timesliceSubscription = controlGroupApi$
-    .pipe(
-      switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
-    )
-    .subscribe((timeslice) => {
-      if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
-    });
+  const reloadPanelsSubscription = controlGroupFilters$.subscribe(() => panelsReload$.next());
+  const timesliceSubscription = controlGroupTimeslice$.subscribe((timeslice) => {
+    if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
+  });
+  const stopSyncingWithControlGroup = () => {
+    filtersSubscription.unsubscribe();
+    reloadPanelsSubscription.unsubscribe();
+    timesliceSubscription.unsubscribe();
+  };
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
@@ -100,6 +97,32 @@ export function initializeUnifiedSearchManager(
       kbnUrlStateStorage
     );
 
+    const unifiedSearchFiltersSubscription = filterManager.getUpdates$().subscribe(() => {
+      const nextUnifiedSearchFilters = filterManager.getFilters();
+      if (!fastIsEqual(nextUnifiedSearchFilters, unifiedSearchFilters$.value)) {
+        unifiedSearchFilters$.next(nextUnifiedSearchFilters);
+      }
+    });
+    const querySubscription = queryString.getUpdates$().subscribe(() => {
+      const nextQuery = queryString.getQuery();
+      if (!fastIsEqual(nextQuery, query$.value)) {
+        query$.next(nextQuery);
+      }
+    });
+    const timeRangeSubscription = timefilterService.getTimeUpdate$().subscribe(() => {
+      const nextTimeRange = timefilterService.getTime();
+      if (!fastIsEqual(nextTimeRange, timeRange$.value)) {
+        timeRange$.next(nextTimeRange);
+      }
+    });
+    const refreshIntervalSubscription = timefilterService
+      .getRefreshIntervalUpdate$()
+      .subscribe(() => {
+        const nextRefreshInternal = timefilterService.getRefreshInterval();
+        if (!fastIsEqual(nextRefreshInternal, refreshInterval$.value)) {
+          refreshInterval$.next(nextRefreshInternal);
+        }
+      });
     const autoRefreshSubscription = timefilterService
       .getAutoRefreshFetch$()
       .pipe(
@@ -110,10 +133,13 @@ export function initializeUnifiedSearchManager(
         switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))
       )
       .subscribe();
-
     stopSyncingWithUnifiedSearch = () => {
       stopSyncingQueryServiceStateWithUrl();
       autoRefreshSubscription.unsubscribe();
+      querySubscription.unsubscribe();
+      refreshIntervalSubscription.unsubscribe();
+      timeRangeSubscription.unsubscribe();
+      unifiedSearchFiltersSubscription.unsubscribe();
     };
   }
 
@@ -130,10 +156,8 @@ export function initializeUnifiedSearchManager(
       panelsReload$,
     },
     cleanup: () => {
-      controlGroupFiltersSubscription.unsubscribe();
-      filtersSubscription.unsubscribe();
+      stopSyncingWithControlGroup();
       stopSyncingWithUnifiedSearch?.();
-      timesliceSubscription.unsubscribe();
     },
   };
 }

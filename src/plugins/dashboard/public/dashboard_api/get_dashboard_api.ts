@@ -53,9 +53,12 @@ export function getDashboardApi({
   const panelsManager = initializePanelsManager(initialState.panels, trackPanel, (id: string) =>
     getReferencesForPanelId(id, references)
   );
-  breakCircularDepUntilEmbeddableLoaded = panelsManager.untilEmbeddableLoaded;
-  const dataLoadingManager = initializeDataLoadingManager(panelsManager.children$);
-  const dataViewsManager = initializeDataViewsManager(controlGroupApi$, panelsManager.children$);
+  breakCircularDepUntilEmbeddableLoaded = panelsManager.api.untilEmbeddableLoaded;
+  const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
+  const dataViewsManager = initializeDataViewsManager(
+    controlGroupApi$,
+    panelsManager.api.children$
+  );
   const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
@@ -68,7 +71,7 @@ export function getDashboardApi({
     api: {
       ...dataLoadingManager.api,
       ...dataViewsManager.api,
-      ...panelsManager,
+      ...panelsManager.api,
       ...settingsManager.api,
       ...trackPanel,
       ...unifiedSearchManager.api,
@@ -101,6 +104,8 @@ export function getDashboardApi({
       type: DASHBOARD_API_TYPE as 'dashboard',
     },
     internalApi: {
+      ...panelsManager.internalApi,
+      ...unifiedSearchManager.internalApi,
       getSerializedStateForControlGroup: () => {
         return {
           rawState: initialState.controlGroupInput
@@ -116,7 +121,6 @@ export function getDashboardApi({
           references: getReferencesForControls(references),
         };
       },
-      ...unifiedSearchManager.internalApi,
     },
     cleanup: () => {
       dataLoadingManager.cleanup();

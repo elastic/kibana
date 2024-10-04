@@ -75,8 +75,8 @@ export function DashboardRenderer({
           reload$: results.internalApi.panelsReload$,
         });
       })
-      .catch((error) => {
-        if (!canceled) setError(error);
+      .catch((err) => {
+        if (!canceled) setError(err);
       });
 
     return () => {

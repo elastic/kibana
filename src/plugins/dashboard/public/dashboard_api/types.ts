@@ -19,6 +19,7 @@ import {
   EmbeddableAppContext,
   HasAppContext,
   HasType,
+  PublishesDataLoading,
   PublishesDataViews,
   PublishesPanelDescription,
   PublishesPanelTitle,
@@ -124,6 +125,7 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   PresentationContainer &
+  PublishesDataLoading &
   PublishesDataViews &
   PublishesPanelDescription &
   Pick<PublishesPanelTitle, 'panelTitle'> &
@@ -148,7 +150,6 @@ export type DashboardApi = CanExpandPanels &
     isEmbeddedExternally: boolean;
     managed$: PublishingSubject<boolean>;
     panels$: PublishingSubject<DashboardPanelMap>;
-    registerChildApi: (api: DefaultEmbeddableApi) => void;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
@@ -176,4 +177,5 @@ export interface DashboardInternalApi {
   panelsReload$: PublishingSubject<void>;
   getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
+  registerChildApi: (api: DefaultEmbeddableApi) => void;
 }

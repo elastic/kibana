@@ -12,7 +12,7 @@ import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PanelPackage } from '@kbn/presentation-containers';
-import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
@@ -69,136 +69,146 @@ export function initializePanelsManager(
   }
 
   return {
-    addNewPanel: async <ApiType extends unknown = unknown>(
-      panelPackage: PanelPackage,
-      displaySuccessMessage?: boolean
-    ) => {
-      usageCollectionService?.reportUiCounter(
-        DASHBOARD_UI_METRIC_ID,
-        METRIC_TYPE.CLICK,
-        panelPackage.panelType
-      );
+    api: {
+      addNewPanel: async <ApiType extends unknown = unknown>(
+        panelPackage: PanelPackage,
+        displaySuccessMessage?: boolean
+      ) => {
+        usageCollectionService?.reportUiCounter(
+          DASHBOARD_UI_METRIC_ID,
+          METRIC_TYPE.CLICK,
+          panelPackage.panelType
+        );
 
-      const newId = v4();
+        const newId = v4();
 
-      const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(
-        panelPackage.panelType
-      );
+        const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(
+          panelPackage.panelType
+        );
 
-      const customPlacementSettings = getCustomPlacementSettingFunc
-        ? await getCustomPlacementSettingFunc(panelPackage.initialState)
-        : undefined;
+        const customPlacementSettings = getCustomPlacementSettingFunc
+          ? await getCustomPlacementSettingFunc(panelPackage.initialState)
+          : undefined;
 
-      const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-        customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
-        {
-          currentPanels: panels$.value,
-          height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
-          width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+          customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
+          {
+            currentPanels: panels$.value,
+            height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
+            width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+          }
+        );
+        const newPanel: DashboardPanelState = {
+          type: panelPackage.panelType,
+          gridData: {
+            ...newPanelPlacement,
+            i: newId,
+          },
+          explicitInput: {
+            id: newId,
+          },
+        };
+        if (panelPackage.initialState) {
+          setRuntimeStateForChild(newId, panelPackage.initialState);
         }
-      );
-      const newPanel: DashboardPanelState = {
-        type: panelPackage.panelType,
-        gridData: {
-          ...newPanelPlacement,
-          i: newId,
-        },
-        explicitInput: {
-          id: newId,
-        },
-      };
-      if (panelPackage.initialState) {
-        setRuntimeStateForChild(newId, panelPackage.initialState);
-      }
-      panels$.next({ ...otherPanels, [newId]: newPanel });
-      if (displaySuccessMessage) {
-        coreServices.notifications.toasts.addSuccess({
-          title: getPanelAddedSuccessString(newPanel.explicitInput.title),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
+        panels$.next({ ...otherPanels, [newId]: newPanel });
+        if (displaySuccessMessage) {
+          coreServices.notifications.toasts.addSuccess({
+            title: getPanelAddedSuccessString(newPanel.explicitInput.title),
+            'data-test-subj': 'addEmbeddableToDashboardSuccess',
+          });
+          trackPanel.setScrollToPanelId(newId);
+          trackPanel.setHighlightPanelId(newId);
+        }
+        return await untilEmbeddableLoaded<ApiType>(newId);
+      },
+      canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
+      children$,
+      getPanelCount: () => {
+        return Object.keys(panels$.value).length;
+      },
+      getSerializedStateForChild: (childId: string) => {
+        const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
+        const { id, ...serializedState } = rawState;
+        return Object.keys(serializedState).length === 0
+          ? undefined
+          : {
+              rawState,
+              references: getReferencesForPanelId(childId),
+            };
+      },
+      getRuntimeStateForChild: (childId: string) => {
+        return restoredRuntimeState?.[childId];
+      },
+      panels$,
+      removePanel: (id: string) => {
+        const panels = { ...panels$.value };
+        if (panels[id]) {
+          delete panels[id];
+          panels$.next(panels);
+        }
+        const children = { ...children$.value };
+        if (children[id]) {
+          delete children[id];
+          children$.next(children);
+        }
+      },
+      replacePanel: async (idToRemove: string, { panelType, initialState }: PanelPackage) => {
+        const panels = { ...panels$.value };
+        if (!panels[idToRemove]) {
+          throw new PanelNotFoundError();
+        }
+
+        const id = v4();
+        const oldPanel = panels[idToRemove];
+        delete panels[idToRemove];
+        panels$.next({
+          ...panels,
+          [id]: {
+            ...oldPanel,
+            explicitInput: { ...initialState, id },
+            type: panelType,
+          },
         });
-        trackPanel.setScrollToPanelId(newId);
-        trackPanel.setHighlightPanelId(newId);
-      }
-      return await untilEmbeddableLoaded<ApiType>(newId);
-    },
-    canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
-    children$,
-    getPanelCount: () => {
-      return Object.keys(panels$.value).length;
-    },
-    getSerializedStateForChild: (childId: string) => {
-      const rawState = panels$.value[childId]?.explicitInput ?? { id: childId };
-      const { id, ...serializedState } = rawState;
-      return Object.keys(serializedState).length === 0
-        ? undefined
-        : {
-            rawState,
-            references: getReferencesForPanelId(childId),
-          };
-    },
-    getRuntimeStateForChild: (childId: string) => {
-      return restoredRuntimeState?.[childId];
-    },
-    panels$,
-    removePanel: (id: string) => {
-      const panels = { ...panels$.value };
-      if (panels[id]) {
-        delete panels[id];
-        panels$.next(panels);
-      }
-      const children = { ...children$.value };
-      if (children[id]) {
-        delete children[id];
-        children$.next(children);
-      }
-    },
-    replacePanel: async (idToRemove: string, { panelType, initialState }: PanelPackage) => {
-      const panels = { ...panels$.value };
-      if (!panels[idToRemove]) {
-        throw new PanelNotFoundError();
-      }
 
-      const id = v4();
-      const oldPanel = panels[idToRemove];
-      delete panels[idToRemove];
-      panels$.next({
-        ...panels,
-        [id]: {
-          ...oldPanel,
-          explicitInput: { ...initialState, id },
-          type: panelType,
-        },
-      });
-
-      const children = { ...children$.value };
-      if (children[idToRemove]) {
-        delete children[idToRemove];
-        children$.next(children);
-      }
-
-      await untilEmbeddableLoaded(id);
-      return id;
-    },
-    resetAllReactEmbeddables: () => {
-      restoredRuntimeState = {};
-      let resetChangedPanelCount = false;
-      const currentChildren = children$.value;
-      for (const panelId of Object.keys(currentChildren)) {
-        if (panels$.value[panelId]) {
-          const child = currentChildren[panelId];
-          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
-        } else {
-          // if reset resulted in panel removal, we need to update the list of children
-          delete currentChildren[panelId];
-          resetChangedPanelCount = true;
+        const children = { ...children$.value };
+        if (children[idToRemove]) {
+          delete children[idToRemove];
+          children$.next(children);
         }
-      }
-      if (resetChangedPanelCount) children$.next(currentChildren);
+
+        await untilEmbeddableLoaded(id);
+        return id;
+      },
+      resetAllReactEmbeddables: () => {
+        restoredRuntimeState = {};
+        let resetChangedPanelCount = false;
+        const currentChildren = children$.value;
+        for (const panelId of Object.keys(currentChildren)) {
+          if (panels$.value[panelId]) {
+            const child = currentChildren[panelId];
+            if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+          } else {
+            // if reset resulted in panel removal, we need to update the list of children
+            delete currentChildren[panelId];
+            resetChangedPanelCount = true;
+          }
+        }
+        if (resetChangedPanelCount) children$.next(currentChildren);
+      },
+      setPanels: (panels: DashboardPanelMap) => {
+        panels$.next(panels);
+      },
+      setRuntimeStateForChild,
+      untilEmbeddableLoaded,
     },
-    setPanels: (panels: DashboardPanelMap) => {
-      panels$.next(panels);
+    internalApi: {
+      registerChildApi: (api: DefaultEmbeddableApi) => {
+        children$.next({
+          ...children$.value,
+          [api.uuid]: api,
+        });
+      },
     },
-    setRuntimeStateForChild,
-    untilEmbeddableLoaded,
   };
 }

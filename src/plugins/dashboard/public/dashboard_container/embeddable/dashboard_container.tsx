@@ -31,7 +31,6 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   Container,
-  DefaultEmbeddableApi,
   EmbeddableFactoryNotFoundError,
   PanelNotFoundError,
   ViewMode,
@@ -100,16 +99,8 @@ import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integra
 import { DashboardReduxState, DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../types';
 import { addFromLibrary, addOrUpdateEmbeddable, runInteractiveSave, runQuickSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import {
-  combineDashboardFiltersWithControlGroupFilters,
-  startSyncingDashboardControlGroup,
-} from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
-import {
-  dashboardTypeDisplayLowercase,
-  dashboardTypeDisplayName,
-} from './dashboard_container_factory';
-import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import { getDashboardApi } from '../../dashboard_api/get_dashboard_api';
 import type { DashboardCreationOptions } from '../..';
 
 export interface InheritedChildInput {
@@ -388,8 +379,6 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
-    startSyncingDashboardControlGroup(this);
-
     this.executionContext = initialInput.executionContext;
 
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
@@ -468,48 +457,6 @@ export class DashboardContainer
       return;
     }
     super.updateInput(changes);
-  }
-
-  protected getInheritedInput(id: string): InheritedChildInput {
-    const {
-      query,
-      filters,
-      viewMode,
-      timeRange,
-      timeslice,
-      syncColors,
-      syncTooltips,
-      syncCursor,
-      hidePanelTitles,
-      refreshInterval,
-      executionContext,
-      panels,
-    } = this.input;
-
-    const combinedFilters = combineDashboardFiltersWithControlGroupFilters(
-      filters,
-      this.controlGroupApi$?.value
-    );
-    const hasCustomTimeRange = Boolean(
-      (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
-    );
-    return {
-      searchSessionId: this.searchSessionId,
-      refreshConfig: refreshInterval,
-      filters: combinedFilters,
-      hidePanelTitles,
-      executionContext,
-      syncTooltips,
-      syncColors,
-      syncCursor,
-      viewMode,
-      query,
-      id,
-      // do not pass any time information from dashboard to panel when panel has custom time range
-      // to avoid confusing panel which timeRange should be used
-      timeRange: hasCustomTimeRange ? undefined : timeRange,
-      timeslice: hasCustomTimeRange ? undefined : timeslice,
-    };
   }
 
   // ------------------------------------------------------------------------------------------------------
@@ -839,12 +786,6 @@ export class DashboardContainer
   // ------------------------------------------------------------------------------------------------------
   // React Embeddable system
   // ------------------------------------------------------------------------------------------------------
-  public registerChildApi = (api: DefaultEmbeddableApi) => {
-    this.children$.next({
-      ...this.children$.value,
-      [api.uuid]: api as DefaultEmbeddableApi,
-    });
-  };
 
   public saveNotification$: Subject<void> = new Subject<void>();
 
