@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import chroma from 'chroma-js';
 
-import { AlertSummaryField, RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
+import { RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -57,10 +57,9 @@ export type MetricThresholdAlert = TopAlert<MetricThresholdAlertField>;
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
-  setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: AppSectionProps) {
+export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const { charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const groups = alert.fields[ALERT_GROUP];
