@@ -25,10 +25,12 @@ import type {
   MlGetDatafeedParams,
   MlGetTrainedModelParams,
 } from './types';
+import type { MlAuditLogger } from '../../audit_logger';
 
 export function getMlClient(
   client: IScopedClusterClient,
-  mlSavedObjectService: MLSavedObjectService
+  mlSavedObjectService: MLSavedObjectService,
+  auditLogger: MlAuditLogger
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
@@ -159,8 +161,9 @@ export function getMlClient(
   // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
+      const [jobId] = getADJobIdsFromRequest(p);
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.closeJob(...p);
+      return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'close_ad_job', jobId);
     },
     async deleteCalendar(...p: Parameters<MlClient['deleteCalendar']>) {
       return mlClient.deleteCalendar(...p);
@@ -173,15 +176,24 @@ export function getMlClient(
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      const resp = await mlClient.deleteDataFrameAnalytics(...p);
+      const [analyticsId] = getDFAJobIdsFromRequest(p);
+      const resp = auditLogger.wrapTask(
+        () => mlClient.deleteDataFrameAnalytics(...p),
+        'delete_dfa_job',
+        analyticsId
+      );
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
       return resp;
     },
     async deleteDatafeed(...p: Parameters<MlClient['deleteDatafeed']>) {
       await datafeedIdsCheck(p);
-      const resp = await mlClient.deleteDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
+      const resp = auditLogger.wrapTask(
+        () => mlClient.deleteDatafeed(...p),
+        'delete_ad_datafeed',
+        datafeedId
+      );
       if (datafeedId !== undefined) {
         await mlSavedObjectService.deleteDatafeed(datafeedId);
       }
@@ -200,12 +212,18 @@ export function getMlClient(
     },
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const resp = await mlClient.deleteJob(...p);
+      const [jobId] = getADJobIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.deleteJob(...p),
+        'delete_ad_job',
+        jobId
+      );
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
       return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
+      // !!!!!!!!!!!!!!!!!!!! how do we pass the snapshot id to audit log?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.deleteModelSnapshot(...p);
     },
@@ -562,7 +580,8 @@ export function getMlClient(
     },
     async openJob(...p: Parameters<MlClient['openJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.openJob(...p);
+      const [jobId] = getADJobIdsFromRequest(p);
+      return auditLogger.wrapTask(() => mlClient.openJob(...p), 'open_ad_job', jobId);
     },
     async postCalendarEvents(...p: Parameters<MlClient['postCalendarEvents']>) {
       return mlClient.postCalendarEvents(...p);
@@ -582,16 +601,24 @@ export function getMlClient(
       return mlClient.putCalendarJob(...p);
     },
     async putDataFrameAnalytics(...p: Parameters<MlClient['putDataFrameAnalytics']>) {
-      const resp = await mlClient.putDataFrameAnalytics(...p);
       const [analyticsId] = getDFAJobIdsFromRequest(p);
+      const resp = await auditLogger.wrapTask(
+        () => mlClient.putDataFrameAnalytics(...p),
+        'put_dfa_job',
+        analyticsId
+      );
       if (analyticsId !== undefined) {
         await mlSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
       }
       return resp;
     },
     async putDatafeed(...p: Parameters<MlClient['putDatafeed']>) {
-      const resp = await mlClient.putDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
+      const resp = auditLogger.wrapTask(
+        () => mlClient.putDatafeed(...p),
+        'put_ad_datafeed',
+        datafeedId
+      );
       const jobId = getJobIdFromBody(p);
       if (datafeedId !== undefined && jobId !== undefined) {
         await mlSavedObjectService.addDatafeed(datafeedId, jobId);
@@ -603,8 +630,8 @@ export function getMlClient(
       return mlClient.putFilter(...p);
     },
     async putJob(...p: Parameters<MlClient['putJob']>) {
-      const resp = await mlClient.putJob(...p);
       const [jobId] = getADJobIdsFromRequest(p);
+      const resp = auditLogger.wrapTask(() => mlClient.putJob(...p), 'put_ad_job', jobId);
       if (jobId !== undefined) {
         await mlSavedObjectService.createAnomalyDetectionJob(jobId);
       }
@@ -622,26 +649,47 @@ export function getMlClient(
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.revertModelSnapshot(...p);
+      const [jobId] = getADJobIdsFromRequest(p);
+      return auditLogger.wrapTask(() => mlClient.revertModelSnapshot(...p), 'revert_ad_job', jobId);
     },
     async setUpgradeMode(...p: Parameters<MlClient['setUpgradeMode']>) {
       return mlClient.setUpgradeMode(...p);
     },
     async startDataFrameAnalytics(...p: Parameters<MlClient['startDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      return mlClient.startDataFrameAnalytics(...p);
+      const [analyticsId] = getDFAJobIdsFromRequest(p);
+      return auditLogger.wrapTask(
+        () => mlClient.startDataFrameAnalytics(...p),
+        'start_dfa_job',
+        analyticsId
+      );
     },
     async startDatafeed(...p: Parameters<MlClient['startDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.startDatafeed(...p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
+      return auditLogger.wrapTask(
+        () => mlClient.startDatafeed(...p),
+        'start_ad_datafeed',
+        datafeedId
+      );
     },
     async stopDataFrameAnalytics(...p: Parameters<MlClient['stopDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      return mlClient.stopDataFrameAnalytics(...p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
+      return auditLogger.wrapTask(
+        () => mlClient.stopDataFrameAnalytics(...p),
+        'stop_dfa_job',
+        datafeedId
+      );
     },
     async stopDatafeed(...p: Parameters<MlClient['stopDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.stopDatafeed(...p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
+      return auditLogger.wrapTask(
+        () => mlClient.stopDatafeed(...p),
+        'stop_ad_datafeed',
+        datafeedId
+      );
     },
     async updateDataFrameAnalytics(...p: Parameters<MlClient['updateDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
@@ -649,43 +697,26 @@ export function getMlClient(
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
+      const [datafeedId] = getDatafeedIdsFromRequest(p);
 
-      // Temporary workaround for the incorrect updateDatafeed function in the esclient
-      if (
-        // @ts-expect-error TS complains it's always false
-        p.length === 0 ||
-        p[0] === undefined
-      ) {
-        // Temporary generic error message. This should never be triggered
-        // but is added for type correctness below
-        throw new Error('Incorrect arguments supplied');
-      }
-      // @ts-expect-error body doesn't exist in the type
-      const { datafeed_id: id, body } = p[0];
-
-      return client.asInternalUser.transport.request(
-        {
-          method: 'POST',
-          path: `/_ml/datafeeds/${id}/_update`,
-          body,
-        },
-        p[1]
+      return auditLogger.wrapTask(
+        () => mlClient.updateDatafeed(...p),
+        'update_ad_datafeed',
+        datafeedId
       );
-
-      // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
-      // is fixed
-      // return mlClient.updateDatafeed(...p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
       return mlClient.updateFilter(...p);
     },
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.updateJob(...p);
+      const [jobId] = getADJobIdsFromRequest(p);
+      return auditLogger.wrapTask(() => mlClient.updateJob(...p), 'update_ad_job', jobId);
     },
     async resetJob(...p: Parameters<MlClient['resetJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.resetJob(...p);
+      const [jobId] = getADJobIdsFromRequest(p);
+      return auditLogger.wrapTask(() => mlClient.resetJob(...p), 'reset_ad_job', jobId);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);

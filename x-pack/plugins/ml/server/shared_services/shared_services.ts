@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
   UiSettingsServiceStart,
   KibanaRequest,
+  CoreAuditService,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
@@ -59,6 +60,7 @@ import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service'
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
+import { MlAuditLogger } from '../audit_logger';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -110,6 +112,7 @@ export function createSharedServices(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
+  getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
   compatibleModuleType: CompatibleModule | null
 ): {
@@ -137,7 +140,8 @@ export function createSharedServices(
       isMlReady,
       getUiSettings,
       getFieldsFormat,
-      getDataViews
+      getDataViews,
+      getAuditService
     );
 
     const {
@@ -209,7 +213,8 @@ function getRequestItemsProvider(
   isMlReady: () => Promise<void>,
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
-  getDataViews: () => DataViewsPluginStart
+  getDataViews: () => DataViewsPluginStart,
+  getAuditService: () => CoreAuditService | null
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
@@ -235,6 +240,11 @@ function getRequestItemsProvider(
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
+    }
+
+    const auditService = getAuditService();
+    if (!auditService) {
+      throw new Error('Audit service not initialized');
     }
 
     const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
@@ -263,7 +273,8 @@ function getRequestItemsProvider(
     if (request instanceof CoreKibanaRequest) {
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService);
+      const auditLogger = new MlAuditLogger(auditService, request);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -273,7 +284,8 @@ function getRequestItemsProvider(
         asSecondaryAuthUser: asInternalUser,
       };
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService);
+      const auditLogger = new MlAuditLogger(auditService);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
     }
 
     const getDataViewsService = getDataViewsServiceFactory(

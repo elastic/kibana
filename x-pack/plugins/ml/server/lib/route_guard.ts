@@ -29,6 +29,7 @@ import type { MlLicense } from '../../common/license';
 import type { MlClient } from './ml_client';
 import { getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
+import { MlAuditLogger } from '../audit_logger';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
@@ -42,6 +43,7 @@ type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   mlSavedObjectService: MLSavedObjectService;
   mlClient: MlClient;
   getDataViewsService(): Promise<DataViewsService>;
+  auditLogger: MlAuditLogger;
 }) => ReturnType<RequestHandler<P, Q, B>>;
 
 type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
@@ -121,6 +123,8 @@ export class RouteGuard {
       const [coreStart] = await this._getStartServices();
       const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
+      const auditLogger = new MlAuditLogger(coreStart.security.audit, request);
+
       return await coreStart.executionContext.withContext(executionContext, () =>
         handler({
           client,
@@ -128,13 +132,14 @@ export class RouteGuard {
           response,
           context,
           mlSavedObjectService,
-          mlClient: getMlClient(client, mlSavedObjectService),
+          mlClient: getMlClient(client, mlSavedObjectService, auditLogger),
           getDataViewsService: getDataViewsServiceFactory(
             this._getDataViews,
             savedObjectClient,
             client,
             request
           ),
+          auditLogger,
         })
       );
     };
