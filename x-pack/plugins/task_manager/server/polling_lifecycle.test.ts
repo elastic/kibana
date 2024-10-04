@@ -515,9 +515,10 @@ describe('TaskPollingLifecycle', () => {
         (event: TaskLifecycleEvent) => event.type === TaskEventType.TASK_POLLING_CYCLE
       );
 
+      expect(pollingCycleEvent!.event.tag).toEqual('err');
       expect(pollingCycleEvent!.event).toEqual({
         tag: 'err',
-        error: new Error(`Failed to poll for work: Error: booo`),
+        error: new Error(`Failed to poll for work: booo`),
       });
     });
 

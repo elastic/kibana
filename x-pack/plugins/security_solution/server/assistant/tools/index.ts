@@ -14,12 +14,27 @@ import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alert
 import { ATTACK_DISCOVERY_TOOL } from './attack_discovery/attack_discovery_tool';
 import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from './knowledge_base/knowledge_base_retrieval_tool';
 import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write_tool';
+import { SECURITY_LABS_KNOWLEDGE_BASE_TOOL } from './security_labs/security_labs_tool';
 
-export const getAssistantTools = (naturalLanguageESQLToolEnabled: boolean): AssistantTool[] => [
-  ALERT_COUNTS_TOOL,
-  ATTACK_DISCOVERY_TOOL,
-  naturalLanguageESQLToolEnabled ? NL_TO_ESQL_TOOL : ESQL_KNOWLEDGE_BASE_TOOL,
-  KNOWLEDGE_BASE_RETRIEVAL_TOOL,
-  KNOWLEDGE_BASE_WRITE_TOOL,
-  OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
-];
+export const getAssistantTools = ({
+  naturalLanguageESQLToolEnabled,
+  assistantKnowledgeBaseByDefault,
+}: {
+  naturalLanguageESQLToolEnabled?: boolean;
+  assistantKnowledgeBaseByDefault?: boolean;
+}): AssistantTool[] => {
+  const tools = [
+    ALERT_COUNTS_TOOL,
+    ATTACK_DISCOVERY_TOOL,
+    naturalLanguageESQLToolEnabled ? NL_TO_ESQL_TOOL : ESQL_KNOWLEDGE_BASE_TOOL,
+    KNOWLEDGE_BASE_RETRIEVAL_TOOL,
+    KNOWLEDGE_BASE_WRITE_TOOL,
+    OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
+  ];
+
+  if (assistantKnowledgeBaseByDefault) {
+    tools.push(SECURITY_LABS_KNOWLEDGE_BASE_TOOL);
+  }
+
+  return tools;
+};
