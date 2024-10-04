@@ -4,19 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPanel,
-  EuiPopover,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import {
   Chart,
   Axis,
@@ -24,7 +13,6 @@ import {
   Settings,
   ScaleType,
   niceTimeFormatter,
-  LegendActionProps,
   DARK_THEME,
   LIGHT_THEME,
 } from '@elastic/charts';
@@ -33,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { MetricsResponse } from '../types';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { MetricTypes } from '../../../common/rest_types';
-import { DatasetQualityLink } from './dataset_quality_link';
+import { LegendAction } from './legend_action';
 interface ChartsProps {
   data: MetricsResponse;
 }
@@ -57,29 +45,15 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
   const theme = useEuiTheme();
   const {
     services: {
-      share: {
-        url: { locators },
-      },
       application: { capabilities },
     },
   } = useKibanaContextForPlugin();
-  const hasDataSetQualityFeature = capabilities.data_quality;
-  const hasIndexManagementFeature = capabilities.index_management;
+  const hasDataSetQualityFeature = !!capabilities?.data_quality;
+  const hasIndexManagementFeature = !!capabilities?.index_management;
 
-  const onClickIndexManagement = async ({ dataStreamName }: { dataStreamName: string }) => {
-    // TODO: use proper index management locator https://github.com/elastic/kibana/issues/195083
-    const dataQualityLocator = locators.get('MANAGEMENT_APP_LOCATOR');
-    if (dataQualityLocator) {
-      await dataQualityLocator.navigate({
-        sectionId: 'data',
-        appId: `index_management/data_streams/${dataStreamName}`,
-      });
-    }
-  };
-
-  const togglePopover = (streamName: string) => {
-    setPopoverOpen(popoverOpen === streamName ? null : streamName);
-  };
+  const togglePopover = useCallback((streamName: string | null) => {
+    setPopoverOpen((prev) => (prev === streamName ? null : streamName));
+  }, []);
   return (
     <EuiFlexGroup direction="column">
       {data.charts.map((chart, idx) => {
@@ -101,54 +75,16 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                     showLegend={true}
                     legendPosition="right"
                     xDomain={{ min: minTimestamp, max: maxTimestamp }}
-                    legendAction={({ label }: LegendActionProps) => {
-                      const uniqueStreamName = `${idx}-${label}`;
-                      return (
-                        <EuiFlexGroup gutterSize="s" alignItems="center">
-                          <EuiPopover
-                            button={
-                              <EuiFlexGroup gutterSize="s" alignItems="center">
-                                <EuiFlexItem grow={false}>
-                                  <EuiButtonIcon
-                                    iconType="boxesHorizontal"
-                                    aria-label="Open data stream actions"
-                                    onClick={() => togglePopover(uniqueStreamName)}
-                                  />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            }
-                            isOpen={popoverOpen === uniqueStreamName}
-                            closePopover={() => setPopoverOpen(null)}
-                            anchorPosition="downRight"
-                          >
-                            <EuiListGroup gutterSize="none">
-                              <EuiListGroupItem
-                                label="Copy data stream name"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(label);
-                                }}
-                              />
-                              <EuiSpacer size="s" />
-
-                              {hasIndexManagementFeature && (
-                                <EuiListGroupItem
-                                  href="#"
-                                  label="Manage data stream"
-                                  onClick={() =>
-                                    onClickIndexManagement({
-                                      dataStreamName: label,
-                                    })
-                                  }
-                                />
-                              )}
-                              {hasDataSetQualityFeature && (
-                                <DatasetQualityLink dataStreamName={label} />
-                              )}
-                            </EuiListGroup>
-                          </EuiPopover>
-                        </EuiFlexGroup>
-                      );
-                    }}
+                    legendAction={({ label }) => (
+                      <LegendAction
+                        idx={idx}
+                        popoverOpen={popoverOpen}
+                        togglePopover={togglePopover}
+                        hasIndexManagementFeature={hasIndexManagementFeature}
+                        hasDataSetQualityFeature={hasDataSetQualityFeature}
+                        label={label}
+                      />
+                    )}
                   />
                   {chart.series.map((stream, streamIdx) => (
                     <BarSeries
