@@ -49,6 +49,7 @@ import {
   InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
+  HookServices,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
@@ -263,18 +264,25 @@ export class ActionsClient {
       })
     );
 
-    if (actionType.preSaveEventHandler) {
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient,
+    };
+
+    if (actionType.preSaveHook) {
       try {
-        await actionType.preSaveEventHandler({
+        await actionType.preSaveHook({
+          connectorId: id,
           config,
           secrets,
           logger: this.context.logger,
-          scopedClusterClient: this.context.scopedClusterClient,
+          request: this.context.request,
+          services: hookServices,
+          isUpdate: false,
         });
       } catch (error) {
         this.context.auditLogger?.log(
           connectorAuditEvent({
-            action: ConnectorAuditAction.CREATE,
+            action: ConnectorAuditAction.UPDATE,
             savedObject: { type: 'action', id },
             error,
           })
@@ -283,17 +291,51 @@ export class ActionsClient {
       }
     }
 
-    const result = await this.context.unsecuredSavedObjectsClient.create(
-      'action',
-      {
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      { id }
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any;
+    try {
+      result = await this.context.unsecuredSavedObjectsClient.create(
+        'action',
+        {
+          actionTypeId,
+          name,
+          isMissingSecrets: false,
+          config: validatedActionTypeConfig as SavedObjectAttributes,
+          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+        },
+        { id }
+      );
+    } catch (err) {
+      result = err;
+      this.context.logger.error(`postSaveHook update error for`);
+    }
+
+    const wasSuccessful = !(result instanceof Error);
+    const label = `connectorId: "${id}"; type: ${actionTypeId}`;
+    const tags = ['post-save-hook', id];
+
+    if (actionType.postSaveHook) {
+      try {
+        await actionType.postSaveHook({
+          connectorId: id,
+          config,
+          secrets,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+          isUpdate: true,
+          wasSuccessful,
+        });
+      } catch (err) {
+        this.context.logger.error(`postSaveHook update error for ${label}: ${err.message}`, {
+          tags,
+        });
+      }
+    }
+
+    if (!wasSuccessful) {
+      throw result;
+    }
 
     return {
       id: result.id,
@@ -376,19 +418,25 @@ export class ActionsClient {
       })
     );
 
-    if (actionType.preSaveEventHandler) {
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient,
+    };
+
+    if (actionType.preSaveHook) {
       try {
-        await actionType.preSaveEventHandler({
+        await actionType.preSaveHook({
+          connectorId: id,
           config,
           secrets,
           logger: this.context.logger,
-          scopedClusterClient: this.context.scopedClusterClient,
+          request: this.context.request,
+          services: hookServices,
           isUpdate: true,
         });
       } catch (error) {
         this.context.auditLogger?.log(
           connectorAuditEvent({
-            action: ConnectorAuditAction.UPDATE,
+            action: ConnectorAuditAction.CREATE,
             savedObject: { type: 'action', id },
             error,
           })
@@ -397,26 +445,60 @@ export class ActionsClient {
       }
     }
 
-    const result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
-      'action',
-      {
-        ...attributes,
-        actionTypeId,
-        name,
-        isMissingSecrets: false,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      omitBy(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any;
+    try {
+      result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
+        'action',
         {
-          id,
-          overwrite: true,
-          references,
-          version,
+          ...attributes,
+          actionTypeId,
+          name,
+          isMissingSecrets: false,
+          config: validatedActionTypeConfig as SavedObjectAttributes,
+          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
         },
-        isUndefined
-      )
-    );
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            references,
+            version,
+          },
+          isUndefined
+        )
+      );
+    } catch (err) {
+      result = err;
+      this.context.logger.error(`postSaveHook update error for`);
+    }
+
+    const wasSuccessful = !(result instanceof Error);
+    const label = `connectorId: "${id}"; type: ${actionTypeId}`;
+    const tags = ['post-save-hook', id];
+
+    if (actionType.postSaveHook) {
+      try {
+        await actionType.postSaveHook({
+          connectorId: id,
+          config,
+          secrets,
+          logger: this.context.logger,
+          request: this.context.request,
+          services: hookServices,
+          isUpdate: true,
+          wasSuccessful,
+        });
+      } catch (err) {
+        this.context.logger.error(`postSaveHook update error for ${label}: ${err.message}`, {
+          tags,
+        });
+      }
+    }
+
+    if (!wasSuccessful) {
+      throw result;
+    }
 
     try {
       await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
@@ -712,26 +794,30 @@ export class ActionsClient {
       'action',
       id
     );
-    const { actionTypeId, config } = attributes;
+    const { actionTypeId, config, secrets } = attributes;
     const actionType = this.context.actionTypeRegistry.get(actionTypeId);
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
-    if (actionType.postDeleteEventHandler) {
+    const hookServices: HookServices = {
+      scopedClusterClient: this.context.scopedClusterClient,
+    };
+
+    if (actionType.postDeleteHook) {
       try {
-        await actionType.postDeleteEventHandler({
+        await actionType.postDeleteHook({
+          connectorId: id,
           config,
+          secrets,
           logger: this.context.logger,
-          scopedClusterClient: this.context.scopedClusterClient,
+          request: this.context.request,
+          services: hookServices,
         });
       } catch (error) {
-        this.context.auditLogger?.log(
-          connectorAuditEvent({
-            action: ConnectorAuditAction.UPDATE,
-            savedObject: { type: 'action', id },
-            error,
-          })
+        const tags = ['post-delete-hook', id];
+        this.context.logger.error(
+          `The post delete hook failed for for connector "${id}": ${error.message}`,
+          { tags }
         );
-        throw error;
       }
     }
     return result;

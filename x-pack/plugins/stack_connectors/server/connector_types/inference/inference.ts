@@ -93,7 +93,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    */
   public async performApiCompletion({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      { inference_id: this.inferenceId, input, task_type: 'completion' },
       false
     );
     // const usageMetadata = response?.data?.usageMetadata;
@@ -101,7 +101,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
+   * responsible for making a POST request to the Inference API rerank task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
   public async performApiRerank({ input, query }: RerankParams): Promise<RerankResponse> {
@@ -110,7 +110,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         query,
         inference_id: this.inferenceId,
         input,
-        task_type: this.taskType as InferenceTaskType,
+        task_type: 'rerank',
       },
       false
     );
@@ -118,14 +118,14 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
+   * responsible for making a POST request to the Inference API sparse embedding task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
   public async performApiSparseEmbedding({
     input,
   }: SparseEmbeddingParams): Promise<SparseEmbeddingResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      { inference_id: this.inferenceId, input, task_type: 'sparse_embedding' },
       false
     );
     return response as SparseEmbeddingResponse;
@@ -143,7 +143,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         inference_id: this.inferenceId,
         input,
-        task_type: this.taskType as InferenceTaskType,
+        task_type: 'text_embedding',
         task_settings: {
           input_type: inputType,
         },
