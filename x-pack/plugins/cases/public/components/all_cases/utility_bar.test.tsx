@@ -41,12 +41,26 @@ describe('Severity form field', () => {
     showClearFiltersButton: false,
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+    sessionStorage.removeItem(localStorageKey);
+  });
+
   beforeEach(() => {
+    jest.useFakeTimers();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
     });
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('renders', async () => {
@@ -312,17 +326,8 @@ describe('Severity form field', () => {
     });
 
     describe('do not show button', () => {
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
-
       afterEach(() => {
         jest.clearAllTimers();
-      });
-
-      afterAll(() => {
-        jest.useRealTimers();
-        sessionStorage.removeItem(localStorageKey);
       });
 
       beforeEach(() => {
