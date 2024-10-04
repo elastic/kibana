@@ -101,7 +101,7 @@ export interface ITelemetryClient {
   reportAddMetricsCalloutAddMetricsClick(params: AddMetricsCalloutEventParams): void;
   reportAddMetricsCalloutTryItClick(params: AddMetricsCalloutEventParams): void;
   reportAddMetricsCalloutLearnMoreClick(params: AddMetricsCalloutEventParams): void;
-  reportAddMetricsCalloutDismissClick(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutDismissed(params: AddMetricsCalloutEventParams): void;
 }
 
 export type InfraTelemetryEvent =

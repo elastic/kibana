@@ -111,7 +111,7 @@ export class TelemetryClient implements ITelemetryClient {
     );
   };
 
-  public reportAddMetricsCalloutDismissClick = (params: AddMetricsCalloutEventParams) => {
+  public reportAddMetricsCalloutDismissed = (params: AddMetricsCalloutEventParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED, params);
   };
 }
