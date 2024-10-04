@@ -94,8 +94,6 @@ export const createStoreFactory = async (
       dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
     });
 
-    console.log({ sourcererDataViews });
-
     if (sourcererDataViews === undefined) {
       throw new Error('');
     }

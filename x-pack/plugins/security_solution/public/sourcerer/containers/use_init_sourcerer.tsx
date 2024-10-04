@@ -43,7 +43,6 @@ export const useInitSourcerer = (
   const { addError, addWarning } = useAppToasts();
 
   useEffect(() => {
-    debugger;
     if (defaultDataView.error != null) {
       addWarning({
         title: i18n.translate('xpack.securitySolution.sourcerer.permissions.title', {
