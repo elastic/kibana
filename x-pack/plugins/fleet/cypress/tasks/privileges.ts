@@ -193,6 +193,95 @@ export const FleetNoneIntegrAllUser: User = {
   roles: [FleetNoneIntegrAllRole.name],
 };
 
+export const AutomaticImportIntegrRole: Role = {
+  name: 'automatic_import_integrations_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+      cluster: ['manage_service_account'],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['read'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const AutomaticImportIntegrUser: User = {
+  username: 'automatic_import_integrations_read_user',
+  password: 'password',
+  roles: [AutomaticImportIntegrRole.name],
+};
+
+export const AutomaticImportConnectorNoneRole: Role = {
+  name: 'automatic_import_connectors_none_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+      cluster: ['manage_service_account'],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['all'],
+          fleet: ['all'],
+          connectors: ['none'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const AutomaticImportConnectorNoneUser: User = {
+  username: 'automatic_import_connectors_none_user',
+  password: 'password',
+  roles: [AutomaticImportConnectorNoneRole.name],
+};
+
+export const AutomaticImportConnectorAllRole: Role = {
+  name: 'automatic_import_connectors_all_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+      cluster: ['manage_service_account'],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['all'],
+          fleet: ['all'],
+          connectors: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const AutomaticImportConnectorAllUser: User = {
+  username: 'automatic_import_connectors_all_user',
+  password: 'password',
+  roles: [AutomaticImportConnectorAllRole.name],
+};
+
 export const BuiltInEditorUser: User = {
   username: 'editor_user',
   password: 'password',
