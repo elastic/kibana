@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
@@ -60,17 +60,23 @@ export const UrlSyncedAlertsSearchBar = ({
   const [spaceId, setSpaceId] = useState<string>();
 
   const {
+    // KQL bar query
     kuery,
     onKueryChange,
+    // KQL bar filters
     filters,
     onFiltersChange,
+    // Controls bar filters
     controlFilters,
     onControlFiltersChange,
+    // Time range
     rangeFrom,
     onRangeFromChange,
     rangeTo,
     onRangeToChange,
+    // Controls bar configuration
     filterControls,
+    // Saved KQL query
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
@@ -125,6 +131,11 @@ export const UrlSyncedAlertsSearchBar = ({
     onFiltersChange(updatedFilters);
   };
 
+  const filterControlsStorageKey = useMemo(
+    () => ['alertsSearchBar', spaceId, 'filterControls'].filter(Boolean).join('.'),
+    [spaceId]
+  );
+
   return (
     <>
       <AlertsSearchBar
@@ -150,6 +161,7 @@ export const UrlSyncedAlertsSearchBar = ({
           controlsUrlState={filterControls}
           filters={controlFilters}
           onFiltersChange={onControlFiltersChange}
+          storageKey={filterControlsStorageKey}
           services={{
             http,
             notifications,

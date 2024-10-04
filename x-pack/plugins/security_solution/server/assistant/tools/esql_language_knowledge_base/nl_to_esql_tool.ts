@@ -20,24 +20,19 @@ const toolDetails = {
   id: 'nl-to-esql-tool',
   name: TOOL_NAME,
   description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
-  - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${TOOL_NAME}" function for this.
-
-  Even if the "${TOOL_NAME}" function was used before that, follow it up with the "${TOOL_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${TOOL_NAME}" function,
-  even if it has been called before.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
 };
 
 export const NL_TO_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
-    const { chain, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && chain != null;
+    const { inference, connectorId, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && inference != null && connectorId != null;
   },
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;

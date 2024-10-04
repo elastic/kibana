@@ -44,6 +44,7 @@ import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
+    featureIds,
     dataViewId,
     onFiltersChange,
     timeRange,
@@ -59,6 +60,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     ControlGroupRenderer,
     Storage,
     ruleTypeIds,
+    storageKey,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -79,8 +81,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi>();
 
   const localStoragePageFilterKey = useMemo(
-    () => `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`,
-    [ruleTypeIds, spaceId]
+    () => storageKey ?? `${ruleTypeIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`,
+    [ruleTypeIds, spaceId, storageKey]
   );
 
   const currentFiltersRef = useRef<Filter[]>();

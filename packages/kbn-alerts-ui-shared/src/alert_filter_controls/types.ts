@@ -73,4 +73,5 @@ export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chaini
    */
   ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
+  storageKey?: string;
 }

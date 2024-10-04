@@ -124,6 +124,7 @@ import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
+import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -212,6 +213,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
       });
     }
+
+    scheduleEntityAnalyticsMigration({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
+    }).catch((err) => {
+      logger.error(`Error scheduling entity analytics migration: ${err}`);
+    });
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -535,7 +545,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(
       APP_UI_ID,
-      getAssistantTools(config.experimentalFeatures.assistantNaturalLanguageESQLTool)
+      getAssistantTools({
+        naturalLanguageESQLToolEnabled:
+          config.experimentalFeatures.assistantNaturalLanguageESQLTool,
+        assistantKnowledgeBaseByDefault:
+          config.experimentalFeatures.assistantKnowledgeBaseByDefault,
+      })
     );
     const features = {
       assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
