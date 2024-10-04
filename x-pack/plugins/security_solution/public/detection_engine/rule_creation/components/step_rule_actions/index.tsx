@@ -16,6 +16,8 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type {
@@ -83,7 +85,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: { application },
   } = useKibana();
-
+  const automatedResponseActionsForAllRulesEnabled = useIsExperimentalFeatureEnabled(
+    'automatedResponseActionsForAllRulesEnabled'
+  );
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -101,15 +105,15 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
-    // if (shouldShowResponseActions(ruleType)) {
-    return (
-      <UseArray path="responseActions" initialNumberOfItems={0}>
-        {ResponseActionsForm}
-      </UseArray>
-    );
-    // }
-    // return null;
-  }, []);
+    if (shouldShowResponseActions(ruleType, automatedResponseActionsForAllRulesEnabled)) {
+      return (
+        <UseArray path="responseActions" initialNumberOfItems={0}>
+          {ResponseActionsForm}
+        </UseArray>
+      );
+    }
+    return null;
+  }, [automatedResponseActionsForAllRulesEnabled, ruleType]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
