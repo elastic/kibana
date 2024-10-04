@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('get roleAuthc', async () => {
             const { body, status } = await supertestAdminWithApiKey.get(
-              '/api/security/role/superuser'
+              '/api/security/role/someRole' // mame of the role doesn't matter, we're checking the endpoint doesn't exist
             );
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('delete roleAuthc', async () => {
             const { body, status } = await supertestAdminWithApiKey.delete(
-              '/api/security/role/superuser'
+              '/api/security/role/someRole' // mame of the role doesn't matter, we're checking the endpoint doesn't exist
             );
             svlCommonApi.assertApiNotFound(body, status);
           });
