@@ -92,7 +92,7 @@ module.exports = (request, options) => {
     }
   }
 
-  if (request.endsWith('?asUrl')) {
+  if (request.startsWith('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js') || request.startsWith('maplibre-gl/dist/maplibre-gl-csp-worker')) {
     return FILE_MOCK;
   }
 

@@ -273,7 +273,7 @@ export function getWebpackConfig(
         },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
-          test: [
+          include: [
             require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
             require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
           ],
