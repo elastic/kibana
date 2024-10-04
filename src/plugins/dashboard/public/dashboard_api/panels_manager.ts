@@ -152,6 +152,33 @@ export function initializePanelsManager(
         children$.next(children);
       }
     },
+    replacePanel: async (idToRemove: string, { panelType, initialState }: PanelPackage) => {
+      const panels = { ...panels$.value };
+      if (!panels[idToRemove]) {
+        throw new PanelNotFoundError();
+      }
+
+      const id = v4();
+      const oldPanel = panels[idToRemove];
+      delete panels[idToRemove];
+      panels$.next({
+        ...panels,
+        [id]: {
+          ...oldPanel,
+          explicitInput: { ...initialState, id },
+          type: panelType,
+        },
+      });
+
+      const children = { ...children$.value };
+      if (children[idToRemove]) {
+        delete children[idToRemove];
+        children$.next(children);
+      }
+
+      await untilEmbeddableLoaded(id);
+      return id;
+    },
     resetAllReactEmbeddables: () => {
       restoredRuntimeState = {};
       let resetChangedPanelCount = false;

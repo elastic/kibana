@@ -72,7 +72,7 @@ export function getDashboardApi({
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
       setManaged: (managed: boolean) => managed$.next(managed),
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
-      type: DASHBOARD_API_TYPE,
+      type: DASHBOARD_API_TYPE as 'dashboard',
     },
     cleanup: () => {},
   };
