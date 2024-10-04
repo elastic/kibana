@@ -65,13 +65,18 @@ export interface AssetDashboardLoadedParams {
   filtered_by?: string[];
 }
 
+export interface AddMetricsCalloutEventParams {
+  view: string;
+}
+
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
   | HostFlyoutFilterActionParams
   | HostsViewQueryHostsCountRetrievedParams
   | AssetDetailsFlyoutViewedParams
-  | AssetDashboardLoadedParams;
+  | AssetDashboardLoadedParams
+  | AddMetricsCalloutEventParams;
 
 export interface PerformanceMetricInnerEvents {
   key1?: string;
@@ -93,6 +98,10 @@ export interface ITelemetryClient {
     meta: Record<string, unknown>
   ): void;
   reportAssetDashboardLoaded(params: AssetDashboardLoadedParams): void;
+  reportAddMetricsCalloutAddDataClick(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutTryItClick(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutLearnMoreClick(params: AddMetricsCalloutEventParams): void;
+  reportAddMetricsCalloutDismissClick(params: AddMetricsCalloutEventParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -127,4 +136,20 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED;
       schema: RootSchema<AssetDashboardLoadedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED;
+      schema: RootSchema<AddMetricsCalloutEventParams>;
     };
