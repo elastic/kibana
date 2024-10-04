@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -28,10 +31,6 @@ import type {
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -42,6 +41,7 @@ export interface ConfigSchema {
 export interface InvestigateAppSetupDependencies {
   investigate: InvestigatePublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -51,7 +51,6 @@ export interface InvestigateAppSetupDependencies {
   unifiedSearch: {};
   uiActions: UiActionsSetup;
   security: SecurityPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -67,7 +66,6 @@ export interface InvestigateAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
 }
 
 export interface InvestigateAppPublicSetup {}
