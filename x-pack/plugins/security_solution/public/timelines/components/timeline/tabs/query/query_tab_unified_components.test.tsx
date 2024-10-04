@@ -297,8 +297,7 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189791
-  describe.only('pagination', () => {
+  describe('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
@@ -311,7 +310,7 @@ describe('query tab with unified timeline', () => {
             totalPages: 5,
           },
           refreshedAt: Date.now(),
-          totalCount: 5,
+          totalCount: 50,
           loadPage: loadPageMock,
         },
       ]);
@@ -372,7 +371,7 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it.only(
+    it(
       'should load more records according to sample size correctly',
       async () => {
         const mockStateWithNoteInTimeline = {
@@ -383,7 +382,7 @@ describe('query tab with unified timeline', () => {
               [TimelineId.test]: {
                 ...mockGlobalState.timeline.timelineById[TimelineId.test],
                 itemsPerPage: 1,
-                sampleSize: 4,
+                sampleSize: 5,
                 itemsPerPageOptions: [1, 2, 3, 4, 5],
                 savedObjectId: 'timeline-1', // match timelineId in mocked notes data
                 pinnedEventIds: { '1': true },
@@ -402,12 +401,14 @@ describe('query tab with unified timeline', () => {
           </TestProviders>
         );
 
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
         await waitFor(() => {
           expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
-          expect(screen.getByTestId('pagination-button-3')).toBeVisible();
+          expect(screen.getByTestId('pagination-button-4')).toBeVisible();
         });
         // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-3'));
+        fireEvent.click(screen.getByTestId('pagination-button-4'));
         await waitFor(() => {
           expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         });

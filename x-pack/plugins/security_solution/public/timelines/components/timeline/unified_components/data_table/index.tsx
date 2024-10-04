@@ -360,12 +360,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
-    console.log({
-      itemsPerPage,
-      itemsPerPageOptions,
-      sampleSize,
-    });
-
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
