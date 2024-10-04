@@ -21,28 +21,22 @@ interface LegendActionProps {
   idx: number;
   popoverOpen: string | null;
   togglePopover: (streamName: string | null) => void;
-  hasIndexManagementFeature: boolean;
-  hasDataSetQualityFeature: boolean;
   label: string;
 }
 
 export const LegendAction: React.FC<LegendActionProps> = React.memo(
-  ({
-    label,
-    idx,
-    popoverOpen,
-    togglePopover,
-    hasIndexManagementFeature,
-    hasDataSetQualityFeature,
-  }) => {
+  ({ label, idx, popoverOpen, togglePopover }) => {
     const uniqueStreamName = `${idx}-${label}`;
     const {
       services: {
         share: {
           url: { locators },
         },
+        application: { capabilities },
       },
     } = useKibanaContextForPlugin();
+    const hasDataSetQualityFeature = !!capabilities?.data_quality;
+    const hasIndexManagementFeature = !!capabilities?.index_management;
 
     const onClickIndexManagement = useCallback(async () => {
       // TODO: use proper index management locator https://github.com/elastic/kibana/issues/195083
