@@ -112,7 +112,10 @@
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/xstate-utils",
     "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-common"
+    "@kbn/core-ui-settings-common",
+    "@kbn/entityManager-plugin",
+    "@kbn/observability-utils",
+    "@kbn/entities-schema"
   ],
   "exclude": ["target/**/*"]
 }
