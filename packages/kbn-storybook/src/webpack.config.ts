@@ -142,7 +142,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       new NodePolyfillPlugin({
         additionalAliases: ['process'],
       }),
-      new IgnoreNotFoundExportPlugin()
+      new IgnoreNotFoundExportPlugin(),
     ],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
