@@ -9757,6 +9757,12 @@
             }
           }
         },
+        "securitySolution:maxUnassociatedNotes": {
+          "type": "integer",
+          "_meta": {
+            "description": "The maximum number of allowed unassociated notes"
+          }
+        },
         "securitySolution:defaultThreatIndex": {
           "type": "keyword",
           "_meta": {
@@ -9919,7 +9925,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "securitySolution:enableVisualizationsInFlyout":{
+        "securitySolution:enableVisualizationsInFlyout": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
