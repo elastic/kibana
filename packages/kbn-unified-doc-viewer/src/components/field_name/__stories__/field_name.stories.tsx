@@ -1,13 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -36,13 +26,28 @@ const renderFieldName = (fldName: React.ReactNode) => {
   );
 };
 
-storiesOf('components/FieldName/FieldNameStories', module)
-  .add('default', () => renderFieldName(<FieldName fieldName={'Discover test'} />))
-  .add('with field type', () =>
-    renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />)
-  )
-  .add('with field mapping', () =>
-    renderFieldName(
-      <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
-    )
+export default {
+  title: 'components/FieldName/FieldNameStories',
+};
+
+export const Default = () => renderFieldName(<FieldName fieldName={'Discover test'} />);
+
+Default.story = {
+  name: 'default',
+};
+
+export const WithFieldType = () =>
+  renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />);
+
+WithFieldType.story = {
+  name: 'with field type',
+};
+
+export const WithFieldMapping = () =>
+  renderFieldName(
+    <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
   );
+
+WithFieldMapping.story = {
+  name: 'with field mapping',
+};
