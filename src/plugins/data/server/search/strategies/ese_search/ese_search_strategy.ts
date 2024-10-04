@@ -81,7 +81,7 @@ export const enhancedEsSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
-    const { body, headers } = await client.asyncSearch.get(
+    const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },
       {
         ...options.transport,
@@ -91,7 +91,7 @@ export const enhancedEsSearchStrategyProvider = (
       }
     );
 
-    return toAsyncKibanaSearchResponse(body, headers);
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }
 
   async function submitAsyncSearch(
