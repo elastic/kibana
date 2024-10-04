@@ -10,7 +10,13 @@ import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices, sendDeletePackagePolicy, useConfig, useMultipleAgentPolicies, sendGetAgents } from '../hooks';
+import {
+  useStartServices,
+  sendDeletePackagePolicy,
+  useConfig,
+  useMultipleAgentPolicies,
+  sendGetAgents,
+} from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
@@ -188,7 +194,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
-        {(hasMultipleAgentPolicies) && (
+        {hasMultipleAgentPolicies && (
           <>
             <EuiCallOut
               color="warning"
