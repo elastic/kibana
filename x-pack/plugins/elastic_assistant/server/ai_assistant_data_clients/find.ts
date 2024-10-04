@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsAggregationContainer,
+  MappingRuntimeFields,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { estypes } from '@elastic/elasticsearch';
@@ -22,6 +26,7 @@ interface FindOptions {
   index: string;
   runtimeMappings?: MappingRuntimeFields | undefined;
   logger: Logger;
+  aggs?: Record<string, AggregationsAggregationContainer>;
 }
 
 export interface FindResponse<T> {
@@ -41,6 +46,7 @@ export const findDocuments = async <TSearchSchema>({
   fields,
   sortOrder,
   logger,
+  aggs,
 }: FindOptions): Promise<FindResponse<TSearchSchema>> => {
   const query = getQueryFilter({ filter });
   let sort: Sort | undefined;
@@ -67,6 +73,7 @@ export const findDocuments = async <TSearchSchema>({
       index,
       seq_no_primary_term: true,
       size: perPage,
+      aggs,
     });
     return {
       data: response,
