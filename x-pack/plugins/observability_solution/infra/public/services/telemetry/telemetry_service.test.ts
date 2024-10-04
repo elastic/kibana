@@ -261,4 +261,86 @@ describe('TelemetryService', () => {
       );
     });
   });
+
+  describe('#reportAddMetricsCalloutAddMetricsClicked', () => {
+    it('should report add metrics callout add data click with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'testView';
+
+      telemetry.reportAddMetricsCalloutAddMetricsClicked({ view });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Add Metrics Callout Add Metrics Clicked',
+        {
+          view,
+        }
+      );
+    });
+  });
+
+  describe('#reportAddMetricsCalloutTryItClicked', () => {
+    it('should report add metrics callout try it click with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'testView';
+
+      telemetry.reportAddMetricsCalloutTryItClicked({
+        view,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Add Metrics Callout Try It Clicked',
+        {
+          view,
+        }
+      );
+    });
+  });
+
+  describe('#reportAddMetricsCalloutLearnMoreClicked', () => {
+    it('should report add metrics callout learn more click with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'testView';
+
+      telemetry.reportAddMetricsCalloutLearnMoreClicked({
+        view,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Add Metrics Callout Learn More Clicked',
+        {
+          view,
+        }
+      );
+    });
+  });
+
+  describe('#reportAddMetricsCalloutDismissed', () => {
+    it('should report add metrics callout dismiss click with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'testView';
+
+      telemetry.reportAddMetricsCalloutDismissed({
+        view,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Add Metrics Callout Dismissed',
+        {
+          view,
+        }
+      );
+    });
+  });
 });
