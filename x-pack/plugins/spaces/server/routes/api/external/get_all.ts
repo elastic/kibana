@@ -8,63 +8,70 @@
 import { schema } from '@kbn/config-schema';
 
 import type { ExternalRouteDeps } from '.';
-import type { Space } from '../../../../common';
+import { API_VERSIONS, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { router, log, getSpacesService, isServerless } = deps;
+  const { router, log, getSpacesService } = deps;
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/api/spaces/space',
+      access: 'public',
+      description: `Get all spaces`,
       options: {
-        access: isServerless ? 'internal' : 'public',
-        description: `Get all spaces`,
+        tags: ['oas-tag:spaces'],
       },
-      validate: {
-        query: schema.object({
-          purpose: schema.maybe(
-            schema.oneOf([
-              schema.literal('any'),
-              schema.literal('copySavedObjectsIntoSpace'),
-              schema.literal('shareSavedObjectsIntoSpace'),
-            ])
-          ),
-          include_authorized_purposes: schema.conditional(
-            schema.siblingRef('purpose'),
-            schema.string(),
-            schema.maybe(schema.literal(false)),
-            schema.maybe(schema.boolean())
-          ),
-        }),
-      },
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      log.debug(`Inside GET /api/spaces/space`);
-
-      const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
-
-      const spacesClient = getSpacesService().createSpacesClient(request);
-
-      let spaces: Space[];
-
-      try {
-        log.debug(
-          `Attempting to retrieve all spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
-        );
-        spaces = await spacesClient.getAll({ purpose, includeAuthorizedPurposes });
-        log.debug(
-          `Retrieved ${spaces.length} spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
-        );
-      } catch (error) {
-        log.debug(
-          `Error retrieving spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
-
-      return response.ok({ body: spaces });
     })
-  );
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            query: schema.object({
+              purpose: schema.maybe(
+                schema.oneOf([
+                  schema.literal('any'),
+                  schema.literal('copySavedObjectsIntoSpace'),
+                  schema.literal('shareSavedObjectsIntoSpace'),
+                ])
+              ),
+              include_authorized_purposes: schema.conditional(
+                schema.siblingRef('purpose'),
+                schema.string(),
+                schema.maybe(schema.literal(false)),
+                schema.maybe(schema.boolean())
+              ),
+            }),
+          },
+        },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        log.debug(`Inside GET /api/spaces/space`);
+
+        const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
+
+        const spacesClient = getSpacesService().createSpacesClient(request);
+
+        let spaces: Space[];
+
+        try {
+          log.debug(
+            `Attempting to retrieve all spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
+          );
+          spaces = await spacesClient.getAll({ purpose, includeAuthorizedPurposes });
+          log.debug(
+            `Retrieved ${spaces.length} spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}`
+          );
+        } catch (error) {
+          log.debug(
+            `Error retrieving spaces for ${purpose} purpose with includeAuthorizedPurposes=${includeAuthorizedPurposes}: ${error}`
+          );
+          return response.customError(wrapError(error));
+        }
+
+        return response.ok({ body: spaces });
+      })
+    );
 }
