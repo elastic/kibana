@@ -34,10 +34,11 @@ export function useCustomCardsForCategory(
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
-  const { href: otelKubernetesUrl } = reactRouterNavigate(
-    history,
-    `/otel-kubernetes/${location.search}`
-  );
+  // TODO: Enable once the feature is ready
+  // const { href: otelKubernetesUrl } = reactRouterNavigate(
+  //   history,
+  //   `/otel-kubernetes/${location.search}`
+  // );
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
@@ -63,25 +64,26 @@ export function useCustomCardsForCategory(
     integration: '',
   };
 
-  const otelKubernetesCard: VirtualCard = {
-    id: 'otel-kubernetes',
-    type: 'virtual',
-    release: 'preview',
-    title: 'Elastic Distro for OTel Collector',
-    description:
-      'Collect logs, metrics and traces for Kubernetes cluster monitoring  using the Elastic Distro for OTel Collector',
-    name: 'custom-kubernetes-virtual',
-    categories: ['observability'],
-    icons: [
-      {
-        type: 'svg',
-        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
-      },
-    ],
-    url: otelKubernetesUrl,
-    version: '',
-    integration: '',
-  };
+  // TODO: Enable once the feature is ready
+  // const otelKubernetesCard: VirtualCard = {
+  //   id: 'otel-kubernetes',
+  //   type: 'virtual',
+  //   release: 'preview',
+  //   title: 'Elastic Distro for OTel Collector',
+  //   description:
+  //     'Collect logs, metrics and traces for Kubernetes cluster monitoring  using the Elastic Distro for OTel Collector',
+  //   name: 'custom-kubernetes-virtual',
+  //   categories: ['observability'],
+  //   icons: [
+  //     {
+  //       type: 'svg',
+  //       src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+  //     },
+  //   ],
+  //   url: otelKubernetesUrl,
+  //   version: '',
+  //   integration: '',
+  // };
 
   switch (category) {
     case 'apm':
@@ -158,7 +160,9 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        isServerless ? toFeaturedCard('docker') : otelKubernetesCard,
+        // TODO: Enable once the feature is ready
+        // isServerless ? toFeaturedCard('docker') : otelKubernetesCard,
+        toFeaturedCard('docker'),
         otelLogsCard,
         {
           id: 'azure-virtual',
