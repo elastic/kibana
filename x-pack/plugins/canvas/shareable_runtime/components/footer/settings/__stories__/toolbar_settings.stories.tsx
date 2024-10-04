@@ -16,32 +16,32 @@ export default {
   title: 'shareables/Footer/Settings/ToolbarSettings',
 };
 
-export const Contextual = () => (
-  <ExampleContext {...{ style }}>
-    <ToolbarSettings onSetAutohide={action('onSetAutohide')} />
-  </ExampleContext>
-);
+export const Contextual = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <ToolbarSettings onSetAutohide={action('onSetAutohide')} />
+    </ExampleContext>
+  ),
 
-Contextual.story = {
   name: 'contextual',
 };
 
-export const ComponentOn = () => (
-  <ExampleContext {...{ style }}>
-    <ToolbarSettingsComponent isAutohide={true} onSetAutohide={action('onSetAutohide')} />
-  </ExampleContext>
-);
+export const ComponentOn = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <ToolbarSettingsComponent isAutohide={true} onSetAutohide={action('onSetAutohide')} />
+    </ExampleContext>
+  ),
 
-ComponentOn.story = {
   name: 'component: on',
 };
 
-export const ComponentOff = () => (
-  <ExampleContext {...{ style }}>
-    <ToolbarSettingsComponent isAutohide={false} onSetAutohide={action('onSetAutohide')} />
-  </ExampleContext>
-);
+export const ComponentOff = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <ToolbarSettingsComponent isAutohide={false} onSetAutohide={action('onSetAutohide')} />
+    </ExampleContext>
+  ),
 
-ComponentOff.story = {
   name: 'component: off',
 };

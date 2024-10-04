@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story, DecoratorFn } from '@storybook/react';
+import type { StoryObj, StoryFn, DecoratorFn } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -69,12 +69,15 @@ export default {
   ] as DecoratorFn[],
 };
 
-export const Example: Story<Args> = () => {
-  return <AnalyzeDataButton />;
-};
-Example.args = {
-  agentName: 'iOS/swift',
-  canShowDashboard: true,
-  environment: 'testEnvironment',
-  serviceName: 'testServiceName',
+export const Example: StoryObj<Args> = {
+  render: () => {
+    return <AnalyzeDataButton />;
+  },
+
+  args: {
+    agentName: 'iOS/swift',
+    canShowDashboard: true,
+    environment: 'testEnvironment',
+    serviceName: 'testServiceName',
+  },
 };

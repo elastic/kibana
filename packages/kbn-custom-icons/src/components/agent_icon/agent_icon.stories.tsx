@@ -8,7 +8,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { AGENT_NAMES } from '@kbn/elastic-agent-utils';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -20,7 +20,7 @@ export default {
   component: AgentIcon,
 };
 
-export const List: Story = () => {
+export const List: StoryFn = () => {
   return (
     <EuiThemeProvider darkMode={false}>
       <EuiFlexGroup gutterSize="l" wrap={true}>

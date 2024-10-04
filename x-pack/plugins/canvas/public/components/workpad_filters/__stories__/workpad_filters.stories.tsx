@@ -18,14 +18,12 @@ export default {
   ],
 };
 
-export const ReduxDefault = () => <WorkpadFilters />;
-
-ReduxDefault.story = {
+export const ReduxDefault = {
+  render: () => <WorkpadFilters />,
   name: 'redux: default',
 };
 
-export const ReduxSelectedElementWithGroup = () => <WorkpadFilters element={elementWithGroup} />;
-
-ReduxSelectedElementWithGroup.story = {
+export const ReduxSelectedElementWithGroup = {
+  render: () => <WorkpadFilters element={elementWithGroup} />,
   name: 'redux: selected element with group',
 };

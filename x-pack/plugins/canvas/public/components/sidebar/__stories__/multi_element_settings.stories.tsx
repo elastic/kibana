@@ -12,8 +12,7 @@ export default {
   title: 'components/Sidebar/MultiElementSettings',
 };
 
-export const Default = () => <MultiElementSettings />;
-
-Default.story = {
+export const Default = {
+  render: () => <MultiElementSettings />,
   name: 'default',
 };

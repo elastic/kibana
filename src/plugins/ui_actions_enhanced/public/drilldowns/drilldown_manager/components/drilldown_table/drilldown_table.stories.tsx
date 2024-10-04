@@ -46,60 +46,60 @@ export const Default = () => (
   />
 );
 
-export const EmptyList = () => (
-  <DrilldownTable
-    items={[]}
-    onCreate={action('onCreate')}
-    onDelete={action('onDelete')}
-    onEdit={action('onEdit')}
-  />
-);
+export const EmptyList = {
+  render: () => (
+    <DrilldownTable
+      items={[]}
+      onCreate={action('onCreate')}
+      onDelete={action('onDelete')}
+      onEdit={action('onEdit')}
+    />
+  ),
 
-EmptyList.story = {
   name: 'Empty list',
 };
 
-export const ASingleDrilldown = () => (
-  <DrilldownTable
-    items={[
-      {
-        id: '1',
-        actionName: 'Dashboard',
-        drilldownName: 'Drilldown 1',
-        icon: 'dashboardApp',
-        triggers: [{ title: 'trigger' }],
-      },
-    ]}
-    onCreate={action('onCreate')}
-    onDelete={action('onDelete')}
-    onEdit={action('onEdit')}
-  />
-);
-
-ASingleDrilldown.story = {
-  name: 'A single drilldown',
-};
-
-export const InsideAFlyoutFrame = () => (
-  <FlyoutFrame title={'Some Title'} onClose={action('onClose')} banner={null}>
+export const ASingleDrilldown = {
+  render: () => (
     <DrilldownTable
       items={[
-        { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
-        { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
         {
-          id: '3',
+          id: '1',
           actionName: 'Dashboard',
-          drilldownName: 'Drilldown 3',
-          error: 'Some error...',
+          drilldownName: 'Drilldown 1',
+          icon: 'dashboardApp',
+          triggers: [{ title: 'trigger' }],
         },
       ]}
       onCreate={action('onCreate')}
       onDelete={action('onDelete')}
       onEdit={action('onEdit')}
     />
-  </FlyoutFrame>
-);
+  ),
 
-InsideAFlyoutFrame.story = {
+  name: 'A single drilldown',
+};
+
+export const InsideAFlyoutFrame = {
+  render: () => (
+    <FlyoutFrame title={'Some Title'} onClose={action('onClose')} banner={null}>
+      <DrilldownTable
+        items={[
+          { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
+          { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
+          {
+            id: '3',
+            actionName: 'Dashboard',
+            drilldownName: 'Drilldown 3',
+            error: 'Some error...',
+          },
+        ]}
+        onCreate={action('onCreate')}
+        onDelete={action('onDelete')}
+        onEdit={action('onEdit')}
+      />
+    </FlyoutFrame>
+  ),
+
   name: 'Inside a flyout frame',
 };

@@ -42,35 +42,35 @@ export const Default = () => {
   );
 };
 
-export const WithLicenseLink = () => {
-  return (
-    <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
-      children...
-    </DrilldownForm>
-  );
-};
+export const WithLicenseLink = {
+  render: () => {
+    return (
+      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
+        children...
+      </DrilldownForm>
+    );
+  },
 
-WithLicenseLink.story = {
   name: 'With license link',
 };
 
-export const NoTriggers = () => {
-  return (
-    <DrilldownForm
-      name={'...'}
-      triggers={{
-        items: [],
-        selected: ['RANGE_SELECT_TRIGGER'],
-        docs: 'http://example.com',
-        onChange: () => {},
-      }}
-      onNameChange={action('onNameChange')}
-    >
-      children...
-    </DrilldownForm>
-  );
-};
+export const NoTriggers = {
+  render: () => {
+    return (
+      <DrilldownForm
+        name={'...'}
+        triggers={{
+          items: [],
+          selected: ['RANGE_SELECT_TRIGGER'],
+          docs: 'http://example.com',
+          onChange: () => {},
+        }}
+        onNameChange={action('onNameChange')}
+      >
+        children...
+      </DrilldownForm>
+    );
+  },
 
-NoTriggers.story = {
   name: 'No triggers',
 };

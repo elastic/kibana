@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 
 import {
   HideExpandConversationListButton as Component,
@@ -25,13 +25,10 @@ export default {
   },
 };
 
-const Template: ComponentStory<typeof Component> = (
-  props: HideExpandConversationListButtonProps
-) => <Component {...props} />;
-
 const defaultProps = {
   isExpanded: true,
 };
 
-export const HideExpandConversationListButton = Template.bind({});
-HideExpandConversationListButton.args = defaultProps;
+export const HideExpandConversationListButton = {
+  args: defaultProps,
+};

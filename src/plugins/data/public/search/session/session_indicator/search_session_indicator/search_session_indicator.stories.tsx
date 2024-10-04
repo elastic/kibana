@@ -15,77 +15,77 @@ export default {
   title: 'components/SearchSessionIndicator',
 };
 
-export const Default = () => {
-  const [searchSessionName, setSearchSessionName] = React.useState('Discover session');
+export const Default = {
+  render: () => {
+    const [searchSessionName, setSearchSessionName] = React.useState('Discover session');
 
-  const saveSearchSessionNameFn = (newName: string) =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        setSearchSessionName(newName);
-        resolve(void 0);
-      }, 1000);
-    });
+    const saveSearchSessionNameFn = (newName: string) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          setSearchSessionName(newName);
+          resolve(void 0);
+        }, 1000);
+      });
 
-  return (
-    <>
-      <div>
-        <SearchSessionIndicator state={SearchSessionState.Loading} startedTime={new Date()} />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.Completed}
-          startedTime={new Date()}
-          completedTime={new Date()}
-        />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.BackgroundLoading}
-          searchSessionName={searchSessionName}
-          saveSearchSessionNameFn={saveSearchSessionNameFn}
-          startedTime={new Date()}
-        />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.BackgroundCompleted}
-          searchSessionName={searchSessionName}
-          saveSearchSessionNameFn={saveSearchSessionNameFn}
-          startedTime={new Date()}
-          completedTime={new Date()}
-        />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.Restored}
-          searchSessionName={searchSessionName}
-          saveSearchSessionNameFn={saveSearchSessionNameFn}
-          startedTime={new Date()}
-          completedTime={new Date()}
-        />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.Canceled}
-          startedTime={new Date()}
-          canceledTime={new Date()}
-        />
-      </div>
-      <div>
-        <SearchSessionIndicator
-          state={SearchSessionState.Completed}
-          saveDisabled={true}
-          startedTime={new Date()}
-          completedTime={new Date()}
-          saveDisabledReasonText={
-            'Search results have expired and it is no longer possible to save this search session'
-          }
-        />
-      </div>
-    </>
-  );
-};
+    return (
+      <>
+        <div>
+          <SearchSessionIndicator state={SearchSessionState.Loading} startedTime={new Date()} />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.Completed}
+            startedTime={new Date()}
+            completedTime={new Date()}
+          />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.BackgroundLoading}
+            searchSessionName={searchSessionName}
+            saveSearchSessionNameFn={saveSearchSessionNameFn}
+            startedTime={new Date()}
+          />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.BackgroundCompleted}
+            searchSessionName={searchSessionName}
+            saveSearchSessionNameFn={saveSearchSessionNameFn}
+            startedTime={new Date()}
+            completedTime={new Date()}
+          />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.Restored}
+            searchSessionName={searchSessionName}
+            saveSearchSessionNameFn={saveSearchSessionNameFn}
+            startedTime={new Date()}
+            completedTime={new Date()}
+          />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.Canceled}
+            startedTime={new Date()}
+            canceledTime={new Date()}
+          />
+        </div>
+        <div>
+          <SearchSessionIndicator
+            state={SearchSessionState.Completed}
+            saveDisabled={true}
+            startedTime={new Date()}
+            completedTime={new Date()}
+            saveDisabledReasonText={
+              'Search results have expired and it is no longer possible to save this search session'
+            }
+          />
+        </div>
+      </>
+    );
+  },
 
-Default.story = {
   name: 'default',
 };

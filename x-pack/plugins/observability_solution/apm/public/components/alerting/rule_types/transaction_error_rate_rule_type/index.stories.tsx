@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import { StoryObj, StoryFn } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -38,62 +38,66 @@ export default {
   ],
 };
 
-export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
+export const CreatingInApmServiceOverview: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
 
-  return (
-    <TransactionErrorRateRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
+    return (
+      <TransactionErrorRateRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
+  },
+
+  args: {
+    ruleParams: {
+      environment: 'testEnvironment',
+      serviceName: 'testServiceName',
+      threshold: 1500,
+      transactionType: 'testTransactionType',
+      transactionName: 'GET /api/customer/:id',
+      windowSize: 5,
+      windowUnit: 'm',
+    },
+    metadata: {
+      environment: ENVIRONMENT_ALL.value,
+      serviceName: undefined,
+    },
+  },
 };
 
-CreatingInApmServiceOverview.args = {
-  ruleParams: {
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
-    threshold: 1500,
-    transactionType: 'testTransactionType',
-    transactionName: 'GET /api/customer/:id',
-    windowSize: 5,
-    windowUnit: 'm',
+export const CreatingInStackManagement: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
+
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
+
+    return (
+      <TransactionErrorRateRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
   },
-  metadata: {
-    environment: ENVIRONMENT_ALL.value,
-    serviceName: undefined,
+
+  args: {
+    ruleParams: {
+      environment: 'testEnvironment',
+      threshold: 1500,
+      windowSize: 5,
+      windowUnit: 'm',
+    },
+    metadata: undefined,
   },
-};
-
-export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
-
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
-
-  return (
-    <TransactionErrorRateRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
-};
-
-CreatingInStackManagement.args = {
-  ruleParams: {
-    environment: 'testEnvironment',
-    threshold: 1500,
-    windowSize: 5,
-    windowUnit: 'm',
-  },
-  metadata: undefined,
 };

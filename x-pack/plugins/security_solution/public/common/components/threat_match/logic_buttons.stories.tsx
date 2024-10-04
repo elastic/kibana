@@ -21,47 +21,47 @@ export default {
   title: 'ThreatMatching|LogicButtons',
 };
 
-export const AndOrButtons = () => {
-  return (
-    <LogicButtons
-      isAndDisabled={false}
-      isOrDisabled={false}
-      onOrClicked={action('onClick')}
-      onAndClicked={action('onClick')}
-    />
-  );
-};
+export const AndOrButtons = {
+  render: () => {
+    return (
+      <LogicButtons
+        isAndDisabled={false}
+        isOrDisabled={false}
+        onOrClicked={action('onClick')}
+        onAndClicked={action('onClick')}
+      />
+    );
+  },
 
-AndOrButtons.story = {
   name: 'and/or buttons',
 };
 
-export const AndDisabled = () => {
-  return (
-    <LogicButtons
-      isAndDisabled
-      isOrDisabled={false}
-      onOrClicked={action('onClick')}
-      onAndClicked={action('onClick')}
-    />
-  );
-};
+export const AndDisabled = {
+  render: () => {
+    return (
+      <LogicButtons
+        isAndDisabled
+        isOrDisabled={false}
+        onOrClicked={action('onClick')}
+        onAndClicked={action('onClick')}
+      />
+    );
+  },
 
-AndDisabled.story = {
   name: 'and disabled',
 };
 
-export const OrDisabled = () => {
-  return (
-    <LogicButtons
-      isAndDisabled={false}
-      isOrDisabled
-      onOrClicked={action('onClick')}
-      onAndClicked={action('onClick')}
-    />
-  );
-};
+export const OrDisabled = {
+  render: () => {
+    return (
+      <LogicButtons
+        isAndDisabled={false}
+        isOrDisabled
+        onOrClicked={action('onClick')}
+        onAndClicked={action('onClick')}
+      />
+    );
+  },
 
-OrDisabled.story = {
   name: 'or disabled',
 };

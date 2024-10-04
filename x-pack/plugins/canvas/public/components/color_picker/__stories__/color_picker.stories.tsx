@@ -72,54 +72,53 @@ export default {
   },
 };
 
-export const ThreeColors = () => (
-  <ColorPicker
-    value="#fff"
-    onAddColor={action('onAddColor')}
-    onRemoveColor={action('onRemoveColor')}
-    onChange={action('onChange')}
-    colors={THREE_COLORS}
-    hasButtons={boolean('Has Buttons', true)}
-  />
-);
+export const ThreeColors = {
+  render: () => (
+    <ColorPicker
+      value="#fff"
+      onAddColor={action('onAddColor')}
+      onRemoveColor={action('onRemoveColor')}
+      onChange={action('onChange')}
+      colors={THREE_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
+    />
+  ),
 
-ThreeColors.story = {
   name: 'three colors',
 };
 
-export const SixColors = () => (
-  <ColorPicker
-    value="#fff"
-    onAddColor={action('onAddColor')}
-    onRemoveColor={action('onRemoveColor')}
-    onChange={action('onChange')}
-    colors={SIX_COLORS}
-    hasButtons={boolean('Has Buttons', true)}
-  />
-);
+export const SixColors = {
+  render: () => (
+    <ColorPicker
+      value="#fff"
+      onAddColor={action('onAddColor')}
+      onRemoveColor={action('onRemoveColor')}
+      onChange={action('onChange')}
+      colors={SIX_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
+    />
+  ),
 
-SixColors.story = {
   name: 'six colors',
 };
 
-export const SixColorsValueMissing = () => (
-  <ColorPicker
-    value="#a1b2c3"
-    onAddColor={action('onAddColor')}
-    onRemoveColor={action('onRemoveColor')}
-    onChange={action('onChange')}
-    colors={SIX_COLORS}
-    hasButtons={boolean('Has Buttons', true)}
-  />
-);
+export const SixColorsValueMissing = {
+  render: () => (
+    <ColorPicker
+      value="#a1b2c3"
+      onAddColor={action('onAddColor')}
+      onRemoveColor={action('onRemoveColor')}
+      onChange={action('onChange')}
+      colors={SIX_COLORS}
+      hasButtons={boolean('Has Buttons', true)}
+    />
+  ),
 
-SixColorsValueMissing.story = {
   name: 'six colors, value missing',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 
   parameters: {

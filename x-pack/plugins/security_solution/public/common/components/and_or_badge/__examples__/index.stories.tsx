@@ -18,29 +18,27 @@ export default {
   decorators: [withTheme],
 };
 
-export const And = () => <AndOrBadge type="and" />;
-
-And.story = {
+export const And = {
+  render: () => <AndOrBadge type="and" />,
   name: 'and',
 };
 
-export const Or = () => <AndOrBadge type="or" />;
-
-Or.story = {
+export const Or = {
+  render: () => <AndOrBadge type="or" />,
   name: 'or',
 };
 
-export const Antennas = () => (
-  <EuiFlexGroup>
-    <EuiFlexItem grow={false}>
-      <AndOrBadge type="and" includeAntennas />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <p>{sampleText}</p>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const Antennas = {
+  render: () => (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <AndOrBadge type="and" includeAntennas />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <p>{sampleText}</p>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
 
-Antennas.story = {
   name: 'antennas',
 };

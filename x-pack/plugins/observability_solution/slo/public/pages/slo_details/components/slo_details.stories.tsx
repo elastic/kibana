@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
@@ -18,13 +18,12 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
-
 const defaultProps: Props = {
   slo: buildSlo(),
   isAutoRefreshing: false,
   selectedTabId: 'overview',
 };
 
-export const SloDetails = Template.bind({});
-SloDetails.args = defaultProps;
+export const SloDetails = {
+  args: defaultProps,
+};

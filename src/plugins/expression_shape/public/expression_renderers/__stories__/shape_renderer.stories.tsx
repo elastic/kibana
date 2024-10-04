@@ -16,19 +16,19 @@ export default {
   title: 'renderers/shape',
 };
 
-export const Default = () => {
-  const config = {
-    type: 'shape' as 'shape',
-    border: '#FFEEDD',
-    borderWidth: 8,
-    shape: Shape.BOOKMARK,
-    fill: '#112233',
-    maintainAspect: true,
-  };
+export const Default = {
+  render: () => {
+    const config = {
+      type: 'shape' as 'shape',
+      border: '#FFEEDD',
+      borderWidth: 8,
+      shape: Shape.BOOKMARK,
+      fill: '#112233',
+      maintainAspect: true,
+    };
 
-  return <Render renderer={getShapeRenderer()} config={config} />;
-};
+    return <Render renderer={getShapeRenderer()} config={config} />;
+  },
 
-Default.story = {
   name: 'default',
 };

@@ -30,29 +30,26 @@ export default {
   title: 'components/Shapes/ShapePickerPopover',
 };
 
-export const Default = () => (
-  <ShapePickerPopover shapes={getAvailableShapes()} onChange={action('onChange')} />
-);
+export const Default = {
+  render: () => <ShapePickerPopover shapes={getAvailableShapes()} onChange={action('onChange')} />,
 
-Default.story = {
   name: 'default',
 };
 
-export const ShapeSelected = () => (
-  <ShapePickerPopover
-    shapes={getAvailableShapes()}
-    onChange={action('onChange')}
-    value={Shape.SQUARE}
-  />
-);
+export const ShapeSelected = {
+  render: () => (
+    <ShapePickerPopover
+      shapes={getAvailableShapes()}
+      onChange={action('onChange')}
+      value={Shape.SQUARE}
+    />
+  ),
 
-ShapeSelected.story = {
   name: 'shape selected',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 
   parameters: {

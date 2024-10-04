@@ -67,15 +67,15 @@ export default {
   title: 'components/ExpressionInput',
 };
 
-export const Default = () => (
-  <ExpressionInput
-    expression="markdown"
-    isCompact={true}
-    onChange={action('onChange')}
-    expressionFunctions={[sampleFunctionDef as any]}
-  />
-);
+export const Default = {
+  render: () => (
+    <ExpressionInput
+      expression="markdown"
+      isCompact={true}
+      onChange={action('onChange')}
+      expressionFunctions={[sampleFunctionDef as any]}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };

@@ -36,22 +36,22 @@ export default {
   ],
 };
 
-export const WithConfig = () => {
-  return (
-    <AgentConfigurationCreateEdit
-      pageStep="choose-settings-step"
-      existingConfigResult={{
-        status: FETCH_STATUS.SUCCESS,
-        data: {
-          service: { name: 'opbeans-node', environment: 'production' },
-          settings: {},
-        } as AgentConfiguration,
-      }}
-    />
-  );
-};
+export const WithConfig = {
+  render: () => {
+    return (
+      <AgentConfigurationCreateEdit
+        pageStep="choose-settings-step"
+        existingConfigResult={{
+          status: FETCH_STATUS.SUCCESS,
+          data: {
+            service: { name: 'opbeans-node', environment: 'production' },
+            settings: {},
+          } as AgentConfiguration,
+        }}
+      />
+    );
+  },
 
-WithConfig.story = {
   name: 'with config',
 
   parameters: {

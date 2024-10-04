@@ -13,18 +13,16 @@ export default {
   title: 'renderers/AdvancedFilter',
 };
 
-export const Default = () => (
-  <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />
-);
+export const Default = {
+  render: () => <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />,
 
-Default.story = {
   name: 'default',
 };
 
-export const WithValue = () => (
-  <AdvancedFilter onChange={action('onChange')} commit={action('commit')} value="expression" />
-);
+export const WithValue = {
+  render: () => (
+    <AdvancedFilter onChange={action('onChange')} commit={action('commit')} value="expression" />
+  ),
 
-WithValue.story = {
   name: 'with value',
 };

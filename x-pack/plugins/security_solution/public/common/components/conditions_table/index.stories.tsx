@@ -21,26 +21,26 @@ export default {
   title: 'Components/ConditionsTable',
 };
 
-export const SingleItem = () => {
-  return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
-};
+export const SingleItem = {
+  render: () => {
+    return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
+  },
 
-SingleItem.story = {
   name: 'single item',
 };
 
-export const And = () => {
-  return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
-};
+export const And = {
+  render: () => {
+    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
+  },
 
-And.story = {
   name: 'and',
 };
 
-export const Or = () => {
-  return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
-};
+export const Or = {
+  render: () => {
+    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
+  },
 
-Or.story = {
   name: 'or',
 };

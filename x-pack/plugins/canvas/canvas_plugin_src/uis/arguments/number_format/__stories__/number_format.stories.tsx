@@ -14,44 +14,44 @@ export default {
   title: 'arguments/NumberFormat',
 };
 
-export const WithNoFormat = () => (
-  <NumberFormatArgInput
-    numberFormats={numberFormats}
-    onValueChange={action('onValueChange')}
-    argValue=""
-    argId="NumberFormatExample1"
-    renderError={action('renderError')}
-  />
-);
+export const WithNoFormat = {
+  render: () => (
+    <NumberFormatArgInput
+      numberFormats={numberFormats}
+      onValueChange={action('onValueChange')}
+      argValue=""
+      argId="NumberFormatExample1"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithNoFormat.story = {
   name: 'with no format',
 };
 
-export const WithPresetFormat = () => (
-  <NumberFormatArgInput
-    numberFormats={numberFormats}
-    onValueChange={action('onValueChange')}
-    argValue="$0.00"
-    argId="NumberFormatExample2"
-    renderError={action('renderError')}
-  />
-);
+export const WithPresetFormat = {
+  render: () => (
+    <NumberFormatArgInput
+      numberFormats={numberFormats}
+      onValueChange={action('onValueChange')}
+      argValue="$0.00"
+      argId="NumberFormatExample2"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithPresetFormat.story = {
   name: 'with preset format',
 };
 
-export const WithCustomFormat = () => (
-  <NumberFormatArgInput
-    numberFormats={numberFormats}
-    onValueChange={action('onValueChange')}
-    argValue="0.0[000]a"
-    argId="NumberFormatExample3"
-    renderError={action('renderError')}
-  />
-);
+export const WithCustomFormat = {
+  render: () => (
+    <NumberFormatArgInput
+      numberFormats={numberFormats}
+      onValueChange={action('onValueChange')}
+      argValue="0.0[000]a"
+      argId="NumberFormatExample3"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithCustomFormat.story = {
   name: 'with custom format',
 };

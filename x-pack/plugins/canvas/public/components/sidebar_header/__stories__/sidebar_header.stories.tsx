@@ -21,16 +21,13 @@ export default {
   decorators: [(story) => <div style={{ width: '300px' }}>{story()}</div>],
 };
 
-export const Default = () => <SidebarHeader title="Selected layer" {...handlers} />;
-
-Default.story = {
+export const Default = {
+  render: () => <SidebarHeader title="Selected layer" {...handlers} />,
   name: 'default',
 };
 
-export const WithLayerControls = () => (
-  <SidebarHeader title="Grouped element" showLayerControls={true} {...handlers} />
-);
+export const WithLayerControls = {
+  render: () => <SidebarHeader title="Grouped element" showLayerControls={true} {...handlers} />,
 
-WithLayerControls.story = {
   name: 'with layer controls',
 };

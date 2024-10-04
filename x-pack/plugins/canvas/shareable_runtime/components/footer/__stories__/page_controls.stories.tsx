@@ -17,37 +17,37 @@ export default {
   title: 'shareables/Footer/PageControls',
 };
 
-export const ContextualHello = () => (
-  <ExampleContext source="austin" {...{ style }}>
-    <PageControls />
-  </ExampleContext>
-);
+export const ContextualHello = {
+  render: () => (
+    <ExampleContext source="austin" {...{ style }}>
+      <PageControls />
+    </ExampleContext>
+  ),
 
-ContextualHello.story = {
   name: 'contextual: hello',
 };
 
-export const ContextualAustin = () => (
-  <ExampleContext source="austin" {...{ style }}>
-    <PageControls />
-  </ExampleContext>
-);
+export const ContextualAustin = {
+  render: () => (
+    <ExampleContext source="austin" {...{ style }}>
+      <PageControls />
+    </ExampleContext>
+  ),
 
-ContextualAustin.story = {
   name: 'contextual: austin',
 };
 
-export const Component = () => (
-  <div {...{ style }}>
-    <PageControlsComponent
-      page={0}
-      totalPages={10}
-      onSetPageNumber={action('onSetPageNumber')}
-      onToggleScrubber={action('onToggleScrubber')}
-    />
-  </div>
-);
+export const Component = {
+  render: () => (
+    <div {...{ style }}>
+      <PageControlsComponent
+        page={0}
+        totalPages={10}
+        onSetPageNumber={action('onSetPageNumber')}
+        onToggleScrubber={action('onToggleScrubber')}
+      />
+    </div>
+  ),
 
-Component.story = {
   name: 'component',
 };

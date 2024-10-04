@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { TransactionFlyout } from '.';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -75,7 +75,7 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = () => {
+export const Example: StoryFn<Args> = () => {
   return (
     <TransactionFlyout
       onClose={() => {}}

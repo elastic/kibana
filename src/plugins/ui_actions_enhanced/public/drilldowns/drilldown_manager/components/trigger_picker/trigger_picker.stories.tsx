@@ -60,55 +60,55 @@ export const Default = () => {
   );
 };
 
-export const WithDocs = () => {
-  return (
-    <TriggerPicker
-      docs={'http://example.com'}
-      items={[
-        {
-          id: 'RANGE_SELECT_TRIGGER',
-          title: 'Range selected',
-          description: 'On chart brush.',
-        },
-        {
-          id: 'VALUE_CLICK_TRIGGER',
-          title: 'Value click',
-          description: 'On point click in chart',
-        },
-      ]}
-      selected={[]}
-      onChange={action('onChange')}
-    />
-  );
-};
+export const WithDocs = {
+  render: () => {
+    return (
+      <TriggerPicker
+        docs={'http://example.com'}
+        items={[
+          {
+            id: 'RANGE_SELECT_TRIGGER',
+            title: 'Range selected',
+            description: 'On chart brush.',
+          },
+          {
+            id: 'VALUE_CLICK_TRIGGER',
+            title: 'Value click',
+            description: 'On point click in chart',
+          },
+        ]}
+        selected={[]}
+        onChange={action('onChange')}
+      />
+    );
+  },
 
-WithDocs.story = {
   name: 'With docs',
 };
 
-export const SelectedTrigger = () => {
-  return (
-    <TriggerPicker
-      docs={'http://example.com'}
-      items={[
-        {
-          id: 'RANGE_SELECT_TRIGGER',
-          title: 'Range selected',
-          description: 'On chart brush.',
-        },
-        {
-          id: 'VALUE_CLICK_TRIGGER',
-          title: 'Value click',
-          description: 'On point click in chart',
-        },
-      ]}
-      selected={['VALUE_CLICK_TRIGGER']}
-      onChange={action('onChange')}
-    />
-  );
-};
+export const SelectedTrigger = {
+  render: () => {
+    return (
+      <TriggerPicker
+        docs={'http://example.com'}
+        items={[
+          {
+            id: 'RANGE_SELECT_TRIGGER',
+            title: 'Range selected',
+            description: 'On chart brush.',
+          },
+          {
+            id: 'VALUE_CLICK_TRIGGER',
+            title: 'Value click',
+            description: 'On point click in chart',
+          },
+        ]}
+        selected={['VALUE_CLICK_TRIGGER']}
+        onChange={action('onChange')}
+      />
+    );
+  },
 
-SelectedTrigger.story = {
   name: 'Selected trigger',
 };
 

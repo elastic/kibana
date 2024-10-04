@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
@@ -24,7 +24,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  } as FileKindBrowser);
+  }) as FileKindBrowser;
 
 const defaultProps: FilePickerProps = {
   kind,
@@ -58,11 +58,9 @@ export default {
       </FilesContext>
     ),
   ],
-} as ComponentMeta<typeof FilePicker>;
+} as Meta<typeof FilePicker>;
 
-const Template: ComponentStory<typeof FilePicker> = (props) => <FilePicker {...props} />;
-
-export const Empty = Template.bind({});
+export const Empty = {};
 
 const d = new Date();
 let id = 0;
@@ -85,47 +83,17 @@ function createFileJSON(file?: Partial<FileJSON<FileImageMetadata>>): FileJSON<F
     ...file,
   };
 }
-export const BasicOne = Template.bind({});
-BasicOne.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-          list: async (): ListResponse => ({
-            files: [createFileJSON()],
-            total: 1,
-          }),
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
 
-export const BasicMany = Template.bind({});
-BasicMany.decorators = [
-  (Story) => {
-    const files = [
-      createFileJSON({ name: 'abc' }),
-      createFileJSON({ name: 'def' }),
-      createFileJSON({ name: 'efg' }),
-      createFileJSON({ name: 'foo' }),
-      createFileJSON({ name: 'bar' }),
-      createFileJSON(),
-      createFileJSON(),
-    ];
-
-    return (
+export const BasicOne = {
+  decorators: [
+    (Story) => (
       <FilesContext
         client={
           {
             getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
             list: async (): ListResponse => ({
-              files,
-              total: files.length,
+              files: [createFileJSON()],
+              total: 1,
             }),
             getFileKind,
           } as unknown as FilesClient
@@ -133,73 +101,80 @@ BasicMany.decorators = [
       >
         <Story />
       </FilesContext>
-    );
-  },
-];
+    ),
+  ],
+};
 
-export const BasicManyMany = Template.bind({});
-BasicManyMany.decorators = [
-  (Story) => {
-    const array = new Array(102);
-    array.fill(null);
-    return (
-      <FilesContext
-        client={
-          {
-            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-            list: async (): ListResponse => ({
-              files: array.map((_, idx) => createFileJSON({ id: String(idx) })),
-              total: array.length,
-            }),
-            getFileKind,
-          } as unknown as FilesClient
-        }
-      >
-        <Story />
-      </FilesContext>
-    );
-  },
-];
+export const BasicMany = {
+  decorators: [
+    (Story) => {
+      const files = [
+        createFileJSON({ name: 'abc' }),
+        createFileJSON({ name: 'def' }),
+        createFileJSON({ name: 'efg' }),
+        createFileJSON({ name: 'foo' }),
+        createFileJSON({ name: 'bar' }),
+        createFileJSON(),
+        createFileJSON(),
+      ];
 
-export const ErrorLoading = Template.bind({});
-ErrorLoading.decorators = [
-  (Story) => {
-    const array = new Array(102);
-    array.fill(createFileJSON());
-    return (
-      <FilesContext
-        client={
-          {
-            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-            list: async () => {
-              throw new Error('stop');
-            },
-            getFileKind,
-          } as unknown as FilesClient
-        }
-      >
-        <Story />
-      </FilesContext>
-    );
-  },
-];
-
-export const TryFilter = Template.bind({});
-TryFilter.decorators = [
-  (Story) => {
-    const array = { files: [createFileJSON()], total: 1 };
-    return (
-      <>
-        <h2>Try entering a filter!</h2>
+      return (
         <FilesContext
           client={
             {
               getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-              list: async ({ name }: { name: string[] }) => {
-                if (name) {
-                  return { files: [], total: 0 };
-                }
-                return array;
+              list: async (): ListResponse => ({
+                files,
+                total: files.length,
+              }),
+              getFileKind,
+            } as unknown as FilesClient
+          }
+        >
+          <Story />
+        </FilesContext>
+      );
+    },
+  ],
+};
+
+export const BasicManyMany = {
+  decorators: [
+    (Story) => {
+      const array = new Array(102);
+      array.fill(null);
+      return (
+        <FilesContext
+          client={
+            {
+              getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+              list: async (): ListResponse => ({
+                files: array.map((_, idx) => createFileJSON({ id: String(idx) })),
+                total: array.length,
+              }),
+              getFileKind,
+            } as unknown as FilesClient
+          }
+        >
+          <Story />
+        </FilesContext>
+      );
+    },
+  ],
+};
+
+export const ErrorLoading = {
+  decorators: [
+    (Story) => {
+      const array = new Array(102);
+      array.fill(createFileJSON());
+      return (
+        <FilesContext
+          client={
+            {
+              getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+              list: async () => {
+                throw new Error('stop');
               },
               getFileKind,
             } as unknown as FilesClient
@@ -207,30 +182,61 @@ TryFilter.decorators = [
         >
           <Story />
         </FilesContext>
-      </>
-    );
-  },
-];
+      );
+    },
+  ],
+};
 
-export const SingleSelect = Template.bind({});
-SingleSelect.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-          list: async (): ListResponse => ({
-            files: [createFileJSON(), createFileJSON(), createFileJSON()],
-            total: 1,
-          }),
-          getFileKind,
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
-];
-SingleSelect.args = {
-  multiple: undefined,
+export const TryFilter = {
+  decorators: [
+    (Story) => {
+      const array = { files: [createFileJSON()], total: 1 };
+      return (
+        <>
+          <h2>Try entering a filter!</h2>
+          <FilesContext
+            client={
+              {
+                getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+                list: async ({ name }: { name: string[] }) => {
+                  if (name) {
+                    return { files: [], total: 0 };
+                  }
+                  return array;
+                },
+                getFileKind,
+              } as unknown as FilesClient
+            }
+          >
+            <Story />
+          </FilesContext>
+        </>
+      );
+    },
+  ],
+};
+
+export const SingleSelect = {
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+            list: async (): ListResponse => ({
+              files: [createFileJSON(), createFileJSON(), createFileJSON()],
+              total: 1,
+            }),
+            getFileKind,
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
+
+  args: {
+    multiple: undefined,
+  },
 };

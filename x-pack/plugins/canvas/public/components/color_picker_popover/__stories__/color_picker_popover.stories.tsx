@@ -71,51 +71,50 @@ export default {
   },
 };
 
-export const ThreeColors = () => (
-  <ColorPickerPopover
-    value="#fff"
-    anchorPosition="downCenter"
-    onChange={action('onChange')}
-    colors={THREE_COLORS}
-    ariaLabel="Color Picker"
-  />
-);
+export const ThreeColors = {
+  render: () => (
+    <ColorPickerPopover
+      value="#fff"
+      anchorPosition="downCenter"
+      onChange={action('onChange')}
+      colors={THREE_COLORS}
+      ariaLabel="Color Picker"
+    />
+  ),
 
-ThreeColors.story = {
   name: 'three colors',
 };
 
-export const SixColors = () => (
-  <ColorPickerPopover
-    value="#fff"
-    anchorPosition="downCenter"
-    onChange={action('onChange')}
-    colors={SIX_COLORS}
-    ariaLabel="Color Picker"
-  />
-);
+export const SixColors = {
+  render: () => (
+    <ColorPickerPopover
+      value="#fff"
+      anchorPosition="downCenter"
+      onChange={action('onChange')}
+      colors={SIX_COLORS}
+      ariaLabel="Color Picker"
+    />
+  ),
 
-SixColors.story = {
   name: 'six colors',
 };
 
-export const SixColorsValueMissing = () => (
-  <ColorPickerPopover
-    value="#a1b2c3"
-    anchorPosition="downCenter"
-    onChange={action('onChange')}
-    colors={SIX_COLORS}
-    ariaLabel="Color Picker"
-  />
-);
+export const SixColorsValueMissing = {
+  render: () => (
+    <ColorPickerPopover
+      value="#a1b2c3"
+      anchorPosition="downCenter"
+      onChange={action('onChange')}
+      colors={SIX_COLORS}
+      ariaLabel="Color Picker"
+    />
+  ),
 
-SixColorsValueMissing.story = {
   name: 'six colors, value missing',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 
   parameters: {

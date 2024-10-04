@@ -7,42 +7,42 @@ export default {
   title: 'UrlTemplateEditor',
 };
 
-export const Default = () => (
-  <UrlTemplateEditor
-    value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
-    onChange={action('onChange')}
-    Editor={CodeEditor}
-  />
-);
+export const Default = {
+  render: () => (
+    <UrlTemplateEditor
+      value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
+      onChange={action('onChange')}
+      Editor={CodeEditor}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };
 
-export const WithVariables = () => (
-  <UrlTemplateEditor
-    value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
-    variables={[
-      {
-        label: 'event.value',
-      },
-      {
-        label: 'event.key',
-        title: 'Field key.',
-        documentation:
-          'Field key is Elasticsearch document key as described in Elasticsearch index pattern.',
-      },
-      {
-        label: 'kibanaUrl',
-        title: 'Kibana deployment URL.',
-        documentation: 'Kibana URL is the link to homepage of Kibana deployment.',
-      },
-    ]}
-    onChange={action('onChange')}
-    Editor={CodeEditor}
-  />
-);
+export const WithVariables = {
+  render: () => (
+    <UrlTemplateEditor
+      value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
+      variables={[
+        {
+          label: 'event.value',
+        },
+        {
+          label: 'event.key',
+          title: 'Field key.',
+          documentation:
+            'Field key is Elasticsearch document key as described in Elasticsearch index pattern.',
+        },
+        {
+          label: 'kibanaUrl',
+          title: 'Kibana deployment URL.',
+          documentation: 'Kibana URL is the link to homepage of Kibana deployment.',
+        },
+      ]}
+      onChange={action('onChange')}
+      Editor={CodeEditor}
+    />
+  ),
 
-WithVariables.story = {
   name: 'with variables',
 };

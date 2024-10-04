@@ -25,23 +25,31 @@ export default {
   parameters: getAddonPanelParameters(),
 };
 
-export const ReduxAssetManager = () => <AssetManager onClose={action('onClose')} />;
-ReduxAssetManager.story = { name: 'redux: AssetManager' };
+export const ReduxAssetManager = {
+  render: () => <AssetManager onClose={action('onClose')} />,
+  name: 'redux: AssetManager',
+};
 
-export const NoAssets = () => (
-  <AssetManagerComponent
-    assets={[]}
-    onClose={action('onClose')}
-    onAddAsset={promiseAction('onAddAsset')}
-  />
-);
-NoAssets.story = { name: 'no assets' };
+export const NoAssets = {
+  render: () => (
+    <AssetManagerComponent
+      assets={[]}
+      onClose={action('onClose')}
+      onAddAsset={promiseAction('onAddAsset')}
+    />
+  ),
 
-export const TwoAssets = () => (
-  <AssetManagerComponent
-    assets={assets}
-    onClose={action('onClose')}
-    onAddAsset={promiseAction('onAddAsset')}
-  />
-);
-TwoAssets.story = { name: 'two assets' };
+  name: 'no assets',
+};
+
+export const TwoAssets = {
+  render: () => (
+    <AssetManagerComponent
+      assets={assets}
+      onClose={action('onClose')}
+      onAddAsset={promiseAction('onAddAsset')}
+    />
+  ),
+
+  name: 'two assets',
+};

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { FieldReadOnly } from '../../field_readonly';
@@ -43,7 +43,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders>
       <MockRelatedIntegrationsData>
@@ -56,10 +56,12 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    related_integrations: [{ package: 'endpoint', version: '^8.2.0' }],
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      related_integrations: [{ package: 'endpoint', version: '^8.2.0' }],
+    }),
+  },
 };

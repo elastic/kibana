@@ -6,7 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -52,23 +52,26 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ allOption, customOptionText, field, placeholder }) => {
-  return (
-    <SuggestionsSelect
-      customOptions={[allOption]}
-      customOptionText={customOptionText}
-      fieldName={field}
-      onChange={() => {}}
-      placeholder={placeholder}
-      start={'2022-04-13T10:29:28.541Z'}
-      end={'2021-04-13T10:29:28.541Z'}
-    />
-  );
-};
-Example.args = {
-  allOption: { label: 'All the things', value: 'ALL_THE_THINGS' },
-  terms: ['thing1', 'thing2'],
-  customOptionText: 'Add {searchValue} as a new thing',
-  field: 'test.field',
-  placeholder: 'Select thing',
+export const Example: StoryObj<Args> = {
+  render: ({ allOption, customOptionText, field, placeholder }) => {
+    return (
+      <SuggestionsSelect
+        customOptions={[allOption]}
+        customOptionText={customOptionText}
+        fieldName={field}
+        onChange={() => {}}
+        placeholder={placeholder}
+        start={'2022-04-13T10:29:28.541Z'}
+        end={'2021-04-13T10:29:28.541Z'}
+      />
+    );
+  },
+
+  args: {
+    allOption: { label: 'All the things', value: 'ALL_THE_THINGS' },
+    terms: ['thing1', 'thing2'],
+    customOptionText: 'Add {searchValue} as a new thing',
+    field: 'test.field',
+    placeholder: 'Select thing',
+  },
 };

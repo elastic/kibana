@@ -38,16 +38,13 @@ export default {
   ],
 };
 
-export const Simple = () => <Interactive />;
-
-Simple.story = {
+export const Simple = {
+  render: () => <Interactive />,
   name: 'simple',
 };
 
-export const _SimpleTemplate = () => (
-  <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />
-);
+export const _SimpleTemplate = {
+  render: () => <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />,
 
-_SimpleTemplate.story = {
   name: 'simple template',
 };

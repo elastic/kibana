@@ -22,10 +22,10 @@ export default {
   title: 'components/Variables/DeleteVar',
 };
 
-export const Default = () => (
-  <DeleteVar selectedVar={variable} onDelete={action('onDelete')} onCancel={action('onCancel')} />
-);
+export const Default = {
+  render: () => (
+    <DeleteVar selectedVar={variable} onDelete={action('onDelete')} onCancel={action('onCancel')} />
+  ),
 
-Default.story = {
   name: 'default',
 };

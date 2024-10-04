@@ -54,54 +54,54 @@ export default {
   },
 };
 
-export const SimpleDatasource = () => (
-  <DatasourceComponent
-    args={args}
-    datasources={[wrappedTestDatasource]}
-    datasource={wrappedTestDatasource}
-    datasourceDef={{}}
-    stateArgs={args}
-    stateDatasource={wrappedTestDatasource}
-    selectDatasouce={action('selectDatasouce')}
-    setDatasourceAst={action('setDatasourceAst')}
-    updateArgs={action('updateArgs')}
-    resetArgs={action('resetArgs')}
-    selecting={false}
-    setSelecting={action('setSelecting')}
-    previewing={false}
-    setPreviewing={action('setPreviewing')}
-    isInvalid={false}
-    setInvalid={action('setInvalid')}
-    renderError={action('renderError')}
-  />
-);
+export const SimpleDatasource = {
+  render: () => (
+    <DatasourceComponent
+      args={args}
+      datasources={[wrappedTestDatasource]}
+      datasource={wrappedTestDatasource}
+      datasourceDef={{}}
+      stateArgs={args}
+      stateDatasource={wrappedTestDatasource}
+      selectDatasouce={action('selectDatasouce')}
+      setDatasourceAst={action('setDatasourceAst')}
+      updateArgs={action('updateArgs')}
+      resetArgs={action('resetArgs')}
+      selecting={false}
+      setSelecting={action('setSelecting')}
+      previewing={false}
+      setPreviewing={action('setPreviewing')}
+      isInvalid={false}
+      setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
+    />
+  ),
 
-SimpleDatasource.story = {
   name: 'simple datasource',
 };
 
-export const DatasourceWithExpressionArguments = () => (
-  <DatasourceComponent
-    args={{ query: [{ name: 'expression' }] }}
-    datasources={[wrappedTestDatasource]}
-    datasource={wrappedTestDatasource}
-    datasourceDef={{}}
-    stateArgs={{ query: [{ name: 'expression' }] }}
-    stateDatasource={wrappedTestDatasource}
-    selectDatasouce={action('selectDatasouce')}
-    setDatasourceAst={action('setDatasourceAst')}
-    updateArgs={action('updateArgs')}
-    resetArgs={action('resetArgs')}
-    selecting={false}
-    setSelecting={action('setSelecting')}
-    previewing={false}
-    setPreviewing={action('setPreviewing')}
-    isInvalid={false}
-    setInvalid={action('setInvalid')}
-    renderError={action('renderError')}
-  />
-);
+export const DatasourceWithExpressionArguments = {
+  render: () => (
+    <DatasourceComponent
+      args={{ query: [{ name: 'expression' }] }}
+      datasources={[wrappedTestDatasource]}
+      datasource={wrappedTestDatasource}
+      datasourceDef={{}}
+      stateArgs={{ query: [{ name: 'expression' }] }}
+      stateDatasource={wrappedTestDatasource}
+      selectDatasouce={action('selectDatasouce')}
+      setDatasourceAst={action('setDatasourceAst')}
+      updateArgs={action('updateArgs')}
+      resetArgs={action('resetArgs')}
+      selecting={false}
+      setSelecting={action('setSelecting')}
+      previewing={false}
+      setPreviewing={action('setPreviewing')}
+      isInvalid={false}
+      setInvalid={action('setInvalid')}
+      renderError={action('renderError')}
+    />
+  ),
 
-DatasourceWithExpressionArguments.story = {
   name: 'datasource with expression arguments',
 };

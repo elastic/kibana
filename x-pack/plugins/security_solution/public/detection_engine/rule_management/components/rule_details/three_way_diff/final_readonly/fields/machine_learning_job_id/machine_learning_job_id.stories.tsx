@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { MachineLearningJobIdReadOnly } from './machine_learning_job_id';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { FieldReadOnly } from '../../field_readonly';
@@ -62,7 +62,7 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders>
       <MockMlData>
@@ -75,10 +75,12 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockMachineLearningRule({
-    machine_learning_job_id: 'auth_high_count_logon_events',
-  }),
+  args: {
+    finalDiffableRule: mockMachineLearningRule({
+      machine_learning_job_id: 'auth_high_count_logon_events',
+    }),
+  },
 };

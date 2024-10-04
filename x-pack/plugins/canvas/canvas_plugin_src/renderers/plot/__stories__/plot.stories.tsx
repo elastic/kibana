@@ -59,19 +59,19 @@ export default {
   title: 'renderers/plot',
 };
 
-export const Default = () => {
-  const config = {
-    data,
-    options: plotOptions,
-    font: {
-      css: '',
-      spec: {},
-      type: 'style' as 'style',
-    },
-  };
-  return <Render renderer={plot} config={config} />;
-};
+export const Default = {
+  render: () => {
+    const config = {
+      data,
+      options: plotOptions,
+      font: {
+        css: '',
+        spec: {},
+        type: 'style' as 'style',
+      },
+    };
+    return <Render renderer={plot} config={config} />;
+  },
 
-Default.story = {
   name: 'default',
 };

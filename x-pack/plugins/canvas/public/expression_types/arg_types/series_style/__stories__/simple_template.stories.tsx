@@ -52,26 +52,26 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
 export default {
   title: 'arguments/SeriesStyle',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
-export const Simple = () => <Interactive />;
-
-Simple.story = {
+export const Simple = {
+  render: () => <Interactive />,
   name: 'simple',
 };
 
 export default {
   title: 'arguments/SeriesStyle/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
-export const SimpleNoLabels = () => (
+export const SimpleNoLabels = {
+  render: () => (
     <SimpleTemplate
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
@@ -81,13 +81,13 @@ export const SimpleNoLabels = () => (
         name: 'defaultStyle',
       }}
     />
-  );
+  ),
 
-SimpleNoLabels.story = {
   name: 'simple: no labels',
 };
 
-export const SimpleDefaults = () => (
+export const SimpleDefaults = {
+  render: () => (
     <SimpleTemplate
       argValue={defaultExpression}
       resolved={{ labels: ['label1', 'label2'] }}
@@ -97,13 +97,13 @@ export const SimpleDefaults = () => (
         name: 'defaultStyle',
       }}
     />
-  );
+  ),
 
-SimpleDefaults.story = {
   name: 'simple: defaults',
 };
 
-export const SimpleNoSeries = () => (
+export const SimpleNoSeries = {
+  render: () => (
     <SimpleTemplate
       argValue={defaultExpression}
       resolved={{ labels: [] }}
@@ -113,13 +113,13 @@ export const SimpleNoSeries = () => (
         name: 'unknown',
       }}
     />
-  );
+  ),
 
-SimpleNoSeries.story = {
   name: 'simple: no series',
 };
 
-export const SimpleWithSeries = () => (
+export const SimpleWithSeries = {
+  render: () => (
     <SimpleTemplate
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
@@ -129,8 +129,7 @@ export const SimpleWithSeries = () => (
         name: 'unknown',
       }}
     />
-  );
+  ),
 
-SimpleWithSeries.story = {
   name: 'simple: with series',
 };

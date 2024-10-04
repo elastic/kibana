@@ -38,53 +38,59 @@ export default {
   ],
 };
 
-export const Default = () => (
-  <TimeFilter filter="timefilter from=now-1y to=now column=@timestamp" commit={action('commit')} />
-);
+export const Default = {
+  render: () => (
+    <TimeFilter
+      filter="timefilter from=now-1y to=now column=@timestamp"
+      commit={action('commit')}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };
 
-export const WithRelativeTimeBounds = () => (
-  <TimeFilter filter="timefilter from=now/w to=now/w column=@timestamp" commit={action('commit')} />
-);
+export const WithRelativeTimeBounds = {
+  render: () => (
+    <TimeFilter
+      filter="timefilter from=now/w to=now/w column=@timestamp"
+      commit={action('commit')}
+    />
+  ),
 
-WithRelativeTimeBounds.story = {
   name: 'with relative time bounds',
 };
 
-export const WithAbsoluteTimeBounds = () => (
-  <TimeFilter
-    filter="timefilter from='01/01/2019' to='12/31/2019' column=@timestamp"
-    commit={action('commit')}
-  />
-);
+export const WithAbsoluteTimeBounds = {
+  render: () => (
+    <TimeFilter
+      filter="timefilter from='01/01/2019' to='12/31/2019' column=@timestamp"
+      commit={action('commit')}
+    />
+  ),
 
-WithAbsoluteTimeBounds.story = {
   name: 'with absolute time bounds',
 };
 
-export const WithDateFormat = () => (
-  <TimeFilter
-    filter="timefilter from=now-24h to=now column=@timestamp"
-    commit={action('commit')}
-    dateFormat="MM/DD/YY HH:MM:SSA"
-  />
-);
+export const WithDateFormat = {
+  render: () => (
+    <TimeFilter
+      filter="timefilter from=now-24h to=now column=@timestamp"
+      commit={action('commit')}
+      dateFormat="MM/DD/YY HH:MM:SSA"
+    />
+  ),
 
-WithDateFormat.story = {
   name: 'with dateFormat',
 };
 
-export const WithCommonlyUsedRanges = () => (
-  <TimeFilter
-    filter="timefilter from=now-30d to=now column=@timestamp"
-    commit={action('commit')}
-    commonlyUsedRanges={timeRanges}
-  />
-);
+export const WithCommonlyUsedRanges = {
+  render: () => (
+    <TimeFilter
+      filter="timefilter from=now-30d to=now column=@timestamp"
+      commit={action('commit')}
+      commonlyUsedRanges={timeRanges}
+    />
+  ),
 
-WithCommonlyUsedRanges.story = {
   name: 'with commonlyUsedRanges',
 };

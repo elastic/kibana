@@ -20,15 +20,23 @@ export default {
   parameters: getAddonPanelParameters(),
 };
 
-export const ReduxAsset = () => <Asset asset={AIRPLANE} />;
-ReduxAsset.story = { name: 'redux: Asset' };
+export const ReduxAsset = {
+  render: () => <Asset asset={AIRPLANE} />,
+  name: 'redux: Asset',
+};
 
-export const Airplane = () => (
-  <AssetComponent asset={AIRPLANE} onCreate={action('onCreate')} onDelete={action('onDelete')} />
-);
-Airplane.story = { name: 'airplane' };
+export const Airplane = {
+  render: () => (
+    <AssetComponent asset={AIRPLANE} onCreate={action('onCreate')} onDelete={action('onDelete')} />
+  ),
 
-export const Marker = () => (
-  <AssetComponent asset={MARKER} onCreate={action('onCreate')} onDelete={action('onDelete')} />
-);
-Marker.story = { name: 'marker' };
+  name: 'airplane',
+};
+
+export const Marker = {
+  render: () => (
+    <AssetComponent asset={MARKER} onCreate={action('onCreate')} onDelete={action('onDelete')} />
+  ),
+
+  name: 'marker',
+};

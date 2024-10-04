@@ -25,10 +25,8 @@ export default {
   ],
 };
 
-export const HasTwoButtons = () => (
-  <ElementControls onDelete={action('onDelete')} onEdit={action('onEdit')} />
-);
+export const HasTwoButtons = {
+  render: () => <ElementControls onDelete={action('onDelete')} onEdit={action('onEdit')} />,
 
-HasTwoButtons.story = {
   name: 'has two buttons',
 };

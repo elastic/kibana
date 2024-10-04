@@ -6,7 +6,7 @@
  */
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { SpanFlyout } from '.';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
@@ -85,7 +85,7 @@ export default {
   ],
 };
 
-export const TransactionSpan: Story<Args> = () => {
+export const TransactionSpan: StoryFn<Args> = () => {
   return (
     <SpanFlyout
       spanId={data.spanEvent['span.id']!}

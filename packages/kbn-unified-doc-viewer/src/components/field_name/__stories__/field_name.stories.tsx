@@ -30,24 +30,22 @@ export default {
   title: 'components/FieldName/FieldNameStories',
 };
 
-export const Default = () => renderFieldName(<FieldName fieldName={'Discover test'} />);
-
-Default.story = {
+export const Default = {
+  render: () => renderFieldName(<FieldName fieldName={'Discover test'} />),
   name: 'default',
 };
 
-export const WithFieldType = () =>
-  renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />);
+export const WithFieldType = {
+  render: () => renderFieldName(<FieldName fieldName={'Discover test'} fieldType={'number'} />),
 
-WithFieldType.story = {
   name: 'with field type',
 };
 
-export const WithFieldMapping = () =>
-  renderFieldName(
-    <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
-  );
+export const WithFieldMapping = {
+  render: () =>
+    renderFieldName(
+      <FieldName fieldName={'Discover test'} fieldMapping={field} fieldType={'number'} />
+    ),
 
-WithFieldMapping.story = {
   name: 'with field mapping',
 };

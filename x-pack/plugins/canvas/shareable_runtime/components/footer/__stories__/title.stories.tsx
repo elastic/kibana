@@ -16,32 +16,32 @@ export default {
   title: 'shareables/Footer/Title',
 };
 
-export const ContextualHello = () => (
-  <ExampleContext source="hello" {...{ style }}>
-    <Title />
-  </ExampleContext>
-);
+export const ContextualHello = {
+  render: () => (
+    <ExampleContext source="hello" {...{ style }}>
+      <Title />
+    </ExampleContext>
+  ),
 
-ContextualHello.story = {
   name: 'contextual: hello',
 };
 
-export const ContextualAustin = () => (
-  <ExampleContext source="austin" {...{ style }}>
-    <Title />
-  </ExampleContext>
-);
+export const ContextualAustin = {
+  render: () => (
+    <ExampleContext source="austin" {...{ style }}>
+      <Title />
+    </ExampleContext>
+  ),
 
-ContextualAustin.story = {
   name: 'contextual: austin',
 };
 
-export const Component = () => (
-  <ExampleContext {...{ style }}>
-    <TitleComponent title="This is a test title." />
-  </ExampleContext>
-);
+export const Component = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <TitleComponent title="This is a test title." />
+    </ExampleContext>
+  ),
 
-Component.story = {
   name: 'component',
 };

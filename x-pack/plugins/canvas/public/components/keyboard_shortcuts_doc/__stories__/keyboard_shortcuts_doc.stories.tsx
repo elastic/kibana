@@ -6,8 +6,7 @@ export default {
   title: 'components/KeyboardShortcutsDoc',
 };
 
-export const Default = () => <KeyboardShortcutsDoc onClose={action('onClose')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <KeyboardShortcutsDoc onClose={action('onClose')} />,
   name: 'default',
 };

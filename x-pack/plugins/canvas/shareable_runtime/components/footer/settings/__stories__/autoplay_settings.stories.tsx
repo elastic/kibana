@@ -16,42 +16,42 @@ export default {
   title: 'shareables/Footer/Settings/AutoplaySettings',
 };
 
-export const Contextual = () => (
-  <ExampleContext {...{ style }}>
-    <AutoplaySettings />
-  </ExampleContext>
-);
+export const Contextual = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <AutoplaySettings />
+    </ExampleContext>
+  ),
 
-Contextual.story = {
   name: 'contextual',
 };
 
-export const ComponentOff2S = () => (
-  <ExampleContext {...{ style }}>
-    <AutoplaySettingsComponent
-      isEnabled={false}
-      interval="2s"
-      onSetAutoplay={action('onSetAutoplay')}
-      onSetInterval={action('onSetInterval')}
-    />
-  </ExampleContext>
-);
+export const ComponentOff2S = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <AutoplaySettingsComponent
+        isEnabled={false}
+        interval="2s"
+        onSetAutoplay={action('onSetAutoplay')}
+        onSetInterval={action('onSetInterval')}
+      />
+    </ExampleContext>
+  ),
 
-ComponentOff2S.story = {
   name: 'component: off, 2s',
 };
 
-export const ComponentOn5S = () => (
-  <ExampleContext {...{ style }}>
-    <AutoplaySettingsComponent
-      isEnabled={true}
-      interval="5s"
-      onSetAutoplay={action('onSetAutoplay')}
-      onSetInterval={action('onSetInterval')}
-    />
-  </ExampleContext>
-);
+export const ComponentOn5S = {
+  render: () => (
+    <ExampleContext {...{ style }}>
+      <AutoplaySettingsComponent
+        isEnabled={true}
+        interval="5s"
+        onSetAutoplay={action('onSetAutoplay')}
+        onSetInterval={action('onSetInterval')}
+      />
+    </ExampleContext>
+  ),
 
-ComponentOn5S.story = {
   name: 'component: on, 5s',
 };

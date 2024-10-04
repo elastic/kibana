@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ReferencesReadOnly } from './references';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -21,18 +21,20 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="references" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    references: [
-      'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html',
-      'https://docs.elastic.co/en/integrations/beaconing',
-      'https://www.elastic.co/security-labs/identifying-beaconing-malware-using-elastic',
-    ],
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      references: [
+        'https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html',
+        'https://docs.elastic.co/en/integrations/beaconing',
+        'https://www.elastic.co/security-labs/identifying-beaconing-malware-using-elastic',
+      ],
+    }),
+  },
 };

@@ -35,11 +35,11 @@ export default {
   title: 'enderers/repeatImage',
 };
 
-export const Default = (_, props) => (
-  <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
-);
+export const Default = {
+  render: (_, props) => (
+    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
+  ),
 
-Default.story = {
   name: 'default',
   decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
 };

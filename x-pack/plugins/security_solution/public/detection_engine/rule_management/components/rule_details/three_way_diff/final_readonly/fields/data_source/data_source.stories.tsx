@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
@@ -27,7 +27,7 @@ interface TemplateProps {
   kibanaServicesOverrides?: Record<string, unknown>;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders kibanaServicesOverrides={args.kibanaServicesOverrides}>
       <FieldReadOnly fieldName="data_source" finalDiffableRule={args.finalDiffableRule} />
@@ -35,24 +35,28 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const DataSourceWithIndexPatterns = Template.bind({});
+export const DataSourceWithIndexPatterns = {
+  render: Template,
 
-DataSourceWithIndexPatterns.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    data_source: dataSourceWithIndexPatterns,
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      data_source: dataSourceWithIndexPatterns,
+    }),
+  },
 };
 
-export const DataSourceWithDataView = Template.bind({});
+export const DataSourceWithDataView = {
+  render: Template,
 
-DataSourceWithDataView.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    data_source: dataSourceWithDataView,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      data_source: dataSourceWithDataView,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
     },
   },

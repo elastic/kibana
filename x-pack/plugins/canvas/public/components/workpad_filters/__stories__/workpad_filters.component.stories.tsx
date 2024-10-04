@@ -55,63 +55,61 @@ export default {
   ],
 };
 
-export const Default = () => (
-  <WorkpadFilters filtersGroups={filtersGroups} onGroupByChange={action('onGroupByChange')} />
-);
+export const Default = {
+  render: () => (
+    <WorkpadFilters filtersGroups={filtersGroups} onGroupByChange={action('onGroupByChange')} />
+  ),
 
-Default.story = {
   name: 'default',
 };
 
-export const FiltersGroupsWithoutName = () => (
-  <WorkpadFilters
-    filtersGroups={[
-      {
-        name: null,
-        filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
-      },
-    ]}
-    groupFiltersByField={'column'}
-    onGroupByChange={action('onGroupByChange')}
-  />
-);
+export const FiltersGroupsWithoutName = {
+  render: () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'column'}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ),
 
-FiltersGroupsWithoutName.story = {
   name: 'Filters groups without name',
 };
 
-export const FiltersGroupsWithoutGroupName = () => (
-  <WorkpadFilters
-    filtersGroups={[
-      {
-        name: null,
-        filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
-      },
-    ]}
-    groupFiltersByField={'filterGroup'}
-    onGroupByChange={action('onGroupByChange')}
-  />
-);
+export const FiltersGroupsWithoutGroupName = {
+  render: () => (
+    <WorkpadFilters
+      filtersGroups={[
+        {
+          name: null,
+          filters: filtersGroups.reduce<Filter[]>((acc, group) => [...acc, ...group.filters], []),
+        },
+      ]}
+      groupFiltersByField={'filterGroup'}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ),
 
-FiltersGroupsWithoutGroupName.story = {
   name: 'Filters groups without group name',
 };
 
-export const FiltersGroupsWithoutNameAndFilters = () => (
-  <WorkpadFilters
-    filtersGroups={[{ name: null, filters: [] }]}
-    onGroupByChange={action('onGroupByChange')}
-  />
-);
+export const FiltersGroupsWithoutNameAndFilters = {
+  render: () => (
+    <WorkpadFilters
+      filtersGroups={[{ name: null, filters: [] }]}
+      onGroupByChange={action('onGroupByChange')}
+    />
+  ),
 
-FiltersGroupsWithoutNameAndFilters.story = {
   name: 'Filters groups without name and filters',
 };
 
-export const EmptyFiltersGroups = () => (
-  <WorkpadFilters filtersGroups={[]} onGroupByChange={action('onGroupByChange')} />
-);
+export const EmptyFiltersGroups = {
+  render: () => <WorkpadFilters filtersGroups={[]} onGroupByChange={action('onGroupByChange')} />,
 
-EmptyFiltersGroups.story = {
   name: 'Empty filters groups',
 };

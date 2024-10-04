@@ -26,8 +26,7 @@ export default {
   title: 'components/DrilldownHelloBar',
 };
 
-export const Default = () => <Demo />;
-
-Default.story = {
+export const Default = {
+  render: () => <Demo />,
   name: 'default',
 };

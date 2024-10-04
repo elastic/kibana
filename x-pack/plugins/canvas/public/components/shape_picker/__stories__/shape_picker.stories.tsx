@@ -14,10 +14,8 @@ export default {
   title: 'components/Shapes/ShapePicker',
 };
 
-export const Default = () => (
-  <ShapePicker shapes={getAvailableShapes()} onChange={action('onChange')} />
-);
+export const Default = {
+  render: () => <ShapePicker shapes={getAvailableShapes()} onChange={action('onChange')} />,
 
-Default.story = {
   name: 'default',
 };

@@ -65,59 +65,53 @@ interface Params {
   kbnBuildNum: number;
 }
 
-export const Component = ({
-  id,
-  email,
-  chatURL,
-  jwt,
-  kbnVersion,
-  trialEndDate,
-  kbnBuildNum,
-}: Params) => {
-  const [isHidden, setIsHidden] = useState(false);
+export const Component = {
+  render: ({ id, email, chatURL, jwt, kbnVersion, trialEndDate, kbnBuildNum }: Params) => {
+    const [isHidden, setIsHidden] = useState(false);
 
-  return (
-    <ServicesProvider
-      chat={{
-        chatURL,
-        chatVariant: 'bubble',
-        user: {
-          jwt,
-          id,
-          email,
-          trialEndDate: new Date(trialEndDate),
-          kbnVersion,
-          kbnBuildNum,
-        },
-      }}
-    >
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <Toaster />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={() => {
-              setIsHidden(false);
-              forceReRender();
-            }}
-            disabled={!isHidden}
-          >
-            Reset
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isHidden ? null : <Chat onHide={() => setIsHidden(true)} />}
-    </ServicesProvider>
-  );
-};
+    return (
+      <ServicesProvider
+        chat={{
+          chatURL,
+          chatVariant: 'bubble',
+          user: {
+            jwt,
+            id,
+            email,
+            trialEndDate: new Date(trialEndDate),
+            kbnVersion,
+            kbnBuildNum,
+          },
+        }}
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <Toaster />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                setIsHidden(false);
+                forceReRender();
+              }}
+              disabled={!isHidden}
+            >
+              Reset
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isHidden ? null : <Chat onHide={() => setIsHidden(true)} />}
+      </ServicesProvider>
+    );
+  },
 
-Component.args = {
-  id: '1234567890',
-  email: 'email.address@elastic.co',
-  chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
-  jwt: 'abcdefghijklmnopqrstuvwxyz',
-  trialEndDate: new Date().toISOString(),
-  kbnVersion: '8.9.0',
-  kbnBuildNum: 12345,
+  args: {
+    id: '1234567890',
+    email: 'email.address@elastic.co',
+    chatURL: 'https://elasticcloud-production-chat-us-east-1.s3.amazonaws.com/drift-iframe.html',
+    jwt: 'abcdefghijklmnopqrstuvwxyz',
+    trialEndDate: new Date().toISOString(),
+    kbnVersion: '8.9.0',
+    kbnBuildNum: 12345,
+  },
 };

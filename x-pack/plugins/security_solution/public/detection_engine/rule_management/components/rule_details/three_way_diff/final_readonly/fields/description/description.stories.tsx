@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { DescriptionReadOnly } from './description';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -21,15 +21,17 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="description" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    description:
-      "Identifies the occurrence of a security alert from the Google Workspace alerts center. Google Workspace's security alert center provides an overview of actionable alerts that may be affecting an organization's domain. An alert is a warning of a potential security issue that Google has detected.",
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      description:
+        "Identifies the occurrence of a security alert from the Google Workspace alerts center. Google Workspace's security alert center provides an overview of actionable alerts that may be affecting an organization's domain. An alert is a warning of a potential security issue that Google has detected.",
+    }),
+  },
 };

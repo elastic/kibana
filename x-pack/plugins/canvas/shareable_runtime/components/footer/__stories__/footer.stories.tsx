@@ -7,22 +7,22 @@ export default {
   title: 'shareables/Footer',
 };
 
-export const ContextualHello = () => (
-  <ExampleContext height={172} source="hello">
-    <Footer />
-  </ExampleContext>
-);
+export const ContextualHello = {
+  render: () => (
+    <ExampleContext height={172} source="hello">
+      <Footer />
+    </ExampleContext>
+  ),
 
-ContextualHello.story = {
   name: 'contextual: hello',
 };
 
-export const ContextualAustin = () => (
-  <ExampleContext height={172} source="austin">
-    <Footer />
-  </ExampleContext>
-);
+export const ContextualAustin = {
+  render: () => (
+    <ExampleContext height={172} source="austin">
+      <Footer />
+    </ExampleContext>
+  ),
 
-ContextualAustin.story = {
   name: 'contextual: austin',
 };

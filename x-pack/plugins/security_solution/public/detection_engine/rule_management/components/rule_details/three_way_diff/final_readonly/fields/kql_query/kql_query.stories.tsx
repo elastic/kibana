@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
@@ -31,7 +31,7 @@ interface TemplateProps {
   kibanaServicesOverrides?: Record<string, unknown>;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders kibanaServicesOverrides={args.kibanaServicesOverrides}>
       <FieldReadOnly fieldName="kql_query" finalDiffableRule={args.finalDiffableRule} />
@@ -39,93 +39,99 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const InlineKqlQueryWithIndexPatterns = Template.bind({});
+export const InlineKqlQueryWithIndexPatterns = {
+  render: Template,
 
-InlineKqlQueryWithIndexPatterns.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    kql_query: inlineKqlQuery,
-    data_source: dataSourceWithIndexPatterns,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        create: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      kql_query: inlineKqlQuery,
+      data_source: dataSourceWithIndexPatterns,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          create: async () => mockDataView(),
+        },
       },
     },
   },
 };
 
-export const InlineKqlQueryWithDataView = Template.bind({});
+export const InlineKqlQueryWithDataView = {
+  render: Template,
 
-InlineKqlQueryWithDataView.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    kql_query: inlineKqlQuery,
-    data_source: dataSourceWithDataView,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      kql_query: inlineKqlQuery,
+      data_source: dataSourceWithDataView,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
     },
   },
 };
 
-export const InlineKqlQueryWithoutDataSource = Template.bind({});
+export const InlineKqlQueryWithoutDataSource = {
+  render: Template,
 
-/*
-  Filters should still be displayed if no `data_source` is provided.
-  Component would fall back to the default index pattern in such case.
-*/
-InlineKqlQueryWithoutDataSource.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    kql_query: inlineKqlQuery,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        create: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      kql_query: inlineKqlQuery,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          create: async () => mockDataView(),
+        },
       },
     },
   },
 };
 
-export const SavedKqlQueryWithIndexPatterns = Template.bind({});
+export const SavedKqlQueryWithIndexPatterns = {
+  render: Template,
 
-SavedKqlQueryWithIndexPatterns.args = {
-  finalDiffableRule: mockSavedQueryRule({
-    kql_query: savedKqlQuery,
-    data_source: dataSourceWithIndexPatterns,
-    type: 'saved_query',
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        create: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockSavedQueryRule({
+      kql_query: savedKqlQuery,
+      data_source: dataSourceWithIndexPatterns,
+      type: 'saved_query',
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          create: async () => mockDataView(),
+        },
       },
-    },
-    http: {
-      get: async () => savedQueryResponse,
+      http: {
+        get: async () => savedQueryResponse,
+      },
     },
   },
 };
 
-export const SavedKqlQueryWithDataView = Template.bind({});
+export const SavedKqlQueryWithDataView = {
+  render: Template,
 
-SavedKqlQueryWithDataView.args = {
-  finalDiffableRule: mockSavedQueryRule({
-    kql_query: savedKqlQuery,
-    data_source: dataSourceWithDataView,
-    type: 'saved_query',
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockSavedQueryRule({
+      kql_query: savedKqlQuery,
+      data_source: dataSourceWithDataView,
+      type: 'saved_query',
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
-    },
-    http: {
-      get: async () => savedQueryResponse,
+      http: {
+        get: async () => savedQueryResponse,
+      },
     },
   },
 };

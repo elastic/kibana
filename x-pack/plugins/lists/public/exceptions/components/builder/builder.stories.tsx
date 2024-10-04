@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story, addDecorator } from '@storybook/react';
+import { StoryFn, addDecorator } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -208,30 +208,27 @@ export default {
   title: 'ExceptionBuilderComponent',
 };
 
-const BuilderTemplate: Story<ExceptionBuilderProps> = (args) => (
-  <ExceptionBuilderComponent {...args} />
-);
-
-export const Default = BuilderTemplate.bind({});
-Default.args = {
-  allowLargeValueLists: true,
-  autocompleteService: mockAutocompleteService,
-  exceptionListItems: [],
-  httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
-  isAndDisabled: false,
-  isNestedDisabled: false,
-  isOrDisabled: false,
-  listId: '1234',
-  listNamespaceType: 'single',
-  listType: 'detection',
-  onChange: (): OnChangeProps => ({
-    errorExists: false,
-    exceptionItems: [],
-    exceptionsToDelete: [],
-    warningExists: false,
-  }),
-  ruleName: 'My awesome rule',
+export const Default = {
+  args: {
+    allowLargeValueLists: true,
+    autocompleteService: mockAutocompleteService,
+    exceptionListItems: [],
+    httpService: mockHttpService,
+    indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+    isAndDisabled: false,
+    isNestedDisabled: false,
+    isOrDisabled: false,
+    listId: '1234',
+    listNamespaceType: 'single',
+    listType: 'detection',
+    onChange: (): OnChangeProps => ({
+      errorExists: false,
+      exceptionItems: [],
+      exceptionsToDelete: [],
+      warningExists: false,
+    }),
+    ruleName: 'My awesome rule',
+  },
 };
 
 const sampleExceptionItem = {
@@ -261,80 +258,71 @@ const sampleNestedExceptionItem = {
   ],
 };
 
-const BuilderSingleExceptionItem: Story<ExceptionBuilderProps> = (args) => (
-  <ExceptionBuilderComponent {...args} />
-);
-
-export const SingleExceptionItem = BuilderSingleExceptionItem.bind({});
-SingleExceptionItem.args = {
-  allowLargeValueLists: true,
-  autocompleteService: mockAutocompleteService,
-  exceptionListItems: [sampleExceptionItem],
-  httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
-  isAndDisabled: false,
-  isNestedDisabled: false,
-  isOrDisabled: false,
-  listId: '1234',
-  listNamespaceType: 'single',
-  listType: 'detection',
-  onChange: (): OnChangeProps => ({
-    errorExists: false,
-    exceptionItems: [sampleExceptionItem],
-    exceptionsToDelete: [],
-    warningExists: false,
-  }),
-  ruleName: 'My awesome rule',
+export const SingleExceptionItem = {
+  args: {
+    allowLargeValueLists: true,
+    autocompleteService: mockAutocompleteService,
+    exceptionListItems: [sampleExceptionItem],
+    httpService: mockHttpService,
+    indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+    isAndDisabled: false,
+    isNestedDisabled: false,
+    isOrDisabled: false,
+    listId: '1234',
+    listNamespaceType: 'single',
+    listType: 'detection',
+    onChange: (): OnChangeProps => ({
+      errorExists: false,
+      exceptionItems: [sampleExceptionItem],
+      exceptionsToDelete: [],
+      warningExists: false,
+    }),
+    ruleName: 'My awesome rule',
+  },
 };
 
-const BuilderMultiExceptionItems: Story<ExceptionBuilderProps> = (args) => (
-  <ExceptionBuilderComponent {...args} />
-);
-
-export const MultiExceptionItems = BuilderMultiExceptionItems.bind({});
-MultiExceptionItems.args = {
-  allowLargeValueLists: true,
-  autocompleteService: mockAutocompleteService,
-  exceptionListItems: [sampleExceptionItem, sampleExceptionItem],
-  httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
-  isAndDisabled: false,
-  isNestedDisabled: false,
-  isOrDisabled: false,
-  listId: '1234',
-  listNamespaceType: 'single',
-  listType: 'detection',
-  onChange: (): OnChangeProps => ({
-    errorExists: false,
-    exceptionItems: [sampleExceptionItem, sampleExceptionItem],
-    exceptionsToDelete: [],
-    warningExists: false,
-  }),
-  ruleName: 'My awesome rule',
+export const MultiExceptionItems = {
+  args: {
+    allowLargeValueLists: true,
+    autocompleteService: mockAutocompleteService,
+    exceptionListItems: [sampleExceptionItem, sampleExceptionItem],
+    httpService: mockHttpService,
+    indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+    isAndDisabled: false,
+    isNestedDisabled: false,
+    isOrDisabled: false,
+    listId: '1234',
+    listNamespaceType: 'single',
+    listType: 'detection',
+    onChange: (): OnChangeProps => ({
+      errorExists: false,
+      exceptionItems: [sampleExceptionItem, sampleExceptionItem],
+      exceptionsToDelete: [],
+      warningExists: false,
+    }),
+    ruleName: 'My awesome rule',
+  },
 };
 
-const BuilderWithNested: Story<ExceptionBuilderProps> = (args) => (
-  <ExceptionBuilderComponent {...args} />
-);
-
-export const WithNestedExceptionItem = BuilderWithNested.bind({});
-WithNestedExceptionItem.args = {
-  allowLargeValueLists: true,
-  autocompleteService: mockAutocompleteService,
-  exceptionListItems: [sampleNestedExceptionItem, sampleExceptionItem],
-  httpService: mockHttpService,
-  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
-  isAndDisabled: false,
-  isNestedDisabled: false,
-  isOrDisabled: false,
-  listId: '1234',
-  listNamespaceType: 'single',
-  listType: 'detection',
-  onChange: (): OnChangeProps => ({
-    errorExists: false,
-    exceptionItems: [sampleNestedExceptionItem, sampleExceptionItem],
-    exceptionsToDelete: [],
-    warningExists: false,
-  }),
-  ruleName: 'My awesome rule',
+export const WithNestedExceptionItem = {
+  args: {
+    allowLargeValueLists: true,
+    autocompleteService: mockAutocompleteService,
+    exceptionListItems: [sampleNestedExceptionItem, sampleExceptionItem],
+    httpService: mockHttpService,
+    indexPatterns: { fields, id: '1234', title: 'logstash-*' },
+    isAndDisabled: false,
+    isNestedDisabled: false,
+    isOrDisabled: false,
+    listId: '1234',
+    listNamespaceType: 'single',
+    listType: 'detection',
+    onChange: (): OnChangeProps => ({
+      errorExists: false,
+      exceptionItems: [sampleNestedExceptionItem, sampleExceptionItem],
+      exceptionsToDelete: [],
+      warningExists: false,
+    }),
+    ruleName: 'My awesome rule',
+  },
 };

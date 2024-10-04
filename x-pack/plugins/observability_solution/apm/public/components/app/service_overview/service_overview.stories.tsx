@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ServiceOverview } from '.';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -58,6 +58,6 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: StoryFn<{}> = () => {
   return <ServiceOverview />;
 };

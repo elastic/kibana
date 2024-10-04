@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, Meta, StoryFn } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -73,10 +73,12 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const ExampleData: Story<Args> = (args) => {
-  return <AgentKeysTable {...args} />;
-};
+export const ExampleData: StoryObj<Args> = {
+  render: (args) => {
+    return <AgentKeysTable {...args} />;
+  },
 
-ExampleData.args = {
-  agentKeys,
+  args: {
+    agentKeys,
+  },
 };

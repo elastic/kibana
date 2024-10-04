@@ -17,64 +17,64 @@ export default {
   title: 'components/FlyoutFrame',
 };
 
-export const Default = () => {
-  return <FlyoutFrame>test</FlyoutFrame>;
-};
+export const Default = {
+  render: () => {
+    return <FlyoutFrame>test</FlyoutFrame>;
+  },
 
-Default.story = {
   name: 'default',
 };
 
-export const WithTitle = () => {
-  return <FlyoutFrame title="Hello world">test</FlyoutFrame>;
-};
+export const WithTitle = {
+  render: () => {
+    return <FlyoutFrame title="Hello world">test</FlyoutFrame>;
+  },
 
-WithTitle.story = {
   name: 'with title',
 };
 
-export const WithOnClose = () => {
-  return <FlyoutFrame onClose={() => console.log('onClose')}>test</FlyoutFrame>;
-};
+export const WithOnClose = {
+  render: () => {
+    return <FlyoutFrame onClose={() => console.log('onClose')}>test</FlyoutFrame>;
+  },
 
-WithOnClose.story = {
   name: 'with onClose',
 };
 
-export const WithOnBack = () => {
-  return (
-    <FlyoutFrame onBack={() => console.log('onClose')} title={'Title'}>
-      test
-    </FlyoutFrame>
-  );
-};
+export const WithOnBack = {
+  render: () => {
+    return (
+      <FlyoutFrame onBack={() => console.log('onClose')} title={'Title'}>
+        test
+      </FlyoutFrame>
+    );
+  },
 
-WithOnBack.story = {
   name: 'with onBack',
 };
 
-export const CustomFooter = () => {
-  return <FlyoutFrame footer={<button>click me!</button>}>test</FlyoutFrame>;
-};
+export const CustomFooter = {
+  render: () => {
+    return <FlyoutFrame footer={<button>click me!</button>}>test</FlyoutFrame>;
+  },
 
-CustomFooter.story = {
   name: 'custom footer',
 };
 
-export const OpenInFlyout = () => {
-  return (
-    <EuiFlyout onClose={() => {}}>
-      <FlyoutFrame
-        title="Create drilldown"
-        footer={<EuiButton>Save</EuiButton>}
-        onClose={() => console.log('onClose')}
-      >
-        test
-      </FlyoutFrame>
-    </EuiFlyout>
-  );
-};
+export const OpenInFlyout = {
+  render: () => {
+    return (
+      <EuiFlyout onClose={() => {}}>
+        <FlyoutFrame
+          title="Create drilldown"
+          footer={<EuiButton>Save</EuiButton>}
+          onClose={() => console.log('onClose')}
+        >
+          test
+        </FlyoutFrame>
+      </EuiFlyout>
+    );
+  },
 
-OpenInFlyout.story = {
   name: 'open in flyout',
 };

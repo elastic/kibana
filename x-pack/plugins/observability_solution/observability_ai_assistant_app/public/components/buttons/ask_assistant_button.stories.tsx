@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { EuiButtonSize } from '@elastic/eui';
 
 import { AskAssistantButton as Component, AskAssistantButtonProps } from './ask_assistant_button';
@@ -37,15 +37,12 @@ export default {
   },
 };
 
-const Template: ComponentStory<typeof Component> = (props: AskAssistantButtonProps) => (
-  <Component {...props} />
-);
-
 const defaultProps = {
   fill: true,
   size: 'm' as EuiButtonSize,
   variant: 'basic' as const,
 };
 
-export const AskAiAssistantButton = Template.bind({});
-AskAiAssistantButton.args = defaultProps;
+export const AskAiAssistantButton = {
+  args: defaultProps,
+};

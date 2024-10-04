@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { merge } from 'lodash';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { KnowledgeBaseCallout as Component } from './knowledge_base_callout';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/KnowledgeBaseCallout',
   decorators: [KibanaReactStorybookDecorator],
 };
 
 export default meta;
-const defaultProps: ComponentStoryObj<typeof Component> = {
+const defaultProps: StoryObj<typeof Component> = {
   args: {
     knowledgeBase: {
       status: {
@@ -34,25 +34,25 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const StatusError: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const StatusError: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: { knowledgeBase: { status: { loading: false, error: new Error() } } },
 });
 
-export const Loading: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const Loading: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: { knowledgeBase: { status: { loading: true } } },
 });
 
-export const NotInstalled: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const NotInstalled: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: { knowledgeBase: { status: { loading: false, value: { ready: false } } } },
 });
 
-export const Installing: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const Installing: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: {
     knowledgeBase: { status: { loading: false, value: { ready: false } }, isInstalling: true },
   },
 });
 
-export const InstallError: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const InstallError: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: {
     knowledgeBase: {
       status: {
@@ -65,6 +65,6 @@ export const InstallError: ComponentStoryObj<typeof Component> = merge({}, defau
   },
 });
 
-export const Installed: ComponentStoryObj<typeof Component> = merge({}, defaultProps, {
+export const Installed: StoryObj<typeof Component> = merge({}, defaultProps, {
   args: { knowledgeBase: { status: { loading: false, value: { ready: true } } } },
 });

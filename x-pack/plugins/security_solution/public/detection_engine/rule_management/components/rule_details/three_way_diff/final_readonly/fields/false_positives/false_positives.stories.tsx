@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FalsePositivesReadOnly } from './false_positives';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -21,17 +21,19 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="false_positives" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    false_positives: [
-      'WAF rules or rule groups may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Rule deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
-      'Uncommon user command activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration.',
-    ],
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      false_positives: [
+        'WAF rules or rule groups may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Rule deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
+        'Uncommon user command activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration.',
+      ],
+    }),
+  },
 };

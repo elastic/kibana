@@ -16,50 +16,50 @@ export default {
   title: 'components/SavedElementsModal',
 };
 
-export const NoCustomElements = () => (
-  <SavedElementsModal
-    customElements={[] as CustomElement[]}
-    onAddCustomElement={action('onAddCustomElement')}
-    onSearch={action('onSearch')}
-    onUpdateCustomElement={action('onUpdateCustomElement')}
-    onRemoveCustomElement={action('onRemoveCustomElement')}
-    onClose={action('onClose')}
-  />
-);
+export const NoCustomElements = {
+  render: () => (
+    <SavedElementsModal
+      customElements={[] as CustomElement[]}
+      onAddCustomElement={action('onAddCustomElement')}
+      onSearch={action('onSearch')}
+      onUpdateCustomElement={action('onUpdateCustomElement')}
+      onRemoveCustomElement={action('onRemoveCustomElement')}
+      onClose={action('onClose')}
+    />
+  ),
 
-NoCustomElements.story = {
   name: 'no custom elements',
 };
 
-export const WithCustomElements = (_, props) => (
-  <SavedElementsModal
-    customElements={props?.testCustomElements}
-    onAddCustomElement={action('onAddCustomElement')}
-    onSearch={action('onSearch')}
-    onUpdateCustomElement={action('onUpdateCustomElement')}
-    onRemoveCustomElement={action('onRemoveCustomElement')}
-    onClose={action('onClose')}
-  />
-);
+export const WithCustomElements = {
+  render: (_, props) => (
+    <SavedElementsModal
+      customElements={props?.testCustomElements}
+      onAddCustomElement={action('onAddCustomElement')}
+      onSearch={action('onSearch')}
+      onUpdateCustomElement={action('onUpdateCustomElement')}
+      onRemoveCustomElement={action('onRemoveCustomElement')}
+      onClose={action('onClose')}
+    />
+  ),
 
-WithCustomElements.story = {
   name: 'with custom elements',
   decorators: [waitFor(getTestCustomElements())],
 };
 
-export const WithTextFilter = (_, props) => (
-  <SavedElementsModal
-    customElements={props?.testCustomElements}
-    initialSearch="Element 2"
-    onAddCustomElement={action('onAddCustomElement')}
-    onSearch={action('onSearch')}
-    onUpdateCustomElement={action('onUpdateCustomElement')}
-    onRemoveCustomElement={action('onRemoveCustomElement')}
-    onClose={action('onClose')}
-  />
-);
+export const WithTextFilter = {
+  render: (_, props) => (
+    <SavedElementsModal
+      customElements={props?.testCustomElements}
+      initialSearch="Element 2"
+      onAddCustomElement={action('onAddCustomElement')}
+      onSearch={action('onSearch')}
+      onUpdateCustomElement={action('onUpdateCustomElement')}
+      onRemoveCustomElement={action('onRemoveCustomElement')}
+      onClose={action('onClose')}
+    />
+  ),
 
-WithTextFilter.story = {
   name: 'with text filter',
   decorators: [waitFor(getTestCustomElements())],
 };

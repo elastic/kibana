@@ -15,55 +15,55 @@ export default {
   title: 'components/Elements/CustomElementModal',
 };
 
-export const WithTitle = () => (
-  <CustomElementModal
-    title="Create new element"
-    onCancel={action('onCancel')}
-    onSave={action('onSave')}
-  />
-);
+export const WithTitle = {
+  render: () => (
+    <CustomElementModal
+      title="Create new element"
+      onCancel={action('onCancel')}
+      onSave={action('onSave')}
+    />
+  ),
 
-WithTitle.story = {
   name: 'with title',
 };
 
-export const WithName = () => (
-  <CustomElementModal
-    title="Edit custom element"
-    name="My Chart"
-    description=""
-    onCancel={action('onCancel')}
-    onSave={action('onSave')}
-  />
-);
+export const WithName = {
+  render: () => (
+    <CustomElementModal
+      title="Edit custom element"
+      name="My Chart"
+      description=""
+      onCancel={action('onCancel')}
+      onSave={action('onSave')}
+    />
+  ),
 
-WithName.story = {
   name: 'with name',
 };
 
-export const WithDescription = () => (
-  <CustomElementModal
-    title="Edit custom element"
-    description="best element ever"
-    onCancel={action('onCancel')}
-    onSave={action('onSave')}
-  />
-);
+export const WithDescription = {
+  render: () => (
+    <CustomElementModal
+      title="Edit custom element"
+      description="best element ever"
+      onCancel={action('onCancel')}
+      onSave={action('onSave')}
+    />
+  ),
 
-WithDescription.story = {
   name: 'with description',
 };
 
-export const WithImage = (_, props) => (
-  <CustomElementModal
-    title="Edit custom element"
-    image={props?.elasticLogo}
-    onCancel={action('onCancel')}
-    onSave={action('onSave')}
-  />
-);
+export const WithImage = {
+  render: (_, props) => (
+    <CustomElementModal
+      title="Edit custom element"
+      image={props?.elasticLogo}
+      onCancel={action('onCancel')}
+      onSave={action('onSave')}
+    />
+  ),
 
-WithImage.story = {
   name: 'with image',
   decorators: [waitFor(getElasticLogo())],
 };

@@ -34,16 +34,16 @@ export default {
   title: 'components/Variables/VarConfig',
 };
 
-export const Default = () => (
-  <VarConfig
-    variables={variables}
-    onCopyVar={action('onCopyVar')}
-    onDeleteVar={action('onDeleteVar')}
-    onAddVar={action('onAddVar')}
-    onEditVar={action('onEditVar')}
-  />
-);
+export const Default = {
+  render: () => (
+    <VarConfig
+      variables={variables}
+      onCopyVar={action('onCopyVar')}
+      onDeleteVar={action('onDeleteVar')}
+      onAddVar={action('onAddVar')}
+      onEditVar={action('onEditVar')}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };

@@ -20,62 +20,62 @@ export default {
   title: 'components/WorkpadHeader/ViewMenu',
 };
 
-export const EditMode = () => (
-  <ViewMenu
-    isWriteable={true}
-    zoomScale={1}
-    refreshInterval={0}
-    autoplayInterval={0}
-    autoplayEnabled={false}
-    {...handlers}
-  />
-);
+export const EditMode = {
+  render: () => (
+    <ViewMenu
+      isWriteable={true}
+      zoomScale={1}
+      refreshInterval={0}
+      autoplayInterval={0}
+      autoplayEnabled={false}
+      {...handlers}
+    />
+  ),
 
-EditMode.story = {
   name: 'edit mode',
 };
 
-export const ReadOnlyMode = () => (
-  <ViewMenu
-    isWriteable={false}
-    zoomScale={1}
-    refreshInterval={0}
-    autoplayInterval={0}
-    autoplayEnabled={false}
-    {...handlers}
-  />
-);
+export const ReadOnlyMode = {
+  render: () => (
+    <ViewMenu
+      isWriteable={false}
+      zoomScale={1}
+      refreshInterval={0}
+      autoplayInterval={0}
+      autoplayEnabled={false}
+      {...handlers}
+    />
+  ),
 
-ReadOnlyMode.story = {
   name: 'read only mode',
 };
 
-export const WithRefreshEnabled = () => (
-  <ViewMenu
-    isWriteable={false}
-    zoomScale={1}
-    refreshInterval={1000}
-    autoplayInterval={0}
-    autoplayEnabled={false}
-    {...handlers}
-  />
-);
+export const WithRefreshEnabled = {
+  render: () => (
+    <ViewMenu
+      isWriteable={false}
+      zoomScale={1}
+      refreshInterval={1000}
+      autoplayInterval={0}
+      autoplayEnabled={false}
+      {...handlers}
+    />
+  ),
 
-WithRefreshEnabled.story = {
   name: 'with refresh enabled',
 };
 
-export const WithAutoplayEnabled = () => (
-  <ViewMenu
-    isWriteable={false}
-    zoomScale={1}
-    refreshInterval={0}
-    autoplayInterval={5000}
-    autoplayEnabled={true}
-    {...handlers}
-  />
-);
+export const WithAutoplayEnabled = {
+  render: () => (
+    <ViewMenu
+      isWriteable={false}
+      zoomScale={1}
+      refreshInterval={0}
+      autoplayInterval={5000}
+      autoplayEnabled={true}
+      {...handlers}
+    />
+  ),
 
-WithAutoplayEnabled.story = {
   name: 'with autoplay enabled',
 };

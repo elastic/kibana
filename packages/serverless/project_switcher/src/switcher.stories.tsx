@@ -32,12 +32,14 @@ export default {
 const mock = new ProjectSwitcherStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const ProjectSwitcher = (params: ProjectSwitcherStorybookParams) => {
-  return (
-    <Provider {...mock.getServices(params)}>
-      <Component {...params} />
-    </Provider>
-  );
-};
+export const ProjectSwitcher = {
+  render: (params: ProjectSwitcherStorybookParams) => {
+    return (
+      <Provider {...mock.getServices(params)}>
+        <Component {...params} />
+      </Provider>
+    );
+  },
 
-ProjectSwitcher.argTypes = argTypes;
+  argTypes: argTypes,
+};

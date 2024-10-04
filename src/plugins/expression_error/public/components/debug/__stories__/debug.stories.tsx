@@ -15,14 +15,12 @@ export default {
   title: 'components/Elements/Debug',
 };
 
-export const SmallPayload = () => <Debug payload={smallPayload} />;
-
-SmallPayload.story = {
+export const SmallPayload = {
+  render: () => <Debug payload={smallPayload} />,
   name: 'small payload',
 };
 
-export const LargePayload = () => <Debug payload={largePayload} />;
-
-LargePayload.story = {
+export const LargePayload = {
+  render: () => <Debug payload={largePayload} />,
   name: 'large payload',
 };

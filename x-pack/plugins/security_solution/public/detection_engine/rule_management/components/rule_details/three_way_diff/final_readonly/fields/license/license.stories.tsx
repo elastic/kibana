@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { LicenseReadOnly } from './license';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -21,14 +21,16 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="license" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    license: 'Elastic License 2.0',
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      license: 'Elastic License 2.0',
+    }),
+  },
 };

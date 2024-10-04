@@ -12,44 +12,44 @@ export default {
   title: 'arguments/DateFormat',
 };
 
-export const WithNoFormat = () => (
-  <DateFormatArgInput
-    dateFormats={dateFormats}
-    onValueChange={action('onValueChange')}
-    argValue=""
-    argId="DateFormatExample1"
-    renderError={action('renderError')}
-  />
-);
+export const WithNoFormat = {
+  render: () => (
+    <DateFormatArgInput
+      dateFormats={dateFormats}
+      onValueChange={action('onValueChange')}
+      argValue=""
+      argId="DateFormatExample1"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithNoFormat.story = {
   name: 'with no format',
 };
 
-export const WithPresetFormat = () => (
-  <DateFormatArgInput
-    dateFormats={dateFormats}
-    onValueChange={action('onValueChange')}
-    argValue="LLL"
-    argId="DateFormatExample2"
-    renderError={action('renderError')}
-  />
-);
+export const WithPresetFormat = {
+  render: () => (
+    <DateFormatArgInput
+      dateFormats={dateFormats}
+      onValueChange={action('onValueChange')}
+      argValue="LLL"
+      argId="DateFormatExample2"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithPresetFormat.story = {
   name: 'with preset format',
 };
 
-export const WithCustomFormat = () => (
-  <DateFormatArgInput
-    dateFormats={dateFormats}
-    onValueChange={action('onValueChange')}
-    argValue="MM/DD/YYYY"
-    argId="DateFormatExample3"
-    renderError={action('renderError')}
-  />
-);
+export const WithCustomFormat = {
+  render: () => (
+    <DateFormatArgInput
+      dateFormats={dateFormats}
+      onValueChange={action('onValueChange')}
+      argValue="MM/DD/YYYY"
+      argId="DateFormatExample3"
+      renderError={action('renderError')}
+    />
+  ),
 
-WithCustomFormat.story = {
   name: 'with custom format',
 };

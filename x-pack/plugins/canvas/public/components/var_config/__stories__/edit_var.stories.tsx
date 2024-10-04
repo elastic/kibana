@@ -34,54 +34,54 @@ export default {
   title: 'components/Variables/EditVar',
 };
 
-export const NewVariable = () => (
-  <EditVar
-    variables={variables}
-    selectedVar={null}
-    onSave={action('onSave')}
-    onCancel={action('onCancel')}
-  />
-);
+export const NewVariable = {
+  render: () => (
+    <EditVar
+      variables={variables}
+      selectedVar={null}
+      onSave={action('onSave')}
+      onCancel={action('onCancel')}
+    />
+  ),
 
-NewVariable.story = {
   name: 'new variable',
 };
 
-export const EditVariableString = () => (
-  <EditVar
-    variables={variables}
-    selectedVar={variables[0]}
-    onSave={action('onSave')}
-    onCancel={action('onCancel')}
-  />
-);
+export const EditVariableString = {
+  render: () => (
+    <EditVar
+      variables={variables}
+      selectedVar={variables[0]}
+      onSave={action('onSave')}
+      onCancel={action('onCancel')}
+    />
+  ),
 
-EditVariableString.story = {
   name: 'edit variable (string)',
 };
 
-export const EditVariableNumber = () => (
-  <EditVar
-    variables={variables}
-    selectedVar={variables[1]}
-    onSave={action('onSave')}
-    onCancel={action('onCancel')}
-  />
-);
+export const EditVariableNumber = {
+  render: () => (
+    <EditVar
+      variables={variables}
+      selectedVar={variables[1]}
+      onSave={action('onSave')}
+      onCancel={action('onCancel')}
+    />
+  ),
 
-EditVariableNumber.story = {
   name: 'edit variable (number)',
 };
 
-export const EditVariableBoolean = () => (
-  <EditVar
-    variables={variables}
-    selectedVar={variables[2]}
-    onSave={action('onSave')}
-    onCancel={action('onCancel')}
-  />
-);
+export const EditVariableBoolean = {
+  render: () => (
+    <EditVar
+      variables={variables}
+      selectedVar={variables[2]}
+      onSave={action('onSave')}
+      onCancel={action('onCancel')}
+    />
+  ),
 
-EditVariableBoolean.story = {
   name: 'edit variable (boolean)',
 };

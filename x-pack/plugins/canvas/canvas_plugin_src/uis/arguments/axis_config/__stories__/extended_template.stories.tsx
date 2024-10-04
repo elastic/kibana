@@ -53,32 +53,31 @@ export default {
   ],
 };
 
-export const Extended = () => <Interactive />;
-
-Extended.story = {
+export const Extended = {
+  render: () => <Interactive />,
   name: 'extended',
 };
 
-export const ExtendedDisabled = () => (
-  <ExtendedTemplate
-    onValueChange={action('onValueChange')}
-    argValue={false}
-    typeInstance={{ name: 'yaxis' }}
-  />
-);
+export const ExtendedDisabled = {
+  render: () => (
+    <ExtendedTemplate
+      onValueChange={action('onValueChange')}
+      argValue={false}
+      typeInstance={{ name: 'yaxis' }}
+    />
+  ),
 
-ExtendedDisabled.story = {
   name: 'extended disabled',
 };
 
-export const _Extended = () => (
-  <ExtendedTemplate
-    onValueChange={action('onValueChange')}
-    argValue={defaultExpression}
-    typeInstance={{ name: 'yaxis' }}
-  />
-);
+export const _Extended = {
+  render: () => (
+    <ExtendedTemplate
+      onValueChange={action('onValueChange')}
+      argValue={defaultExpression}
+      typeInstance={{ name: 'yaxis' }}
+    />
+  ),
 
-_Extended.story = {
   name: 'extended',
 };

@@ -40,107 +40,107 @@ export default {
   title: 'renderers/Metric',
 };
 
-export const WithNullMetric = () => {
-  const config: MetricRendererConfig = {
-    metric: null,
-    metricFont: {} as Style,
-    labelFont: {} as Style,
-    label: '',
-    metricFormat: '',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithNullMetric = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: null,
+      metricFont: {} as Style,
+      labelFont: {} as Style,
+      label: '',
+      metricFormat: '',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithNullMetric.story = {
   name: 'with null metric',
 };
 
-export const WithNumberMetric = () => {
-  const config: MetricRendererConfig = {
-    metric: '12345.6789',
-    metricFont: metricFontSpec as Style,
-    labelFont: {} as Style,
-    label: '',
-    metricFormat: '',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithNumberMetric = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '12345.6789',
+      metricFont: metricFontSpec as Style,
+      labelFont: {} as Style,
+      label: '',
+      metricFormat: '',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithNumberMetric.story = {
   name: 'with number metric',
 };
 
-export const WithStringMetric = () => {
-  const config: MetricRendererConfig = {
-    metric: '$12.34',
-    metricFont: metricFontSpec as Style,
-    labelFont: labelFontSpec as Style,
-    label: '',
-    metricFormat: '',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithStringMetric = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '$12.34',
+      metricFont: metricFontSpec as Style,
+      labelFont: labelFontSpec as Style,
+      label: '',
+      metricFormat: '',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithStringMetric.story = {
   name: 'with string metric',
 };
 
-export const WithLabel = () => {
-  const config: MetricRendererConfig = {
-    metric: '$12.34',
-    metricFont: metricFontSpec as Style,
-    labelFont: labelFontSpec as Style,
-    label: 'Average price',
-    metricFormat: '',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithLabel = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '$12.34',
+      metricFont: metricFontSpec as Style,
+      labelFont: labelFontSpec as Style,
+      label: 'Average price',
+      metricFormat: '',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithLabel.story = {
   name: 'with label',
 };
 
-export const WithNumberMetricAndASpecifiedFormat = () => {
-  const config: MetricRendererConfig = {
-    metric: '-0.0024',
-    metricFont: metricFontSpec as Style,
-    labelFont: labelFontSpec as Style,
-    label: 'Average price',
-    metricFormat: '0.00%',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithNumberMetricAndASpecifiedFormat = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '-0.0024',
+      metricFont: metricFontSpec as Style,
+      labelFont: labelFontSpec as Style,
+      label: 'Average price',
+      metricFormat: '0.00%',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithNumberMetricAndASpecifiedFormat.story = {
   name: 'with number metric and a specified format',
 };
 
-export const WithFormattedStringMetricAndASpecifiedFormat = () => {
-  const config: MetricRendererConfig = {
-    metric: '$10000000.00',
-    metricFont: metricFontSpec as Style,
-    labelFont: labelFontSpec as Style,
-    label: 'Total Revenue',
-    metricFormat: '$0a',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithFormattedStringMetricAndASpecifiedFormat = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '$10000000.00',
+      metricFont: metricFontSpec as Style,
+      labelFont: labelFontSpec as Style,
+      label: 'Total Revenue',
+      metricFormat: '$0a',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithFormattedStringMetricAndASpecifiedFormat.story = {
   name: 'with formatted string metric and a specified format',
 };
 
-export const WithInvalidMetricFont = () => {
-  const config: MetricRendererConfig = {
-    metric: '$10000000.00',
-    metricFont: metricFontSpec as Style,
-    labelFont: labelFontSpec as Style,
-    label: 'Total Revenue',
-    metricFormat: '$0a',
-  };
-  return <Render renderer={getMetricRenderer()} config={config} />;
-};
+export const WithInvalidMetricFont = {
+  render: () => {
+    const config: MetricRendererConfig = {
+      metric: '$10000000.00',
+      metricFont: metricFontSpec as Style,
+      labelFont: labelFontSpec as Style,
+      label: 'Total Revenue',
+      metricFormat: '$0a',
+    };
+    return <Render renderer={getMetricRenderer()} config={config} />;
+  },
 
-WithInvalidMetricFont.story = {
   name: 'with invalid metricFont',
 };

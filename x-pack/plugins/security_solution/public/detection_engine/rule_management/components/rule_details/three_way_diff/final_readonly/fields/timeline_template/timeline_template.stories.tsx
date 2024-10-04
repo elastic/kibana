@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TimelineTemplateReadOnly } from './timeline_template';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
@@ -22,17 +22,19 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="timeline_template" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    timeline_template: {
-      timeline_title: 'Alerts Involving a Single User Timeline',
-      timeline_id: 'some-timeline-id-123',
-    },
-  }),
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      timeline_template: {
+        timeline_title: 'Alerts Involving a Single User Timeline',
+        timeline_id: 'some-timeline-id-123',
+      },
+    }),
+  },
 };

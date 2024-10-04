@@ -22,22 +22,18 @@ export default {
   decorators: [(fn) => <div style={{ width: '350px' }}>{fn()}</div>],
 };
 
-export const Default = () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <PalettePicker palette={paulTor14} onChange={action('onChange')} />,
   name: 'default',
 };
 
-export const Clearable = () => (
-  <PalettePicker palette={null} onChange={action('onChange')} clearable={true} />
-);
+export const Clearable = {
+  render: () => <PalettePicker palette={null} onChange={action('onChange')} clearable={true} />,
 
-Clearable.story = {
   name: 'clearable',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 };

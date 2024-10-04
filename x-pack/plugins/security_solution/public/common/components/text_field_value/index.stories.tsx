@@ -22,30 +22,24 @@ export default {
   title: 'Components/TextFieldValue',
 };
 
-export const ShortTextNoLimit = () => <TextFieldValue fieldName="Field name" value="Small value" />;
-
-ShortTextNoLimit.story = {
+export const ShortTextNoLimit = {
+  render: () => <TextFieldValue fieldName="Field name" value="Small value" />,
   name: 'short text, no limit',
 };
 
-export const ShortTextWithLimit = () => (
-  <TextFieldValue fieldName="Field name" value="Small value" maxLength={100} />
-);
+export const ShortTextWithLimit = {
+  render: () => <TextFieldValue fieldName="Field name" value="Small value" maxLength={100} />,
 
-ShortTextWithLimit.story = {
   name: 'short text, with limit',
 };
 
-export const LongTextNoLimit = () => <TextFieldValue fieldName="Field name" value={longText} />;
-
-LongTextNoLimit.story = {
+export const LongTextNoLimit = {
+  render: () => <TextFieldValue fieldName="Field name" value={longText} />,
   name: 'long text, no limit',
 };
 
-export const LongTextWithLimit = () => (
-  <TextFieldValue fieldName="Field name" value={longText} maxLength={100} />
-);
+export const LongTextWithLimit = {
+  render: () => <TextFieldValue fieldName="Field name" value={longText} maxLength={100} />,
 
-LongTextWithLimit.story = {
   name: 'long text, with limit',
 };

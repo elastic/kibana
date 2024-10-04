@@ -63,26 +63,26 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
 export default {
   title: 'arguments/SeriesStyle',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
-export const Extended = () => <Interactive />;
-
-Extended.story = {
+export const Extended = {
+  render: () => <Interactive />,
   name: 'extended',
 };
 
 export default {
   title: 'arguments/SeriesStyle/components',
 
-  decorators: [(story) => (
-      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-    )],
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
 };
 
-export const ExtendedDefaults = () => (
+export const ExtendedDefaults = {
+  render: () => (
     <ExtendedTemplate
       argValue={defaultExpression}
       resolved={{ labels: [] }}
@@ -94,8 +94,7 @@ export const ExtendedDefaults = () => (
         },
       }}
     />
-  );
+  ),
 
-ExtendedDefaults.story = {
   name: 'extended: defaults',
 };

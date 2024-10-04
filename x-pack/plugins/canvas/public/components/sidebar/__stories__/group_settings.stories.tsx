@@ -12,8 +12,7 @@ export default {
   title: 'components/Sidebar/GroupSettings',
 };
 
-export const Default = () => <GroupSettings />;
-
-Default.story = {
+export const Default = {
+  render: () => <GroupSettings />,
   name: 'default',
 };

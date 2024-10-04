@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, Meta, StoryFn } from '@storybook/react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -55,102 +55,114 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const CreatingInApmFromInventory: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+export const CreatingInApmFromInventory: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
 
-  return (
-    <ErrorCountRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
-};
-CreatingInApmFromInventory.args = {
-  ruleParams: {},
-  metadata: {
-    end: '2021-09-10T14:14:04.789Z',
-    environment: ENVIRONMENT_ALL.value,
-    serviceName: undefined,
-    start: '2021-09-10T13:59:00.000Z',
+    return (
+      <ErrorCountRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
+  },
+
+  args: {
+    ruleParams: {},
+    metadata: {
+      end: '2021-09-10T14:14:04.789Z',
+      environment: ENVIRONMENT_ALL.value,
+      serviceName: undefined,
+      start: '2021-09-10T13:59:00.000Z',
+    },
   },
 };
 
-export const CreatingInApmFromService: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+export const CreatingInApmFromService: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
 
-  return (
-    <ErrorCountRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
-};
-CreatingInApmFromService.args = {
-  ruleParams: {},
-  metadata: {
-    end: '2021-09-10T14:14:04.789Z',
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
-    start: '2021-09-10T13:59:00.000Z',
+    return (
+      <ErrorCountRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
+  },
+
+  args: {
+    ruleParams: {},
+    metadata: {
+      end: '2021-09-10T14:14:04.789Z',
+      environment: 'testEnvironment',
+      serviceName: 'testServiceName',
+      start: '2021-09-10T13:59:00.000Z',
+    },
   },
 };
 
-export const EditingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+export const EditingInStackManagement: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
 
-  return (
-    <ErrorCountRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
-};
-EditingInStackManagement.args = {
-  ruleParams: {
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
-    threshold: 25,
-    windowSize: 1,
-    windowUnit: TIME_UNITS.MINUTE,
+    return (
+      <ErrorCountRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
   },
-  metadata: undefined,
+
+  args: {
+    ruleParams: {
+      environment: 'testEnvironment',
+      serviceName: 'testServiceName',
+      threshold: 25,
+      windowSize: 1,
+      windowUnit: TIME_UNITS.MINUTE,
+    },
+    metadata: undefined,
+  },
 };
 
-export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
-  const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
+export const CreatingInStackManagement: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => {
+    const [params, setParams] = useState<ErrorCountRuleParams>(ruleParams);
 
-  function setRuleParams(property: string, value: any) {
-    setParams({ ...params, [property]: value });
-  }
+    function setRuleParams(property: string, value: any) {
+      setParams({ ...params, [property]: value });
+    }
 
-  return (
-    <ErrorCountRuleType
-      ruleParams={params}
-      metadata={metadata}
-      setRuleParams={setRuleParams}
-      setRuleProperty={() => {}}
-    />
-  );
-};
-CreatingInStackManagement.args = {
-  ruleParams: {},
-  metadata: undefined,
+    return (
+      <ErrorCountRuleType
+        ruleParams={params}
+        metadata={metadata}
+        setRuleParams={setRuleParams}
+        setRuleProperty={() => {}}
+      />
+    );
+  },
+
+  args: {
+    ruleParams: {},
+    metadata: undefined,
+  },
 };

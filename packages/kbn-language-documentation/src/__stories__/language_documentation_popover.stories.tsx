@@ -65,16 +65,16 @@ export default {
   title: 'Language documentation popover',
 };
 
-export const Default = () => (
-  <LanguageDocumentationPopover
-    language="Test"
-    sections={sections}
-    buttonProps={{ color: 'text' }}
-    isHelpMenuOpen={true}
-    onHelpMenuVisibilityChange={() => {}}
-  />
-);
+export const Default = {
+  render: () => (
+    <LanguageDocumentationPopover
+      language="Test"
+      sections={sections}
+      buttonProps={{ color: 'text' }}
+      isHelpMenuOpen={true}
+      onHelpMenuVisibilityChange={() => {}}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };

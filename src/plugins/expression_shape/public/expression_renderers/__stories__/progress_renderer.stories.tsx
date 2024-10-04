@@ -16,26 +16,26 @@ export default {
   title: 'renderers/progress',
 };
 
-export const Default = () => {
-  const config = {
-    barColor: '#bc1234',
-    barWeight: 20,
-    font: {
-      css: '',
-      spec: {},
-      type: 'style' as 'style',
-    },
-    label: '66%',
-    max: 1,
-    shape: Progress.UNICORN,
-    value: 0.66,
-    valueColor: '#000',
-    valueWeight: 15,
-  };
+export const Default = {
+  render: () => {
+    const config = {
+      barColor: '#bc1234',
+      barWeight: 20,
+      font: {
+        css: '',
+        spec: {},
+        type: 'style' as 'style',
+      },
+      label: '66%',
+      max: 1,
+      shape: Progress.UNICORN,
+      value: 0.66,
+      valueColor: '#000',
+      valueWeight: 15,
+    };
 
-  return <Render renderer={getProgressRenderer()} config={config} />;
-};
+    return <Render renderer={getProgressRenderer()} config={config} />;
+  },
 
-Default.story = {
   name: 'default',
 };

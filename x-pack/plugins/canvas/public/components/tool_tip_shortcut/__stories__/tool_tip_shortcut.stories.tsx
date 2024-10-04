@@ -11,44 +11,37 @@ export default {
   ],
 };
 
-export const WithShortcut = () => <ToolTipShortcut shortcut="G" />;
-
-WithShortcut.story = {
+export const WithShortcut = {
+  render: () => <ToolTipShortcut shortcut="G" />,
   name: 'with shortcut',
 };
 
-export const WithCmd = () => <ToolTipShortcut shortcut="⌘ + D" />;
-
-WithCmd.story = {
+export const WithCmd = {
+  render: () => <ToolTipShortcut shortcut="⌘ + D" />,
   name: 'with cmd',
 };
 
-export const WithAlt = () => <ToolTipShortcut shortcut="⌥ + P" />;
-
-WithAlt.story = {
+export const WithAlt = {
+  render: () => <ToolTipShortcut shortcut="⌥ + P" />,
   name: 'with alt',
 };
 
-export const WithLeftArrow = () => <ToolTipShortcut shortcut="←" />;
-
-WithLeftArrow.story = {
+export const WithLeftArrow = {
+  render: () => <ToolTipShortcut shortcut="←" />,
   name: 'with left arrow',
 };
 
-export const WithRightArrow = () => <ToolTipShortcut shortcut="→" />;
-
-WithRightArrow.story = {
+export const WithRightArrow = {
+  render: () => <ToolTipShortcut shortcut="→" />,
   name: 'with right arrow',
 };
 
-export const WithUpArrow = () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↑" />;
-
-WithUpArrow.story = {
+export const WithUpArrow = {
+  render: () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↑" />,
   name: 'with up arrow',
 };
 
-export const WithDownArrow = () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↓" />;
-
-WithDownArrow.story = {
+export const WithDownArrow = {
+  render: () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↓" />,
   name: 'with down arrow',
 };

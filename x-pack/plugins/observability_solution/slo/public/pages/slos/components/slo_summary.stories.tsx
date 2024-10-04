@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
@@ -21,8 +21,6 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
-
 const defaultProps = {
   slo: buildSlo(),
   historicalSummary: historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!
@@ -30,8 +28,10 @@ const defaultProps = {
   historicalSummaryLoading: false,
 };
 
-export const WithHistoricalData = Template.bind({});
-WithHistoricalData.args = { ...defaultProps };
+export const WithHistoricalData = {
+  args: { ...defaultProps },
+};
 
-export const WithLoadingData = Template.bind({});
-WithLoadingData.args = { ...defaultProps, historicalSummaryLoading: true };
+export const WithLoadingData = {
+  args: { ...defaultProps, historicalSummaryLoading: true },
+};

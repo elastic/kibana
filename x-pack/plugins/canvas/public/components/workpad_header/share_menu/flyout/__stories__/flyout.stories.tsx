@@ -23,22 +23,20 @@ export default {
   },
 };
 
-export const Default = () => (
-  <ShareWebsiteFlyout onClose={action('onClose')} renderedWorkpad={{} as any} />
-);
+export const Default = {
+  render: () => <ShareWebsiteFlyout onClose={action('onClose')} renderedWorkpad={{} as any} />,
 
-Default.story = {
   name: 'default',
 };
 
-export const UnsupportedRenderers = () => (
-  <ShareWebsiteFlyout
-    onClose={action('onClose')}
-    unsupportedRenderers={['rendererOne', 'rendererTwo']}
-    renderedWorkpad={{} as any}
-  />
-);
+export const UnsupportedRenderers = {
+  render: () => (
+    <ShareWebsiteFlyout
+      onClose={action('onClose')}
+      unsupportedRenderers={['rendererOne', 'rendererTwo']}
+      renderedWorkpad={{} as any}
+    />
+  ),
 
-UnsupportedRenderers.story = {
   name: 'unsupported renderers',
 };

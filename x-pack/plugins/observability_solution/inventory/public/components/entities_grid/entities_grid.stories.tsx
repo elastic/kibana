@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridSorting, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react';
+import { StoryFn, Meta } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { EntitiesGrid } from '.';
@@ -20,7 +20,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: StoryFn<{}> = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
@@ -67,7 +67,7 @@ export const Example: Story<{}> = () => {
   );
 };
 
-export const EmptyGridExample: Story<{}> = () => {
+export const EmptyGridExample: StoryFn<{}> = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,

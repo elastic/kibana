@@ -14,58 +14,58 @@ export default {
   decorators: [withTheme],
 };
 
-export const Empty = () => (
-  <JobIdFilter
-    title="Job id"
-    selectedJobIds={[]}
-    jobIds={[]}
-    jobNameById={{}}
-    onSelect={action('onSelect')}
-  />
-);
+export const Empty = {
+  render: () => (
+    <JobIdFilter
+      title="Job id"
+      selectedJobIds={[]}
+      jobIds={[]}
+      jobNameById={{}}
+      onSelect={action('onSelect')}
+    />
+  ),
 
-Empty.story = {
   name: 'empty',
 };
 
-export const OneSelectedItem = () => (
-  <JobIdFilter
-    title="Job id"
-    selectedJobIds={['test_job_1']}
-    jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
-    jobNameById={{}}
-    onSelect={action('onSelect')}
-  />
-);
+export const OneSelectedItem = {
+  render: () => (
+    <JobIdFilter
+      title="Job id"
+      selectedJobIds={['test_job_1']}
+      jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
+      onSelect={action('onSelect')}
+    />
+  ),
 
-OneSelectedItem.story = {
   name: 'one selected item',
 };
 
-export const MultipleSelectedItem = () => (
-  <JobIdFilter
-    title="Job id"
-    selectedJobIds={['test_job_2', 'test_job_3']}
-    jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
-    jobNameById={{}}
-    onSelect={action('onSelect')}
-  />
-);
+export const MultipleSelectedItem = {
+  render: () => (
+    <JobIdFilter
+      title="Job id"
+      selectedJobIds={['test_job_2', 'test_job_3']}
+      jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
+      onSelect={action('onSelect')}
+    />
+  ),
 
-MultipleSelectedItem.story = {
   name: 'multiple selected item',
 };
 
-export const NoSelectedItem = () => (
-  <JobIdFilter
-    title="Job id"
-    selectedJobIds={[]}
-    jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
-    jobNameById={{}}
-    onSelect={action('onSelect')}
-  />
-);
+export const NoSelectedItem = {
+  render: () => (
+    <JobIdFilter
+      title="Job id"
+      selectedJobIds={[]}
+      jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
+      onSelect={action('onSelect')}
+    />
+  ),
 
-NoSelectedItem.story = {
   name: 'no selected item',
 };

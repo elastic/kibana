@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, Meta, StoryFn } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { ApmServicesTable } from './apm_services_table';
@@ -48,55 +48,66 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const ServiceListWithItems: Story<Args> = (args) => {
-  return <ApmServicesTable {...args} />;
-};
-ServiceListWithItems.args = {
-  status: FETCH_STATUS.SUCCESS,
-  items,
-  displayHealthStatus: true,
-  initialSortField: ServiceInventoryFieldName.HealthStatus,
-  initialSortDirection: 'desc',
-  initialPageSize: 25,
-  sortFn: (sortItems) => sortItems,
+export const ServiceListWithItems: StoryObj<Args> = {
+  render: (args) => {
+    return <ApmServicesTable {...args} />;
+  },
+
+  args: {
+    status: FETCH_STATUS.SUCCESS,
+    items,
+    displayHealthStatus: true,
+    initialSortField: ServiceInventoryFieldName.HealthStatus,
+    initialSortDirection: 'desc',
+    initialPageSize: 25,
+    sortFn: (sortItems) => sortItems,
+  },
 };
 
-export const ServiceListEmptyState: Story<Args> = (args) => {
-  return <ApmServicesTable {...args} />;
-};
-ServiceListEmptyState.args = {
-  status: FETCH_STATUS.SUCCESS,
-  items: [],
-  displayHealthStatus: true,
-  initialSortField: ServiceInventoryFieldName.HealthStatus,
-  initialSortDirection: 'desc',
-  initialPageSize: 25,
-  sortFn: (sortItems) => sortItems,
+export const ServiceListEmptyState: StoryObj<Args> = {
+  render: (args) => {
+    return <ApmServicesTable {...args} />;
+  },
+
+  args: {
+    status: FETCH_STATUS.SUCCESS,
+    items: [],
+    displayHealthStatus: true,
+    initialSortField: ServiceInventoryFieldName.HealthStatus,
+    initialSortDirection: 'desc',
+    initialPageSize: 25,
+    sortFn: (sortItems) => sortItems,
+  },
 };
 
-export const WithHealthWarnings: Story<Args> = (args) => {
-  return <ApmServicesTable {...args} />;
-};
-WithHealthWarnings.args = {
-  status: FETCH_STATUS.SUCCESS,
-  initialPageSize: 25,
-  items: items.map((item) => ({
-    ...item,
-    healthStatus: ServiceHealthStatus.warning,
-  })),
-  sortFn: (sortItems) => sortItems,
+export const WithHealthWarnings: StoryObj<Args> = {
+  render: (args) => {
+    return <ApmServicesTable {...args} />;
+  },
+
+  args: {
+    status: FETCH_STATUS.SUCCESS,
+    initialPageSize: 25,
+    items: items.map((item) => ({
+      ...item,
+      healthStatus: ServiceHealthStatus.warning,
+    })),
+    sortFn: (sortItems) => sortItems,
+  },
 };
 
-export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
-  return <ApmServicesTable {...args} />;
-};
+export const ServiceListWithOverflowBucket: StoryObj<Args> = {
+  render: (args) => {
+    return <ApmServicesTable {...args} />;
+  },
 
-ServiceListWithOverflowBucket.args = {
-  status: FETCH_STATUS.SUCCESS,
-  items: overflowItems,
-  displayHealthStatus: false,
-  initialSortField: ServiceInventoryFieldName.HealthStatus,
-  initialSortDirection: 'desc',
-  initialPageSize: 25,
-  sortFn: (sortItems) => sortItems,
+  args: {
+    status: FETCH_STATUS.SUCCESS,
+    items: overflowItems,
+    displayHealthStatus: false,
+    initialSortField: ServiceInventoryFieldName.HealthStatus,
+    initialSortDirection: 'desc',
+    initialPageSize: 25,
+    sortFn: (sortItems) => sortItems,
+  },
 };

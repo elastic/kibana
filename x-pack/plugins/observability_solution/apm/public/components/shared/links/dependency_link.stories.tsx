@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
+import { StoryObj, StoryFn } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { DependencyLink } from './dependency_link';
@@ -26,16 +26,19 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = (args) => {
-  return <DependencyLink {...args} />;
-};
-Example.args = {
-  query: {
-    dependencyName: 'postgres',
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    rangeFrom: 'now-15m',
-    rangeTo: 'now',
-    comparisonEnabled: false,
+export const Example: StoryObj<Args> = {
+  render: (args) => {
+    return <DependencyLink {...args} />;
+  },
+
+  args: {
+    query: {
+      dependencyName: 'postgres',
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      comparisonEnabled: false,
+    },
   },
 };

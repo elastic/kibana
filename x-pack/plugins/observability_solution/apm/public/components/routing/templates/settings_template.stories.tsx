@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta, StoryFn } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps } from 'react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -62,10 +62,13 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
-  return <SettingsTemplate {...args} />;
-};
-Example.args = {
-  children: <>test</>,
-  selectedTab: 'agent-configuration',
+export const Example: StoryObj<Args> = {
+  render: (args) => {
+    return <SettingsTemplate {...args} />;
+  },
+
+  args: {
+    children: <>test</>,
+    selectedTab: 'agent-configuration',
+  },
 };

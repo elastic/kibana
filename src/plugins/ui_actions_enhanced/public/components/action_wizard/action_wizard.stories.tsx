@@ -28,26 +28,25 @@ export default {
   title: 'components/ActionWizard',
 };
 
-export const Default = () => <Demo actionFactories={[dashboard, url]} />;
-
-Default.story = {
+export const Default = {
+  render: () => <Demo actionFactories={[dashboard, url]} />,
   name: 'default',
 };
 
-export const OnlyOneFactoryIsAvailable = () => (
-  // to make sure layout doesn't break
-  (<Demo actionFactories={[dashboard]} />)
-);
+export const OnlyOneFactoryIsAvailable = {
+  render: () => (
+    // to make sure layout doesn't break
+    <Demo actionFactories={[dashboard]} />
+  ),
 
-OnlyOneFactoryIsAvailable.story = {
   name: 'Only one factory is available',
 };
 
-export const LongListOfActionFactories = () => (
-  // to make sure layout doesn't break
-  (<Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />)
-);
+export const LongListOfActionFactories = {
+  render: () => (
+    // to make sure layout doesn't break
+    <Demo actionFactories={[dashboard, url, dashboard, url, dashboard, url, dashboard, url]} />
+  ),
 
-LongListOfActionFactories.story = {
   name: 'Long list of action factories',
 };

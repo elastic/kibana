@@ -19,38 +19,34 @@ export default {
   title: 'renderers/DropdownFilter',
 };
 
-export const Default = () => <DropdownFilter commit={action('commit')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <DropdownFilter commit={action('commit')} />,
   name: 'default',
 };
 
-export const WithNewValue = () => (
-  <DropdownFilter commit={action('commit')} initialValue="selectedValue" />
-);
+export const WithNewValue = {
+  render: () => <DropdownFilter commit={action('commit')} initialValue="selectedValue" />,
 
-WithNewValue.story = {
   name: 'with new value',
 };
 
-export const WithChoices = () => <DropdownFilter commit={action('commit')} choices={choices} />;
-
-WithChoices.story = {
+export const WithChoices = {
+  render: () => <DropdownFilter commit={action('commit')} choices={choices} />,
   name: 'with choices',
 };
 
-export const WithChoicesAndValue = () => (
-  <DropdownFilter commit={action('commit')} choices={choices} initialValue="Item Two" />
-);
+export const WithChoicesAndValue = {
+  render: () => (
+    <DropdownFilter commit={action('commit')} choices={choices} initialValue="Item Two" />
+  ),
 
-WithChoicesAndValue.story = {
   name: 'with choices and value',
 };
 
-export const WithChoicesAndNewValue = () => (
-  <DropdownFilter commit={action('commit')} choices={choices} initialValue="selectedValue" />
-);
+export const WithChoicesAndNewValue = {
+  render: () => (
+    <DropdownFilter commit={action('commit')} choices={choices} initialValue="selectedValue" />
+  ),
 
-WithChoicesAndNewValue.story = {
   name: 'with choices and new value',
 };

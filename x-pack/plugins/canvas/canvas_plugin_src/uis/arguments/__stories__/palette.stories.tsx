@@ -7,29 +7,29 @@ export default {
   title: 'arguments/Palette',
 };
 
-export const Default = () => (
-  <div className="canvasContainerWrapper" style={{ width: '200px' }}>
-    <PaletteArgInput
-      argValue={{
-        type: 'expression',
-        chain: [
-          {
-            arguments: {
-              _: paulTor14.colors,
-              gradient: [paulTor14.gradient],
+export const Default = {
+  render: () => (
+    <div className="canvasContainerWrapper" style={{ width: '200px' }}>
+      <PaletteArgInput
+        argValue={{
+          type: 'expression',
+          chain: [
+            {
+              arguments: {
+                _: paulTor14.colors,
+                gradient: [paulTor14.gradient],
+              },
+              function: 'palette',
+              type: 'function',
             },
-            function: 'palette',
-            type: 'function',
-          },
-        ],
-      }}
-      onValueChange={action('onValueChange')}
-      renderError={action('renderError')}
-      typeInstance={{}}
-    />
-  </div>
-);
+          ],
+        }}
+        onValueChange={action('onValueChange')}
+        renderError={action('renderError')}
+        typeInstance={{}}
+      />
+    </div>
+  ),
 
-Default.story = {
   name: 'default',
 };

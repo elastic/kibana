@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   CopyToClipboardButtonEmpty,
@@ -20,16 +20,16 @@ export default {
 
 const mockValue: string = 'Text copied!';
 
-export const ButtonEmpty: Story<void> = () => {
+export const ButtonEmpty: StoryFn<void> = () => {
   return <CopyToClipboardButtonEmpty value={mockValue} />;
 };
 
-export const ContextMenu: Story<void> = () => {
+export const ContextMenu: StoryFn<void> = () => {
   const items = [<CopyToClipboardContextMenu value={mockValue} />];
 
   return <EuiContextMenuPanel items={items} />;
 };
 
-export const ButtonIcon: Story<void> = () => {
+export const ButtonIcon: StoryFn<void> = () => {
   return <CopyToClipboardButtonIcon value={mockValue} />;
 };

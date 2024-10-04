@@ -31,19 +31,21 @@ export default {
 const mock = new CodeEditorStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const Basic = (params: CodeEditorStorybookParams) => {
-  return (
-    <CodeEditor
-      {...params}
-      languageId="plainText"
-      onChange={action('on change')}
-      value="Hello!"
-      height={200}
-    />
-  );
-};
+export const Basic = {
+  render: (params: CodeEditorStorybookParams) => {
+    return (
+      <CodeEditor
+        {...params}
+        languageId="plainText"
+        onChange={action('on change')}
+        value="Hello!"
+        height={200}
+      />
+    );
+  },
 
-Basic.argTypes = argTypes;
+  argTypes: argTypes,
+};
 
 // A sample language definition with a few example tokens
 // Taken from https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-custom-languages
@@ -66,25 +68,27 @@ const logs = `[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a 
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
   `;
 
-export const CustomLogLanguage = (params: CodeEditorStorybookParams) => {
-  return (
-    <div>
-      <CodeEditor
-        {...params}
-        languageId="loglang"
-        height={250}
-        value={logs}
-        options={{
-          minimap: {
-            enabled: false,
-          },
-        }}
-      />
-    </div>
-  );
-};
+export const CustomLogLanguage = {
+  render: (params: CodeEditorStorybookParams) => {
+    return (
+      <div>
+        <CodeEditor
+          {...params}
+          languageId="loglang"
+          height={250}
+          value={logs}
+          options={{
+            minimap: {
+              enabled: false,
+            },
+          }}
+        />
+      </div>
+    );
+  },
 
-CustomLogLanguage.argTypes = argTypes;
+  argTypes: argTypes,
+};
 
 export const JSONSupport = () => {
   return (
@@ -207,38 +211,42 @@ export const HoverProvider = () => {
   );
 };
 
-export const AutomaticResize = (params: CodeEditorStorybookParams) => {
-  return (
-    <div style={{ height: `calc(100vh - 30px)` }}>
+export const AutomaticResize = {
+  render: (params: CodeEditorStorybookParams) => {
+    return (
+      <div style={{ height: `calc(100vh - 30px)` }}>
+        <CodeEditor
+          {...params}
+          languageId="plainText"
+          onChange={action('on change')}
+          value="Hello!"
+          height={'100%'}
+          options={{ automaticLayout: true }}
+        />
+      </div>
+    );
+  },
+
+  argTypes: argTypes,
+};
+
+export const FitToContent = {
+  render: (params: CodeEditorStorybookParams) => {
+    const [value, setValue] = useState('hello');
+    return (
       <CodeEditor
         {...params}
         languageId="plainText"
-        onChange={action('on change')}
-        value="Hello!"
-        height={'100%'}
+        onChange={(newValue) => {
+          setValue(newValue);
+          action('on change');
+        }}
+        value={value}
+        fitToContent={{ minLines: 3, maxLines: 5 }}
         options={{ automaticLayout: true }}
       />
-    </div>
-  );
+    );
+  },
+
+  argTypes: argTypes,
 };
-
-AutomaticResize.argTypes = argTypes;
-
-export const FitToContent = (params: CodeEditorStorybookParams) => {
-  const [value, setValue] = useState('hello');
-  return (
-    <CodeEditor
-      {...params}
-      languageId="plainText"
-      onChange={(newValue) => {
-        setValue(newValue);
-        action('on change');
-      }}
-      value={value}
-      fitToContent={{ minLines: 3, maxLines: 5 }}
-      options={{ automaticLayout: true }}
-    />
-  );
-};
-
-FitToContent.argTypes = argTypes;

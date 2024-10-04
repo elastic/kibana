@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
 import { InsightsSummaryRow } from './insights_summary_row';
 
@@ -25,7 +25,7 @@ const wrapper = (children: React.ReactNode) => (
   </div>
 );
 
-export const Default: Story<void> = () =>
+export const Default: StoryFn<void> = () =>
   wrapper(
     <InsightsSummaryRow
       icon={'image'}
@@ -35,7 +35,7 @@ export const Default: Story<void> = () =>
     />
   );
 
-export const InvalidColor: Story<void> = () =>
+export const InvalidColor: StoryFn<void> = () =>
   wrapper(
     <InsightsSummaryRow
       icon={'warning'}
@@ -45,10 +45,10 @@ export const InvalidColor: Story<void> = () =>
     />
   );
 
-export const NoColor: Story<void> = () =>
+export const NoColor: StoryFn<void> = () =>
   wrapper(<InsightsSummaryRow icon={'image'} value={3} text={'this is a test for an no color'} />);
 
-export const LongText: Story<void> = () =>
+export const LongText: StoryFn<void> = () =>
   wrapper(
     <InsightsSummaryRow
       icon={'image'}
@@ -60,7 +60,7 @@ export const LongText: Story<void> = () =>
     />
   );
 
-export const LongNumber: Story<void> = () =>
+export const LongNumber: StoryFn<void> = () =>
   wrapper(
     <InsightsSummaryRow
       icon={'image'}
@@ -70,8 +70,8 @@ export const LongNumber: Story<void> = () =>
     />
   );
 
-export const Loading: Story<void> = () =>
+export const Loading: StoryFn<void> = () =>
   wrapper(<InsightsSummaryRow loading={true} icon={''} value={0} text={''} />);
 
-export const Error: Story<void> = () =>
+export const Error: StoryFn<void> = () =>
   wrapper(<InsightsSummaryRow error={true} icon={''} value={0} text={''} />);

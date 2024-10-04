@@ -13,8 +13,7 @@ export default {
   title: 'components/FileUpload',
 };
 
-export const Default = () => <FileUpload onUpload={action('onUpload')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <FileUpload onUpload={action('onUpload')} />,
   name: 'default',
 };

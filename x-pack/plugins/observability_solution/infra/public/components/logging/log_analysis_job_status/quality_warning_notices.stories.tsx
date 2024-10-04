@@ -16,31 +16,31 @@ export default {
   decorators: [decorateWithGlobalStorybookThemeProviders],
 };
 
-export const PartitionedWarnings = () => {
-  return (
-    <CategoryQualityWarnings
-      hasSetupCapabilities={true}
-      onRecreateMlJob={action('on-recreate-ml-job')}
-      qualityWarnings={partitionedQualityWarnings}
-    />
-  );
-};
+export const PartitionedWarnings = {
+  render: () => {
+    return (
+      <CategoryQualityWarnings
+        hasSetupCapabilities={true}
+        onRecreateMlJob={action('on-recreate-ml-job')}
+        qualityWarnings={partitionedQualityWarnings}
+      />
+    );
+  },
 
-PartitionedWarnings.story = {
   name: 'Partitioned warnings',
 };
 
-export const UnpartitionedWarnings = () => {
-  return (
-    <CategoryQualityWarnings
-      hasSetupCapabilities={true}
-      onRecreateMlJob={action('on-recreate-ml-job')}
-      qualityWarnings={unpartitionedQualityWarnings}
-    />
-  );
-};
+export const UnpartitionedWarnings = {
+  render: () => {
+    return (
+      <CategoryQualityWarnings
+        hasSetupCapabilities={true}
+        onRecreateMlJob={action('on-recreate-ml-job')}
+        qualityWarnings={unpartitionedQualityWarnings}
+      />
+    );
+  },
 
-UnpartitionedWarnings.story = {
   name: 'Unpartitioned warnings',
 };
 

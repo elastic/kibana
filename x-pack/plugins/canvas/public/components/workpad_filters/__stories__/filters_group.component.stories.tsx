@@ -36,16 +36,13 @@ export default {
   decorators: [(story) => <div className="canvasLayout__sidebar">{story()}</div>],
 };
 
-export const Default = () => <FiltersGroup filtersGroup={filtersGroup} id="0" />;
-
-Default.story = {
+export const Default = {
+  render: () => <FiltersGroup filtersGroup={filtersGroup} id="0" />,
   name: 'default',
 };
 
-export const EmptyGroup = () => (
-  <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />
-);
+export const EmptyGroup = {
+  render: () => <FiltersGroup filtersGroup={{ name: 'Group 1', filters: [] }} id="0" />,
 
-EmptyGroup.story = {
   name: 'empty group',
 };

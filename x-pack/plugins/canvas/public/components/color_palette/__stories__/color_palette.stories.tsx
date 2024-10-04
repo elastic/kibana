@@ -32,47 +32,44 @@ export default {
   title: 'components/Color/ColorPalette',
 };
 
-export const ThreeColors = () => (
-  <>
-    <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />
-    <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />
-  </>
-);
+export const ThreeColors = {
+  render: () => (
+    <>
+      <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />
+      <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />
+    </>
+  ),
 
-ThreeColors.story = {
   name: 'three colors',
 };
 
-export const SixColors = () => (
-  <>
-    <ColorPalette key="1" onChange={action('onChange')} colors={SIX_COLORS} />
-    <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={SIX_COLORS} />
-  </>
-);
+export const SixColors = {
+  render: () => (
+    <>
+      <ColorPalette key="1" onChange={action('onChange')} colors={SIX_COLORS} />
+      <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={SIX_COLORS} />
+    </>
+  ),
 
-SixColors.story = {
   name: 'six colors',
 };
 
-export const SixColorsWrapAt4 = () => (
-  <ColorPalette value="#fff" onChange={action('onChange')} colors={SIX_COLORS} colorsPerRow={4} />
-);
+export const SixColorsWrapAt4 = {
+  render: () => (
+    <ColorPalette value="#fff" onChange={action('onChange')} colors={SIX_COLORS} colorsPerRow={4} />
+  ),
 
-SixColorsWrapAt4.story = {
   name: 'six colors, wrap at 4',
 };
 
-export const SixColorsValueMissing = () => (
-  <ColorPalette value="#f00" onChange={action('onChange')} colors={SIX_COLORS} />
-);
+export const SixColorsValueMissing = {
+  render: () => <ColorPalette value="#f00" onChange={action('onChange')} colors={SIX_COLORS} />,
 
-SixColorsValueMissing.story = {
   name: 'six colors, value missing',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 
   parameters: {

@@ -9,32 +9,32 @@ export default {
   title: 'shareables/Page',
 };
 
-export const ContextualAustin = () => (
-  <ExampleContext source="austin" style={{ height: 720 }}>
-    <Page index={3} />
-  </ExampleContext>
-);
+export const ContextualAustin = {
+  render: () => (
+    <ExampleContext source="austin" style={{ height: 720 }}>
+      <Page index={3} />
+    </ExampleContext>
+  ),
 
-ContextualAustin.story = {
   name: 'contextual: austin',
 };
 
-export const ContextualHello = () => (
-  <ExampleContext source="hello" style={{ height: 720 }}>
-    <Page index={0} />
-  </ExampleContext>
-);
+export const ContextualHello = {
+  render: () => (
+    <ExampleContext source="hello" style={{ height: 720 }}>
+      <Page index={0} />
+    </ExampleContext>
+  ),
 
-ContextualHello.story = {
   name: 'contextual: hello',
 };
 
-export const Component = () => (
-  <ExampleContext source="austin" style={{ height: 720 }}>
-    <PageComponent height={720} width={1280} page={austin.pages[3]} />
-  </ExampleContext>
-);
+export const Component = {
+  render: () => (
+    <ExampleContext source="austin" style={{ height: 720 }}>
+      <PageComponent height={720} width={1280} page={austin.pages[3]} />
+    </ExampleContext>
+  ),
 
-Component.story = {
   name: 'component',
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { buildConversation } from '../../utils/builders';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
@@ -13,7 +13,7 @@ import { ConversationList as Component } from './conversation_list';
 
 type ConversationListProps = React.ComponentProps<typeof Component>;
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Organisms/ConversationList',
   decorators: [KibanaReactStorybookDecorator],
@@ -29,7 +29,7 @@ const Wrapper = (props: ConversationListProps) => {
   );
 };
 
-export const ConversationListLoading: ComponentStoryObj<typeof Component> = {
+export const ConversationListLoading: StoryObj<typeof Component> = {
   args: {
     conversations: {
       loading: true,
@@ -42,7 +42,7 @@ export const ConversationListLoading: ComponentStoryObj<typeof Component> = {
   render: Wrapper,
 };
 
-export const ConversationListError: ComponentStoryObj<typeof Component> = {
+export const ConversationListError: StoryObj<typeof Component> = {
   args: {
     conversations: {
       loading: false,
@@ -55,7 +55,7 @@ export const ConversationListError: ComponentStoryObj<typeof Component> = {
   render: Wrapper,
 };
 
-export const ConversationListLoaded: ComponentStoryObj<typeof Component> = {
+export const ConversationListLoaded: StoryObj<typeof Component> = {
   args: {
     conversations: {
       loading: false,
@@ -78,7 +78,7 @@ export const ConversationListLoaded: ComponentStoryObj<typeof Component> = {
   render: Wrapper,
 };
 
-export const ConversationListEmpty: ComponentStoryObj<typeof Component> = {
+export const ConversationListEmpty: StoryObj<typeof Component> = {
   args: {
     conversations: {
       loading: false,

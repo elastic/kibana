@@ -8,22 +8,22 @@ export default {
   title: 'shareables/Footer/Settings',
 };
 
-export const Contextual = () => (
-  <ExampleContext style={{ background: '#333', padding: 10 }}>
-    <Settings />
-  </ExampleContext>
-);
+export const Contextual = {
+  render: () => (
+    <ExampleContext style={{ background: '#333', padding: 10 }}>
+      <Settings />
+    </ExampleContext>
+  ),
 
-Contextual.story = {
   name: 'contextual',
 };
 
-export const Component = () => (
-  <ExampleContext style={{ background: '#333', padding: 10 }}>
-    <SettingsComponent refs={initialCanvasShareableState.refs} />
-  </ExampleContext>
-);
+export const Component = {
+  render: () => (
+    <ExampleContext style={{ background: '#333', padding: 10 }}>
+      <SettingsComponent refs={initialCanvasShareableState.refs} />
+    </ExampleContext>
+  ),
 
-Component.story = {
   name: 'component',
 };

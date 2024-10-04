@@ -28,17 +28,17 @@ export default {
   title: 'components/common/ErrorCallout',
 };
 
-export const ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace = () => {
-  const sampleError = new Error(
-    'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
-  );
-  return (
-    <DiscoverServicesProvider>
-      <ErrorCallout title="Sample Error Title" error={sampleError} />
-    </DiscoverServicesProvider>
-  );
-};
+export const ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace = {
+  render: () => {
+    const sampleError = new Error(
+      'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
+    );
+    return (
+      <DiscoverServicesProvider>
+        <ErrorCallout title="Sample Error Title" error={sampleError} />
+      </DiscoverServicesProvider>
+    );
+  },
 
-ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace.story = {
   name: 'Error Callout with a very long error message without whitespace',
 };

@@ -45,42 +45,42 @@ export default {
   title: 'renderers/pie',
 };
 
-export const Default = () => {
-  const config = {
-    data,
-    options: pieOptions,
-    font: {
-      css: '',
-      spec: {},
-      type: 'style' as 'style',
-    },
-  };
-  return <Render renderer={pie} config={config} />;
-};
+export const Default = {
+  render: () => {
+    const config = {
+      data,
+      options: pieOptions,
+      font: {
+        css: '',
+        spec: {},
+        type: 'style' as 'style',
+      },
+    };
+    return <Render renderer={pie} config={config} />;
+  },
 
-Default.story = {
   name: 'default',
 };
 
-export const WithLegend = () => {
-  const options = {
-    ...pieOptions,
-    legend: { show: true },
-  };
+export const WithLegend = {
+  render: () => {
+    const options = {
+      ...pieOptions,
+      legend: { show: true },
+    };
 
-  const config = {
-    data,
-    options,
-    font: {
-      css: '',
-      spec: {},
-      type: 'style' as 'style',
-    },
-  };
+    const config = {
+      data,
+      options,
+      font: {
+        css: '',
+        spec: {},
+        type: 'style' as 'style',
+      },
+    };
 
-  return <Render renderer={pie} config={config} />;
-};
+    return <Render renderer={pie} config={config} />;
+  },
 
-WithLegend.story = {
   name: 'with legend',
 };

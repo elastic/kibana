@@ -88,18 +88,18 @@ export default {
   title: 'components/WorkpadHeader/EditorMenu',
 };
 
-export const Default = () => (
-  <EditorMenu
-    addPanelActions={[]}
-    factories={testFactories}
-    promotedVisTypes={testVisTypes}
-    visTypeAliases={testVisTypeAliases}
-    createNewVisType={() => action('createNewVisType')}
-    createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
-    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
-  />
-);
+export const Default = {
+  render: () => (
+    <EditorMenu
+      addPanelActions={[]}
+      factories={testFactories}
+      promotedVisTypes={testVisTypes}
+      visTypeAliases={testVisTypeAliases}
+      createNewVisType={() => action('createNewVisType')}
+      createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
+      createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
+    />
+  ),
 
-Default.story = {
   name: 'default',
 };

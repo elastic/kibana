@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Meta, Story } from '@storybook/react';
+import { StoryObj, Meta, StoryFn } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CreateAgentKeyFlyout } from './create_agent_key';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
@@ -17,12 +17,14 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
-  return <CreateAgentKeyFlyout {...args} />;
-};
+export const Example: StoryObj<Args> = {
+  render: (args) => {
+    return <CreateAgentKeyFlyout {...args} />;
+  },
 
-Example.args = {
-  onCancel: () => {},
-  onSuccess: (agentKey: CreateApiKeyResponse) => {},
-  onError: (keyName: string, message: string) => {},
+  args: {
+    onCancel: () => {},
+    onSuccess: (agentKey: CreateApiKeyResponse) => {},
+    onError: (keyName: string, message: string) => {},
+  },
 };

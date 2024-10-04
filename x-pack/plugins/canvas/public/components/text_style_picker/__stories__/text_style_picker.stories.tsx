@@ -24,14 +24,12 @@ export default {
   decorators: [(fn) => <div style={{ width: 264 }}>{fn()}</div>],
 };
 
-export const Default = () => <TextStylePicker onChange={action('onChange')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <TextStylePicker onChange={action('onChange')} />,
   name: 'default',
 };
 
-export const _Interactive = () => <Interactive />;
-
-_Interactive.story = {
+export const _Interactive = {
+  render: () => <Interactive />,
   name: 'interactive',
 };

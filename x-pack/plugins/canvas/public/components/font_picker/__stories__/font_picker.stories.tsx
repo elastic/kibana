@@ -14,16 +14,13 @@ export default {
   title: 'components/FontPicker',
 };
 
-export const Default = () => <FontPicker onSelect={action('onSelect')} />;
-
-Default.story = {
+export const Default = {
+  render: () => <FontPicker onSelect={action('onSelect')} />,
   name: 'default',
 };
 
-export const WithValue = () => (
-  <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />
-);
+export const WithValue = {
+  render: () => <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />,
 
-WithValue.story = {
   name: 'with value',
 };

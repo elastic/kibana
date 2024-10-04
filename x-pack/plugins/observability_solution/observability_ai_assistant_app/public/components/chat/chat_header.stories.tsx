@@ -5,19 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { EuiPanel } from '@elastic/eui';
 import { ChatHeader as Component } from './chat_header';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/ChatHeader',
 };
 
 export default meta;
 
-export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
+export const ChatHeaderLoaded: StoryObj<typeof Component> = {
   args: {
     title: 'My conversation',
     connectors: {

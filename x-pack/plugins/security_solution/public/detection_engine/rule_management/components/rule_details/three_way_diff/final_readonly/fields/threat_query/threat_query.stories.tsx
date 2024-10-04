@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatQueryReadOnly } from './threat_query';
@@ -29,7 +29,7 @@ interface TemplateProps {
   kibanaServicesOverrides?: Record<string, unknown>;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return (
     <ThreeWayDiffStorybookProviders kibanaServicesOverrides={args.kibanaServicesOverrides}>
       <FieldReadOnly fieldName="threat_query" finalDiffableRule={args.finalDiffableRule} />
@@ -37,33 +37,37 @@ const Template: Story<TemplateProps> = (args) => {
   );
 };
 
-export const ThreatQueryWithIndexPatterns = Template.bind({});
+export const ThreatQueryWithIndexPatterns = {
+  render: Template,
 
-ThreatQueryWithIndexPatterns.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_query: inlineKqlQuery,
-    data_source: dataSourceWithIndexPatterns,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        create: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockThreatMatchRule({
+      threat_query: inlineKqlQuery,
+      data_source: dataSourceWithIndexPatterns,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          create: async () => mockDataView(),
+        },
       },
     },
   },
 };
 
-export const ThreatQueryWithDataView = Template.bind({});
+export const ThreatQueryWithDataView = {
+  render: Template,
 
-ThreatQueryWithDataView.args = {
-  finalDiffableRule: mockThreatMatchRule({
-    threat_query: inlineKqlQuery,
-    data_source: dataSourceWithDataView,
-  }),
-  kibanaServicesOverrides: {
-    data: {
-      dataViews: {
-        get: async () => mockDataView(),
+  args: {
+    finalDiffableRule: mockThreatMatchRule({
+      threat_query: inlineKqlQuery,
+      data_source: dataSourceWithDataView,
+    }),
+    kibanaServicesOverrides: {
+      data: {
+        dataViews: {
+          get: async () => mockDataView(),
+        },
       },
     },
   },

@@ -27,31 +27,31 @@ export default {
   ],
 };
 
-export const Default = (_, props) => (
-  <ElementGrid
-    elements={props?.testCustomElements}
-    onClick={action('addCustomElement')}
-    onDelete={action('onDelete')}
-    onEdit={action('onEdit')}
-  />
-);
+export const Default = {
+  render: (_, props) => (
+    <ElementGrid
+      elements={props?.testCustomElements}
+      onClick={action('addCustomElement')}
+      onDelete={action('onDelete')}
+      onEdit={action('onEdit')}
+    />
+  ),
 
-Default.story = {
   name: 'default',
   decorators: [waitFor(getTestCustomElements())],
 };
 
-export const WithTextFilter = (_, props) => (
-  <ElementGrid
-    elements={props?.testCustomElements}
-    onClick={action('addCustomElement')}
-    filterText="table"
-    onDelete={action('onDelete')}
-    onEdit={action('onEdit')}
-  />
-);
+export const WithTextFilter = {
+  render: (_, props) => (
+    <ElementGrid
+      elements={props?.testCustomElements}
+      onClick={action('addCustomElement')}
+      filterText="table"
+      onDelete={action('onDelete')}
+      onEdit={action('onEdit')}
+    />
+  ),
 
-WithTextFilter.story = {
   name: 'with text filter',
   decorators: [waitFor(getTestCustomElements())],
 };

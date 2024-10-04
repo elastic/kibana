@@ -51,34 +51,30 @@ export default {
   title: 'components/Tags/TagList',
 };
 
-export const EmptyList = () => <TagList getTag={getTag} />;
-
-EmptyList.story = {
+export const EmptyList = {
+  render: () => <TagList getTag={getTag} />,
   name: 'empty list',
 };
 
-export const WithHealthTags = () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />;
-
-WithHealthTags.story = {
+export const WithHealthTags = {
+  render: () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />,
   name: 'with health tags',
 };
 
-export const WithBadgeTags = () => (
-  <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />
-);
+export const WithBadgeTags = {
+  render: () => <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />,
 
-WithBadgeTags.story = {
   name: 'with badge tags',
 };
 
-export const WithLotsOfTags = () => (
-  <TagList
-    tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}
-    getTag={getTag}
-    tagType="badge"
-  />
-);
+export const WithLotsOfTags = {
+  render: () => (
+    <TagList
+      tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}
+      getTag={getTag}
+      tagType="badge"
+    />
+  ),
 
-WithLotsOfTags.story = {
   name: 'with lots of tags',
 };

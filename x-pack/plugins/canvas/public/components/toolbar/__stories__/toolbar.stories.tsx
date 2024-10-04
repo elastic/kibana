@@ -25,8 +25,7 @@ export default {
   decorators: [(story) => <Pages story={story} />, reduxDecorator({ pages })],
 };
 
-export const Redux = () => <Toolbar />;
-
-Redux.story = {
+export const Redux = {
+  render: () => <Toolbar />,
   name: 'redux',
 };

@@ -27,51 +27,51 @@ export default {
   ],
 };
 
-export const WithTitleAndDescription = () => (
-  <ElementCard
-    title="Element 1"
-    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-  />
-);
+export const WithTitleAndDescription = {
+  render: () => (
+    <ElementCard
+      title="Element 1"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+    />
+  ),
 
-WithTitleAndDescription.story = {
   name: 'with title and description',
 };
 
-export const WithImage = (_, props) => (
-  <ElementCard
-    title="Element 1"
-    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-    image={props?.elasticLogo}
-  />
-);
+export const WithImage = {
+  render: (_, props) => (
+    <ElementCard
+      title="Element 1"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+      image={props?.elasticLogo}
+    />
+  ),
 
-WithImage.story = {
   name: 'with image',
   decorators: [waitFor(getElasticLogo())],
 };
 
-export const WithTags = () => (
-  <ElementCard
-    title="Element 1"
-    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-    tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']}
-    onClick={action('onClick')}
-  />
-);
+export const WithTags = {
+  render: () => (
+    <ElementCard
+      title="Element 1"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+      tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']}
+      onClick={action('onClick')}
+    />
+  ),
 
-WithTags.story = {
   name: 'with tags',
 };
 
-export const WithClickHandler = () => (
-  <ElementCard
-    title="Element 1"
-    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-    onClick={action('onClick')}
-  />
-);
+export const WithClickHandler = {
+  render: () => (
+    <ElementCard
+      title="Element 1"
+      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+      onClick={action('onClick')}
+    />
+  ),
 
-WithClickHandler.story = {
   name: 'with click handler',
 };

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { PageTitleContent as Component, PageTitleContentProps } from './page_title_content';
@@ -18,13 +18,7 @@ export default {
   alert,
 };
 
-const Template: ComponentStory<typeof Component> = (props: PageTitleContentProps) => (
-  <Component {...props} />
-);
-
-const TemplateWithPageTemplate: ComponentStory<typeof Component> = (
-  props: PageTitleContentProps
-) => (
+const TemplateWithPageTemplate: StoryFn<typeof Component> = (props: PageTitleContentProps) => (
   <EuiPageTemplate>
     <EuiPageTemplate.Header children={<Component {...props} />} bottomBorder={false} />
   </EuiPageTemplate>
@@ -34,10 +28,14 @@ const defaultProps = {
   alert,
 };
 
-export const PageTitleContent = Template.bind({});
-PageTitleContent.args = defaultProps;
+export const PageTitleContent = {
+  args: defaultProps,
+};
 
-export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
-PageTitleUsedWithinPageTemplate.args = {
-  ...defaultProps,
+export const PageTitleUsedWithinPageTemplate = {
+  render: TemplateWithPageTemplate,
+
+  args: {
+    ...defaultProps,
+  },
 };

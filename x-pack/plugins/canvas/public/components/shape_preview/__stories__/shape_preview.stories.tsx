@@ -6,14 +6,12 @@ export default {
   title: 'components/Shapes/ShapePreview',
 };
 
-export const Arrow = () => <ShapePreview shape={Shape.ARROW} />;
-
-Arrow.story = {
+export const Arrow = {
+  render: () => <ShapePreview shape={Shape.ARROW} />,
   name: 'arrow',
 };
 
-export const Square = () => <ShapePreview shape={Shape.SQUARE} />;
-
-Square.story = {
+export const Square = {
+  render: () => <ShapePreview shape={Shape.SQUARE} />,
   name: 'square',
 };

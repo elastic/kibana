@@ -94,92 +94,92 @@ export const Default = () => {
   );
 };
 
-export const WithLogScale = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.LOG } }}
-      {...containerSize}
-    />
-  );
-};
+export const WithLogScale = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.LOG } }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithLogScale.story = {
   name: 'With log scale',
 };
 
-export const WithSquareRootScale = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.SQUARE_ROOT } }}
-      {...containerSize}
-    />
-  );
-};
+export const WithSquareRootScale = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.SQUARE_ROOT } }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithSquareRootScale.story = {
   name: 'With square root scale',
 };
 
-export const WithRightAngledOrientation = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{
-        ...config,
-        visParams: { ...config.visParams, orientation: Orientation.RIGHT_ANGLED },
-      }}
-      {...containerSize}
-    />
-  );
-};
+export const WithRightAngledOrientation = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.RIGHT_ANGLED },
+        }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithRightAngledOrientation.story = {
   name: 'With right angled orientation',
 };
 
-export const WithMultipleOrientations = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{
-        ...config,
-        visParams: { ...config.visParams, orientation: Orientation.MULTIPLE },
-      }}
-      {...containerSize}
-    />
-  );
-};
+export const WithMultipleOrientations = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.MULTIPLE },
+        }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithMultipleOrientations.story = {
   name: 'With multiple orientations',
 };
 
-export const WithHiddenLabel = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{ ...config, visParams: { ...config.visParams, showLabel: false } }}
-      {...containerSize}
-    />
-  );
-};
+export const WithHiddenLabel = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{ ...config, visParams: { ...config.visParams, showLabel: false } }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithHiddenLabel.story = {
   name: 'With hidden label',
 };
 
-export const WithEmptyResults = () => {
-  return (
-    <Render
-      renderer={() => tagcloudRenderer({ getStartDeps })}
-      config={{ ...config, visData: { ...config.visData, rows: [] } }}
-      {...containerSize}
-    />
-  );
-};
+export const WithEmptyResults = {
+  render: () => {
+    return (
+      <Render
+        renderer={() => tagcloudRenderer({ getStartDeps })}
+        config={{ ...config, visData: { ...config.visData, rows: [] } }}
+        {...containerSize}
+      />
+    );
+  },
 
-WithEmptyResults.story = {
   name: 'With empty results',
 };

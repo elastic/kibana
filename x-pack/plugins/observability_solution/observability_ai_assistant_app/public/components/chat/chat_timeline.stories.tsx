@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import type { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React, { type ComponentProps, useState } from 'react';
 import {
   MessageRole,
@@ -33,7 +33,7 @@ export default {
   argTypes: {},
 };
 
-const Template: ComponentStory<typeof Component> = (props: ChatTimelineProps) => {
+const Template: StoryFn<typeof Component> = (props: ChatTimelineProps) => {
   const [count, setCount] = useState(props.messages.length - 1);
 
   return (
@@ -129,5 +129,7 @@ const defaultProps: ComponentProps<typeof Component> = {
   onStopGenerating: () => {},
 };
 
-export const ChatTimeline = Template.bind({});
-ChatTimeline.args = defaultProps;
+export const ChatTimeline = {
+  render: Template,
+  args: defaultProps,
+};

@@ -8,7 +8,7 @@
  */
 
 import React, { FC } from 'react';
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,19 +24,24 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<FiltersBuilderProps>> = (args) => <FiltersBuilder {...args} />;
+export const Default = {
+  decorators: [
+    (Story) => (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <Story />
+        </KibanaContextProvider>
+      </I18nProvider>
+    ),
+  ],
 
-export const Default = Template.bind({});
-
-Default.decorators = [
-  (Story) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <Story />
-      </KibanaContextProvider>
-    </I18nProvider>
-  ),
-];
+  args: {
+    filters,
+    dataView: mockedDataView,
+    onChange: (f: Filter[]) => {},
+    hideOr: false,
+  },
+};
 
 const mockedDataView = {
   id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
@@ -55,25 +60,19 @@ const mockedDataView = {
 
 const filters = getFiltersMock();
 
-Default.args = {
-  filters,
-  dataView: mockedDataView,
-  onChange: (f: Filter[]) => {},
-  hideOr: false,
+export const withoutOR = {
+  args: { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true },
+
+  decorators: [
+    (Story) => (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <Story />
+        </KibanaContextProvider>
+      </I18nProvider>
+    ),
+  ],
 };
-
-export const withoutOR = Template.bind({});
-withoutOR.args = { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true };
-
-withoutOR.decorators = [
-  (Story) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <Story />
-      </KibanaContextProvider>
-    </I18nProvider>
-  ),
-];
 
 const createMockWebStorage = () => ({
   clear: action('clear'),

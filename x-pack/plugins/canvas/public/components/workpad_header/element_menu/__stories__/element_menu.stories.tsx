@@ -130,10 +130,8 @@ export default {
   title: 'components/WorkpadHeader/ElementMenu',
 };
 
-export const Default = () => (
-  <ElementMenu elements={testElements} addElement={action('addElement')} />
-);
+export const Default = {
+  render: () => <ElementMenu elements={testElements} addElement={action('addElement')} />,
 
-Default.story = {
   name: 'default',
 };

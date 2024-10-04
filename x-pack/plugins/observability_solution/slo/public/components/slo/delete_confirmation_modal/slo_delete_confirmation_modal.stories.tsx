@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
@@ -17,11 +17,10 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
-
 const defaultProps = {
   slo: buildSlo(),
 };
 
-export const SloDeleteConfirmationModal = Template.bind({});
-SloDeleteConfirmationModal.args = defaultProps;
+export const SloDeleteConfirmationModal = {
+  args: defaultProps,
+};

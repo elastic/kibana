@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatReadOnly } from './threat';
@@ -21,37 +21,39 @@ interface TemplateProps {
   finalDiffableRule: DiffableRule;
 }
 
-const Template: Story<TemplateProps> = (args) => {
+const Template: StoryFn<TemplateProps> = (args) => {
   return <FieldReadOnly fieldName="threat" finalDiffableRule={args.finalDiffableRule} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    threat: [
-      {
-        framework: 'MITRE ATT&CK',
-        tactic: {
-          id: 'TA0006',
-          name: 'Credential Access',
-          reference: 'https://attack.mitre.org/tactics/TA0006/',
-        },
-        technique: [
-          {
-            id: 'T1003',
-            name: 'OS Credential Dumping',
-            reference: 'https://attack.mitre.org/techniques/T1003/',
-            subtechnique: [
-              {
-                id: 'T1003.001',
-                name: 'LSASS Memory',
-                reference: 'https://attack.mitre.org/techniques/T1003/001/',
-              },
-            ],
+  args: {
+    finalDiffableRule: mockCustomQueryRule({
+      threat: [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            id: 'TA0006',
+            name: 'Credential Access',
+            reference: 'https://attack.mitre.org/tactics/TA0006/',
           },
-        ],
-      },
-    ],
-  }),
+          technique: [
+            {
+              id: 'T1003',
+              name: 'OS Credential Dumping',
+              reference: 'https://attack.mitre.org/techniques/T1003/',
+              subtechnique: [
+                {
+                  id: 'T1003.001',
+                  name: 'LSASS Memory',
+                  reference: 'https://attack.mitre.org/techniques/T1003/001/',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  },
 };

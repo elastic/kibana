@@ -15,14 +15,14 @@ export default {
   title: 'renderers/error',
 };
 
-export const Default = () => {
-  const thrownError = new Error('There was an error');
-  const config = {
-    error: thrownError,
-  };
-  return <Render renderer={getErrorRenderer()} config={config} />;
-};
+export const Default = {
+  render: () => {
+    const thrownError = new Error('There was an error');
+    const config = {
+      error: thrownError,
+    };
+    return <Render renderer={getErrorRenderer()} config={config} />;
+  },
 
-Default.story = {
   name: 'default',
 };

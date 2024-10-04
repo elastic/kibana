@@ -26,11 +26,11 @@ export default {
   title: 'renderers/image',
 };
 
-export const Default = (_, props) => {
-  return <Renderer elasticLogo={props?.elasticLogo} />;
-};
+export const Default = {
+  render: (_, props) => {
+    return <Renderer elasticLogo={props?.elasticLogo} />;
+  },
 
-Default.story = {
   name: 'default',
   decorators: [waitFor(getElasticLogo())],
 };

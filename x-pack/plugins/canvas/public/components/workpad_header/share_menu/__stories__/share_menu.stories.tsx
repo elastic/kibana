@@ -15,9 +15,8 @@ export default {
   decorators: [reduxDecorator()],
 };
 
-export const Minimal = () => <ShareMenu onExport={action('onExport')} ReportingComponent={null} />;
-
-Minimal.story = {
+export const Minimal = {
+  render: () => <ShareMenu onExport={action('onExport')} ReportingComponent={null} />,
   name: 'minimal',
 };
 
@@ -25,13 +24,13 @@ export default {
   title: 'components/WorkpadHeader/ShareMenu',
 };
 
-export const WithReporting = () => (
-  <ShareMenu
-    onExport={action('onExport')}
-    ReportingComponent={() => <div>Provided Reporting Component</div>}
-  />
-);
+export const WithReporting = {
+  render: () => (
+    <ShareMenu
+      onExport={action('onExport')}
+      ReportingComponent={() => <div>Provided Reporting Component</div>}
+    />
+  ),
 
-WithReporting.story = {
   name: 'with Reporting',
 };

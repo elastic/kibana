@@ -41,29 +41,26 @@ export default {
   title: 'components/WorkpadFilters/FilterComponent',
 };
 
-export const Default = () => <Filter filter={filter} />;
-
-Default.story = {
+export const Default = {
+  render: () => <Filter filter={filter} />,
   name: 'default',
 };
 
-export const WithComponentField = () => (
-  <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
-);
+export const WithComponentField = {
+  render: () => <Filter filter={{ ...filter, value: { ...filter.value, component } }} />,
 
-WithComponentField.story = {
   name: 'with component field',
 };
 
-export const WithCustomFilterFields = () => (
-  <Filter
-    filter={{
-      ...filter,
-      customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
-    }}
-  />
-);
+export const WithCustomFilterFields = {
+  render: () => (
+    <Filter
+      filter={{
+        ...filter,
+        customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
+      }}
+    />
+  ),
 
-WithCustomFilterFields.story = {
   name: 'with custom filter fields',
 };

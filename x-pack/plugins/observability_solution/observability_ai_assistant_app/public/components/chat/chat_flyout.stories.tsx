@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
 import React from 'react';
 import { buildSystemMessage } from '../../utils/builders';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
@@ -19,7 +19,7 @@ export default {
 
 type ChatFlyoutProps = React.ComponentProps<typeof Component>;
 
-const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
+const Template: StoryFn<typeof Component> = (props: ChatFlyoutProps) => {
   return (
     <div style={{ display: 'flex', minHeight: 800, maxWidth: 600 }}>
       <Component {...props} />
@@ -35,5 +35,7 @@ const defaultProps: ChatFlyoutProps = {
   onClose: () => {},
 };
 
-export const ChatFlyout = Template.bind({});
-ChatFlyout.args = defaultProps;
+export const ChatFlyout = {
+  render: Template,
+  args: defaultProps,
+};
