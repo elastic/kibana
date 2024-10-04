@@ -34,19 +34,19 @@ export default function getAllSpacesTestSuite({ getService }: FtrProviderContext
         tests: {
           exists: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           copySavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           shareSavedObjectsPurpose: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
           includeAuthorizedPurposes: {
             statusCode: 200,
-            response: createExpectResults('default', 'space_1', 'space_2'),
+            response: createExpectResults('default', 'space_1', 'space_2', 'space_3'),
           },
         },
       });

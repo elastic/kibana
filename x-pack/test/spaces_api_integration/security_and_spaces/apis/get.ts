@@ -58,6 +58,22 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
+      {
+        spaceId: SPACES.SPACE_3.spaceId, // This space has a solution set and we expect disabledFeatures to be automatically set
+        otherSpaceId: SPACES.DEFAULT.spaceId,
+        users: {
+          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
+          superuser: AUTHENTICATION.SUPERUSER,
+          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
+          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
+          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER,
+          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_READ_USER,
+          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
+          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
+          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
+          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+        },
+      },
     ].forEach((scenario) => {
       getTest(`user with no access`, {
         currentSpaceId: scenario.spaceId,
