@@ -97,7 +97,7 @@ export const AddNote = memo(
     // show a toast if the create note call fails
     useEffect(() => {
       if (createStatus === ReqStatus.Failed && createError) {
-        addErrorToast(null, {
+        addErrorToast(createError, {
           title: CREATE_NOTE_ERROR,
         });
       }

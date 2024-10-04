@@ -103,7 +103,7 @@ export const fetchNotesByDocumentIds = createAsyncThunk<
 >('notes/fetchNotesByDocumentIds', async (args) => {
   const { documentIds } = args;
   const res = await fetchNotesByDocumentIdsApi(documentIds);
-  return normalizeEntities(res.notes);
+  return normalizeEntities('notes' in res ? res.notes : []);
 });
 
 export const fetchNotesBySavedObjectIds = createAsyncThunk<
@@ -113,7 +113,7 @@ export const fetchNotesBySavedObjectIds = createAsyncThunk<
 >('notes/fetchNotesBySavedObjectIds', async (args) => {
   const { savedObjectIds } = args;
   const res = await fetchNotesBySaveObjectIdsApi(savedObjectIds);
-  return normalizeEntities(res.notes);
+  return normalizeEntities('notes' in res ? res.notes : []);
 });
 
 export const fetchNotes = createAsyncThunk<
@@ -130,7 +130,10 @@ export const fetchNotes = createAsyncThunk<
 >('notes/fetchNotes', async (args) => {
   const { page, perPage, sortField, sortOrder, filter, search } = args;
   const res = await fetchNotesApi({ page, perPage, sortField, sortOrder, filter, search });
-  return { ...normalizeEntities(res.notes), totalCount: res.totalCount };
+  return {
+    ...normalizeEntities('notes' in res ? res.notes : []),
+    totalCount: 'totalCount' in res ? res.totalCount : 0,
+  };
 });
 
 export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareNote }, {}>(
@@ -308,12 +311,12 @@ export const selectFetchNotesError = (state: State) => state.notes.error.fetchNo
 export const selectFetchNotesStatus = (state: State) => state.notes.status.fetchNotes;
 
 export const selectNotesByDocumentId = createSelector(
-  [selectAllNotes, (state: State, documentId: string) => documentId],
+  [selectAllNotes, (_: State, documentId: string) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
 );
 
 export const selectNotesBySavedObjectId = createSelector(
-  [selectAllNotes, (state: State, savedObjectId: string) => savedObjectId],
+  [selectAllNotes, (_: State, savedObjectId: string) => savedObjectId],
   (notes, savedObjectId) =>
     savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
 );
@@ -322,7 +325,7 @@ export const selectSortedNotesByDocumentId = createSelector(
   [
     selectAllNotes,
     (
-      state: State,
+      _: State,
       {
         documentId,
         sort,
@@ -347,7 +350,7 @@ export const selectSortedNotesBySavedObjectId = createSelector(
   [
     selectAllNotes,
     (
-      state: State,
+      _: State,
       {
         savedObjectId,
         sort,

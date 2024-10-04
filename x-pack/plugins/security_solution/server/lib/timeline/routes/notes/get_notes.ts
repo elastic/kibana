@@ -11,11 +11,11 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { NOTE_URL } from '../../../../../common/constants';
+import { MAX_UNASSOCIATED_NOTES, NOTE_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
-import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
+import { getAllSavedNote } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { GetNotesRequestQuery, type GetNotesResponse } from '../../../../../common/api/timeline';
 
@@ -39,6 +39,10 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
+          const {
+            uiSettings: { client: uiSettingsClient },
+          } = await frameworkRequest.context.core;
+          const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
           const documentIds = queryParams.documentIds ?? null;
           const savedObjectIds = queryParams.savedObjectIds ?? null;
           if (documentIds != null) {
@@ -48,7 +52,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
                 type: noteSavedObjectType,
                 search: docIdSearchString,
                 page: 1,
-                perPage: MAX_UNASSOCIATED_NOTES,
+                perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               const body: GetNotesResponse = res ?? {};
@@ -58,7 +62,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
                 type: noteSavedObjectType,
                 search: documentIds,
                 page: 1,
-                perPage: MAX_UNASSOCIATED_NOTES,
+                perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               return response.ok({ body: res ?? {} });
@@ -73,7 +77,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
                   id: soIdSearchString,
                 },
                 page: 1,
-                perPage: MAX_UNASSOCIATED_NOTES,
+                perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               const body: GetNotesResponse = res ?? {};
@@ -85,7 +89,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter) => {
                   type: timelineSavedObjectType,
                   id: savedObjectIds,
                 },
-                perPage: MAX_UNASSOCIATED_NOTES,
+                perPage: maxUnassociatedNotes,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               const body: GetNotesResponse = res ?? {};

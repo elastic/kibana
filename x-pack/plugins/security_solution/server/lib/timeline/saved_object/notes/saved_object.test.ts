@@ -187,6 +187,10 @@ describe('persistNote', () => {
     created_at: '2024-06-25T22:56:01.354Z',
     created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
   };
+  const mockUiSettingsClientGet = jest.fn();
+  const mockUiSettingsClient = {
+    get: mockUiSettingsClientGet,
+  };
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const core = coreMock.createRequestHandlerContext();
   const context = {
@@ -196,6 +200,10 @@ describe('persistNote', () => {
       savedObjects: {
         ...core.savedObjects,
         client: mockSavedObjectClient,
+      },
+      uiSettings: {
+        ...core.uiSettings,
+        client: mockUiSettingsClient,
       },
     },
     resolve: jest.fn(),
@@ -304,7 +312,7 @@ describe('persistNote', () => {
       message: 'Cannot create more than 1000 notes without associating them to a timeline',
       note: mockNote,
     });
-
+    mockUiSettingsClientGet.mockResolvedValue(1000);
     const result = await persistNote({ request: mockRequest, noteId: null, note: mockNote });
 
     expect(result.code).toBe(403);
