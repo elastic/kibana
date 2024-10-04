@@ -22,6 +22,10 @@ export enum InfraTelemetryEventTypes {
   ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
   ASSET_DETAILS_PAGE_VIEWED = 'Asset Details Page Viewed',
   ASSET_DASHBOARD_LOADED = 'Asset Dashboard Loaded',
+  ADD_DATA_CALLOUT_ADD_METRICS_CLICKED = 'Add Data Callout Add Metrics Clicked',
+  ADD_DATA_CALLOUT_TRY_IT_CLICKED = 'Add Data Callout Try It Clicked',
+  ADD_DATA_CALLOUT_LEARN_MORE_CLICKED = 'Add Data Callout Learn More Clicked',
+  ADD_DATA_CALLOUT_DISMISSED = 'Add Data Callout Dismissed',
 }
 
 export interface HostsViewQuerySubmittedParams {
