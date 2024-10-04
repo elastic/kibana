@@ -82,12 +82,17 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       id={popoverId}
       input={
         <EuiFormControlLayout
+          // Adding classname to make functional tests similar to EuiComboBox
+          className={singleSelection ? 'euiComboBox__inputWrap--plainText' : ''}
+          data-test-subj="comboBoxInput"
           clear={isClearable && hasSelections ? { onClick: onChange.bind(null, []) } : undefined}
           isDropdown={true}
         >
           <EuiFieldText
+            data-test-subj="comboBoxSearchInput"
             onClick={setPopoverOpen.bind(null, true)}
             type="text"
+            role="combobox"
             controlOnly
             aria-label={i18n.translate(
               'xpack.ml.controls.optionsList.popover.selectOptionAriaLabel',
