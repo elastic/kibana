@@ -102,6 +102,9 @@ NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that 
 
 Description::
 The details about the incident.
+Event action::
+The type of action to test: resolve or trigger.
+When you test a resolve action, you must provide a correlation identifier.
 Impact::
 The effect an incident has on business.
 It can be measured by the number of affected users or by how critical it is to the business in question.
@@ -110,7 +113,7 @@ The severity of the incident.
 Short description::
 A short description for the incident, used for searching the contents of the knowledge base.
 Subcategory::
-The category of the incident.
+The subcategory of the incident.
 Urgency::
 The extent to which the incident resolution can delay.
 
