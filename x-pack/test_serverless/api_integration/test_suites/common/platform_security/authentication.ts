@@ -13,12 +13,25 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const svlCommonApi = getService('svlCommonApi');
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
+  let supertestViewerWithApiKey: SupertestWithRoleScopeType;
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
+
   describe('security/authentication', function () {
     before(async () => {
       supertestAdminWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin');
+      supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer');
+      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'viewer',
+        {
+          useCookieHeader: true,
+          withCommonHeaders: true,
+        }
+      );
     });
     after(async () => {
       await supertestAdminWithApiKey.destroy();
+      await supertestViewerWithApiKey.destroy();
+      await supertestViewerWithCookieCredentials.destroy();
     });
     describe('route access', () => {
       describe('disabled', () => {
@@ -121,9 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertestAdminWithApiKey
-            .get('/internal/security/me')
-            .set(svlCommonApi.getCommonRequestHeader()));
+          ({ body, status } = await supertestViewerWithCookieCredentials.get(
+            '/internal/security/me'
+          ));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -134,16 +147,20 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertestAdminWithApiKey
+          ({ body, status } = await supertestViewerWithCookieCredentials
             .get('/internal/security/me')
             .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
           expect(body).toEqual(
             expect.objectContaining({
-              authentication_provider: { name: '__http__', type: 'http' },
-              authentication_type: 'api_key',
+              authentication_provider: { name: 'cloud-saml-kibana', type: 'saml' },
+              authentication_type: 'token',
+              authentication_realm: {
+                name: 'cloud-saml-kibana',
+                type: 'saml',
+              },
               enabled: true,
-              full_name: 'test admin',
+              full_name: 'test viewer',
             })
           );
           expect(status).toBe(200);
@@ -154,9 +171,9 @@ export default function ({ getService }: FtrProviderContext) {
           let body: any;
           let status: number;
 
-          ({ body, status } = await supertestAdminWithApiKey
-            .post('/internal/security/login')
-            .set(svlCommonApi.getCommonRequestHeader()));
+          ({ body, status } = await supertestViewerWithCookieCredentials.post(
+            '/internal/security/login'
+          ));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -167,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(400);
 
-          ({ body, status } = await supertestAdminWithApiKey
+          ({ body, status } = await supertestViewerWithCookieCredentials
             .post('/internal/security/login')
             .set(svlCommonApi.getInternalRequestHeader()));
           expect(status).not.toBe(404);
@@ -176,12 +193,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('public', () => {
         it('logout', async () => {
-          const { status } = await supertestAdminWithApiKey.get('/api/security/logout');
+          const { status } = await supertestViewerWithApiKey.get('/api/security/logout');
           expect(status).toBe(302);
         });
 
         it('SAML callback', async () => {
-          const { body, status } = await supertestAdminWithApiKey
+          const { body, status } = await supertestViewerWithApiKey
             .post('/api/security/saml/callback')
             .set(svlCommonApi.getCommonRequestHeader())
             .send({
