@@ -14,18 +14,15 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
-import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from './tooltip_content';
 import { Popover } from './popover';
-import {
-  ChartMetricType,
-  getMetricsFormula,
-} from '../../../shared/charts/helper/get_metrics_formulas';
-import { ExploreLogsButton } from '../../../shared/explore_logs_button/explore_logs_button';
 import { mergeKueries, toKueryFilterFormat } from '../../../../../common/utils/kuery_utils';
 import { ERROR_LOG_LEVEL, LOG_LEVEL } from '../../../../../common/es_fields/apm';
+import { ExploreLogsButton } from '../../explore_logs_button/explore_logs_button';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
+import { ChartMetricType, getMetricsFormula } from '../helper/get_metrics_formulas';
+import { getTimeSeriesColor, ChartType } from '../helper/get_timeseries_color';
 
 type LogErrorRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
