@@ -198,7 +198,7 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
-export const ERROR_TRANSLATION: Record<ErrorCode, string> = {
+export const ERROR_TRANSLATION: Record<ErrorCode, string | ((context: unknown) => string)> = {
   [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {
@@ -218,4 +218,11 @@ export const ERROR_TRANSLATION: Record<ErrorCode, string> = {
       defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
+  [ErrorCode.UNPARSEABLE_CSV_DATA]: (context: unknown) =>
+    i18n.translate('xpack.integrationAssistant.errors.uparseableCSV', {
+      values: {
+        exampleErrorMessage: (context as { errorMessages: string }).errorMessages[0],
+      },
+      defaultMessage: `Failed to convert samples to JSON ({exampleErrorMessage}). Please check the provided samples.`,
+    }),
 };

@@ -33,4 +33,5 @@ export enum ErrorCode {
   RECURSION_LIMIT = 'recursion-limit',
   RECURSION_LIMIT_ANALYZE_LOGS = 'recursion-limit-analyze-logs',
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
+  UNPARSEABLE_CSV_DATA = 'unparseable-csv-data',
 }

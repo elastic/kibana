@@ -97,9 +97,11 @@ export const useGeneration = ({
         });
 
         let errorMessage = originalErrorMessage;
-        const errorCode = e.body?.attributes?.errorCode as ErrorCode | undefined;
-        if (errorCode != null) {
-          errorMessage = i18n.ERROR_TRANSLATION[errorCode];
+        const context = e.body?.attributes as { errorCode: ErrorCode } | undefined;
+        if (context != null) {
+          const errorCode = context.errorCode;
+          const translation = i18n.ERROR_TRANSLATION[errorCode];
+          errorMessage = typeof translation === 'function' ? translation(context) : translation;
         }
         setError(errorMessage);
       } finally {

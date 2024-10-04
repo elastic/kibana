@@ -8,6 +8,7 @@ import type { LogFormatDetectionState } from '../../types';
 import type { LogDetectionNodeParams } from './types';
 import { createJSONInput } from '../../util';
 import { createCSVProcessor, createDropProcessor } from '../../util/processors';
+import { CSVParseError, UnparseableCSVFormatError } from '../../lib/errors/unparseable_csv_error';
 
 // We will only create the processor for the first MAX_CSV_COLUMNS columns.
 const MAX_CSV_COLUMNS = 100;
@@ -93,10 +94,7 @@ export async function convertCSVSamples({
   );
 
   if (tempErrors.length > 0) {
-    const exampleError = JSON.stringify(tempErrors[0]);
-    throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processor (${tempErrors.length} errors encountered, such as ${exampleError})`
-    );
+    throw new UnparseableCSVFormatError(tempErrors as CSVParseError[]);
   }
 
   const headerColumns = state.header ? columnsFromHeader(temporaryColumns, tempResults[0]) : [];
@@ -135,10 +133,7 @@ export async function convertCSVSamples({
   );
 
   if (finalErrors.length > 0) {
-    const exampleError = JSON.stringify(finalErrors[0]);
-    throw new Error(
-      `Failed to convert CSV samples to JSON using the csv processing pipeline (${finalErrors.length} errors encountered, such as ${exampleError})`
-    );
+    throw new UnparseableCSVFormatError(finalErrors as CSVParseError[]);
   }
 
   // Converts JSON Object into a string and parses it as a array of JSON strings
