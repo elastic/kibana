@@ -11,9 +11,7 @@ import { cloneDeep, omit } from 'lodash';
 import { v4 } from 'uuid';
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
 
 import {
   DashboardContainerInput,
@@ -24,7 +22,6 @@ import {
   DEFAULT_DASHBOARD_INPUT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
-  GLOBAL_STATE_STORAGE_KEY,
   PanelPlacementStrategy,
 } from '../../../dashboard_constants';
 import {
@@ -43,7 +40,6 @@ import { DashboardContainer } from '../dashboard_container';
 import type { DashboardCreationOptions } from '../../..';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
-import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 
 /**
  * Initializes a Dashboard and starts all of its integrations
@@ -57,19 +53,12 @@ export const initializeDashboard = async ({
   untilDashboardReady: () => Promise<DashboardContainer>;
   creationOptions?: DashboardCreationOptions;
 }) => {
-  const {
-    queryString,
-    filterManager,
-    timefilter: { timefilter: timefilterService },
-  } = dataService.query;
   const dashboardBackupService = getDashboardBackupService();
 
   const {
     getInitialInput,
     searchSessionSettings,
-    unifiedSearchSettings,
     validateLoadedSavedObject,
-    useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
 
@@ -187,60 +176,6 @@ export const initializeDashboard = async ({
     dashboard.savedObjectReferences = loadDashboardReturn?.references;
     dashboard.controlGroupInput = loadDashboardReturn?.dashboardInput?.controlGroupInput;
   });
-
-  // --------------------------------------------------------------------------------------
-  // Set up unified search integration.
-  // --------------------------------------------------------------------------------------
-  if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
-    const {
-      query,
-      filters,
-      timeRestore,
-      timeRange: savedTimeRange,
-      refreshInterval: savedRefreshInterval,
-    } = initialDashboardInput;
-    const { kbnUrlStateStorage } = unifiedSearchSettings;
-
-    // apply filters and query to the query service
-    filterManager.setAppFilters(cloneDeep(filters ?? []));
-    queryString.setQuery(query ?? queryString.getDefaultQuery());
-
-    /**
-     * Get initial time range, and set up dashboard time restore if applicable
-     */
-    const initialTimeRange: TimeRange = (() => {
-      // if there is an explicit time range in the URL it always takes precedence.
-      const urlOverrideTimeRange =
-        kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY)?.time;
-      if (urlOverrideTimeRange) return urlOverrideTimeRange;
-
-      // if this Dashboard has timeRestore return the time range that was saved with the dashboard.
-      if (timeRestore && savedTimeRange) return savedTimeRange;
-
-      // otherwise fall back to the time range from the timefilterService.
-      return timefilterService.getTime();
-    })();
-    initialDashboardInput.timeRange = initialTimeRange;
-    if (timeRestore) {
-      if (savedTimeRange) timefilterService.setTime(savedTimeRange);
-      if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
-    }
-
-    // start syncing global query state with the URL.
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      dataService.query,
-      kbnUrlStateStorage
-    );
-
-    untilDashboardReady().then((dashboardContainer) => {
-      const stopSyncingUnifiedSearchState =
-        syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
-      dashboardContainer.stopSyncingWithUnifiedSearch = () => {
-        stopSyncingUnifiedSearchState();
-        stopSyncingQueryServiceStateWithUrl();
-      };
-    });
-  }
 
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one

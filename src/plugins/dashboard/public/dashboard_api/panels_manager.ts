@@ -16,7 +16,6 @@ import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import { getReferencesForPanelId } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
 import { runPanelPlacementStrategy } from '../dashboard_container/panel_placement/place_new_panel_strategies';
@@ -31,14 +30,13 @@ import { UnsavedPanelState } from '../dashboard_container/types';
 
 export function initializePanelsManager(
   initialPanels: DashboardPanelMap,
-  initialReferences: Reference[],
-  trackPanel: ReturnType<typeof initializeTrackPanel>
+  trackPanel: ReturnType<typeof initializeTrackPanel>,
+  getReferencesForPanelId: (id: string) => Reference[]
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
   }>({});
   const panels$ = new BehaviorSubject(initialPanels);
-  let references: Reference[] = initialReferences;
   let restoredRuntimeState: UnsavedPanelState = {};
 
   function setRuntimeStateForChild(childId: string, state: object) {
@@ -135,14 +133,13 @@ export function initializePanelsManager(
         ? undefined
         : {
             rawState,
-            references: getReferencesForPanelId(childId, references),
+            references: getReferencesForPanelId(childId),
           };
     },
     getRuntimeStateForChild: (childId: string) => {
       return restoredRuntimeState?.[childId];
     },
     panels$,
-    references,
     removePanel: (id: string) => {
       const panels = { ...panels$.value };
       if (panels[id]) {
@@ -201,7 +198,6 @@ export function initializePanelsManager(
     setPanels: (panels: DashboardPanelMap) => {
       panels$.next(panels);
     },
-    setReferences: (nextReferences: Reference[]) => (references = nextReferences),
     setRuntimeStateForChild,
     untilEmbeddableLoaded,
   };

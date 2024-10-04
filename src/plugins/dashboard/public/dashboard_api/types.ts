@@ -44,12 +44,7 @@ import { Observable } from 'rxjs';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import {
-  DashboardAttributes,
-  DashboardOptions,
-  DashboardPanelMap,
-  DashboardPanelState,
-} from '../../common';
+import { DashboardOptions, DashboardPanelMap, DashboardPanelState } from '../../common';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -114,7 +109,7 @@ export interface DashboardState {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
+  controlGroupInput?: ControlGroupSerializedState | undefined;
   /**
    * Runtime control group state.
    * Contains state passed from dashboard locator
@@ -143,8 +138,6 @@ export type DashboardApi = CanExpandPanels &
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
-    getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
-    getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
     getSettings: () => DashboardStateFromSettingsFlyout;
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     hasOverlays$: PublishingSubject<boolean>;
@@ -177,3 +170,10 @@ export type DashboardApi = CanExpandPanels &
     // TODO remove types below this line - from legacy embeddable system
     untilEmbeddableLoaded: (id: string) => Promise<IEmbeddable | ErrorEmbeddable>;
   };
+
+export interface DashboardInternalApi {
+  controlGroupReload$: PublishingSubject<void>;
+  panelsReload$: PublishingSubject<void>;
+  getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;
+  getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
+}

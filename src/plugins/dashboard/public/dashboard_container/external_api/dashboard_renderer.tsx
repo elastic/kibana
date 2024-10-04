@@ -18,7 +18,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { DashboardApi } from '../../dashboard_api/types';
+import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
@@ -26,6 +26,7 @@ import { Dashboard404Page } from './dashboard_404';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { createDashboardApi } from '../../dashboard_api/create_dashboard_api';
+import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -46,11 +47,15 @@ export function DashboardRenderer({
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
+  const [dashboardInternalApi, setDashboardInternalApi] = useState<
+    DashboardInternalApi | undefined
+  >();
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
     if (error) setError(undefined);
-    if (dashboardApi) setError(undefined);
+    if (dashboardApi) setDashboardApi(undefined);
+    if (dashboardInternalApi) setDashboardInternalApi(undefined);
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
@@ -64,7 +69,11 @@ export function DashboardRenderer({
 
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
-        onApiAvailable?.(results.api);
+        setDashboardInternalApi(results.internalApi);
+        onApiAvailable?.({
+          ...results.api,
+          reload$: results.internalApi.panelsReload$,
+        });
       })
       .catch((error) => {
         if (!canceled) setError(error);
@@ -104,7 +113,9 @@ export function DashboardRenderer({
         coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
       >
         <DashboardContext.Provider value={dashboardApi}>
-          <DashboardViewport />
+          <DashboardInternalContext.Provider value={dashboardInternalApi}>
+            <DashboardViewport />
+          </DashboardInternalContext.Provider>
         </DashboardContext.Provider>
       </ExitFullScreenButtonKibanaProvider>
     ) : (

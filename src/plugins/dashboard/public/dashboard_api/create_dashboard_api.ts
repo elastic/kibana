@@ -46,12 +46,11 @@ export async function createDashboardApi({
     creationOptions,
   });
   if (!initializeResult) return;
-  const { input: dashboardState, searchSessionId } = initializeResult;
+  const { input: initialState, searchSessionId } = initializeResult;
 
-  const { api, cleanup } = getDashboardApi({
-    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
-    dashboardState,
-    getEmbeddableAppContext: creationOptions?.getEmbeddableAppContext,
+  const { api, cleanup, internalApi } = getDashboardApi({
+    creationOptions,
+    initialState,
     savedObjectResult,
     savedObjectId,
     searchSessionId,
@@ -65,5 +64,5 @@ export async function createDashboardApi({
   });
 
   dashboardApiReady$.next(api);
-  return { api, cleanup };
+  return { api, cleanup, internalApi };
 }

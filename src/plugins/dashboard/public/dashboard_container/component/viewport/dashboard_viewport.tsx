@@ -26,6 +26,7 @@ import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -46,6 +47,7 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 
 export const DashboardViewportComponent = () => {
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
   const [
     controlGroupApi,
@@ -131,8 +133,9 @@ export const DashboardViewportComponent = () => {
             getParentApi={() => {
               return {
                 ...dashboardApi,
-                getSerializedStateForChild: dashboardApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardApi.getRuntimeStateForControlGroup,
+                reload$: dashboardInternalApi.controlGroupReload$,
+                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
             onApiAvailable={(api) => dashboardApi.setControlGroupApi(api)}

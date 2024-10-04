@@ -9,16 +9,12 @@
 
 import { Subject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
-import {
-  connectToQueryState,
-  GlobalQueryStateFromUrl,
-  waitUntilNextSessionCompletes$,
-} from '@kbn/data-plugin/public';
+import { connectToQueryState, GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../../dashboard_constants';
@@ -129,19 +125,6 @@ export function syncUnifiedSearchState(
         this.dispatch.setRefreshInterval(newRefreshInterval);
       }
     });
-
-  const autoRefreshSubscription = timefilterService
-    .getAutoRefreshFetch$()
-    .pipe(
-      tap(() => {
-        this.forceRefresh();
-      }),
-      switchMap((done) =>
-        // best way on a dashboard to estimate that panels are updated is to rely on search session service state
-        waitUntilNextSessionCompletes$(dataService.search.session).pipe(finalize(done))
-      )
-    )
-    .subscribe();
 
   const stopSyncingUnifiedSearchState = () => {
     autoRefreshSubscription.unsubscribe();

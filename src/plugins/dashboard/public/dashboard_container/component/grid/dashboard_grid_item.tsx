@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
@@ -49,6 +50,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     ref
   ) => {
     const dashboardApi = useDashboardApi();
+    const dashboardInternalApi = useDashboardInternalApi();
     const [highlightPanelId, scrollToPanelId, useMargins, viewMode] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
@@ -112,7 +114,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           <ReactEmbeddableRenderer
             type={type}
             maybeId={id}
-            getParentApi={() => dashboardApi}
+            getParentApi={() => ({
+              ...dashboardApi,
+              reload$: dashboardInternalApi.panelsReload$,
+            })}
             key={`${type}_${id}`}
             panelProps={panelProps}
             onApiAvailable={(api) => dashboardApi.registerChildApi(api)}

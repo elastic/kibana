@@ -25,7 +25,7 @@ import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -50,14 +50,11 @@ import {
   PanelPackage,
   TrackContentfulRender,
   TracksQueryPerformance,
-  combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import {
-  PublishesDataLoading,
   PublishesViewMode,
-  apiPublishesDataLoading,
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
@@ -75,10 +72,7 @@ import {
   DashboardPanelMap,
   DashboardPanelState,
 } from '../../../common';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
@@ -398,24 +392,6 @@ export class DashboardContainer
 
     this.executionContext = initialInput.executionContext;
 
-    this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
-    this.publishingSubscription.add(
-      combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
-        this,
-        'dataLoading',
-        apiPublishesDataLoading,
-        undefined,
-        // flatten method
-        (values) => {
-          return values.some((isLoading) => isLoading);
-        }
-      ).subscribe((isAtLeastOneChildLoading) => {
-        (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
-      })
-    );
-
-    this.dataViews = new BehaviorSubject<DataView[] | undefined>([]);
-
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getInput().query);
     this.query$ = query$;
     this.publishingSubscription.add(
@@ -465,7 +441,7 @@ export class DashboardContainer
 
     ReactDOM.render(
       <KibanaRenderContextProvider
-        analytics={coreServices.analytics}
+        analytics={ControlcoreServices.analytics}
         i18n={coreServices.i18n}
         theme={coreServices.theme}
       >
@@ -880,22 +856,6 @@ export class DashboardContainer
     return {
       rawState,
       references,
-    };
-  };
-
-  public getSerializedStateForControlGroup = () => {
-    return {
-      rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
-            controlStyle: 'oneLine',
-            chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
-      references: getReferencesForControls(this.savedObjectReferences),
     };
   };
 
