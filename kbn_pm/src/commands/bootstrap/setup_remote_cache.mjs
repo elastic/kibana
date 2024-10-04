@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
 import Fsp from 'fs/promises';
 
 import { run } from '../../lib/spawn.mjs';
 import { isFile } from '../../lib/fs.mjs';
-import { dedent } from '../../lib/indent.mjs';
-import { REPO_ROOT } from '../../lib/paths.mjs';
 
 async function isElasticCommitter() {
   try {
