@@ -33,3 +33,7 @@ export const DeleteDownloadSourcesRequestSchema = {
     sourceId: schema.string(),
   }),
 };
+
+export const DeleteDownloadSourcesResponseSchema = schema.object({
+  id: schema.string(),
+});

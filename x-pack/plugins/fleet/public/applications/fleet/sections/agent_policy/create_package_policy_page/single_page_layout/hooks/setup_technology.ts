@@ -174,7 +174,6 @@ export function useSetupTechnology({
         setNewAgentPolicy({
           ...newAgentBasedPolicy.current,
           supports_agentless: false,
-          is_managed: false,
         });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
         updateAgentPolicies([newAgentBasedPolicy.current] as AgentPolicy[]);

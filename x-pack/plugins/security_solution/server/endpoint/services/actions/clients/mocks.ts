@@ -106,7 +106,10 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   );
 
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
-  endpointService.start(createMockEndpointAppContextServiceStartContract());
+  endpointService.start({
+    ...createMockEndpointAppContextServiceStartContract(),
+    esClient,
+  });
 
   return {
     esClient,

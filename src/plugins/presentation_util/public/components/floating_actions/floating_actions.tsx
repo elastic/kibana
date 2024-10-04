@@ -56,7 +56,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         trigger: panelHoverTrigger,
       };
       const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action): action is Action & { MenuItem: React.FC } => {
+        .filter((action): action is Action & { MenuItem: React.FC<{ context: unknown }> } => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -66,7 +66,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         setFloatingActions(
           <>
             {actions.map((action) =>
-              // @ts-expect-error upgrade typescript v5.1.6
               React.createElement(action.MenuItem, {
                 key: action.id,
                 context,

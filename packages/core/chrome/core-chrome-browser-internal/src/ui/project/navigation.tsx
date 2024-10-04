@@ -17,6 +17,8 @@ interface Props {
   isSideNavCollapsed$: Observable<boolean>;
 }
 
+const PANEL_WIDTH = 290;
+
 export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
   children,
   isSideNavCollapsed$,
@@ -29,11 +31,10 @@ export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
       data-test-subj="projectLayoutSideNav"
       isCollapsed={isCollapsed}
       onCollapseToggle={toggleSideNav}
-      css={
-        isCollapsed
-          ? undefined
-          : { overflow: 'visible', clipPath: 'polygon(0 0, 300% 0, 300% 100%, 0 100%)' }
-      }
+      css={{
+        overflow: 'visible',
+        clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
+      }}
     >
       {children}
     </EuiCollapsibleNavBeta>

@@ -77,6 +77,7 @@ export interface CreateIndexCodeDefinition {
 }
 
 export interface CreateIndexCodeExamples {
+  exampleType: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
