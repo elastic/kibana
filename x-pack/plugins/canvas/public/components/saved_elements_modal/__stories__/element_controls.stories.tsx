@@ -6,20 +6,29 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { ElementControls } from '../element_controls';
 
-storiesOf('components/SavedElementsModal/ElementControls', module)
-  .addDecorator((story) => (
-    <div
-      style={{
-        width: '50px',
-      }}
-    >
-      {story()}
-    </div>
-  ))
-  .add('has two buttons', () => (
-    <ElementControls onDelete={action('onDelete')} onEdit={action('onEdit')} />
-  ));
+export default {
+  title: 'components/SavedElementsModal/ElementControls',
+
+  decorators: [
+    (story) => (
+      <div
+        style={{
+          width: '50px',
+        }}
+      >
+        {story()}
+      </div>
+    ),
+  ],
+};
+
+export const HasTwoButtons = () => (
+  <ElementControls onDelete={action('onDelete')} onEdit={action('onEdit')} />
+);
+
+HasTwoButtons.story = {
+  name: 'has two buttons',
+};

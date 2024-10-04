@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
+import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { TextFieldValue } from '.';
@@ -18,12 +18,34 @@ addDecorator((storyFn) => (
 
 const longText = [...new Array(20).keys()].map((i) => ` super long text part ${i}`).join(' ');
 
-storiesOf('Components/TextFieldValue', module)
-  .add('short text, no limit', () => <TextFieldValue fieldName="Field name" value="Small value" />)
-  .add('short text, with limit', () => (
-    <TextFieldValue fieldName="Field name" value="Small value" maxLength={100} />
-  ))
-  .add('long text, no limit', () => <TextFieldValue fieldName="Field name" value={longText} />)
-  .add('long text, with limit', () => (
-    <TextFieldValue fieldName="Field name" value={longText} maxLength={100} />
-  ));
+export default {
+  title: 'Components/TextFieldValue',
+};
+
+export const ShortTextNoLimit = () => <TextFieldValue fieldName="Field name" value="Small value" />;
+
+ShortTextNoLimit.story = {
+  name: 'short text, no limit',
+};
+
+export const ShortTextWithLimit = () => (
+  <TextFieldValue fieldName="Field name" value="Small value" maxLength={100} />
+);
+
+ShortTextWithLimit.story = {
+  name: 'short text, with limit',
+};
+
+export const LongTextNoLimit = () => <TextFieldValue fieldName="Field name" value={longText} />;
+
+LongTextNoLimit.story = {
+  name: 'long text, no limit',
+};
+
+export const LongTextWithLimit = () => (
+  <TextFieldValue fieldName="Field name" value={longText} maxLength={100} />
+);
+
+LongTextWithLimit.story = {
+  name: 'long text, with limit',
+};

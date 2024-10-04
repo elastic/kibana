@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 // @ts-expect-error
@@ -28,7 +20,13 @@ const Pages = ({ story }: { story: Function }) => (
   </div>
 );
 
-storiesOf('components/Toolbar', module)
-  .addDecorator((story) => <Pages story={story} />)
-  .addDecorator(reduxDecorator({ pages }))
-  .add('redux', () => <Toolbar />);
+export default {
+  title: 'components/Toolbar',
+  decorators: [(story) => <Pages story={story} />, reduxDecorator({ pages })],
+};
+
+export const Redux = () => <Toolbar />;
+
+Redux.story = {
+  name: 'redux',
+};

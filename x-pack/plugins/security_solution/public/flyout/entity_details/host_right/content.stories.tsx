@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -16,76 +15,96 @@ import { mockObservedHostData } from '../mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/HostPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
-    <HostPanelContent
-      observedHost={mockObservedHostData}
-      riskScoreState={riskScoreData}
-      contextID={'test-host-details'}
-      scopeId={'test-scopeId'}
-      isDraggable={false}
-      openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
-    />
-  ))
-  .add('no observed data', () => (
-    <HostPanelContent
-      observedHost={{
-        details: {},
+export default {
+  title: 'Components/HostPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+};
+
+export const Default = () => (
+  <HostPanelContent
+    observedHost={mockObservedHostData}
+    riskScoreState={riskScoreData}
+    contextID={'test-host-details'}
+    scopeId={'test-scopeId'}
+    isDraggable={false}
+    openDetailsPanel={() => {}}
+    hostName={'test-host-name'}
+    onAssetCriticalityChange={() => {}}
+    recalculatingScore={false}
+  />
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const NoObservedData = () => (
+  <HostPanelContent
+    observedHost={{
+      details: {},
+      isLoading: false,
+      firstSeen: {
         isLoading: false,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
-      }}
-      riskScoreState={riskScoreData}
-      contextID={'test-host-details'}
-      scopeId={'test-scopeId'}
-      isDraggable={false}
-      openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
-    />
-  ))
-  .add('loading', () => (
-    <HostPanelContent
-      observedHost={{
-        details: {},
+        date: undefined,
+      },
+      lastSeen: {
+        isLoading: false,
+        date: undefined,
+      },
+      anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
+    }}
+    riskScoreState={riskScoreData}
+    contextID={'test-host-details'}
+    scopeId={'test-scopeId'}
+    isDraggable={false}
+    openDetailsPanel={() => {}}
+    hostName={'test-host-name'}
+    onAssetCriticalityChange={() => {}}
+    recalculatingScore={false}
+  />
+);
+
+NoObservedData.story = {
+  name: 'no observed data',
+};
+
+export const Loading = () => (
+  <HostPanelContent
+    observedHost={{
+      details: {},
+      isLoading: true,
+      firstSeen: {
         isLoading: true,
-        firstSeen: {
-          isLoading: true,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: true,
-          date: undefined,
-        },
-        anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
-      }}
-      riskScoreState={riskScoreData}
-      contextID={'test-host-details'}
-      scopeId={'test-scopeId'}
-      isDraggable={false}
-      openDetailsPanel={() => {}}
-      hostName={'test-host-name'}
-      onAssetCriticalityChange={() => {}}
-      recalculatingScore={false}
-    />
-  ));
+        date: undefined,
+      },
+      lastSeen: {
+        isLoading: true,
+        date: undefined,
+      },
+      anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
+    }}
+    riskScoreState={riskScoreData}
+    contextID={'test-host-details'}
+    scopeId={'test-scopeId'}
+    isDraggable={false}
+    openDetailsPanel={() => {}}
+    hostName={'test-host-name'}
+    onAssetCriticalityChange={() => {}}
+    recalculatingScore={false}
+  />
+);
+
+Loading.story = {
+  name: 'loading',
+};

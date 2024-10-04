@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getTableRenderer } from '../table';
 import { Render } from './render';
 
-storiesOf('renderers/table', module).add('default', () => {
+export default {
+  title: 'renderers/table',
+};
+
+export const Default = () => {
   const config = {
     paginate: true,
     perPage: 5,
@@ -46,4 +49,8 @@ storiesOf('renderers/table', module).add('default', () => {
   return (
     <Render renderer={getTableRenderer(coreMock.createStart())} config={config} width="400px" />
   );
-});
+};
+
+Default.story = {
+  name: 'default',
+};

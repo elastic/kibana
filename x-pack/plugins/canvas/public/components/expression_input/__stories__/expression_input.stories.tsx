@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import {
   ExpressionFunction,
@@ -64,11 +63,19 @@ const sampleFunctionDef = {
 
 registerExpressionsLanguage([sampleFunctionDef]);
 
-storiesOf('components/ExpressionInput', module).add('default', () => (
+export default {
+  title: 'components/ExpressionInput',
+};
+
+export const Default = () => (
   <ExpressionInput
     expression="markdown"
     isCompact={true}
     onChange={action('onChange')}
     expressionFunctions={[sampleFunctionDef as any]}
   />
-));
+);
+
+Default.story = {
+  name: 'default',
+};

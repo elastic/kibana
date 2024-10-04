@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import { array, radios, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
@@ -61,17 +60,29 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
   }
 }
 
-storiesOf('arguments/SeriesStyle', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended', () => <Interactive />);
+export default {
+  title: 'arguments/SeriesStyle',
 
-storiesOf('arguments/SeriesStyle/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended: defaults', () => (
+  decorators: [(story) => (
+      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
+    )],
+};
+
+export const Extended = () => <Interactive />;
+
+Extended.story = {
+  name: 'extended',
+};
+
+export default {
+  title: 'arguments/SeriesStyle/components',
+
+  decorators: [(story) => (
+      <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
+    )],
+};
+
+export const ExtendedDefaults = () => (
     <ExtendedTemplate
       argValue={defaultExpression}
       resolved={{ labels: [] }}
@@ -83,4 +94,8 @@ storiesOf('arguments/SeriesStyle/components', module)
         },
       }}
     />
-  ));
+  );
+
+ExtendedDefaults.story = {
+  name: 'extended: defaults',
+};

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { plot } from '..';
 import { Render } from '../../__stories__/render';
 
@@ -56,7 +55,11 @@ const data = [
   },
 ];
 
-storiesOf('renderers/plot', module).add('default', () => {
+export default {
+  title: 'renderers/plot',
+};
+
+export const Default = () => {
   const config = {
     data,
     options: plotOptions,
@@ -67,4 +70,8 @@ storiesOf('renderers/plot', module).add('default', () => {
     },
   };
   return <Render renderer={plot} config={config} />;
-});
+};
+
+Default.story = {
+  name: 'default',
+};

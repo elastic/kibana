@@ -7,7 +7,6 @@
 
 import { action } from '@storybook/addon-actions';
 import { boolean } from '@storybook/addon-knobs';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPicker } from '../color_picker';
 
@@ -54,8 +53,10 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/Color/ColorPicker', module)
-  .addParameters({
+export default {
+  title: 'components/Color/ColorPicker',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -68,38 +69,60 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  })
-  .add('three colors', () => (
-    <ColorPicker
-      value="#fff"
-      onAddColor={action('onAddColor')}
-      onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={THREE_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
-    />
-  ))
-  .add('six colors', () => (
-    <ColorPicker
-      value="#fff"
-      onAddColor={action('onAddColor')}
-      onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
-    />
-  ))
-  .add('six colors, value missing', () => (
-    <ColorPicker
-      value="#a1b2c3"
-      onAddColor={action('onAddColor')}
-      onRemoveColor={action('onRemoveColor')}
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
-    />
-  ))
-  .add('interactive', () => <Interactive />, {
+  },
+};
+
+export const ThreeColors = () => (
+  <ColorPicker
+    value="#fff"
+    onAddColor={action('onAddColor')}
+    onRemoveColor={action('onRemoveColor')}
+    onChange={action('onChange')}
+    colors={THREE_COLORS}
+    hasButtons={boolean('Has Buttons', true)}
+  />
+);
+
+ThreeColors.story = {
+  name: 'three colors',
+};
+
+export const SixColors = () => (
+  <ColorPicker
+    value="#fff"
+    onAddColor={action('onAddColor')}
+    onRemoveColor={action('onRemoveColor')}
+    onChange={action('onChange')}
+    colors={SIX_COLORS}
+    hasButtons={boolean('Has Buttons', true)}
+  />
+);
+
+SixColors.story = {
+  name: 'six colors',
+};
+
+export const SixColorsValueMissing = () => (
+  <ColorPicker
+    value="#a1b2c3"
+    onAddColor={action('onAddColor')}
+    onRemoveColor={action('onRemoveColor')}
+    onChange={action('onChange')}
+    colors={SIX_COLORS}
+    hasButtons={boolean('Has Buttons', true)}
+  />
+);
+
+SixColorsValueMissing.story = {
+  name: 'six colors, value missing',
+};
+
+export const _Interactive = () => <Interactive />;
+
+_Interactive.story = {
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -114,4 +137,5 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  });
+  },
+};

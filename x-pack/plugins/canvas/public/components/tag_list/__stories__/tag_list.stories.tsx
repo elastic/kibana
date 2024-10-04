@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { TagList } from '../tag_list';
 import { TagSpec } from '../../../lib/tag';
@@ -55,16 +47,38 @@ const mockTagRegistry: { [tag: string]: TagSpec } = {
 
 const getTag = (name: string): TagSpec => mockTagRegistry[name] || { name, color: '#666666' };
 
-storiesOf('components/Tags/TagList', module)
-  .add('empty list', () => <TagList getTag={getTag} />)
-  .add('with health tags', () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />)
-  .add('with badge tags', () => (
-    <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />
-  ))
-  .add('with lots of tags', () => (
-    <TagList
-      tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}
-      getTag={getTag}
-      tagType="badge"
-    />
-  ));
+export default {
+  title: 'components/Tags/TagList',
+};
+
+export const EmptyList = () => <TagList getTag={getTag} />;
+
+EmptyList.story = {
+  name: 'empty list',
+};
+
+export const WithHealthTags = () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />;
+
+WithHealthTags.story = {
+  name: 'with health tags',
+};
+
+export const WithBadgeTags = () => (
+  <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />
+);
+
+WithBadgeTags.story = {
+  name: 'with badge tags',
+};
+
+export const WithLotsOfTags = () => (
+  <TagList
+    tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}
+    getTag={getTag}
+    tagType="badge"
+  />
+);
+
+WithLotsOfTags.story = {
+  name: 'with lots of tags',
+};

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
+import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { createItems, TEST_COLUMNS } from './test_utils';
@@ -17,13 +17,30 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components/ConditionsTable', module)
-  .add('single item', () => {
-    return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
-  })
-  .add('and', () => {
-    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
-  })
-  .add('or', () => {
-    return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
-  });
+export default {
+  title: 'Components/ConditionsTable',
+};
+
+export const SingleItem = () => {
+  return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
+};
+
+SingleItem.story = {
+  name: 'single item',
+};
+
+export const And = () => {
+  return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
+};
+
+And.story = {
+  name: 'and',
+};
+
+export const Or = () => {
+  return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
+};
+
+Or.story = {
+  name: 'or',
+};

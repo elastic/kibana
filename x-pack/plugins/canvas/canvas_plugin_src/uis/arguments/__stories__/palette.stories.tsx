@@ -1,17 +1,13 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { PaletteArgInput } from '../palette';
 import { paulTor14 } from '../../../../common/lib/palettes';
 
-storiesOf('arguments/Palette', module).add('default', () => (
+export default {
+  title: 'arguments/Palette',
+};
+
+export const Default = () => (
   <div className="canvasContainerWrapper" style={{ width: '200px' }}>
     <PaletteArgInput
       argValue={{
@@ -32,4 +28,8 @@ storiesOf('arguments/Palette', module).add('default', () => (
       typeInstance={{}}
     />
   </div>
-));
+);
+
+Default.story = {
+  name: 'default',
+};

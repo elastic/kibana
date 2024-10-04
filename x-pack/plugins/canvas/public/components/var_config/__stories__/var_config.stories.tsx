@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 import { CanvasVariable } from '../../../../types';
@@ -31,7 +30,11 @@ const variables: CanvasVariable[] = [
   },
 ];
 
-storiesOf('components/Variables/VarConfig', module).add('default', () => (
+export default {
+  title: 'components/Variables/VarConfig',
+};
+
+export const Default = () => (
   <VarConfig
     variables={variables}
     onCopyVar={action('onCopyVar')}
@@ -39,4 +42,8 @@ storiesOf('components/Variables/VarConfig', module).add('default', () => (
     onAddVar={action('onAddVar')}
     onEditVar={action('onEditVar')}
   />
-));
+);
+
+Default.story = {
+  name: 'default',
+};
