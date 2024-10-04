@@ -22,13 +22,18 @@ export function RuleUpgradeConflictsResolver({
       Required<typeof ruleUpgradeState.diff.fields>[keyof typeof ruleUpgradeState.diff.fields]
     ]
   >;
-  const fields = fieldDiffEntries.map(([fieldName, fieldDiff]) => (
-    <FieldUpgradeConflictsResolver
-      key={fieldName}
-      fieldName={fieldName}
-      fieldThreeWayDiff={fieldDiff}
-    />
-  ));
+  const fields = fieldDiffEntries
+    .filter(([fieldName]) => {
+      /* Do not show "version" field among changes */
+      return fieldName !== 'version';
+    })
+    .map(([fieldName, fieldDiff]) => (
+      <FieldUpgradeConflictsResolver
+        key={fieldName}
+        fieldName={fieldName}
+        fieldThreeWayDiff={fieldDiff}
+      />
+    ));
 
   return <>{fields}</>;
 }

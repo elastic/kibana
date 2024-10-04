@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
-import { NameEdit, nameSchema } from './fields/name';
 import { FieldFormWrapper } from './field_form_wrapper';
+import { NameEdit, nameSchema } from './fields/name';
 
 interface CommonRuleFieldEditProps {
   fieldName: keyof DiffableCommonFields;
@@ -18,6 +18,9 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'name':
       return <FieldFormWrapper component={NameEdit} fieldFormSchema={nameSchema} />;
+    case 'version':
+      /* "version" is not editable */
+      return null;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

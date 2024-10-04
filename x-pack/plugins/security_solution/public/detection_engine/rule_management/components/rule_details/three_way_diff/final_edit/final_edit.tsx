@@ -7,11 +7,22 @@
 
 import React, { useMemo } from 'react';
 import { DiffableCommonFields } from '../../../../../../../common/api/detection_engine';
-import type { DiffableRuleTypes } from '../../../../../../../common/api/detection_engine';
+import type {
+  DiffableThreatMatchFields,
+  DiffableCustomQueryFields,
+  DiffableRuleTypes,
+  DiffableThresholdFields,
+  DiffableNewTermsFields,
+} from '../../../../../../../common/api/detection_engine';
 import { FinalEditContextProvider } from './final_edit_context';
-import { CommonRuleFieldEdit } from './common_rule_field_edit';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { useDiffableRuleContext } from '../diffable_rule_context';
+import { CommonRuleFieldEdit } from './common_rule_field_edit';
+import { CustomQueryRuleFieldEdit } from './custom_query_rule_field_edit';
+import { SavedQueryRuleFieldEdit } from './saved_query_rule_field_edit';
+import { ThreatMatchRuleFieldEdit } from './threat_match_rule_field_edit';
+import { ThresholdRuleFieldEdit } from './threshold_rule_field_edit';
+import { NewTermsRuleFieldEdit } from './new_terms_rule_field_edit';
 
 interface FinalEditProps {
   fieldName: string;
@@ -45,21 +56,21 @@ function FieldEdit({ fieldName, ruleType }: FinalEditFieldProps) {
 
   switch (ruleType) {
     case 'query':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <CustomQueryRuleFieldEdit fieldName={fieldName as keyof DiffableCustomQueryFields} />;
     case 'saved_query':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <SavedQueryRuleFieldEdit fieldName={fieldName as keyof DiffableCustomQueryFields} />;
     case 'eql':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'esql':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'threat_match':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <ThreatMatchRuleFieldEdit fieldName={fieldName as keyof DiffableThreatMatchFields} />;
     case 'threshold':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <ThresholdRuleFieldEdit fieldName={fieldName as keyof DiffableThresholdFields} />;
     case 'machine_learning':
       return <span>{'Rule type not yet implemented'}</span>;
     case 'new_terms':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <NewTermsRuleFieldEdit fieldName={fieldName as keyof DiffableNewTermsFields} />;
     default:
       return assertUnreachable(ruleType);
   }
