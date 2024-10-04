@@ -232,7 +232,10 @@
           "(serverOptions: ",
           "ServerOptions",
           ") => ",
-          "Server"
+          "Server",
+          "<",
+          "ServerApplicationState",
+          ">"
         ],
         "path": "packages/kbn-server-http-tools/src/create_server.ts",
         "deprecated": false,
@@ -269,11 +272,15 @@
         "signature": [
           "(request: ",
           "Request",
-          ", h: ",
+          "<",
+          "ReqRefDefaults",
+          ">, h: ",
           "ResponseToolkit",
           ", err: Error | undefined) => ",
           "Lifecycle",
-          ".ReturnValue"
+          ".ReturnValue<",
+          "ReqRefDefaults",
+          ">"
         ],
         "path": "packages/kbn-server-http-tools/src/default_validation_error_handler.ts",
         "deprecated": false,
@@ -287,7 +294,10 @@
             "label": "request",
             "description": [],
             "signature": [
-              "Request"
+              "Request",
+              "<",
+              "ReqRefDefaults",
+              ">"
             ],
             "path": "packages/kbn-server-http-tools/src/default_validation_error_handler.ts",
             "deprecated": false,
@@ -338,7 +348,9 @@
         "signature": [
           "(request: ",
           "Request",
-          ", { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[]; }) => string"
+          "<",
+          "ReqRefDefaults",
+          ">, { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[]; }) => string"
         ],
         "path": "packages/kbn-server-http-tools/src/get_request_id.ts",
         "deprecated": false,
@@ -352,7 +364,10 @@
             "label": "request",
             "description": [],
             "signature": [
-              "Request"
+              "Request",
+              "<",
+              "ReqRefDefaults",
+              ">"
             ],
             "path": "packages/kbn-server-http-tools/src/get_request_id.ts",
             "deprecated": false,
@@ -600,7 +615,9 @@
         "signature": [
           "(hapiServer: ",
           "Server",
-          ", sslConfig: ",
+          "<",
+          "ServerApplicationState",
+          ">, sslConfig: ",
           {
             "pluginId": "@kbn/server-http-tools",
             "scope": "server",
@@ -622,7 +639,10 @@
             "label": "hapiServer",
             "description": [],
             "signature": [
-              "Server"
+              "Server",
+              "<",
+              "ServerApplicationState",
+              ">"
             ],
             "path": "packages/kbn-server-http-tools/src/set_tls_config.ts",
             "deprecated": false,

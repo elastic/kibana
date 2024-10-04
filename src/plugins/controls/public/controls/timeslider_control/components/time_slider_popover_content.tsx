@@ -24,6 +24,7 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
+  compressed: boolean;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
@@ -35,6 +36,7 @@ export function TimeSliderPopoverContent(props: Props) {
       ticks={props.ticks}
       timeRangeMin={props.timeRangeMin}
       timeRangeMax={props.timeRangeMax}
+      compressed={props.compressed}
     />
   ) : (
     <TimeSliderSlidingWindowRange
@@ -44,6 +46,7 @@ export function TimeSliderPopoverContent(props: Props) {
       ticks={props.ticks}
       timeRangeMin={props.timeRangeMin}
       timeRangeMax={props.timeRangeMax}
+      compressed={props.compressed}
     />
   );
   const anchorStartToggleButtonLabel = props.isAnchored
