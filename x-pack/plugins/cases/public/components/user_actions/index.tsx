@@ -16,7 +16,6 @@ import { getManualAlertIdsWithNoRuleId } from './helpers';
 import type { UserActionTreeProps } from './types';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
@@ -25,6 +24,7 @@ import { useUserActionsPagination } from './use_user_actions_pagination';
 import { useLastPageUserActions } from './use_user_actions_last_page';
 import { ShowMoreButton } from './show_more_button';
 import { useLastPage } from './use_last_page';
+import { useUserPermissions } from './use_user_permissions';
 
 const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage
@@ -108,18 +108,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
-  const { permissions } = useCasesContext();
+  const { checkShowCommentEditor } = useUserPermissions({ status: caseData.status });
 
   // add-comment markdown is not visible in History filter
-  const showCommentEditor = useMemo(() => {
-    if (permissions.create && userActivityQueryParams.type !== 'action') {
-      return permissions.createComment;
-    } else if (permissions.createComment && userActivityQueryParams.type !== 'action') {
-      return true;
-    } else {
-      return false;
-    }
-  }, [permissions.create, userActivityQueryParams.type, permissions.createComment]);
+  const showCommentEditor = checkShowCommentEditor(userActivityQueryParams);
 
   const {
     commentRefs,

@@ -38,6 +38,7 @@ export const onlyDeleteCasesPermission = () =>
   buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
 export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
 export const noCasesSettingsPermission = () => buildCasesPermissions({ settings: false });
+export const disabledReopenCasePermission = () => buildCasesPermissions({ reopenCases: false });
 
 export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
   const create = overrides.create ?? true;
@@ -47,7 +48,18 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const push = overrides.push ?? true;
   const connectors = overrides.connectors ?? true;
   const settings = overrides.settings ?? true;
-  const all = create && read && update && deletePermissions && push && settings && connectors;
+  const reopenCases = overrides.reopenCases ?? true;
+  const createComment = overrides.createComment ?? true;
+  const all =
+    create &&
+    read &&
+    update &&
+    deletePermissions &&
+    push &&
+    settings &&
+    connectors &&
+    reopenCases &&
+    createComment;
 
   return {
     all,
@@ -58,6 +70,8 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     push,
     connectors,
     settings,
+    reopenCases,
+    createComment,
   };
 };
 
@@ -95,5 +109,7 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     push_cases: overrides?.push_cases ?? true,
     cases_connectors: overrides?.cases_connectors ?? true,
     cases_settings: overrides?.cases_settings ?? true,
+    create_comment: overrides?.create_comment ?? true,
+    reopen_cases: overrides?.reopen_cases ?? true,
   };
 };
