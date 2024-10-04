@@ -8,9 +8,16 @@
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+  OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
@@ -29,17 +36,31 @@ export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProp
   const discoverUrl = discoverLocator?.getRedirectUrl(emptyParams);
   const logsExplorerUrl = logsExplorerLocator?.getRedirectUrl(emptyParams);
 
-  const navigateToDiscover = createNavigateHandler(() => {
-    if (selectedTab !== 'discover') {
-      discoverLocator?.navigate(emptyParams);
-    }
-  });
+  const [_, setLastUsedViewer] = useLocalStorage<
+    typeof DISCOVER_APP_ID | typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID
+  >(OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY, OBSERVABILITY_LOGS_EXPLORER_APP_ID);
 
-  const navigateToLogsExplorer = createNavigateHandler(() => {
-    if (selectedTab !== 'logs-explorer') {
-      logsExplorerLocator?.navigate(emptyParams);
+  const navigateToDiscover = createNavigateHandler(
+    () => {
+      if (selectedTab !== 'discover') {
+        discoverLocator?.navigate(emptyParams);
+      }
+    },
+    () => {
+      setLastUsedViewer(DISCOVER_APP_ID);
     }
-  });
+  );
+
+  const navigateToLogsExplorer = createNavigateHandler(
+    () => {
+      if (selectedTab !== 'logs-explorer') {
+        logsExplorerLocator?.navigate(emptyParams);
+      }
+    },
+    () => {
+      setLastUsedViewer(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+    }
+  );
 
   return (
     <EuiTabs bottomBorder={false} data-test-subj="logsExplorerTabs">
@@ -77,11 +98,12 @@ const isModifiedEvent = (event: MouseEvent) =>
 
 const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
 
-const createNavigateHandler = (onClick: () => void) => (e: MouseEvent) => {
+const createNavigateHandler = (onClick: () => void, updateState: () => void) => (e: MouseEvent) => {
   if (isModifiedEvent(e) || !isLeftClickEvent(e)) {
     return;
   }
 
   e.preventDefault();
+  updateState(); // Update local storage
   onClick();
 };

@@ -10,10 +10,21 @@
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import {
+  ALL_DATASETS_LOCATOR_ID,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { LogsExplorerTabs, LogsExplorerTabsProps } from './logs_explorer_tabs';
 import { DISCOVER_APP_LOCATOR } from '../../../common';
-import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+
+const mockSetLastUsedViewer = jest.fn();
+jest.mock('react-use/lib/useLocalStorage', () => {
+  return jest.fn((key: string, initialValue: string) => {
+    return [initialValue, mockSetLastUsedViewer];
+  });
+});
 
 const createMockLocator = (id: string) => ({
   navigate: jest.fn(),
@@ -85,5 +96,17 @@ describe('LogsExplorerTabs', () => {
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
     await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
+  });
+
+  it('should update the last used viewer in local storage', async () => {
+    renderTabs();
+
+    mockSetLastUsedViewer.mockClear();
+    await userEvent.click(getLogsExplorerTab());
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
+
+    mockSetLastUsedViewer.mockClear();
+    await userEvent.click(getDiscoverTab());
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(DISCOVER_APP_ID);
   });
 });
