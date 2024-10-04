@@ -415,12 +415,9 @@ export function getDiscoverStateContainer({
       services.dataViews.clearInstanceCache(edited);
       setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
-      const nextDataView = await updateAdHocDataViewId();
-      // eslint-disable-next-line no-console
-      console.log('onDataViewEdited', `${edited} -> ${nextDataView?.id}`);
+      await updateAdHocDataViewId();
     }
-    // maybe it's flaky because of this line
-    loadDataViewList();
+    await loadDataViewList();
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
