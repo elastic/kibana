@@ -90,6 +90,7 @@ export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undef
   return (
     (kbStatus?.elser_exists &&
       kbStatus?.esql_exists &&
+      kbStatus?.security_labs_exists &&
       kbStatus?.index_exists &&
       kbStatus?.pipeline_exists) ??
     false
