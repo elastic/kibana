@@ -19,7 +19,7 @@ interface AggregationBucket {
   doc_count?: number;
 }
 
-type AggregationBuckets = Record<string, AggregationBucket>;
+export type AggregationBuckets = Record<string, AggregationBucket>;
 
 const RESULT_EVALUATION = {
   PASSED: 'passed',
@@ -27,7 +27,7 @@ const RESULT_EVALUATION = {
   UNKNOWN: 'unknown',
 };
 
-const VULNERABILITIES_RESULT_EVALUATION = {
+export const VULNERABILITIES_RESULT_EVALUATION = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
   HIGH: 'HIGH',

@@ -48,7 +48,13 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
       filter: [
         {
           bool: {
-            should: [{ match: { [field]: `${queryValue || ''}` } }],
+            should: [
+              {
+                term: {
+                  [field]: `${queryValue || ''}`,
+                },
+              },
+            ],
             minimum_should_match: 1,
           },
         },

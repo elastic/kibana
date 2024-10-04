@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import numeral from '@elastic/numeral';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,15 +17,9 @@ import { ExpandablePanel } from '@kbn/security-solution-common';
 import {
   buildEntityFlyoutPreviewQuery,
   VULNERABILITIES_SEVERITY,
+  getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
 import { getSeverityStatusColor, getSeverityText } from '@kbn/cloud-security-posture';
-
-export const getAbbreviatedNumber = (value: number) => {
-  if (isNaN(value)) {
-    return 0;
-  }
-  return value < 1000 ? value : numeral(value).format('0.0a');
-};
 
 interface VulnerabilitiesDistributionBarProps {
   key: string;

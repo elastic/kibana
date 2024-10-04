@@ -39,7 +39,7 @@ interface FindingsAggs {
 
 const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
-  size: MAX_FINDINGS_TO_LOAD,
+  size: 0,
   aggs: getFindingsCountAggQueryVulnerabilities(),
   ignore_unavailable: true,
   query: {
