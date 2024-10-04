@@ -47,7 +47,7 @@ export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
       onAddData={handleAddMetricsClick}
       onTryIt={handleTryItClick}
       onLearnMore={handleLearnMoreClick}
-      onDissmiss={handleDismiss}
+      onDissmiss={onDismiss && handleDismiss}
     />
   );
 }
