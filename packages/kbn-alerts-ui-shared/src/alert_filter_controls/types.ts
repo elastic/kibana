@@ -70,4 +70,5 @@ export interface FilterGroupProps
    */
   ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
+  storageKey?: string;
 }
