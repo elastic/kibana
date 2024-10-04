@@ -63,7 +63,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Starting the import process');
-    const result = importSavedObjectsFromStream({
+    return importSavedObjectsFromStream({
       readStream,
       createNewCopies,
       namespace,
@@ -76,7 +76,6 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       importHooks: this.#importHooks,
       managed,
     });
-    return result;
   }
 
   public resolveImportErrors({
@@ -88,7 +87,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Resolving import errors');
-    const result = resolveSavedObjectsImportErrors({
+    return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
       compatibilityMode,
@@ -100,6 +99,5 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       importHooks: this.#importHooks,
       managed,
     });
-    return result;
   }
 }
