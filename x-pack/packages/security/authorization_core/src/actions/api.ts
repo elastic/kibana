@@ -17,7 +17,7 @@ export class ApiActions implements ApiActionsType {
     this.prefix = `api:`;
   }
 
-  private isValidOperation(operation: string): boolean {
+  private isValidOperation(operation: string): operation is ApiOperation {
     return Object.values(ApiOperation).includes(operation as ApiOperation);
   }
   public actionFromRouteTag(routeTag: string) {
