@@ -52,7 +52,7 @@ export async function getEntitiesWithSource({
     const processedEntities = await Promise.all(
       response.map(async (entity: EntitiesLatest) => {
         const sourceIndex = entity?.sourceIndex;
-        if (!sourceIndex) return null;
+        if (!sourceIndex || !sourceIndex.length) return null;
 
         const indices = await esClient.indices.get({ index: sourceIndex });
         const sources = await fetchSources(indices);
