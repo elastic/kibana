@@ -743,6 +743,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
       for (const [ruleTypeId, params] of ruleTypes) {
         it(`should get rules of ${ruleTypeId} rule type ID and stackAlerts consumer`, async () => {
+          /**
+           * We create two rules. The first one is a test.noop
+           * rule with stackAlerts as consumer. The second rule
+           * is has different rule type ID but with the same consumer as the first rule (stackAlerts).
+           * This way we can verify that the find API call returns only the rules the user is authorized to.
+           * Specifically only the second rule because the StackAlertsOnly user does not have
+           * access to the test.noop rule type.
+           */
           await createRule();
           await createRule({ rule_type_id: ruleTypeId, params });
 
