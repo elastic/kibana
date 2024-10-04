@@ -15,7 +15,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
  * For example, changing stateSchemaByVersion[1].schema to stateSchemaByVersion[2].schema.
  */
 
-const schemaBaseV1 = {
+const stateSchemaV1 = schema.object({
   has_errors: schema.boolean(),
   error_messages: schema.maybe(schema.arrayOf(schema.any())),
   runs: schema.number(),
@@ -110,16 +110,15 @@ const schemaBaseV1 = {
     schema.string(),
     schema.recordOf(schema.string(), schema.number())
   ),
-};
+});
 
-const schemaBaseV2 = {
-  ...schemaBaseV1,
+const stateSchemaV2 = stateSchemaV1.extends({
   count_mw_total: schema.number(),
   count_mw_with_repeat_toggle_on: schema.number(),
   count_mw_with_filter_alert_toggle_on: schema.number(),
   count_alerts_total: schema.number(),
   count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
-};
+});
 
 export const stateSchemaByVersion = {
   1: {
@@ -206,7 +205,7 @@ export const stateSchemaByVersion = {
       percentile_num_alerts_per_day: state.percentile_num_alerts_per_day || {},
       percentile_num_alerts_by_type_per_day: state.percentile_num_alerts_by_type_per_day || {},
     }),
-    schema: schema.object(schemaBaseV1),
+    schema: stateSchemaV1,
   },
   2: {
     up: (state: Record<string, unknown>) => ({
@@ -217,7 +216,7 @@ export const stateSchemaByVersion = {
       count_alerts_total: state.count_alerts_total || 0,
       count_alerts_by_rule_type: state.count_alerts_by_rule_type || {},
     }),
-    schema: schema.object(schemaBaseV2),
+    schema: stateSchemaV2,
   },
 };
 
