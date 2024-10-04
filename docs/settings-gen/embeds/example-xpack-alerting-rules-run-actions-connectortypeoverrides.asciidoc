@@ -1,0 +1,11 @@
+For example:
+
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    actions:
+        max: 10
+        connectorTypeOverrides:
+            - id: '.server-log'
+              max: 5
+--

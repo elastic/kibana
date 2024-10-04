@@ -1,0 +1,7 @@
+To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
+proxy in tunneling mode, and display some of the interaction between the client and the proxy.
+
+[source,sh]
+--
+curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+--

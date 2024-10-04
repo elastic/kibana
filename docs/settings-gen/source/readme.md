@@ -12,11 +12,12 @@ page_description:
 
 groups:
   - group: [Optional] (string) - Section title on the settings page, e.g. Preconfigured connector settings
-    group_id: [Optional] (string) - ID used for documentation links, e.g., general-alert-action-settings
+    id: [Optional] (string) - ID used for documentation links, e.g., general-alert-action-settings
     description:
      - [Optional] (asciidoc in quotes) - The description content that appears below the group title.
      - [Optional] (asciidoc in quotes) - Paragraph 2
      - [Optional] (asciidoc in quotes) - Paragraph 3
+    example: Any complex Asciidoc such as tables, lists, code examples, etc.
 
     settings:
       - setting: [Required] (string) - Setting name, e.g. xpack.encryptedSavedObjects.encryptionKey
@@ -27,8 +28,6 @@ groups:
           - [Optional] (asciidoc in quotes) - Paragraph 3
         state: [Optional] - 'deprecated', 'technical-preview', or 'hidden'
         deprecation_details: [Optional] (asciidoc in quotes) - details about when it was deprecated and/or what setting to use instead
-
-        intro: Any complex Asciidoc such as tables, lists, code examples, etc.
         note: [Optional] (asciidoc in quotes) - Text to display in a 'note' callout
         tip: [Optional] (asciidoc in quotes) - Text to display in a 'tip' callout
         warning: [Optional] (asciidoc in quotes) - Text to display in a 'warning' callout
@@ -41,9 +40,9 @@ groups:
             description: [Optional] (asciidoc in quotes) - Description of the setting option
         type: [Optional] One of 'static' or 'dynamic'
         platforms:
-          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
-          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
-          - [Optional] - one of 'self-managed', 'cloud', or 'serverless'
+          - [Optional] - one of cloud/serverless/self-managed
+          - [Optional] - one of cloud/serverless/self-managed
+          - [Optional] - one of cloud/serverless/self-managed
         example: Any complex Asciidoc such as tables, lists, code examples, etc.
 ```
 
@@ -57,16 +56,17 @@ collection: REQUIRED
 groups:
   - group: REQUIRED
     id: REQUIRED
-    # description: ""
+    # description:
+    #  - ""
+    # example: example-group-name.asciidoc
     settings:
 
       - setting: REQUIRED
         # id: 
         description:
           - "REQUIRED"
-        # state:
+        # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
-        # intro: intro.asciidoc
         # note: ""
         # tip: ""
         # warning: ""
@@ -77,6 +77,6 @@ groups:
         #     description: ""
         # type: static/dynamic
         # platforms:
-        #   - platform:
-        # example: example.asciidoc
+        #   - cloud/serverless/self-managed
+        # example: example-setting-name.asciidoc
 ```

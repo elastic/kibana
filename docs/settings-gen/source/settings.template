@@ -7,16 +7,17 @@ collection: REQUIRED
 groups:
   - group: REQUIRED
     id: REQUIRED
-    # description: ""
+    # description:
+    #  - ""
+    # example: example-group-name.asciidoc
     settings:
 
       - setting: REQUIRED
         # id: 
         description:
           - "REQUIRED"
-        # state:
+        # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
-        # intro: intro.asciidoc
         # note: ""
         # tip: ""
         # warning: ""
@@ -27,6 +28,6 @@ groups:
         #     description: ""
         # type: static/dynamic
         # platforms:
-        #   - platform:
-        # example: example.asciidoc
+        #   - cloud/serverless/self-managed
+        # example: example-setting-name.asciidoc
 

@@ -1,0 +1,10 @@
+For example:
+
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    timeout: '5m'
+    ruleTypeOverrides:
+        - id: '.index-threshold'
+          timeout: '15m'
+--

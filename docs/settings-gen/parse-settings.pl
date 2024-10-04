@@ -97,13 +97,12 @@ sub parsefile {
     #  $group_description_string =~ s/\+$//;
     #  chomp ($group_description_string);
     #}
-
-    # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
-    if ($group_example) {
-      $asciidocoutput .= "\n**Example**\n\ninclude::../embeds/".$group_example."[]\n";
-    }
     if ($group_description_string) {
       $asciidocoutput .= $group_description_string;
+    }
+    # Add an example if there is one, like this:    include::../examples/example-logging-root-level.asciidoc[]
+    if ($group_example) {
+      $asciidocoutput .= "\ninclude::../embeds/".$group_example."[]\n";
     }
 
     my $settings = $group->{settings};
@@ -112,8 +111,7 @@ sub parsefile {
       # Grab the setting name, description, and other properties
       my $setting_name = $setting->{setting};
       my $setting_id = $setting->{id};
-      my $setting_description = $setting->{description};
-      my $setting_intro = $setting->{intro};      
+      my $setting_description = $setting->{description};   
       my $setting_note = $setting->{note};
       my $setting_warning = $setting->{warning};
       my $setting_important = $setting->{important};
@@ -146,22 +144,17 @@ sub parsefile {
 
       # check if supported on Cloud (these settings are marked with a Cloud icon)
       my $supported_cloud = 0;
-      #for my $platform (@$setting_platforms) {
-      #  if ($platform =~ /cloud/) {$supported_cloud = 1;}
-      #}
+      for my $platform (@$setting_platforms) {
+        if ($platform =~ /cloud/) {$supported_cloud = 1;}
+      }
   
       # build the description paragraphs
       my $setting_description_string = "";
       for my $paragraph (@$setting_description) {
         $setting_description_string .= $paragraph."\n\n";
       }
-      # remove the + sign after the last paragraph of the description
-      #if ($setting_description_string) {
-      #  $setting_description_string =~ s/\+$//;
-      #  chomp ($setting_description_string);
-      #}
   
-      # build the list of supported platforms
+      # Currently, we're just adding the "C" icon when Cloud is supported, but in future we might instead want to provide the supported platforms (cloud, serverless, self-managed) as a list.
       #my $setting_platforms_string = "";
       #for my $platform (@$setting_platforms) {
       #  $setting_platforms_string .= '`'.$platform.'`, ';
@@ -203,11 +196,6 @@ sub parsefile {
 
       if ($setting_description_string) {
         $asciidocoutput .= $setting_description_string;
-      }
-
-      # Add an intro if there is one, like this:    include::../embeds/intro-logging-root-level.asciidoc[]
-      if ($setting_intro) {
-        $asciidocoutput .= "\n\ninclude::../embeds/".$setting_intro."[]\n";
       }
 
       if ($setting_note) {

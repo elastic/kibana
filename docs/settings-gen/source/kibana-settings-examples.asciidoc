@@ -19,7 +19,7 @@ A group description, like this one, can include warnings, tips, code examples, e
 
 
 [[kibana-example-setting-mercury]]
-.`kibana.example.setting.mercury`
+.`kibana.example.setting.mercury` {ess-icon}
 [%collapsible]
 ====
 The first planet from from <<kibana-example-setting-sun,The Sun>> and the smallest in the Solar System.
@@ -104,7 +104,7 @@ Your group description can include warnings, examples, etc., just like the setti
 
 
 [[kibana-example-setting-sun]]
-.`kibana.example.setting.sun`
+.`kibana.example.setting.sun` {ess-icon}
 [%collapsible]
 ====
 The Sun is the star at the center of the Solar System.
@@ -120,7 +120,7 @@ Type: `dynamic` +
 
 
 [[kibana-example-setting-arcturus]]
-.`kibana.example.setting.arcturus`
+.`kibana.example.setting.arcturus` {ess-icon}
 [%collapsible]
 ====
 Arcturus is the brightest star in the northern constellation of Bootes.

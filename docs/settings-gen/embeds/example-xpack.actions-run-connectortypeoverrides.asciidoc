@@ -1,0 +1,10 @@
+For example:
+
+[source,yaml]
+--
+xpack.actions.run:
+    maxAttempts: 1
+    connectorTypeOverrides:
+        - id: '.server-log'
+          maxAttempts: 5
+--
