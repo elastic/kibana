@@ -310,8 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
           });
 
-          // Fails in chrome 129+: https://github.com/elastic/kibana-operations/issues/199
-          it.skip('should render selected columns correctly', async () => {
+          it('should render selected columns correctly', async () => {
             await PageObjects.discover.selectTextBaseLang();
 
             await checkSelectedColumns({
