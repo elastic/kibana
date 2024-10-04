@@ -43,6 +43,7 @@ export function useFetchAlert({ investigation }: UseFetchAlertParams): UseFetchA
         signal,
       });
     },
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {

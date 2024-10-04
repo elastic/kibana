@@ -28,6 +28,10 @@ import type {
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -47,6 +51,7 @@ export interface InvestigateAppSetupDependencies {
   unifiedSearch: {};
   uiActions: UiActionsSetup;
   security: SecurityPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -62,6 +67,7 @@ export interface InvestigateAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
 }
 
 export interface InvestigateAppPublicSetup {}
