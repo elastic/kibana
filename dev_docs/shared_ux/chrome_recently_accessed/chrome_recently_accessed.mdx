@@ -58,5 +58,5 @@ coreStart.chrome.recentlyAccessed.add(
 
 ## Implementation details
 
-The `ChromeRecentlyAccessed` services is based on `@kbn/recently-accessed` package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
+The `ChromeRecentlyAccessed` services is based on <DocLink id="kibKbnRecentlyAccessedPluginApi" text="@kbn/recently-accessed"/> package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
 Applications can create their own instance of `RecentlyAccessedService` to manage their own list of recently accessed items scoped to their application.
