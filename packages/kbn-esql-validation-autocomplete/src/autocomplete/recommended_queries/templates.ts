@@ -113,7 +113,8 @@ export const getRecommendedQueries = ({
                 defaultMessage: 'A more complicated example',
               }
             ),
-            queryString: `${fromCommand}\n  | SORT ${timeField}
+            queryString: `${fromCommand}
+    | SORT ${timeField}
     | EVAL now = NOW()
     | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other")
     | STATS count = COUNT(*) BY key
