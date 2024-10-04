@@ -34,7 +34,8 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
     kbStatus?.elser_exists &&
     kbStatus?.index_exists &&
     kbStatus?.pipeline_exists &&
-    kbStatus?.esql_exists;
+    kbStatus?.esql_exists &&
+    kbStatus?.security_labs_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
     setupKB(ESQL_RESOURCE);

@@ -1643,10 +1643,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@66.1.1":
-  version "66.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-66.1.1.tgz#94b931a2c070d92cc35574392a404435d2d37de9"
-  integrity sha512-CQQUBsU7VwnencHcnZ6Wh5mGjkX73ui6nSTjtwJuxtjXezflN6cPzbWKgwVKeduxHGoHcWUWoScLSgSCLkMdJQ==
+"@elastic/charts@67.0.1":
+  version "67.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-67.0.1.tgz#17ba397a97f207f99b6f682f136dde0aef474b57"
+  integrity sha512-6H9DUxm1vwp/R78PAx/zkBKechXF0g1LQuflfpfxMFplwRRw7OTz9cMMRjvrqUp1bVhkp9yLb4CWao+HWaIofA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
