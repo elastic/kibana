@@ -72,6 +72,8 @@
       "@kbn/analytics-ftr-helpers-plugin/*": ["test/analytics/plugins/analytics_ftr_helpers/*"],
       "@kbn/analytics-plugin-a-plugin": ["test/analytics/plugins/analytics_plugin_a"],
       "@kbn/analytics-plugin-a-plugin/*": ["test/analytics/plugins/analytics_plugin_a/*"],
+      "@kbn/api-scraper-plugin": ["x-pack/plugins/logsai/api_scraper"],
+      "@kbn/api-scraper-plugin/*": ["x-pack/plugins/logsai/api_scraper/*"],
       "@kbn/apm-config-loader": ["packages/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["packages/kbn-apm-config-loader/*"],
       "@kbn/apm-data-access-plugin": ["x-pack/plugins/observability_solution/apm_data_access"],

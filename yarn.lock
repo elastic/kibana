@@ -3415,6 +3415,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/api-scraper-plugin@link:x-pack/plugins/logsai/api_scraper":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-config-loader@link:packages/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
