@@ -98,6 +98,10 @@
     "@kbn/presentation-util-plugin",
     "@kbn/core-application-browser",
     "@kbn/dashboard-plugin",
+    "@kbn/search-types",
+    "@kbn/slo-schema",
+    "@kbn/alerting-types",
+    "@kbn/babel-register",
     "@kbn/slo-plugin",
     "@kbn/ebt-tools",
     "@kbn/alerting-types"

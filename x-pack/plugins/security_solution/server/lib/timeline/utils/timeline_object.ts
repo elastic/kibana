@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineSavedObject } from '../../../../common/api/timeline';
+import type { TimelineResponse } from '../../../../common/api/timeline';
 import {
   type TimelineType,
   TimelineTypeEnum,
@@ -27,7 +27,7 @@ export class TimelineObject {
   public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
-  public data: TimelineSavedObject | null;
+  public data: TimelineResponse | null;
 
   constructor({
     id = null,

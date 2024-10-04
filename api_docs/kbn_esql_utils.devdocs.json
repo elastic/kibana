@@ -75,7 +75,7 @@
         "label": "appendWhereClauseToESQLQuery",
         "description": [],
         "signature": [
-          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string"
+          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string | undefined"
         ],
         "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts",
         "deprecated": false,

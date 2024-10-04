@@ -59,13 +59,15 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           }
 
           // Check mappings and upgrade if necessary -- this route only supports v2 KB, so always `true`
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            true
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
+            v2KnowledgeBaseEnabled: true,
+          });
 
           logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
+            // TODO: KB-RBAC check, required when users != null as entry will either be created globally if empty, or for specific users (only admin API feature)
+            global: request.body.users != null && request.body.users.length === 0,
           });
 
           if (createResponse == null) {

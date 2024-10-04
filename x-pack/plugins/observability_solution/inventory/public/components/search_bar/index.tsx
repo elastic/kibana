@@ -8,12 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EntityType } from '../../../common/entities';
 import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
 import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypesControls } from './entity_types_controls';
+import { DiscoverButton } from './discover_button';
 
 export function SearchBar() {
   const { searchBarContentSubject$ } = useInventorySearchBarContext();
@@ -68,18 +70,28 @@ export function SearchBar() {
   );
 
   return (
-    <UnifiedSearchBar
-      appName="Inventory"
-      displayStyle="inPage"
-      showDatePicker={false}
-      showFilterBar={false}
-      indexPatterns={dataView ? [dataView] : undefined}
-      renderQueryInputAppend={() => <EntityTypesControls onChange={handleEntityTypesChange} />}
-      onQuerySubmit={handleQuerySubmit}
-      placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
-        defaultMessage:
-          'Search for your entities by name or its metadata (e.g. entity.type : service)',
-      })}
-    />
+    <EuiFlexGroup direction="row" gutterSize="s">
+      <EuiFlexItem grow>
+        <UnifiedSearchBar
+          appName="Inventory"
+          displayStyle="inPage"
+          showDatePicker={false}
+          showFilterBar={false}
+          indexPatterns={dataView ? [dataView] : undefined}
+          renderQueryInputAppend={() => <EntityTypesControls onChange={handleEntityTypesChange} />}
+          onQuerySubmit={handleQuerySubmit}
+          placeholder={i18n.translate('xpack.inventory.searchBar.placeholder', {
+            defaultMessage:
+              'Search for your entities by name or its metadata (e.g. entity.type : service)',
+          })}
+        />
+      </EuiFlexItem>
+
+      {dataView ? (
+        <EuiFlexItem grow={false}>
+          <DiscoverButton dataView={dataView} />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 }
