@@ -20,6 +20,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -82,6 +83,8 @@ export function RunControls({
   newForecastDuration,
   isNewForecastDurationValid,
   newForecastDurationErrors,
+  neverExpires,
+  onNeverExpiresChange,
   onNewForecastDurationChange,
   runForecast,
   isForecastRequested,
@@ -134,34 +137,60 @@ export function RunControls({
       <EuiSpacer size="s" />
       <EuiForm>
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.ml.timeSeriesExplorer.runControls.durationLabel"
-                  defaultMessage="Duration"
-                />
-              }
-              fullWidth
-              isInvalid={!isNewForecastDurationValid}
-              error={newForecastDurationErrors}
-              helpText={
-                <FormattedMessage
-                  id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
-                  defaultMessage="Length of forecast, up to a maximum of {maximumForecastDurationDays} days.
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.runControls.durationLabel"
+                      defaultMessage="Duration"
+                    />
+                  }
+                  fullWidth
+                  isInvalid={!isNewForecastDurationValid}
+                  error={newForecastDurationErrors}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
+                      defaultMessage="Length of forecast, up to a maximum of {maximumForecastDurationDays} days.
                   Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
-                  values={{ maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS }}
-                />
-              }
-            >
-              {disabledState.isDisabledToolTipText === undefined ? (
-                durationInput
-              ) : (
-                <EuiToolTip position="right" content={disabledState.isDisabledToolTipText}>
-                  {durationInput}
-                </EuiToolTip>
-              )}
-            </EuiFormRow>
+                      values={{ maximumForecastDurationDays: FORECAST_DURATION_MAX_DAYS }}
+                    />
+                  }
+                >
+                  {disabledState.isDisabledToolTipText === undefined ? (
+                    durationInput
+                  ) : (
+                    <EuiToolTip position="right" content={disabledState.isDisabledToolTipText}>
+                      {durationInput}
+                    </EuiToolTip>
+                  )}
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  helpText={i18n.translate(
+                    'xpack.ml.timeSeriesExplorer.runControls.neverExpireHelpText',
+                    {
+                      defaultMessage:
+                        'When not selected, created forecasts will expire after 14 days.',
+                    }
+                  )}
+                >
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.ml.timeSeriesExplorer.runControls.neverExpireLabel',
+                      {
+                        defaultMessage: 'Never expire',
+                      }
+                    )}
+                    checked={neverExpires}
+                    onChange={onNeverExpiresChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
@@ -193,7 +222,9 @@ RunControls.propType = {
   newForecastDuration: PropTypes.string,
   isNewForecastDurationValid: PropTypes.bool,
   newForecastDurationErrors: PropTypes.array,
+  neverExpires: PropTypes.bool.isRequired,
   onNewForecastDurationChange: PropTypes.func.isRequired,
+  onNeverExpiresChange: PropTypes.func.isRequired,
   runForecast: PropTypes.func.isRequired,
   isForecastRequested: PropTypes.bool,
   forecastProgress: PropTypes.number,

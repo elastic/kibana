@@ -355,9 +355,18 @@ export function mlApiProvider(httpService: HttpService) {
       });
     },
 
-    forecast({ jobId, duration }: { jobId: string; duration?: string }) {
+    forecast({
+      jobId,
+      duration,
+      neverExpires,
+    }: {
+      jobId: string;
+      duration?: string;
+      neverExpires?: boolean;
+    }) {
       const body = JSON.stringify({
         ...(duration !== undefined ? { duration } : {}),
+        ...(neverExpires === true ? { expires_in: '0' } : {}),
       });
 
       return httpService.http<any>({
