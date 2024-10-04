@@ -43,7 +43,7 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       <EuiButton href="#" color="warning" fill>
         CTA Link Button
       </EuiButton>
-      <EuiLink href="#" target="_blank" onClick={onDismissAction}>
+      <EuiLink target="_blank" onClick={onDismissAction}>
         {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
           defaultMessage: 'dismiss',
         })}
