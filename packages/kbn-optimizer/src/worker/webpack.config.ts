@@ -108,7 +108,7 @@ export function getWebpackConfig(
               openAnalyzer: false,
               logLevel: 'silent',
             }),
-            new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
+            // new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
             new StatoscopeWebpackPlugin({
               open: false,
               saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
