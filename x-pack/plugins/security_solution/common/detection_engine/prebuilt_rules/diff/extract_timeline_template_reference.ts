@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
 import type { TimelineTemplateReference } from '../../../api/detection_engine/prebuilt_rules';
-import type { DiffableRuleInput } from './types';
 
 export const extractTimelineTemplateReference = (
-  rule: DiffableRuleInput
+  rule: RuleResponse
 ): TimelineTemplateReference | undefined => {
   if (rule.timeline_id == null) {
     return undefined;
