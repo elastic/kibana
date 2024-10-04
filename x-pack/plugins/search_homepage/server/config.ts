@@ -11,7 +11,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 export * from './types';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
