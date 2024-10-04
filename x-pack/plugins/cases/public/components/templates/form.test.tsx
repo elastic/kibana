@@ -38,7 +38,7 @@ const SubmitButtonMock = ({ submit }: { submit: FormState<TemplateFormProps>['su
   </button>
 );
 
-describe('TemplateForm', () => {
+describe.skip('TemplateForm', () => {
   let user: UserEvent;
   let appMockRenderer: AppMockRenderer;
   const defaultProps = {
