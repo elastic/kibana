@@ -24,6 +24,8 @@ const projectDefaultRoles = new Map<string, Role>([
   ['oblt', 'editor'],
 ]);
 
+const projectTypesWithCustomRolesEnabled = ['es', 'security'];
+
 const getDefaultServerlessRole = (projectType: string) => {
   if (projectDefaultRoles.has(projectType)) {
     return projectDefaultRoles.get(projectType)!;
@@ -56,8 +58,8 @@ export class ServerlessAuthProvider implements AuthProvider {
         readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
       )
     );
-    if (this.projectType !== 'oblt') {
-      // no privileges set by default
+    // Adding custom role to the map without privileges, so it can defined and used in the tests
+    if (projectTypesWithCustomRolesEnabled.includes(this.projectType)) {
       roleDescriptors.set(this.getCustomRole(), null);
     }
     return roleDescriptors;
