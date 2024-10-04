@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { closeKibanaBrowserSecurityToastIfNecessary } from './toasts';
+
 export const API_AUTH = Object.freeze({
   user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
@@ -24,6 +26,7 @@ export const waitForPageToBeLoaded = () => {
 export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
   cy.visit(url, options);
   waitForPageToBeLoaded();
+  closeKibanaBrowserSecurityToastIfNecessary();
 };
 
 export const request = <T = unknown>({

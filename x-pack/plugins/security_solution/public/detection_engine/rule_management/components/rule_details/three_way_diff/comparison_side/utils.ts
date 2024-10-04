@@ -26,7 +26,7 @@ export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFiel
   resolvedValue?: DiffableAllFields[FieldName]
 ): DiffableAllFields[FieldName] | undefined {
   if (version === Version.Final) {
-    return resolvedValue ?? fieldThreeWayDiff.merged_version;
+    return resolvedValue;
   }
 
   const versionFieldToPick = `${version}_version` as const;

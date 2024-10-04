@@ -33,7 +33,7 @@ export const navigationTree = (useSearchHomepage: boolean = false): NavigationTr
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          link: 'dev_tools:console',
+          link: 'dev_tools',
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
           },

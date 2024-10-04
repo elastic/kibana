@@ -25,7 +25,7 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
-export const NOTES = i18n.translate('xpack.securitySolution.navigation.notesManagement', {
+export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
 

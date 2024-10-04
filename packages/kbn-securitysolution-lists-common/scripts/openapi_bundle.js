@@ -24,12 +24,12 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Lists API (Elastic Cloud Serverless)',
+          title: 'Security Lists API (Elastic Cloud Serverless)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
         tags: [
           {
-            name: 'Security Solution Lists API',
+            name: 'Security Lists API',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },
@@ -48,12 +48,12 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Lists API (Elastic Cloud and self-hosted)',
+          title: 'Security Lists API (Elastic Cloud and self-hosted)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
         tags: [
           {
-            name: 'Security Solution Lists API',
+            name: 'Security Lists API',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },

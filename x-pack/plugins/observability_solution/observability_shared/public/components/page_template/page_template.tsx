@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps, EuiEmptyPromptProps } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -31,7 +31,13 @@ import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
-  'children' | 'data-test-subj' | 'pageHeader' | 'restrictWidth' | 'isEmptyState' | 'noDataConfig'
+  | 'children'
+  | 'data-test-subj'
+  | 'pageHeader'
+  | 'restrictWidth'
+  | 'isEmptyState'
+  | 'noDataConfig'
+  | 'paddingSize'
 > & {
   showSolutionNav?: boolean;
   isPageDataLoaded?: boolean;
@@ -39,7 +45,7 @@ export type WrappedPageTemplateProps = Pick<
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
   topSearchBar?: React.ReactNode;
-} & Pick<EuiEmptyPromptProps, 'paddingSize'>;
+};
 
 export interface NavigationEntry {
   // the label of the menu entry, should be translated

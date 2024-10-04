@@ -7,6 +7,7 @@
 
 import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
@@ -16,9 +17,10 @@ import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
-import { CheckPermissionsRequestSchema } from '../../types';
+import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 import { type FleetConfigType } from '../../config';
+import { genericErrorResponse } from '../schema/errors';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -189,6 +191,11 @@ const serviceTokenBodyValidation = (data: any, validationResult: RouteValidation
   return ok({ remote });
 };
 
+export const GenerateServiceTokenResponseSchema = schema.object({
+  name: schema.string(),
+  value: schema.string(),
+});
+
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
 
@@ -212,11 +219,25 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+      description: `Check permissions`,
+      options: {
+        tags: ['oas_tag:Fleet internals'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: CheckPermissionsRequestSchema },
+        validate: {
+          request: CheckPermissionsRequestSchema,
+          response: {
+            200: {
+              body: () => CheckPermissionsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getCheckPermissionsHandler
     );
@@ -244,12 +265,23 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleet: { allAgents: true },
       },
       description: `Create a service token`,
+      options: {
+        tags: ['oas_tag:Fleet service tokens'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
           request: { body: serviceTokenBodyValidation },
+          response: {
+            200: {
+              body: () => GenerateServiceTokenResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
         },
       },
       generateServiceTokenHandler

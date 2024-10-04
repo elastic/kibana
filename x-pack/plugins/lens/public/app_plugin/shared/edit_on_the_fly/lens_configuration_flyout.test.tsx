@@ -258,7 +258,7 @@ describe('LensEditConfigurationFlyout', () => {
     await renderConfigFlyout({
       canEditTextBasedQuery: false,
     });
-    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+    expect(screen.queryByTestId('ESQLEditor')).toBeNull();
   });
 
   it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
@@ -275,7 +275,7 @@ describe('LensEditConfigurationFlyout', () => {
         },
       },
     });
-    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+    expect(screen.queryByTestId('ESQLEditor')).toBeNull();
   });
 
   it('should not display the suggestions if hidesSuggestions prop is true', async () => {

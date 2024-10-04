@@ -46,4 +46,5 @@ export interface AppServicesContext {
   overlays: OverlayStart;
   http: HttpSetup;
   history: ScopedHistory;
+  capabilities: ApplicationStart['capabilities'];
 }

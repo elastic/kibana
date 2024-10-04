@@ -444,7 +444,7 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
-  public async findFieldByNameInDocViewer(name: string) {
+  public async findFieldByNameOrValueInDocViewer(name: string) {
     const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
     await fieldSearch.type(name);
   }

@@ -68,9 +68,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'slo',
           },
           {
-            link: 'inventory',
-          },
-          {
             id: 'aiMl',
             title: i18n.translate('xpack.observability.obltNav.ml.aiAndMlGroupTitle', {
               defaultMessage: 'AI & ML',
@@ -131,6 +128,10 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 link: 'ml:notifications',
               },
             ],
+          },
+          {
+            link: 'inventory',
+            spaceBefore: 'm',
           },
           {
             id: 'apm',
@@ -272,6 +273,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
             link: 'management',
             title: i18n.translate('xpack.observability.obltNav.stackManagement', {
               defaultMessage: 'Stack Management',

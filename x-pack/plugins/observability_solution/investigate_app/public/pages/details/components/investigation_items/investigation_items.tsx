@@ -18,7 +18,7 @@ export function InvestigationItems() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
         <InvestigationSearchBar
           dateRangeFrom={globalParams.timeRange.from}
           dateRangeTo={globalParams.timeRange.to}
@@ -31,11 +31,11 @@ export function InvestigationItems() {
             updateInvestigationParams({ timeRange: nextTimeRange });
           }}
         />
+      </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <InvestigationItemsList />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <InvestigationItemsList />
+      </EuiFlexItem>
 
       <AddInvestigationItem />
     </EuiFlexGroup>
