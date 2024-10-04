@@ -74,7 +74,7 @@ function prefixColumns(columns: string[], prefixes: string[]): string[] {
 }
 
 // Converts CSV samples into JSON samples.
-export async function convertCSVSamples({
+export async function handleCSV({
   state,
   client,
 }: LogDetectionNodeParams): Promise<Partial<LogFormatDetectionState>> {
@@ -145,6 +145,6 @@ export async function convertCSVSamples({
   return {
     jsonSamples,
     additionalProcessors: [...state.additionalProcessors, ...csvHandlingProcessors],
-    lastExecutedChain: 'convertCSVSamples',
+    lastExecutedChain: 'handleCSV',
   };
 }
