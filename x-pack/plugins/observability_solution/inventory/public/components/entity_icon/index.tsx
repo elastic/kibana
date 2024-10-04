@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { AGENT_NAME, CLOUD_PROVIDER } from '@kbn/observability-shared-plugin/common';
+import { AGENT_NAME, CLOUD_PROVIDER, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { type CloudProvider, CloudProviderIcon, AgentIcon } from '@kbn/custom-icons';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { ENTITY_TYPE } from '../../../common/es_fields/entities';
 import type { Entity } from '../../../common/entities';
 
 interface EntityIconProps {

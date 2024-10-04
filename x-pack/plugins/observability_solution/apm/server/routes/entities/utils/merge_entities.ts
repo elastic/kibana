@@ -53,7 +53,7 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   if (!existingEntity) {
     return {
       ...commonEntityFields,
-      dataStreamTypes: entity.data_stream.type,
+      dataStreamTypes: entity.source_data_stream.type,
       environments: compact([entity?.service.environment]),
       metrics: [entity.entity.metrics],
       hasLogMetrics,
@@ -62,7 +62,7 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   return {
     ...commonEntityFields,
     dataStreamTypes: uniq(
-      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.data_stream.type])
+      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.source_data_stream.type])
     ),
     environments: uniq(compact([...existingEntity?.environments, entity?.service.environment])),
     metrics: [...existingEntity?.metrics, entity.entity.metrics],

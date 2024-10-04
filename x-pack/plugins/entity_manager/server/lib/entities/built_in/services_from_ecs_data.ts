@@ -20,7 +20,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.2.0',
+    version: '0.3.0',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
@@ -46,8 +46,15 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     displayNameTemplate: '{{service.name}}',
     metadata: [
       { source: '_index', destination: 'sourceIndex' },
+      {
+        source: 'data_stream.type',
+        destination: 'source_data_stream.type',
+      },
+      {
+        source: 'data_stream.dataset',
+        destination: 'source_data_stream.dataset',
+      },
       { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
-      'data_stream.type',
       'service.environment',
       'service.name',
       'service.namespace',
