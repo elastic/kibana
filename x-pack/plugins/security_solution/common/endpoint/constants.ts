@@ -60,7 +60,7 @@ export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
-export const BASE_INTERNAL_ENDPOINT_ROUTE = '/internal/endpoint';
+export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
 
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;

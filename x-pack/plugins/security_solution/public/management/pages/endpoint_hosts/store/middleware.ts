@@ -432,7 +432,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
       METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
-      { version: '2023-10-31' }
+      { version: '1' }
     );
 
     dispatch({

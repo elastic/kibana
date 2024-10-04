@@ -507,7 +507,7 @@ describe('test endpoint routes', () => {
         routerMock,
         'get',
         METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
-        '2023-10-31'
+        '1'
       ));
 
       const contextOverrides = {
@@ -540,7 +540,7 @@ describe('test endpoint routes', () => {
         routerMock,
         'get',
         METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
-        '2023-10-31'
+        '1'
       ));
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),

@@ -428,7 +428,7 @@ export default function ({ getService }: FtrProviderContext) {
         await t1AnalystSupertest
           .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .ca(ca)
           .expect(401);
       });
@@ -440,7 +440,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await adminSupertest
           .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
@@ -468,7 +468,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await adminSupertest
           .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
