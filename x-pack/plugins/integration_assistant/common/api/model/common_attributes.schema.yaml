@@ -16,6 +16,16 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
+    PackageTitle:
+      type: string
+      minLength: 1
+      description: Package title for the integration to be built.
+
+    DataStreamTitle:
+      type: string
+      minLength: 1
+      description: DataStream title for the integration to be built.
+
     LogSamples:
       type: array
       items:

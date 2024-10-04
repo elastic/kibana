@@ -148,6 +148,9 @@ async function runGeneration({
     const analyzeLogsRequest: AnalyzeLogsRequestBody = {
       packageName: integrationSettings.name ?? '',
       dataStreamName: integrationSettings.dataStreamName ?? '',
+      packageTitle: integrationSettings.title ?? integrationSettings.name ?? '',
+      dataStreamTitle:
+        integrationSettings.dataStreamTitle ?? integrationSettings.dataStreamName ?? '',
       logSamples: integrationSettings.logSamples ?? [],
       connectorId: connector.id,
       langSmithOptions: getLangSmithOptions(),

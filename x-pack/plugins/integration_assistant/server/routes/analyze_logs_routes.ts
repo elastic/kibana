@@ -43,7 +43,14 @@ export function registerAnalyzeLogsRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeLogsResponse>> => {
-        const { packageName, dataStreamName, logSamples, langSmithOptions } = req.body;
+        const {
+          packageName,
+          dataStreamName,
+          packageTitle,
+          dataStreamTitle,
+          logSamples,
+          langSmithOptions,
+        } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -79,6 +86,8 @@ export function registerAnalyzeLogsRoutes(
           const logFormatParameters = {
             packageName,
             dataStreamName,
+            packageTitle,
+            dataStreamTitle,
             logSamples,
           };
           const graph = await getLogFormatDetectionGraph({ model, client });

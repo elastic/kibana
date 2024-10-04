@@ -95,6 +95,8 @@ export interface LogFormatDetectionState {
   lastExecutedChain: string;
   packageName: string;
   dataStreamName: string;
+  packageTitle: string;
+  dataStreamTitle: string;
   logSamples: string[];
   jsonSamples: string[];
   exAnswer: string;

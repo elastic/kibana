@@ -97,7 +97,9 @@ export async function handleCSV({
     throw new UnparseableCSVFormatError(tempErrors as CSVParseError[]);
   }
 
-  const headerColumns = state.header ? columnsFromHeader(temporaryColumns, tempResults[0]) : [];
+  const headerColumns = state.samplesFormat.header
+    ? columnsFromHeader(temporaryColumns, tempResults[0])
+    : [];
   const needColumns = totalColumnCount(temporaryColumns, tempResults);
   const columns: string[] = [];
 
