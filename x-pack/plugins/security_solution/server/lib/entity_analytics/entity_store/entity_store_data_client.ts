@@ -68,7 +68,7 @@ export class EntityStoreDataClient {
 
     const definition = getEntityDefinition(entityType, this.options.namespace);
 
-    this.options.logger.info(
+    logger.info(
       `In namespace ${this.options.namespace}: Initializing entity store for ${entityType}`
     );
 
