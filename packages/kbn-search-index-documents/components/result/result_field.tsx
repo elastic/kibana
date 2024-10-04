@@ -67,11 +67,13 @@ const defaultToken = 'questionInCircle';
 
 const PERMANENTLY_TRUNCATED_FIELDS = ['dense_vector', 'sparse_vector'];
 
-const ResultValue: React.FC<{ fieldValue: string; fieldType: string; isExpanded?: boolean }> = ({
-  fieldValue,
-  fieldType,
-  isExpanded = false,
-}) => {
+interface ResultValueProps {
+  fieldValue: string;
+  fieldType: string;
+  isExpanded?: boolean;
+}
+
+const ResultValue: React.FC<ResultValueProps> = ({ fieldValue, fieldType, isExpanded = false }) => {
   if (
     isExpanded &&
     fieldType &&
