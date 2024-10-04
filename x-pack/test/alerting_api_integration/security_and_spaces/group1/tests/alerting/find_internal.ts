@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { Space } from '../../../../common/types';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { Space1AllAtSpace1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -564,6 +564,94 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('filtering', () => {
+      it('should return the correct rules when trying to exploit RBAC through the ruleTypeIds parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
+
+        const { body: createdAlert1 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        const { body: createdAlert2 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.noop',
+              consumer: 'alertsFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert1.id, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert2.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            rule_type_ids: ['test.noop', 'test.restricted-noop'],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].rule_type_id).to.eql('test.noop');
+      });
+
+      it('should return the correct rules when trying to exploit RBAC through the consumers parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
+
+        const { body: createdAlert1 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        const { body: createdAlert2 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.noop',
+              consumer: 'alertsFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert1.id, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert2.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            consumers: ['alertsFixture', 'alertsRestrictedFixture'],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].consumer).to.eql('alertsFixture');
+      });
+    });
 
     async function createNoOpAlert(space: Space, overrides = {}) {
       const alert = getTestRuleData(overrides);

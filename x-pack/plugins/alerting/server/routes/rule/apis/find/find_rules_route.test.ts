@@ -502,6 +502,73 @@ describe('findRulesRoute', () => {
         },
       });
     });
+
+    it('should not support consumers', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      findRulesRoute(router, licenseState);
+
+      const [config, handler] = router.get.mock.calls[0];
+
+      expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rules/_find"`);
+
+      const findResult = {
+        page: 1,
+        perPage: 1,
+        total: 0,
+        data: [],
+      };
+      rulesClient.find.mockResolvedValueOnce(findResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          query: {
+            per_page: 1,
+            page: 1,
+            default_search_operator: 'OR',
+            consumers: ['foo'],
+          },
+        },
+        ['ok']
+      );
+
+      expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+              Object {
+                "body": Object {
+                  "data": Array [],
+                  "page": 1,
+                  "per_page": 1,
+                  "total": 0,
+                },
+              }
+          `);
+
+      expect(rulesClient.find).toHaveBeenCalledTimes(1);
+      expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "excludeFromPublicApi": true,
+                  "includeSnoozeData": true,
+                  "options": Object {
+                    "defaultSearchOperator": "OR",
+                    "page": 1,
+                    "perPage": 1,
+                  },
+                },
+              ]
+          `);
+
+      expect(res.ok).toHaveBeenCalledWith({
+        body: {
+          page: 1,
+          per_page: 1,
+          total: 0,
+          data: [],
+        },
+      });
+    });
   });
 
   describe('Internal', () => {
@@ -531,6 +598,7 @@ describe('findRulesRoute', () => {
             page: 1,
             default_search_operator: 'OR',
             rule_type_ids: ['foo'],
+            consumers: ['bar'],
           },
         },
         ['ok']
@@ -554,6 +622,9 @@ describe('findRulesRoute', () => {
             "excludeFromPublicApi": false,
             "includeSnoozeData": true,
             "options": Object {
+              "consumers": Array [
+                "bar",
+              ],
               "defaultSearchOperator": "OR",
               "page": 1,
               "perPage": 1,

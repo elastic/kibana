@@ -22,6 +22,7 @@ async function createAlert(
     .set('kbn-xsrf', 'foo')
     .send(getTestRuleData(overwrites))
     .expect(200);
+
   objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
   return createdAlert;
 }
@@ -76,18 +77,21 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            search: 'test.noop',
+            search_fields: 'alertTypeId',
+          });
 
         expect(response.status).to.eql(200);
         expect(response.body.page).to.equal(1);
         expect(response.body.per_page).to.be.greaterThan(0);
         expect(response.body.total).to.be.greaterThan(0);
         const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-
+        const activeSnoozes = match.active_snoozes;
+        const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
         expect(match).to.eql({
           id: createdAlert.id,
           name: 'abc',
@@ -127,7 +131,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           execution_status: match.execution_status,
           ...(match.next_run ? { next_run: match.next_run } : {}),
           ...(match.last_run ? { last_run: match.last_run } : {}),
+          monitoring: match.monitoring,
+          snooze_schedule: match.snooze_schedule,
+          ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+          is_snoozed_until: null,
         });
+
         expect(Date.parse(match.created_at)).to.be.greaterThan(0);
         expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
       });
@@ -142,11 +151,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       await supertest
-        .get(
-          `${getUrlPrefix(
-            Spaces.other.id
-          )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
-        )
+        .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_find`)
+        .send({
+          search: 'test.noop',
+          search_fields: 'alertTypeId',
+        })
         .expect(200, {
           page: 1,
           per_page: 10,
@@ -182,51 +191,46 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it(`it should NOT allow filter on monitoring attributes`, async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?filter=alert.attributes.monitoring.run.calculated_metrics.success_ratio>50`
-        );
+      it(`it should allow filter on monitoring attributes`, async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            filter: 'alert.attributes.monitoring.run.calculated_metrics.success_ratio>50',
+          });
 
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio'
-        );
+        expect(response.status).to.eql(200);
       });
 
-      it(`it should NOT allow ordering on monitoring attributes`, async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?sort_field=monitoring.run.calculated_metrics.success_ratio`
-        );
+      it(`it should allow ordering on monitoring attributes`, async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sort_field: 'monitoring.run.calculated_metrics.success_ratio',
+          });
 
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.eql(
-          'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
-        );
+        expect(response.status).to.eql(200);
       });
 
-      it(`it should NOT allow search_fields on monitoring attributes`, async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?search_fields=monitoring.run.calculated_metrics.success_ratio&search=50`
-        );
+      it(`it should allow search_fields on monitoring attributes`, async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            search_fields: 'monitoring.run.calculated_metrics.success_ratio&search=50',
+          });
 
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.eql(
-          'Error find rules: Search field monitoring.run.calculated_metrics.success_ratio not supported'
-        );
+        expect(response.status).to.eql(200);
       });
 
       it('should filter on string parameters', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            filter: `alert.attributes.params.strValue:"my b"`,
+          });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
@@ -234,11 +238,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       });
 
       it('should filter on kueryNode parameters', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?filter=${JSON.stringify(
-            fromKueryExpression('alert.attributes.params.strValue:"my b"')
-          )}`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            filter: `${JSON.stringify(
+              fromKueryExpression('alert.attributes.params.strValue:"my b"')
+            )}`,
+          });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
@@ -246,22 +253,27 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       });
 
       it('should sort by parameters', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?sort_field=params.severity&sort_order=asc`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sort_field: 'params.severity',
+            sort_order: 'asc',
+          });
+
         expect(response.body.data[0].params.severity).to.equal('low');
         expect(response.body.data[1].params.severity).to.equal('medium');
         expect(response.body.data[2].params.severity).to.equal('high');
       });
 
       it('should search by parameters', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?search_fields=params.severity&search=medium`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            search_fields: 'params.severity',
+            search: 'medium',
+          });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
@@ -269,73 +281,63 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       });
 
       it('should filter on parameters', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
-        );
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            filter: 'alert.attributes.params.risk_score:40',
+          });
 
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.risk_score).to.eql(40);
+      });
+    });
 
-        expect(response.body.data[0].mapped_params).to.eql(undefined);
+    it('should filter rules by rule type IDs', async () => {
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.noop',
+        consumer: 'alertsFixture',
       });
 
-      it('should error if filtering on mapped parameters directly using the public API', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerting/rules/_find?filter=alert.attributes.mapped_params.risk_score:40`
-        );
-
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
-        );
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
       });
 
-      it('should throw when using rule_type_ids', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?rule_type_ids=foo`
-        );
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: '[request query.rule_type_ids]: definition for this key is missing',
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          rule_type_ids: ['test.restricted-noop'],
         });
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].rule_type_id).to.eql('test.restricted-noop');
+    });
+
+    it('should filter rules by consumers', async () => {
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.noop',
+        consumer: 'alertsFixture',
       });
 
-      it('should throw when using consumers', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
+      await createAlert(objectRemover, supertest, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
+      });
 
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find?consumers=foo`
-        );
-
-        expect(response.statusCode).to.eql(400);
-        expect(response.body).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: '[request query.consumers]: definition for this key is missing',
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          consumers: ['alertsRestrictedFixture'],
         });
-      });
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].consumer).to.eql('alertsRestrictedFixture');
     });
 
     describe('legacy', function () {
@@ -348,11 +350,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-        const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
-        );
+        const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/_find`);
 
         expect(response.status).to.eql(200);
         expect(response.body.page).to.equal(1);

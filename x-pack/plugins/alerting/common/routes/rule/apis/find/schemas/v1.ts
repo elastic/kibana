@@ -127,4 +127,5 @@ export const findRulesInternalRequestQuerySchema = schema.object({
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
   rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
+  consumers: schema.maybe(schema.arrayOf(schema.string())),
 });

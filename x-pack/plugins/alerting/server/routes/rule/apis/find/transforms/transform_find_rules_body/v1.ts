@@ -55,6 +55,7 @@ export const transformFindRulesInternalBody = (
     fields,
     filter,
     rule_type_ids: ruleTypeIds,
+    consumers,
   } = params;
   return {
     ...(page ? { page } : {}),
@@ -64,6 +65,7 @@ export const transformFindRulesInternalBody = (
     ...(defaultSearchOperator ? { defaultSearchOperator } : {}),
     ...(perPage ? { perPage } : {}),
     ...(ruleTypeIds ? { ruleTypeIds } : {}),
+    ...(consumers ? { consumers } : {}),
     ...(sortField ? { sortField } : {}),
     ...(sortOrder ? { sortOrder } : {}),
     ...(hasReference ? { hasReference } : {}),

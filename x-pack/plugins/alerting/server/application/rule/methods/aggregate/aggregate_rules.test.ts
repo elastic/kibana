@@ -23,7 +23,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 
 import { RegistryRuleType } from '../../../../rule_type_registry';
-import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
@@ -388,7 +388,7 @@ describe('aggregate()', () => {
     ]);
   });
 
-  test('supports filtering by rule type IDs when aggregating', async () => {
+  test('combines the filters with the auth filter correctly', async () => {
     const authFilter = fromKueryExpression(
       'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
     );
@@ -400,257 +400,20 @@ describe('aggregate()', () => {
 
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.aggregate({
-      options: { ruleTypeIds: ['my-rule-type-id'] },
+      options: {
+        ruleTypeIds: ['my-rule-type-id'],
+        consumers: ['bar'],
+        filter: `alert.attributes.tags: ['bar']`,
+      },
       aggs: defaultRuleAggregationFactory(),
     });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "aggs": Object {
-            "enabled": Object {
-              "terms": Object {
-                "field": "alert.attributes.enabled",
-              },
-            },
-            "muted": Object {
-              "terms": Object {
-                "field": "alert.attributes.muteAll",
-              },
-            },
-            "outcome": Object {
-              "terms": Object {
-                "field": "alert.attributes.lastRun.outcome",
-              },
-            },
-            "snoozed": Object {
-              "aggs": Object {
-                "count": Object {
-                  "filter": Object {
-                    "exists": Object {
-                      "field": "alert.attributes.snoozeSchedule.duration",
-                    },
-                  },
-                },
-              },
-              "nested": Object {
-                "path": "alert.attributes.snoozeSchedule",
-              },
-            },
-            "status": Object {
-              "terms": Object {
-                "field": "alert.attributes.executionStatus.status",
-              },
-            },
-            "tags": Object {
-              "terms": Object {
-                "field": "alert.attributes.tags",
-                "order": Object {
-                  "_key": "asc",
-                },
-                "size": 50,
-              },
-            },
-          },
-          "filter": Object {
-            "arguments": Array [
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "alert.attributes.alertTypeId",
-                  },
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "my-rule-type-id",
-                  },
-                ],
-                "function": "is",
-                "type": "function",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "alert.attributes.alertTypeId",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "myType",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "alert.attributes.consumer",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "myApp",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                ],
-                "function": "and",
-                "type": "function",
-              },
-            ],
-            "function": "and",
-            "type": "function",
-          },
-          "page": 1,
-          "perPage": 0,
-          "type": "alert",
-        },
-      ]
-    `);
-  });
+    const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
 
-  test('supports filtering by consumers when aggregating', async () => {
-    const authFilter = fromKueryExpression(
-      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
+      `"((alert.attributes.tags: ['bar'] OR alert.attributes.alertTypeId: my-rule-type-id OR alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
     );
-    authorization.getFindAuthorizationFilter.mockResolvedValue({
-      filter: authFilter,
-      ensureRuleTypeIsAuthorized() {},
-    });
-
-    const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({
-      options: { consumers: ['my-consumer'] },
-      aggs: defaultRuleAggregationFactory(),
-    });
-
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "aggs": Object {
-            "enabled": Object {
-              "terms": Object {
-                "field": "alert.attributes.enabled",
-              },
-            },
-            "muted": Object {
-              "terms": Object {
-                "field": "alert.attributes.muteAll",
-              },
-            },
-            "outcome": Object {
-              "terms": Object {
-                "field": "alert.attributes.lastRun.outcome",
-              },
-            },
-            "snoozed": Object {
-              "aggs": Object {
-                "count": Object {
-                  "filter": Object {
-                    "exists": Object {
-                      "field": "alert.attributes.snoozeSchedule.duration",
-                    },
-                  },
-                },
-              },
-              "nested": Object {
-                "path": "alert.attributes.snoozeSchedule",
-              },
-            },
-            "status": Object {
-              "terms": Object {
-                "field": "alert.attributes.executionStatus.status",
-              },
-            },
-            "tags": Object {
-              "terms": Object {
-                "field": "alert.attributes.tags",
-                "order": Object {
-                  "_key": "asc",
-                },
-                "size": 50,
-              },
-            },
-          },
-          "filter": Object {
-            "arguments": Array [
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "alert.attributes.consumer",
-                  },
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "my-consumer",
-                  },
-                ],
-                "function": "is",
-                "type": "function",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "alert.attributes.alertTypeId",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "myType",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "alert.attributes.consumer",
-                      },
-                      Object {
-                        "isQuoted": false,
-                        "type": "literal",
-                        "value": "myApp",
-                      },
-                    ],
-                    "function": "is",
-                    "type": "function",
-                  },
-                ],
-                "function": "and",
-                "type": "function",
-              },
-            ],
-            "function": "and",
-            "type": "function",
-          },
-          "page": 1,
-          "perPage": 0,
-          "type": "alert",
-        },
-      ]
-    `);
   });
 
   test('logs audit event when not authorized to aggregate rules', async () => {

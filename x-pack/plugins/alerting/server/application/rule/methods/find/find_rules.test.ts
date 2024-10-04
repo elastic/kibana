@@ -1040,7 +1040,7 @@ describe('find()', () => {
       });
 
       const rulesClient = new RulesClient(rulesClientParams);
-      await rulesClient.find({ options: { ruleTypeIds: ['foo'] } });
+      await rulesClient.find({ options: { ruleTypeIds: ['foo'], consumers: ['bar'] } });
 
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
         authorizationEntity: 'rule',
@@ -1066,13 +1066,17 @@ describe('find()', () => {
 
       const rulesClient = new RulesClient(rulesClientParams);
       await rulesClient.find({
-        options: { ruleTypeIds: ['foo'], filter: `alert.attributes.tags: ['bar']` },
+        options: {
+          ruleTypeIds: ['foo'],
+          consumers: ['bar'],
+          filter: `alert.attributes.tags: ['bar']`,
+        },
       });
 
       const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
 
       expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
-        `"((alert.attributes.tags: ['bar'] AND alert.attributes.alertTypeId: foo) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+        `"((alert.attributes.tags: ['bar'] OR alert.attributes.alertTypeId: foo OR alert.attributes.consumer: bar) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
       );
     });
   });

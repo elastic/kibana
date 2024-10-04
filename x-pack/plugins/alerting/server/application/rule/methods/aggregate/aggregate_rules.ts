@@ -52,7 +52,10 @@ export async function aggregateRules<T = Record<string, unknown>>(
   const filterKueryNode = buildKueryNodeFilter(filter);
   const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
   const consumersFilter = buildConsumersFilter(consumers);
-  const combinedFilters = combineFilters([filterKueryNode, ruleTypeIdsFilter, consumersFilter]);
+  const combinedFilters = combineFilters(
+    [filterKueryNode, ruleTypeIdsFilter, consumersFilter],
+    'or'
+  );
 
   const { aggregations } = await findRulesSo<T>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,

@@ -29,6 +29,7 @@ export const findRulesOptionsSchema = schema.object(
       schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])
     ),
     ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
+    consumers: schema.maybe(schema.arrayOf(schema.string())),
   },
   { unknowns: 'allow' }
 );
