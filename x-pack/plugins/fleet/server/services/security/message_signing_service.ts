@@ -67,7 +67,6 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       privateKeyEncoding: {
         type: 'pkcs8',
         format: 'pem',
-        cipher: 'aes-256-gcm',
         passphrase,
       },
       publicKeyEncoding: {
