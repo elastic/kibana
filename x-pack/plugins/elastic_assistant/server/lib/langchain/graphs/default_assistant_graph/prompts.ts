@@ -10,6 +10,7 @@ import {
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
+  GEMINI_USER_PROMPT,
   STRUCTURED_SYSTEM_PROMPT,
 } from './nodes/translations';
 
@@ -24,7 +25,8 @@ export const formatPrompt = (prompt: string, additionalPrompt?: string) =>
 export const systemPrompts = {
   openai: DEFAULT_SYSTEM_PROMPT,
   bedrock: `${DEFAULT_SYSTEM_PROMPT} ${BEDROCK_SYSTEM_PROMPT}`,
-  gemini: `${DEFAULT_SYSTEM_PROMPT} ${GEMINI_SYSTEM_PROMPT}`,
+  // The default prompt overwhelms gemini, do not prepend
+  gemini: GEMINI_SYSTEM_PROMPT,
   structuredChat: STRUCTURED_SYSTEM_PROMPT,
 };
 
@@ -45,3 +47,16 @@ export const formatPromptStructured = (prompt: string, additionalPrompt?: string
   ]);
 
 export const structuredChatAgentPrompt = formatPromptStructured(systemPrompts.structuredChat);
+
+/**
+ * If Gemini is the llmType,
+ * Adds a user prompt for the latest message in a conversation
+ * @param prompt
+ * @param llmType
+ */
+export const formatLatestUserMessage = (prompt: string, llmType?: string): string => {
+  if (llmType === 'gemini') {
+    return `${GEMINI_USER_PROMPT}${prompt}`;
+  }
+  return prompt;
+};

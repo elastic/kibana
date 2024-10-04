@@ -17,7 +17,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
   ActionsClientSimpleChatModel,
-  ActionsClientGeminiChatModel,
+  ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
@@ -192,7 +192,7 @@ export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
     : llmType === 'bedrock' && bedrockChatEnabled
     ? ActionsClientBedrockChatModel
     : llmType === 'gemini' && bedrockChatEnabled
-    ? ActionsClientGeminiChatModel
+    ? ActionsClientChatVertexAI
     : ActionsClientSimpleChatModel;
 
 export const isOpenSourceModel = (connector?: Connector): boolean => {
