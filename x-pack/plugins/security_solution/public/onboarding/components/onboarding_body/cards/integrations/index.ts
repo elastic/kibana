@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
+import integrationsIcon from './images/integrations_icon.png';
 
 export const integrationsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.integrations,
   title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
     defaultMessage: 'Add data with integrations',
   }),
-  icon: 'fleetApp',
+  icon: integrationsIcon,
   Component: React.lazy(
     () => import('./integrations_card' /* webpackChunkName: "onboarding_integrations_card" */)
   ),

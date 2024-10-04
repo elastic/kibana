@@ -42,7 +42,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText data-test-subj="dashboardsDescription" size="s" color="subdued">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (
@@ -53,7 +53,10 @@ export const DashboardsCard: OnboardingCardComponent = ({
                 icon="iInCircle"
                 text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
                 action={
-                  <EuiLink onClick={expandIntegrationsCard}>
+                  <EuiLink
+                    data-test-subj="dashboardsCardCalloutLink"
+                    onClick={expandIntegrationsCard}
+                  >
                     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                       <EuiFlexItem>{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -66,7 +69,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem data-test-subj="dashboardsCardButton" grow={false}>
           <CardLinkButton
             onClick={() => setComplete(true)}
             linkId="goToDashboardsButton"

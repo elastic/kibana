@@ -35,7 +35,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText data-test-subj="rulesCardDescription" size="s" color="subdued">
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (
@@ -59,7 +59,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem data-test-subj="rulesCardButton" grow={false}>
           <SecuritySolutionLinkButton
             deepLinkId={SecurityPageName.rules}
             fill

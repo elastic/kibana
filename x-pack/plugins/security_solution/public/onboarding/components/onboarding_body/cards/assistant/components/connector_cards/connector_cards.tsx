@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -18,15 +18,15 @@ import {
   EuiLink,
   EuiTextColor,
   useEuiBackgroundColor,
+  EuiBadge,
+  EuiSpacer,
 } from '@elastic/eui';
-import {
-  ConnectorAddModal,
-  type ActionConnector,
-} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { css } from '@emotion/css';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import { CreateConnectorPopover } from '../create_connector_popover/create_connector_popover';
 
 const useConnectorCardsStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -53,7 +53,7 @@ const useConnectorCardsStyles = () => {
 
 interface ConnectorCardsProps {
   connectors?: AIConnector[];
-  onConnectorSaved?: (savedAction: ActionConnector) => void;
+  onConnectorSaved: () => void;
   onClose?: () => void;
   actionTypeIds?: string[];
 }
@@ -79,7 +79,39 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
       return actionTypeIds ? data?.filter(({ id }) => actionTypeIds.includes(id)) : data;
     }, [data, actionTypeIds]);
 
-    if (!actionTypes) return <EuiLoadingSpinner />;
+    if (!actionTypes || !connectors) return <EuiLoadingSpinner />;
+
+    if (connectors.length > 0) {
+      return (
+        <>
+          <EuiFlexGroup wrap>
+            {connectors?.map((connector) => (
+              <EuiFlexItem
+                grow={false}
+                className={css`
+                  width: 30%;
+                `}
+              >
+                <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem>
+                      <EuiText>{connector.name}</EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        {actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <CreateConnectorPopover onConnectorSaved={onConnectorSaved} />
+        </>
+      );
+    }
 
     return (
       <>

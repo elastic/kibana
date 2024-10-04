@@ -10,10 +10,12 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ASSISTANT_CARD_TITLE } from './translations';
+import { checkAssistantCardComplete } from './assistant_check_complete';
 
-export const asistantCardConfig: OnboardingCardConfig = {
-  id: OnboardingCardId.asistant,
+export const assistantCardConfig: OnboardingCardConfig = {
+  id: OnboardingCardId.assistant,
   title: ASSISTANT_CARD_TITLE,
   icon: AssistantAvatar,
-  Component: React.lazy(() => import('./asistant_card')),
+  Component: React.lazy(() => import('./assistant_card')),
+  checkComplete: checkAssistantCardComplete,
 };

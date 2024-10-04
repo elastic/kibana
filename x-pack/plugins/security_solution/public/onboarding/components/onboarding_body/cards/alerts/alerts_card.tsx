@@ -39,7 +39,7 @@ export const AlertsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
+          <EuiText data-test-subj="alertsCardDescription" size="s" color="subdued">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </EuiText>
           {!isIntegrationsCardComplete && (
@@ -63,7 +63,7 @@ export const AlertsCard: OnboardingCardComponent = ({
             </>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem data-test-subj="alertsCardButton" grow={false}>
           <SecuritySolutionLinkButton
             onClick={() => setComplete(true)}
             deepLinkId={SecurityPageName.alerts}
