@@ -29,10 +29,10 @@ import {
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { MetricsResponse } from '../types';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { MetricTypes } from '../../../common/rest_types';
+import { DatasetQualityLink } from './dataset_quality_link';
 interface ChartsProps {
   data: MetricsResponse;
 }
@@ -50,13 +50,7 @@ export const chartKeyToTitleMap: Record<ChartKey, string> = {
     defaultMessage: 'Data Retained in Storage',
   }),
 };
-function getDatasetFromDataStream(dataStreamName: string): string | null {
-  const parts = dataStreamName.split('-');
-  if (parts.length !== 3) {
-    return null;
-  }
-  return parts[1];
-}
+
 export const Charts: React.FC<ChartsProps> = ({ data }) => {
   const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
   const theme = useEuiTheme();
@@ -69,20 +63,16 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
     },
   } = useKibanaContextForPlugin();
   const hasDataSetQualityFeature = capabilities.data_quality;
-  const onClickDataQuality = async ({ dataStreamName }: { dataStreamName: string }) => {
-    const dataQualityLocator = locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
-    const locatorParams: DataQualityLocatorParams = {
-      filters: {
-        // TODO: get time range from our page state
-        timeRange: { from: 'now-15m', to: 'now', refresh: { pause: true, value: 0 } },
-      },
-    };
-    const dataset = getDatasetFromDataStream(dataStreamName);
-    if (locatorParams?.filters && dataset) {
-      locatorParams.filters.query = dataset;
-    }
+  const hasIndexManagementFeature = capabilities.index_management;
+
+  const onClickIndexManagement = async ({ dataStreamName }: { dataStreamName: string }) => {
+    // TODO: use proper index management locator https://github.com/elastic/kibana/issues/195083
+    const dataQualityLocator = locators.get('MANAGEMENT_APP_LOCATOR');
     if (dataQualityLocator) {
-      await dataQualityLocator.navigate(locatorParams);
+      await dataQualityLocator.navigate({
+        sectionId: 'data',
+        appId: `index_management/data_streams/${dataStreamName}`,
+      });
     }
   };
 
@@ -136,20 +126,19 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
                                 label="Copy data stream name"
                                 onClick={() => undefined}
                               />
-                              <EuiListGroupItem
-                                href="#"
-                                label="Manage data stream"
-                                onClick={() => undefined}
-                              />
-                              {hasDataSetQualityFeature && (
+                              {hasIndexManagementFeature && (
                                 <EuiListGroupItem
-                                  label="View data quality"
+                                  href="#"
+                                  label="Manage data stream"
                                   onClick={() =>
-                                    onClickDataQuality({
+                                    onClickIndexManagement({
                                       dataStreamName: label,
                                     })
                                   }
                                 />
+                              )}
+                              {hasDataSetQualityFeature && (
+                                <DatasetQualityLink dataStreamName={label} />
                               )}
                             </EuiListGroup>
                           </EuiPopover>
