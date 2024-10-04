@@ -90,22 +90,20 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   });
 
   const getFilesClient = mockGetFilesClient();
+  const casesProviderValue = {
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    features,
+    owner,
+    permissions,
+    getFilesClient,
+  };
 
   return (
     <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
-          <CasesProvider
-            value={{
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              features,
-              owner,
-              permissions,
-              getFilesClient,
-            }}
-            queryClient={queryClient}
-          >
+          <CasesProvider value={casesProviderValue} queryClient={queryClient}>
             <FilesContext client={createMockFilesClient()}>{children}</FilesContext>
           </CasesProvider>
         </MemoryRouter>
