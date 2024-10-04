@@ -233,7 +233,6 @@ export const getInfoHandler: FleetRequestHandler<
       prerelease,
     });
     const flattenedRes = soToInstallationInfo(res) as PackageInfo;
-
     let metadata: any;
     if (request.query.withMetadata) {
       const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -334,8 +333,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const spaceId = fleetContext.spaceId;
+  const installSource = 'registry';
   const res = await installPackage({
-    installSource: 'registry',
+    installSource,
     savedObjectsClient,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
@@ -352,7 +352,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     const body: InstallPackageResponse = {
       items: res.assets || [],
       _meta: {
-        install_source: res.installSource,
+        install_source: res.installSource ?? installSource,
       },
     };
     return response.ok({ body });
@@ -375,10 +375,10 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
-
+  const installSource = 'custom';
   try {
     const res = await installPackage({
-      installSource: 'custom',
+      installSource,
       savedObjectsClient,
       pkgName: integrationName,
       datasets,
@@ -393,7 +393,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       const body: InstallPackageResponse = {
         items: res.assets || [],
         _meta: {
-          install_source: res.installSource,
+          install_source: res.installSource ?? installSource,
         },
       };
       return response.ok({ body });
@@ -479,9 +479,9 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
-
+  const installSource = 'upload';
   const res = await installPackage({
-    installSource: 'upload',
+    installSource,
     savedObjectsClient,
     esClient,
     archiveBuffer,
@@ -496,7 +496,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       items: res.assets || [],
       response: res.assets || [],
       _meta: {
-        install_source: res.installSource,
+        install_source: res.installSource ?? installSource,
       },
     };
     return response.ok({ body });
@@ -600,16 +600,17 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
       pkgVersion,
     });
 
-    const resp = await handleTransformReauthorizeAndStart({
-      esClient,
-      savedObjectsClient,
-      logger,
-      pkgName,
-      pkgVersion,
-      transforms,
-      secondaryAuth,
-      username,
-    });
+    const resp: Array<{ transformId: string; success: boolean; error: null | any }> =
+      await handleTransformReauthorizeAndStart({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName,
+        pkgVersion,
+        transforms,
+        secondaryAuth,
+        username,
+      });
 
     return response.ok({ body: resp });
   } catch (error) {
