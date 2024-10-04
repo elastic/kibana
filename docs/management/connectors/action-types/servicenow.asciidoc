@@ -64,7 +64,7 @@ The username for HTTP basic authentication.
 When you create or edit a connector, use the *Test* tab to test its actions:
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
+image::management/connectors/images/servicenow-params-test.png[ServiceNow params test, width=75%]
 
 {sn-itsm} actions have the following configuration properties.
 
@@ -84,7 +84,7 @@ For example:
     "u_assignment_group": "Testing"
 }
 ----
-Note that the built-in source field names are prefixed with "u_".
+Note that the default source field names in the Elastic ServiceNow application are prefixed with "u_".
 --
 Category::
 The category of the incident.
