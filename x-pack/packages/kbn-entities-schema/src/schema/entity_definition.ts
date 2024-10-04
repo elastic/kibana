@@ -14,7 +14,6 @@ import {
   durationSchema,
   identityFieldsSchema,
   semVerSchema,
-  durationSchemaWithMinimum,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
@@ -33,7 +32,6 @@ export const entityDefinitionSchema = z.object({
   managed: z.optional(z.boolean()).default(false),
   latest: z.object({
     timestampField: z.string(),
-    interval: durationSchemaWithMinimum(1),
     lookbackPeriod: z.optional(durationSchema).default('24h'),
     settings: z.optional(
       z.object({

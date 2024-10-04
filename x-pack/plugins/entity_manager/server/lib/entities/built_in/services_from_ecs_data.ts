@@ -35,9 +35,8 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
     ],
     latest: {
       timestampField: '@timestamp',
-      interval: '1m',
+      lookbackPeriod: '10m',
       settings: {
-        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },

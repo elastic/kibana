@@ -15,7 +15,6 @@ export const builtInEntityDefinition = entityDefinitionSchema.parse({
   managed: true,
   latest: {
     timestampField: '@timestamp',
-    interval: '1m',
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',

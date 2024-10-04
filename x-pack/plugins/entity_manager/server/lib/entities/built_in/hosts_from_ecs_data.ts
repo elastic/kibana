@@ -21,7 +21,7 @@ export const builtInHostsFromEcsEntityDefinition: EntityDefinition = entityDefin
   displayNameTemplate: '{{host.name}}',
   latest: {
     timestampField: '@timestamp',
-    interval: '5m',
+    lookbackPeriod: '10m',
     settings: {
       frequency: '5m',
     },

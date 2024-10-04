@@ -14,7 +14,6 @@ export const rawEntityDefinition = {
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
   latest: {
     timestampField: '@timestamp',
-    interval: '1m',
     lookbackPeriod: '10m',
     settings: {
       frequency: '30s',
