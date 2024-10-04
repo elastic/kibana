@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiTitle, EuiPanel, EuiFlexItem, EuiText } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { ALERT_START, ALERT_END } from '@kbn/rule-data-utils';
-import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { AlertDetailsSource } from '../types';
 import { TopAlert } from '../../..';
@@ -27,24 +26,11 @@ export function SourceBar({ alert, sources = [] }: SourceBarProps) {
 
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-
-  const alertSummary = [];
-  const groups = getSources(alert) as Array<{ field: string; value: string }>;
+  const groups = getSources(alert);
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
   }, [alertStart, alertEnd]);
-
-  if (groups && groups.length > 0) {
-    alertSummary.push({
-      label: i18n.translate('xpack.observability.alertDetails.sourceBar.source', {
-        defaultMessage: 'Source',
-      }),
-      value: (
-        <Groups groups={groups} timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }} />
-      ),
-    });
-  }
 
   return (
     <>

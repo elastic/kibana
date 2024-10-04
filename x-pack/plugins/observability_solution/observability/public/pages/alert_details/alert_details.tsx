@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiTabbedContentTab,
   useEuiTheme,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -213,9 +214,11 @@ export function AlertDetails() {
     */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
-        <EuiSpacer size="l" />
-        <SourceBar alert={alertDetail.formatted} sources={sources} />
-        <AlertDetailContextualInsights alert={alertDetail} />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <AlertDetailContextualInsights alert={alertDetail} />
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         {rule && alertDetail.formatted && (
           <>

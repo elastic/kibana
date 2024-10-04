@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -72,27 +72,29 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
             />
             :&nbsp;
           </EuiText>
-          <EuiText
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            size="s"
-          >
-            <EuiLink
-              data-test-subj="o11yAlertRuleLink"
-              href={ruleLink}
-              style={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: '200px',
-                display: 'flow',
-                alignItems: 'center',
-              }}
+          <EuiToolTip position="top" content={ruleName}>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size="s"
             >
-              {ruleName}
-            </EuiLink>
-          </EuiText>
+              <EuiLink
+                data-test-subj="o11yAlertRuleLink"
+                href={ruleLink}
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '200px',
+                  display: 'flow',
+                  alignItems: 'center',
+                }}
+              >
+                {ruleName}
+              </EuiLink>
+            </EuiText>
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
