@@ -32,6 +32,21 @@ export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
 };
 
 /**
+ * helper utility that defines whether bulk edit action is related to alert suppression, i.e. one of:
+ * 'add_alert_suppression', 'delete_alert_suppression', 'set_alert_suppression'
+ * @param editAction {@link BulkActionEditType}
+ * @returns {boolean}
+ */
+export const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType) => {
+  const indexPatternsActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.add_alert_suppression,
+    BulkActionEditTypeEnum.delete_alert_suppression,
+    BulkActionEditTypeEnum.set_alert_suppression,
+  ];
+  return indexPatternsActions.includes(editAction);
+};
+
+/**
  * Separates system actions from actions and performs necessary transformations for
  * alerting rules client bulk edit operations.
  * @param actionsClient
