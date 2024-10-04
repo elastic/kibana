@@ -127,4 +127,17 @@ describe('AddNote', () => {
       title: CREATE_NOTE_ERROR,
     });
   });
+
+  it('should call onNodeAdd callback when it is available', async () => {
+    const onNodeAdd = jest.fn();
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <AddNote eventId={'event-id'} onNoteAdd={onNodeAdd} />
+      </TestProviders>
+    );
+    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+    getByTestId(ADD_NOTE_BUTTON_TEST_ID).click();
+    expect(onNodeAdd).toHaveBeenCalled();
+  });
 });
