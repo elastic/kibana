@@ -316,7 +316,6 @@ export class SearchInterceptor {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal: searchAbortController.getSignal(),
-          stream: true,
           isSearchStored,
         }
       )
@@ -461,6 +460,8 @@ export class SearchInterceptor {
             ...searchOptions,
           }),
           asResponse: true,
+          stream:
+            strategy === ESQL_ASYNC_SEARCH_STRATEGY || strategy === ENHANCED_ES_SEARCH_STRATEGY,
         })
         .then((rawResponse) => {
           const response = rawResponse.body;
@@ -514,7 +515,7 @@ export class SearchInterceptor {
           }
         }) as Promise<IKibanaSearchResponse>;
     } else {
-      const { executionContext, stream, ...rest } = options || {};
+      const { executionContext, ...rest } = options || {};
       return this.batchedFetch(
         {
           request,
