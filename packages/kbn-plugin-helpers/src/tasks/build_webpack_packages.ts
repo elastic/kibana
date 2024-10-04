@@ -7,33 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'path';
-import fs from 'fs';
-import fsp from 'fs/promises';
-import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
 import globby from 'globby';
-import { run } from '@kbn/dev-cli-runner';
+import path from 'path';
+import fsp from 'fs/promises';
+import fs from 'fs';
+import execa from 'execa';
+
 import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { TaskContext } from '../task_context';
 
-let toolingLog: ToolingLog;
-run(async ({ log, flagsReader }) => {
-  toolingLog = log;
-  const packagePath = flagsReader.getPositionals()[0];
+export async function buildWebpackPackages({ log, dist, sourceDir }: TaskContext) {
+  log.info('run bazel and build required artifacts for the optimizer');
 
-  const packageRoot = path.resolve(REPO_ROOT, packagePath);
+  try {
+    await buildPackage(sourceDir, log);
 
-  if (!fs.existsSync(packageRoot)) {
-    throw new Error(`Package not found at ${packageRoot}`);
+    log.success('bazel run successfully and artifacts were created');
+  } catch (e) {
+    log.error(`bazel run failed: ${e}`);
+    process.exit(1);
   }
-
-  await buildPackage(packageRoot, log);
-})
-  .then(() => {})
-  .catch((e) => {
-    toolingLog.error(e.message);
-    throw e;
-  });
+}
 
 async function buildPackage(packageRoot: string, log: ToolingLog) {
   const packageConfig = JSON.parse(
