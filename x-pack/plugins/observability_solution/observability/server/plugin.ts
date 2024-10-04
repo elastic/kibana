@@ -210,6 +210,66 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.addCommentsSubFeatureName', {
+            defaultMessage: 'Add comments',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'create_comment',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.addCommentsSubFeatureDetails',
+                    {
+                      defaultMessage: 'Add comments to cases',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    createComment: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.createComment,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.reopenCasesSubFeatureName', {
+            defaultMessage: 'Reopen Closed Cases',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'reopen_cases',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.reopenCasesSubFeatureDetails',
+                    {
+                      defaultMessage: 'Reopen closed cases',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    reopenCases: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.reopenCases,
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
