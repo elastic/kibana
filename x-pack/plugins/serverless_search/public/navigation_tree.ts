@@ -86,6 +86,16 @@ export const navigationTree = (
               link: 'management:index_management',
               breadcrumbStatus:
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(
+                    prepend('/app/management/data/index_management/')
+                  ) ||
+                  pathNameSerialized.startsWith(
+                    prepend('/app/elasticsearch/indices/index_details/')
+                  )
+                );
+              },
             },
             {
               title: CONNECTORS_LABEL,
