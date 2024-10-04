@@ -69,6 +69,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         format: 'der',
         cipher: 'aes-256-gcm',
         passphrase,
+        iv: crypto.randomBytes(32),
       },
       publicKeyEncoding: {
         type: 'spki',
