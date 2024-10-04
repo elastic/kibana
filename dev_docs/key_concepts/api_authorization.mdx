@@ -1,0 +1,285 @@
+---
+id: kibDevDocsSecurityAPIAuthorization
+slug: /kibana-dev-docs/key-concepts/security-api-authorization
+title: Kibana API authorization
+description: This guide provides an overview of API authorization in Kibana.
+date: 2024-10-04
+tags: ['kibana', 'dev', 'contributor', 'security']
+---
+
+Security is everyone's responsibility. This is inclusive of design, product, and engineering. The purpose of this guide is to give a high-level overview of security constructs and expectations.
+
+This guide specifically focuses on API authorization.
+
+## API authorization
+Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
+This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
+
+Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are already met.
+This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
+
+If your endpoint is not a CRUD interface to Saved Objects, then your route ensure that only authorized users can invoke your endpoint. This is **especially** important if your route does any of the following:
+1. Performs non-insignificant processing, causing load on the Kibana server.
+2. Calls Elasticsearch using the internal `kibana_system` user.
+3. Calls a third-party service.
+4. Returns any non-public information to the caller, such as system configuration or state.
+
+## [Deprecated] Adding API authorization with `access` tags
+`access` tags are used to restrict access to API routes. They are used to ensure that only users with the required privileges can access the route.
+Example configuration:
+```ts
+router.get({
+  path: '/api/path',
+  options: {
+    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
+  },
+  ...
+}, handler);
+```
+
+More information on adding `access` tags to your routes can be found temporarily in the [legacy documentation](https://www.elastic.co/guide/en/kibana/current/development-security.html#development-plugin-feature-registration)
+
+### Why not add `access` tags to all routes by default?
+Each authorization check that we perform involves a round-trip to Elasticsearch, so they are not as cheap as we'd like. Therefore, we want to keep the number of authorization checks we perform within a single route to a minimum.
+Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
+
+
+## Adding API authorization with `security` configuration
+`KibanaRouteOptions` provides a security configuration at the route definition level.
+It provides robust security configurations for both **Classic** and **Versioned** routes.
+
+### Configuring Authorization on Routes
+**Before Migration:**
+```ts
+// Before
+router.get({
+  path: '/api/path',
+  options: {
+    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
+  },
+  ...
+}, handler);
+```
+
+**After Migration:**
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+    },
+  },
+  ...
+}, handler);
+```
+
+### Opting Out of Authorization for Specific Routes
+**Before Migration:**
+```ts
+router.get({
+  path: '/api/path',
+  ...
+}, handler);
+```
+
+**After Migration:**
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'This route is opted out from authorization because ...',
+    },
+  },
+  ...
+}, handler);
+```
+
+### Classic Router Security Configuration Examples
+
+**Example1: All Privileges Required**
+Requires `privilege_1` AND both `privilege_2` to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 2: Any Privileges Required**
+Requires `privilege_1` OR `privilege_2` to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [{ anyRequired: ['<privilege_1>', '<privilege_2>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 3: Complex Configuration**
+Requires `privilege_1` AND `privilege_2` AND (`privilege_3` OR `privilege_4`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [{ allRequired: ['<privilege_1>', '<privilege_2>'], anyRequired: ['<privilege_3>', '<privilege_4>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+### Versioned Router Security Configuration Examples
+Versioned router allows different security configurations registered per version, giving flexibility when evolving API security over time.
+**Example 1: Default and Custom Version Security**
+
+1. **Default Configuration (applies to versions without specific authorization)**: Requires `<privilege_1>`.
+
+2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
+
+3. **Version 2**: Inherits the default authorization configuration, requiring `<privilege_1>`.
+
+```ts
+router.versioned
+  .get({
+    path: '/internal/path',
+    access: 'internal',
+    // default security configuration, will be used for version unless overridden
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>'],
+      },
+    },
+  })
+  .addVersion({
+    version: '1',
+    validate: false,
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+      },
+    },
+  }, handlerV1)
+  .addVersion({
+    version: '2',
+    validate: false,
+  }, handlerV2);
+```
+
+**Example 2: Multiple Versions with Different Security Requirements**
+1. **Default Configuration (applies to versions without specific authorization)**: Requires `<privilege_1>`.
+
+2. **Version 1**: Requires **both** `<privilege_1>` and `<privilege_2>` privileges.
+
+3. **Version 2**: Requires `<privilege_3>` AND (`<privilege_1>` OR `<privilege_2>`).
+
+4. **Version 3**: Requires only `<privilege_3>`.
+
+```ts
+router.versioned
+  .get({
+    path: '/internal/path',
+    access: 'internal',
+    // default security configuration, will be used for version unless overridden
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>'],
+      },
+    },
+  })
+  .addVersion({
+    version: '1',
+    validate: false,
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
+      },
+    },
+  }, handlerV1)
+  .addVersion({
+    version: '2',
+    validate: false,
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_3>', anyRequired: ['<privilege_1>', '<privilege_2>']],
+      },
+    },
+  }, handlerV2)
+  .addVersion({
+    version: '3',
+    validate: false,
+    security: {
+      authz: {
+        requiredPrivileges: ['<privilege_3>'],
+      },
+    },
+  }, handlerV3);
+```
+
+## Authorization Response Available in Route Handlers
+The `AuthzResult` object is available in route handlers, which provides information about the authorization response.
+For example, you have a route that requires  `privilege_3` and ANY of the privileges `privilege_1` OR `privilege_2`:
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['privilege_3', { anyRequired: ['<privilege_1>', '<privilege_2>'] }],
+    },
+  },
+  ...
+}, (context, request, response) => {
+  // The authorization response is available in `request.authzResult`
+  // {
+  //   "privilege_3": true,
+  //   "privilege_1": true,
+  //   "privilege_2": false
+  // }
+});
+```
+
+## OpenAPI Specification (OAS) documentation
+Based on the security configuration defined in routes, OAS documentation will automatically generate and include description about the required privileges. 
+This makes it easy to view the security requirements of each endpoint in a standardized format, facilitating better understanding and usage by developers or teams consuming the API
+
+To check the OAS documentation for a specific API route and see its security details, you can use the following command:
+```sh
+GET /api/oas?pathStartsWith=/your/api/path
+```
+
+## Migrating from `access` Tags to `security` Configuration
+We aim to use the same privileges that are currently defined with tags `access:<privilege_name>`.
+To assist with this migration, we have created eslint rule `no_deprecated_authz_config`, that will automatically convert your `access` tags to the new `security` configuration.
+It scans route definitions and converts `access` tags to the new `requiredPriviliges` configuration.
+
+Note: The rule is disabled by default to avoid automatic migrations without an oversight. You can perform migrations by running:
+
+**Migrate Routes with Defined Authorization**
+```sh
+MIGRATE_DISABLED_AUTHZ=false npx eslint --ext .ts --fix --rule "@kbn/eslint/no_deprecated_authz_config:error" path/to/your/folder
+```
+We encourage you to migrate routes that are opted out from authorization to new config and provide legitimate reason for disabled authorization.
+It is better to migrate routes opted out from authorization iteratively and elaborate on the reasoning. 
+Probably, you can consider enabling authorization for these routes in the future.
+
+**Migrate All Routes (Including Those Opted Out from Authorization)**
+```sh
+MIGRATE_DISABLED_AUTHZ=true npx eslint --ext .ts --fix --rule "@kbn/eslint/no_deprecated_authz_config:error" path/to/your/folder
+```
+
+## Questions?
+If you have any questions or need help with API authorization, please reach out to the Kibana Security team on the `#kibana-security` Slack channel.
+
+

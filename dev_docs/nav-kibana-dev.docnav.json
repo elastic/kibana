@@ -101,7 +101,10 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityIntro"
+          "id": "kibDevDocsSecurityAPIAuthorization"
+        },
+        {
+          "id": "kibDevDocsSecurityKibanaSystemUser"
         },
         {
           "id": "kibDevFeaturePrivileges",
