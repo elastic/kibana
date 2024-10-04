@@ -6263,6 +6263,1427 @@
         ]
       }
     },
+    "/api/security/role": {
+      "get": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole#0",
+        "parameters": [],
+        "responses": {},
+        "summary": "Get all roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/role/{name}": {
+      "delete": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Delete a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Get a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "put": {
+        "operationId": "%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createOnly",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "maxLength": 2048,
+                    "type": "string"
+                  },
+                  "elasticsearch": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "cluster": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "type": "boolean"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_cluster": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "clusters": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "privileges",
+                            "clusters"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "remote_indices": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "allow_restricted_indices": {
+                              "type": "boolean"
+                            },
+                            "clusters": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "field_security": {
+                              "additionalProperties": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "type": "object"
+                            },
+                            "names": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "privileges": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "query": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "clusters",
+                            "names",
+                            "privileges"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "run_as": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "kibana": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "base": {
+                          "anyOf": [
+                            {
+                              "items": {},
+                              "type": "array"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "object"
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ],
+                          "nullable": true,
+                          "oneOf": [
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "feature": {
+                          "additionalProperties": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "type": "object"
+                        },
+                        "spaces": {
+                          "anyOf": [
+                            {
+                              "items": {
+                                "enum": [
+                                  "*"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 1,
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ],
+                          "default": [
+                            "*"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "base"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "metadata": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "elasticsearch"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Create or update a role",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/security/roles": {
+      "post": {
+        "operationId": "%2Fapi%2Fsecurity%2Froles#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "roles": {
+                    "additionalProperties": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "description": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "elasticsearch": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cluster": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "type": "boolean"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_cluster": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "clusters": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "privileges",
+                                  "clusters"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "remote_indices": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "allow_restricted_indices": {
+                                    "type": "boolean"
+                                  },
+                                  "clusters": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "field_security": {
+                                    "additionalProperties": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "names": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "privileges": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "query": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "clusters",
+                                  "names",
+                                  "privileges"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "run_as": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "kibana": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "base": {
+                                "anyOf": [
+                                  {
+                                    "items": {},
+                                    "type": "array"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ],
+                                "nullable": true,
+                                "oneOf": [
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ]
+                              },
+                              "feature": {
+                                "additionalProperties": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "type": "object"
+                              },
+                              "spaces": {
+                                "anyOf": [
+                                  {
+                                    "items": {
+                                      "enum": [
+                                        "*"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "maxItems": 1,
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "type": "array"
+                                  }
+                                ],
+                                "default": [
+                                  "*"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "base"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "metadata": {
+                          "additionalProperties": {},
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "elasticsearch"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "roles"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Create or update roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/spaces/_copy_saved_objects": {
+      "post": {
+        "description": "Copy saved objects to spaces",
+        "operationId": "%2Fapi%2Fspaces%2F_copy_saved_objects#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "compatibilityMode": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "createNewCopies": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "includeReferences": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "objects": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "overwrite": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "spaces": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "spaces",
+                  "objects"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": []
+      }
+    },
+    "/api/spaces/_disable_legacy_url_aliases": {
+      "post": {
+        "description": "Disable legacy URL aliases",
+        "operationId": "%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "aliases": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "sourceId": {
+                          "type": "string"
+                        },
+                        "targetSpace": {
+                          "type": "string"
+                        },
+                        "targetType": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "targetSpace",
+                        "targetType",
+                        "sourceId"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "aliases"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": []
+      }
+    },
+    "/api/spaces/_get_shareable_references": {
+      "post": {
+        "description": "Get shareable references",
+        "operationId": "%2Fapi%2Fspaces%2F_get_shareable_references#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "objects": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "objects"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": []
+      }
+    },
+    "/api/spaces/_resolve_copy_saved_objects_errors": {
+      "post": {
+        "description": "Resolve conflicts copying saved objects",
+        "operationId": "%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "compatibilityMode": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "createNewCopies": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "includeReferences": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "objects": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "retries": {
+                    "additionalProperties": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "createNewCopy": {
+                            "type": "boolean"
+                          },
+                          "destinationId": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "ignoreMissingReferences": {
+                            "type": "boolean"
+                          },
+                          "overwrite": {
+                            "default": false,
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "retries",
+                  "objects"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": []
+      }
+    },
+    "/api/spaces/_update_objects_spaces": {
+      "post": {
+        "description": "Update saved objects in spaces",
+        "operationId": "%2Fapi%2Fspaces%2F_update_objects_spaces#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "objects": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "spacesToAdd": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "spacesToRemove": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "objects",
+                  "spacesToAdd",
+                  "spacesToRemove"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": []
+      }
+    },
+    "/api/spaces/space": {
+      "get": {
+        "description": "Get all spaces",
+        "operationId": "%2Fapi%2Fspaces%2Fspace#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "purpose",
+            "required": false,
+            "schema": {
+              "enum": [
+                "any",
+                "copySavedObjectsIntoSpace",
+                "shareSavedObjectsIntoSpace"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_authorized_purposes",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {},
+                  "type": "array"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "nullable": true,
+              "oneOf": [
+                {
+                  "enum": [
+                    false
+                  ],
+                  "type": "boolean",
+                  "x-oas-optional": true
+                },
+                {
+                  "type": "boolean",
+                  "x-oas-optional": true
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "post": {
+        "description": "Create a space",
+        "operationId": "%2Fapi%2Fspaces%2Fspace#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "_reserved": {
+                    "type": "boolean"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "disabledFeatures": {
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "imageUrl": {
+                    "type": "string"
+                  },
+                  "initials": {
+                    "maxLength": 2,
+                    "type": "string"
+                  },
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "solution": {
+                    "enum": [
+                      "security",
+                      "oblt",
+                      "es",
+                      "classic"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/api/spaces/space/{id}": {
+      "delete": {
+        "description": "Delete a space",
+        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "get": {
+        "description": "Get a space",
+        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "put": {
+        "description": "Update a space",
+        "operationId": "%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "_reserved": {
+                    "type": "boolean"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "disabledFeatures": {
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "imageUrl": {
+                    "type": "string"
+                  },
+                  "initials": {
+                    "maxLength": 2,
+                    "type": "string"
+                  },
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "solution": {
+                    "enum": [
+                      "security",
+                      "oblt",
+                      "es",
+                      "classic"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/api/status": {
       "get": {
         "operationId": "%2Fapi%2Fstatus#0",
@@ -6359,6 +7780,12 @@
     },
     {
       "name": "connectors"
+    },
+    {
+      "name": "roles"
+    },
+    {
+      "name": "spaces"
     },
     {
       "name": "system"

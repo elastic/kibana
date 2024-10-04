@@ -172,7 +172,13 @@ test('searchSessionId propagates to children', async () => {
     0,
     undefined,
     undefined,
-    { lastSavedInput: sampleInput }
+    {
+      anyMigrationRun: false,
+      isEmbeddedExternally: false,
+      lastSavedInput: sampleInput,
+      lastSavedId: undefined,
+      managed: false,
+    }
   );
   container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<

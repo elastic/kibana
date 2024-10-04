@@ -28,6 +28,7 @@ export const EntityInsight = <T,>({
   const hasMisconfigurationFindings = getSetupStatus.data?.hasMisconfigurationsFindings;
   const hasVulnerabilitiesFindings = getSetupStatus.data?.hasVulnerabilitiesFindings;
   const insightContent: React.ReactElement[] = [];
+  const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
 
   if (hasMisconfigurationFindings)
     insightContent.push(
@@ -36,7 +37,7 @@ export const EntityInsight = <T,>({
         <EuiSpacer size="m" />
       </>
     );
-  if (hasVulnerabilitiesFindings && fieldName === 'host.name')
+  if (isVulnerabilitiesFindingForHost)
     insightContent.push(
       <>
         <VulnerabilitiesPreview name={name} isPreviewMode={isPreviewMode} />
@@ -45,8 +46,7 @@ export const EntityInsight = <T,>({
     );
   return (
     <>
-      {(hasMisconfigurationFindings ||
-        (hasVulnerabilitiesFindings && fieldName === 'host.name')) && (
+      {(hasMisconfigurationFindings || isVulnerabilitiesFindingForHost) && (
         <>
           <EuiAccordion
             initialIsOpen={true}

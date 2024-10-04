@@ -19,7 +19,7 @@ interface AggregationBucket {
   doc_count?: number;
 }
 
-type AggregationBuckets = Record<string, AggregationBucket>;
+export type AggregationBuckets = Record<string, AggregationBucket>;
 
 const RESULT_EVALUATION = {
   PASSED: 'passed',
@@ -27,12 +27,12 @@ const RESULT_EVALUATION = {
   UNKNOWN: 'unknown',
 };
 
-const VULNERABILITIES_RESULT_EVALUATION = {
+export const VULNERABILITIES_RESULT_EVALUATION = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
   HIGH: 'HIGH',
   CRITICAL: 'CRITICAL',
-  UNKNOWN: 'UNKNOWN',
+  NONE: 'NONE',
 };
 
 export const getFindingsCountAggQueryMisconfiguration = () => ({
@@ -120,7 +120,7 @@ export const getVulnerabilitiesAggregationCount = (
     [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: { doc_count: 0 },
     [VULNERABILITIES_RESULT_EVALUATION.HIGH]: { doc_count: 0 },
     [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: { doc_count: 0 },
-    [VULNERABILITIES_RESULT_EVALUATION.UNKNOWN]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.NONE]: { doc_count: 0 },
   };
 
   // if buckets are undefined we will use default buckets
@@ -135,7 +135,7 @@ export const getVulnerabilitiesAggregationCount = (
       [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
       [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
       [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
-      [VULNERABILITIES_RESULT_EVALUATION.UNKNOWN]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
     }
   );
 };
@@ -143,7 +143,7 @@ export const getVulnerabilitiesAggregationCount = (
 export const getFindingsCountAggQueryVulnerabilities = () => ({
   count: {
     filters: {
-      other_bucket_key: VULNERABILITIES_RESULT_EVALUATION.UNKNOWN,
+      other_bucket_key: VULNERABILITIES_RESULT_EVALUATION.NONE,
       filters: {
         [VULNERABILITIES_RESULT_EVALUATION.LOW]: {
           match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.LOW },

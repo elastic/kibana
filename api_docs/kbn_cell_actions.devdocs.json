@@ -27,7 +27,7 @@
         "label": "CellActions",
         "description": [],
         "signature": [
-          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: React.PropsWithChildren<",
+          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -35,7 +35,7 @@
             "section": "def-common.CellActionsProps",
             "text": "CellActionsProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-cell-actions/src/components/cell_actions.tsx",
         "deprecated": false,
@@ -49,15 +49,13 @@
             "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/cell-actions",
                 "scope": "common",
                 "docId": "kibKbnCellActionsPluginApi",
                 "section": "def-common.CellActionsProps",
                 "text": "CellActionsProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-cell-actions/src/components/cell_actions.tsx",
             "deprecated": false,
@@ -76,7 +74,7 @@
         "label": "CellActionsProvider",
         "description": [],
         "signature": [
-          "({ children, getTriggerCompatibleActions, }: React.PropsWithChildren<",
+          "({ children, getTriggerCompatibleActions, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -84,7 +82,7 @@
             "section": "def-common.CellActionsProviderProps",
             "text": "CellActionsProviderProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-cell-actions/src/context/cell_actions_context.tsx",
         "deprecated": false,
@@ -98,15 +96,13 @@
             "label": "{\n  children,\n  getTriggerCompatibleActions,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/cell-actions",
                 "scope": "common",
                 "docId": "kibKbnCellActionsPluginApi",
                 "section": "def-common.CellActionsProviderProps",
                 "text": "CellActionsProviderProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-cell-actions/src/context/cell_actions_context.tsx",
             "deprecated": false,

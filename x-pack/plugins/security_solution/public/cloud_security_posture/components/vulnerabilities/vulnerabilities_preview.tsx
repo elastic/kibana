@@ -7,17 +7,20 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import numeral from '@elastic/numeral';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  buildEntityFlyoutPreviewQuery,
+  VULNERABILITIES_SEVERITY,
+  getAbbreviatedNumber,
+} from '@kbn/cloud-security-posture-common';
+import { getSeverityStatusColor, getSeverityText } from '@kbn/cloud-security-posture';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -27,13 +30,6 @@ import { buildHostNamesFilter } from '../../../../common/search_strategy';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
-};
-
-export const getAbbreviatedNumber = (value: number) => {
-  if (isNaN(value)) {
-    return 0;
-  }
-  return value < 1000 ? value : numeral(value).format('0.0a');
 };
 
 interface VulnerabilitiesDistributionBarProps {
@@ -47,70 +43,70 @@ const getVulnerabilityStats = (
   high: number,
   medium: number,
   low: number,
-  unknown: number
+  none: number
 ): VulnerabilitiesDistributionBarProps[] => {
-  const vulnPropsArray: VulnerabilitiesDistributionBarProps[] = [];
-  if (critical === 0 && high === 0 && medium === 0 && low === 0 && unknown === 0)
-    return vulnPropsArray;
+  const vulnerabilityStats: VulnerabilitiesDistributionBarProps[] = [];
+  if (critical === 0 && high === 0 && medium === 0 && low === 0 && none === 0)
+    return vulnerabilityStats;
 
-  if (unknown > 0)
-    vulnPropsArray.push({
+  if (none > 0)
+    vulnerabilityStats.push({
       key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.unknownVulnerabilitiesText',
+        'xpack.securitySolution.flyout.right.insights.vulnerabilities.noneVulnerabilitiesText',
         {
-          defaultMessage: 'Unknown',
+          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.UNKNOWN),
         }
       ),
-      count: unknown,
-      color: '#aaa',
+      count: none,
+      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.UNKNOWN),
     });
   if (low > 0)
-    vulnPropsArray.push({
+    vulnerabilityStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.vulnerabilities.lowVulnerabilitiesText',
         {
-          defaultMessage: 'Low',
+          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.LOW),
         }
       ),
       count: low,
-      color: euiThemeVars.euiColorVis0,
+      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.LOW),
     });
 
   if (medium > 0)
-    vulnPropsArray.push({
+    vulnerabilityStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.vulnerabilities.mediumVulnerabilitiesText',
         {
-          defaultMessage: 'Medium',
+          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.MEDIUM),
         }
       ),
       count: medium,
-      color: euiThemeVars.euiColorVis5_behindText,
+      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.MEDIUM),
     });
   if (high > 0)
-    vulnPropsArray.push({
+    vulnerabilityStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.vulnerabilities.highVulnerabilitiesText',
         {
-          defaultMessage: 'High',
+          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.HIGH),
         }
       ),
       count: high,
-      color: euiThemeVars.euiColorVis9_behindText,
+      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.HIGH),
     });
   if (critical > 0)
-    vulnPropsArray.push({
+    vulnerabilityStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.vulnerabilities.CriticalVulnerabilitiesText',
         {
-          defaultMessage: 'Critical',
+          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.CRITICAL),
         }
       ),
       count: critical,
-      color: euiThemeVars.euiColorDanger,
+      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.CRITICAL),
     });
 
-  return vulnPropsArray;
+  return vulnerabilityStats;
 };
 
 const VulnerabilitiesEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{}> }) => {
@@ -188,9 +184,10 @@ export const VulnerabilitiesPreview = ({
     pageSize: 1,
   });
 
-  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, UNKNOWN = 0 } = data?.count || {};
+  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
-  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + UNKNOWN;
+  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
+
   const hasVulnerabilities = totalVulnerabilities > 0;
 
   const { euiTheme } = useEuiTheme();
@@ -281,9 +278,7 @@ export const VulnerabilitiesPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar
-                stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)}
-              />
+              <DistributionBar stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, NONE)} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
