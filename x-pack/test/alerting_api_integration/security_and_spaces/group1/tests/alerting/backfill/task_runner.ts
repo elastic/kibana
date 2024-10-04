@@ -53,6 +53,7 @@ import {
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
@@ -108,7 +109,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     // - checks that the expected alerts are generated in the alerts as data index
     // - checks that the timestamps in the alerts are as expected
     // - checks that the expected event log documents are written for the backfill
-    it('testtest should run all execution sets of a scheduled backfill and correctly generate alerts', async () => {
+    it('should run all execution sets of a scheduled backfill and correctly generate alerts', async () => {
       const spaceId = SuperuserAtSpace1.space.id;
 
       // Index documents
@@ -175,9 +176,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .send([{ rule_id: ruleId, start, end }])
         .expect(200);
 
-      console.log(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
-
-      console.log(`scheduledBackfill ${JSON.stringify(response2.body)}`);
+      log.info(`originalDocTimestamps ${JSON.stringify(originalDocTimestamps)}`);
+      log.info(`scheduledBackfill ${JSON.stringify(response2.body)}`);
 
       const scheduleResult = response2.body;
 
@@ -308,8 +308,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       );
       expect(alertDocsBackfill1.length).to.eql(3);
 
-      console.log(`alertDocsBackfill1 ${JSON.stringify(alertDocsBackfill1)}`);
-
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill1) {
         const source = alert._source!;
@@ -331,8 +329,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         (alert) => alert._source![ALERT_RULE_EXECUTION_UUID] === executionUuids[1]
       );
       expect(alertDocsBackfill2.length).to.eql(1);
-
-      console.log(`alertDocsBackfill2 ${JSON.stringify(alertDocsBackfill2)}`);
 
       // check timestamps in alert docs
       for (const alert of alertDocsBackfill2) {
@@ -365,8 +361,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
           scheduleResult[0].schedule[2].run_at
         );
       }
-
-      console.log(`alertDocsBackfill3 ${JSON.stringify(alertDocsBackfill3)}`);
 
       expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[5]);
       expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(originalDocTimestamps[6]);
