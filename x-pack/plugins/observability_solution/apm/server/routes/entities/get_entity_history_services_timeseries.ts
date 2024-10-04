@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { getBucketSize } from '@kbn/apm-data-access-plugin/common';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { keyBy } from 'lodash';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import {
   ENTITY_METRICS_FAILED_TRANSACTION_RATE,
   ENTITY_METRICS_LATENCY,
   ENTITY_METRICS_LOG_ERROR_RATE,
   ENTITY_METRICS_LOG_RATE,
   ENTITY_METRICS_THROUGHPUT,
-  LAST_SEEN,
 } from '../../../common/es_fields/entities';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
 interface Params {
   entitiesESClient: EntitiesESClient;
@@ -48,7 +48,7 @@ export async function getEntityHistoryServicesTimeseries({
       query: {
         bool: {
           filter: [
-            ...rangeQuery(start, end, LAST_SEEN),
+            ...rangeQuery(start, end, ENTITY_LAST_SEEN),
             ...termsQuery(SERVICE_NAME, ...serviceNames),
             ...environmentQuery(environment),
           ],
