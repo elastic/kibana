@@ -302,8 +302,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       // if records are too less, we don't want table to be of fixed height.
       // it should shrink to the content height.
       // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
-      height: count >= 10 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
-      initialPageSize: 20,
+      height: count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
+      initialPageSize: 50,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -318,8 +318,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       cellContext,
       onLoad,
       sourcererDataView?.runtimeFieldMap,
-      count,
       toolbarVisibility,
+      count,
     ]
   );
 
