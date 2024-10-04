@@ -107,6 +107,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(result.body).toEqual(clientResponse);
@@ -119,6 +120,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   it('calls upon savedObjectClient.get', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(savedObjectsClient.get).toHaveBeenCalled();
@@ -130,6 +132,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   it('returns with status 400 when a type is hidden from the http APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/hidden-from-http/hiddenId')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(400);
     expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
   });
@@ -137,6 +140,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/index-pattern/logstash-*')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
