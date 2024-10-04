@@ -11,7 +11,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiPopover,
   EuiButton,
-  type EuiContextMenuPanelProps,
+  type EuiContextMenuPanelDescriptor,
   EuiContextMenuItem,
   EuiContextMenu,
 } from '@elastic/eui';
@@ -160,7 +160,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }),
       },
     ];
-    return panels as EuiContextMenuPanelProps[];
+    return panels as EuiContextMenuPanelDescriptor[];
   }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, toggleLanguageComponent]);
 
   return (
