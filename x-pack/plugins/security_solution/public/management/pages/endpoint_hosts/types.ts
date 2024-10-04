@@ -49,8 +49,6 @@ export interface EndpointState {
   endpointPackageInfo: AsyncResourceState<GetInfoResponse['item']>;
   /** Tracks the list of policy IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
-  /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
-  agentPolicies: PolicyIds['agentPolicy'];
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** index patterns for query bar */
@@ -80,11 +78,9 @@ export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending
 
 /**
  * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.
- * agentPolicy contains a list of existing Package Policy Ids mapped to an associated Fleet parent Agent Config.
  */
 export interface PolicyIds {
   packagePolicy: Record<string, boolean>;
-  agentPolicy: Record<string, string>;
 }
 
 /**

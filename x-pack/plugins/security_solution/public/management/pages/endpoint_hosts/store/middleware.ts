@@ -161,30 +161,25 @@ const getAgentAndPoliciesForEndpointsList = async (
   ).items.reduce<PolicyIds>(
     (list, packagePolicy) => {
       list.packagePolicy[packagePolicy.id as string] = true;
-      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_ids[0]; // TODO
 
       return list;
     },
-    { packagePolicy: {}, agentPolicy: {} }
+    { packagePolicy: {} }
   );
 
   // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
   const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
     (list, policyId: string) => {
       if (policiesFound.packagePolicy[policyId as string]) {
-        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
         return list;
       }
       list.packagePolicy[policyId as string] = true;
       return list;
     },
-    { packagePolicy: {}, agentPolicy: {} }
+    { packagePolicy: {} }
   );
 
-  if (
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0 &&
-    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.agentPolicy).length === 0
-  ) {
+  if (Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0) {
     return;
   }
 
@@ -467,12 +462,6 @@ async function dispatchIngestPolicies({
       dispatch({
         type: 'serverReturnedEndpointNonExistingPolicies',
         payload: ingestPolicies.packagePolicy,
-      });
-    }
-    if (ingestPolicies?.agentPolicy !== undefined) {
-      dispatch({
-        type: 'serverReturnedEndpointAgentPolicies',
-        payload: ingestPolicies.agentPolicy,
       });
     }
   } catch (error) {

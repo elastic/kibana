@@ -131,10 +131,6 @@ describe('When using the Endpoint Details Actions Menu', () => {
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
         await render();
-        // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
-        // await act(async () => {
-        //   await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        // });
 
         const takeActionMenuItem = renderResult.getByTestId(dataTestSubj);
         takeActionMenuItem.style.pointerEvents = 'all';

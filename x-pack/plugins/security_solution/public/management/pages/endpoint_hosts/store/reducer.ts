@@ -72,14 +72,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         ...action.payload,
       },
     };
-  } else if (action.type === 'serverReturnedEndpointAgentPolicies') {
-    return {
-      ...state,
-      agentPolicies: {
-        ...state.agentPolicies,
-        ...action.payload,
-      },
-    };
   } else if (action.type === 'serverReturnedMetadataPatterns') {
     // handle an error case
     return {

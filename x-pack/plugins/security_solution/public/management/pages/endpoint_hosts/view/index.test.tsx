@@ -1242,7 +1242,6 @@ describe('when on the endpoint list page', () => {
 
       render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
       endpointActionsButton = (await renderResult.findAllByTestId('endpointTableRowActions'))[0];
 
@@ -1492,7 +1491,6 @@ describe('when on the endpoint list page', () => {
 
       render();
       await middlewareSpy.waitForAction('serverReturnedEndpointList');
-      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
 
       const endpointActionsButton: HTMLElement = (
         await renderResult.findAllByTestId('endpointTableRowActions')
