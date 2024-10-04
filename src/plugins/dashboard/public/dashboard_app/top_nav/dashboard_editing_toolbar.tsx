@@ -7,40 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useCallback, useMemo } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
-import { EditorMenu } from './editor_menu';
-import { pluginServices } from '../../services/plugin_services';
-import { ControlsToolbarButton } from './controls_toolbar_button';
-import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import {
+  dataService,
+  embeddableService,
+  usageCollectionService,
+  visualizationsService,
+} from '../../services/kibana_services';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { ControlsToolbarButton } from './controls_toolbar_button';
+import { EditorMenu } from './editor_menu';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
-  const {
-    usageCollection,
-    data: { search },
-    embeddable: { getStateTransfer },
-    visualizations: { getAliases: getVisTypeAliases },
-  } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
 
-  const stateTransferService = getStateTransfer();
-
-  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
-
-  const trackUiMetric = usageCollection.reportUiCounter?.bind(
-    usageCollection,
-    DASHBOARD_UI_METRIC_ID
+  const lensAlias = useMemo(
+    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
+    []
   );
 
   const createNewVisType = useCallback(
@@ -49,6 +44,10 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       let appId = '';
 
       if (visType) {
+        const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
+          usageCollectionService,
+          DASHBOARD_UI_METRIC_ID
+        );
         if (trackUiMetric) {
           trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
@@ -67,16 +66,17 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         path = '#/create?';
       }
 
+      const stateTransferService = embeddableService.getStateTransfer();
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
           originatingApp: dashboardApi.getAppContext()?.currentAppId,
           originatingPath: dashboardApi.getAppContext()?.getCurrentPath?.(),
-          searchSessionId: search.session.getSessionId(),
+          searchSessionId: dataService.search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, dashboardApi, search.session, trackUiMetric]
+    [dashboardApi]
   );
 
   /**

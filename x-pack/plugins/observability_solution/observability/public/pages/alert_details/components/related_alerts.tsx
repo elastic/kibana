@@ -18,7 +18,6 @@ import {
   AlertSearchBarContainerState,
   DEFAULT_STATE,
 } from '../../../components/alert_search_bar/containers/state_container';
-import type { Group } from '../../../../common/typings';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
@@ -36,22 +35,20 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
-import { getRelatedAlertKuery } from '../helpers/get_related_alerts_query';
 
 const ALERTS_PER_PAGE = 50;
 const RELATED_ALERTS_SEARCH_BAR_ID = 'related-alerts-search-bar-o11y';
 const ALERTS_TABLE_ID = 'xpack.observability.related.alerts.table';
 
 interface Props {
-  alert?: TopAlert;
-  groups?: Group[];
-  tags?: string[];
+  alert: TopAlert;
+  kuery: string;
 }
 
 const defaultState: AlertSearchBarContainerState = { ...DEFAULT_STATE, status: 'active' };
 const DEFAULT_FILTERS: Filter[] = [];
 
-export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
+export function InternalRelatedAlerts({ alert, kuery }: Props) {
   const kibanaServices = useKibana().services;
   const {
     http,
@@ -65,9 +62,9 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const alertStart = alert?.fields[ALERT_START];
-  const alertEnd = alert?.fields[ALERT_END];
-  const alertId = alert?.fields[ALERT_UUID];
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
+  const alertId = alert.fields[ALERT_UUID];
 
   const defaultQuery = useRef<Query[]>([
     { query: `not kibana.alert.uuid: ${alertId}`, language: 'kuery' },
@@ -93,7 +90,7 @@ export function InternalRelatedAlerts({ alert, groups, tags }: Props) {
           defaultSearchQueries={defaultQuery.current}
           defaultState={{
             ...defaultState,
-            kuery: getRelatedAlertKuery(tags, groups) ?? '',
+            kuery,
           }}
         />
       </EuiFlexItem>

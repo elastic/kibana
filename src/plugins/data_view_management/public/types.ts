@@ -30,10 +30,12 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import type { IndexPatternManagementStart } from '.';
+import type { DataViewMgmtService } from './management_app/data_view_management_service';
 
 export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface IndexPatternManagmentContext extends StartServices {
+  dataViewMgmtService: DataViewMgmtService;
   application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;

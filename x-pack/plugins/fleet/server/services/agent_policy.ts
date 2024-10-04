@@ -84,6 +84,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
+  AgentlessPolicyExistsRequestError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -113,6 +114,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
@@ -387,7 +389,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
+        is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -411,7 +413,7 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string }
+    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
@@ -423,13 +425,24 @@ class AgentPolicyService {
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
       const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
-      if (!givenPolicy.id || !isEditingSelf) {
+
+      if (
+        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
+        (!givenPolicy?.supports_agentless && !isEditingSelf)
+      ) {
         const isSinglePolicy = idsWithName.length === 1;
         const existClause = isSinglePolicy
           ? `Agent Policy '${idsWithName[0]}' already exists`
           : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
         throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
+      }
+
+      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
+        const integrationName = givenPolicy.name.split(' ').pop();
+        throw new AgentlessPolicyExistsRequestError(
+          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
+        );
       }
     }
   }
@@ -613,7 +626,7 @@ class AgentPolicyService {
               showInactive: true,
               perPage: 0,
               page: 1,
-              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+              kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
             }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
@@ -661,6 +674,7 @@ class AgentPolicyService {
       await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
+        supports_agentless: agentPolicy?.supports_agentless,
       });
     }
     if (agentPolicy.namespace) {
@@ -853,7 +867,11 @@ class AgentPolicyService {
    * @param esClient
    * @param outputId
    */
-  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
+  public async removeOutputFromAll(
+    esClient: ElasticsearchClient,
+    outputId: string,
+    options?: { force?: boolean }
+  ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
       await appContextService
@@ -906,6 +924,7 @@ class AgentPolicyService {
           );
           return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
             skipValidation: true,
+            force: options?.force,
           });
         },
         {
@@ -1136,18 +1155,39 @@ class AgentPolicyService {
     if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
+
     // Prevent deleting policy when assigned agents are inactive
     const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
     });
 
-    if (total > 0) {
+    if (total > 0 && !agentPolicy?.supports_agentless) {
       throw new FleetError(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
+    }
+
+    if (agentPolicy?.supports_agentless) {
+      logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
+      try {
+        // Deleting agentless deployment
+        await agentlessAgentService.deleteAgentlessAgent(id);
+        logger.debug(
+          `[Agentless API] Successfully deleted agentless deployment for single agent policy id ${id}`
+        );
+      } catch (error) {
+        logger.error(
+          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id}`
+        );
+        logger.error(error);
+      }
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
@@ -1211,9 +1251,11 @@ class AgentPolicyService {
     await soClient.delete(savedObjectType, id, {
       force: true, // need to delete through multiple space
     });
-    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
-      spaceId: soClient.getCurrentNamespace(),
-    });
+    if (!agentPolicy?.supports_agentless) {
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
+    }
 
     // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);

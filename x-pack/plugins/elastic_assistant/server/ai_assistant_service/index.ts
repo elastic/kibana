@@ -26,8 +26,14 @@ import { conversationsFieldMap } from '../ai_assistant_data_clients/conversation
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import {
+  knowledgeBaseFieldMap,
+  knowledgeBaseFieldMapV2,
+} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import {
+  AIAssistantKnowledgeBaseDataClient,
+  GetAIAssistantKnowledgeBaseDataClientParams,
+} from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
@@ -90,7 +96,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap, // TODO: use v2 if FF is enabled
+      fieldMap: knowledgeBaseFieldMap, // TODO: use V2 if FF is enabled
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
@@ -173,17 +179,28 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
+      // If v2 is enabled, re-install data stream resources for new mappings
+      if (this.v2KnowledgeBaseEnabled) {
+        this.options.logger.debug(`Using V2 Knowledge Base Mappings`);
+        this.knowledgeBaseDataStream = this.createDataStream({
+          resource: 'knowledgeBase',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: knowledgeBaseFieldMapV2,
+        });
+      }
+
       await this.knowledgeBaseDataStream.install({
         esClient,
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
 
-      // TODO: Pipeline creation is temporary as we'll be moving to semantic_text field once available in ES
+      // Note: Pipeline creation can be removed in favor of semantic_text
       const pipelineCreated = await pipelineExists({
         esClient,
         id: this.resourceNames.pipelines.knowledgeBase,
       });
+      // TODO: When FF is removed, ensure pipeline is re-created for those upgrading
       if (!pipelineCreated || this.v2KnowledgeBaseEnabled) {
         this.options.logger.debug(
           `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
@@ -329,12 +346,24 @@ export class AIAssistantService {
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
-    opts: CreateAIAssistantClientParams & { v2KnowledgeBaseEnabled: boolean }
+    opts: CreateAIAssistantClientParams & GetAIAssistantKnowledgeBaseDataClientParams
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
+    // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
+    if (opts.modelIdOverride != null) {
+      const modelIdOverride = opts.modelIdOverride;
+      this.getElserId = async () => modelIdOverride;
+    }
+
     // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
     // Remove this param and initialization when the `assistantKnowledgeBaseByDefault` feature flag is removed
     if (opts.v2KnowledgeBaseEnabled) {
       this.v2KnowledgeBaseEnabled = true;
+    }
+
+    // If either v2 KB or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
+    // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
+    // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
+    if (opts.v2KnowledgeBaseEnabled || opts.modelIdOverride != null) {
       await this.initializeResources();
     }
 
@@ -356,7 +385,7 @@ export class AIAssistantService {
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
-      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled,
+      v2KnowledgeBaseEnabled: opts.v2KnowledgeBaseEnabled ?? false,
     });
   }
 

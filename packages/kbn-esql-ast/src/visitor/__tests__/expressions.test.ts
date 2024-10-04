@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { parse } from '../../parser';
 import { Visitor } from '../visitor';
 
 test('"visitExpression" captures all non-captured expressions', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 123
@@ -36,7 +36,7 @@ test('"visitExpression" captures all non-captured expressions', () => {
 
 test('can terminate walk early, does not visit all literals', () => {
   const numbers: number[] = [];
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 0, 1, 2, 3
       | LIMIT 123
@@ -62,7 +62,7 @@ test('can terminate walk early, does not visit all literals', () => {
 });
 
 test('"visitColumnExpression" takes over all column visits', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index | STATS a
   `);
   const visitor = new Visitor()
@@ -85,7 +85,7 @@ test('"visitColumnExpression" takes over all column visits', () => {
 });
 
 test('"visitSourceExpression" takes over all source visits', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 123
@@ -110,7 +110,7 @@ test('"visitSourceExpression" takes over all source visits', () => {
 });
 
 test('"visitFunctionCallExpression" takes over all literal visits', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 123
@@ -135,7 +135,7 @@ test('"visitFunctionCallExpression" takes over all literal visits', () => {
 });
 
 test('"visitLiteral" takes over all literal visits', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 123

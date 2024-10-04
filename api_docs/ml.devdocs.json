@@ -96,7 +96,7 @@
         "label": "MLJobsAwaitingNodeWarning",
         "description": [],
         "signature": [
-          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ jobIds }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
         "deprecated": false,
@@ -105,12 +105,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-public.MLJobsAwaitingNodeWarning.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ jobIds }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
             "deprecated": false,
@@ -129,7 +129,7 @@
         "label": "MlNodeAvailableWarningShared",
         "description": [],
         "signature": [
-          "({ nodeAvailableCallback, size }: React.PropsWithChildren<Props>) => JSX.Element | null"
+          "({ nodeAvailableCallback, size }: Props) => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
         "deprecated": false,
@@ -138,12 +138,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-public.MlNodeAvailableWarningShared.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ nodeAvailableCallback, size }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
             "deprecated": false,
@@ -1671,7 +1671,11 @@
         },
         ">; getTrainedModelsNodesOverview(): Promise<",
         "NodesOverviewResponse",
-        ">; startModelAllocation(modelId: string, queryParams?: { number_of_allocations: number; threads_per_allocation: number; priority: \"normal\" | \"low\"; deployment_id?: string | undefined; } | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
+        ">; startModelAllocation(modelId: string, queryParams?: ",
+        "CommonDeploymentParams",
+        " | undefined, bodyParams?: ",
+        "AdaptiveAllocationsParams",
+        " | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
         {
           "pluginId": "@kbn/ml-error-utils",
           "scope": "common",
@@ -1679,7 +1683,9 @@
           "section": "def-common.ErrorType",
           "text": "ErrorType"
         },
-        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: { number_of_allocations: number; }): Promise<{ acknowledge: boolean; }>; inferTrainedModel(modelId: string, deploymentsId: string, payload: { docs: Record<string, any>[]; inference_config?: ",
+        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
+        "UpdateAllocationParams",
+        "): Promise<{ acknowledge: boolean; }>; inferTrainedModel(modelId: string, deploymentsId: string, payload: { docs: Record<string, any>[]; inference_config?: ",
         "MlInferenceConfigUpdateContainer",
         " | undefined; } | undefined, timeout?: string | undefined): Promise<",
         "MlInferTrainedModelResponse",
@@ -1727,7 +1733,7 @@
         "GetSchemaDefinitionParams",
         "): Promise<object>; }; } | undefined; components: { AnomalySwimLane: React.ForwardRefExoticComponent<",
         "AnomalySwimLaneProps",
-        " & { children?: React.ReactNode; } & React.RefAttributes<{}>>; }; }"
+        " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/plugins/ml/public/plugin.ts",
       "deprecated": false,

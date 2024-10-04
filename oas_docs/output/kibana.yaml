@@ -6684,7 +6684,7 @@ paths:
         feature privileges, depending on the owner of the cases you're seeking.
       operationId: findCasesDefaultSpace
       parameters:
-        - $ref: '#/components/parameters/Cases_assignees'
+        - $ref: '#/components/parameters/Cases_assignees_filter'
         - $ref: '#/components/parameters/Cases_category'
         - $ref: '#/components/parameters/Cases_defaultSearchOperator'
         - $ref: '#/components/parameters/Cases_from'
@@ -11734,11 +11734,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/Fleet_package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -13135,6 +13132,949 @@ paths:
       summary: Resolve a saved object
       tags:
         - saved objects
+  /api/security/role:
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole#0'
+      parameters: []
+      responses: {}
+      summary: Get all roles
+      tags:
+        - roles
+  /api/security/role/{name}:
+    delete:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Delete a role
+      tags:
+        - roles
+    get:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            minLength: 1
+            type: string
+      responses: {}
+      summary: Get a role
+      tags:
+        - roles
+    put:
+      operationId: '%2Fapi%2Fsecurity%2Frole%2F%7Bname%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+        - in: query
+          name: createOnly
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  maxLength: 2048
+                  type: string
+                elasticsearch:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cluster:
+                      items:
+                        type: string
+                      type: array
+                    indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            type: boolean
+                          field_security:
+                            additionalProperties:
+                              items:
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            type: string
+                        required:
+                          - names
+                          - privileges
+                      type: array
+                    remote_cluster:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          clusters:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                        required:
+                          - privileges
+                          - clusters
+                      type: array
+                    remote_indices:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          allow_restricted_indices:
+                            type: boolean
+                          clusters:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          field_security:
+                            additionalProperties:
+                              items:
+                                type: string
+                              type: array
+                            type: object
+                          names:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          privileges:
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          query:
+                            type: string
+                        required:
+                          - clusters
+                          - names
+                          - privileges
+                      type: array
+                    run_as:
+                      items:
+                        type: string
+                      type: array
+                kibana:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      base:
+                        anyOf:
+                          - items: {}
+                            type: array
+                          - type: boolean
+                          - type: number
+                          - type: object
+                          - type: string
+                        nullable: true
+                        oneOf:
+                          - items:
+                              type: string
+                            type: array
+                          - items:
+                              type: string
+                            type: array
+                      feature:
+                        additionalProperties:
+                          items:
+                            type: string
+                          type: array
+                        type: object
+                      spaces:
+                        anyOf:
+                          - items:
+                              enum:
+                                - '*'
+                              type: string
+                            maxItems: 1
+                            minItems: 1
+                            type: array
+                          - items:
+                              type: string
+                            type: array
+                        default:
+                          - '*'
+                    required:
+                      - base
+                  type: array
+                metadata:
+                  additionalProperties: {}
+                  type: object
+              required:
+                - elasticsearch
+      responses: {}
+      summary: Create or update a role
+      tags:
+        - roles
+  /api/security/roles:
+    post:
+      operationId: '%2Fapi%2Fsecurity%2Froles#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                roles:
+                  additionalProperties:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        maxLength: 2048
+                        type: string
+                      elasticsearch:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          cluster:
+                            items:
+                              type: string
+                            type: array
+                          indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  type: boolean
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  type: string
+                              required:
+                                - names
+                                - privileges
+                            type: array
+                          remote_cluster:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                clusters:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                              required:
+                                - privileges
+                                - clusters
+                            type: array
+                          remote_indices:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                allow_restricted_indices:
+                                  type: boolean
+                                clusters:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                field_security:
+                                  additionalProperties:
+                                    items:
+                                      type: string
+                                    type: array
+                                  type: object
+                                names:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                privileges:
+                                  items:
+                                    type: string
+                                  minItems: 1
+                                  type: array
+                                query:
+                                  type: string
+                              required:
+                                - clusters
+                                - names
+                                - privileges
+                            type: array
+                          run_as:
+                            items:
+                              type: string
+                            type: array
+                      kibana:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            base:
+                              anyOf:
+                                - items: {}
+                                  type: array
+                                - type: boolean
+                                - type: number
+                                - type: object
+                                - type: string
+                              nullable: true
+                              oneOf:
+                                - items:
+                                    type: string
+                                  type: array
+                                - items:
+                                    type: string
+                                  type: array
+                            feature:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              type: object
+                            spaces:
+                              anyOf:
+                                - items:
+                                    enum:
+                                      - '*'
+                                    type: string
+                                  maxItems: 1
+                                  minItems: 1
+                                  type: array
+                                - items:
+                                    type: string
+                                  type: array
+                              default:
+                                - '*'
+                          required:
+                            - base
+                        type: array
+                      metadata:
+                        additionalProperties: {}
+                        type: object
+                    required:
+                      - elasticsearch
+                  type: object
+              required:
+                - roles
+      responses: {}
+      summary: Create or update roles
+      tags:
+        - roles
+  /api/spaces/_copy_saved_objects:
+    post:
+      description: Copy saved objects to spaces
+      operationId: '%2Fapi%2Fspaces%2F_copy_saved_objects#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                compatibilityMode:
+                  default: false
+                  type: boolean
+                createNewCopies:
+                  default: true
+                  type: boolean
+                includeReferences:
+                  default: false
+                  type: boolean
+                objects:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - type
+                      - id
+                  type: array
+                overwrite:
+                  default: false
+                  type: boolean
+                spaces:
+                  items:
+                    type: string
+                  type: array
+              required:
+                - spaces
+                - objects
+      responses: {}
+      summary: ''
+      tags: []
+  /api/spaces/_disable_legacy_url_aliases:
+    post:
+      description: Disable legacy URL aliases
+      operationId: '%2Fapi%2Fspaces%2F_disable_legacy_url_aliases#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                aliases:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      sourceId:
+                        type: string
+                      targetSpace:
+                        type: string
+                      targetType:
+                        type: string
+                    required:
+                      - targetSpace
+                      - targetType
+                      - sourceId
+                  type: array
+              required:
+                - aliases
+      responses: {}
+      summary: ''
+      tags: []
+  /api/spaces/_get_shareable_references:
+    post:
+      description: Get shareable references
+      operationId: '%2Fapi%2Fspaces%2F_get_shareable_references#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                objects:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - type
+                      - id
+                  type: array
+              required:
+                - objects
+      responses: {}
+      summary: ''
+      tags: []
+  /api/spaces/_resolve_copy_saved_objects_errors:
+    post:
+      description: Resolve conflicts copying saved objects
+      operationId: '%2Fapi%2Fspaces%2F_resolve_copy_saved_objects_errors#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                compatibilityMode:
+                  default: false
+                  type: boolean
+                createNewCopies:
+                  default: true
+                  type: boolean
+                includeReferences:
+                  default: false
+                  type: boolean
+                objects:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - type
+                      - id
+                  type: array
+                retries:
+                  additionalProperties:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        createNewCopy:
+                          type: boolean
+                        destinationId:
+                          type: string
+                        id:
+                          type: string
+                        ignoreMissingReferences:
+                          type: boolean
+                        overwrite:
+                          default: false
+                          type: boolean
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - id
+                    type: array
+                  type: object
+              required:
+                - retries
+                - objects
+      responses: {}
+      summary: ''
+      tags: []
+  /api/spaces/_update_objects_spaces:
+    post:
+      description: Update saved objects in spaces
+      operationId: '%2Fapi%2Fspaces%2F_update_objects_spaces#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                objects:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - type
+                      - id
+                  type: array
+                spacesToAdd:
+                  items:
+                    type: string
+                  type: array
+                spacesToRemove:
+                  items:
+                    type: string
+                  type: array
+              required:
+                - objects
+                - spacesToAdd
+                - spacesToRemove
+      responses: {}
+      summary: ''
+      tags: []
+  /api/spaces/space:
+    get:
+      description: Get all spaces
+      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: purpose
+          required: false
+          schema:
+            enum:
+              - any
+              - copySavedObjectsIntoSpace
+              - shareSavedObjectsIntoSpace
+            type: string
+        - in: query
+          name: include_authorized_purposes
+          required: true
+          schema:
+            anyOf:
+              - items: {}
+                type: array
+              - type: boolean
+              - type: number
+              - type: object
+              - type: string
+            nullable: true
+            oneOf:
+              - enum:
+                  - false
+                type: boolean
+                x-oas-optional: true
+              - type: boolean
+                x-oas-optional: true
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    post:
+      description: Create a space
+      operationId: '%2Fapi%2Fspaces%2Fspace#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+                solution:
+                  enum:
+                    - security
+                    - oblt
+                    - es
+                    - classic
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+  /api/spaces/space/{id}:
+    delete:
+      description: Delete a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    get:
+      description: Get a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    put:
+      description: Update a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+                solution:
+                  enum:
+                    - security
+                    - oblt
+                    - es
+                    - classic
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
   /api/status:
     get:
       operationId: '%2Fapi%2Fstatus#0'
@@ -16418,7 +17358,7 @@ components:
       schema:
         example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
         type: string
-    Cases_assignees:
+    Cases_assignees_filter:
       description: >
         Filters the returned cases by assignees. Valid values are `none` or
         unique identifiers for the user profiles. These identifiers can be found
@@ -19783,6 +20723,17 @@ components:
         force:
           description: Force agent policy creation even if packages are not verified.
           type: boolean
+        global_data_tags:
+          items:
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
+            type: object
+          type: array
         inactivity_timeout:
           type: integer
         is_protected:
@@ -22294,9 +23245,7 @@ components:
           description: A description for the SLO.
           type: string
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: >-
             A optional and unique identifier for the SLO. Must be between 8 and
@@ -22455,6 +23404,21 @@ components:
           type: number
       title: Find SLO response
       type: object
+    SLOs_group_by:
+      description: >-
+        optional group by field or fields to use to generate an SLO per distinct
+        value
+      example:
+        - - service.name
+        - service.name
+        - - service.name
+          - service.environment
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      title: Group by
     SLOs_indicator_properties_apm_availability:
       description: Defines properties for the APM availability indicator type
       type: object
@@ -23045,9 +24009,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -23131,9 +24093,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -23354,6 +24314,8 @@ components:
         description:
           description: A description for the SLO.
           type: string
+        groupBy:
+          $ref: '#/components/schemas/SLOs_group_by'
         indicator:
           oneOf:
             - $ref: '#/components/schemas/SLOs_indicator_properties_custom_kql'
@@ -23429,6 +24391,7 @@ tags:
   - name: Fleet uninstall tokens
   - description: Machine learning
     name: ml
+  - name: roles
   - description: >
       Export sets of saved objects that you want to import into {kib}, resolve
       import errors, and rotate an encryption key for encrypted saved objects
@@ -23455,4 +24418,5 @@ tags:
     x-displayName: Saved objects
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
+  - name: spaces
   - name: system

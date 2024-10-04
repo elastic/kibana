@@ -9123,11 +9123,8 @@ paths:
                 properties:
                   item:
                     $ref: '#/components/schemas/Fleet_package_policy'
-                  sucess:
-                    type: boolean
                 required:
                   - item
-                  - sucess
           description: OK
         '400':
           $ref: '#/components/responses/Fleet_error'
@@ -9863,6 +9860,214 @@ paths:
               -X POST api/saved_objects/_import?createNewCopies=true
               -H "kbn-xsrf: true"
               --form file=@file.ndjson
+  /api/spaces/space:
+    get:
+      description: Get all spaces
+      operationId: '%2Fapi%2Fspaces%2Fspace#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: query
+          name: purpose
+          required: false
+          schema:
+            enum:
+              - any
+              - copySavedObjectsIntoSpace
+              - shareSavedObjectsIntoSpace
+            type: string
+        - in: query
+          name: include_authorized_purposes
+          required: true
+          schema:
+            anyOf:
+              - items: {}
+                type: array
+              - type: boolean
+              - type: number
+              - type: object
+              - type: string
+            nullable: true
+            oneOf:
+              - enum:
+                  - false
+                type: boolean
+                x-oas-optional: true
+              - type: boolean
+                x-oas-optional: true
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    post:
+      description: Create a space
+      operationId: '%2Fapi%2Fspaces%2Fspace#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+  /api/spaces/space/{id}:
+    delete:
+      description: Delete a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#2'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    get:
+      description: Get a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#0'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
+    put:
+      description: Update a space
+      operationId: '%2Fapi%2Fspaces%2Fspace%2F%7Bid%7D#1'
+      parameters:
+        - description: The version of the API to use
+          in: header
+          name: elastic-api-version
+          schema:
+            default: '2023-10-31'
+            enum:
+              - '2023-10-31'
+            type: string
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                _reserved:
+                  type: boolean
+                color:
+                  type: string
+                description:
+                  type: string
+                disabledFeatures:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                id:
+                  type: string
+                imageUrl:
+                  type: string
+                initials:
+                  maxLength: 2
+                  type: string
+                name:
+                  minLength: 1
+                  type: string
+              required:
+                - id
+                - name
+      responses: {}
+      summary: ''
+      tags:
+        - spaces
   /api/status:
     get:
       operationId: '%2Fapi%2Fstatus#0'
@@ -12824,6 +13029,17 @@ components:
         force:
           description: Force agent policy creation even if packages are not verified.
           type: boolean
+        global_data_tags:
+          items:
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+            description: >-
+              User defined data tags that are added to all of the inputs. The
+              values can be strings or numbers.
+            type: object
+          type: array
         inactivity_timeout:
           type: integer
         is_protected:
@@ -15307,9 +15523,7 @@ components:
           description: A description for the SLO.
           type: string
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: >-
             A optional and unique identifier for the SLO. Must be between 8 and
@@ -15468,6 +15682,21 @@ components:
           type: number
       title: Find SLO response
       type: object
+    SLOs_group_by:
+      description: >-
+        optional group by field or fields to use to generate an SLO per distinct
+        value
+      example:
+        - - service.name
+        - service.name
+        - - service.name
+          - service.environment
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      title: Group by
     SLOs_indicator_properties_apm_availability:
       description: Defines properties for the APM availability indicator type
       type: object
@@ -16058,9 +16287,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -16144,9 +16371,7 @@ components:
           example: true
           type: boolean
         groupBy:
-          description: optional group by field to use to generate an SLO per distinct value
-          example: some.field
-          type: string
+          $ref: '#/components/schemas/SLOs_group_by'
         id:
           description: The identifier of the SLO.
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
@@ -16367,6 +16592,8 @@ components:
         description:
           description: A description for the SLO.
           type: string
+        groupBy:
+          $ref: '#/components/schemas/SLOs_group_by'
         indicator:
           oneOf:
             - $ref: '#/components/schemas/SLOs_indicator_properties_custom_kql'
@@ -16457,4 +16684,5 @@ tags:
     x-displayName: Saved objects
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
+  - name: spaces
   - name: system
