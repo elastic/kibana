@@ -29,7 +29,7 @@ export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';
 
 // ErrorCodes
 
-export enum ErrorCode {
+export enum GenerationErrorCode {
   RECURSION_LIMIT = 'recursion-limit',
   RECURSION_LIMIT_ANALYZE_LOGS = 'recursion-limit-analyze-logs',
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',

@@ -7,28 +7,37 @@
 
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
-import { ErrorCode } from '../../../common/constants';
+import { GenerationErrorCode } from '../../../common/constants';
+import {
+  GenerationErrorAttributes,
+  GenerationErrorBody,
+} from '../../../common/api/generation_error';
 
-const errorCode = ErrorCode.UNPARSEABLE_CSV_DATA;
+const errorCode = GenerationErrorCode.UNPARSEABLE_CSV_DATA;
 
 export interface CSVParseError {
   message: string[];
 }
 
 export class UnparseableCSVFormatError extends Error implements ErrorThatHandlesItsOwnResponse {
-  errorMessages: string[];
+  attributes: GenerationErrorAttributes;
 
   constructor(public readonly csvParseErrors: CSVParseError[]) {
     super(errorCode);
-    this.errorMessages = csvParseErrors
-      .flatMap((error) => error.message)
-      .map((message) => message.replace(/{%.*?%}/g, '').trim());
+    this.attributes = {
+      errorCode,
+      underlyingMessages: csvParseErrors.flatMap((error) => error.message),
+    };
   }
 
   public sendResponse(res: KibanaResponseFactory) {
+    const body: GenerationErrorBody = {
+      message: errorCode,
+      attributes: this.attributes,
+    };
     return res.customError({
       statusCode: 422,
-      body: { message: this.message, attributes: { errorCode, errorMessages: this.errorMessages } },
+      body,
     });
   }
 }

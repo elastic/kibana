@@ -6,7 +6,7 @@
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { ESProcessorItem } from '../../common';
-import { createOnFailureProcessor, createRemoveProcessor } from './processors';
+import { createPassthroughFailureProcessor, createRemoveProcessor } from './processors';
 
 interface DocTemplate {
   _index: string;
@@ -61,7 +61,7 @@ export async function createJSONInput(
 ): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
   const pipeline = {
     processors: [...processors, createRemoveProcessor()],
-    on_failure: [createOnFailureProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
   };
   const { pipelineResults, errors } = await testPipeline(formattedSamples, pipeline, client);
   return { pipelineResults, errors };

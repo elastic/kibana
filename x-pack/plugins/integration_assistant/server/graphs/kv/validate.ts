@@ -12,7 +12,7 @@ import type { HandleKVNodeParams } from './types';
 import { testPipeline } from '../../util';
 import {
   createGrokProcessor,
-  createOnFailureProcessor,
+  createPassthroughFailureProcessor,
   createRemoveProcessor,
 } from '../../util/processors';
 
@@ -68,7 +68,7 @@ export async function handleHeaderValidate({
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const grokPattern = state.grokPattern;
   const grokProcessor = createGrokProcessor([grokPattern]);
-  const pipeline = { processors: grokProcessor, on_failure: [createOnFailureProcessor()] };
+  const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
     pipelineResults: GrokResult[];
@@ -99,7 +99,7 @@ async function verifyKVProcessor(
   // This processor removes the original message field in the  output
   const pipeline = {
     processors: [kvProcessor[0], createRemoveProcessor()],
-    on_failure: [createOnFailureProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
   };
   const { errors } = await testPipeline(formattedSamples, pipeline, client);
   return { errors };
@@ -112,7 +112,7 @@ async function buildJSONSamples(
 ): Promise<StructuredLogResult[]> {
   const pipeline = {
     processors: [...processors, createRemoveProcessor()],
-    on_failure: [createOnFailureProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
   };
   const { pipelineResults } = (await testPipeline(samples, pipeline, client)) as {
     pipelineResults: StructuredLogResult[];

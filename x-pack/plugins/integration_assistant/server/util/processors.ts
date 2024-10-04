@@ -90,15 +90,15 @@ export function createCSVProcessor(source: string, targets: string[]): ESProcess
   };
 }
 
-// Standard processor for the on_failure part of the pipeline.
-export function createOnFailureProcessor(): ESProcessorItem {
+// Trivial processor for the on_failure part of the pipeline.
+// Use only if the source of error is not necessary.
+export function createPassthroughFailureProcessor(): ESProcessorItem {
   return {
     append: {
       field: 'error.message',
-      description: 'Append the error message',
+      description: 'Append the error message as-is',
       tag: 'append_error_message',
-      value:
-        '{% raw %}Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.on_failure_pipeline}}} failed with message: {{{_ingest.on_failure_message}}}{% endraw %}',
+      value: '{{{_ingest.on_failure_message}}}',
     },
   };
 }

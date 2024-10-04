@@ -16,6 +16,7 @@ import {
   type EcsMappingRequestBody,
   type RelatedRequestBody,
 } from '../../../../../../common';
+import type { GenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {
   runCategorizationGraph,
   runEcsGraph,
@@ -26,7 +27,6 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
-import type { ErrorCode } from '../../../../../../common/constants';
 import type { AIConnector, IntegrationSettings } from '../../types';
 
 export type OnComplete = (result: State['result']) => void;
@@ -97,11 +97,12 @@ export const useGeneration = ({
         });
 
         let errorMessage = originalErrorMessage;
-        const context = e.body?.attributes as { errorCode: ErrorCode } | undefined;
-        if (context != null) {
-          const errorCode = context.errorCode;
-          const translation = i18n.ERROR_TRANSLATION[errorCode];
-          errorMessage = typeof translation === 'function' ? translation(context) : translation;
+        const body = e.body as GenerationErrorBody | undefined;
+        if (body != null) {
+          const errorCode = body.attributes.errorCode;
+          const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
+          errorMessage =
+            typeof translation === 'function' ? translation(body.attributes) : translation;
         }
         setError(errorMessage);
       } finally {

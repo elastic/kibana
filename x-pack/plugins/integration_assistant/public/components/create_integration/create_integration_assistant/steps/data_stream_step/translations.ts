@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ErrorCode } from '../../../../../../common/constants';
+import { GenerationErrorCode } from '../../../../../../common/constants';
+import type { GenerationErrorAttributes } from '../../../../../../common/api/generation_error';
 
 export const INTEGRATION_NAME_TITLE = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.integrationNameTitle',
@@ -188,7 +189,7 @@ export const PROGRESS_RELATED_GRAPH = i18n.translate(
     defaultMessage: 'Generating related fields',
   }
 );
-export const GENERATION_ERROR = (progressStep: string) =>
+export const GENERATION_ERROR_TITLE = (progressStep: string) =>
   i18n.translate('xpack.integrationAssistant.step.dataStream.generationError', {
     values: { progressStep },
     defaultMessage: 'An error occurred during: {progressStep}',
@@ -198,31 +199,41 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
-export const ERROR_TRANSLATION: Record<ErrorCode, string | ((context: unknown) => string)> = {
-  [ErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
+const ERROR_NO_UNDERLYING_MESSAGE_AVAILABLE = i18n.translate(
+  'xpack.integrationAssistant.errors.noUnderlyingMessage',
+  {
+    defaultMessage: 'No reason available',
+  }
+);
+
+export const GENERATION_ERROR_TRANSLATION: Record<
+  GenerationErrorCode,
+  string | ((attributes: GenerationErrorAttributes) => string)
+> = {
+  [GenerationErrorCode.RECURSION_LIMIT_ANALYZE_LOGS]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitAnalyzeLogsErrorMessage',
     {
       defaultMessage:
         'Please verify the format of log samples is correct and try again. Try with a fewer samples if error persists.',
     }
   ),
-  [ErrorCode.RECURSION_LIMIT]: i18n.translate(
+  [GenerationErrorCode.RECURSION_LIMIT]: i18n.translate(
     'xpack.integrationAssistant.errors.recursionLimitReached',
     {
       defaultMessage: 'Max attempts exceeded. Please try again.',
     }
   ),
-  [ErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
+  [GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT]: i18n.translate(
     'xpack.integrationAssistant.errors.unsupportedLogSamples',
     {
       defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
-  [ErrorCode.UNPARSEABLE_CSV_DATA]: (context: unknown) =>
+  [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) =>
     i18n.translate('xpack.integrationAssistant.errors.uparseableCSV', {
       values: {
-        exampleErrorMessage: (context as { errorMessages: string }).errorMessages[0],
+        exampleReason: attributes.underlyingMessages?.[0] || ERROR_NO_UNDERLYING_MESSAGE_AVAILABLE,
       },
-      defaultMessage: `Failed to convert samples to JSON ({exampleErrorMessage}). Please check the provided samples.`,
+      defaultMessage: `The CSV processor failed to convert samples to JSON (reason: {exampleReason}). Please check the provided samples.`,
     }),
 };
