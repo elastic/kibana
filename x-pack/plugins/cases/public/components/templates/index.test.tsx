@@ -131,5 +131,6 @@ describe('Templates', () => {
     appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
 
     expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
+    expect(screen.queryByTestId('add-template')).not.toBeInTheDocument();
   });
 });

@@ -103,5 +103,6 @@ describe('CustomFields', () => {
     appMockRender.render(<CustomFields {...{ ...props, customFields }} />);
 
     expect(await screen.findByText(i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)));
+    expect(screen.queryByTestId('add-custom-field')).not.toBeInTheDocument();
   });
 });
