@@ -16,6 +16,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
+  EuiButtonIcon
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,6 +55,7 @@ export const GeoipList: React.FunctionComponent = () => {
         defaultMessage="Add database"
       />
     </EuiButton>
+
   );
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
     'data-test-subj': 'geoipDatabaseList',
@@ -80,17 +82,24 @@ export const GeoipList: React.FunctionComponent = () => {
       },
       {
         name: 'Actions',
-        actions: [
-          {
-            name: 'Delete',
-            description: 'Delete this database',
-            icon: 'trash',
-            color: 'danger',
-            onClick: onDatabaseDelete,
-            type: 'icon',
-            'data-test-subj': 'deleteGeoipDatabaseButton',
-          },
-        ],
+        align: 'right',
+        render: (item: GeoipDatabase) => {
+          // Local and web databases are read only and cannot be deleted through UI
+          if (['web', 'local'].includes(item.type)) {
+            return;
+          }
+
+          return (
+            <EuiButtonIcon
+              name="Delete"
+              aria-label="Delete this database"
+              iconType="trash"
+              color="danger"
+              onClick={() => onDatabaseDelete(item)}
+              data-test-subj="deleteGeoipDatabaseButton"
+            />
+          );
+        },
       },
     ],
     items: data ?? [],
