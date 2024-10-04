@@ -17,13 +17,13 @@ import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+// import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 // @ts-expect-error
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import {
   STATS_WARNINGS_FILTER,
-  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+  // STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
 } from '@kbn/optimizer-webpack-helpers';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
@@ -109,11 +109,11 @@ export function getWebpackConfig(
               logLevel: 'silent',
             }),
             new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
-            new StatoscopeWebpackPlugin({
-              open: false,
-              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
-              statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
-            }),
+            // new StatoscopeWebpackPlugin({
+            //   open: false,
+            //   saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
+            //   statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+            // }),
           ]
         : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
