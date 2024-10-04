@@ -26,7 +26,7 @@ export interface Props {
   allowAdHocDataView?: boolean;
   /** if the kibana instance is customly branded */
   showPlainSpinner: boolean;
-  /** If the cluster has data, the user can be prompted to try ES|QL. This click handler customizes the action */
+  /** If the cluster has data, this handler allows the user to try ES|QL */
   onTryESQL?: () => void;
   /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
   onESQLNavigationComplete?: () => void;

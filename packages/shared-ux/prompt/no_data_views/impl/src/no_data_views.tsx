@@ -28,19 +28,13 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
 export const NoDataViewsPrompt = ({
   onDataViewCreated,
   allowAdHocDataView = false,
-  onTryESQL: onTryESQLParent,
+  onTryESQL: onTryESQLProp,
   onESQLNavigationComplete,
-  emptyPromptColor,
 }: NoDataViewsPromptProps) => {
-  const {
-    canCreateNewDataView,
-    openDataViewEditor,
-    dataViewsDocLink,
-    onTryESQL: onTryESQLService,
-    esqlDocLink,
-  } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, esqlDocLink, ...services } =
+    useServices();
 
-  const onTryESQL = onTryESQLParent ?? onTryESQLService;
+  const onTryESQL = onTryESQLProp ?? services.onTryESQL;
 
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
@@ -91,7 +85,6 @@ export const NoDataViewsPrompt = ({
         canCreateNewDataView,
         dataViewsDocLink,
         esqlDocLink,
-        emptyPromptColor,
         onTryESQL: onTryESQL
           ? () => {
               onTryESQL();

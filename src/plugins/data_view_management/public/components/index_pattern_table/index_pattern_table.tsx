@@ -369,7 +369,7 @@ export const IndexPatternTable = ({
       </ContextWrapper>
     </>
   );
-  if (!hasDataView) {
+  if (!hasDataView)
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
@@ -383,7 +383,6 @@ export const IndexPatternTable = ({
         />
       </>
     );
-  }
   if (!hasDataView && !hasESData)
     displayIndexPatternSection = (
       <>
