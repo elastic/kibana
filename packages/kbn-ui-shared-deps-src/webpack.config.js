@@ -33,7 +33,7 @@ module.exports = {
   },
   context: __dirname,
   devtool: 'cheap-source-map',
-  // target: 'web',
+  target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
