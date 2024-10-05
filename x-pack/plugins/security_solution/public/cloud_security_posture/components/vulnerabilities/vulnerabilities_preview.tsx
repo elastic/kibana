@@ -12,14 +12,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
 import {
   buildEntityFlyoutPreviewQuery,
-  VULNERABILITIES_SEVERITY,
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
-import { getSeverityStatusColor, getSeverityText } from '@kbn/cloud-security-posture';
+import { getVulnerabilityStats } from '@kbn/cloud-security-posture';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
@@ -30,83 +28,6 @@ import { buildHostNamesFilter } from '../../../../common/search_strategy';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
-};
-
-interface VulnerabilitiesDistributionBarProps {
-  key: string;
-  count: number;
-  color: string;
-}
-
-const getVulnerabilityStats = (
-  critical: number,
-  high: number,
-  medium: number,
-  low: number,
-  none: number
-): VulnerabilitiesDistributionBarProps[] => {
-  const vulnerabilityStats: VulnerabilitiesDistributionBarProps[] = [];
-  if (critical === 0 && high === 0 && medium === 0 && low === 0 && none === 0)
-    return vulnerabilityStats;
-
-  if (none > 0)
-    vulnerabilityStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.noneVulnerabilitiesText',
-        {
-          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.UNKNOWN),
-        }
-      ),
-      count: none,
-      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.UNKNOWN),
-    });
-  if (low > 0)
-    vulnerabilityStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.lowVulnerabilitiesText',
-        {
-          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.LOW),
-        }
-      ),
-      count: low,
-      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.LOW),
-    });
-
-  if (medium > 0)
-    vulnerabilityStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.mediumVulnerabilitiesText',
-        {
-          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.MEDIUM),
-        }
-      ),
-      count: medium,
-      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.MEDIUM),
-    });
-  if (high > 0)
-    vulnerabilityStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.highVulnerabilitiesText',
-        {
-          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.HIGH),
-        }
-      ),
-      count: high,
-      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.HIGH),
-    });
-  if (critical > 0)
-    vulnerabilityStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.CriticalVulnerabilitiesText',
-        {
-          defaultMessage: getSeverityText(VULNERABILITIES_SEVERITY.CRITICAL),
-        }
-      ),
-      count: critical,
-      color: getSeverityStatusColor(VULNERABILITIES_SEVERITY.CRITICAL),
-    });
-
-  return vulnerabilityStats;
 };
 
 const VulnerabilitiesEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{}> }) => {
@@ -225,7 +146,6 @@ export const VulnerabilitiesPreview = ({
         hasVulnerabilitiesFindings,
         path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
       },
-      path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
     });
   }, [
     hasMisconfigurationFindings,

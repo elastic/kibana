@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { VulnerabilitiesPreview } from './vulnerabilities_preview';
 
-const mockProps: { hostName: string } = {
-  hostName: 'testContextID',
+const mockProps: { name: string } = {
+  name: 'testContextID',
 };
 
 describe('VulnerabilitiesPreview', () => {

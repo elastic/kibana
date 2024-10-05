@@ -9,8 +9,10 @@ import React, { memo, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import type { FlyoutPanels } from '@kbn/expandable-flyout/src/store/state';
 import { MisconfigurationFindingsDetailsTable } from './misconfiguration_findings_details_table';
 import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_details_table';
 
@@ -18,9 +20,20 @@ import { VulnerabilitiesFindingsDetailsTable } from './vulnerabilities_findings_
  * Insights view displayed in the document details expandable flyout left section
  */
 
+interface CspFlyoutPanelProps extends FlyoutPanelProps {
+  params: {
+    path: PanelPath;
+    hasMisconfigurationFindings: boolean;
+    hasVulnerabilitiesFindings: boolean;
+  };
+}
+interface CspFlyoutPanels extends FlyoutPanels {
+  left: CspFlyoutPanelProps;
+}
+
 export const InsightsTabCsp = memo(
   ({ name, fieldName }: { name: string; fieldName: 'host.name' | 'user.name' }) => {
-    const panels = useExpandableFlyoutState();
+    const panels = useExpandableFlyoutState() as CspFlyoutPanels;
     const defaultTab = () =>
       panels.left?.params?.hasMisconfigurationFindings
         ? 'misconfigurationTabId'
@@ -29,7 +42,7 @@ export const InsightsTabCsp = memo(
         : 'undefined';
 
     const [activeInsightsId, setActiveInsightsId] = useState(
-      panels.left?.path?.subTab || defaultTab
+      panels.left?.params?.path?.subTab || defaultTab
     );
     const insightsButtonsNew: EuiButtonGroupOptionProps[] = useMemo(() => {
       const buttons: EuiButtonGroupOptionProps[] = [];

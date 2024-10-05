@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
-import { css } from '@emotion/react';
+// import { css } from '@emotion/react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiSpacer,
@@ -15,14 +15,13 @@ import {
   EuiLink,
   EuiText,
   EuiBasicTable,
-  EuiBadge,
-  EuiTextColor,
+  // EuiBadge,
+  // EuiTextColor,
 } from '@elastic/eui';
-import type { float } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+// import type { float } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useNavigateVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
@@ -30,100 +29,82 @@ import type {
   CspVulnerabilityFinding,
   Vulnerability,
 } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import {
+  // getSeverityStatusColor,
+  // getCvsScoreColor,
+  getVulnerabilityStats,
+  CVSScoreBadge,
+  SeverityStatusBadge,
+} from '@kbn/cloud-security-posture';
+
 // Replace Below from here
-interface CVSScoreBadgeProps {
-  score?: float;
-  version?: string;
-}
+// interface CVSScoreBadgeProps {
+//   score?: float;
+//   version?: string;
+// }
 
-export const CVSScoreBadge = ({ score, version }: CVSScoreBadgeProps) => {
-  if (!score) return null;
+// export const CVSScoreBadge = ({ score, version }: CVSScoreBadgeProps) => {
+//   if (!score) return null;
 
-  const color = getCvsScoreColor(score);
-  const versionDisplay = version ? `v${version.split('.')[0]}` : null;
+//   const color = getCvsScoreColor(score);
+//   const versionDisplay = version ? `v${version.split('.')[0]}` : null;
 
-  return (
-    <EuiBadge
-      color={color}
-      css={css`
-        border: none;
-        .euiBadge__text {
-          display: flex;
-        }
-        width: 62px;
-      `}
-      data-test-subj={'blabla'}
-    >
-      <>
-        <EuiTextColor color="ghost">{score < 10 ? score.toFixed(1) : score}</EuiTextColor>
-        <>
-          <hr
-            css={css`
-              width: 1px;
-              border: 0 none;
-              background-color: rgba(255, 255, 255, 0.2);
-              margin: 0px 6px;
-            `}
-          />
-          <EuiTextColor color="ghost">{versionDisplay || '-'}</EuiTextColor>
-        </>
-      </>
-    </EuiBadge>
-  );
-};
+//   return (
+//     <EuiBadge
+//       color={color}
+//       css={css`
+//         border: none;
+//         .euiBadge__text {
+//           display: flex;
+//         }
+//         width: 62px;
+//       `}
+//       data-test-subj={'blabla'}
+//     >
+//       <>
+//         <EuiTextColor color="ghost">{score < 10 ? score.toFixed(1) : score}</EuiTextColor>
+//         <>
+//           <hr
+//             css={css`
+//               width: 1px;
+//               border: 0 none;
+//               background-color: rgba(255, 255, 255, 0.2);
+//               margin: 0px 6px;
+//             `}
+//           />
+//           <EuiTextColor color="ghost">{versionDisplay || '-'}</EuiTextColor>
+//         </>
+//       </>
+//     </EuiBadge>
+//   );
+// };
 
-export const getCvsScoreColor = (score: number): string | undefined => {
-  if (score <= 4) {
-    return euiThemeVars.euiColorVis0; // low severity
-  } else if (score >= 4 && score <= 7) {
-    return euiThemeVars.euiColorVis7; // medium severity
-  } else if (score >= 7 && score <= 9) {
-    return euiThemeVars.euiColorVis9; // high severity
-  } else if (score >= 9) {
-    return euiThemeVars.euiColorDanger; // critical severity
-  }
-};
+// interface SeverityStatusBadgeProps {
+//   severity?: VulnSeverity;
+// }
+// export const SeverityStatusBadge = ({ severity }: SeverityStatusBadgeProps) => {
+//   if (!severity) return null;
+//   const color = getSeverityStatusColor(severity);
 
-export const getSeverityStatusColor = (severity: VulnSeverity): string => {
-  switch (severity) {
-    case 'LOW':
-      return euiThemeVars.euiColorVis0;
-    case 'MEDIUM':
-      return euiThemeVars.euiColorVis5_behindText;
-    case 'HIGH':
-      return euiThemeVars.euiColorVis9_behindText;
-    case 'CRITICAL':
-      return euiThemeVars.euiColorDanger;
-    default:
-      return '#aaa';
-  }
-};
-interface SeverityStatusBadgeProps {
-  severity?: VulnSeverity;
-}
-export const SeverityStatusBadge = ({ severity }: SeverityStatusBadgeProps) => {
-  if (!severity) return null;
-  const color = getSeverityStatusColor(severity);
-
-  return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      `}
-    >
-      <EuiIcon
-        type="dot"
-        color={color}
-        css={css`
-          opacity: ${severity ? 1 : 0};
-        `}
-      />
-      {severity}
-    </div>
-  );
-};
+//   return (
+//     <div
+//       css={css`
+//         display: flex;
+//         flex-direction: row;
+//         align-items: center;
+//       `}
+//     >
+//       <EuiIcon
+//         type="dot"
+//         color={color}
+//         css={css`
+//           opacity: ${severity ? 1 : 0};
+//         `}
+//       />
+//       {severity}
+//     </div>
+//   );
+// };
 // TO here
 type VulnerabilitiesFindingDetailFields = Pick<
   CspVulnerabilityFinding,
@@ -135,82 +116,6 @@ interface VulnerabilitiesPackage extends Vulnerability {
     name: string;
   };
 }
-interface VulnerabilitiesDistributionBarProps {
-  key: string;
-  count: number;
-  color: string;
-}
-
-const getVulnerabilityStats = (
-  critical: number,
-  high: number,
-  medium: number,
-  low: number,
-  unknown: number
-): VulnerabilitiesDistributionBarProps[] => {
-  const vulnPropsArray: VulnerabilitiesDistributionBarProps[] = [];
-  if (critical === 0 && high === 0 && medium === 0 && low === 0 && unknown === 0)
-    return vulnPropsArray;
-
-  if (unknown > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.unknownVulnerabilitiesText',
-        {
-          defaultMessage: 'Unknown',
-        }
-      ),
-      count: unknown,
-      color: '#aaa',
-    });
-  if (low > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.lowVulnerabilitiesText',
-        {
-          defaultMessage: 'Low',
-        }
-      ),
-      count: low,
-      color: euiThemeVars.euiColorVis0,
-    });
-
-  if (medium > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.mediumVulnerabilitiesText',
-        {
-          defaultMessage: 'Medium',
-        }
-      ),
-      count: medium,
-      color: euiThemeVars.euiColorVis5_behindText,
-    });
-  if (high > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.highVulnerabilitiesText',
-        {
-          defaultMessage: 'High',
-        }
-      ),
-      count: high,
-      color: euiThemeVars.euiColorVis9_behindText,
-    });
-  if (critical > 0)
-    vulnPropsArray.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.vulnerabilities.CriticalVulnerabilitiesText',
-        {
-          defaultMessage: 'Critical',
-        }
-      ),
-      count: critical,
-      color: euiThemeVars.euiColorDanger,
-    });
-
-  return vulnPropsArray;
-};
 
 /**
  * Insights view displayed in the document details expandable flyout left section
