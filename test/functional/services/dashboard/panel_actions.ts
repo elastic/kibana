@@ -51,12 +51,10 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`scrollPanelIntoView`);
     wrapper = wrapper || (await this.getPanelWrapper());
     const yOffset = (await wrapper.getPosition()).y;
-    if (yOffset > DASHBOARD_TOP_OFFSET) {
-      await this.browser.execute(`
+    await this.browser.execute(`
         const scrollY = window.scrollY;
         window.scrollBy(0, scrollY - ${yOffset});
       `);
-    }
     await wrapper.moveMouseTo();
   }
 
