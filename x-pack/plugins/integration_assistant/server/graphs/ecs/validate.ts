@@ -54,12 +54,12 @@ interface ECSFieldTarget {
 }
 
 /**
- * Parses a given object as an ECSMapping object if it meets the required structure.
+ * Parses a given object as an ECSFieldTarget object if it meets the required structure.
  *
  * @param value - The value to be converted to an ECSMapping object. It should be an object
  *                with properties `target` and `type`. It should have `confidence` field and
  *                either `date_formats` or `date_format`, though we also fill in these otherwise.
- * @returns An ECSMapping object if the input value meets the required structure, otherwise null.
+ * @returns An ECSFieldTarget object if the conversion succeeded, otherwise null.
  */
 function asECSFieldTarget(value: any): ECSFieldTarget | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -79,6 +79,8 @@ function asECSFieldTarget(value: any): ECSFieldTarget | null {
     let dateFormats: string[] = [];
     if (value.date_formats && Array.isArray(value.date_formats)) {
       dateFormats = value.date_formats;
+    } else if (value.date_format && Array.isArray(value.date_format)) {
+      dateFormats = value.date_format;
     } else if (value.date_format && typeof value.date_format === 'string') {
       dateFormats = [value.date_format];
     }
@@ -110,7 +112,7 @@ export function extractECSMapping(
   output: Record<string, string[][]>
 ): void {
   if (Array.isArray(value)) {
-    // If the value is an array, iterate through items and process them
+    // If the value is an array, iterate through items and process them.
     for (const item of value) {
       if (typeof item === 'object' && item !== null) {
         extractECSMapping(path, item, output);
@@ -119,9 +121,9 @@ export function extractECSMapping(
     return;
   }
 
-  // Can we interpret the value as an ecsMapping?
   const ecsFieldTarget = asECSFieldTarget(value);
   if (ecsFieldTarget) {
+    // If we can interpret the value as an ECSFieldTarget.
     if (!output[ecsFieldTarget.target]) {
       output[ecsFieldTarget.target] = [];
     }
@@ -130,7 +132,7 @@ export function extractECSMapping(
   }
 
   if (typeof value === 'object' && value !== null) {
-    // Regular dictionary, continue traversing
+    // Regular dictionary, continue traversing.
     for (const [k, v] of Object.entries(value)) {
       extractECSMapping([...path, k], v, output);
     }
