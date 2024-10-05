@@ -13,6 +13,7 @@ import type {
 } from '../../../model/prebuilt_rule_upgrade';
 import { RuleUpgradeInfoBar } from './components/rule_upgrade_info_bar';
 import { RuleUpgradeConflictsResolver } from './components/rule_upgrade_conflicts_resolver';
+import { RuleUpgradeCallout } from './components/rule_upgrade_callout';
 
 interface RuleUpgradeConflictsResolverTabProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -27,6 +28,8 @@ export function RuleUpgradeConflictsResolverTab({
     <>
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
+      <EuiSpacer size="s" />
+      <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
       <RuleUpgradeConflictsResolver
         ruleUpgradeState={ruleUpgradeState}
