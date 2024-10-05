@@ -197,6 +197,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   } else if (data && data.length === 0) {
     content = <EmptyPrompt history={history} />;
   } else if (error) {
+    // todo - render auth fail component
     content = (
       <PageError
         title={
