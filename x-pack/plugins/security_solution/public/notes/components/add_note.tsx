@@ -61,6 +61,10 @@ export interface AddNewNoteProps {
    * Children to render between the markdown and the add note button
    */
   children?: React.ReactNode;
+  /*
+   * Callback to execute when a new note is added
+   */
+  onNoteAdd?: () => void;
 }
 
 /**
@@ -68,7 +72,7 @@ export interface AddNewNoteProps {
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
 export const AddNote = memo(
-  ({ eventId, timelineId, disableButton = false, children }: AddNewNoteProps) => {
+  ({ eventId, timelineId, disableButton = false, children, onNoteAdd }: AddNewNoteProps) => {
     const { telemetry } = useKibana().services;
     const dispatch = useDispatch();
     const { addError: addErrorToast } = useAppToasts();
@@ -88,11 +92,14 @@ export const AddNote = memo(
           },
         })
       );
+      if (onNoteAdd) {
+        onNoteAdd();
+      }
       telemetry.reportAddNoteFromExpandableFlyoutClicked({
         isRelatedToATimeline: timelineId != null,
       });
       setEditorValue('');
-    }, [dispatch, editorValue, eventId, telemetry, timelineId]);
+    }, [dispatch, editorValue, eventId, telemetry, timelineId, onNoteAdd]);
 
     // show a toast if the create note call fails
     useEffect(() => {

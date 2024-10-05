@@ -53,6 +53,7 @@ export * from './steps';
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
   agentPolicy,
+  selectedAgentPolicies,
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
@@ -69,11 +70,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const [selectionType, setSelectionType] = useState<SelectionType>();
 
   const {
-    agentPolicies,
+    agentPolicies: fetchedAgentPolicies,
     isLoadingInitialAgentPolicies,
     isLoadingAgentPolicies,
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
+
+  // Have the option to pass agentPolicies from props, otherwise use the fetched ones
+  const agentPolicies = selectedAgentPolicies ? selectedAgentPolicies : fetchedAgentPolicies;
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
 
