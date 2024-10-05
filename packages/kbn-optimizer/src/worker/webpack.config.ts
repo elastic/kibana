@@ -86,6 +86,7 @@ export function getWebpackConfig(
 
     plugins: [
       new webpack.ProvidePlugin({
+        Buffer: [require.resolve('buffer/'), 'Buffer'],
         process: require.resolve('process/browser'),
       }),
       new CleanWebpackPlugin(),
@@ -313,6 +314,7 @@ export function getWebpackConfig(
         fs: false,
       },
       fallback: {
+        buffer: require.resolve('buffer/'),
         child_process: false,
         crypto: require.resolve('crypto-browserify'),
         fs: false,
