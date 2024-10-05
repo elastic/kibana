@@ -192,7 +192,7 @@ export class TaskPool {
   public cancelRunningTasks(reason?: TaskCancellationReason) {
     this.logger.debug('Cancelling running tasks.');
     for (const task of this.tasksInPool.values()) {
-      this.cancelTask(task, reason);
+      this.cancelTask(task, reason).catch(() => {});
     }
   }
 
@@ -239,7 +239,7 @@ export class TaskPool {
               : ``
           }.`
         );
-        this.cancelTask(taskRunner, TaskCancellationReason.Timeout);
+        this.cancelTask(taskRunner, TaskCancellationReason.Timeout).catch(() => {});
       }
     }
   }
