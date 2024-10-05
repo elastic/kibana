@@ -104,6 +104,100 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getSeverityStatusColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityStatusColor",
+        "description": [],
+        "signature": [
+          "(severity: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.VulnSeverity",
+            "text": "VulnSeverity"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_colors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getSeverityStatusColor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.VulnSeverity",
+                "text": "VulnSeverity"
+              }
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_colors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getSeverityText",
+        "type": "Function",
+        "tags": [],
+        "label": "getSeverityText",
+        "description": [],
+        "signature": [
+          "(severity: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.VulnSeverity",
+            "text": "VulnSeverity"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getSeverityText.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.VulnSeverity",
+                "text": "VulnSeverity"
+              }
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/get_vulnerability_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.showErrorToast",
         "type": "Function",
         "tags": [],
@@ -166,6 +260,36 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.CspBaseEsQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "CspBaseEsQuery",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CspBaseEsQuery.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ bool: { filter: ",
+              "QueryDslQueryContainer",
+              "[]; }; } | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.CspClientPluginStartDeps",
@@ -671,56 +795,26 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.MisconfigurationBaseEsQuery",
+        "id": "def-public.UseCspOptions",
         "type": "Interface",
         "tags": [],
-        "label": "MisconfigurationBaseEsQuery",
-        "description": [],
-        "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.MisconfigurationBaseEsQuery.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ bool: { filter: ",
-              "QueryDslQueryContainer",
-              "[]; }; } | undefined"
-            ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.UseMisconfigurationOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseMisconfigurationOptions",
+        "label": "UseCspOptions",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/cloud-security-posture",
             "scope": "public",
             "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.UseMisconfigurationOptions",
-            "text": "UseMisconfigurationOptions"
+            "section": "def-public.UseCspOptions",
+            "text": "UseCspOptions"
           },
           " extends ",
           {
             "pluginId": "@kbn/cloud-security-posture",
             "scope": "public",
             "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.MisconfigurationBaseEsQuery",
-            "text": "MisconfigurationBaseEsQuery"
+            "section": "def-public.CspBaseEsQuery",
+            "text": "CspBaseEsQuery"
           }
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/type.ts",
@@ -729,7 +823,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseMisconfigurationOptions.sort",
+            "id": "def-public.UseCspOptions.sort",
             "type": "Array",
             "tags": [],
             "label": "sort",
@@ -743,7 +837,7 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseMisconfigurationOptions.enabled",
+            "id": "def-public.UseCspOptions.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -754,7 +848,7 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseMisconfigurationOptions.pageSize",
+            "id": "def-public.UseCspOptions.pageSize",
             "type": "number",
             "tags": [],
             "label": "pageSize",
@@ -765,7 +859,7 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseMisconfigurationOptions.ignore_unavailable",
+            "id": "def-public.UseCspOptions.ignore_unavailable",
             "type": "CompoundType",
             "tags": [],
             "label": "ignore_unavailable",

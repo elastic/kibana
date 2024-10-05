@@ -416,6 +416,23 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.PartialCodeSignatureCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "PartialCodeSignatureCallout",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/partial_code_signature_callout/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
         "id": "def-common.SearchBar",
         "type": "Function",
         "tags": [],
