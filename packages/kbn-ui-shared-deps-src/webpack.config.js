@@ -121,6 +121,7 @@ module.exports = {
       buffer: require.resolve('buffer/'),
       child_process: false,
       fs: false,
+      process: require.resolve('process/browser'),
     },
   },
 
@@ -141,6 +142,7 @@ module.exports = {
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: [require.resolve('buffer/'), 'Buffer'],
+      process: require.resolve('process/browser'),
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
