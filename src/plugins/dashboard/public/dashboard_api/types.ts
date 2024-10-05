@@ -52,6 +52,7 @@ import {
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -130,12 +131,12 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataViews &
   PublishesPanelDescription &
   Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesReload &
   PublishesSavedObjectId &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
   TracksOverlays & {
-    addFromLibrary: () => void;
     animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
@@ -158,11 +159,13 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
     setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-    setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
+    setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
     setQuery: (query?: Query | undefined) => void;
+    setScrollToPanelId: (id: string | undefined) => void;
+    setSettings: (settings: DashboardStateFromSettingsFlyout) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     useMargins$: PublishingSubject<boolean | undefined>;
