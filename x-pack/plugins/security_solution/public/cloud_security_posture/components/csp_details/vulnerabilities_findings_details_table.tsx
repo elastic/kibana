@@ -6,19 +6,8 @@
  */
 
 import React, { memo, useState } from 'react';
-// import { css } from '@emotion/react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiIcon,
-  EuiPanel,
-  EuiLink,
-  EuiText,
-  EuiBasicTable,
-  // EuiBadge,
-  // EuiTextColor,
-} from '@elastic/eui';
-// import type { float } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiSpacer, EuiIcon, EuiPanel, EuiLink, EuiText, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
@@ -30,82 +19,11 @@ import type {
   Vulnerability,
 } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import {
-  // getSeverityStatusColor,
-  // getCvsScoreColor,
   getVulnerabilityStats,
   CVSScoreBadge,
   SeverityStatusBadge,
 } from '@kbn/cloud-security-posture';
 
-// Replace Below from here
-// interface CVSScoreBadgeProps {
-//   score?: float;
-//   version?: string;
-// }
-
-// export const CVSScoreBadge = ({ score, version }: CVSScoreBadgeProps) => {
-//   if (!score) return null;
-
-//   const color = getCvsScoreColor(score);
-//   const versionDisplay = version ? `v${version.split('.')[0]}` : null;
-
-//   return (
-//     <EuiBadge
-//       color={color}
-//       css={css`
-//         border: none;
-//         .euiBadge__text {
-//           display: flex;
-//         }
-//         width: 62px;
-//       `}
-//       data-test-subj={'blabla'}
-//     >
-//       <>
-//         <EuiTextColor color="ghost">{score < 10 ? score.toFixed(1) : score}</EuiTextColor>
-//         <>
-//           <hr
-//             css={css`
-//               width: 1px;
-//               border: 0 none;
-//               background-color: rgba(255, 255, 255, 0.2);
-//               margin: 0px 6px;
-//             `}
-//           />
-//           <EuiTextColor color="ghost">{versionDisplay || '-'}</EuiTextColor>
-//         </>
-//       </>
-//     </EuiBadge>
-//   );
-// };
-
-// interface SeverityStatusBadgeProps {
-//   severity?: VulnSeverity;
-// }
-// export const SeverityStatusBadge = ({ severity }: SeverityStatusBadgeProps) => {
-//   if (!severity) return null;
-//   const color = getSeverityStatusColor(severity);
-
-//   return (
-//     <div
-//       css={css`
-//         display: flex;
-//         flex-direction: row;
-//         align-items: center;
-//       `}
-//     >
-//       <EuiIcon
-//         type="dot"
-//         color={color}
-//         css={css`
-//           opacity: ${severity ? 1 : 0};
-//         `}
-//       />
-//       {severity}
-//     </div>
-//   );
-// };
-// TO here
 type VulnerabilitiesFindingDetailFields = Pick<
   CspVulnerabilityFinding,
   'vulnerability' | 'resource'
@@ -211,7 +129,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       field: 'vulnerability',
       render: (vulnerability: Vulnerability) => <EuiText size="s">{vulnerability?.id}</EuiText>,
       name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.misconfigurations.table.resultColumnName',
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
         {
           defaultMessage: 'Vulnerability',
         }
@@ -229,7 +147,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         </EuiText>
       ),
       name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         {
           defaultMessage: 'CVSS',
         }
@@ -248,7 +166,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         </>
       ),
       name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         {
           defaultMessage: 'Severity',
         }
@@ -261,7 +179,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
         <EuiText size="s">{vulnerability?.package?.name}</EuiText>
       ),
       name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.misconfigurations.table.ruleColumnName',
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         {
           defaultMessage: 'Package',
         }
@@ -278,12 +196,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
             navToVulnerabilitiesByName(queryName, 'host.name');
           }}
         >
-          {i18n.translate(
-            'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
-            {
-              defaultMessage: 'Vulnerability ',
-            }
-          )}
+          {i18n.translate('xpack.securitySolution.flyout.left.insights.vulnerability.tableTitle', {
+            defaultMessage: 'Vulnerability ',
+          })}
           <EuiIcon type={'popout'} />
         </EuiLink>
         <EuiSpacer size="xl" />
