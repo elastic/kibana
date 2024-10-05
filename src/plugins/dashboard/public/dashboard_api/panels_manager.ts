@@ -180,7 +180,20 @@ export function initializePanelsManager(
         await untilEmbeddableLoaded(id);
         return id;
       },
-      resetAllReactEmbeddables: () => {
+      setPanels: (panels: DashboardPanelMap) => {
+        panels$.next(panels);
+      },
+      setRuntimeStateForChild,
+      untilEmbeddableLoaded,
+    },
+    internalApi: {
+      registerChildApi: (api: DefaultEmbeddableApi) => {
+        children$.next({
+          ...children$.value,
+          [api.uuid]: api,
+        });
+      },
+      reset: () => {
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
@@ -195,19 +208,6 @@ export function initializePanelsManager(
           }
         }
         if (resetChangedPanelCount) children$.next(currentChildren);
-      },
-      setPanels: (panels: DashboardPanelMap) => {
-        panels$.next(panels);
-      },
-      setRuntimeStateForChild,
-      untilEmbeddableLoaded,
-    },
-    internalApi: {
-      registerChildApi: (api: DefaultEmbeddableApi) => {
-        children$.next({
-          ...children$.value,
-          [api.uuid]: api,
-        });
       },
     },
   };

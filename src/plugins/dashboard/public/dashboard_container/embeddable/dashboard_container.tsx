@@ -143,7 +143,6 @@ export class DashboardContainer
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
   public anyReducerRun: Subject<null> = new Subject();
-  public setAnimatePanelTransforms: (animate: boolean) => void;
   public setManaged: (managed: boolean) => void;
   public setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
   public openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => void;
@@ -308,7 +307,6 @@ export class DashboardContainer
     this.hasUnsavedChanges$ = dashboardApi.hasUnsavedChanges$;
     this.isEmbeddedExternally = dashboardApi.isEmbeddedExternally;
     this.managed$ = dashboardApi.managed$;
-    this.setAnimatePanelTransforms = dashboardApi.setAnimatePanelTransforms;
     this.setFullScreenMode = dashboardApi.setFullScreenMode;
     this.setHasUnsavedChanges = dashboardApi.setHasUnsavedChanges;
     this.setManaged = dashboardApi.setManaged;
@@ -700,7 +698,6 @@ export class DashboardContainer
     this.searchSessionId = searchSessionId;
     this.searchSessionId$.next(searchSessionId);
 
-    this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
     this.setManaged(loadDashboardReturn?.managed ?? false);
     this.setExpandedPanelId(undefined);
     this.setLastSavedInput(omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput'));

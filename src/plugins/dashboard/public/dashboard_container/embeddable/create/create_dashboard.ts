@@ -307,13 +307,6 @@ export const initializeDashboard = async ({
   );
 
   // --------------------------------------------------------------------------------------
-  // Start animating panel transforms 500 ms after dashboard is created.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboard) =>
-    setTimeout(() => dashboard.setAnimatePanelTransforms(true), 500)
-  );
-
-  // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
   let initialSearchSessionId;

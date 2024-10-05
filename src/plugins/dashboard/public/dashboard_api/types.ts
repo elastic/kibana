@@ -137,7 +137,6 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   PublishesWritableViewMode &
   TracksOverlays & {
-    animatePanelTransforms$: PublishingSubject<boolean>;
     asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
@@ -177,6 +176,7 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
+  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: PublishingSubject<void>;
   panelsReload$: PublishingSubject<void>;
   getRuntimeStateForControlGroup: () => UnsavedPanelState | undefined;

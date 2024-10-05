@@ -153,6 +153,9 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       panelsReload$,
+      reset: (lastSavedState: DashboardState) => {
+
+      }
     },
     cleanup: () => {
       stopSyncingWithControlGroup();

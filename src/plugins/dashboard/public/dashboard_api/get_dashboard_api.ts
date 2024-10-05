@@ -69,6 +69,11 @@ export function getDashboardApi({
     creationOptions
   );
 
+  // --------------------------------------------------------------------------------------
+  // Start animating panel transforms 500 ms after dashboard is created.
+  // --------------------------------------------------------------------------------------
+  setTimeout(() => animatePanelTransforms$.next(true), 500)
+
   return {
     api: {
       ...dataLoadingManager.api,
@@ -78,14 +83,18 @@ export function getDashboardApi({
       ...trackPanel,
       ...unifiedSearchManager.api,
       ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
-      ...initializeUnsavedChanges(
-        savedObjectResult?.anyMigrationRun ?? false,
-        omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
+      ...initializeUnsavedChanges({
+        anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
+        lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
           ...DEFAULT_DASHBOARD_INPUT,
           id: v4(),
-        }
-      ),
-      animatePanelTransforms$,
+        },
+        resetControlGroup: async () => {
+          await controlGroupApi$.value?.asyncResetUnsavedChanges();
+        },
+        resetPanels: panelsManager.internalApi.reset,
+        resetUnifiedSearch: unifiedSearchManager.internalApi.reset,
+      }),
       fullScreenMode$,
       getAppContext: () => {
         const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(
@@ -99,7 +108,6 @@ export function getDashboardApi({
       isEmbeddedExternally: creationOptions?.isEmbeddedExternally ?? false,
       managed$,
       savedObjectId: savedObjectId$,
-      setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),
       setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
       setManaged: (managed: boolean) => managed$.next(managed),
       setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
@@ -116,6 +124,7 @@ export function getDashboardApi({
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
+      animatePanelTransforms$,
       getSerializedStateForControlGroup: () => {
         return {
           rawState: initialState.controlGroupInput
