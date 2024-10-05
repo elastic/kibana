@@ -458,10 +458,10 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...request,
             ...searchOptions,
+            stream:
+              strategy === ESQL_ASYNC_SEARCH_STRATEGY || strategy === ENHANCED_ES_SEARCH_STRATEGY,
           }),
           asResponse: true,
-          stream:
-            strategy === ESQL_ASYNC_SEARCH_STRATEGY || strategy === ENHANCED_ES_SEARCH_STRATEGY,
         })
         .then((rawResponse) => {
           const response = rawResponse.body;
