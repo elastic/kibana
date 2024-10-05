@@ -48,7 +48,7 @@ export function getWebpackConfig(
     devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
-    target: 'web',
+    // target: 'web',
 
     output: {
       // TODO: remove this commented line if xxhash64 is faster

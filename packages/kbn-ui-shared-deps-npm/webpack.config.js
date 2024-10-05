@@ -101,7 +101,7 @@ module.exports = (_, argv) => {
     },
     context: __dirname,
     devtool: 'cheap-source-map',
-    target: 'web',
+    // target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',

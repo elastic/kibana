@@ -33,7 +33,7 @@ module.exports = {
   },
   context: __dirname,
   devtool: 'cheap-source-map',
-  target: 'web',
+  // target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
@@ -107,7 +107,7 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    mainFields: ['browser', 'main'],
+    // mainFields: ['browser', 'main'],
     // conditionNames: ['require', 'default', 'node', 'module', 'import'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
