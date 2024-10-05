@@ -46,7 +46,7 @@ function findMissingFields(combinedSamples: string, ecsMapping: AnyObject): stri
 }
 
 // Describes an LLM-generated ECS mapping candidate.
-interface ECSMapping {
+interface ECSFieldTarget {
   target: string;
   type: string;
   confidence: number;
@@ -61,7 +61,7 @@ interface ECSMapping {
  *                either `date_formats` or `date_format`, though we also fill in these otherwise.
  * @returns An ECSMapping object if the input value meets the required structure, otherwise null.
  */
-function asECSMapping(value: any): ECSMapping | null {
+function asECSFieldTarget(value: any): ECSFieldTarget | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return null;
   }
@@ -94,7 +94,7 @@ function asECSMapping(value: any): ECSMapping | null {
 }
 
 /**
- * Extracts ECS (Elastic Common Schema) mappings from the LLM output.
+ * Extracts ECS (Elastic Common Schema) field mapping dictionary from the LLM output.
  *
  * @param path - The current path in the object being traversed (an array of strings).
  * @param value - The value to be processed, which can be an array, object, or other types.
@@ -104,7 +104,7 @@ function asECSMapping(value: any): ECSMapping | null {
  * If the value can be interpreted as an ECS mapping, it adds the path to the output record under the appropriate ECS target.
  * If the value is a regular object, it continues traversing its properties.
  */
-export function extractECSMappings(
+export function extractECSMapping(
   path: string[],
   value: any,
   output: Record<string, string[][]>
@@ -113,26 +113,26 @@ export function extractECSMappings(
     // If the value is an array, iterate through items and process them
     for (const item of value) {
       if (typeof item === 'object' && item !== null) {
-        extractECSMappings(path, item, output);
+        extractECSMapping(path, item, output);
       }
     }
     return;
   }
 
   // Can we interpret the value as an ecsMapping?
-  const ecsMapping = asECSMapping(value);
-  if (ecsMapping) {
-    if (!output[ecsMapping.target]) {
-      output[ecsMapping.target] = [];
+  const ecsFieldTarget = asECSFieldTarget(value);
+  if (ecsFieldTarget) {
+    if (!output[ecsFieldTarget.target]) {
+      output[ecsFieldTarget.target] = [];
     }
-    output[ecsMapping.target].push(path);
+    output[ecsFieldTarget.target].push(path);
     return;
   }
 
   if (typeof value === 'object' && value !== null) {
     // Regular dictionary, continue traversing
     for (const [k, v] of Object.entries(value)) {
-      extractECSMappings([...path, k], v, output);
+      extractECSMapping([...path, k], v, output);
     }
   }
 }
@@ -147,7 +147,7 @@ export function findDuplicateFields(prefixedSamples: string[], ecsMapping: AnyOb
   const output: Record<string, string[][]> = {};
 
   // Get all keys for each target ECS mapping field
-  extractECSMappings([], ecsMapping, output);
+  extractECSMapping([], ecsMapping, output);
 
   // Filter out any ECS field that does not have multiple source fields mapped to it
   const filteredOutput = Object.fromEntries(
@@ -180,7 +180,7 @@ export function findInvalidEcsFields(currentMapping: AnyObject): string[] {
   const ecsDict = ECS_FULL;
   const ecsReserved = ECS_RESERVED;
 
-  extractECSMappings([], currentMapping, output);
+  extractECSMapping([], currentMapping, output);
   const filteredOutput = Object.fromEntries(
     Object.entries(output).filter(([key, _]) => key !== null)
   );

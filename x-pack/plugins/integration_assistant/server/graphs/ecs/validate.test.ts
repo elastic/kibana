@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { findDuplicateFields, findInvalidEcsFields, extractECSMappings } from './validate';
+import { findDuplicateFields, findInvalidEcsFields, extractECSMapping } from './validate';
 
 describe('Testing ecs handler', () => {
-  it('extractECSMappings()', async () => {
+  it('extractECSMapping()', async () => {
     const path: string[] = [];
     const value = {
       checkpoint: {
@@ -43,7 +43,7 @@ describe('Testing ecs handler', () => {
       },
     };
     const output: Record<string, string[][]> = {};
-    await extractECSMappings(path, value, output);
+    await extractECSMapping(path, value, output);
     expect(output).toEqual({
       'source.address': [['checkpoint', 'firewall', 'origin']],
       'user.name': [['checkpoint', 'firewall', 'administrator']],
