@@ -41,6 +41,10 @@
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
+    "xpack.entities": [
+      "plugins/logsai/entities_api",
+      "plugins/logsai/entities_app"
+    ],
     "xpack.features": "plugins/features",
     "xpack.dataVisualizer": "plugins/data_visualizer",
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",

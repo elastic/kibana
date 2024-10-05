@@ -4883,6 +4883,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entities-api-plugin@link:x-pack/plugins/logsai/entities_api":
+  version "0.0.0"
+  uid ""
+
+"@kbn/entities-app-plugin@link:x-pack/plugins/logsai/entities_app":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entities-data-access-plugin@link:x-pack/plugins/observability_solution/entities_data_access":
   version "0.0.0"
   uid ""

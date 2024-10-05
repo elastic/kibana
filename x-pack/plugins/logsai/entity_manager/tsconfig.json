@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -36,6 +36,8 @@
     "@kbn/zod-helpers",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/alerting-plugin"
+    "@kbn/safer-lodash-set",
+    "@kbn/tinymath",
+    "@kbn/utility-types"
   ]
 }

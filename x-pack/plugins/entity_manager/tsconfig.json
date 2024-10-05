@@ -36,6 +36,5 @@
     "@kbn/zod-helpers",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/alerting-plugin",
   ]
 }

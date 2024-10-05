@@ -951,6 +951,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/logsai/**/*.{ts,tsx}',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
@@ -967,6 +968,7 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/logsai/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
@@ -977,6 +979,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/logsai/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
