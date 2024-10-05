@@ -52,7 +52,6 @@ describe('dashboard renderer', () => {
 
   test('saved object id & creation options are passed to dashboard factory', async () => {
     const options: DashboardCreationOptions = {
-      useControlGroupIntegration: true,
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
     };
