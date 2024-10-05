@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateKeyPairSync, createSign, randomBytes getCiphers } from 'crypto';
+import { generateKeyPairSync, createSign, randomBytes, getCiphers } from 'crypto';
 
 import { backOff } from 'exponential-backoff';
 
