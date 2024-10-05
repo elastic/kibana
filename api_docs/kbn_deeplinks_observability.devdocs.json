@@ -114,6 +114,20 @@
             "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.showCurrentQualityIssues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentQualityIssues",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
