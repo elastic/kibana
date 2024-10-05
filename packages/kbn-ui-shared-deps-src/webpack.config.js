@@ -118,6 +118,7 @@ module.exports = {
       'scheduler/tracing': 'scheduler/tracing-profiling',
     },
     fallback: {
+      buffer: require.resolve('buffer/'),
       child_process: false,
       fs: false,
     },
@@ -138,6 +139,9 @@ module.exports = {
   },
 
   plugins: [
+    new webpack.ProvidePlugin({
+      Buffer: [require.resolve('buffer/'), 'Buffer'],
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),

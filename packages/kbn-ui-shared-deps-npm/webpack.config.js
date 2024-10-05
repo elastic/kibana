@@ -148,6 +148,7 @@ module.exports = (_, argv) => {
         buffer: require.resolve('buffer/'),
         child_process: false,
         fs: false,
+        process: require.resolve('process/browser'),
       },
     },
 
@@ -168,6 +169,7 @@ module.exports = (_, argv) => {
     plugins: [
       new webpack.ProvidePlugin({
         Buffer: [require.resolve('buffer/'), 'Buffer'],
+        process: require.resolve('process/browser'),
       }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,

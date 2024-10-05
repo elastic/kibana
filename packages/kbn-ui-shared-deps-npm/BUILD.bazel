@@ -53,6 +53,7 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//lodash",
   "@npm//moment-timezone",
+  "@npm//process",
   "@npm//react-ace",
   "@npm//react-dom",
   "@npm//react-router-dom",

@@ -1795,6 +1795,7 @@
     "postcss-prefix-selector": "^1.16.0",
     "postcss-scss": "^4.0.4",
     "prettier": "^2.8.8",
+    "process": "^0.11.10",
     "proxy": "^2.1.1",
     "react-test-renderer": "^17.0.2",
     "recast": "^0.23.9",

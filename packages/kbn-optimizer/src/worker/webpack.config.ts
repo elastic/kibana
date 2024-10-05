@@ -85,6 +85,9 @@ export function getWebpackConfig(
     },
 
     plugins: [
+      new webpack.ProvidePlugin({
+        process: require.resolve('process/browser'),
+      }),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
@@ -315,6 +318,7 @@ export function getWebpackConfig(
         fs: false,
         os: require.resolve('os-browserify/browser'),
         path: require.resolve('path-browserify'),
+        process: require.resolve('process/browser'),
         stream: require.resolve('stream-browserify'),
         timers: require.resolve('timers-browserify'),
       },
