@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
+import { generateKeyPairSync, createSign, randomBytes getCiphers } from 'crypto';
 
 import { backOff } from 'exponential-backoff';
 
@@ -124,6 +124,9 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     if (!passphrase) {
       throw new SigningServiceNotFoundError('Unable to find passphrase');
     }
+
+    this.logger.info('These are the available ciphers:');
+    this.logger.info(getCiphers());
 
     const privateKey = Buffer.from(serializedPrivateKey, 'base64');
     const signature = signer.sign(
