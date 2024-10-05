@@ -735,7 +735,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ ...rule, consumer: 'stackAlerts' }))
+          .send(getTestRuleData({ ...rule }))
           .expect(200);
 
         objectRemover.add('space1', createdAlert.id, 'rule', 'alerting');
@@ -751,8 +751,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
            * Specifically only the second rule because the StackAlertsOnly user does not have
            * access to the test.noop rule type.
            */
-          await createRule();
-          await createRule({ rule_type_id: ruleTypeId, params });
+          await createRule({ consumer: 'stackAlerts' });
+          await createRule({ rule_type_id: ruleTypeId, params, consumer: 'stackAlerts' });
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix('space1')}/api/alerting/rules/_find`)
@@ -762,6 +762,24 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           expect(response.body.total).to.equal(1);
           expect(response.body.data[0].rule_type_id).to.equal(ruleTypeId);
           expect(response.body.data[0].consumer).to.equal('stackAlerts');
+        });
+      }
+
+      for (const [ruleTypeId, params] of ruleTypes) {
+        it(`should NOT get rules of ${ruleTypeId} rule type ID and NOT stackAlerts consumer`, async () => {
+          /**
+           * We create two rules with logs as consumer. The user is authorized to
+           * access rules only with the stackAlerts consumers.
+           */
+          await createRule({ consumer: 'logs' });
+          await createRule({ rule_type_id: ruleTypeId, params, consumer: 'logs' });
+
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix('space1')}/api/alerting/rules/_find`)
+            .auth(StackAlertsOnly.username, StackAlertsOnly.password);
+
+          expect(response.statusCode).to.eql(200);
+          expect(response.body.total).to.equal(0);
         });
       }
     });
