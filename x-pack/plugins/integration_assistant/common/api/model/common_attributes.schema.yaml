@@ -41,6 +41,7 @@ components:
     Mapping:
       type: object
       description: mapping object to ECS Mapping Request.
+      additionalProperties: true
 
     Connector:
       type: string
@@ -51,6 +52,7 @@ components:
       description: An array of processed documents.
       items:
         type: object
+        additionalProperties: true
 
     SamplesFormatName:
       type: string
@@ -74,6 +76,14 @@ components:
         multiline:
           type: boolean
           description: For some formats, specifies whether the samples can be multiline.
+        header: 
+          type: boolean
+          description: For CSV format, specifies whether the samples have a header row.
+        columns:
+          type: array
+          description: For CSV format, specifies the columns guessed at by the LLM.
+          items:
+            type: string
         json_path:
           type: array
           description: For a JSON format, describes how to get to the sample array from the root of the JSON.
