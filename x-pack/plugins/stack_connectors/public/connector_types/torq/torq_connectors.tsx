@@ -44,7 +44,6 @@ const torqWebhookEndpoint =
     const hostname = new URL(value).hostname;
     const isTorqHostname = /^hooks(\.[a-z0-9]+)*\.torq\.io$/.test(hostname);
     return isTorqHostname ? undefined : error;
-
   };
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
