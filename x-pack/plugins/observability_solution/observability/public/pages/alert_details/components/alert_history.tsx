@@ -16,13 +16,10 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
-  OBSERVABILITY_RULE_TYPE_IDS,
-} from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../../../../common/constants';
 import { convertTo } from '../../../../common/utils/formatters';
 import { useKibana } from '../../../utils/kibana_react';
 import { TopAlert } from '../../..';
@@ -54,7 +51,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     isError,
   } = useAlertsHistory({
     http,
-    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
     ruleId: rule.id,
     dateRange,
     instanceId,
@@ -153,7 +150,7 @@ export function AlertHistoryChart({ rule, alert }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <AlertSummaryWidget
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
         timeRange={getDefaultAlertSummaryTimeRange()}
         fullSize
         hideStats

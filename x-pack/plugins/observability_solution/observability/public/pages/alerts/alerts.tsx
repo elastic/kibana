@@ -16,7 +16,6 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { rulesLocatorID } from '../../../common';
 import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
@@ -38,7 +37,11 @@ import {
 } from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
+import {
+  ALERTS_URL_STORAGE_KEY,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+  observabilityAlertFeatureIds,
+} from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -245,7 +248,7 @@ function InternalAlertsPage() {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -255,7 +258,7 @@ function InternalAlertsPage() {
           <EuiFlexItem>
             {esQuery && (
               <AlertsGrouping<AlertsByGroupingAgg>
-                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
                 defaultFilters={
                   ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
                 }
@@ -281,7 +284,7 @@ function InternalAlertsPage() {
                   return (
                     <AlertsStateTable
                       id={ALERTS_TABLE_ID}
-                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       showAlertStatusWithFlapping

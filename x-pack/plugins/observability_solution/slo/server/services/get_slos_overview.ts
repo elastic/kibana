@@ -15,7 +15,7 @@ import {
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { typedSearch } from '../utils/queries';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
@@ -115,16 +115,9 @@ export class GetSLOsOverview {
       }),
 
       this.racClient.getAlertSummary({
-        ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
+        ruleTypeIds: SLO_RULE_TYPE_IDS,
         gte: moment().subtract(24, 'hours').toISOString(),
         lte: moment().toISOString(),
-        filter: [
-          {
-            term: {
-              'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
-            },
-          },
-        ],
       }),
     ]);
 

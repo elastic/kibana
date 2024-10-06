@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -27,7 +26,10 @@ import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
 import { isRuleEditable } from './helpers/is_rule_editable';
 import { ruleDetailsLocatorID } from '../../../common';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
+import {
+  ALERT_STATUS_ALL,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
+} from '../../../common/constants';
 import {
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
@@ -222,7 +224,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
             filter={{
@@ -249,7 +251,7 @@ export function RuleDetailsPage() {
 
       <RuleDetailsTabs
         esQuery={esQuery}
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
         rule={rule}
         ruleId={ruleId}
         ruleType={ruleType}

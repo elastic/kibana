@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleCreationValidConsumer } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -29,3 +29,5 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
 ];
 
 export const EventsAsUnit = 'events';
+
+export const OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK = [...OBSERVABILITY_RULE_TYPE_IDS, ES_QUERY_ID];

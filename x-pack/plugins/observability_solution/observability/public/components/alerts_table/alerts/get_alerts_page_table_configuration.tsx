@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_START, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
@@ -15,6 +15,7 @@ import {
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../../../../common/constants';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
@@ -63,7 +64,7 @@ export const getAlertsPageTableConfiguration = (
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
     usePersistentControls: getPersistentControlsHook({
       groupingId: ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
-      ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS,
+      ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK,
       services: {
         dataViews,
         http,

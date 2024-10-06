@@ -9,8 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK } from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
 import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
@@ -229,7 +230,7 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -237,7 +238,7 @@ export function OverviewPage() {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_STACK}
               hideLazyLoader
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
