@@ -24,6 +24,8 @@ import { BlobStorageService } from '../../../blob_storage_service';
 import { InternalFileShareService } from '../../../file_share_service';
 import { InternalFileService } from '../../../file_service/internal_file_service';
 
+import { getFips } from 'crypto';
+
 describe('When using the FileHashTransform', () => {
   let file: IFile;
   let fileContent: Readable;
@@ -75,19 +77,20 @@ describe('When using the FileHashTransform', () => {
     expect(() => fileHash.getFileHash()).toThrow('File hash generation not yet complete');
   });
 
-  describe('legacy algorithms', function () {
-    this.tags('skipFIPS');
-    it.each([['md5', '098f6bcd4621d373cade4e832627b4f6']] as Array<
-      [SupportedFileHashAlgorithm, string]
-    >)('should generate file hash using algorithm: %s', async (algorithm, expectedHash) => {
-      const fileHash = createFileHashTransform(algorithm);
-      await file.uploadContent(fileContent, undefined, {
-        transforms: [fileHash],
-      });
+  if (getFips() !== 1) {
+    describe('legacy algorithms', function () {
+      it.each([['md5', '098f6bcd4621d373cade4e832627b4f6']] as Array<
+        [SupportedFileHashAlgorithm, string]
+      >)('should generate file hash using algorithm: %s', async (algorithm, expectedHash) => {
+        const fileHash = createFileHashTransform(algorithm);
+        await file.uploadContent(fileContent, undefined, {
+          transforms: [fileHash],
+        });
 
-      expect(fileHash.getFileHash()).toEqual({ algorithm, value: expectedHash });
+        expect(fileHash.getFileHash()).toEqual({ algorithm, value: expectedHash });
+      });
     });
-  });
+  }
 
   describe('other algorithms', function () {
     it.each([

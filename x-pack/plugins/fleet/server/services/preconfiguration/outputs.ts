@@ -153,7 +153,7 @@ const scryptParams = {
 export async function hashSecret(secret: string) {
   return new Promise((resolve, reject) => {
     const salt = crypto.randomBytes(saltLength).toString('hex');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+    crypto.pbkdf2(secret, salt, 100000, keyLength, 'sha512', (err, derivedKey) => {
       if (err) reject(err);
       resolve(`${salt}:${derivedKey.toString('hex')}`);
     });
@@ -163,7 +163,7 @@ export async function hashSecret(secret: string) {
 async function verifySecret(hash: string, secret: string) {
   return new Promise((resolve, reject) => {
     const [salt, key] = hash.split(':');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+    crypto.pbkdf2(secret, salt, 100000, keyLength, 'sha512', (err, derivedKey) => {
       if (err) reject(err);
       resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
     });
