@@ -23,7 +23,7 @@ const createStubInternalContract = (): CoreSecurityDelegateContract => {
 };
 
 describe('SecurityService', function () {
-  if (getFips() !== 0) {
+  if (getFips() !== 1) {
     let coreContext: ReturnType<typeof mockCoreContext.create>;
     let service: SecurityService;
 

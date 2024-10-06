@@ -125,8 +125,8 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       throw new SigningServiceNotFoundError('Unable to find passphrase');
     }
 
-    this.logger.info('These are the available ciphers:');
-    this.logger.info(getCiphers());
+    this.logger.warn('These are the available ciphers:');
+    this.logger.warn(getCiphers());
 
     const privateKey = Buffer.from(serializedPrivateKey, 'base64');
     const signature = signer.sign(
