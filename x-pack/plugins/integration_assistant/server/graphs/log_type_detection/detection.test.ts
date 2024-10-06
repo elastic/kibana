@@ -16,7 +16,7 @@ import { handleLogFormatDetection } from './detection';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
-  response: '{ "log_type": "structured"}',
+  response: '{ "name": "structured"}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const state: LogFormatDetectionState = logFormatDetectionTestState;
