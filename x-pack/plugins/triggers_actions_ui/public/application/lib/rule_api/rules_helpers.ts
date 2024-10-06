@@ -15,6 +15,7 @@ export interface LoadRulesProps {
   http: HttpSetup;
   page: Pagination;
   searchText?: string;
+  typesFilter?: string[];
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];

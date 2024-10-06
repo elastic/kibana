@@ -269,6 +269,7 @@ export const RulesList = ({
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
     : filters.types;
+
   const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
 
   const computedFilter = useMemo(() => {

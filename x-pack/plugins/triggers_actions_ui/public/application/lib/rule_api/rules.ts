@@ -15,6 +15,7 @@ export async function loadRules({
   http,
   page,
   searchText,
+  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
@@ -29,6 +30,7 @@ export async function loadRules({
   data: Rule[];
 }> {
   const filters = mapFiltersToKql({
+    typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,

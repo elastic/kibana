@@ -121,7 +121,7 @@ describe('loadRules', () => {
     `);
   });
 
-  test('should call find API with ruleTypeIds', async () => {
+  test('should call find API with typesFilter', async () => {
     const resolvedValue = {
       page: 1,
       per_page: 10,
@@ -132,30 +132,24 @@ describe('loadRules', () => {
 
     const result = await loadRules({
       http,
-      ruleTypeIds: ['foo', 'bar'],
+      typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
-
     expect(result).toEqual({
       page: 1,
       perPage: 10,
       total: 0,
       data: [],
     });
-
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/internal/alerting/rules/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": undefined,
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
             "per_page": 10,
-            "rule_type_ids": Array [
-              "foo",
-              "bar",
-            ],
             "search": undefined,
             "search_fields": undefined,
             "sort_field": "name",
@@ -166,7 +160,7 @@ describe('loadRules', () => {
     `);
   });
 
-  test('should call find API with actionTypesFilter and ruleTypeIds', async () => {
+  test('should call find API with actionTypesFilter and typesFilter', async () => {
     const resolvedValue = {
       page: 1,
       per_page: 10,
@@ -178,7 +172,7 @@ describe('loadRules', () => {
     const result = await loadRules({
       http,
       searchText: 'baz',
-      ruleTypeIds: ['foo', 'bar'],
+      typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({
@@ -193,14 +187,50 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": undefined,
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
             "per_page": 10,
-            "rule_type_ids": Array [
-              "foo",
-              "bar",
-            ],
             "search": "baz",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+            "sort_field": "name",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call find API with searchText and tagsFilter and typesFilter', async () => {
+    const resolvedValue = {
+      page: 1,
+      per_page: 10,
+      total: 0,
+      data: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRules({
+      http,
+      searchText: 'apples, foo, baz',
+      typesFilter: ['foo', 'bar'],
+      page: { index: 0, size: 10 },
+    });
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
+            "page": 1,
+            "per_page": 10,
+            "search": "apples, foo, baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
             "sort_field": "name",
             "sort_order": "asc",
@@ -222,7 +252,8 @@ describe('loadRules', () => {
     const result = await loadRules({
       http,
       searchText: 'apples, foo, baz',
-      ruleTypeIds: ['foo', 'bar'],
+      typesFilter: ['foo', 'bar'],
+      ruleTypeIds: ['one', 'two'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({
@@ -237,12 +268,12 @@ describe('loadRules', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": undefined,
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
             "per_page": 10,
             "rule_type_ids": Array [
-              "foo",
-              "bar",
+              "one",
+              "two",
             ],
             "search": "apples, foo, baz",
             "search_fields": "[\\"name\\",\\"tags\\"]",
@@ -379,6 +410,49 @@ describe('loadRules', () => {
             "filter": "alert.attributes.tags:(a or b or c)",
             "page": 1,
             "per_page": 10,
+            "search": undefined,
+            "search_fields": undefined,
+            "sort_field": "name",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call find API with ruleTypeIds', async () => {
+    const resolvedValue = {
+      page: 1,
+      per_page: 10,
+      total: 0,
+      data: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRules({
+      http,
+      ruleTypeIds: ['foo', 'bar'],
+      page: { index: 0, size: 10 },
+    });
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": undefined,
+            "page": 1,
+            "per_page": 10,
+            "rule_type_ids": Array [
+              "foo",
+              "bar",
+            ],
             "search": undefined,
             "search_fields": undefined,
             "sort_field": "name",

@@ -15,6 +15,7 @@ export async function loadRulesWithKueryFilter({
   http,
   page,
   searchText,
+  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleLastRunOutcomesFilter,
@@ -33,6 +34,7 @@ export async function loadRulesWithKueryFilter({
   data: Rule[];
 }> {
   const filtersKueryNode = mapFiltersToKueryNode({
+    typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
