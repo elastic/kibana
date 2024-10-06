@@ -360,11 +360,11 @@ const AlertsTableStateWithQueryProvider = memo(
       }
     }, [alerts, isLoading, isSuccess, onLoaded]);
 
-    const mutedAlertIds = useMemo(() => {
+    const mutedRuleIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
     }, [alerts]);
 
-    const { data: mutedAlerts } = useGetMutedAlerts(mutedAlertIds);
+    const { data: mutedAlerts } = useGetMutedAlerts(mutedRuleIds);
     const overriddenActions = useMemo(() => {
       return { toggleColumn: onToggleColumn };
     }, [onToggleColumn]);

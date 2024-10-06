@@ -21,6 +21,7 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
   enabled: boolean;
   refresh?: Date;
   ruleTypeIds?: string[];
+  consumers?: string[];
   hasReference?: {
     type: string;
     id: string;
@@ -28,7 +29,8 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
 };
 
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
-  const { ruleTypeIds, filters, page, sort, onPage, enabled, refresh, hasReference } = props;
+  const { ruleTypeIds, consumers, filters, page, sort, onPage, enabled, refresh, hasReference } =
+    props;
   const {
     http,
     notifications: { toasts },
@@ -45,7 +47,6 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       'loadRules',
       filters.tags,
       filters.searchText,
-      filters.types,
       filters.actionTypes,
       filters.ruleStatuses,
       filters.ruleLastRunOutcomes,
@@ -64,7 +65,6 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         http,
         page,
         searchText: filters.searchText,
-        typesFilter: filters.types,
         actionTypesFilter: filters.actionTypes,
         ruleExecutionStatusesFilter: filters.ruleExecutionStatuses,
         ruleLastRunOutcomesFilter: filters.ruleLastRunOutcomes,
@@ -74,6 +74,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         kueryNode: filters.kueryNode,
         sort,
         ruleTypeIds,
+        consumers,
         hasReference,
       });
     },

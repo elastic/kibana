@@ -15,7 +15,6 @@ export interface LoadRulesProps {
   http: HttpSetup;
   page: Pagination;
   searchText?: string;
-  typesFilter?: string[];
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
@@ -25,6 +24,7 @@ export interface LoadRulesProps {
   sort?: Sorting;
   kueryNode?: KueryNode;
   ruleTypeIds?: string[];
+  consumers?: string[];
   hasReference?: {
     type: string;
     id: string;

@@ -283,6 +283,7 @@ export const RulesList = ({
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
     ruleTypeIds,
+    consumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,

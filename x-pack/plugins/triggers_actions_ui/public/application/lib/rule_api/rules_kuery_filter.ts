@@ -15,7 +15,6 @@ export async function loadRulesWithKueryFilter({
   http,
   page,
   searchText,
-  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleLastRunOutcomesFilter,
@@ -26,6 +25,7 @@ export async function loadRulesWithKueryFilter({
   kueryNode,
   ruleTypeIds,
   hasReference,
+  consumers,
 }: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
@@ -33,7 +33,6 @@ export async function loadRulesWithKueryFilter({
   data: Rule[];
 }> {
   const filtersKueryNode = mapFiltersToKueryNode({
-    typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
@@ -60,6 +59,7 @@ export async function loadRulesWithKueryFilter({
       sort_order: sort.direction,
       ...(hasReference ? { has_reference: hasReference } : {}),
       ...(ruleTypeIds ? { rule_type_ids: ruleTypeIds } : {}),
+      ...(consumers ? { consumers } : {}),
     }),
   });
 

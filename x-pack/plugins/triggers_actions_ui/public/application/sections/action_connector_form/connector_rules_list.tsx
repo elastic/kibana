@@ -73,7 +73,6 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
   const ruleFilters = useMemo(() => {
     const baseFilters = {
       searchText: searchFilter,
-      types: ruleTypeIds,
     };
 
     if (connector.isPreconfigured) {
@@ -105,10 +104,11 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         id: connector.id,
       },
     };
-  }, [connector, searchFilter, ruleTypeIds]);
+  }, [connector, searchFilter]);
 
   const { rulesState } = useLoadRulesQuery({
     ...ruleFilters,
+    ruleTypeIds,
     hasDefaultRuleTypesFiltersOn: ruleTypeIds.length === 0,
     page,
     sort,

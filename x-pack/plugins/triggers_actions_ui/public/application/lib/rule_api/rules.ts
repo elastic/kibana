@@ -15,13 +15,13 @@ export async function loadRules({
   http,
   page,
   searchText,
-  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
   ruleTypeIds,
+  consumers,
 }: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
@@ -29,7 +29,6 @@ export async function loadRules({
   data: Rule[];
 }> {
   const filters = mapFiltersToKql({
-    typesFilter,
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
@@ -53,6 +52,7 @@ export async function loadRules({
       sort_field: sort.field,
       sort_order: sort.direction,
       ...(ruleTypeIds ? { rule_type_ids: ruleTypeIds } : {}),
+      ...(consumers ? { consumers } : {}),
     },
   });
   return {
