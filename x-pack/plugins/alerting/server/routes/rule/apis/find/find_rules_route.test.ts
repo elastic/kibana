@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { findRulesRoute } from './find_rules_route';
+import { findRulesRoute, findInternalRulesRoute } from './find_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -30,6 +30,18 @@ beforeEach(() => {
 });
 
 describe('findRulesRoute', () => {
+  it('registers the route with public access', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findRulesRoute(router, licenseState);
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ access: 'public' }),
+      }),
+      expect.any(Function)
+    );
+  });
   it('finds rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -433,5 +445,20 @@ describe('findRulesRoute', () => {
       counterType: 'alertingFieldsUsage',
       incrementBy: 1,
     });
+  });
+});
+
+describe('findInternalRulesRoute', () => {
+  it('registers the route without public access', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+    expect(router.post).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        options: expect.objectContaining({ access: 'public' }),
+      }),
+      expect.any(Function)
+    );
   });
 });
