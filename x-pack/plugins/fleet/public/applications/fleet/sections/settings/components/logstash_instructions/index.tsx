@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices, useAuthz } from '../../../../hooks';
+import { MissingPrivilegesToolTip } from '../../../../../../components/missing_privileges_tooltip';
 
 import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
 import { useLogstashApiKey } from './hooks';
@@ -77,12 +78,17 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
           />
         </EuiButton>
       ) : (
-        <EuiButton onClick={() => setIsOpen(true)} fill={true} disabled={!hasAllSettings}>
-          <FormattedMessage
-            id="xpack.fleet.settings.logstashInstructions.viewInstructionButtonLabel"
-            defaultMessage="View steps"
-          />
-        </EuiButton>
+        <MissingPrivilegesToolTip
+          missingPrivilege={!hasAllSettings ? 'Settings All' : undefined}
+          position="left"
+        >
+          <EuiButton onClick={() => setIsOpen(true)} fill={true} disabled={!hasAllSettings}>
+            <FormattedMessage
+              id="xpack.fleet.settings.logstashInstructions.viewInstructionButtonLabel"
+              defaultMessage="View steps"
+            />
+          </EuiButton>
+        </MissingPrivilegesToolTip>
       )}
       {isOpen && (
         <>
