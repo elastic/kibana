@@ -254,82 +254,78 @@ export const getTimeseriesExplorerStyle = () =>
     },
 
     // Annotations styles
-    // SASS TODO: This uses non-BEM styles to be in line with the existing
-    // legacy Time Series Viewer style. Where applicable it tries to avoid
-    // overrides. The one override with `.extent` is because of d3.
 
-    '.mlAnnotationBrush .extent': {
-      stroke: euiThemeVars.euiColorLightShade,
-      strokeWidth: mlAnnotationBorderWidth,
-      strokeDasharray: '2 2',
-      fill: euiThemeVars.euiColorLightestShade,
-      shapeRendering: 'geometricPrecision',
-    },
+    '.ml-annotation': {
+      '&__brush': {
+        '.extent': {
+          stroke: euiThemeVars.euiColorLightShade,
+          strokeWidth: mlAnnotationBorderWidth,
+          strokeDasharray: '2 2',
+          fill: euiThemeVars.euiColorLightestShade,
+          shapeRendering: 'geometricPrecision',
+        },
+      },
 
-    '.mlAnnotationRect': {
-      stroke: euiThemeVars.euiColorFullShade,
-      strokeWidth: mlAnnotationBorderWidth,
-      strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-      fill: euiThemeVars.euiColorFullShade,
-      fillOpacity: mlAnnotationRectDefaultFillOpacity,
-      shapeRendering: 'geometricPrecision',
-      transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+      '&__rect': {
+        stroke: euiThemeVars.euiColorFullShade,
+        strokeWidth: mlAnnotationBorderWidth,
+        strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+        fill: euiThemeVars.euiColorFullShade,
+        fillOpacity: mlAnnotationRectDefaultFillOpacity,
+        shapeRendering: 'geometricPrecision',
+        transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
 
-    '.mlAnnotationRect-isHighlight': {
-      strokeOpacity: mlAnnotationRectDefaultStrokeOpacity * 2,
-      fillOpacity: mlAnnotationRectDefaultFillOpacity * 2,
-      transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+        '&--highlight': {
+          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity * 2,
+          fillOpacity: mlAnnotationRectDefaultFillOpacity * 2,
+        },
 
-    '.mlAnnotationRect-isBlur': {
-      strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
-      fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
-      transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+        '&--blur': {
+          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+          fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+        },
+      },
 
-    '.mlAnnotationText': {
-      textAnchor: 'middle',
-      fontSize: euiThemeVars.euiFontSizeXS,
-      fontFamily: euiThemeVars.euiFontFamily,
-      fontWeight: euiThemeVars.euiFontWeightMedium,
-      fill: euiThemeVars.euiColorFullShade,
-      transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-      userSelect: 'none',
-    },
+      '&__text': {
+        textAnchor: 'middle',
+        fontSize: euiThemeVars.euiFontSizeXS,
+        fontFamily: euiThemeVars.euiFontFamily,
+        fontWeight: euiThemeVars.euiFontWeightMedium,
+        fill: euiThemeVars.euiColorFullShade,
+        transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
+        userSelect: 'none',
 
-    '.mlAnnotationText-isBlur': {
-      fill: euiThemeVars.euiColorMediumShade,
-      transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+        '&--blur': {
+          fill: euiThemeVars.euiColorMediumShade,
+        },
+      },
 
-    '.mlAnnotationTextRect': {
-      fill: euiThemeVars.euiColorLightShade,
-      transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+      '&__text-rect': {
+        fill: euiThemeVars.euiColorLightShade,
+        transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
 
-    '.mlAnnotationTextRect-isBlur': {
-      fill: euiThemeVars.euiColorLightestShade,
-      transition: `fill ${euiThemeVars.euiAnimSpeedFast}`,
-    },
+        '&--blur': {
+          fill: euiThemeVars.euiColorLightestShade,
+        },
+      },
 
-    '.mlAnnotationHidden': {
-      display: 'none',
-    },
+      '&--hidden': {
+        display: 'none',
+      },
 
-    '.mlContextAnnotationRect': {
-      stroke: euiThemeVars.euiColorFullShade,
-      strokeWidth: mlAnnotationBorderWidth,
-      strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-      fill: euiThemeVars.euiColorFullShade,
-      fillOpacity: mlAnnotationRectDefaultFillOpacity,
-      transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
-      shapeRendering: 'geometricPrecision',
-    },
+      '&__context-rect': {
+        stroke: euiThemeVars.euiColorFullShade,
+        strokeWidth: mlAnnotationBorderWidth,
+        strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+        fill: euiThemeVars.euiColorFullShade,
+        fillOpacity: mlAnnotationRectDefaultFillOpacity,
+        transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
+        shapeRendering: 'geometricPrecision',
 
-    '.mlContextAnnotationRect-isBlur': {
-      strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
-      fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
-      transition: `stroke-opacity ${euiThemeVars.euiAnimSpeedFast}, fill-opacity ${euiThemeVars.euiAnimSpeedFast}`,
+        '&--blur': {
+          strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+          fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+        },
+      },
     },
   });
