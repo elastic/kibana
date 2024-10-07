@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getArtifactName, DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
-import type { ProductDocInstallClient } from '../../dao/doc_install_status';
+import type { ProductDocInstallClient } from '../doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
 import {
   downloadToDisk,

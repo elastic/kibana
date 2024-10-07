@@ -21,7 +21,7 @@ import type {
 import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
-import { ProductDocInstallClient } from './dao/doc_install_status';
+import { ProductDocInstallClient } from './services/doc_install_status';
 
 export class KnowledgeBaseRegistryPlugin
   implements
@@ -73,14 +73,14 @@ export class KnowledgeBaseRegistryPlugin
       logger: this.logger.get('package-installer'),
     });
 
+    // TODO: remove
     delay(10)
       .then(async () => {
-        console.log('*** test installating packages');
-
+        this.logger.info('*** test installating packages');
         return packageInstaller.installAll({});
       })
       .catch((e) => {
-        console.log('*** ERROR', e);
+        this.logger.error('*** ERROR', e);
       });
 
     return {};

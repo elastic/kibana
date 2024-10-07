@@ -16,5 +16,5 @@ export interface ProductDocInstallStatus {
   installationStatus: InstallationStatus;
   lastInstallationDate: Date | undefined;
   lastInstallationFailureReason: string | undefined;
-  indexName: string;
+  indexName?: string;
 }

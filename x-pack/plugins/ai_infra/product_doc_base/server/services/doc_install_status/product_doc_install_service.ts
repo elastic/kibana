@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { InstallationStatus, ProductName, ProductDocInstallStatus } from '../../../common/saved_objects';
+import { ProductName } from '@kbn/product-doc-common';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { KnowledgeBaseProductDocInstallAttributes as TypeAttributes } from '../../saved_objects';
-import { soToModel } from './model_conversion';
+// import { soToModel } from './model_conversion';
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
