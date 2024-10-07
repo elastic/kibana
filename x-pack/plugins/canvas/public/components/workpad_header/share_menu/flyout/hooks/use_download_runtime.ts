@@ -41,7 +41,7 @@ export const useDownloadRuntime = () => {
 
   const downloadRuntime = useCallback(() => {
     try {
-      const path = `${coreServices.http.basePath.get}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
+      const path = `${coreServices.http.basePath.get()}${API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD}`;
       window.open(path);
       return;
     } catch (err) {

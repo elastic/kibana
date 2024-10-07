@@ -75,7 +75,7 @@ export const useWorkpad = (
       const { aliasId, outcome, aliasPurpose } = resolveInfo;
       if (outcome === 'aliasMatch' && spacesService && aliasId) {
         const redirectPath = getRedirectPath(aliasId);
-        await spacesService?.ui.redirectLegacyUrl({
+        await spacesService.ui.redirectLegacyUrl({
           path: `#${redirectPath}`,
           aliasPurpose,
           objectNoun: getWorkpadLabel(),

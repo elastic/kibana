@@ -13,7 +13,7 @@ import { CanvasTemplate } from '../../types';
 import { coreServices } from '../services/kibana_services';
 
 const getApiPath = function () {
-  const basePath = coreServices.http.basePath.get;
+  const basePath = coreServices.http.basePath.get();
   return `${basePath}${API_ROUTE_TEMPLATES}`;
 };
 
