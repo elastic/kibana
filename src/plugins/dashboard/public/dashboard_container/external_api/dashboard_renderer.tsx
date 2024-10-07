@@ -59,7 +59,7 @@ export function DashboardRenderer({
 
   const dashboardFactory = useMemo(() => {
     return new DashboardContainerFactoryDefinition(embeddableService);
-  }, [embeddableService])
+  }, []);
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
