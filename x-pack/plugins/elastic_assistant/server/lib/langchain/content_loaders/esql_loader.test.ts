@@ -70,6 +70,7 @@ describe('loadESQL', () => {
           ...addRequiredKbResourceMetadata({
             docs: mockExampleQueryDocsFromDirectoryLoader,
             kbResource: ESQL_RESOURCE,
+            required: true,
           }),
         ],
         global: true,

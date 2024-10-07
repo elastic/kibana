@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List Fleet Server hosts`,
       options: {
-        tags: ['oas_tag:Fleet Server hosts'],
+        tags: ['oas-tag:Fleet Server hosts'],
       },
     })
     .addVersion(
@@ -69,7 +69,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create Fleet Server host`,
       options: {
-        tags: ['oas_tag:Fleet Server hosts'],
+        tags: ['oas-tag:Fleet Server hosts'],
       },
     })
     .addVersion(
@@ -97,7 +97,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get Fleet Server host by ID`,
       options: {
-        tags: ['oas_tag:Fleet Server hosts'],
+        tags: ['oas-tag:Fleet Server hosts'],
       },
     })
     .addVersion(
@@ -125,7 +125,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Delete Fleet Server host by ID`,
       options: {
-        tags: ['oas_tag:Fleet Server hosts'],
+        tags: ['oas-tag:Fleet Server hosts'],
       },
     })
     .addVersion(
@@ -156,7 +156,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Update Fleet Server host by ID`,
       options: {
-        tags: ['oas_tag:Fleet Server hosts'],
+        tags: ['oas-tag:Fleet Server hosts'],
       },
     })
     .addVersion(
