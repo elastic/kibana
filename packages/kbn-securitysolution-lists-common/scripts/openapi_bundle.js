@@ -30,6 +30,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Lists API',
+            'x-displayName': 'Security lists',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },
@@ -54,6 +55,7 @@ const ROOT = resolve(__dirname, '..');
         tags: [
           {
             name: 'Security Lists API',
+            'x-displayName': 'Security lists',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },
