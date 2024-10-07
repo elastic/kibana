@@ -7,9 +7,12 @@
 
 import { cloneDeep } from 'lodash';
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
-export function createCategorizeQuery(
+export function createDefaultQuery(
   queryIn: QueryDslQueryContainer | undefined,
   timeField: string,
   timeRange: { from: number; to: number } | undefined
@@ -17,13 +20,18 @@ export function createCategorizeQuery(
   const query = cloneDeep(queryIn ?? { match_all: {} });
 
   if (query.bool === undefined) {
-    query.bool = {};
+    query.bool = Object.create(null) as QueryDslBoolQuery;
   }
+
   if (query.bool.must === undefined) {
     query.bool.must = [];
     if (query.match_all !== undefined) {
       query.bool.must.push({ match_all: query.match_all });
       delete query.match_all;
+    }
+    if (query.query_string !== undefined) {
+      query.bool.must.push({ query_string: query.query_string });
+      delete query.query_string;
     }
   }
   if (query.multi_match !== undefined) {
