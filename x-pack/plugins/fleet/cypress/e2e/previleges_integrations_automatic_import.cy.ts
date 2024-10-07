@@ -20,8 +20,9 @@ import {
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import {
   ASSISTANT_BUTTON,
-  CONNECTOR_ACTION_ID,
-  CONNECTOR_ACTION_NAME,
+  CONNECTOR_BEDROCK,
+  CONNECTOR_GEMINI,
+  CONNECTOR_OPENAI,
   CREATE_INTEGRATION_ASSISTANT,
   CREATE_INTEGRATION_LANDING_PAGE,
   CREATE_INTEGRATION_UPLOAD,
@@ -124,10 +125,11 @@ describe('When the user has All permissions for Integrations and read permission
     cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
   });
 
-  it('Create Assistant is not accessible but upload is accessible', () => {
+  it('Create Assistant is accessible but execute connector is not accessible', () => {
     loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorReadUser);
-    cy.getBySel(CONNECTOR_ACTION_ID).should('not.exist');
-    cy.getBySel(CONNECTOR_ACTION_NAME).should('not.exist');
+    cy.getBySel(CONNECTOR_BEDROCK).should('not.exist');
+    cy.getBySel(CONNECTOR_OPENAI).should('not.exist');
+    cy.getBySel(CONNECTOR_GEMINI).should('not.exist');
   });
 });
 
@@ -150,7 +152,8 @@ describe('When the user has All permissions for Integrations and All permissions
 
   it('Create Assistant is not accessible but upload is accessible', () => {
     loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorAllUser);
-    cy.getBySel(CONNECTOR_ACTION_ID).should('exist');
-    cy.getBySel(CONNECTOR_ACTION_NAME).should('exist');
+    cy.getBySel(CONNECTOR_BEDROCK).should('exist');
+    cy.getBySel(CONNECTOR_OPENAI).should('exist');
+    cy.getBySel(CONNECTOR_GEMINI).should('exist');
   });
 });

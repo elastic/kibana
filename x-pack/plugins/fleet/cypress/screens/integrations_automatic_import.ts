@@ -9,8 +9,20 @@ export const UPLOAD_PACKAGE_LINK = 'uploadPackageLink';
 export const ASSISTANT_BUTTON = 'assistantButton';
 export const TECH_PREVIEW_BADGE = 'techPreviewBadge';
 export const MISSING_PRIVILEGES = 'missingPrivilegesCallOut';
-export const CONNECTOR_ACTION_ID = 'connectorActionId';
-export const CONNECTOR_ACTION_NAME = 'connectorActionName';
+
+export const CONNECTOR_BEDROCK = 'actionType-.bedrock';
+export const CONNECTOR_OPENAI = 'actionType-.gen-ai';
+export const CONNECTOR_GEMINI = 'actionType-.gemini';
+
+export const BUTTON_FOOTER_NEXT = 'buttonsFooter-nextButton';
+
+export const INTEGRATION_TITLE_INPUT = 'integrationTitleInput';
+export const INTEGRATION_DESCRIPTION_INPUT = 'integrationDescriptionInput';
+export const DATASTREAM_TITLE_INPUT = 'dataStreamTitleInput';
+export const DATASTREAM_DESCRIPTION_INPUT = 'dataStreamDescriptionInput';
+export const DATASTREAM_NAME_INPUT = 'dataStreamNameInput';
+export const DATA_COLLECTION_METHOD_INPUT = 'dataCollectionMethodInput';
+export const LOGS_SAMPLE_FILE_PICKER = 'logsSampleFilePicker';
 
 export const CREATE_INTEGRATION_LANDING_PAGE = '/app/integrations/create';
 export const CREATE_INTEGRATION_ASSISTANT = '/app/integrations/create/assistant';
