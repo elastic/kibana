@@ -5435,10 +5435,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
-  version "0.0.0"
-  uid ""
-
 "@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
@@ -6004,6 +6000,10 @@
   uid ""
 
 "@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
   version "0.0.0"
   uid ""
 
