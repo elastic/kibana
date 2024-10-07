@@ -615,7 +615,7 @@ export const ModelsList: FC<Props> = ({
           <EuiFlexGroup gutterSize={'xs'} direction={'column'}>
             <EuiFlexGroup gutterSize={'s'} alignItems={'center'} wrap={true}>
               <EuiFlexItem grow={false}>
-                <strong>{modelId}</strong>
+                <strong data-test-subj="mlModelsTableColumnIdValueId">{modelId}</strong>
               </EuiFlexItem>
               {isTechPreview ? (
                 <EuiFlexItem grow={false}>
@@ -625,7 +625,11 @@ export const ModelsList: FC<Props> = ({
             </EuiFlexGroup>
 
             {descriptionText ? (
-              <EuiText color={'subdued'} size={'xs'}>
+              <EuiText
+                color={'subdued'}
+                size={'xs'}
+                data-test-subj="mlModelsTableColumnIdValueDescription"
+              >
                 {tooltipContent ? (
                   <EuiToolTip content={tooltipContent}>
                     <>

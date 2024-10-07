@@ -52,27 +52,21 @@ export function TrainedModelsTableProvider(
           id: string;
           description: string;
           modelTypes: string[];
-          createdAt: string;
           state: string;
         } = {
           id: $tr
             .findTestSubject('mlModelsTableColumnId')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnIdValueId')
             .text()
             .trim(),
           description: $tr
-            .findTestSubject('mlModelsTableColumnDescription')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnId')
+            .findTestSubject('mlModelsTableColumnIdValueDescription')
             .text()
             .trim(),
           modelTypes,
           state: $tr
             .findTestSubject('mlModelsTableColumnDeploymentState')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
-          createdAt: $tr
-            .findTestSubject('mlModelsTableColumnCreatedAt')
             .find('.euiTableCellContent')
             .text()
             .trim(),
