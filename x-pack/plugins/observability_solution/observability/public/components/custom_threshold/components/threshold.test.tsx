@@ -7,10 +7,10 @@
 
 import { LIGHT_THEME } from '@elastic/charts';
 
-import { render } from '@testing-library/react';
-import { Props, Threshold } from './custom_threshold';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Props, Threshold } from './threshold';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
@@ -38,7 +38,7 @@ describe('Threshold', () => {
 
   it('shows component', () => {
     const component = renderComponent();
-    expect(component.queryByTestId('thresholdRule-90-93')).toBeTruthy();
+    expect(component.queryByTestId('threshold-90-93')).toBeTruthy();
   });
 
   it('shows component for between', () => {
@@ -46,6 +46,6 @@ describe('Threshold', () => {
       comparator: COMPARATORS.BETWEEN,
       threshold: [90, 95],
     });
-    expect(component.queryByTestId('thresholdRule-90-95-93')).toBeTruthy();
+    expect(component.queryByTestId('threshold-90-95-93')).toBeTruthy();
   });
 });

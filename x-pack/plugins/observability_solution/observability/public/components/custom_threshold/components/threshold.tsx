@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { Chart, Metric, Settings } from '@elastic/charts';
+import { Chart, Metric, Settings, ValueFormatter } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
-  theme?: PartialTheme;
+  theme?: PartialTheme[];
   baseTheme: Theme;
 }
 
@@ -24,7 +24,7 @@ export interface Props {
   threshold: number[];
   title: string;
   value: number;
-  valueFormatter: (d: number) => string;
+  valueFormatter?: ValueFormatter;
 }
 
 export function Threshold({
@@ -34,7 +34,7 @@ export function Threshold({
   threshold,
   title,
   value,
-  valueFormatter,
+  valueFormatter = (d) => String(d),
 }: Props) {
   const color = useEuiBackgroundColor('danger');
 
@@ -42,13 +42,14 @@ export function Threshold({
     <EuiPanel
       paddingSize="none"
       style={{
-        height: '100%',
+        height: '170px',
         overflow: 'hidden',
         position: 'relative',
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`thresholdRule-${threshold.join('-')}-${value}`}
+      data-test-subj={`threshold-${threshold.join('-')}-${value}`}
+      grow={false}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
