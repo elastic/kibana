@@ -6,9 +6,9 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldRetentionDefinition } from '../field_retention_definitions';
-import { fieldOperatorToIngestProcessor } from '../operators';
-import type { FieldRetentionOperatorBuilderOptions } from '../operators/types';
+import type { FieldRetentionOperatorBuilderOptions } from '../../field_retention/operators/types';
+import type { FieldRetentionDefinition } from '../../field_retention/field_retention_definitions';
+import { fieldOperatorToIngestProcessor } from '../../field_retention/operators';
 
 /**
  * Converts a field retention definition to the ingest processor steps

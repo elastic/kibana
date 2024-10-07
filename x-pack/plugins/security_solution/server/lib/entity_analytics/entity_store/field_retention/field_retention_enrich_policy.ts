@@ -6,20 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  EnrichPutPolicyRequest,
-  IngestProcessorContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   getFieldRetentionDefinitionMetadata,
-  type FieldRetentionDefinition,
   getFieldRetentionDefinitionWithDefaults,
 } from './field_retention_definitions';
 import { getEntitiesIndexName } from '../utils';
-import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
-const getEnrichPolicyName = (namespace: string, entityType: EntityType) => {
+export const getFieldRetentionEnrichPolicyName = (namespace: string, entityType: EntityType) => {
   const metadata = getFieldRetentionDefinitionMetadata(entityType);
   return `entity_store_field_retention_${metadata.entityType}_${namespace}_v${metadata.version}`;
 };
@@ -33,7 +28,7 @@ const getFieldRetentionEnrichPolicy = ({
 }): EnrichPutPolicyRequest => {
   const { fields, matchField } = getFieldRetentionDefinitionWithDefaults(entityType);
   return {
-    name: getEnrichPolicyName(namespace, entityType),
+    name: getFieldRetentionEnrichPolicyName(namespace, entityType),
     match: {
       indices: getEntitiesIndexName(entityType, namespace),
       match_field: matchField,
@@ -67,7 +62,7 @@ export const executeFieldRetentionEnrichPolicy = async ({
   esClient: ElasticsearchClient;
   entityType: EntityType;
 }) => {
-  const name = getEnrichPolicyName(namespace, entityType);
+  const name = getFieldRetentionEnrichPolicyName(namespace, entityType);
   return esClient.enrich.executePolicy({ name });
 };
 
@@ -80,27 +75,6 @@ export const deleteFieldRetentionEnrichPolicy = async ({
   esClient: ElasticsearchClient;
   entityType: EntityType;
 }) => {
-  const name = getEnrichPolicyName(namespace, entityType);
+  const name = getFieldRetentionEnrichPolicyName(namespace, entityType);
   return esClient.enrich.deletePolicy({ name }, { ignore: [404] });
-};
-
-export const getFieldRetentionPipelineSteps = ({
-  fieldRetentionDefinition,
-  namespace,
-  allEntityFields,
-  debugMode,
-}: {
-  namespace: string;
-  debugMode?: boolean;
-  allEntityFields: string[];
-  fieldRetentionDefinition: FieldRetentionDefinition;
-}): IngestProcessorContainer[] => {
-  const enrichPolicyName = getEnrichPolicyName(namespace, fieldRetentionDefinition.entityType);
-
-  return buildFieldRetentionIngestPipeline({
-    allEntityFields,
-    fieldRetentionDefinition,
-    enrichPolicyName,
-    debugMode,
-  });
 };
