@@ -25,6 +25,7 @@ export const ManageIntegrationsCallout = React.memo(
         color="primary"
         text={
           <FormattedMessage
+            data-test-subj="integrationsCompleteText"
             id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
             defaultMessage={`
       {desc} {link} {icon}

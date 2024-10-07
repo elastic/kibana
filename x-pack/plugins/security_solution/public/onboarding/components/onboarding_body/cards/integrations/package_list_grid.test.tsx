@@ -5,20 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { PackageListGrid } from './package_list_grid';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
 } from '../../../../hooks/use_stored_state';
-import { PackageList } from './utils';
+import * as module from '@kbn/fleet-plugin/public';
 import { DEFAULT_TAB } from './constants';
 
 jest.mock('../../../onboarding_context');
 jest.mock('../../../../hooks/use_stored_state');
-jest.mock('./utils', () => ({
-  PackageList: jest.fn(() => <div data-test-subj="packageList" />),
-}));
+
 jest.mock('../../../../../common/lib/kibana', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
@@ -26,9 +24,14 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   }),
 }));
 
+const mockPackageList = jest.fn().mockReturnValue(<div data-test-subj="packageList" />);
+
+jest
+  .spyOn(module, 'PackageList')
+  .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
+
 describe('PackageListGrid', () => {
   const mockUseAvailablePackages = jest.fn();
-  const mockPackageList = PackageList as unknown as jest.Mock;
   const mockSetTabId = jest.fn();
   const mockSetCategory = jest.fn();
   const mockSetSelectedSubCategory = jest.fn();
@@ -56,7 +59,7 @@ describe('PackageListGrid', () => {
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
   });
 
-  it('renders the package list when data is available', () => {
+  it('renders the package list when data is available', async () => {
     mockUseAvailablePackages.mockReturnValue({
       isLoading: false,
       filteredCards: [{ id: 'card1', name: 'Card 1', url: 'https://mock-url' }],
@@ -69,7 +72,9 @@ describe('PackageListGrid', () => {
       <PackageListGrid useAvailablePackages={mockUseAvailablePackages} />
     );
 
-    expect(getByTestId('packageList')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByTestId('packageList')).toBeInTheDocument();
+    });
   });
 
   it('saves the selected tab to storage', () => {
@@ -89,11 +94,13 @@ describe('PackageListGrid', () => {
 
     const tabButton = getByTestId('user');
 
-    fireEvent.click(tabButton);
+    act(() => {
+      fireEvent.click(tabButton);
+    });
     expect(mockSetTabId).toHaveBeenCalledWith('user');
   });
 
-  it('renders no search tools when showSearchTools is false', () => {
+  it('renders no search tools when showSearchTools is false', async () => {
     mockUseAvailablePackages.mockReturnValue({
       isLoading: false,
       filteredCards: [],
@@ -104,7 +111,9 @@ describe('PackageListGrid', () => {
 
     render(<PackageListGrid useAvailablePackages={mockUseAvailablePackages} />);
 
-    expect(mockPackageList.mock.calls[0][0].showSearchTools).toEqual(false);
+    await waitFor(() => {
+      expect(mockPackageList.mock.calls[0][0].showSearchTools).toEqual(false);
+    });
   });
 
   it('updates the search term when the search input changes', async () => {
@@ -125,6 +134,8 @@ describe('PackageListGrid', () => {
 
     render(<PackageListGrid useAvailablePackages={mockUseAvailablePackages} />);
 
-    expect(mockPackageList.mock.calls[0][0].searchTerm).toEqual('new search term');
+    await waitFor(() => {
+      expect(mockPackageList.mock.calls[0][0].searchTerm).toEqual('new search term');
+    });
   });
 });

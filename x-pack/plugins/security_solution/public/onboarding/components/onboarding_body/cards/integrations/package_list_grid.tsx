@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
-import { PackageList } from './utils';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
@@ -39,6 +38,13 @@ const isIntegrationTabId = (id: string): id is IntegrationTabId => {
 };
 
 const emptyStateStyles = { paddingTop: '16px' };
+
+export const PackageList = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.PackageList())
+    .then((pkg) => pkg.PackageListGrid),
+}));
+
 export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
   const { spaceId } = useOnboardingContext();
   const scrollElement = useRef<HTMLDivElement>(null);
@@ -127,7 +133,6 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
       />
     );
   }
-
   return (
     <EuiFlexGroup
       direction="column"

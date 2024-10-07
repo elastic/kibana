@@ -21,7 +21,7 @@ export const IntegrationsCard: OnboardingCardComponent = ({
   checkCompleteMetadata, // this is undefined before the first checkComplete call finishes
 }) => {
   if (!isCheckCompleteMetadata(checkCompleteMetadata)) {
-    return <CenteredLoadingSpinner />;
+    return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
   }
   const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
 

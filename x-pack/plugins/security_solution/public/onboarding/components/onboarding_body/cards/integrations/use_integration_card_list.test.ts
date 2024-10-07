@@ -6,16 +6,15 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { useNavigation } from '../../../../../common/lib/kibana';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
-  useNavigation: jest.fn(),
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+    getAppUrl: jest.fn(),
+  }),
 }));
 
 describe('useIntegrationCardList', () => {
-  const mockUseNavigation = useNavigation as jest.Mock;
-  const mockNavigateTo = jest.fn();
-  const mockGetAppUrl = jest.fn();
   const mockIntegrationsList = [
     {
       id: 'security',
@@ -37,10 +36,7 @@ describe('useIntegrationCardList', () => {
   ];
 
   beforeEach(() => {
-    mockUseNavigation.mockReturnValue({
-      navigateTo: mockNavigateTo,
-      getAppUrl: mockGetAppUrl,
-    });
+    jest.clearAllMocks();
   });
 
   it('returns filtered integration cards when customCardNames are not provided', () => {
