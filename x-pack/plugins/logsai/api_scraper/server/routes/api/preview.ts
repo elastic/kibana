@@ -6,16 +6,16 @@
  */
 
 import { z } from '@kbn/zod';
-import { apiEntityDefinitionSchema } from '@kbn/entities-schema';
 import { JsonObject } from '@kbn/utility-types';
 import { ApiDefinitionNotFound } from '../../lib/api/errors/api_scraper_not_found';
 import { createDocsFromApiDefinition } from '../../lib/api/tasks/lib/create_docs_from_api_definition';
 import { createApiScraperServerRoute } from '../create_api_scraper_server_route';
+import { apiScraperDefinitionSchema } from '../../../common/types';
 
 export const previewApiDefinitionRoute = createApiScraperServerRoute({
   endpoint: 'POST /internal/api-scraper/definition/_preview',
   params: z.object({
-    body: apiEntityDefinitionSchema,
+    body: apiScraperDefinitionSchema,
   }),
   handler: async ({ request, response, params, logger, getScopedClients }) => {
     try {

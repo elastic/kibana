@@ -13,6 +13,8 @@ import { JsonObject } from '@kbn/utility-types';
 import { get, isArray, isEmpty } from 'lodash';
 import { ApiScraperDefinition } from '../../../../../common/types';
 
+const DOT = '.';
+
 export async function createDocsFromApiDefinition(
   esClient: ElasticsearchClient,
   definition: ApiScraperDefinition
@@ -59,7 +61,7 @@ function extractEntities(definition: ApiScraperDefinition, response: any) {
 
 function collectDocs(definition: ApiScraperDefinition, response: any): JsonObject[] {
   const { source } = definition;
-  const root = get(response, source.collect.path);
+  const root = source.collect.path === DOT ? response : get(response, source.collect.path);
   if (source.collect.keyed) {
     return Object.keys(root).map((key) => ({ ...get(root, key, {}), _key: key }));
   }
