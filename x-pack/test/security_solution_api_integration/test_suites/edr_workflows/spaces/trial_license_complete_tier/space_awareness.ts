@@ -32,21 +32,27 @@ export default function ({ getService }: FtrProviderContext) {
       adminSupertest = await utils.createSuperTest();
 
       await Promise.all([
-        ensureSpaceIdExists(kbnServer, 'space-a', { log }),
-        ensureSpaceIdExists(kbnServer, 'space-b', { log }),
+        ensureSpaceIdExists(kbnServer, 'space_a', { log }),
+        ensureSpaceIdExists(kbnServer, 'space_b', { log }),
       ]);
-      await Promise.all([
-        endpointTestresources
-          .loadEndpointData({ spaceId: 'space-a', generatorSeed: Math.random().toString(32) })
-          .then((responseA) => {
-            dataSpaceA = responseA;
-          }),
-        endpointTestresources
-          .loadEndpointData({ spaceId: 'space-b', generatorSeed: Math.random().toString(32) })
-          .then((responseB) => {
-            dataSpaceB = responseB;
-          }),
-      ]);
+
+      dataSpaceA = await endpointTestresources.loadEndpointData({
+        spaceId: 'space_a',
+        generatorSeed: Math.random().toString(32),
+      });
+
+      dataSpaceB = await endpointTestresources.loadEndpointData({
+        spaceId: 'space_b',
+        generatorSeed: Math.random().toString(32),
+      });
+
+      log.verbose(
+        `mocked data loaded:\nSPACE A:\n${JSON.stringify(
+          dataSpaceA,
+          null,
+          2
+        )}\nSPACE B:\n${JSON.stringify(dataSpaceB, null, 2)}`
+      );
     });
 
     // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
@@ -70,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             addSpaceIdToPath(
               '/',
-              'space-a',
+              dataSpaceA.spaceId,
               `/api/endpoint/policy_response?agentId=${dataSpaceA.hosts[0].agent.id}`
             )
           )
@@ -85,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             addSpaceIdToPath(
               '/',
-              'space-a',
+              dataSpaceA.spaceId,
               `/api/endpoint/policy_response?agentId=${dataSpaceB.hosts[0].agent.id}`
             )
           )
@@ -95,14 +101,79 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe(`Host Metadata List API: ${HOST_METADATA_LIST_ROUTE}`, () => {
-      // FIXME:PT implement
+      it('should retrieve list with only metadata for hosts in current space', async () => {
+        const { body } = await adminSupertest
+          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
+          .send()
+          .expect(200);
+
+        expect(body.total).to.eql(1);
+        expect(body.data[0].metadata.agent.id).to.eql(dataSpaceA.hosts[0].agent.id);
+      });
+
+      it('should not return host data from other spaces when using kuery value', async () => {
+        const { body } = await adminSupertest
+          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
+          .query({
+            kuery: `united.endpoint.agent.id: "${dataSpaceB.hosts[0].agent.id}"`,
+          })
+          .send()
+          .expect(200);
+
+        expect(body.total).to.eql(0);
+      });
     });
 
     describe(`Host Details Metadata API: ${HOST_METADATA_GET_ROUTE}`, () => {
-      // FIXME:PT implement
+      it('should retrieve metadata details for agent id in space', async () => {
+        await adminSupertest
+          .get(
+            addSpaceIdToPath(
+              '/',
+              dataSpaceA.spaceId,
+              HOST_METADATA_GET_ROUTE.replace('{id}', dataSpaceA.hosts[0].agent.id)
+            )
+          )
+          .send()
+          .expect(200);
+      });
+
+      it('should NOT return metadata details for agent id that is not in current space', async () => {
+        await adminSupertest
+          .get(
+            addSpaceIdToPath(
+              '/',
+              dataSpaceA.spaceId,
+              HOST_METADATA_GET_ROUTE.replace('{id}', dataSpaceB.hosts[0].agent.id)
+            )
+          )
+          .send()
+          .expect(404);
+      });
     });
 
-    describe(`Agent Status API: ${AGENT_STATUS_ROUTE}`, () => {});
-    // FIXME:PT implement
+    describe(`Agent Status API: ${AGENT_STATUS_ROUTE}`, () => {
+      it('should return status for an agent in current space', async () => {
+        const { body } = await adminSupertest
+          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
+          .query({ agentIds: [dataSpaceA.hosts[0].agent.id] })
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(body.data[dataSpaceA.hosts[0].agent.id].found).to.eql(true);
+      });
+
+      it('should NOT return status for an agent that is not in current space', async () => {
+        const { body } = await adminSupertest
+          .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
+          .query({ agentIds: [dataSpaceB.hosts[0].agent.id] })
+          .set('elastic-api-version', '1')
+          .send()
+          .expect(200);
+
+        expect(body.data[dataSpaceB.hosts[0].agent.id].found).to.eql(false);
+      });
+    });
   });
 }
