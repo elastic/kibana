@@ -234,13 +234,12 @@ export const calculateRiskScores = async ({
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
-    const filter = [
-      filterFromRange(range),
-      ...(excludeAlertStatuses.length > 0
-        ? [{ bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } } }]
-        : []),
-      { exists: { field: ALERT_RISK_SCORE } },
-    ];
+    const filter = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
+    if (excludeAlertStatuses.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_STATUS]: excludeAlertStatuses } } },
+      });
+    }
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
     }

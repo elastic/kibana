@@ -59,10 +59,16 @@ components:
         weights:
           $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreWeights'
         excludeAlertStatuses:
+          description: A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
           type: array
           items:
             type: string
-          description: A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
+            enum:
+              - open
+              - closed
+              - in-progress
+              - acknowledged
+          
 
     RiskScoresPreviewResponse:
       type: object
