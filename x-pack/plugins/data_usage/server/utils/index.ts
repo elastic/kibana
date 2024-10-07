@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { isValidateTimeRange } from './validate_time_range';
 export { CustomHttpRequestError } from './custom_http_request_error';
