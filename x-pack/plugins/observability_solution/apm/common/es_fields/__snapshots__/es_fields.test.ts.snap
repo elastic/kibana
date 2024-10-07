@@ -230,6 +230,10 @@ exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
+exports[`Error PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Error PROCESS_PID 1`] = `undefined`;
+
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error SERVICE 1`] = `
@@ -307,6 +311,8 @@ exports[`Error TIER 1`] = `undefined`;
 exports[`Error TIMESTAMP 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -565,6 +571,10 @@ exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
+exports[`Span PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Span PROCESS_PID 1`] = `undefined`;
+
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span SERVICE 1`] = `
@@ -638,6 +648,8 @@ exports[`Span TIER 1`] = `undefined`;
 exports[`Span TIMESTAMP 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
+
+exports[`Span TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -910,6 +922,10 @@ exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
+exports[`Transaction PROCESS_ARGS 1`] = `undefined`;
+
+exports[`Transaction PROCESS_PID 1`] = `undefined`;
+
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction SERVICE 1`] = `
@@ -987,6 +1003,8 @@ exports[`Transaction TIER 1`] = `undefined`;
 exports[`Transaction TIMESTAMP 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANSACTION_AGENT_MARKS 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 

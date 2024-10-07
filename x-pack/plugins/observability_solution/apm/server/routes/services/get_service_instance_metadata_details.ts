@@ -7,6 +7,8 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
@@ -70,7 +72,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    return unflattenKnownApmEventFields(
+      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+    );
   }
 
   async function getTransactionEventSample() {
@@ -89,7 +93,9 @@ export async function getServiceInstanceMetadataDetails({
       }
     );
 
-    return maybe(response.hits.hits[0]?._source);
+    return unflattenKnownApmEventFields(
+      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+    );
   }
 
   async function getTransactionMetricSample() {
@@ -111,7 +117,10 @@ export async function getServiceInstanceMetadataDetails({
         },
       }
     );
-    return maybe(response.hits.hits[0]?._source);
+
+    return unflattenKnownApmEventFields(
+      maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+    );
   }
 
   // we can expect the most detail of application metrics,

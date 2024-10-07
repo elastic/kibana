@@ -7,6 +7,8 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   AGENT,
@@ -27,17 +29,11 @@ import {
   FAAS_TRIGGER_TYPE,
   LABEL_TELEMETRY_AUTO_VERSION,
 } from '../../../common/es_fields/apm';
-
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
 import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
-
-type ServiceMetadataDetailsRaw = Pick<
-  TransactionRaw,
-  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
->;
+import { maybe } from '../../../common/utils/maybe';
 
 export interface ServiceMetadataDetails {
   service?: {
@@ -171,8 +167,11 @@ export async function getServiceMetadataDetails({
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
-  const hit = response.hits.hits[0]?._source as ServiceMetadataDetailsRaw | undefined;
-  if (!hit) {
+  const event = unflattenKnownApmEventFields(
+    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+  );
+
+  if (!event) {
     return {
       service: undefined,
       container: undefined,
@@ -180,7 +179,7 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } = hit;
+  const { service, agent, host, kubernetes, container, cloud, labels } = event;
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
