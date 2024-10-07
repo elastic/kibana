@@ -10,7 +10,6 @@ import { ThemeProvider } from '@emotion/react';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import { Story } from '@storybook/react';
 import {
-  type NodeData,
   HexagonNode,
   PentagonNode,
   EllipseNode,
@@ -18,11 +17,11 @@ import {
   DiamondNode,
   LabelNode,
 } from './node';
-import { type EdgeData, CustomPathEdge } from './edge';
+import { CustomPathEdge } from './edge';
 
 import '@xyflow/react/dist/style.css';
 import { SvgDefsMarker } from './edge/styles';
-import { GraphMetadata } from '.';
+import type { EdgeViewModel, GraphMetadata, NodeViewModel } from './types';
 
 export default {
   title: 'Components/Graph Components/Custom Path Edge',
@@ -43,8 +42,8 @@ const edgeTypes = {
 };
 
 interface GraphData {
-  nodes: NodeData[];
-  edges: EdgeData[];
+  nodes: NodeViewModel[];
+  edges: EdgeViewModel[];
   interactive: boolean;
 }
 

@@ -23,7 +23,8 @@ import { SvgDefsMarker } from './styles';
 import { DefaultEdge } from '.';
 
 import '@xyflow/react/dist/style.css';
-import { LabelNode, NodeData } from '../node';
+import { LabelNode } from '../node';
+import type { NodeViewModel } from '../types';
 
 export default {
   title: 'Components/Graph Components/Default Edge',
@@ -60,7 +61,7 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
-const Template: Story<NodeData> = (args: NodeData) => {
+const Template: Story<NodeViewModel> = (args: NodeViewModel) => {
   const initialNodes = [
     {
       id: 'source',

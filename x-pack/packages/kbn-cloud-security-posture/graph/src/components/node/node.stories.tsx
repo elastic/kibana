@@ -10,15 +10,8 @@ import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import { Story } from '@storybook/react';
-import {
-  type NodeData,
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-} from '.';
+import { NodeViewModel } from '../types';
+import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 
@@ -47,7 +40,7 @@ const nodeTypes = {
   label: LabelNode,
 };
 
-const Template: Story<NodeData> = (args: NodeData) => (
+const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView

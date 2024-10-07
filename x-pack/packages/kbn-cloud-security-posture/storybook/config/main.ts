@@ -15,6 +15,17 @@ module.exports = {
   },
   webpack: async (config) => {
     config.module.rules.push({
+      test: /\.js$/,
+      include: /node_modules[\\\/]@dagrejs/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+          plugins: ['@babel/plugin-proposal-class-properties'],
+        },
+      },
+    });
+    config.module.rules.push({
       test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
       loaders: 'babel-loader',
       options: {

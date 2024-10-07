@@ -17,10 +17,11 @@ import {
   NodeButton,
   HandleStyleOverride,
 } from './styles';
-import type { EntityNodeData, NodeProps } from '.';
+import type { EntityNodeViewModel, NodeProps } from '../types';
 
 export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } = props.data as EntityNodeData;
+  const { id, color, icon, label, interactive, expandButtonClick } =
+    props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>

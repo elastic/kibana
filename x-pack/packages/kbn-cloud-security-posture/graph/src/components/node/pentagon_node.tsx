@@ -18,14 +18,15 @@ import {
   NodeButton,
   HandleStyleOverride,
 } from './styles';
-import type { EntityNodeData, NodeProps } from '.';
+import type { EntityNodeViewModel, NodeProps } from '../types';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
 `;
 
 export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } = props.data as EntityNodeData;
+  const { id, color, icon, label, interactive, expandButtonClick } =
+    props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
     <NodeContainer>

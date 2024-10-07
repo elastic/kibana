@@ -8,10 +8,10 @@
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { LabelNodeContainer, LabelShape, HandleStyleOverride, LabelShapeOnHover } from './styles';
-import { LabelNodeData, NodeProps } from '.';
+import type { LabelNodeViewModel, NodeProps } from '../types';
 
 export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, label, interactive } = props.data as LabelNodeData;
+  const { id, color, label, interactive } = props.data as LabelNodeViewModel;
 
   return (
     <LabelNodeContainer>

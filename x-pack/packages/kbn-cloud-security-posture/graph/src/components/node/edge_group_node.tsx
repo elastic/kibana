@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { Handle, NodeResizeControl, Position } from '@xyflow/react';
 import { HandleStyleOverride } from './styles';
-import { NodeProps } from '.';
+import type { NodeProps } from '../types';
 
 export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
   // Handles order horizontally is: in > inside > out > outside
@@ -33,25 +33,20 @@ export const EdgeGroupNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeResizeControl>
-      <NodeResizeControl
-        position="left"
-        style={{ borderColor: 'transparent', background: 'transparent' }}
-      >
-        <Handle
-          type="source"
-          isConnectable={false}
-          position={Position.Left}
-          id="inside"
-          style={HandleStyleOverride}
-        />
-        <Handle
-          type="target"
-          isConnectable={false}
-          position={Position.Left}
-          id="in"
-          style={HandleStyleOverride}
-        />
-      </NodeResizeControl>
+      <Handle
+        type="source"
+        isConnectable={false}
+        position={Position.Left}
+        id="inside"
+        style={HandleStyleOverride}
+      />
+      <Handle
+        type="target"
+        isConnectable={false}
+        position={Position.Left}
+        id="in"
+        style={HandleStyleOverride}
+      />
     </>
   );
 });

@@ -5,25 +5,5 @@
  * 2.0.
  */
 
-import type { Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
-import { NodeShape } from '../node';
-import { GraphMetadata } from '..';
-
 export { CustomPathEdge } from './custom_path_edge';
 export { DefaultEdge } from './default_edge';
-
-export interface EdgeData extends Record<string, unknown> {
-  id: string;
-  source: string;
-  sourceShape: NodeShape;
-  target: string;
-  targetShape: NodeShape;
-  label?: string;
-  color?: 'primary' | 'danger' | 'warning';
-  icon?: string;
-  graphMetadata?: GraphMetadata;
-  interactive: boolean;
-  onClick?: (e: React.MouseEvent<HTMLElement>, edge: EdgeProps) => void;
-}
-
-export type EdgeProps = xyEdgeProps<Edge<EdgeData>>;

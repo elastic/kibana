@@ -5,162 +5,136 @@
  * 2.0.
  */
 
-import { GraphMetadata, PositionXY } from '..';
-import { EdgeLabelWidth } from '../edge/styles';
-import { getShapeHandlePosition } from '../edge/utils';
-import { LabelNodeData, NodeData } from '../node';
-import { LABEL_BORDER_WIDTH, LABEL_PADDING_X, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
+import Dagre from '@dagrejs/dagre';
+import type {
+  EdgeDataModel,
+  NodeDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/latest';
+import type { NodeViewModel, Size } from '../types';
+import { calcLabelSize } from './utils';
 
-type LabelAlignment = 'right' | 'center' | 'left';
-const PADDING = 20;
-const EdgeLabelHeight = 33;
-const LABEL_FONT = `600 7.875px Inter, "system-ui", Helvetica, Arial, sans-serif`;
-const LABEL_PADDING = (LABEL_PADDING_X + LABEL_BORDER_WIDTH) * 2;
+export const layoutGraph = (
+  nodes: NodeDataModel[],
+  edges: EdgeDataModel[]
+): { nodes: NodeViewModel[] } => {
+  const nodesById: { [key: string]: NodeViewModel } = {};
+  const graphOpts = {
+    compound: true,
+  };
 
-export const layoutGraph = (nodes: NodeData[], metadata: GraphMetadata) => {
-  // Scan graph for groups and labels nodes
-  // Calculate the alignment of the grouped labels
-  // Position the labels - stacked on top of each other and centered
-  // Calculated the group size
-  // Position the group node based on the alignment and group size
+  const g = new Dagre.graphlib.Graph(graphOpts)
+    .setGraph({ rankdir: 'LR', align: 'UL' })
+    .setDefaultEdgeLabel(() => ({}));
 
-  // Scan graph for groups
-  nodes
-    .filter((node) => node.shape === 'group')
-    .forEach((groupNode) => {
-      const children = nodes.filter(
-        (node) => node.shape === 'label' && node.parentId === groupNode.id
-      );
-      const stackSize = children.length;
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
 
-      const { source, target } = children[0] as LabelNodeData;
-      const sourceNode = nodes.find((node) => node.id === source);
-      const targetNode = nodes.find((node) => node.id === target);
+  nodes.forEach((node) => {
+    let size = { width: 90, height: 90 };
+    const position = { x: 0, y: 0 };
 
-      if (sourceNode && targetNode) {
-        const sourcePos = sourceNode.position;
-        const targetPos = targetNode.position;
-        const { alignment: labelAlignment } = calcAlignment({
-          edgeId: buildEdgeId(source, target),
-          source,
-          sourcePos,
-          target,
-          targetPos,
-          graphMetadata: metadata,
-        });
+    if (node.shape === 'label') {
+      size = calcLabelSize(node.label);
 
-        const sourceX = sourcePos.x - getShapeHandlePosition(sourceNode.shape);
-        const sourceY = sourcePos.y;
-        const targetX = targetPos.x + getShapeHandlePosition(targetNode.shape) - 1;
-        const targetY = targetPos.y;
-        const STACK_VERTICAL_PADDING = 20;
-        const MIN_STACK_HEIGHT = 70;
-        const stackHeight = Math.max(
-          stackSize * EdgeLabelHeight + (stackSize - 1) * STACK_VERTICAL_PADDING,
-          MIN_STACK_HEIGHT
-        );
-        const space = (stackHeight - stackSize * EdgeLabelHeight) / (stackSize - 1);
-        const groupNodeWidth = children.reduce((acc, child) => {
-          const currLblWidth =
-            PADDING * 2 +
-            Math.max(EdgeLabelWidth, LABEL_PADDING + getTextWidth(child.label ?? '', LABEL_FONT));
-          return Math.max(acc, currLblWidth);
-        }, EdgeLabelWidth + PADDING * 2);
+      // TODO: waiting for a fix: https://github.com/dagrejs/dagre/issues/238
+      // if (node.parentId) {
+      //   g.setParent(node.id, node.parentId);
+      // }
+    } else if (node.shape === 'group') {
+      const res = layoutGroupChildren(node, nodes);
 
-        groupNode.size = {
-          width: groupNodeWidth,
-          height: stackHeight,
-        };
+      size = res.size;
 
-        children.forEach((child, idx) => {
-          child.position = {
-            x:
-              (groupNodeWidth -
-                Math.max(
-                  EdgeLabelWidth,
-                  LABEL_PADDING + getTextWidth(child.label ?? '', LABEL_FONT)
-                )) /
-              2,
-            y: idx * (EdgeLabelHeight * 2 + space),
-          };
-        });
+      res.children.forEach((child) => {
+        nodesById[child.id] = { ...child };
+      });
+    }
 
-        const stackX = sourceX + NODE_WIDTH + (targetX - sourceX - NODE_WIDTH - groupNodeWidth) / 2;
-        const stackY =
-          (labelAlignment === 'center' || labelAlignment === 'left' ? sourceY : targetY) +
-          (NODE_HEIGHT - stackHeight) / 2;
+    if (!nodesById[node.id]) {
+      nodesById[node.id] = { ...node, position };
+    }
 
-        groupNode.position = {
-          x: stackX,
-          y: stackY,
-        };
-      }
+    g.setNode(node.id, {
+      ...node,
+      ...size,
     });
+  });
+
+  Dagre.layout(g);
+
+  const nodesViewModel: NodeViewModel[] = nodes.map((nodeData) => {
+    const dagreNode = g.node(nodeData.id);
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    const x = dagreNode.x - (dagreNode.width ?? 0) / 2;
+    const y = dagreNode.y - (dagreNode.height ?? 0) / 2;
+
+    // For grouped nodes, we want to keep the original position relative to the parent
+    if (nodeData.shape === 'label' && nodeData.parentId) {
+      return {
+        ...nodeData,
+        position: nodesById[nodeData.id].position,
+      };
+    } else if (nodeData.shape === 'group') {
+      return {
+        ...nodeData,
+        position: { x, y },
+        size: {
+          width: dagreNode.width,
+          height: dagreNode.height,
+        },
+      };
+    }
+
+    return {
+      ...nodeData,
+      position: { x, y },
+    };
+  });
+
+  return { nodes: nodesViewModel };
 };
 
-function calcAlignment({
-  edgeId,
-  source,
-  sourcePos,
-  target,
-  targetPos,
-  graphMetadata,
-}: {
-  edgeId: string;
-  source: string;
-  sourcePos: PositionXY;
-  target: string;
-  targetPos: PositionXY;
-  graphMetadata: GraphMetadata | undefined;
-}): {
-  alignment: LabelAlignment;
-} {
-  let alignment: LabelAlignment;
+const layoutGroupChildren = (
+  groupNode: NodeDataModel,
+  nodes: NodeDataModel[]
+): { size: Size; children: NodeViewModel[] } => {
+  const children = nodes.filter(
+    (child) => child.shape === 'label' && child.parentId === groupNode.id
+  );
 
-  if (!source || !target || !graphMetadata) {
-    return { alignment: 'left' };
-  }
+  const STACK_VERTICAL_PADDING = 20;
+  const MIN_STACK_HEIGHT = 70;
+  const PADDING = 20;
+  const stackSize = children.length;
+  const allChildrenHeight = children.reduce(
+    (prevHeight, node) => prevHeight + calcLabelSize(node.label).height,
+    0
+  );
+  const stackHeight = Math.max(
+    allChildrenHeight + (stackSize - 1) * STACK_VERTICAL_PADDING,
+    MIN_STACK_HEIGHT
+  );
 
-  if (sourcePos.y === targetPos.y) {
-    alignment = 'center';
-  } else if (
-    graphMetadata.nodes[source].edgesOut === graphMetadata.edges[edgeId].edges.length &&
-    graphMetadata.nodes[target].edgesIn > graphMetadata.edges[edgeId].edges.length
-  ) {
-    alignment = 'left';
-  } else {
-    alignment = 'right';
-  }
+  const space = (stackHeight - allChildrenHeight) / (stackSize - 1);
+  const groupNodeWidth = children.reduce((acc, child) => {
+    const currLblWidth = PADDING * 2 + calcLabelSize(child.label).width;
+    return Math.max(acc, currLblWidth);
+  }, 0);
 
-  return { alignment };
-}
+  // Layout children relative to parent
+  const positionedChildren: NodeViewModel[] = children.map((child, index) => {
+    const childSize = calcLabelSize(child.label);
+    const childPosition = {
+      x: groupNodeWidth / 2 - childSize.width / 2,
+      y: index * (childSize.height * 2 + space),
+    };
 
-function buildEdgeId(source: string, target: string) {
-  return `a(${source})-b(${target})`;
-}
+    return { ...child, position: childPosition };
+  });
 
-function getTextWidth(text: string, font: string) {
-  // re-use canvas object for better performance
-  const canvas: HTMLCanvasElement =
-    // @ts-ignore
-    getTextWidth.canvas || (getTextWidth.canvas = document.createElement('canvas'));
-  const context = canvas.getContext('2d');
-  if (context) {
-    context.font = font;
-  }
-  const metrics = context?.measureText(text);
-  return metrics?.width ?? 0;
-}
-
-function getCssStyle(element: HTMLElement, prop: string) {
-  return window.getComputedStyle(element, null).getPropertyValue(prop);
-}
-
-// @ts-ignore
-function getCanvasFont(el = document.body) {
-  const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-  const fontSize = getCssStyle(el, 'font-size') || '16px';
-  const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
-
-  return `${fontWeight} ${fontSize} ${fontFamily}`;
-}
+  return {
+    size: { width: groupNodeWidth, height: stackHeight },
+    children: positionedChildren,
+  };
+};

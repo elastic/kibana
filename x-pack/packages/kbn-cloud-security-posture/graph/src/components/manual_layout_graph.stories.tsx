@@ -18,8 +18,8 @@ import {
   useEdgesState,
 } from '@xyflow/react';
 import { Story } from '@storybook/react';
+import { Writable } from '@kbn/utility-types';
 import {
-  type NodeData,
   HexagonNode,
   PentagonNode,
   EllipseNode,
@@ -27,17 +27,17 @@ import {
   DiamondNode,
   LabelNode,
   EdgeGroupNode,
-  LabelNodeData,
 } from './node';
-import { type EdgeData, DefaultEdge } from './edge';
+import type { EdgeViewModel, LabelNodeViewModel, NodeViewModel } from './types';
+import { DefaultEdge } from './edge';
 
 import '@xyflow/react/dist/style.css';
 import { SvgDefsMarker } from './edge/styles';
 import { GroupStyleOverride } from './node/styles';
-import { layoutGraph } from './graph/layout_graph';
+import { layoutStorybookGraph } from './graph/manual_layout_graph';
 
 export default {
-  title: 'Components/Graph Components/Default Edge',
+  title: 'Components/Graph Components/Manually layout graph',
   description: 'CDR - Graph visualization',
 };
 
@@ -56,7 +56,7 @@ const edgeTypes = {
 };
 
 interface GraphData {
-  nodes: NodeData[];
+  nodes: NodeViewModel[];
   interactive: boolean;
 }
 
@@ -87,7 +87,7 @@ const Template: Story<GraphData> = (args: GraphData) => {
 };
 
 export const Graph = Template.bind({});
-const baseGraph: NodeData[] = [
+const baseGraph: NodeViewModel[] = [
   {
     id: 'siem-windows',
     label: '',
@@ -324,9 +324,12 @@ if (GraphStackedEdgeCases.args.nodes) {
   };
 }
 
-function processGraph(graphData: NodeData[]): { initialNodes: Node[]; initialEdges: EdgeData[] } {
+function processGraph(graphData: NodeViewModel[]): {
+  initialNodes: Node[];
+  initialEdges: EdgeViewModel[];
+} {
   const { nodes, edges } = extractEdges(graphData);
-  const nodesById: { [key: string]: NodeData } = {};
+  const nodesById: { [key: string]: NodeViewModel } = {};
 
   const initialNodes = nodes.map((nodeData) => {
     const node: Node = {
@@ -381,7 +384,9 @@ function processGraph(graphData: NodeData[]): { initialNodes: Node[]; initialEdg
   return { initialNodes, initialEdges };
 }
 
-const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeData[] } => {
+const extractEdges = (
+  graphData: NodeViewModel[]
+): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
   // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
   // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
   // Connect from a to the group node and from the group node to all the labels. and from the labels to the group again and from the group to b.
@@ -390,10 +395,10 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
     [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
   } = {};
   const labelsMetadata: {
-    [key: string]: { source: string; target: string; labelsNodes: LabelNodeData[] };
+    [key: string]: { source: string; target: string; labelsNodes: LabelNodeViewModel[] };
   } = {};
-  const nodes: { [key: string]: NodeData } = {};
-  const edges: EdgeData[] = [];
+  const nodesById: { [key: string]: NodeViewModel } = {};
+  const edges: EdgeViewModel[] = [];
 
   graphData.forEach((node) => {
     if (node.shape === 'label') {
@@ -406,7 +411,7 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
         labelsMetadata[node.id] = { source, target, labelsNodes: [labelNode] };
       }
 
-      nodes[labelNode.id] = labelNode;
+      nodesById[labelNode.id] = labelNode;
 
       // Set metadata
       const edgeId = node.id;
@@ -425,14 +430,14 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
         };
       }
     } else {
-      nodes[node.id] = node;
+      nodesById[node.id] = node;
       nodesMetadata[node.id] = { edgesIn: 0, edgesOut: 0 };
     }
   });
 
   Object.values(labelsMetadata).forEach((edge) => {
     if (edge.labelsNodes.length > 1) {
-      const groupNode: NodeData = {
+      const groupNode: NodeViewModel = {
         id: `grp(a(${edge.source})-b(${edge.target}))`,
         shape: 'group',
         position: {
@@ -442,11 +447,11 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
         interactive: true,
       };
 
-      nodes[groupNode.id] = groupNode;
+      nodesById[groupNode.id] = groupNode;
       edges.push({
         id: `a(${edge.source})-b(${groupNode.id})`,
         source: edge.source,
-        sourceShape: nodes[edge.source].shape,
+        sourceShape: nodesById[edge.source].shape,
         target: groupNode.id,
         targetShape: groupNode.shape,
         color: edge.labelsNodes[0].color,
@@ -458,12 +463,12 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
         source: groupNode.id,
         sourceShape: groupNode.shape,
         target: edge.target,
-        targetShape: nodes[edge.target].shape,
+        targetShape: nodesById[edge.target].shape,
         color: edge.labelsNodes[0].color,
         interactive: true,
       });
 
-      edge.labelsNodes.forEach((labelNode: LabelNodeData) => {
+      edge.labelsNodes.forEach((labelNode: Writable<LabelNodeViewModel>) => {
         labelNode.parentId = groupNode.id;
 
         edges.push({
@@ -490,7 +495,7 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
       edges.push({
         id: `a(${edge.source})-b(${edge.labelsNodes[0].id})`,
         source: edge.source,
-        sourceShape: nodes[edge.source].shape,
+        sourceShape: nodesById[edge.source].shape,
         target: edge.labelsNodes[0].id,
         targetShape: edge.labelsNodes[0].shape,
         color: edge.labelsNodes[0].color,
@@ -502,15 +507,15 @@ const extractEdges = (graphData: NodeData[]): { nodes: NodeData[]; edges: EdgeDa
         source: edge.labelsNodes[0].id,
         sourceShape: edge.labelsNodes[0].shape,
         target: edge.target,
-        targetShape: nodes[edge.target].shape,
+        targetShape: nodesById[edge.target].shape,
         color: edge.labelsNodes[0].color,
         interactive: true,
       });
     }
   });
 
-  layoutGraph(Object.values(nodes), { nodes: nodesMetadata, edges: edgesMetadata });
+  layoutStorybookGraph(Object.values(nodesById), { nodes: nodesMetadata, edges: edgesMetadata });
 
   // Reversing order, groups like to be first in order :D
-  return { nodes: Object.values(nodes).reverse(), edges };
+  return { nodes: Object.values(nodesById).reverse(), edges };
 };

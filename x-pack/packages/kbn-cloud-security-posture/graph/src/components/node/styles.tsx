@@ -128,9 +128,9 @@ export const NodeLabel = styled(EuiText)`
   top: 108%;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
+  width: 130%;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  // white-space: nowrap;
   overflow: hidden;
 `;
 
