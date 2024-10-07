@@ -20,8 +20,8 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 ====
 
 
-1. Copy and edit the template in the right area section of this file. Most recent entries should be at the top of the section. 
-2. Edit the anchor ID [[REPO-PR]] of the template with proper values. 
+1. Copy and edit the template in the right section of this file. Most recent entries should be at the top of the section, search for sections using the text "[float]".
+2. Edit the anchor ID [[REPO-PR]] of the template with proper values.
 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
   - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
   - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
@@ -31,7 +31,7 @@ The entry in the main links file should look like this:
 id: `${KIBANA_DOCS}breaking-changes-summary.html#REPO-PR`
 
 Where:
-      - `id` is the ID of your choice.   
+      - `id` is the ID of your choice.
       - `REPO-PR` is the anchor ID that you assigned to the entry in this upgrade document.
 
 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
@@ -39,7 +39,7 @@ Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details
 
 ////
 
-Before you upgrade, review the breaking changes and deprecations introduced in {kib} 8.x, then mitigate the impact. 
+Before you upgrade, review the breaking changes and deprecations introduced in {kib} 8.x, then mitigate the impact.
 
 For Elastic Security release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
