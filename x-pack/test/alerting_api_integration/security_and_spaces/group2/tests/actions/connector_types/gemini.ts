@@ -288,7 +288,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
 
           // TODO to fix, we need to figure out how to mock the gcp oauth token
           it.skip('should invoke AI with assistant AI body argument formatted to gemini expectations', async () => {
-            // await createTokenForConnector(geminiActionId);
             const { body } = await supertest
               .post(`/api/actions/connector/${geminiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
