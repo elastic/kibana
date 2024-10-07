@@ -70,56 +70,10 @@ export const navigationTree: NavigationTreeDefinition = {
           link: 'slo',
         },
         {
-          id: 'aiops',
-          title: 'AIOps',
-          link: 'ml:anomalyDetection',
-          renderAs: 'accordion',
-          spaceBefore: null,
-          children: [
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
-                defaultMessage: 'Anomaly detection',
-              }),
-              link: 'ml:anomalyDetection',
-              id: 'ml:anomalyDetection',
-              renderAs: 'item',
-              children: [
-                {
-                  link: 'ml:singleMetricViewer',
-                },
-                {
-                  link: 'ml:anomalyExplorer',
-                },
-                {
-                  link: 'ml:settings',
-                },
-              ],
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
-                defaultMessage: 'Log rate analysis',
-              }),
-              link: 'ml:logRateAnalysis',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
-              },
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
-                defaultMessage: 'Change point detection',
-              }),
-              link: 'ml:changePointDetections',
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.includes(prepend('/app/ml/aiops/change_point_detection'));
-              },
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
-                defaultMessage: 'Job notifications',
-              }),
-              link: 'ml:notifications',
-            },
-          ],
+          link: 'observabilityAIAssistant',
+          title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
+            defaultMessage: 'AI Assistant',
+          }),
         },
         { link: 'inventory', spaceBefore: 'm' },
         {
