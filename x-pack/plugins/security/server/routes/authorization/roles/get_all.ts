@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '../..';
+import { API_VERSIONS } from '../../../../common/constants';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -21,52 +22,57 @@ export function defineGetAllRolesRoutes({
   buildFlavor,
   config,
 }: RouteDefinitionParams) {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/api/security/role',
-      validate: {
-        query: schema.maybe(
-          schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
-        ),
-      },
+      access: 'public',
+      summary: `Get all roles`,
       options: {
-        access: 'public',
-        summary: `Get all roles`,
+        tags: ['oas-tag:roles'],
       },
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      try {
-        const hideReservedRoles = buildFlavor === 'serverless';
-        const esClient = (await context.core).elasticsearch.client;
-        const [features, elasticsearchRoles] = await Promise.all([
-          getFeatures(),
-          await esClient.asCurrentUser.security.getRole(),
-        ]);
-
-        // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
-        return response.ok({
-          body: Object.entries(elasticsearchRoles)
-            .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole({
-                features,
-                subFeaturePrivilegeIterator,
-                // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
-                elasticsearchRole,
-                name: roleName,
-                application: authz.applicationName,
-                logger,
-                replaceDeprecatedKibanaPrivileges:
-                  request.query?.replaceDeprecatedPrivileges ?? false,
-              })
-            )
-            .filter((role) => {
-              return !hideReservedRoles || !role.metadata?._reserved;
-            })
-            .sort(compareRolesByName),
-        });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
-      }
     })
-  );
+    .addVersion(
+      {
+        version: API_VERSIONS.roles.public.v1,
+        validate: {
+          query: schema.maybe(
+            schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
+          ),
+        },
+      },
+      createLicensedRouteHandler(async (context, request, response) => {
+        try {
+          const hideReservedRoles = buildFlavor === 'serverless';
+          const esClient = (await context.core).elasticsearch.client;
+          const [features, elasticsearchRoles] = await Promise.all([
+            getFeatures(),
+            await esClient.asCurrentUser.security.getRole(),
+          ]);
+
+          // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
+          return response.ok({
+            body: Object.entries(elasticsearchRoles)
+              .map(([roleName, elasticsearchRole]) =>
+                transformElasticsearchRoleToRole({
+                  features,
+                  subFeaturePrivilegeIterator,
+                  // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
+                  elasticsearchRole,
+                  name: roleName,
+                  application: authz.applicationName,
+                  logger,
+                  replaceDeprecatedKibanaPrivileges:
+                    request.query?.replaceDeprecatedPrivileges ?? false,
+                })
+              )
+              .filter((role) => {
+                return !hideReservedRoles || !role.metadata?._reserved;
+              })
+              .sort(compareRolesByName),
+          });
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
+        }
+      })
+    );
 }

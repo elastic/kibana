@@ -15,7 +15,7 @@
           "\nReact component to track the number of clicks and minutes on screen of the children components."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "usageCollection",
             "scope": "public",
@@ -23,7 +23,7 @@
             "section": "def-public.TrackApplicationViewProps",
             "text": "TrackApplicationViewProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
         "deprecated": false,
@@ -32,22 +32,20 @@
           {
             "parentPluginId": "usageCollection",
             "id": "def-public.TrackApplicationView.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "{@link TrackApplicationViewProps }"
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "usageCollection",
                 "scope": "public",
                 "docId": "kibUsageCollectionPluginApi",
                 "section": "def-public.TrackApplicationViewProps",
                 "text": "TrackApplicationViewProps"
-              },
-              ">"
+              }
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
             "deprecated": false,
@@ -96,7 +94,7 @@
               "\nThe React component to be tracked."
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
             "deprecated": false,

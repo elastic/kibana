@@ -16,7 +16,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
-import { DataTableRowControl, Size } from '../../data_table_row_control';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -40,23 +39,25 @@ export const RowControlCell = ({
         tooltipContent,
       }) => {
         return (
-          <DataTableRowControl size={Size.normal}>
-            <EuiToolTip content={tooltipContent ?? label} delay="long">
-              <EuiButtonIcon
-                data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
-                disabled={disabled}
-                iconSize="s"
-                iconType={iconType}
-                color={color ?? 'text'}
-                aria-label={label}
-                onClick={() => {
-                  if (record) {
-                    onClick?.({ record, rowIndex });
-                  }
-                }}
-              />
-            </EuiToolTip>
-          </DataTableRowControl>
+          <EuiToolTip
+            content={tooltipContent ?? label}
+            delay="long"
+            anchorClassName="unifiedDataTable__rowControl"
+          >
+            <EuiButtonIcon
+              data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+              disabled={disabled}
+              iconSize="s"
+              iconType={iconType}
+              color={color ?? 'text'}
+              aria-label={label}
+              onClick={() => {
+                if (record) {
+                  onClick?.({ record, rowIndex });
+                }
+              }}
+            />
+          </EuiToolTip>
         );
       },
     [props.columnId, record, rowIndex]

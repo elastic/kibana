@@ -9,11 +9,13 @@ import Boom from '@hapi/boom';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { defineGetRolesRoutes } from './get';
+import { API_VERSIONS } from '../../../../common/constants';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';
@@ -147,6 +149,8 @@ describe('GET role', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const versionedRouterMock = mockRouteDefinitionParams.router
+        .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
       mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue(features);
       mockRouteDefinitionParams.subFeaturePrivilegeIterator =
@@ -168,7 +172,9 @@ describe('GET role', () => {
       }
 
       defineGetRolesRoutes(mockRouteDefinitionParams);
-      const [[, handler]] = mockRouteDefinitionParams.router.get.mock.calls;
+      const handler = versionedRouterMock.getRoute('get', '/api/security/role/{name}').versions[
+        API_VERSIONS.roles.public.v1
+      ].handler;
 
       const headers = { authorization: 'foo' };
       const mockRequest = httpServerMock.createKibanaRequest({
