@@ -17,6 +17,9 @@ import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
+import anthropicIcon from '../assets/images/anthropic.svg';
+import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
+import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -46,7 +49,7 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     solutions: ['Observability', 'Security', 'Search'],
   },
   [ServiceProviderKeys.anthropic]: {
-    icon: '',
+    icon: anthropicIcon,
     name: 'Anthropic',
     solutions: ['Search'],
   },
@@ -89,6 +92,16 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: openAIIcon,
     name: 'OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
+  },
+  [ServiceProviderKeys['alibabacloud-ai-search']]: {
+    icon: alibabaCloudIcon,
+    name: 'AlibabaCloud AI Search',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.watsonxai]: {
+    icon: ibmWatsonxIcon,
+    name: 'IBM Watsonx',
+    solutions: ['Search'],
   },
 };
 

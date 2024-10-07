@@ -27,6 +27,8 @@ export enum ServiceProviderKeys {
   mistral = 'mistral',
   openai = 'openai',
   anthropic = 'anthropic',
+  watsonxai = 'watsonxai',
+  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
 }
 
 export const INFERENCE_CONNECTOR_ID = '.inference';

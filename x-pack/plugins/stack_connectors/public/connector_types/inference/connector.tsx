@@ -428,6 +428,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               return (
                 <EuiFormRow
                   id="taskType"
+                  fullWidth
                   label={
                     <FormattedMessage
                       id="xpack.stackConnectors.components.inference.taskTypeLabel"
@@ -437,14 +438,32 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                   isInvalid={isInvalid}
                   error={errorMessage}
                 >
-                  {isEdit ? (
-                    <EuiButton isDisabled>{config?.taskType}</EuiButton>
+                  {isEdit || readOnly ? (
+                    <EuiButton
+                      css={{
+                        background: euiTheme.colors.disabled,
+                        color: euiTheme.colors.lightestShade,
+                      }}
+                      isDisabled
+                    >
+                      {config?.taskType}
+                    </EuiButton>
+                  ) : taskTypeOptions.length === 1 ? (
+                    <EuiButton
+                      css={{
+                        background: euiTheme.colors.darkShade,
+                        color: euiTheme.colors.lightestShade,
+                      }}
+                      onClick={() => onTaskTypeOptionsSelect(config?.taskType)}
+                    >
+                      {config?.taskType}
+                    </EuiButton>
                   ) : (
                     <EuiButtonGroup
                       data-test-subj="taskTypeSelect"
+                      buttonSize="m"
                       legend="Task type"
                       defaultValue={DEFAULT_TASK_TYPE}
-                      isDisabled={readOnly}
                       idSelected={config?.taskType}
                       onChange={(id) => onTaskTypeOptionsSelect(id)}
                       options={taskTypeOptions}
@@ -470,13 +489,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       selectedTaskType,
       config?.taskType,
       xsFontSize,
-      euiTheme.colors.subduedText,
+      euiTheme.colors,
       taskTypeFormFields,
       onSetTaskTypeConfigEntry,
       isEdit,
       readOnly,
-      onTaskTypeOptionsSelect,
       taskTypeOptions,
+      onTaskTypeOptionsSelect,
     ]
   );
 

@@ -512,6 +512,96 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
         },
       },
     ],
+    'alibabacloud-ai-search': [
+      {
+        task_type: 'text_embedding',
+        configuration: {
+          input_type: {
+            display: DisplayType.DROPDOWN,
+            label: 'Input type',
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: 'Specifies the type of input passed to the model.',
+            type: FieldType.STRING,
+            validations: [],
+            options: [
+              {
+                label: 'ingest',
+                value: 'ingest',
+              },
+              {
+                label: 'search',
+                value: 'search',
+              },
+            ],
+            value: '',
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+        },
+      },
+      {
+        task_type: 'sparse_embedding',
+        configuration: {
+          input_type: {
+            display: DisplayType.DROPDOWN,
+            label: 'Input type',
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: 'Specifies the type of input passed to the model.',
+            type: FieldType.STRING,
+            validations: [],
+            options: [
+              {
+                label: 'ingest',
+                value: 'ingest',
+              },
+              {
+                label: 'search',
+                value: 'search',
+              },
+            ],
+            value: '',
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+          return_token: {
+            display: DisplayType.TOGGLE,
+            label: 'Return token',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip:
+              'If `true`, the token name will be returned in the response. Defaults to `false` which means only the token ID will be returned in the response.',
+            type: FieldType.BOOLEAN,
+            validations: [],
+            value: true,
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+        },
+      },
+      {
+        task_type: 'completion',
+        configuration: {},
+      },
+      {
+        task_type: 'rerank',
+        configuration: {},
+      },
+    ],
+    watsonxai: [
+      {
+        task_type: 'text_embedding',
+        configuration: {},
+      },
+    ],
   };
   return Promise.resolve(providersTaskTypes[provider]);
 };
