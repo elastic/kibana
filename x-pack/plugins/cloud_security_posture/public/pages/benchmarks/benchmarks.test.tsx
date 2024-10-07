@@ -18,6 +18,7 @@ import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
@@ -83,6 +84,27 @@ describe('<Benchmarks />', () => {
     renderBenchmarks(createReactQueryResponse({ status: 'error', error }));
 
     expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
+  });
+
+  it('renders unprivileged state ', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'unprivileged' },
+          kspm: { status: 'unprivileged' },
+        },
+      })
+    );
+
+    renderBenchmarks(
+      createReactQueryResponse({
+        status: 'success',
+        data: { total: 1, items: [createCspBenchmarkIntegrationFixture()] },
+      })
+    );
+
+    expect(screen.getByTestId(NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED)).toBeInTheDocument();
   });
 
   it('renders the benchmarks table', () => {
