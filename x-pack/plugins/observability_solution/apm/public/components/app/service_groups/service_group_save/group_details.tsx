@@ -34,8 +34,6 @@ interface Props {
   titleId?: string;
 }
 
-const DEFAULT_COLOR = '#5094C4';
-
 export function GroupDetails({
   isEdit,
   serviceGroup,
@@ -45,14 +43,13 @@ export function GroupDetails({
   isLoading,
   titleId,
 }: Props) {
+  const initialColor = serviceGroup?.color || '#5094C4';
   const [name, setName] = useState(serviceGroup?.groupName);
-  const [color, setColor, colorPickerErrors] = useColorPickerState(
-    serviceGroup?.color || DEFAULT_COLOR
-  );
+  const [color, setColor, colorPickerErrors] = useColorPickerState(initialColor);
   const [description, setDescription] = useState<string | undefined>(serviceGroup?.description);
 
   const isNamePristine = name === serviceGroup?.groupName;
-  const isColorPristine = color === (serviceGroup?.color || DEFAULT_COLOR);
+  const isColorPristine = color === initialColor;
 
   useEffect(() => {
     if (serviceGroup) {
