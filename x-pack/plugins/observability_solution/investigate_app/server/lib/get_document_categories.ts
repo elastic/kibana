@@ -35,6 +35,11 @@ export type LogCategoryChange =
   | LogCategoryOtherChange
   | LogCategoryUnknownChange;
 
+export type NonImpactingCategoryChange =
+  | LogCategoryNoChange
+  | LogCategoryOtherChange
+  | LogCategoryUnknownChange;
+
 export interface LogCategoryNoChange {
   type: 'none';
 }
@@ -490,4 +495,9 @@ export const createCategorizationQuery = ({
       must_not: ignoredCategoryTerms.map(createCategoryQuery(messageField)),
     },
   };
+};
+
+export const excludeNonImpactingCategories = (categories: LogCategory[]): LogCategory[] => {
+  const nonImpactingCategories = ['none', 'other', 'unknown'];
+  return categories.filter((category) => !nonImpactingCategories.includes(category.change.type));
 };

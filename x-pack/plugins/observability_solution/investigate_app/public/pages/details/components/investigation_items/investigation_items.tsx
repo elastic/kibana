@@ -34,9 +34,13 @@ export function InvestigationItems() {
         />
       </EuiFlexItem>
 
-      {investigation?.id && (
+      {investigation && (
         <EuiFlexItem grow={false}>
-          <AssistantHypothesis investigationId={investigation.id} />
+          <AssistantHypothesis
+            investigation={investigation}
+            start={globalParams.timeRange.from}
+            end={globalParams.timeRange.to}
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

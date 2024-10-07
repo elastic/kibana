@@ -25,6 +25,8 @@ import {
   GetEventsResponse,
   getEntitiesParamsSchema,
   GetEntitiesResponse,
+  getLogPatternsParamsSchema,
+  GetLogPatternsResponse,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { createInvestigation } from '../services/create_investigation';
@@ -48,6 +50,7 @@ import { createInvestigateAppServerRoute } from './create_investigate_app_server
 import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 import { getEntitiesWithSource } from '../services/get_entities';
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
+import { getLogPatterns } from '../services/get_log_patterns';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -381,6 +384,29 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getLogPatternsRoute = createInvestigateAppServerRoute({
+  endpoint: 'POST /internal/observability/investigation/log_patterns',
+  options: {
+    tags: [],
+  },
+  params: getLogPatternsParamsSchema,
+  handler: async ({ params, context, request }): Promise<GetLogPatternsResponse> => {
+    const core = await context.core;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+
+    const logPatterns = await getLogPatterns({
+      esClient,
+      sources: params.body.sources,
+      start: params.body.start,
+      end: params.body.end,
+    });
+
+    return {
+      logPatterns,
+    };
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -398,6 +424,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getInvestigationItemsRoute,
     ...getEventsRoute,
     ...getEntitiesRoute,
+    ...getLogPatternsRoute,
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
   };

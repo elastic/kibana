@@ -32,6 +32,15 @@ export const investigationKeys = {
     hostName?: string;
     containerId?: string;
   }) => [...investigationKeys.detail(investigationId), 'entities', params] as const,
+  logPatterns: ({
+    investigationId,
+    ...params
+  }: {
+    investigationId: string;
+    sources: string;
+    start: string;
+    end: string;
+  }) => [...investigationKeys.detail(investigationId), 'logPatterns', params] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;

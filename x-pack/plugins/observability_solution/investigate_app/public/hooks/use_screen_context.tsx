@@ -74,3 +74,28 @@ function getAlertDetailScreenContext(alertDetail: EcsFieldsResponse) {
   }
   `);
 }
+
+export function getScreenContext({
+  alertDetails,
+  investigation,
+}: {
+  alertDetails: EcsFieldsResponse;
+  investigation: GetInvestigationResponse;
+}) {
+  const screenDescription = dedent(`
+    The user is looking at the details of an investigation in order to understand the root cause of an issue.
+    The investigation details include the title, status, tags, and its time range.
+
+    ${alertDetails ? getAlertDetailScreenContext(alertDetails) : ''}
+
+    Title: ${investigation.title}
+    Tags: ${investigation.tags.join(', ')}
+    Status: ${investigation.status}
+    Start time: ${new Date(investigation.params.timeRange.from).toISOString()}
+    End time: ${new Date(investigation.params.timeRange.to).toISOString()}
+  `);
+
+  return {
+    screenDescription,
+  };
+}
