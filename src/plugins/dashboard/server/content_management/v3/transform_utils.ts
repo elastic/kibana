@@ -22,7 +22,7 @@ import {
 } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
-import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
   ControlGroupAttributes,
   DashboardAttributes,
@@ -223,13 +223,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
 export const itemAttrsToSavedObjectAttrs = (
   attributes: DashboardAttributes
 ): DashboardSavedObjectAttributes => {
-  const {
-    controlGroupInput,
-    kibanaSavedObjectMeta: { searchSource },
-    options,
-    panels,
-    ...rest
-  } = attributes;
+  const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
   const soAttributes = {
     ...rest,
     ...(controlGroupInput && {
@@ -241,14 +235,39 @@ export const itemAttrsToSavedObjectAttrs = (
     ...(panels && {
       panelsJSON: panelsIn(panels),
     }),
-    kibanaSavedObjectMeta: searchSource ? { searchSourceJSON: JSON.stringify(searchSource) } : {},
+    ...(kibanaSavedObjectMeta && {
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify(kibanaSavedObjectMeta.searchSource),
+      },
+    }),
   };
   return soAttributes;
 };
 
-export const savedObjectToItem = (
-  savedObject: SavedObject<DashboardSavedObjectAttributes>
-): DashboardItem => {
+type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
+  references: SavedObjectReference[] | undefined;
+};
+
+type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
+  attributes: Partial<DashboardAttributes>;
+  references: SavedObjectReference[] | undefined;
+};
+
+export function savedObjectToItem(
+  savedObject: SavedObject<DashboardSavedObjectAttributes>,
+  partial: false
+): DashboardItem;
+
+export function savedObjectToItem(
+  savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
+  partial: true
+): PartialDashboardItem;
+
+export function savedObjectToItem(
+  savedObject:
+    | SavedObject<DashboardSavedObjectAttributes>
+    | PartialSavedObject<DashboardSavedObjectAttributes>
+): DashboardItem | PartialDashboardItem {
   const {
     id,
     type,
@@ -278,4 +297,4 @@ export const savedObjectToItem = (
     version,
     managed,
   };
-};
+}

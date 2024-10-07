@@ -40,7 +40,7 @@ const searchArgsToSOFindOptions = (
   return {
     type: DASHBOARD_SAVED_OBJECT_ID,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: ['description', 'title', 'timeRestore'],
+    fields: options?.fields ?? ['title', 'description', 'timeRestore'],
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
@@ -75,7 +75,8 @@ export class DashboardStorage {
         const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
         const contentItem = savedObjectToItem(
-          savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>
+          savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
+          false
         );
 
         const validationError = transforms.mSearch.out.result.validate(contentItem);
@@ -128,7 +129,7 @@ export class DashboardStorage {
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_ID, id);
 
     const response = {
-      item: savedObjectToItem(savedObject),
+      item: savedObjectToItem(savedObject, false),
       meta: {
         aliasPurpose,
         aliasTargetId,
@@ -202,7 +203,7 @@ export class DashboardStorage {
     );
 
     const result = {
-      item: savedObjectToItem(savedObject),
+      item: savedObjectToItem(savedObject, false),
     };
 
     const validationError = transforms.create.out.result.validate(result);
@@ -267,7 +268,7 @@ export class DashboardStorage {
     );
 
     const result = {
-      item: savedObjectToItem(partialSavedObject),
+      item: savedObjectToItem(partialSavedObject, true),
     };
 
     const validationError = transforms.update.out.result.validate(result);
@@ -310,7 +311,7 @@ export class DashboardStorage {
   async search(
     ctx: StorageContext,
     query: SearchQuery,
-    options: DashboardSearchOptions = {}
+    options: DashboardSearchOptions
   ): Promise<DashboardSearchOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
@@ -328,7 +329,7 @@ export class DashboardStorage {
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) => savedObjectToItem(so)),
+      hits: soResponse.saved_objects.map((so) => savedObjectToItem(so, false)),
       pagination: {
         total: soResponse.total,
       },
