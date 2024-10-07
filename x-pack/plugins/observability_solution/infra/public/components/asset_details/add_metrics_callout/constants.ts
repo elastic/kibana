@@ -15,12 +15,12 @@ export type AddMetricsCalloutKey =
   | 'containerOverview'
   | 'containerMetrics';
 
-const defaultPrimaryAction = {
-  href: '', // TODO add correct href
-  label: i18n.translate('xpack.infra.addDataCallout.hostOverviewPrimaryActionLabel', {
+const defaultPrimaryActionLabel = i18n.translate(
+  'xpack.infra.addDataCallout.hostOverviewPrimaryActionLabel',
+  {
     defaultMessage: 'Add Metrics',
-  }),
-};
+  }
+);
 
 const defaultContent = {
   content: {
@@ -34,57 +34,71 @@ const defaultContent = {
   },
 };
 
-const hostDefaultActions = {
-  actions: {
-    primary: defaultPrimaryAction,
-    secondary: {
-      href: 'https://ela.st/demo-cluster-hosts',
+const hostDefaultActions = (basePath: string) => {
+  return {
+    actions: {
+      primary: {
+        href: `${basePath}/app/observabilityOnboarding/?category=logs`,
+        label: defaultPrimaryActionLabel,
+      },
+      secondary: {
+        href: 'https://ela.st/demo-cluster-hosts',
+      },
+      link: {
+        href: 'https://ela.st/docs-hosts-add-metrics',
+      },
     },
-    link: {
-      href: 'https://ela.st/docs-hosts-add-metrics',
-    },
-  },
+  };
 };
 
-const containerDefaultActions = {
-  actions: {
-    primary: defaultPrimaryAction,
-    link: {
-      href: 'https://ela.st/docs-containers-add-metrics',
+const containerDefaultActions = (basePath: string) => {
+  return {
+    actions: {
+      primary: {
+        href: `${basePath}/app/observabilityOnboarding/?category=infra`,
+        label: defaultPrimaryActionLabel,
+      },
+      link: {
+        href: 'https://ela.st/docs-containers-add-metrics',
+      },
     },
-  },
+  };
 };
 
-export const addMetricsCalloutDefinitions: Record<
+export const addMetricsCalloutDefinitions = (
+  basePath: string
+): Record<
   AddMetricsCalloutKey,
   Omit<AddDataPanelProps, 'onDismiss' | 'onAddData' | 'onLearnMore' | 'onTryIt'>
-> = {
-  hostOverview: {
-    ...defaultContent,
-    ...hostDefaultActions,
-  },
-  hostMetrics: {
-    ...defaultContent,
-    ...hostDefaultActions,
-  },
-  hostProcesses: {
-    content: {
-      title: i18n.translate('xpack.infra.addDataCallout.hostProcessesTitle', {
-        defaultMessage: 'View host processes to identify performance bottlenecks',
-      }),
-      content: i18n.translate('xpack.infra.addDataCallout.hostProcessesContent', {
-        defaultMessage:
-          'Collect process data to understand what is consuming resource on your hosts.',
-      }),
+> => {
+  return {
+    hostOverview: {
+      ...defaultContent,
+      ...hostDefaultActions(basePath),
     },
-    ...hostDefaultActions,
-  },
-  containerOverview: {
-    ...defaultContent,
-    ...containerDefaultActions,
-  },
-  containerMetrics: {
-    ...defaultContent,
-    ...containerDefaultActions,
-  },
+    hostMetrics: {
+      ...defaultContent,
+      ...hostDefaultActions(basePath),
+    },
+    hostProcesses: {
+      content: {
+        title: i18n.translate('xpack.infra.addDataCallout.hostProcessesTitle', {
+          defaultMessage: 'View host processes to identify performance bottlenecks',
+        }),
+        content: i18n.translate('xpack.infra.addDataCallout.hostProcessesContent', {
+          defaultMessage:
+            'Collect process data to understand what is consuming resource on your hosts.',
+        }),
+      },
+      ...hostDefaultActions(basePath),
+    },
+    containerOverview: {
+      ...defaultContent,
+      ...containerDefaultActions(basePath),
+    },
+    containerMetrics: {
+      ...defaultContent,
+      ...containerDefaultActions(basePath),
+    },
+  };
 };

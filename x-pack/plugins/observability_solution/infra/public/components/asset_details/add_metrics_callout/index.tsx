@@ -20,8 +20,10 @@ const defaultEventParams: AddMetricsCalloutEventParams = { view: 'add_metrics_ct
 
 export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
   const {
-    services: { telemetry },
+    services: { telemetry, http },
   } = useKibanaContextForPlugin();
+
+  const basePath = http.basePath.get() || '';
 
   function handleAddMetricsClick() {
     telemetry.reportAddMetricsCalloutAddMetricsClicked(defaultEventParams);
@@ -42,8 +44,8 @@ export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
 
   return (
     <AddDataPanel
-      content={addMetricsCalloutDefinitions[id].content}
-      actions={addMetricsCalloutDefinitions[id].actions}
+      content={addMetricsCalloutDefinitions(basePath)[id].content}
+      actions={addMetricsCalloutDefinitions(basePath)[id].actions}
       onAddData={handleAddMetricsClick}
       onTryIt={handleTryItClick}
       onLearnMore={handleLearnMoreClick}
