@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
+import { Filter } from '@kbn/es-query';
 import type { DashboardContainerInput } from '../../common';
 import { backupServiceStrings } from '../dashboard_container/_dashboard_container_strings';
 import { UnsavedPanelState } from '../dashboard_container/types';
@@ -24,6 +25,7 @@ export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
+export const DASHBOARD_FILTERS_LOCAL_KEY = 'dashboardFilters';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
@@ -81,6 +83,21 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   };
 
+  public getFilters = (): Filter => {
+    return this.localStorage.get(DASHBOARD_FILTERS_LOCAL_KEY);
+  };
+
+  public storeFilters = (filters: Filter[]) => {
+    try {
+      this.localStorage.set(DASHBOARD_FILTERS_LOCAL_KEY, filters);
+    } catch (e) {
+      coreServices.notifications.toasts.addDanger({
+        title: backupServiceStrings.filtersStorageError(e.message),
+        'data-test-subj': 'dashboardFiltersBackupFailure',
+      });
+    }
+  };
+
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
       const dashboardStateStorage =
@@ -117,7 +134,9 @@ class DashboardBackupService implements DashboardBackupServiceType {
         id
       ] as UnsavedPanelState | undefined;
 
-      return { dashboardState, panels };
+      const filters = dashboardState?.filters;
+
+      return { dashboardState, panels, filters };
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsGetError(e.message),
@@ -135,6 +154,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       const dashboardStateStorage = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
       set(dashboardStateStorage, [this.activeSpaceId, id], newState);
       this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, dashboardStateStorage);
+      this.storeFilters(dashboardStateStorage[this.activeSpaceId][id]?.filters ?? []);
 
       const panelsStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) ?? {};
       set(panelsStorage, [this.activeSpaceId, id], unsavedPanels);
