@@ -234,6 +234,6 @@ export const GENERATION_ERROR_TRANSLATION: Record<
       values: {
         exampleReason: attributes.underlyingMessages?.[0] || ERROR_NO_UNDERLYING_MESSAGE_AVAILABLE,
       },
-      defaultMessage: `The CSV processor failed to convert samples to JSON (reason: {exampleReason}). Please check the provided samples.`,
+      defaultMessage: `Cannot parse the samples as the CSV data (reason: {exampleReason}). Please check the provided samples.`,
     }),
 };
