@@ -374,9 +374,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={
-              isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(agentPolicies[0])
-            }
+            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
           />
         </ExtensionWrapper>
       )
