@@ -24,7 +24,7 @@ import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import {
   commonColumns,
   significantItemColumns,
-  type LogRateAnalysisResultsTableColumnNames,
+  type LogRateAnalysisResultsTableColumnName,
 } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
 import {
   getBaselineAndDeviationRates,
@@ -226,7 +226,7 @@ export const useColumns = (
   );
 
   const columnsMap: Record<
-    LogRateAnalysisResultsTableColumnNames,
+    LogRateAnalysisResultsTableColumnName,
     EuiBasicTableColumn<SignificantItem>
   > = useMemo(
     () => ({
@@ -572,7 +572,7 @@ export const useColumns = (
   );
 
   const columns = useMemo(() => {
-    const columnNamesToReturn: Partial<Record<LogRateAnalysisResultsTableColumnNames, string>> =
+    const columnNamesToReturn: Partial<Record<LogRateAnalysisResultsTableColumnName, string>> =
       isGroupsTable ? commonColumns : significantItemColumns;
     const columnsToReturn = [];
 
@@ -580,13 +580,13 @@ export const useColumns = (
       if (
         Object.hasOwn(columnNamesToReturn, columnName) === false ||
         skippedColumns.includes(
-          columnNamesToReturn[columnName as LogRateAnalysisResultsTableColumnNames] as string
+          columnNamesToReturn[columnName as LogRateAnalysisResultsTableColumnName] as string
         ) ||
         ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
       )
         continue;
 
-      columnsToReturn.push(columnsMap[columnName as LogRateAnalysisResultsTableColumnNames]);
+      columnsToReturn.push(columnsMap[columnName as LogRateAnalysisResultsTableColumnName]);
     }
 
     if (isExpandedRow === true) {

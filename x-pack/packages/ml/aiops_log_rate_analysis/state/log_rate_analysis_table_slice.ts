@@ -64,13 +64,13 @@ export const significantItemColumns = {
   ...commonColumns,
 } as const;
 
-export type LogRateAnalysisResultsTableColumnNames = keyof typeof significantItemColumns | 'unique';
+export type LogRateAnalysisResultsTableColumnName = keyof typeof significantItemColumns | 'unique';
 
 type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
 export interface LogRateAnalysisTableState {
-  skippedColumns: LogRateAnalysisResultsTableColumnNames[];
+  skippedColumns: LogRateAnalysisResultsTableColumnName[];
   pinnedGroup: GroupOrNull;
   pinnedSignificantItem: SignificantItemOrNull;
   selectedGroup: GroupOrNull;
@@ -136,7 +136,7 @@ export const logRateAnalysisTableSlice = createSlice({
     },
     setSkippedColumns: (
       state: LogRateAnalysisTableState,
-      action: PayloadAction<LogRateAnalysisResultsTableColumnNames[]>
+      action: PayloadAction<LogRateAnalysisResultsTableColumnName[]>
     ) => {
       state.skippedColumns = action.payload;
     },
