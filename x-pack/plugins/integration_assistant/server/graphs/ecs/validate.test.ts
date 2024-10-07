@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ECS_RESERVED } from './constants';
+
 import {
   findDuplicateFields,
   findInvalidEcsFields,
@@ -142,6 +144,12 @@ describe('removeReservedFields', () => {
 
     const result = removeReservedFields(ecsMapping);
     expect(result).toEqual(expectedMapping);
+  });
+
+  it('should remove all fields if all are reserved', () => {
+    const ecsMapping = Object.fromEntries(ECS_RESERVED.map((key) => [key, key]));
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
   });
 
   it('should return the same mapping if there are no reserved fields', () => {
