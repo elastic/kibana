@@ -15,7 +15,6 @@ export const removeEntityDefinitionFieldsStep = (): IngestProcessorContainer => 
   remove: {
     ignore_failure: true,
     field: [
-      'event',
       'entity.lastSeenTimestamp',
       'entity.schemaVersion',
       'entity.definitionVersion',
