@@ -6,3 +6,4 @@
  */
 
 export * from './entity_index';
+export * from './ingest_pipeline';

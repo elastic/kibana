@@ -26,13 +26,16 @@ import { getDefinitionForEntityType } from './definition';
 import {
   createFieldRetentionEnrichPolicy,
   executeFieldRetentionEnrichPolicy,
-  getFieldRetentionPipelineSteps,
   deleteFieldRetentionEnrichPolicy,
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
-  getFieldRetentionDefinition,
 } from './field_retention';
-import { createEntityIndex, deleteEntityIndex } from './assets';
+import {
+  createEntityIndex,
+  deleteEntityIndex,
+  createPlatformPipeline,
+  deletePlatformPipeline,
+} from './assets';
 import { getEntityIndexMapping } from './index_mappings';
 
 interface EntityStoreClientOpts {
@@ -121,7 +124,13 @@ export class EntityStoreDataClient {
     debugLog(`Created field retention enrich policy`);
     await this.executeFieldRetentionEnrichPolicy(entityType);
     debugLog(`Executed field retention enrich policy`);
-    await this.createPlatformPipeline(entityType, { fieldHistoryLength });
+    await createPlatformPipeline({
+      entityType,
+      fieldHistoryLength,
+      namespace: this.options.namespace,
+      logger,
+      esClient: this.options.esClient,
+    });
     debugLog(`Created @platform pipeline`);
 
     // finally start the entity definition now that everything is in place
@@ -178,59 +187,6 @@ export class EntityStoreDataClient {
       esClient: this.options.esClient,
       entityType,
     });
-  }
-
-  private async createPlatformPipeline(
-    entityType: EntityType,
-    { fieldHistoryLength }: { fieldHistoryLength: number }
-  ) {
-    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-    const fieldRetentionDefinition = getFieldRetentionDefinition({
-      entityType,
-      fieldHistoryLength,
-    });
-    const allEntityFields: string[] = (definition?.metadata || []).map((m) => {
-      if (typeof m === 'string') {
-        return m;
-      }
-
-      return m.destination;
-    });
-
-    const pipeline = {
-      id: `${definition.id}-latest@platform`,
-      body: {
-        _meta: {
-          managed_by: 'entity_store',
-          managed: true,
-        },
-        description: `Ingest pipeline for entity defiinition ${definition.id}`,
-        processors: getFieldRetentionPipelineSteps({
-          namespace: this.options.namespace,
-          fieldRetentionDefinition,
-          allEntityFields,
-        }),
-      },
-    };
-
-    this.options.logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);
-
-    await this.options.esClient.ingest.putPipeline(pipeline);
-  }
-
-  private async deletePlatformPipeline(entityType: EntityType) {
-    const pipelineId = `${
-      getDefinitionForEntityType(entityType, this.options.namespace).id
-    }-latest@platform`;
-    this.options.logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
-    await this.options.esClient.ingest.deletePipeline(
-      {
-        id: pipelineId,
-      },
-      {
-        ignore: [404],
-      }
-    );
   }
 
   private async createEntityIndexComponentTemplate(entityType: EntityType) {
@@ -311,7 +267,12 @@ export class EntityStoreDataClient {
     try {
       await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
       await this.deleteEntityIndexComponentTemplate(entityType);
-      await this.deletePlatformPipeline(entityType);
+      await deletePlatformPipeline({
+        entityType,
+        namespace: this.options.namespace,
+        logger: this.options.logger,
+        esClient: this.options.esClient,
+      });
       await this.deleteFieldRetentionEnrichPolicy(entityType);
 
       if (deleteData) {
