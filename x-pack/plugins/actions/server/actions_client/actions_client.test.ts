@@ -393,7 +393,7 @@ describe('create()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveEventHandler: async (params) => {
+      postSaveHook: async (params) => {
         preSaveEvent(params);
       },
     });
@@ -2174,7 +2174,7 @@ describe('delete()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
-      postDeleteEventHandler: async (params) => {
+      postDeleteHook: async (params) => {
         preDeleteEvent(params);
       },
     });
@@ -2401,7 +2401,7 @@ describe('update()', () => {
         params: { schema: schema.object({}) },
       },
       executor,
-      preSaveEventHandler: async (params) => {
+      postSaveHook: async (params) => {
         preSaveEvent(params);
       },
     });
