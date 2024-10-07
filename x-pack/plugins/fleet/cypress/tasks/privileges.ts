@@ -8,7 +8,7 @@
 import { request } from './common';
 import { constructUrlWithUser, getEnvAuth } from './login';
 
-interface User {
+export interface User {
   username: string;
   password: string;
   description?: string;
@@ -193,7 +193,7 @@ export const FleetNoneIntegrAllUser: User = {
   roles: [FleetNoneIntegrAllRole.name],
 };
 
-export const AutomaticImportIntegrRole: Role = {
+export const getIntegrationsAutoImportRole = (feature: FeaturesPrivileges): Role => ({
   name: 'automatic_import_integrations_read_role',
   privileges: {
     elasticsearch: {
@@ -207,20 +207,12 @@ export const AutomaticImportIntegrRole: Role = {
     },
     kibana: [
       {
-        feature: {
-          fleetv2: ['read'],
-          fleet: ['read'],
-        },
+        feature,
         spaces: ['*'],
       },
     ],
   },
-};
-export const AutomaticImportIntegrUser: User = {
-  username: 'automatic_import_integrations_read_user',
-  password: 'password',
-  roles: [AutomaticImportIntegrRole.name],
-};
+});
 
 export const AutomaticImportConnectorNoneRole: Role = {
   name: 'automatic_import_connectors_none_role',
@@ -239,7 +231,7 @@ export const AutomaticImportConnectorNoneRole: Role = {
         feature: {
           fleetv2: ['all'],
           fleet: ['all'],
-          connectors: ['none'],
+          actions: ['none'],
         },
         spaces: ['*'],
       },
@@ -250,6 +242,36 @@ export const AutomaticImportConnectorNoneUser: User = {
   username: 'automatic_import_connectors_none_user',
   password: 'password',
   roles: [AutomaticImportConnectorNoneRole.name],
+};
+
+export const AutomaticImportConnectorReadRole: Role = {
+  name: 'automatic_import_connectors_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+      cluster: ['manage_service_account'],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['all'],
+          fleet: ['all'],
+          actions: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const AutomaticImportConnectorReadUser: User = {
+  username: 'automatic_import_connectors_read_user',
+  password: 'password',
+  roles: [AutomaticImportConnectorReadRole.name],
 };
 
 export const AutomaticImportConnectorAllRole: Role = {
@@ -269,7 +291,7 @@ export const AutomaticImportConnectorAllRole: Role = {
         feature: {
           fleetv2: ['all'],
           fleet: ['all'],
-          connectors: ['all'],
+          actions: ['all'],
         },
         spaces: ['*'],
       },

@@ -5,54 +5,79 @@
  * 2.0.
  */
 
+import type { User } from '../tasks/privileges';
 import {
   deleteUsersAndRoles,
-  AutomaticImportIntegrRole,
-  AutomaticImportIntegrUser,
+  getIntegrationsAutoImportRole,
   createUsersAndRoles,
   AutomaticImportConnectorNoneUser,
   AutomaticImportConnectorNoneRole,
   AutomaticImportConnectorAllUser,
   AutomaticImportConnectorAllRole,
+  AutomaticImportConnectorReadUser,
+  AutomaticImportConnectorReadRole,
 } from '../tasks/privileges';
 import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import {
   ASSISTANT_BUTTON,
+  CONNECTOR_ACTION_ID,
+  CONNECTOR_ACTION_NAME,
   CREATE_INTEGRATION_ASSISTANT,
+  CREATE_INTEGRATION_LANDING_PAGE,
   CREATE_INTEGRATION_UPLOAD,
   MISSING_PRIVILEGES,
   UPLOAD_PACKAGE_LINK,
 } from '../screens/integrations_automatic_import';
 
-describe('When the user has Read previleges for Integrations', () => {
-  before(() => {
-    createUsersAndRoles([AutomaticImportIntegrUser], [AutomaticImportIntegrRole]);
-  });
+describe('When the user does not have enough previleges for Integrations', () => {
+  const runs = [
+    { fleetRole: 'read', integrationsRole: 'read' },
+    { fleetRole: 'read', integrationsRole: 'all' },
+    { fleetRole: 'all', integrationsRole: 'read' },
+  ];
 
-  beforeEach(() => {
-    login();
-  });
+  runs.forEach(function (run) {
+    describe(`When the user has '${run.fleetRole}' role for fleet and '${run.integrationsRole}' role for Integrations`, () => {
+      const automaticImportIntegrRole = getIntegrationsAutoImportRole({
+        fleetv2: [run.fleetRole], // fleet
+        fleet: [run.integrationsRole], // integrations
+      });
+      const AutomaticImportIntegrUser: User = {
+        username: 'automatic_import_integrations_read_user',
+        password: 'password',
+        roles: [automaticImportIntegrRole.name],
+      };
 
-  afterEach(() => {
-    logout();
-  });
+      before(() => {
+        createUsersAndRoles([AutomaticImportIntegrUser], [automaticImportIntegrRole]);
+      });
 
-  after(() => {
-    deleteUsersAndRoles([AutomaticImportIntegrUser], [AutomaticImportIntegrRole]);
-  });
+      beforeEach(() => {
+        login();
+      });
 
-  it('Create Assistant is not accessible if user has read role in integrations', () => {
-    loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportIntegrUser);
-    cy.getBySel(MISSING_PRIVILEGES).should('exist');
-  });
+      afterEach(() => {
+        logout();
+      });
 
-  it('Create upload is not accessible if user has read role in integrations', () => {
-    loginWithUserAndWaitForPage(CREATE_INTEGRATION_UPLOAD, AutomaticImportIntegrUser);
-    cy.getBySel(MISSING_PRIVILEGES).should('exist');
+      after(() => {
+        deleteUsersAndRoles([AutomaticImportIntegrUser], [automaticImportIntegrRole]);
+      });
+
+      it('Create Assistant is not accessible if user has read role in integrations', () => {
+        loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportIntegrUser);
+        cy.getBySel(MISSING_PRIVILEGES).should('exist');
+      });
+
+      it('Create upload is not accessible if user has read role in integrations', () => {
+        loginWithUserAndWaitForPage(CREATE_INTEGRATION_UPLOAD, AutomaticImportIntegrUser);
+        cy.getBySel(MISSING_PRIVILEGES).should('exist');
+      });
+    });
   });
 });
 
-describe('When the user has All previleges for Integrations and No permissions for Connectors', () => {
+describe('When the user has All permissions for Integrations and No permissions for actions', () => {
   before(() => {
     createUsersAndRoles([AutomaticImportConnectorNoneUser], [AutomaticImportConnectorNoneRole]);
   });
@@ -70,13 +95,43 @@ describe('When the user has All previleges for Integrations and No permissions f
   });
 
   it('Create Assistant is not accessible but upload is accessible', () => {
-    loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorNoneUser);
+    loginWithUserAndWaitForPage(CREATE_INTEGRATION_LANDING_PAGE, AutomaticImportConnectorNoneUser);
     cy.getBySel(ASSISTANT_BUTTON).should('not.exist');
     cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
   });
 });
 
-describe('When the user has All previleges for Integrations and All permissions for Connectors', () => {
+describe('When the user has All permissions for Integrations and read permissions for actions', () => {
+  before(() => {
+    createUsersAndRoles([AutomaticImportConnectorReadUser], [AutomaticImportConnectorReadRole]);
+  });
+
+  beforeEach(() => {
+    login();
+  });
+
+  afterEach(() => {
+    logout();
+  });
+
+  after(() => {
+    deleteUsersAndRoles([AutomaticImportConnectorReadUser], [AutomaticImportConnectorReadRole]);
+  });
+
+  it('Create Assistant is not accessible but upload is accessible', () => {
+    loginWithUserAndWaitForPage(CREATE_INTEGRATION_LANDING_PAGE, AutomaticImportConnectorReadUser);
+    cy.getBySel(ASSISTANT_BUTTON).should('exist');
+    cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
+  });
+
+  it('Create Assistant is not accessible but upload is accessible', () => {
+    loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorReadUser);
+    cy.getBySel(CONNECTOR_ACTION_ID).should('not.exist');
+    cy.getBySel(CONNECTOR_ACTION_NAME).should('not.exist');
+  });
+});
+
+describe('When the user has All permissions for Integrations and All permissions for actions', () => {
   before(() => {
     createUsersAndRoles([AutomaticImportConnectorAllUser], [AutomaticImportConnectorAllRole]);
   });
@@ -95,7 +150,7 @@ describe('When the user has All previleges for Integrations and All permissions 
 
   it('Create Assistant is not accessible but upload is accessible', () => {
     loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorAllUser);
-    cy.getBySel(ASSISTANT_BUTTON).should('not.exist');
-    cy.getBySel(UPLOAD_PACKAGE_LINK).should('exist');
+    cy.getBySel(CONNECTOR_ACTION_ID).should('exist');
+    cy.getBySel(CONNECTOR_ACTION_NAME).should('exist');
   });
 });

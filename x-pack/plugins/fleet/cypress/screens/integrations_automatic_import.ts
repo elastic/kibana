@@ -9,6 +9,8 @@ export const UPLOAD_PACKAGE_LINK = 'uploadPackageLink';
 export const ASSISTANT_BUTTON = 'assistantButton';
 export const TECH_PREVIEW_BADGE = 'techPreviewBadge';
 export const MISSING_PRIVILEGES = 'missingPrivilegesCallOut';
+export const CONNECTOR_ACTION_ID = 'connectorActionId';
+export const CONNECTOR_ACTION_NAME = 'connectorActionName';
 
 export const CREATE_INTEGRATION_LANDING_PAGE = '/app/integrations/create';
 export const CREATE_INTEGRATION_ASSISTANT = '/app/integrations/create/assistant';
