@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getAll, getAllUnsecured, getAllSystemConnectors } from './get_all';
+export { transformUpdateConnectorResponse } from './v1';
