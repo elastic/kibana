@@ -732,6 +732,7 @@ components:
         - installing
         - started
         - stopped
+        - error
       type: string
     Entity:
       oneOf:

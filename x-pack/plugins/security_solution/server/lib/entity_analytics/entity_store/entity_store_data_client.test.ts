@@ -14,7 +14,6 @@ import { EntityStoreDataClient } from './entity_store_data_client';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 
 describe('EntityStoreDataClient', () => {
   const logger = loggingSystemMock.createLogger();
@@ -30,11 +29,6 @@ describe('EntityStoreDataClient', () => {
       esClient: esClientMock,
       soClient: mockSavedObjectClient,
       logger,
-    }),
-    assetCriticalityMigrationClient: new AssetCriticalityEcsMigrationClient({
-      esClient: esClientMock,
-      logger: loggerMock,
-      auditLogger: undefined,
     }),
   });
 
