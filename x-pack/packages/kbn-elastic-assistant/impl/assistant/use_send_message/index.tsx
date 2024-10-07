@@ -50,6 +50,7 @@ export const useSendMessage = (): UseSendMessage => {
 
       const timeoutId = setTimeout(() => {
         abortController.current.abort(i18n.FETCH_MESSAGE_TIMEOUT_ERROR);
+        abortController.current = new AbortController();
       }, EXECUTE_ACTION_TIMEOUT);
 
       try {
