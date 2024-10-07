@@ -20,6 +20,7 @@ import {
   HasUniqueId,
   PublishesDataViews,
   PublishesUnifiedSearch,
+  CanLockHoverActions,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -31,7 +32,8 @@ export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
-  Partial<HasParentApi<Partial<PublishesDataViews>>>;
+  Partial<HasParentApi<Partial<PublishesDataViews>>> &
+  Partial<CanLockHoverActions>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));

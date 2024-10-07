@@ -108,12 +108,17 @@ export const ReactEmbeddableRenderer = <
         const setApi = (
           apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
         ) => {
+          const hasLockedHoverActions$ = new BehaviorSubject(false);
           return {
             ...apiRegistration,
             uuid,
             phase$,
             parentApi,
             type: factory.type,
+            hasLockedHoverActions$,
+            lockHoverActions: (lock: boolean) => {
+              hasLockedHoverActions$.next(lock);
+            },
           } as unknown as Api;
         };
 

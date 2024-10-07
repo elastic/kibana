@@ -59,7 +59,6 @@ export type DashboardApi = CanExpandPanels &
     getSettings: () => DashboardStateFromSettingsFlyout;
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     hasOverlays$: PublishingSubject<boolean>;
-    lockHoverActionsForId$: PublishingSubject<boolean>;
     hasRunMigrations$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;

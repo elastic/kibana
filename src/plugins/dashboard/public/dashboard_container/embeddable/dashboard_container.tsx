@@ -337,7 +337,6 @@ export class DashboardContainer
     this.setScrollToPanelId = dashboardApi.setScrollToPanelId;
     this.clearOverlays = dashboardApi.clearOverlays;
     this.hasOverlays$ = dashboardApi.hasOverlays$;
-    this.lockHoverActionsForId$ = dashboardApi.lockHoverActionsForId$;
     this.openOverlay = dashboardApi.openOverlay;
     this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
     this.setLastSavedInput = dashboardApi.setLastSavedInput;
@@ -575,7 +574,6 @@ export class DashboardContainer
   public hasRunMigrations$: BehaviorSubject<boolean>;
   public hasUnsavedChanges$: BehaviorSubject<boolean>;
   public hasOverlays$: BehaviorSubject<boolean>;
-  public lockHoverActionsForId$: BehaviorSubject<string>;
   public useMargins$: BehaviorSubject<boolean>;
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;

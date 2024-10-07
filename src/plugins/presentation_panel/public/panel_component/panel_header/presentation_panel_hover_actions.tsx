@@ -33,6 +33,7 @@ import {
 import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import {
+  apiCanLockHoverActions,
   EmbeddableApiContext,
   getViewModeSubject,
   useBatchedOptionalPublishingSubjects,
@@ -173,14 +174,15 @@ export const PresentationPanelHoverActions = ({
     title,
     description,
     hidePanelTitle,
+    hasLockedHoverActions,
     parentHideTitle,
     parentViewMode,
-    parentLockHoverActionsForId,
   ] = useBatchedOptionalPublishingSubjects(
     api?.defaultPanelTitle,
     api?.panelTitle,
     api?.panelDescription,
     api?.hidePanelTitle,
+    api?.hasLockedHoverActions$,
     api?.parentApi?.hidePanelTitle,
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
@@ -188,11 +190,8 @@ export const PresentationPanelHoverActions = ({
      * actions should eventually all be Frequent Compatibility Change Actions which can track their
      * own dependencies.
      */
-    getViewModeSubject(api ?? undefined),
-    api?.parentApi?.lockHoverActionsForId$
+    getViewModeSubject(api ?? undefined)
   );
-
-  const lockHoverActions = parentLockHoverActionsForId === api?.uuid;
 
   const hideTitle = hidePanelTitle || parentHideTitle;
 
@@ -205,7 +204,9 @@ export const PresentationPanelHoverActions = ({
 
   const onClose = useCallback(() => {
     setIsContextMenuOpen(false);
-    api?.parentApi?.lockHoverActionsForId$.next('');
+    if (apiCanLockHoverActions(api)) {
+      api?.lockHoverActions(false);
+    }
   }, [api]);
 
   useEffect(() => {
@@ -359,6 +360,7 @@ export const PresentationPanelHoverActions = ({
         const name = action.getDisplayName(apiContext);
         const iconType = action.getIconType(apiContext) as IconType;
         const id = action.id;
+
         return {
           iconType,
           'data-test-subj': `embeddablePanelAction-${action.id}`,
@@ -372,6 +374,7 @@ export const PresentationPanelHoverActions = ({
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];
     return notifications?.map((notification) => {
+      console.log('notificationElements', { api });
       let notificationComponent = notification.MenuItem ? (
         React.createElement(notification.MenuItem, {
           key: notification.id,
@@ -424,10 +427,10 @@ export const PresentationPanelHoverActions = ({
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       onClick={() => {
-        api?.parentApi?.lockHoverActionsForId$.next(
-          parentLockHoverActionsForId === api?.uuid ? undefined : api?.uuid
-        );
         setIsContextMenuOpen(!isContextMenuOpen);
+        if (apiCanLockHoverActions(api)) {
+          api?.lockHoverActions(!hasLockedHoverActions);
+        }
       }}
       iconType="boxesVertical"
     />
@@ -466,7 +469,7 @@ export const PresentationPanelHoverActions = ({
           ref={hoverActionsRef}
           css={css`anchorStyles`}
           className={classNames('embPanel__hoverActionsWrapper', {
-            'embPanel__hoverActionsWrapper--lockHoverActions': lockHoverActions,
+            'embPanel__hoverActionsWrapper--lockHoverActions': hasLockedHoverActions,
           })}
         >
           {viewMode === 'edit' && !combineHoverActions ? (
