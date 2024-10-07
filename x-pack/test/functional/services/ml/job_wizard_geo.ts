@@ -15,7 +15,6 @@ export function MachineLearningJobWizardGeoProvider(
   mlCommonUI: MlCommonUI
 ) {
   const retry = getService('retry');
-  const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
   return {
