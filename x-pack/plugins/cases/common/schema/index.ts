@@ -7,7 +7,6 @@
 
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
-
 import { MAX_DOCS_PER_PAGE } from '../constants';
 import type { PartialPaginationType } from './types';
 import { PaginationSchemaRt } from './types';
@@ -16,6 +15,10 @@ export interface LimitedSchemaType {
   fieldName: string;
   min: number;
   max: number;
+}
+
+interface LimitedJSNumberSchemaType {
+  fieldName: string;
 }
 
 export const NonEmptyString = new rt.Type<string, string, unknown>(
@@ -147,6 +150,33 @@ export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) 
 
         if (s > max) {
           return rt.failure(input, context, `The ${fieldName} field cannot be more than ${max}.`);
+        }
+
+        return rt.success(s);
+      }),
+    rt.identity
+  );
+
+export const limitedJSNumberSchema = ({ fieldName }: LimitedJSNumberSchemaType) =>
+  new rt.Type<number, number, unknown>(
+    'LimitedNumber',
+    rt.number.is,
+    (input, context) =>
+      either.chain(rt.number.validate(input, context), (s) => {
+        if (Math.abs(s) > Number.MAX_VALUE) {
+          return rt.failure(
+            input,
+            context,
+            `Absolute value of the ${fieldName} field cannot be more than ${Number.MAX_VALUE}.`
+          );
+        }
+
+        if (Math.abs(s) < Number.MIN_VALUE) {
+          return rt.failure(
+            input,
+            context,
+            `Absolute value of the ${fieldName} field cannot be less than ${Number.MIN_VALUE}.`
+          );
         }
 
         return rt.success(s);

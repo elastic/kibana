@@ -319,4 +319,36 @@ describe('schema', () => {
       `);
     });
   });
+
+  describe('limitedJSNumberSchema', () => {
+    it('works correctly the number is between min and max', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 0, max: 2 }).decode(1))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('fails when given a number that is lower than the minimum', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(0))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The foo field cannot be less than 1.",
+        ]
+      `);
+    });
+
+    it('fails when given number that is higher than the maximum', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(3))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "The foo field cannot be more than 2.",
+        ]
+      `);
+    });
+  });
 });

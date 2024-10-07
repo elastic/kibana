@@ -7,7 +7,11 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
-import { CaseCustomFieldTextWithValidationValueRt, CustomFieldPutRequestRt } from './v1';
+import {
+  CaseCustomFieldTextWithValidationValueRt,
+  CustomFieldPutRequestRt,
+  CaseCustomFieldNumberWithValidationValueRt,
+} from './v1';
 
 describe('Custom Fields', () => {
   describe('CaseCustomFieldTextWithValidationValueRt', () => {
@@ -98,6 +102,32 @@ describe('Custom Fields', () => {
           })
         )
       ).toContain('The value field cannot be an empty string.');
+    });
+  });
+
+  describe('CaseCustomFieldNumberWithValidationValueRt', () => {
+    const numberCustomFieldValueType = CaseCustomFieldNumberWithValidationValueRt({
+      fieldName: 'value',
+    });
+    it('should decode strings correctly', () => {
+      const query = numberCustomFieldValueType.decode(123);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: 123,
+      });
+    });
+
+    it('should not be more than Number.MAX_VALUE', () => {
+      expect(
+        PathReporter.report(numberCustomFieldValueType.decode(Number.MAX_VALUE * 2))[0]
+      ).toContain(`Absolute value of the value field cannot be more than ${Number.MAX_VALUE}.`);
+    });
+
+    it('should not be less than Number.MIN_VALUE', () => {
+      expect(
+        PathReporter.report(numberCustomFieldValueType.decode(Number.MIN_VALUE * 0.5))[0]
+      ).toContain(`Absolute value of the value field cannot be less than ${Number.MIN_VALUE}.`);
     });
   });
 });
