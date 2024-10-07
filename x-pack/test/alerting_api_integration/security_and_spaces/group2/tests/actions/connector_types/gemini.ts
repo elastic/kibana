@@ -325,8 +325,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                 },
               })
               .expect(200);
-            console.log('HEYHEY body', body);
-            console.log('HEYHEY requestData', JSON.stringify(simulator?.requestData, null, 2));
 
             expect(simulator.requestData).to.eql({
               contents: [
