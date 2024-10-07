@@ -90,7 +90,7 @@ describe('findInvalidEcsFields', () => {
     expect(invalid.length).toBe(1);
   });
 
-  it('invalid: date_format fields', async () => {
+  it('invalid: date_format fields (natural example)', async () => {
     const misspelledDateFormatMapping = {
       ai_postgres_202410050058: {
         logs: {
@@ -155,6 +155,42 @@ describe('findInvalidEcsFields', () => {
     };
 
     const invalid = findInvalidEcsFields(misspelledDateFormatMapping);
+    expect(invalid.length).toBe(1);
+  });
+
+  it('invalid: date_format fields (handcrafted example)', async () => {
+    const mixedMapping = {
+      some_title: {
+        logs: {
+          column1: {
+            target: 'event.created',
+            confidence: 0.9,
+            type: 'date',
+            date_format: ['yyyy-MM-dd HH:mm:ss.SSS z'],
+          },
+          column12: {
+            target: 'log.level',
+            confidence: 0.95,
+            type: 'string',
+            date_formats: [],
+          },
+          column11: null,
+          column4: null,
+          column9: {
+            target: 'event.start',
+            confidence: 0.8,
+            type: 'date',
+            date_format: 'yyyy-MM-dd HH:mm:ss z',
+          },
+          column2: {
+            target: 'destination.user.name',
+            type: 'string',
+            date_format: [],
+          },
+        },
+      },
+    };
+    const invalid = findInvalidEcsFields(mixedMapping);
     expect(invalid.length).toBe(1);
   });
 });
