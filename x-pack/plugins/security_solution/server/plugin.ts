@@ -115,7 +115,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/field_retention/task/field_retention_enrichment_task';
+import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,

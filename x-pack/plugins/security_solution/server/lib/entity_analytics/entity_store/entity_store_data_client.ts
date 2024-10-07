@@ -26,7 +26,7 @@ import { getDefinitionForEntityType } from './definition';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
-} from './field_retention';
+} from './task';
 import {
   createEntityIndex,
   deleteEntityIndex,
