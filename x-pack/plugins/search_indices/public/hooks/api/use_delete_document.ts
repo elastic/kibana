@@ -8,7 +8,7 @@
 import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryKeys } from '../../constants';
+import { MutationKeys, QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 import { INDEX_SEARCH_POLLING, IndexDocuments } from './use_document_search';
 
@@ -24,6 +24,7 @@ export const useDeleteDocument = (indexName: string) => {
       return response.acknowledged;
     },
     {
+      mutationKey: [MutationKeys.SearchIndicesDeleteDocument, indexName],
       onMutate: async ({ id }: { id: string }) => {
         await queryClient.cancelQueries([QueryKeys.SearchDocuments, indexName]);
 
