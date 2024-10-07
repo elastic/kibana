@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import moment from 'moment';
 
 import { Chart, Axis, AreaSeries, Position, ScaleType, Settings } from '@elastic/charts';
@@ -34,6 +34,21 @@ export const EventsTimeLine = () => {
   const handleCursorUpdate = useActiveCursor(dependencies.start.charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
+
+  const data = useMemo(() => {
+    const points = [
+      { x: moment(globalParams.timeRange.from).valueOf(), y: 0 },
+      { x: moment(globalParams.timeRange.to).valueOf(), y: 0 },
+    ];
+
+    // adding 100 fake points to the chart so the chart shows cursor on hover
+    for (let i = 0; i < 100; i++) {
+      const diff =
+        moment(globalParams.timeRange.to).valueOf() - moment(globalParams.timeRange.from).valueOf();
+      points.push({ x: moment(globalParams.timeRange.from).valueOf() + (diff / 100) * i, y: 0 });
+    }
+    return points;
+  }, [globalParams.timeRange.from, globalParams.timeRange.to]);
 
   if (isLoading) {
     return <EuiSkeletonText />;
@@ -90,10 +105,7 @@ export const EventsTimeLine = () => {
           xScaleType={ScaleType.Time}
           xAccessor="x"
           yAccessors={['y']}
-          data={[
-            { x: moment(globalParams.timeRange.from).valueOf(), y: 0 },
-            { x: moment(globalParams.timeRange.to).valueOf(), y: 0 },
-          ]}
+          data={data}
           filterSeriesInTooltip={() => false}
         />
       </Chart>

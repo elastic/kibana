@@ -8,6 +8,11 @@
 import { PartialTheme } from '@elastic/charts';
 
 export const TIME_LINE_THEME: PartialTheme = {
+  highlighter: {
+    point: {
+      opacity: 0,
+    },
+  },
   axes: {
     gridLine: {
       horizontal: {
