@@ -37,19 +37,6 @@ interface RegisterAPIRoutesArgs {
 const TECHNICAL_PREVIEW_WARNING =
   'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
 
-function recursiveSortObjectByKeys(obj: unknown): unknown {
-  if (typeof obj !== 'object' || obj === null) return obj;
-  if (Array.isArray(obj)) {
-    return obj.map(recursiveSortObjectByKeys);
-  }
-  return Object.keys(obj)
-    .sort()
-    .reduce((acc, key) => {
-      acc[key] = recursiveSortObjectByKeys(obj[key]);
-      return acc;
-    }, {} as Record<string, unknown>);
-}
-
 export function registerAPIRoutes({
   http,
   contentManagement,
@@ -123,8 +110,7 @@ export function registerAPIRoutes({
         return res.badRequest();
       }
 
-      const body = recursiveSortObjectByKeys(result);
-      return res.ok({ body });
+      return res.ok({ body: result });
     }
   );
 
@@ -170,16 +156,19 @@ export function registerAPIRoutes({
         ({ result } = await client.update(req.params.id, attributes, { references }));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound();
+          return res.notFound({
+            body: {
+              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
+            },
+          });
         }
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest();
+        return res.badRequest(e.message);
       }
 
-      const body = recursiveSortObjectByKeys(result);
-      return res.ok({ body });
+      return res.created({ body: result });
     }
   );
 
@@ -200,7 +189,6 @@ export function registerAPIRoutes({
       validate: {
         request: {
           query: schema.object({
-            kuery: schema.maybe(schema.string()),
             page: schema.number({ defaultValue: 1 }),
             perPage: schema.maybe(schema.number()),
           }),
@@ -217,19 +205,15 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      const { kuery, page, perPage: limit } = req.query;
+      const { page, perPage: limit } = req.query;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
       let result;
       try {
-        // TODO add kuery filtering
+        // TODO add filtering
         ({ result } = await client.search({ cursor: page.toString(), limit }));
       } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound();
-        }
-
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
@@ -238,7 +222,7 @@ export function registerAPIRoutes({
       }
 
       const body = {
-        items: result.hits.map((item) => recursiveSortObjectByKeys(item)),
+        items: result.hits,
         total: result.pagination.total,
       };
       return res.ok({ body });
@@ -281,18 +265,21 @@ export function registerAPIRoutes({
         ({ result } = await client.get(req.params.id));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound();
+          return res.notFound({
+            body: {
+              message: `A dashboard with saved object ID ${req.params.id}] was not found.`,
+            },
+          });
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return res.badRequest(e.message);
       }
 
-      const body = recursiveSortObjectByKeys(result);
-      return res.ok({ body });
+      return res.ok({ body: result });
     }
   );
 
@@ -326,7 +313,11 @@ export function registerAPIRoutes({
         await client.delete(req.params.id);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound();
+          return res.notFound({
+            body: {
+              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
+            },
+          });
         }
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
