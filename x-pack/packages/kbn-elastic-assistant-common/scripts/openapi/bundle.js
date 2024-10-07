@@ -29,6 +29,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security AI Assistant API',
+            'x-displayName': 'Security AI assistant',
             description: 'Manage and interact with Security Assistant resources.',
           },
         ],
@@ -52,6 +53,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security AI Assistant API',
+            'x-displayName': 'Security AI assistant',
             description: 'Manage and interact with Security Assistant resources.',
           },
         ],
