@@ -265,5 +265,12 @@ describe('esql query helpers', () => {
         getQueryColumnsFromESQLQuery('from a | where field > 1000 and abs(fieldb) < 20')
       ).toStrictEqual(['field', 'fieldb']);
     });
+
+    it('should return the rename columns', () => {
+      expect(getQueryColumnsFromESQLQuery('from a | rename field as fieldb')).toStrictEqual([
+        'field',
+        'fieldb',
+      ]);
+    });
   });
 });
