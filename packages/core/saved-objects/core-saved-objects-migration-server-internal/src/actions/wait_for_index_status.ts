@@ -59,12 +59,11 @@ export function waitForIndexStatus({
  *
  * A yellow index status means the index's primary shard was allocated but ES
  * wasn't able to allocate the replica. Thus a yellow index can be searched
- * and read from but indexing documents with `wait_for_active_shards='all'`
- * will fail.
+ * and read from but when indexing documents only the primary will be written.
  *
- * A green index status means the index's primary and replica shards has been
- * allocated so we can search, read and index documents with
- * `wait_for_active_shards='all'`.
+ * A green index status means the index's primary and replica shards have been
+ * allocated so we can search, read and index documents knowing the primary
+ * and replica should be written
  */
 export function waitForIndexStatus({
   client,
