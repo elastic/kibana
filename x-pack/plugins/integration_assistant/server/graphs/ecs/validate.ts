@@ -62,7 +62,7 @@ interface ECSFieldTarget {
  * @returns An ECSFieldTarget object if the conversion succeeded, otherwise null.
  */
 function asECSFieldTarget(value: any): ECSFieldTarget | null {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return null;
   }
 
