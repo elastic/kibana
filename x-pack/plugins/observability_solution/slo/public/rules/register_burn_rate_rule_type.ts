@@ -46,7 +46,7 @@ const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   }
 );
 
-export const registerBurnRateRuleType = async (
+export const registerBurnRateRuleType = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
   observabilityRuleTypeRegistry.register({

@@ -8,234 +8,16 @@
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-const TEST_DOC_COUNT = 100;
-const TIME_PICKER_FORMAT = 'MMM D, YYYY [@] HH:mm:ss.SSS';
-const timeSeriesMetrics: Record<string, 'gauge' | 'counter'> = {
-  bytes_gauge: 'gauge',
-  bytes_counter: 'counter',
-};
-const timeSeriesDimensions = ['request', 'url'];
-
-type TestDoc = Record<string, string | string[] | number | null | Record<string, unknown>>;
-
-const testDocTemplate: TestDoc = {
-  agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-  bytes: 6219,
-  clientip: '223.87.60.27',
-  extension: 'deb',
-  geo: {
-    srcdest: 'US:US',
-    src: 'US',
-    dest: 'US',
-    coordinates: { lat: 39.41042861, lon: -88.8454325 },
-  },
-  host: 'artifacts.elastic.co',
-  index: 'kibana_sample_data_logs',
-  ip: '223.87.60.27',
-  machine: { ram: 8589934592, os: 'win 8' },
-  memory: null,
-  message:
-    '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /elasticsearch/elasticsearch-6.3.2.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-  phpmemory: null,
-  referer: 'http://twitter.com/success/wendy-lawrence',
-  request: '/elasticsearch/elasticsearch-6.3.2.deb',
-  response: 200,
-  tags: ['success', 'info'],
-  '@timestamp': '2018-07-22T00:39:02.912Z',
-  url: 'https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb_1',
-  utc_time: '2018-07-22T00:39:02.912Z',
-  event: { dataset: 'sample_web_logs' },
-  bytes_gauge: 0,
-  bytes_counter: 0,
-};
-
-function getDataMapping(
-  { tsdb, removeTSDBFields }: { tsdb: boolean; removeTSDBFields?: boolean } = {
-    tsdb: false,
-  }
-): Record<string, MappingProperty> {
-  const dataStreamMapping: Record<string, MappingProperty> = {
-    '@timestamp': {
-      type: 'date',
-    },
-    agent: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    bytes: {
-      type: 'long',
-    },
-    bytes_counter: {
-      type: 'long',
-    },
-    bytes_gauge: {
-      type: 'long',
-    },
-    clientip: {
-      type: 'ip',
-    },
-    event: {
-      properties: {
-        dataset: {
-          type: 'keyword',
-        },
-      },
-    },
-    extension: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    geo: {
-      properties: {
-        coordinates: {
-          type: 'geo_point',
-        },
-        dest: {
-          type: 'keyword',
-        },
-        src: {
-          type: 'keyword',
-        },
-        srcdest: {
-          type: 'keyword',
-        },
-      },
-    },
-    host: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    index: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    ip: {
-      type: 'ip',
-    },
-    machine: {
-      properties: {
-        os: {
-          fields: {
-            keyword: {
-              ignore_above: 256,
-              type: 'keyword',
-            },
-          },
-          type: 'text',
-        },
-        ram: {
-          type: 'long',
-        },
-      },
-    },
-    memory: {
-      type: 'double',
-    },
-    message: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    phpmemory: {
-      type: 'long',
-    },
-    referer: {
-      type: 'keyword',
-    },
-    request: {
-      type: 'keyword',
-    },
-    response: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    tags: {
-      fields: {
-        keyword: {
-          ignore_above: 256,
-          type: 'keyword',
-        },
-      },
-      type: 'text',
-    },
-    timestamp: {
-      path: '@timestamp',
-      type: 'alias',
-    },
-    url: {
-      type: 'keyword',
-    },
-    utc_time: {
-      type: 'date',
-    },
-  };
-
-  if (tsdb) {
-    // augment the current mapping
-    for (const [fieldName, fieldMapping] of Object.entries(dataStreamMapping || {})) {
-      if (
-        timeSeriesMetrics[fieldName] &&
-        (fieldMapping.type === 'double' || fieldMapping.type === 'long')
-      ) {
-        fieldMapping.time_series_metric = timeSeriesMetrics[fieldName];
-      }
-
-      if (timeSeriesDimensions.includes(fieldName) && fieldMapping.type === 'keyword') {
-        fieldMapping.time_series_dimension = true;
-      }
-    }
-  } else if (removeTSDBFields) {
-    for (const fieldName of Object.keys(timeSeriesMetrics)) {
-      delete dataStreamMapping[fieldName];
-    }
-  }
-  return dataStreamMapping;
-}
-
-function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): number {
-  const indexes = Array(n)
-    .fill(1)
-    .map((_, i) => i);
-  let countSum = 0;
-  for (const index of indexes) {
-    if (bars?.[index]) {
-      countSum += bars[index].y;
-    }
-  }
-  return countSum;
-}
+import {
+  type ScenarioIndexes,
+  TEST_DOC_COUNT,
+  TIME_PICKER_FORMAT,
+  getDataMapping,
+  getDocsGenerator,
+  setupScenarioRunner,
+  sumFirstNValues,
+} from './tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
@@ -245,71 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const dataStreams = getService('dataStreams');
-  const elasticChart = getService('elasticChart');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
   const comboBox = getService('comboBox');
 
-  const createDocs = async (
-    esIndex: string,
-    { isStream, removeTSDBFields }: { isStream: boolean; removeTSDBFields?: boolean },
-    startTime: string
-  ) => {
-    log.info(
-      `Adding ${TEST_DOC_COUNT} to ${esIndex} with starting time from ${moment
-        .utc(startTime, TIME_PICKER_FORMAT)
-        .format(TIME_PICKER_FORMAT)} to ${moment
-        .utc(startTime, TIME_PICKER_FORMAT)
-        .add(2 * TEST_DOC_COUNT, 'seconds')
-        .format(TIME_PICKER_FORMAT)}`
-    );
-    const docs = Array<TestDoc>(TEST_DOC_COUNT)
-      .fill(testDocTemplate)
-      .map((templateDoc, i) => {
-        const timestamp = moment
-          .utc(startTime, TIME_PICKER_FORMAT)
-          .add(TEST_DOC_COUNT + i, 'seconds')
-          .format();
-        const doc: TestDoc = {
-          ...templateDoc,
-          '@timestamp': timestamp,
-          utc_time: timestamp,
-          bytes_gauge: Math.floor(Math.random() * 10000 * i),
-          bytes_counter: 5000,
-        };
-        if (removeTSDBFields) {
-          for (const field of Object.keys(timeSeriesMetrics)) {
-            delete doc[field];
-          }
-        }
-        return doc;
-      });
-
-    const result = await es.bulk(
-      {
-        index: esIndex,
-        body: docs.map((d) => `{"${isStream ? 'create' : 'index'}": {}}\n${JSON.stringify(d)}\n`),
-      },
-      { meta: true }
-    );
-
-    const res = result.body;
-
-    if (res.errors) {
-      const resultsWithErrors = res.items
-        .filter(({ index }) => index?.error)
-        .map(({ index }) => index?.error);
-      for (const error of resultsWithErrors) {
-        log.error(`Error: ${JSON.stringify(error)}`);
-      }
-      const [indexExists, dataStreamExists] = await Promise.all([
-        es.indices.exists({ index: esIndex }),
-        es.indices.getDataStream({ name: esIndex }),
-      ]);
-      log.debug(`Index exists: ${indexExists} - Data stream exists: ${dataStreamExists}`);
-    }
-    log.info(`Indexed ${res.items.length} test data docs.`);
-  };
+  const createDocs = getDocsGenerator(log, es, 'tsdb');
 
   describe('lens tsdb', function () {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
@@ -592,23 +314,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Scenarios with changing stream type', () => {
-      const now = moment().utc();
-      const fromMoment = now.clone().subtract(1, 'hour');
-      const toMoment = now.clone();
-      const fromTimeForScenarios = fromMoment.format(TIME_PICKER_FORMAT);
-      const toTimeForScenarios = toMoment.format(TIME_PICKER_FORMAT);
-
       const getScenarios = (
         initialIndex: string
       ): Array<{
         name: string;
-        indexes: Array<{
-          index: string;
-          create?: boolean;
-          downsample?: boolean;
-          tsdb?: boolean;
-          removeTSDBFields?: boolean;
-        }>;
+        indexes: ScenarioIndexes[];
       }> => [
         {
           name: 'Dataview with no additional stream/index',
@@ -625,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           name: 'Dataview with an additional downsampled TSDB stream',
           indexes: [
             { index: initialIndex },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
@@ -633,112 +343,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           indexes: [
             { index: initialIndex },
             { index: 'regular_index', create: true, removeTSDBFields: true },
-            { index: 'tsdb_index_2', create: true, tsdb: true, downsample: true },
+            { index: 'tsdb_index_2', create: true, mode: 'tsdb', downsample: true },
           ],
         },
         {
           name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],
+          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, mode: 'tsdb' }],
         },
       ];
 
-      function runTestsForEachScenario(
-        initialIndex: string,
-        testingFn: (
-          indexes: Array<{
-            index: string;
-            create?: boolean;
-            downsample?: boolean;
-            tsdb?: boolean;
-            removeTSDBFields?: boolean;
-          }>
-        ) => void
-      ): void {
-        for (const { name, indexes } of getScenarios(initialIndex)) {
-          describe(name, () => {
-            let dataViewName: string;
-            let downsampledTargetIndex: string = '';
-
-            before(async () => {
-              for (const { index, create, downsample, tsdb, removeTSDBFields } of indexes) {
-                if (create) {
-                  if (tsdb) {
-                    await dataStreams.createDataStream(
-                      index,
-                      getDataMapping({ tsdb, removeTSDBFields }),
-                      tsdb
-                    );
-                  } else {
-                    log.info(`creating a index "${index}" with mapping...`);
-                    await es.indices.create({
-                      index,
-                      mappings: {
-                        properties: getDataMapping({ tsdb: Boolean(tsdb), removeTSDBFields }),
-                      },
-                    });
-                  }
-                  // add data to the newly created index
-                  await createDocs(
-                    index,
-                    { isStream: Boolean(tsdb), removeTSDBFields },
-                    fromTimeForScenarios
-                  );
-                }
-                if (downsample) {
-                  downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(index, {
-                    isStream: Boolean(tsdb),
-                  });
-                }
-              }
-              dataViewName = `${indexes.map(({ index }) => index).join(',')}${
-                downsampledTargetIndex ? `,${downsampledTargetIndex}` : ''
-              }`;
-              log.info(`creating a data view for "${dataViewName}"...`);
-              await indexPatterns.create(
-                {
-                  title: dataViewName,
-                  timeFieldName: '@timestamp',
-                },
-                { override: true }
-              );
-              await common.navigateToApp('lens');
-              await elasticChart.setNewChartUiDebugFlag(true);
-              // go to the
-              await lens.goToTimeRange(
-                fromTimeForScenarios,
-                moment
-                  .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                  .add(2, 'hour')
-                  .format(TIME_PICKER_FORMAT) // consider also new documents
-              );
-            });
-
-            after(async () => {
-              for (const { index, create, tsdb } of indexes) {
-                if (create) {
-                  if (tsdb) {
-                    await dataStreams.deleteDataStream(index);
-                  } else {
-                    log.info(`deleting the index "${index}"...`);
-                    await es.indices.delete({
-                      index,
-                    });
-                  }
-                }
-                // no need to cleant he specific downsample index as everything linked to the stream
-                // is cleaned up automatically
-              }
-            });
-
-            beforeEach(async () => {
-              await lens.switchDataPanelIndexPattern(dataViewName);
-              await lens.removeLayer();
-            });
-
-            testingFn(indexes);
-          });
-        }
-      }
+      const { runTestsForEachScenario, toTimeForScenarios, fromTimeForScenarios } =
+        setupScenarioRunner(getService, getPageObjects, getScenarios);
 
       describe('Data-stream upgraded to TSDB scenarios', () => {
         const streamIndex = 'data_stream';
@@ -747,7 +362,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${streamIndex}" data stream...`);
-          await dataStreams.createDataStream(streamIndex, getDataMapping(), false);
+          await dataStreams.createDataStream(
+            streamIndex,
+            getDataMapping({ mode: 'tsdb' }),
+            undefined
+          );
 
           // add some data to the stream
           await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
@@ -759,8 +378,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           log.info(`Upgrade "${streamIndex}" stream to TSDB...`);
 
-          const tsdbMapping = getDataMapping({ tsdb: true });
-          await dataStreams.upgradeStreamToTSDB(streamIndex, tsdbMapping);
+          const tsdbMapping = getDataMapping({ mode: 'tsdb' });
+          await dataStreams.upgradeStream(streamIndex, tsdbMapping, 'tsdb');
           log.info(
             `Add more data to new "${streamConvertedToTsdbIndex}" dataView (now with TSDB backing index)...`
           );
@@ -772,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataStreams.deleteDataStream(streamIndex);
         });
 
-        runTestsForEachScenario(streamConvertedToTsdbIndex, (indexes) => {
+        runTestsForEachScenario(streamConvertedToTsdbIndex, 'tsdb', (indexes) => {
           it('should detect the data stream has now been upgraded to TSDB', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -850,7 +469,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${tsdbStream}" data stream...`);
-          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), true);
+          await dataStreams.createDataStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
 
           // add some data to the stream
           await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
@@ -864,7 +483,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
           );
 
-          await dataStreams.downgradeTSDBtoStream(tsdbStream, getDataMapping({ tsdb: true }));
+          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
           log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
           // add some more data when upgraded
           await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
@@ -874,7 +493,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataStreams.deleteDataStream(tsdbConvertedToStream);
         });
 
-        runTestsForEachScenario(tsdbConvertedToStream, (indexes) => {
+        runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
           it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -893,7 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
                 timeout: 500,
               })
-            ).to.eql(indexes.some(({ tsdb }) => tsdb));
+            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
             await lens.closeDimensionEditor();
           });
 

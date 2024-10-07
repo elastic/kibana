@@ -28,6 +28,7 @@ import {
   IndexPatternManagementSetupDependencies,
 } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
+import { DataViewMgmtService } from './data_view_management_service';
 
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
@@ -75,6 +76,15 @@ export async function mountManagementSection(
   }
 
   const deps: IndexPatternManagmentContext = {
+    dataViewMgmtService: new DataViewMgmtService({
+      services: {
+        dataViews,
+        application,
+        savedObjectsManagement,
+        uiSettings,
+      },
+      initialValues: {},
+    }),
     application,
     chrome,
     uiSettings,

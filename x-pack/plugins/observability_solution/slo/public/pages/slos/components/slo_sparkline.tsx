@@ -82,7 +82,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
         fit={Fit.Nearest}
         id={id}
         lineSeriesStyle={{
-          point: { visible: false },
+          point: { visible: 'never' },
         }}
         xAccessor={'key'}
         xScaleType={ScaleType.Time}
