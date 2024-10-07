@@ -126,6 +126,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
           await pageObjects.svlSearchIndexDetailPage.expectSettingsComponentIsVisible();
         });
+        it('should be able to delete document', async () => {
+          await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
+          await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
+          await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+        });
       });
 
       describe('page loading error', () => {
