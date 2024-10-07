@@ -61,7 +61,7 @@ describe('EditSpaceSettings', () => {
     deleteSpaceSpy.mockReset();
   });
 
-  const TestComponent: React.FC = ({ children }) => {
+  const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
       <IntlProvider locale="en">
         <EditSpaceProvider

@@ -12282,14 +12282,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionRendererComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12303,7 +12303,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12672,7 +12672,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -13588,7 +13588,7 @@
               "section": "def-public.ReactExpressionRendererProps",
               "text": "ReactExpressionRendererProps"
             },
-            ") => JSX.Element"
+            ") => React.JSX.Element"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -22577,7 +22577,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
@@ -38082,7 +38082,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
+          "\"text\" | \"size\" | \"color\" | \"y\" | \"x\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/pointseries.ts",
         "deprecated": false,
