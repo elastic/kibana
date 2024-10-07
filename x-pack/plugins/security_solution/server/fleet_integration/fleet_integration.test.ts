@@ -600,7 +600,29 @@ describe('ingest_integration tests ', () => {
         await expect(() =>
           callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
         ).rejects.toThrow(
-          'To modify protection updates, you must add at least Endpoint Complete to your project.'
+          'To modify protection updates, you must add Endpoint Complete to your project.'
+        );
+      });
+
+      it('should throw if endpointCustomNotification productFeature is disabled and user modifies popup.[protection].message', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_notification')
+        );
+        const callback = getPackagePolicyUpdateCallback(
+          logger,
+          licenseService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
+          cloudService,
+          esClient,
+          productFeaturesService
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.ransomware.message = 'foo';
+        await expect(() =>
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toThrow(
+          'To customize the user notification, you must add Endpoint Protection Complete to your project.'
         );
       });
 

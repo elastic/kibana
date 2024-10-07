@@ -6,7 +6,7 @@
   "plugin": {
     "id": "cloudChat",
     "server": true,
-    "browser": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "cloud_integrations",
