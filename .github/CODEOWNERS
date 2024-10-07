@@ -683,6 +683,7 @@ packages/presentation/presentation_containers @elastic/kibana-presentation
 src/plugins/presentation_panel @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
+x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
