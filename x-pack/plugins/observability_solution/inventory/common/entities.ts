@@ -79,6 +79,7 @@ interface BaseEntity {
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
   [ENTITY_IDENTITY_FIELDS]: string | string[];
+  alertsCount?: number;
 }
 
 /**

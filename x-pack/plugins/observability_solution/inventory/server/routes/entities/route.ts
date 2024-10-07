@@ -6,7 +6,6 @@
  */
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
-import { merge } from 'lodash';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { entityTypeRt } from '../../../common/entities';
@@ -16,6 +15,7 @@ import { getLatestEntities } from './get_latest_entities';
 import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import { joinByKey } from '../../../common/utils/join_by_key';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
@@ -80,7 +80,17 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       kuery,
     });
 
-    return { entities: merge(latestEntities, alerts) };
+    console.log('identityFieldsPerEntityType', identityFieldsPerEntityType.values());
+    console.log('alerts', alerts);
+    const joined = joinByKey(
+      [...latestEntities, ...alerts],
+      ['service.name', 'service.environment']
+    );
+
+    console.log('joined', joined);
+    return {
+      entities: joined,
+    };
   },
 });
 
