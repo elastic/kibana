@@ -39,6 +39,8 @@ import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
+import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { hasMetrics } from '../../utils/get_data_stream_types';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -53,6 +55,10 @@ export const Processes = () => {
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
+  const { dataStreams } = useAssetEntitySummary({
+    entityType: 'host',
+    entityId: asset.name,
+  });
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
@@ -135,7 +141,7 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
-  const showAddMetricsCallout = true && renderMode.mode === 'page'; // TODO integrate proper logic from #193701
+  const showAddMetricsCallout = !hasMetrics(dataStreams) && renderMode.mode === 'page';
   const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
 
   return (
