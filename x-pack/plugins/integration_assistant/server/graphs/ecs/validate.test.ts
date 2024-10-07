@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { findDuplicateFields, findInvalidEcsFields, processMapping } from './validate';
+import {
+  findDuplicateFields,
+  findInvalidEcsFields,
+  processMapping,
+  removeReservedFields,
+} from './validate';
 
 describe('Testing ecs handler', () => {
   it('processMapping()', async () => {
@@ -120,5 +125,52 @@ describe('findDuplicateFields', () => {
     expect(duplicates).toStrictEqual([
       "One or more samples have matching fields for ECS field 'event.action': teleport_log.audit.event, teleport_log.audit.uid",
     ]);
+  });
+});
+
+describe('removeReservedFields', () => {
+  it('should remove reserved fields from the mapping', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'event.category': 'Category',
+      'source.ip': 'IP',
+    };
+
+    const expectedMapping = {
+      'source.ip': 'IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(expectedMapping);
+  });
+
+  it('should return the same mapping if there are no reserved fields', () => {
+    const ecsMapping = {
+      'source.ip': 'Some IP',
+      'destination.ip': 'Another IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(ecsMapping);
+  });
+
+  it('should handle an empty mapping', () => {
+    const ecsMapping = {};
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
+  });
+
+  it('should not modify the original mapping object', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'source.ip': 'IP',
+    };
+
+    const ecsMappingCopy = { ...ecsMapping };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(ecsMapping).toEqual(ecsMappingCopy);
+    expect(ecsMapping).not.toEqual(result);
   });
 });
