@@ -6,25 +6,106 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { getDefinitionForEntityType } from '../definition';
-import { getFieldRetentionDefinition, getFieldRetentionPipelineSteps } from '../field_retention';
+import { getFieldRetentionDefinition, getFieldRetentionEnrichPolicyName } from '../field_retention';
+import type { FieldRetentionDefinition } from '../field_retention/field_retention_definitions';
+import {
+  debugDeepCopyContextStep,
+  getDotExpanderSteps,
+  getRemoveEmptyFieldSteps,
+  removeEntityDefinitionFieldsStep,
+  retentionDefinitionToIngestProcessorSteps,
+} from './ingest_processor_steps';
+import { getIdentityFieldForEntityType } from '../utils';
 
 const getPlatformPipelineId = (definition: ReturnType<typeof getDefinitionForEntityType>) => {
   return `${definition.id}-latest@platform`;
 };
+
+// the field that the enrich processor writes to
+export const ENRICH_FIELD = 'historical';
+
+/**
+ * Builds the ingest pipeline for the field retention policy.
+ * Broadly the pipeline enriches the entity with the field retention enrich policy,
+ * then applies the field retention policy to the entity fields, and finally removes
+ * the enrich field and any empty fields.
+ *
+ * While developing, be sure to set debugMode to true this will keep the enrich field
+ * and the context field in the document to help with debugging.
+ */
+const buildIngestPipeline = ({
+  fieldRetentionDefinition,
+  allEntityFields,
+  debugMode,
+  namespace,
+}: {
+  fieldRetentionDefinition: FieldRetentionDefinition;
+  allEntityFields: string[];
+  debugMode?: boolean;
+  namespace: string;
+}): IngestProcessorContainer[] => {
+  const enrichPolicyName = getFieldRetentionEnrichPolicyName(
+    namespace,
+    fieldRetentionDefinition.entityType
+  );
+  const { entityType, matchField } = fieldRetentionDefinition;
+  return [
+    ...(debugMode ? [debugDeepCopyContextStep()] : []),
+    {
+      enrich: {
+        policy_name: enrichPolicyName,
+        field: matchField,
+        target_field: ENRICH_FIELD,
+      },
+    },
+    {
+      set: {
+        field: '@timestamp',
+        value: '{{entity.lastSeenTimestamp}}',
+      },
+    },
+    {
+      set: {
+        field: 'entity.name',
+        value: `{{${getIdentityFieldForEntityType(entityType)}}}`,
+      },
+    },
+    ...getDotExpanderSteps(allEntityFields),
+    ...retentionDefinitionToIngestProcessorSteps(fieldRetentionDefinition, {
+      enrichField: ENRICH_FIELD,
+    }),
+    ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${entityType}.risk`]),
+    removeEntityDefinitionFieldsStep(),
+    ...(!debugMode
+      ? [
+          {
+            remove: {
+              ignore_failure: true,
+              field: ENRICH_FIELD,
+            },
+          },
+        ]
+      : []),
+  ];
+};
+
 export const createPlatformPipeline = async ({
   namespace,
   entityType,
   fieldHistoryLength,
   logger,
   esClient,
+  debugMode,
 }: {
   namespace: string;
   fieldHistoryLength: number;
   entityType: EntityType;
   logger: Logger;
   esClient: ElasticsearchClient;
+  debugMode?: boolean;
 }) => {
   const definition = getDefinitionForEntityType(entityType, namespace);
   const fieldRetentionDefinition = getFieldRetentionDefinition({
@@ -47,10 +128,11 @@ export const createPlatformPipeline = async ({
         managed: true,
       },
       description: `Ingest pipeline for entity defiinition ${definition.id}`,
-      processors: getFieldRetentionPipelineSteps({
+      processors: buildIngestPipeline({
         namespace,
         fieldRetentionDefinition,
         allEntityFields,
+        debugMode,
       }),
     },
   };
