@@ -19,6 +19,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -95,18 +96,18 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
 export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
   return (
     <div className="resultHeader">
-      <EuiText size="s">
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem>
-            <strong>{title}</strong>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        {!!metaData && (
+          <EuiFlexItem grow={false}>
+            <MetadataPopover {...metaData} />
           </EuiFlexItem>
-          {!!metaData && (
-            <EuiFlexItem grow={false}>
-              <MetadataPopover {...metaData} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiText>
+        )} 
+      </EuiFlexGroup>
     </div>
   );
 };

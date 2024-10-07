@@ -1243,6 +1243,7 @@
     "rison-node": "1.0.2",
     "rxjs": "^7.8.1",
     "safe-squel": "^5.12.5",
+    "sass-embedded-darwin-arm64": "^1.79.4",
     "seedrandom": "^3.0.5",
     "semver": "^7.6.3",
     "set-value": "^4.1.0",

@@ -67,7 +67,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const metaDataIcon = (
     <EuiButtonIcon
       display="empty"
-      size="xs"
+      size="s"
       iconType="iInCircle"
       color="primary"
       onClick={(e: React.MouseEvent<HTMLElement>) => {
@@ -201,12 +201,12 @@ export const RichResultHeader: React.FC<Props> = ({
                   <EuiFlexItem>
                     {onTitleClick ? (
                       <EuiLink onClick={onTitleClick} color="text">
-                        <EuiTitle size="xs">
+                        <EuiTitle size="s">
                           <h4>{title}</h4>
                         </EuiTitle>
                       </EuiLink>
                     ) : (
-                      <EuiTitle size="xs">
+                      <EuiTitle size="s">
                         <h4>{title}</h4>
                       </EuiTitle>
                     )}
