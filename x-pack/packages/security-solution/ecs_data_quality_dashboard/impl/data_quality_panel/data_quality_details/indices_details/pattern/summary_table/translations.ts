@@ -62,9 +62,9 @@ export const CHECK_INDEX = i18n.translate(
   }
 );
 
-export const VIEW_CHECK_HISTORY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.viewCheckHistory',
+export const VIEW_HISTORY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.viewHistory',
   {
-    defaultMessage: 'View check history',
+    defaultMessage: 'View history',
   }
 );
