@@ -130,13 +130,13 @@ export const getSummaryTableColumns = ({
         },
       },
       {
-        name: i18n.VIEW_CHECK_HISTORY,
+        name: i18n.VIEW_HISTORY,
         render: (item) => {
           return (
-            <EuiToolTip content={i18n.VIEW_CHECK_HISTORY}>
+            <EuiToolTip content={i18n.VIEW_HISTORY}>
               <EuiButtonIcon
                 iconType="clockCounter"
-                aria-label={i18n.VIEW_CHECK_HISTORY}
+                aria-label={i18n.VIEW_HISTORY}
                 onClick={() => onViewCheckHistoryAction(item.indexName)}
               />
             </EuiToolTip>
