@@ -1,5 +1,5 @@
 [[alert-action-settings-kb]]
-== Alerting and action settings in {kib}
+=== Alerting and action settings in {kib}
 ++++
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++

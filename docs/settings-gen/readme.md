@@ -78,5 +78,5 @@ groups:
         # type: static/dynamic
         # platforms:
         #   - cloud/serverless/self-managed
-        # example: example-setting-name.asciidoc
+        # example: example-{setting-name}.asciidoc
 ```
