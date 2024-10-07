@@ -205,13 +205,18 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
+        color: 'success',
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading;
         },
-        available: (item) =>
-          item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED,
+        available: (item) => {
+          return (
+            item.model_type === TRAINED_MODEL_TYPE.PYTORCH && item.state === MODEL_STATE.DOWNLOADED
+          );
+        },
         onClick: async (item) => {
           const modelDeploymentParams = await getUserInputModelDeploymentParams(
             item,
@@ -486,10 +491,16 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          return (
+          return model.state === MODEL_STATE.DOWNLOADING ? (
             <>
               {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
+                defaultMessage: 'Cancel',
+              })}
+            </>
+          ) : (
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete',
               })}
             </>
           );
@@ -497,27 +508,35 @@ export function useModelActions({
         description: (model: ModelItem) => {
           const hasDeployments = model.deployment_ids.length > 0;
           const { hasInferenceServices } = model;
-          return hasInferenceServices
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
-                {
-                  defaultMessage: 'Model is used by the _inference API',
-                }
-              )
-            : hasDeployments
-            ? i18n.translate(
-                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                {
-                  defaultMessage: 'Model has started deployments',
-                }
-              )
-            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                defaultMessage: 'Delete model',
-              });
+
+          if (model.state === MODEL_STATE.DOWNLOADING) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.cancelDownloadActionLabel', {
+              defaultMessage: 'Cancel download',
+            });
+          } else if (hasInferenceServices) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+              {
+                defaultMessage: 'Model is used by the _inference API',
+              }
+            );
+          } else if (hasDeployments) {
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+              {
+                defaultMessage: 'Model has started deployments',
+              }
+            );
+          } else {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+              defaultMessage: 'Delete model',
+            });
+          }
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        type: 'icon',
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,
         onClick: (model) => {
