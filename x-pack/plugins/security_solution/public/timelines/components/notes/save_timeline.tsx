@@ -39,7 +39,7 @@ export const SaveTimelineCallout = memo(() => {
   return (
     <EuiCallOut
       title={SAVE_TIMELINE_CALLOUT_TITLE}
-      color="warning"
+      color="danger"
       iconType="iInCircle"
       data-test-subj={SAVE_TIMELINE_CALLOUT_TEST_ID}
       css={css`
@@ -54,6 +54,7 @@ export const SaveTimelineCallout = memo(() => {
           <SaveTimelineButton
             timelineId={TimelineId.active}
             buttonText={SAVE_TIMELINE_BUTTON}
+            buttonColor="danger"
             data-test-subj={SAVE_TIMELINE_BUTTON_TEST_ID}
           />
         </EuiFlexItem>
