@@ -13,7 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
 
