@@ -17,6 +17,7 @@ import { EuiButtonIcon, EuiIcon, EuiIconTip, EuiInMemoryTable, EuiText, EuiToolT
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCurrentThemeVars } from '../../../contexts/kibana';
 
 function getColumns(viewForecast) {
   return [
@@ -76,15 +77,13 @@ function getColumns(viewForecast) {
 };
 
 export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   const getRowProps = (item) => {
     return {
       'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
       ...(item.forecast_id === selectedForecastId ? { style: {
-            backgroundColor: `${colors.lightShade}`,
+            backgroundColor: `${euiTheme.euiPanelBackgroundColorModifiers.primary}`,
           }} : {}),
     };
   };

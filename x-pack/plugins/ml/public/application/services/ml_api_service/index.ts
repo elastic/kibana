@@ -103,6 +103,10 @@ export interface GetModelSnapshotsResponse {
   model_snapshots: ModelSnapshot[];
 }
 
+export interface DeleteForecastResponse {
+  acknowledged: boolean;
+}
+
 export function mlApiProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
@@ -369,7 +373,7 @@ export function mlApiProvider(httpService: HttpService) {
     },
 
     deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string }) {
-      return httpService.http<any>({
+      return httpService.http<DeleteForecastResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_forecast/${forecastId}`,
         method: 'DELETE',
         version: '1',

@@ -385,7 +385,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_forecast/{forecastId}`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canForecastJob'],
+        tags: ['access:ml:canDeleteForecast'],
       },
       summary: 'Deletes specified forecast for specified job',
       description: 'Deletes a specified forecast for the specified anomaly detection job.',

@@ -63,7 +63,7 @@ const DeleteForecastConfirm = ({ onCancel, onConfirm }) => (
     <p>
       <FormattedMessage
         id="xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastConfirm.text"
-        defaultMessage="This will delete the forecast from the job permanently."
+        defaultMessage="This will permanently delete the forecast from the job."
       />
     </p>
   </EuiConfirmModal>
@@ -90,7 +90,7 @@ export class ForecastsTable extends Component {
 
   componentDidMount() {
     this.loadForecasts();
-    this.canDeleteJobForecast = checkPermission('canForecastJob');
+    this.canDeleteJobForecast = checkPermission('canDeleteForecast');
   }
 
   async loadForecasts() {
@@ -223,7 +223,7 @@ export class ForecastsTable extends Component {
         errorMessage: i18n.translate(
           'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastErrorMessage',
           {
-            defaultMessage: 'An error occurred deleting the forecast.',
+            defaultMessage: 'An error occurred when deleting the forecast.',
           }
         ),
       });
@@ -371,7 +371,7 @@ export class ForecastsTable extends Component {
         textOnly: true,
       },
       {
-        width: '70px',
+        width: '75px',
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.actionsLabel', {
           defaultMessage: 'Actions',
         }),
