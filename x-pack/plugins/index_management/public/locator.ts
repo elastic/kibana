@@ -7,7 +7,7 @@
 
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
-import { IMLocatorParams } from '@kbn/index-management-shared-types';
+import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { getDataStreamDetailsLink } from './application/services/routing';
 import { PLUGIN } from '../common/constants';
 
@@ -17,12 +17,12 @@ export interface IndexManagementLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class IndexManagementLocatorDefinition implements LocatorDefinition<IMLocatorParams> {
+export class IndexManagementLocatorDefinition implements LocatorDefinition<IndexManagementLocatorParams> {
   constructor(protected readonly deps: IndexManagementLocatorDefinitionDependencies) {}
 
   public readonly id = INDEX_MANAGEMENT_LOCATOR_ID;
 
-  public readonly getLocation = async (params: IMLocatorParams) => {
+  public readonly getLocation = async (params: IndexManagementLocatorParams) => {
     const location = await this.deps.managementAppLocator.getLocation({
       sectionId: 'data',
       appId: PLUGIN.ID,
