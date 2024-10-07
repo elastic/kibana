@@ -6,12 +6,14 @@
  */
 
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { alertOriginSchema } from '@kbn/investigation-shared';
-import { ALERT_RULE_CATEGORY } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_UUID,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useFetchAlert } from '../../../../hooks/use_fetch_alert';
 import { useInvestigation } from '../../contexts/investigation_context';
-import { useFetchAlert } from '../../hooks/use_fetch_alert';
 
 export function AlertDetailsButton() {
   const {
@@ -21,9 +23,7 @@ export function AlertDetailsButton() {
   } = useKibana();
   const { investigation } = useInvestigation();
 
-  const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
-  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
-  const { data: alertDetails } = useFetchAlert({ id: alertId });
+  const { data: alertDetails } = useFetchAlert({ investigation });
 
   if (!alertDetails) {
     return null;
@@ -33,7 +33,7 @@ export function AlertDetailsButton() {
       data-test-subj="investigationDetailsAlertLink"
       iconType="arrowLeft"
       size="xs"
-      href={basePath.prepend(`/app/observability/alerts/${alertId}`)}
+      href={basePath.prepend(`/app/observability/alerts/${alertDetails[ALERT_UUID]}`)}
     >
       <EuiText size="s">{`[Alert] ${alertDetails?.[ALERT_RULE_CATEGORY]} breached`}</EuiText>
     </EuiButtonEmpty>
