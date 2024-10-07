@@ -41,7 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `List agent binary download sources`,
       options: {
-        tags: ['oas_tag:Elastic Agent binary download sources'],
+        tags: ['oas-tag:Elastic Agent binary download sources'],
       },
     })
     .addVersion(
@@ -70,7 +70,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Get agent binary download source by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent binary download sources'],
+        tags: ['oas-tag:Elastic Agent binary download sources'],
       },
     })
     .addVersion(
@@ -99,7 +99,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Update agent binary download source by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent binary download sources'],
+        tags: ['oas-tag:Elastic Agent binary download sources'],
       },
     })
     .addVersion(
@@ -128,7 +128,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Create agent binary download source`,
       options: {
-        tags: ['oas_tag:Elastic Agent binary download sources'],
+        tags: ['oas-tag:Elastic Agent binary download sources'],
       },
     })
     .addVersion(
@@ -157,7 +157,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       description: `Delete agent binary download source by ID`,
       options: {
-        tags: ['oas_tag:Elastic Agent binary download sources'],
+        tags: ['oas-tag:Elastic Agent binary download sources'],
       },
     })
     .addVersion(
