@@ -11,7 +11,6 @@ import { Subject, first } from 'rxjs';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardApi, DashboardCreationOptions } from './types';
 import { initializeDashboard } from '../dashboard_container/embeddable/create/create_dashboard';
-import { startDiffingDashboardState } from '../dashboard_container/state/diffing/dashboard_diffing_integration';
 import { getDashboardApi } from './get_dashboard_api';
 
 export async function createDashboardApi({
@@ -59,9 +58,9 @@ export async function createDashboardApi({
   // --------------------------------------------------------------------------------------
   // Start the diffing integration after all other integrations are set up.
   // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardApi) => {
+  /*untilDashboardReady().then((dashboardApi) => {
     startDiffingDashboardState.bind(dashboardApi)(creationOptions);
-  });
+  });*/
 
   dashboardApiReady$.next(api);
   return { api, cleanup, internalApi };

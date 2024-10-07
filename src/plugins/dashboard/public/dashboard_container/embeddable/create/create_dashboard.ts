@@ -300,17 +300,17 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Start performance tracker
   // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) =>
+  /*untilDashboardReady().then((dashboardContainer) =>
     dashboardContainer.integrationSubscriptions.add(
       startQueryPerformanceTracking(dashboardContainer)
     )
-  );
+  );*/
 
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
   let initialSearchSessionId;
-  if (searchSessionSettings) {
+  /*if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
@@ -334,7 +334,7 @@ export const initializeDashboard = async ({
         creationOptions?.searchSessionSettings
       );
     });
-  }
+  }*/
 
   if (loadDashboardReturn.dashboardId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode

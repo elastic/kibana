@@ -67,13 +67,15 @@ export function DashboardRenderer({
           return;
         }
 
-        cleanupDashboardApi = results.cleanup;
-        setDashboardApi(results.api);
-        setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.({
+        const api = {
           ...results.api,
           reload$: results.internalApi.panelsReload$,
-        });
+        };
+
+        cleanupDashboardApi = results.cleanup;
+        setDashboardApi(api);
+        setDashboardInternalApi(results.internalApi);
+        onApiAvailable?.(api);
       })
       .catch((err) => {
         if (!canceled) setError(err);
@@ -108,7 +110,7 @@ export function DashboardRenderer({
       );
     }
 
-    return dashboardApi ? (
+    return dashboardApi && dashboardInternalApi ? (
       <ExitFullScreenButtonKibanaProvider
         coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
       >

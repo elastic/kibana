@@ -94,6 +94,7 @@ export function getDashboardApi({
         settingsManager,
         unifiedSearchManager,
       }),
+      controlGroupApi$,
       fullScreenMode$,
       getAppContext: () => {
         const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(
