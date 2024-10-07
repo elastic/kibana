@@ -17,7 +17,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
   ActionsClientSimpleChatModel,
-  ActionsClientGeminiChatModel,
+  ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
@@ -187,5 +187,5 @@ export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
     : llmType === 'bedrock' && bedrockChatEnabled
     ? ActionsClientBedrockChatModel
     : llmType === 'gemini' && bedrockChatEnabled
-    ? ActionsClientGeminiChatModel
+    ? ActionsClientChatVertexAI
     : ActionsClientSimpleChatModel;
