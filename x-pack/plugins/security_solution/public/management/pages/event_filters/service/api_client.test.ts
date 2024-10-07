@@ -27,7 +27,7 @@ describe('EventFiltersApiClient', () => {
   it('should call the SUGGESTIONS_INTERNAL_ROUTE with correct URL and body', async () => {
     await eventFiltersApiClient.getSuggestions({
       field: 'host.name',
-      value: 'test',
+      query: 'test',
     });
 
     expect(fakeHttpServices.post).toHaveBeenCalledWith(
@@ -36,7 +36,7 @@ describe('EventFiltersApiClient', () => {
         version: '1',
         body: JSON.stringify({
           field: 'host.name',
-          value: 'test',
+          query: 'test',
         }),
       }
     );
