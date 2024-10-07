@@ -8,6 +8,8 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
+  DegradedFieldAnalysis,
+  degradedFieldAnalysisRt,
   DegradedFieldValues,
   degradedFieldValuesRt,
   getDataStreamDegradedFieldsResponseRt,
@@ -32,7 +34,10 @@ import {
 } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
+import {
+  AnalyzeDegradedFieldsParams,
+  GetDataStreamIntegrationParams,
+} from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
@@ -166,5 +171,29 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     const integration = integrations.find((i) => i.name === integrationName);
 
     if (integration) return Integration.create(integration);
+  }
+
+  public async analyzeDegradedField({
+    dataStream,
+    degradedField,
+    lastBackingIndex,
+  }: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis> {
+    const response = await this.http
+      .get<DegradedFieldAnalysis>(
+        `/internal/dataset_quality/data_streams/${dataStream}/degraded_field/${degradedField}/analyze`,
+        { query: { lastBackingIndex } }
+      )
+      .catch((error) => {
+        throw new DatasetQualityError(
+          `Failed to analyze degraded field: ${degradedField} for datastream: ${dataStream}`,
+          error
+        );
+      });
+
+    return decodeOrThrow(
+      degradedFieldAnalysisRt,
+      (message: string) =>
+        new DatasetQualityError(`Failed to decode the analysis response: ${message}`)
+    )(response);
   }
 }
