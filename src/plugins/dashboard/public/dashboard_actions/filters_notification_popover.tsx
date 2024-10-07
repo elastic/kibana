@@ -69,13 +69,19 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         <EuiButtonIcon
           color="text"
           iconType={'filter'}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            api?.parentApi?.lockHoverActionsForId$.next(isPopoverOpen ? '' : api?.uuid);
+          }}
           data-test-subj={`embeddablePanelNotification-${api.uuid}`}
           aria-label={displayName}
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+        api.parentApi?.lockHoverActionsForId$.next('');
+      }}
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>

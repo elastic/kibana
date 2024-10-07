@@ -214,7 +214,7 @@
 
   &:hover .embPanel__hoverActionsWrapper,
   &:focus-within .embPanel__hoverActionsWrapper,
-  .embPanel__hoverActionsWrapper--openContextMenu {
+  .embPanel__hoverActionsWrapper--lockHoverActions {
     z-index: $euiZLevel9;
     top: -$euiSizeXL;
 

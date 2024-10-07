@@ -29,6 +29,7 @@ export function getDashboardApi(
   const fullScreenMode$ = new BehaviorSubject(false);
   const managed$ = new BehaviorSubject(initialComponentState.managed);
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialComponentState.lastSavedId);
+  const lockHoverActionsForId$ = new BehaviorSubject<string>('');
 
   const trackPanel = initializeTrackPanel(untilEmbeddableLoaded);
 
@@ -42,6 +43,7 @@ export function getDashboardApi(
     animatePanelTransforms$,
     fullScreenMode$,
     isEmbeddedExternally: initialComponentState.isEmbeddedExternally,
+    lockHoverActionsForId$,
     managed$,
     savedObjectId: savedObjectId$,
     setAnimatePanelTransforms: (animate: boolean) => animatePanelTransforms$.next(animate),

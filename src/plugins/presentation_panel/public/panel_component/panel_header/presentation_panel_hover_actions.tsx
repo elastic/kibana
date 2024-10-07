@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import React, {
   MouseEventHandler,
   ReactElement,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -167,22 +168,31 @@ export const PresentationPanelHoverActions = ({
     }
   };
 
-  const [defaultTitle, title, description, hidePanelTitle, parentHideTitle, parentViewMode] =
-    useBatchedOptionalPublishingSubjects(
-      api?.defaultPanelTitle,
-      api?.panelTitle,
-      api?.panelDescription,
-      api?.hidePanelTitle,
-      api?.parentApi?.hidePanelTitle,
+  const [
+    defaultTitle,
+    title,
+    description,
+    hidePanelTitle,
+    parentHideTitle,
+    parentViewMode,
+    parentLockHoverActionsForId,
+  ] = useBatchedOptionalPublishingSubjects(
+    api?.defaultPanelTitle,
+    api?.panelTitle,
+    api?.panelDescription,
+    api?.hidePanelTitle,
+    api?.parentApi?.hidePanelTitle,
+    /**
+     * View mode changes often have the biggest influence over which actions will be compatible,
+     * so we build and update all actions when the view mode changes. This is temporary, as these
+     * actions should eventually all be Frequent Compatibility Change Actions which can track their
+     * own dependencies.
+     */
+    getViewModeSubject(api ?? undefined),
+    api?.parentApi?.lockHoverActionsForId$
+  );
 
-      /**
-       * View mode changes often have the biggest influence over which actions will be compatible,
-       * so we build and update all actions when the view mode changes. This is temporary, as these
-       * actions should eventually all be Frequent Compatibility Change Actions which can track their
-       * own dependencies.
-       */
-      getViewModeSubject(api ?? undefined)
-    );
+  const lockHoverActions = parentLockHoverActionsForId === api?.uuid;
 
   const hideTitle = hidePanelTitle || parentHideTitle;
 
@@ -192,6 +202,11 @@ export const PresentationPanelHoverActions = ({
     () => QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'],
     [parentViewMode]
   );
+
+  const onClose = useCallback(() => {
+    setIsContextMenuOpen(false);
+    api?.parentApi?.lockHoverActionsForId$.next('');
+  }, [api]);
 
   useEffect(() => {
     if (!api) return;
@@ -308,7 +323,7 @@ export const PresentationPanelHoverActions = ({
           context: apiContext,
           trigger: contextMenuTrigger,
         })) as ActionWithContext[],
-        closeMenu: () => setIsContextMenuOpen(false),
+        closeMenu: onClose,
       });
       setContextMenuPanels(menuPanels);
       setShowNotification(contextMenuActions.some((action) => action.showNotification));
@@ -320,7 +335,15 @@ export const PresentationPanelHoverActions = ({
     return () => {
       canceled = true;
     };
-  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode, quickActionIds]);
+  }, [
+    actionPredicate,
+    api,
+    getActions,
+    isContextMenuOpen,
+    onClose,
+    parentViewMode,
+    quickActionIds,
+  ]);
 
   const quickActionElements = useMemo(() => {
     if (!api || quickActions.length < 1) return [];
@@ -400,7 +423,12 @@ export const PresentationPanelHoverActions = ({
       color="text"
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
-      onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
+      onClick={() => {
+        api?.parentApi?.lockHoverActionsForId$.next(
+          parentLockHoverActionsForId === api?.uuid ? undefined : api?.uuid
+        );
+        setIsContextMenuOpen(!isContextMenuOpen);
+      }}
       iconType="boxesVertical"
     />
   );
@@ -438,7 +466,7 @@ export const PresentationPanelHoverActions = ({
           ref={hoverActionsRef}
           css={css`anchorStyles`}
           className={classNames('embPanel__hoverActionsWrapper', {
-            'embPanel__hoverActionsWrapper--openContextMenu': isContextMenuOpen,
+            'embPanel__hoverActionsWrapper--lockHoverActions': lockHoverActions,
           })}
         >
           {viewMode === 'edit' && !combineHoverActions ? (
@@ -505,7 +533,7 @@ export const PresentationPanelHoverActions = ({
                 button={ContextMenuButton}
                 isOpen={isContextMenuOpen}
                 className={contextMenuClasses}
-                closePopover={() => setIsContextMenuOpen(false)}
+                closePopover={onClose}
                 data-test-subj={
                   isContextMenuOpen
                     ? 'embeddablePanelContextMenuOpen'
@@ -514,9 +542,7 @@ export const PresentationPanelHoverActions = ({
                 focusTrapProps={{
                   closeOnMouseup: true,
                   clickOutsideDisables: false,
-                  onClickOutside: (e) => {
-                    setIsContextMenuOpen(false);
-                  },
+                  onClickOutside: onClose,
                 }}
               >
                 <EuiContextMenu
