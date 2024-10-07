@@ -55,7 +55,7 @@ describe('CaseCustomFieldRt', () => {
       {
         key: 'date_custom_field_2',
         type: 'date',
-        value: '2024/09/30',
+        value: '2024-09-30',
       },
     ],
     [
@@ -112,7 +112,7 @@ describe('CaseCustomFieldRt', () => {
       value: 'hello',
     });
 
-    expect(PathReporter.report(query)[0]).toContain('Invalid value true supplied');
+    expect(PathReporter.report(query)[0]).toContain('hello is not a valid date.');
   });
 
   it('fails if date type has invalid date value', () => {

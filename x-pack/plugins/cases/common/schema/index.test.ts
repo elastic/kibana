@@ -330,25 +330,8 @@ describe('schema', () => {
       `);
     });
 
-    it('succeeds with correct format YYYY/MM/DD', () => {
-      expect(PathReporter.report(dateSchema().decode('2024/09/30'))).toMatchInlineSnapshot(`
-        Array [
-          "No errors!",
-        ]
-      `);
-    });
-
     it('succeeds with format YYYY-MM-DD-HH:MM:SS', () => {
       expect(PathReporter.report(dateSchema().decode('2024-10-01T15:11:48')))
-        .toMatchInlineSnapshot(`
-        Array [
-          "No errors!",
-        ]
-      `);
-    });
-
-    it('succeeds when format YYYY/MM/DD/HH:MM:SS', () => {
-      expect(PathReporter.report(dateSchema().decode('2024/10/01 15:11:48')))
         .toMatchInlineSnapshot(`
         Array [
           "No errors!",

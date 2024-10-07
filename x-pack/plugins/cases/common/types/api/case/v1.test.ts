@@ -149,6 +149,11 @@ describe('CasePostRequestRt', () => {
         type: CustomFieldTypes.TOGGLE,
         value: true,
       },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.DATE,
+        value: '2024-10-07',
+      },
     ],
   };
 
@@ -337,6 +342,23 @@ describe('CasePostRequestRt', () => {
         })
       )
     ).toContain('The value field cannot be an empty string.');
+  });
+
+  it('throws an error when a date customField is invalid', () => {
+    expect(
+      PathReporter.report(
+        CasePostRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'first_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: '202',
+            },
+          ],
+        })
+      )
+    ).toContain('202 is not a valid date.');
   });
 });
 
@@ -662,8 +684,13 @@ describe('CasePatchRequestRt', () => {
       },
       {
         key: 'second_custom_field_key',
-        type: 'toggle',
+        type: CustomFieldTypes.TOGGLE,
         value: true,
+      },
+      {
+        key: 'third_custom_field_key',
+        type: CustomFieldTypes.DATE,
+        value: '1970-01-01',
       },
     ],
   };
@@ -780,6 +807,23 @@ describe('CasePatchRequestRt', () => {
     ).toContain(
       `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
     );
+  });
+
+  it('throws an error when a date customField is invalid', () => {
+    expect(
+      PathReporter.report(
+        CasePatchRequestRt.decode({
+          ...defaultRequest,
+          customFields: [
+            {
+              key: 'third_custom_field_key',
+              type: CustomFieldTypes.DATE,
+              value: '-1',
+            },
+          ],
+        })
+      )
+    ).toContain('-1 is not a valid date.');
   });
 });
 

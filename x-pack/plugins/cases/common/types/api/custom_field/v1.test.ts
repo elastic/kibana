@@ -67,6 +67,19 @@ describe('Custom Fields', () => {
       });
     });
 
+    it('has expected attributes of date field in request', () => {
+      const newRequest = {
+        caseVersion: 'WzQ3LDFd',
+        value: '30-09-2024',
+      };
+      const query = CustomFieldPutRequestRt.decode(newRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: newRequest,
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = CustomFieldPutRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -98,6 +111,17 @@ describe('Custom Fields', () => {
           })
         )
       ).toContain('The value field cannot be an empty string.');
+    });
+
+    it('throws an error when a date customField is invalid', () => {
+      expect(
+        PathReporter.report(
+          CustomFieldPutRequestRt.decode({
+            caseVersion: 'WzQ3LDFd',
+            value: '13/13/2024',
+          })
+        )
+      ).toContain('13/13/2024 is not a valid date.');
     });
   });
 });

@@ -405,6 +405,18 @@ describe('configure', () => {
       ).toContain('Invalid value false supplied');
     });
 
+    it('defaultValue fails if not valid', () => {
+      expect(
+        PathReporter.report(
+          DateCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            required: true,
+            defaultValue: '2021-02-30',
+          })
+        )[0]
+      ).toContain('2021-02-30 is not a valid date.');
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = DateCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 

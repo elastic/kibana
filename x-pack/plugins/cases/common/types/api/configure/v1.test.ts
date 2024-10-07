@@ -533,12 +533,12 @@ describe('configure', () => {
     it('has expected attributes in request with defaultValue', () => {
       const query = DateCustomFieldConfigurationRt.decode({
         ...defaultRequest,
-        defaultValue: '05-30-2024',
+        defaultValue: '2024-05-13',
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, defaultValue: '05-30-2024' },
+        right: { ...defaultRequest, defaultValue: '2024-05-13' },
       });
     });
 
@@ -567,10 +567,10 @@ describe('configure', () => {
         PathReporter.report(
           DateCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            defaultValue: '32-09-2024',
+            defaultValue: '30-08-2020',
           })
         )[0]
-      ).toContain(`32-09-2024 is not a valid date.`);
+      ).toContain(`30-08-2020 is not a valid date.`);
     });
 
     it('throws an error if the default value is an empty string', () => {

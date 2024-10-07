@@ -88,6 +88,19 @@ export default ({ getService }: FtrProviderContext): void => {
             required: false,
             defaultValue: true,
           },
+          {
+            key: 'date_1',
+            label: 'date 1',
+            type: CustomFieldTypes.DATE,
+            required: false,
+            defaultValue: '2024-03-05',
+          },
+          {
+            key: 'date_2',
+            label: 'date 2',
+            type: CustomFieldTypes.DATE,
+            required: true,
+          },
         ],
       };
 
@@ -116,6 +129,12 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TOGGLE,
           required: false,
         },
+        {
+          key: 'date_field_1',
+          label: 'Date filed 1',
+          type: CustomFieldTypes.DATE,
+          required: true,
+        },
       ];
 
       const templates = [
@@ -134,6 +153,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: false,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'date_field_1',
+                value: '2024-02-28',
+                type: CustomFieldTypes.DATE,
               },
             ],
           },
@@ -160,6 +184,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: true,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'date_field_1',
+                value: '2020-03-08',
+                type: CustomFieldTypes.DATE,
               },
             ],
             connector: {
@@ -188,6 +217,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_field_1',
                 value: false,
                 type: CustomFieldTypes.TOGGLE,
+              },
+              {
+                key: 'date_field_1',
+                value: null,
+                type: CustomFieldTypes.DATE,
               },
             ],
           },
