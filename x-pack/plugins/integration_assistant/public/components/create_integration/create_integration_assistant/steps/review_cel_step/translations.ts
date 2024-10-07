@@ -11,7 +11,8 @@ export const TITLE = i18n.translate('xpack.integrationAssistant.step.review.titl
   defaultMessage: 'Review results',
 });
 export const DESCRIPTION = i18n.translate('xpack.integrationAssistant.step.review.description', {
-  defaultMessage: 'Review the generated CEL input configuration settings for your integration.',
+  defaultMessage:
+    'Review the generated CEL input configuration settings for your integration. These settings will be auto-populated into the integration configuration where editing will be possible.',
 });
 
 export const PROGRAM = i18n.translate('xpack.integrationAssistant.step.review.program', {

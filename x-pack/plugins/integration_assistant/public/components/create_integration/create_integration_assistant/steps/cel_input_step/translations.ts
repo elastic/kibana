@@ -14,21 +14,20 @@ export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStr
 export const CEL_INPUT_TITLE = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.dataStreamTitle',
   {
-    defaultMessage: 'Define CEL input configuration',
+    defaultMessage: 'Generate CEL input configuration',
   }
 );
 export const CEL_INPUT_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.dataStreamDescription',
   {
-    defaultMessage:
-      'OpenAPI specifications are analyzed and CEL configurations are automatically created',
+    defaultMessage: 'Upload an OpenAPI spec file to generate a configuration for the CEL input',
   }
 );
 
 export const API_DEFINITION_LABEL = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.apiDefinition.label',
   {
-    defaultMessage: 'API Definition',
+    defaultMessage: 'OpenAPI spec',
   }
 );
 
