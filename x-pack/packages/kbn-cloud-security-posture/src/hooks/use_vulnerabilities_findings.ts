@@ -14,19 +14,11 @@ import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CDR_VULNERABILITIES_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
-  MAX_FINDINGS_TO_LOAD,
-} from '@kbn/cloud-security-posture-common';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../../type';
 import { showErrorToast } from '../..';
-import {
-  getFindingsCountAggQueryVulnerabilities,
-  getVulnerabilitiesAggregationCount,
-} from '../utils/hooks_utils';
+import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
@@ -36,30 +28,6 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
-
-export const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
-  index: CDR_VULNERABILITIES_INDEX_PATTERN,
-  size: MAX_FINDINGS_TO_LOAD,
-  aggs: getFindingsCountAggQueryVulnerabilities(),
-  ignore_unavailable: true,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
-  },
-});
 
 export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
   const {

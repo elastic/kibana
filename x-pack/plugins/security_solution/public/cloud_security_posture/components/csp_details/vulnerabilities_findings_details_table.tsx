@@ -91,15 +91,13 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
     navToVulnerabilities({ [queryField]: name });
   };
 
-  const navToVulnerabilityByRuleAndResourceId = (
+  const navToVulnerabilityByVulnerabilityAndResourceId = (
     vulnerabilityId: string,
-    resourceId: string,
-    packageName: string
+    resourceId: string
   ) => {
     navToVulnerabilities({
       'vulnerability.id': vulnerabilityId,
       'resource.id': resourceId,
-      'package.name': packageName,
     });
   };
 
@@ -114,10 +112,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       ) => (
         <EuiLink
           onClick={() => {
-            navToVulnerabilityByRuleAndResourceId(
+            navToVulnerabilityByVulnerabilityAndResourceId(
               vulnerability?.id,
-              finding?.resource?.id || '',
-              vulnerability?.package?.name
+              finding?.resource?.id || ''
             );
           }}
         >
