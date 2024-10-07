@@ -6,12 +6,14 @@
  */
 
 import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createListenerMiddleware } from '@reduxjs/toolkit';
 
 import { i18n } from '@kbn/i18n';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
+
+export const AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS = 'aiops.logRateAnalysisResultColumns';
 
 export const commonColumns = {
   ['Log rate']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTitle', {
@@ -85,6 +87,25 @@ function getDefaultState(): LogRateAnalysisTableState {
   };
 }
 
+export function getPreloadedState(): LogRateAnalysisTableState {
+  const defaultState = getDefaultState();
+
+  const localStorageSkippedColumns = localStorage.getItem(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS);
+
+  if (localStorageSkippedColumns === null) {
+    return defaultState;
+  }
+
+  try {
+    defaultState.skippedColumns = JSON.parse(localStorageSkippedColumns);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to parse skipped columns from local storage:', err);
+  }
+
+  return defaultState;
+}
+
 export const logRateAnalysisTableSlice = createSlice({
   name: 'logRateAnalysisTable',
   initialState: getDefaultState(),
@@ -131,3 +152,21 @@ export const {
   setSelectedSignificantItem,
   setSkippedColumns,
 } = logRateAnalysisTableSlice.actions;
+
+// Create listener middleware
+export const localStorageListenerMiddleware = createListenerMiddleware();
+
+// Add a listener to save skippedColumns to localStorage whenever it changes
+localStorageListenerMiddleware.startListening({
+  actionCreator: setSkippedColumns,
+  effect: (action, listenerApi) => {
+    const state = listenerApi.getState() as { logRateAnalysisTable: LogRateAnalysisTableState };
+    try {
+      const serializedState = JSON.stringify(state.logRateAnalysisTable.skippedColumns);
+      localStorage.setItem(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS, serializedState);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to save state to localStorage:', err);
+    }
+  },
+});
