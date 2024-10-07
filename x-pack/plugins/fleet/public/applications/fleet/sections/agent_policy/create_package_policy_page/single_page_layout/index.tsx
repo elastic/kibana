@@ -350,7 +350,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
   const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
     setNewAgentPolicy,
@@ -374,7 +374,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            isAgentlessEnabled={
+              isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(agentPolicies[0])
+            }
           />
         </ExtensionWrapper>
       )
