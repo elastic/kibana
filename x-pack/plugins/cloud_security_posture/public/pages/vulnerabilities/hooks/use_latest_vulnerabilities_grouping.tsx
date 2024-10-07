@@ -14,7 +14,10 @@ import {
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
-import { LATEST_VULNERABILITIES_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
+import {
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  VULNERABILITIES_SEVERITY,
+} from '@kbn/cloud-security-posture-common';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
@@ -22,7 +25,6 @@ import {
   VULNERABILITY_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { VULNERABILITIES_SEVERITY } from '../../../../common/constants';
 import {
   VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
