@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ECS_FULL } from '../../../common/ecs';
+import { EcsFields, ECS_FULL } from '../../../common/ecs';
 import { mergeSamples } from '../../util/samples';
 import { ECS_RESERVED } from './constants';
 import type { EcsBaseNodeParams } from './types';
@@ -120,6 +120,15 @@ export function findDuplicateFields(prefixedSamples: string[], ecsMapping: AnyOb
     }
   }
   return results;
+}
+
+// Produces a version of ECS mapping without reserved fields.
+export function removeReservedFields(mapping: EcsFields): EcsFields {
+  const mappingCopy = { ...mapping };
+  for (const field of ECS_RESERVED) {
+    delete mappingCopy[field];
+  }
+  return mappingCopy;
 }
 
 // Function to find invalid ECS fields
