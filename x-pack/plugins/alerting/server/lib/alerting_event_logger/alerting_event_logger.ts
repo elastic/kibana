@@ -322,6 +322,16 @@ export class AlertingEventLogger {
     this.eventLogger.logEvent(executeTimeoutEvent);
   }
 
+  public logShutdown() {
+    if (!this.isInitialized || !this.context) {
+      throw new Error('AlertingEventLogger not initialized');
+    }
+
+    this.eventLogger.logEvent(
+      createSystemShutdownRecord(this.context, this.relatedSavedObjects, this.ruleData)
+    );
+  }
+
   public logAlert(alert: AlertOpts) {
     if (!this.isInitialized || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
@@ -480,6 +490,28 @@ export function createExecuteTimeoutRecord(
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.executeTimeout,
     message,
+    savedObjects,
+    ruleName: ruleData?.name,
+    ruleRevision: ruleData?.revision,
+  });
+}
+
+export function createSystemShutdownRecord(
+  context: ContextOpts,
+  savedObjects: SavedObjects[],
+  ruleData?: RuleContext
+) {
+  return createAlertEventLogRecordObject({
+    ruleId: ruleData?.id,
+    ruleType: ruleData?.type,
+    consumer: ruleData?.consumer,
+    namespace: context.namespace,
+    spaceId: context.spaceId,
+    executionId: context.executionId,
+    action: EVENT_LOG_ACTIONS.executeCanceled,
+    message: `rule: ${ruleData?.type.id}:${ruleData?.id}: '${
+      ruleData?.name ?? ''
+    }' execution cancelled due to system shutdown`,
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,

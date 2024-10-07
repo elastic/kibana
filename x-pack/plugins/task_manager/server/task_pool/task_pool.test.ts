@@ -6,7 +6,7 @@
  */
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
-import { TaskPool, TaskPoolRunResult } from './task_pool';
+import { TaskCancellationReason, TaskPool, TaskPoolRunResult } from './task_pool';
 import { resolvable, sleep } from '../test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
@@ -370,6 +370,46 @@ describe('TaskPool', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
       );
+    });
+
+    test('should cancel all running tasks when cancelRunningTasks is called', async () => {
+      const pool = new TaskPool({
+        capacity$: of(10),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
+
+      const cancelFn = jest.fn();
+
+      const promise = pool.run([
+        { ...mockTask(), cancel: cancelFn },
+        { ...mockTask(), cancel: cancelFn },
+        { ...mockTask(), cancel: cancelFn },
+      ]);
+      await Promise.resolve();
+      await pool.cancelRunningTasks(TaskCancellationReason.Shutdown);
+      await promise;
+
+      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenNthCalledWith(2, `Cancelling running tasks.`);
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        3,
+        `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
+      );
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        4,
+        `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
+      );
+      expect(logger.debug).toHaveBeenNthCalledWith(
+        5,
+        `Cancelling task TaskType \"shooooo\" due to reason: Shutdown.`
+      );
+
+      expect(cancelFn).toHaveBeenCalledTimes(3);
+      expect(cancelFn).toHaveBeenNthCalledWith(1, TaskCancellationReason.Shutdown);
+      expect(cancelFn).toHaveBeenNthCalledWith(2, TaskCancellationReason.Shutdown);
+      expect(cancelFn).toHaveBeenNthCalledWith(3, TaskCancellationReason.Shutdown);
     });
 
     test('calls to availableWorkers ensures we cancel expired tasks', async () => {

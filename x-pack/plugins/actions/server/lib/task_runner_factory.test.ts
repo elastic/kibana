@@ -32,6 +32,7 @@ import {
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { TaskCancellationReason } from '@kbn/task-manager-plugin/server/task_pool';
 
 const executeParamsFields = [
   'actionId',
@@ -447,7 +448,7 @@ describe('Task Runner Factory', () => {
     );
   });
 
-  test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
+  test('task runner should implement CancellableTask cancel method when task is cancelled', async () => {
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
       type: 'action_task_params',
@@ -469,14 +470,10 @@ describe('Task Runner Factory', () => {
       taskInstance: mockedTaskInstance,
     });
 
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
     expect(mockedActionExecutor.logCancellation.mock.calls[0][0].actionId).toBe('2');
 
     expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
-
-    expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
-      `Cancelling action task for action with id 2 - execution error due to timeout.`
-    );
   });
 
   test('cleanup runs successfully when action_task_params cleanup fails and logs the error', async () => {
@@ -1122,7 +1119,7 @@ describe('Task Runner Factory', () => {
       references: [],
     });
 
-    await taskRunner.cancel();
+    await taskRunner.cancel(TaskCancellationReason.Timeout);
 
     expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
