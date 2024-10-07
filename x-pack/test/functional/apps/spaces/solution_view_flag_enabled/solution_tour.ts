@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -15,12 +16,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const browser = getService('browser');
   const es = getService('es');
+  const log = getService('log');
 
   describe('space solution tour', () => {
     let version: string | undefined;
 
     const removeGlobalSettings = async () => {
       version = version ?? (await kibanaServer.version.get());
+
+      log.debug(`Deleting [config-global:${version}] doc from the .kibana index`);
 
       await es
         .delete(
@@ -42,15 +46,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('solution tour', () => {
-      let defaultSpace: any;
+      let _defaultSpace: any = {};
+
+      const updateSolutionDefaultSpace = async (solution: SolutionView) => {
+        log.debug(`Updating default space solution: [${solution}].`);
+
+        await spacesService.update('default', {
+          ..._defaultSpace,
+          solution,
+        });
+      };
 
       before(async () => {
-        defaultSpace = await spacesService.getSpace('default');
+        _defaultSpace = await spacesService.getSpace('default');
 
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
           shouldUseHashForSubUrl: false,
         });
+
         await PageObjects.common.sleep(1000); // wait to save the setting
+      });
+
+      afterEach(async () => {
+        await updateSolutionDefaultSpace('classic'); // revert to not impact future tests
       });
 
       it('does not show the solution tour for the classic space', async () => {
@@ -58,14 +76,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does show the solution tour if the default space has a solution set', async () => {
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'es', // set a solution
-        });
-
+        await updateSolutionDefaultSpace('es'); // set a solution
+        await PageObjects.common.sleep(500);
         await removeGlobalSettings(); // Make sure we start from a clean state
-
         await browser.refresh();
+
         await testSubjects.existOrFail('spaceSolutionTour', { timeout: 3000 });
 
         await testSubjects.click('closeTourBtn'); // close the tour
@@ -73,35 +88,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await browser.refresh();
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
-
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'classic', // revert to not impact future tests
-        });
       });
 
       it('does now show the solution tour after updating the default space from classic to solution', async () => {
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'es', // set a solution
-        });
-
+        await updateSolutionDefaultSpace('es'); // set a solution
+        await PageObjects.common.sleep(500);
         await browser.refresh();
 
         // The tour does not appear after refresh, even with the default space with a solution set
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
-
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'classic', // revert to not impact future tests
-        });
       });
 
       it('does now show the solution tour after deleting spaces and leave only the default', async () => {
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'es', // set a solution
-        });
+        await updateSolutionDefaultSpace('es'); // set a solution
 
         await spacesService.create({
           id: 'foo-space',
@@ -121,13 +120,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('foo-space');
         await browser.refresh();
 
-        // The tour does not appear after refresh, even with 1 space with a solution set
+        // The tour still does not appear after refresh, even with 1 space with a solution set
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
-
-        await spacesService.update('default', {
-          ...defaultSpace,
-          solution: 'classic', // revert to not impact future tests
-        });
       });
     });
   });
