@@ -27,7 +27,7 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 
 This page summarizes all breaking changes and deprecation notices introduced to {kib} version 8 since 8.0. Review these changes before upgrading Kibana to mitigate the impact to your application.
 
-NOTE: For the complete Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+For Elastic Security release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [float]
 === Breaking changes
@@ -62,10 +62,10 @@ In 8.8.0 and later, an error appears when you use the project monitor API.
 [%collapsible]
 ====
 *Details* +
-The `api/fleet/current_upgrades` endpoint has been removed. For more information, refer to {kibana-pull}147616[#147616].
+The `/api/fleet/current_upgrades` endpoint has been removed. For more information, refer to {kibana-pull}147616[#147616].
 
 *Impact* +
-When you upgrade to 8.7.0, use the `/action_status` endpoint.
+When you upgrade to 8.7.0, use the `api/fleet/agents/action_status` endpoint.
 ====
 
 [discrete]
@@ -320,7 +320,7 @@ Integration content installed by {fleet} is no longer editable. This content is 
 
 When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies.
 
-Managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
+For managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
 
 For more information, refer to ({kibana-pull}172393[#172393]).
 ====
@@ -352,12 +352,12 @@ The agent policy saved object no longer includes the `package_policies` field.
 [%collapsible]
 ====
 *Details* +
-When you configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI.
+When you configure `xpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI.
 
 For more information, refer to {kibana-pull}135669[#135669].
 
 *Impact* +
-To configure `setxpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
+To configure `xpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
 ====
 
 [discrete]
@@ -432,8 +432,7 @@ The deprecation notice for `server.cors` has changed from `level:critical` to `l
 
 The following settings have changed:
 
-* The `xpack.banners.placement` value has been renamed
-* The `newsfeed.defaultLanguage` newsfeed item retrieval method and default language has changed
+* The `xpack.banners.placement` value of `header` has been renamed to `top`
 
 Support for the following configuration settings has been removed:
 
@@ -525,7 +524,7 @@ To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to 
 [%collapsible]
 ====
 *Details* +
-Some of the `so/server/es` settings have been removed. If your configuration uses the following settings, {kib} fails to start:
+Some of the `savedObjects`, `server`, and `elasticsearch` settings have been removed. If your configuration uses the following settings, {kib} fails to start:
 
 * `savedObjects.indexCheckTimeout`
 * `server.xsrf.token`
@@ -598,17 +597,6 @@ The deprecated `courier:batchSearches` setting in *Advanced Settings* has been r
 When you upgrade, the `courier:batchSearches` setting will no longer be available.
 ====
 
-[discrete]
-[[breaking-108111]]
-.[General settings] Removed `xpack.task_manager.index` setting. (8.0)
-[%collapsible]
-====
-*Details* +
-The deprecated `xpack.task_manager.index` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}108111[#108111].
-
-*Impact* +
-When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
-====
 
 [discrete]
 [[breaking-106061]]
@@ -619,7 +607,7 @@ When you upgrade, remove `xpack.task_manager.index` from your kibana.yml file.
 The default values for the session timeout `xpack.security.session.{lifespan|idleTimeout}` settings have changed. For more information, refer to {kibana-pull}106061[#106061]
 
 *Impact* +
-Use the following default values:
+The new default values are as follows:
 
 * `xpack.security.session.idleTimeout: 3d`
 * `xpack.security.session.lifespan: 30d`
@@ -752,7 +740,7 @@ This impacts user roles that have *Privileges for all features* set to *All*. Af
 Unknown saved object types now cause {kib} migrations to fail. For more information, refer to {kibana-issue}107678[#107678].
 
 *Impact* +
-To complete the migration, re enable plugins or delete documents from the index in the previous version.
+To complete the migration, re-enable plugins or delete documents from the index in the previous version.
 ====
 
 [discrete]
