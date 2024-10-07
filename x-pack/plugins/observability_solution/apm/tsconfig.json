@@ -128,6 +128,7 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/router-utils",
     "@kbn/react-hooks",
+    "@kbn/alerting-comparators",
   ],
   "exclude": ["target/**/*"]
 }

@@ -18,16 +18,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import type { EntityType } from '../../../common/entities';
 import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
-import type { APIReturnType } from '../../api';
-import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
+} from '@kbn/observability-shared-plugin/common';
+import { APIReturnType } from '../../api';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
 import { EntityName } from './entity_name';
+import { EntityType } from '../../../common/entities';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
 type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
@@ -147,7 +147,7 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
-          const entityType = entity[columnEntityTableId] as EntityType;
+          const entityType = entity[columnEntityTableId];
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
