@@ -21,7 +21,7 @@ import {
   commonColumns,
   significantItemColumns,
   setSkippedColumns,
-  type LogRateAnalysisResultsTableColumnNames,
+  type LogRateAnalysisResultsTableColumnName,
 } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_table_slice';
 
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
@@ -116,7 +116,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
     dispatch(clearAllRowState());
   };
 
-  const onVisibleColumnsChange = (columns: LogRateAnalysisResultsTableColumnNames[]) => {
+  const onVisibleColumnsChange = (columns: LogRateAnalysisResultsTableColumnName[]) => {
     dispatch(setSkippedColumns(columns));
   };
 
