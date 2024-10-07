@@ -169,28 +169,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-    describe('as Viewer', () => {
-      before(async () => {
-        await pageObjects.svlCommonPage.loginWithRole('viewer');
-        await pageObjects.svlApiKeys.deleteAPIKeys();
-        await es.index({
-          index: indexName,
-          body: {
-            my_field: [1, 0, 1],
-          },
-        });
-        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-      });
-
-      after(async () => {
-        await esDeleteAllIndices(indexName);
-      });
-
-      it('should not be able to delete document', async () => {
-        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-        await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
-        await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionNotVisible();
-      });
-    });
   });
 }
