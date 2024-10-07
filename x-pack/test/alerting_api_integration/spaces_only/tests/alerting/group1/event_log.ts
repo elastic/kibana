@@ -1197,7 +1197,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '1s' },
-                throttle: '1s',
+                notify_when: 'onActiveAlert',
                 params: {
                   pattern,
                 },

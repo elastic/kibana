@@ -61,6 +61,9 @@ export class ESTestIndexTool {
               group: {
                 type: 'keyword',
               },
+              '@timestamp': {
+                type: 'date',
+              },
               host: {
                 properties: {
                   hostname: {
@@ -109,6 +112,7 @@ export class ESTestIndexTool {
   async search(source: string, reference?: string) {
     const body = reference
       ? {
+          sort: [{ '@timestamp': 'asc' }],
           query: {
             bool: {
               must: [
@@ -127,6 +131,7 @@ export class ESTestIndexTool {
           },
         }
       : {
+          sort: [{ '@timestamp': 'asc' }],
           query: {
             term: {
               source,
