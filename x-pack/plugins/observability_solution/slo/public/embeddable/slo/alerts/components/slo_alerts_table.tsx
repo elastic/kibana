@@ -37,7 +37,7 @@ const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
       {
         defaultMessage: 'Status',
       }
@@ -48,7 +48,7 @@ const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
+      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.durationColumnDescription',
       {
         defaultMessage: 'Duration',
       }
@@ -59,7 +59,7 @@ const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
+      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.sloColumnDescription',
       {
         defaultMessage: 'Rule name',
       }
@@ -70,7 +70,7 @@ const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate(
-      'xpack.slo.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
+      'xpack.slo.sloAlertsEmbeddable.alertsTGrid.reasonColumnDescription',
       {
         defaultMessage: 'Reason',
       }
