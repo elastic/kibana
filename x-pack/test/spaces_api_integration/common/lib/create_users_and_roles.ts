@@ -185,6 +185,30 @@ export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent)
     .expect(204);
 
   await supertest
+    .put('/api/security/role/kibana_rbac_space_3_all_user')
+    .send({
+      kibana: [
+        {
+          base: ['all'],
+          spaces: ['space_3'],
+        },
+      ],
+    })
+    .expect(204);
+
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_3_read_user')
+    .send({
+      kibana: [
+        {
+          base: ['read'],
+          spaces: ['space_3'],
+        },
+      ],
+    })
+    .expect(204);
+
+  await supertest
     .put('/api/security/role/kibana_rbac_default_space_saved_objects_all_user')
     .send({
       kibana: [
@@ -341,6 +365,26 @@ export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent)
       roles: ['kibana_rbac_space_1_read_user'],
       full_name: 'a kibana rbac space 1 read-only user',
       email: 'a_kibana_rbac_space_1_readonly_user@elastic.co',
+    },
+  });
+
+  await es.security.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER.password,
+      roles: ['kibana_rbac_space_3_all_user'],
+      full_name: 'a kibana rbac space 3 all user',
+      email: 'a_kibana_rbac_space_3_all_user@elastic.co',
+    },
+  });
+
+  await es.security.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_SPACE_3_READ_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_SPACE_3_READ_USER.password,
+      roles: ['kibana_rbac_space_3_read_user'],
+      full_name: 'a kibana rbac space 3 read-only user',
+      email: 'a_kibana_rbac_space_3_readonly_user@elastic.co',
     },
   });
 
