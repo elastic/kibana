@@ -29,12 +29,18 @@ import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
+import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { hasMetrics } from '../../utils/get_data_stream_types';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => {
     const { euiTheme } = useEuiTheme();
     const { asset, renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
+    const { dataStreams } = useAssetEntitySummary({
+      entityType: asset.type,
+      entityId: asset.type === 'host' ? asset.name : asset.id,
+    });
 
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const initialScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -114,7 +120,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     const quickAccessItems = [...quickAccessItemsRef.current];
 
-    const showAddMetricsCallout = true && renderMode.mode === 'page'; // TODO integrate proper logic from #193701
+    const showAddMetricsCallout = !hasMetrics(dataStreams) && renderMode.mode === 'page';
     const addMetricsCalloutId: AddMetricsCalloutKey =
       asset.type === 'host' ? 'hostMetrics' : 'containerMetrics';
 
