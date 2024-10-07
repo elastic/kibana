@@ -322,24 +322,29 @@ export function LensEditConfigurationFlyout({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
-      const attrs = await getSuggestions(
-        q,
-        startDependencies,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        setErrors,
-        abortController,
-        setDataGridAttrs
-      );
+      // do not run the suggestions if the query is the same as the previous one
+      const attrs = isEqual(q, prevQuery.current)
+        ? attributes
+        : await getSuggestions(
+            q,
+            startDependencies,
+            datasourceMap,
+            visualizationMap,
+            adHocDataViews,
+            setErrors,
+            abortController,
+            setDataGridAttrs
+          );
       if (attrs) {
         setCurrentAttributes?.(attrs);
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
     [
+      attributes,
       startDependencies,
       datasourceMap,
       visualizationMap,
@@ -481,7 +486,6 @@ export function LensEditConfigurationFlyout({
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
-                  prevQuery.current = q;
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
