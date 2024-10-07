@@ -71,7 +71,7 @@ export class EntityStoreDataClient {
     assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-    const { entityClient, logger } = this.options;
+    const { entityClient, logger, esClient, namespace } = this.options;
     const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
 
     if (requiresMigration) {
@@ -80,7 +80,7 @@ export class EntityStoreDataClient {
       );
     }
 
-    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
+    const definition = getDefinitionForEntityType(entityType, namespace);
 
     logger.info(`Initializing entity store for ${entityType}`);
 
@@ -112,24 +112,28 @@ export class EntityStoreDataClient {
     debugLog(`Created entity index component template`);
     await createEntityIndex({
       entityType,
-      esClient: this.options.esClient,
-      namespace: this.options.namespace,
+      esClient,
+      namespace,
       logger,
     });
     debugLog(`Created entity index`);
 
     // we must create and execute the enrich policy before the pipeline is created
     // this is because the pipeline will fail if the enrich index does not exist
-    await this.createFieldRetentionEnrichPolicy(entityType);
+    await createFieldRetentionEnrichPolicy({
+      entityType,
+      esClient,
+      namespace,
+    });
     debugLog(`Created field retention enrich policy`);
     await this.executeFieldRetentionEnrichPolicy(entityType);
     debugLog(`Executed field retention enrich policy`);
     await createPlatformPipeline({
       entityType,
       fieldHistoryLength,
-      namespace: this.options.namespace,
+      namespace,
       logger,
-      esClient: this.options.esClient,
+      esClient,
     });
     debugLog(`Created @platform pipeline`);
 
@@ -139,7 +143,7 @@ export class EntityStoreDataClient {
 
     // the task will execute the enrich policy on a schedule
     await startEntityStoreFieldRetentionEnrichTask({
-      namespace: this.options.namespace,
+      namespace,
       logger,
       taskManager,
     });
@@ -171,22 +175,6 @@ export class EntityStoreDataClient {
       );
       throw e;
     }
-  }
-
-  private async createFieldRetentionEnrichPolicy(entityType: EntityType) {
-    return createFieldRetentionEnrichPolicy({
-      namespace: this.options.namespace,
-      esClient: this.options.esClient,
-      entityType,
-    });
-  }
-
-  private async deleteFieldRetentionEnrichPolicy(entityType: EntityType) {
-    return deleteFieldRetentionEnrichPolicy({
-      namespace: this.options.namespace,
-      esClient: this.options.esClient,
-      entityType,
-    });
   }
 
   private async createEntityIndexComponentTemplate(entityType: EntityType) {
@@ -261,34 +249,39 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     deleteData: boolean
   ) {
-    const { id } = getDefinitionForEntityType(entityType, this.options.namespace);
+    const { namespace, logger, esClient, entityClient } = this.options;
+    const { id } = getDefinitionForEntityType(entityType, namespace);
 
-    this.options.logger.info(`Deleting entity store for ${entityType}`);
+    logger.info(`Deleting entity store for ${entityType}`);
     try {
-      await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
+      await entityClient.deleteEntityDefinition({ id, deleteData });
       await this.deleteEntityIndexComponentTemplate(entityType);
       await deletePlatformPipeline({
         entityType,
-        namespace: this.options.namespace,
-        logger: this.options.logger,
-        esClient: this.options.esClient,
+        namespace,
+        logger,
+        esClient,
       });
-      await this.deleteFieldRetentionEnrichPolicy(entityType);
+      await deleteFieldRetentionEnrichPolicy({
+        entityType,
+        namespace,
+        esClient,
+      });
 
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
-          esClient: this.options.esClient,
-          namespace: this.options.namespace,
-          logger: this.options.logger,
+          esClient,
+          namespace,
+          logger,
         });
       }
       // if the last engine then stop the task
       const { engines } = await this.engineClient.list();
       if (engines.length === 0) {
         await removeEntityStoreFieldRetentionEnrichTask({
-          namespace: this.options.namespace,
-          logger: this.options.logger,
+          namespace,
+          logger,
           taskManager,
         });
       }
@@ -297,7 +290,7 @@ export class EntityStoreDataClient {
 
       return { deleted: true };
     } catch (e) {
-      this.options.logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
+      logger.error(`Error deleting entity store for ${entityType}: ${e.message}`);
       // TODO: should we set the engine status to error here?
       throw e;
     }
