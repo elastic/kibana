@@ -19,6 +19,7 @@ import {
   ENTITY_ID,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
+  ENTITY_IDENTITY_FIELDS,
 } from './es_fields/entities';
 
 export const entityTypeRt = t.union([
@@ -77,6 +78,7 @@ interface BaseEntity {
   [ENTITY_TYPE]: EntityType;
   [ENTITY_DISPLAY_NAME]: string;
   [ENTITY_DEFINITION_ID]: string;
+  [ENTITY_IDENTITY_FIELDS]: string | string[];
 }
 
 /**

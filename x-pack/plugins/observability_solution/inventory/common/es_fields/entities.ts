@@ -10,3 +10,4 @@ export const ENTITY_ID = 'entity.id';
 export const ENTITY_TYPE = 'entity.type';
 export const ENTITY_DISPLAY_NAME = 'entity.displayName';
 export const ENTITY_DEFINITION_ID = 'entity.definitionId';
+export const ENTITY_IDENTITY_FIELDS = 'entity.identityFields';

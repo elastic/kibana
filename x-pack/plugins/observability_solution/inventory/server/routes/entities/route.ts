@@ -6,12 +6,16 @@
  */
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { jsonRt } from '@kbn/io-ts-utils';
+import { merge } from 'lodash';
 import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
 import * as t from 'io-ts';
 import { entityTypeRt } from '../../../common/entities';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityTypes } from './get_entity_types';
 import { getLatestEntities } from './get_latest_entities';
+import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
+import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
+import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
@@ -48,7 +52,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   options: {
     tags: ['access:inventory'],
   },
-  handler: async ({ params, context, logger }) => {
+  handler: async ({ params, context, logger, plugins, request }) => {
     const coreContext = await context.core;
     const inventoryEsClient = createObservabilityEsClient({
       client: coreContext.elasticsearch.client.asCurrentUser,
@@ -58,6 +62,8 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
 
     const { sortDirection, sortField, entityTypes, kuery } = params.query;
 
+    const alertsClient = await createAlertsClient({ plugins, request });
+
     const latestEntities = await getLatestEntities({
       inventoryEsClient,
       sortDirection,
@@ -66,7 +72,15 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       kuery,
     });
 
-    return { entities: latestEntities };
+    const identityFieldsPerEntityType = getIdentityFieldsPerEntityType(latestEntities);
+
+    const alerts = await getLatestEntitiesAlerts({
+      identityFieldsPerEntityType,
+      alertsClient,
+      kuery,
+    });
+
+    return { entities: merge(latestEntities, alerts) };
   },
 });
 
