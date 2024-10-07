@@ -144,11 +144,11 @@ const keyLength = 64;
 const saltLength = 16;
 
 // N=2^14 (16 MiB), r=8 (1024 bytes), p=5
-const scryptParams = {
-  cost: 16384,
-  blockSize: 8,
-  parallelization: 5,
-};
+// const scryptParams = {
+//   cost: 16384,
+//   blockSize: 8,
+//   parallelization: 5,
+// };
 
 export async function hashSecret(secret: string) {
   return new Promise((resolve, reject) => {
