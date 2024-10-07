@@ -14,6 +14,8 @@ import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+//@ts-expect-error
+import nodeLibsBrowser from 'node-libs-browser';
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
@@ -147,9 +149,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
       fallback: {
-        constants: require.resolve('constants-browserify'),
-        stream: require.resolve('stream-browserify'),
-        timers: require.resolve('timers-browserify'),
+        constants: nodeLibsBrowser.path,
+        stream: nodeLibsBrowser.path,
+        timers: nodeLibsBrowser.path,
       },
     },
     stats: 'errors-only',

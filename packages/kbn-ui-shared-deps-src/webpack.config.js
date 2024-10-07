@@ -13,6 +13,8 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
+//@ts-expect-error
+const nodeLibsBrowser = require('node-libs-browser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
@@ -118,10 +120,10 @@ module.exports = {
       'scheduler/tracing': 'scheduler/tracing-profiling',
     },
     fallback: {
-      buffer: require.resolve('buffer/'),
+      buffer: nodeLibsBrowser.buffer,
       child_process: false,
       fs: false,
-      process: require.resolve('process/browser'),
+      process: nodeLibsBrowser.process,
     },
   },
 
@@ -141,8 +143,8 @@ module.exports = {
 
   plugins: [
     new webpack.ProvidePlugin({
-      Buffer: [require.resolve('buffer/'), 'Buffer'],
-      process: require.resolve('process/browser'),
+      Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+      process: nodeLibsBrowser.process,
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',

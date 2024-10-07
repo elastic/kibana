@@ -9,6 +9,8 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+//@ts-expect-error
+const nodeLibsBrowser = require('node-libs-browser');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -145,10 +147,10 @@ module.exports = (_, argv) => {
       // mainFields: ['browser', 'main'],
       // conditionNames: ['require', 'default', 'node', 'module', 'import'],
       fallback: {
-        buffer: require.resolve('buffer/'),
+        buffer: nodeLibsBrowser.buffer,
         child_process: false,
         fs: false,
-        process: require.resolve('process/browser'),
+        process: nodeLibsBrowser.process,
       },
     },
 
@@ -168,8 +170,8 @@ module.exports = (_, argv) => {
 
     plugins: [
       new webpack.ProvidePlugin({
-        Buffer: [require.resolve('buffer/'), 'Buffer'],
-        process: require.resolve('process/browser'),
+        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+        process: nodeLibsBrowser.process,
       }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,

@@ -11,6 +11,8 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
+//@ts-expect-error
+import nodeLibsBrowser from 'node-libs-browser';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -86,8 +88,8 @@ export function getWebpackConfig(
 
     plugins: [
       new webpack.ProvidePlugin({
-        Buffer: [require.resolve('buffer/'), 'Buffer'],
-        process: require.resolve('process/browser'),
+        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+        process: nodeLibsBrowser.process,
       }),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
@@ -314,15 +316,15 @@ export function getWebpackConfig(
         fs: false,
       },
       fallback: {
-        buffer: require.resolve('buffer/'),
+        buffer: nodeLibsBrowser.buffer,
         child_process: false,
-        crypto: require.resolve('crypto-browserify'),
+        crypto: nodeLibsBrowser.crypto,
         fs: false,
-        os: require.resolve('os-browserify/browser'),
-        path: require.resolve('path-browserify'),
-        process: require.resolve('process/browser'),
-        stream: require.resolve('stream-browserify'),
-        timers: require.resolve('timers-browserify'),
+        os: nodeLibsBrowser.os,
+        path: nodeLibsBrowser.path,
+        process: nodeLibsBrowser.process,
+        stream: nodeLibsBrowser.stream,
+        timers: nodeLibsBrowser.timers,
       },
     },
 
