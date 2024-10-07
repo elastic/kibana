@@ -62,8 +62,8 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
 
     const passphrase = providedPassphrase || this.generatePassphrase();
-    const keyPair = generateKeyPairSync('rsa', {
-      modulusLength: 2048,
+    const keyPair = generateKeyPairSync('ec', {
+      namedCurve: 'prime256v1',
       privateKeyEncoding: {
         type: 'pkcs8',
         format: 'der',
