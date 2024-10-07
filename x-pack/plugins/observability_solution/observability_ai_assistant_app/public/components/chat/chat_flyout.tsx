@@ -274,6 +274,7 @@ export function ChatFlyout({
                 conversationList.conversations.refresh();
               }}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
+              onClose={onClose}
             />
           </EuiFlexItem>
 

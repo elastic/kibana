@@ -542,9 +542,6 @@ export function isVariable(
 ): column is ESQLVariable {
   return Boolean(column && 'location' in column);
 }
-export function hasCCSSource(name: string) {
-  return name.includes(':');
-}
 
 /**
  * This returns the name with any quotes that were present.
