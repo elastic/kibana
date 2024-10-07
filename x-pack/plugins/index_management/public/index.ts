@@ -22,3 +22,6 @@ export type {
 } from '@kbn/index-management-shared-types';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
+
+export type { IMLocatorParams } from './locator';
+export { IM_LOCATOR_ID } from './locator';
