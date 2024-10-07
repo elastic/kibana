@@ -28240,11 +28240,6 @@ sass-embedded-darwin-arm64@1.78.0:
   resolved "https://registry.yarnpkg.com/sass-embedded-darwin-arm64/-/sass-embedded-darwin-arm64-1.78.0.tgz#aa45e97c01561b5303076bff4ec138c80c16a6d0"
   integrity sha512-3JaxceFSR6N+a22hPYYkj1p45eBaWTt/M8MPTbfzU3TGZrU9bmRX7WlUVtXTo1yYI2iMf22nCv0PQ5ExFF3FMQ==
 
-sass-embedded-darwin-arm64@^1.79.4:
-  version "1.79.4"
-  resolved "https://registry.yarnpkg.com/sass-embedded-darwin-arm64/-/sass-embedded-darwin-arm64-1.79.4.tgz#2e8761be8fd2bdb2bbfde32b3a796840712c7d55"
-  integrity sha512-pcYtbN1VUAAcfgyHeX8ySndDWGjIvcq6rldduktPbGGuAlEWFDfnwjTbv0hS945ggdzZ6TFnaFlLEDr0SjKzBA==
-
 sass-embedded-darwin-x64@1.78.0:
   version "1.78.0"
   resolved "https://registry.yarnpkg.com/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.78.0.tgz#c7d7d39408568652622b227b4553a06a2377782b"
