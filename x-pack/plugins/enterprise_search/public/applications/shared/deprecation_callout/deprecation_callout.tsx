@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface DeprecationCalloutProps {
@@ -37,17 +37,23 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       <p>
         {i18n.translate('xpack.enterpriseSearch.deprecationCallout.first_message', {
           defaultMessage:
-            'See this blog[link here] post for more information about upgrading your internal knowledge search or this blog post[link here] about upgrading your catalog search. (opens in a new tab or window).',
+            'See this blog[link here, placeholder] post for more information about upgrading your internal knowledge search or this blog post[link here] about upgrading your catalog search. (opens in a new tab or window).',
         })}
       </p>
-      <EuiButton href="#" color="warning" fill>
-        CTA Link Button
-      </EuiButton>
-      <EuiLink target="_blank" onClick={onDismissAction}>
-        {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
-          defaultMessage: 'dismiss',
-        })}
-      </EuiLink>
+      <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiButton href="#placeholder-for-link" color="warning" iconType="popout" iconSide="right" target="_blank" fill>
+            Learn more
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink target="_blank" onClick={onDismissAction} color="warning">
+            {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
+              defaultMessage: 'Dismiss',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiCallOut>
   );
 };
