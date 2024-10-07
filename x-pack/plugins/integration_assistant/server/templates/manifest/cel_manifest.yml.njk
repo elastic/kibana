@@ -53,7 +53,7 @@
       show_user: true
       multi: false
       required: false{% if state %}
-      default:{% for key, value in state %}
+      default: | {% for key, value in state %}
         {{ key }} : {% if value %}{{ value }}{% else %}""{% endif %}{% endfor %}{% endif %}
     - name: regexp
       type: yaml
