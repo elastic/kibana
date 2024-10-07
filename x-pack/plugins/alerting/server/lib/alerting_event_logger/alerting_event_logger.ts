@@ -78,6 +78,8 @@ interface AlertOpts {
 
 export interface ActionOpts {
   id: string;
+  // uuid is typed as optional but in reality it is always
+  // populated - https://github.com/elastic/kibana/issues/195255
   uuid?: string;
   typeId: string;
   alertId?: string;

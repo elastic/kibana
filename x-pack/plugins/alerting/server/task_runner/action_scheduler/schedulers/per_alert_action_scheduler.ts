@@ -276,6 +276,8 @@ export class PerAlertActionScheduler<
         }),
         actionToLog: {
           id: action.id,
+          // uuid is typed as optional but in reality it is always
+          // populated - https://github.com/elastic/kibana/issues/195255
           uuid: action.uuid,
           typeId: action.actionTypeId,
           alertId: alert.getId(),
