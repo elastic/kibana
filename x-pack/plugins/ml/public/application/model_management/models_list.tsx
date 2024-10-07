@@ -304,10 +304,15 @@ export const ModelsList: FC<Props> = ({
         // Need to merge existing items with new items
         // to preserve state and download status
         return resultItems.map((item) => {
+          const prevItem = prevItems.find((i) => i.model_id === item.model_id);
           return {
             ...item,
-            state: item.state ?? prevItems.find((i) => i.model_id === item.model_id)?.state,
-            downloadState: prevItems.find((i) => i.model_id === item.model_id)?.downloadState,
+            ...(prevItem?.state === MODEL_STATE.DOWNLOADING
+              ? {
+                  state: prevItem.state,
+                  downloadState: prevItem.downloadState,
+                }
+              : {}),
           };
         });
       });
@@ -403,9 +408,10 @@ export const ModelsList: FC<Props> = ({
    */
   const fetchDownloadStatus = useCallback(
     /**
+     * @param initRequest If true, resolves with the first download status
      * @param downloadInProgress Set of model ids that reports download in progress
      */
-    async (downloadInProgress: Set<string> = new Set<string>()) => {
+    async (initRequest: boolean = true, downloadInProgress: Set<string> = new Set<string>()) => {
       // Allows only single fetch to be in progress
       if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
 
@@ -421,6 +427,7 @@ export const ModelsList: FC<Props> = ({
                 return item;
               }
               const newItem = cloneDeep(item);
+
               if (downloadStatus[item.model_id]) {
                 newItem.state = MODEL_STATE.DOWNLOADING;
                 newItem.downloadState = downloadStatus[item.model_id];
@@ -462,7 +469,7 @@ export const ModelsList: FC<Props> = ({
         }
 
         await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
-        await fetchDownloadStatus(downloadInProgress);
+        await fetchDownloadStatus(false, downloadInProgress);
       } catch (e) {
         downLoadStatusFetchInProgress.current = false;
       }
