@@ -14,6 +14,7 @@ export interface OtelErrorDocument extends OtelDocument {
   'event.name'?: string;
   attributes?: {
     'exception.message'?: string;
+    'error.stack_trace'?: string;
     'exception.type'?: string;
     'processor.event'?: string;
     'timestamp.us'?: number;

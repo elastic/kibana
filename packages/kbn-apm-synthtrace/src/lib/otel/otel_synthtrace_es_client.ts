@@ -24,7 +24,7 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
       ...options,
       pipeline: otelPipeline(),
     });
-    this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*'];
+    this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*', 'logs-generic.otel*'];
   }
 }
 
@@ -58,28 +58,28 @@ export function getRoutingTransform() {
           break;
 
         case 'error':
-          index = `.logs-generic-otel-${namespace}-synth`;
+          index = `logs-generic.otel-${namespace}-synth`;
           break;
 
         case 'metric':
-          const metricsetName = document.attributes['metricset.name'];
+          const metricsetName = document?.resource?.attributes?.['metricset.name'];
           if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||
             metricsetName === 'service_destination' ||
             metricsetName === 'service_summary'
           ) {
-            index = `metrics-otel.${metricsetName}.${document.attributes[
+            index = `metrics-generic.otel.${metricsetName}.${document.attributes[
               'metricset.interval'
             ]!}-${namespace}-synth`;
           } else {
-            index = `metrics-otel.internal-${namespace}`;
+            index = `metrics-generic.otel.internal-${namespace}-synth`;
           }
           break;
         default:
-          // if (document['event.action'] != null) {
-          //   index = `logs-otel.app-${namespace}`;
-          // }
+          if (document?.attributes?.['event.action'] != null) {
+            index = `logs-generic.otel-${namespace}-synth`;
+          }
           break;
       }
 

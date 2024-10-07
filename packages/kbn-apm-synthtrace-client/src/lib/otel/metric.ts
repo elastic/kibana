@@ -12,9 +12,13 @@ import { Serializable } from '../serializable';
 
 export interface OtelMetricDocument extends OtelDocument {
   attributes?: {
-    'metricset.interval'?: string;
     'metricset.name'?: string;
     'processor.event'?: string;
+    // service_destination
+    'event.outcome'?: string;
+    'service.target.name'?: string;
+    'service.target.type'?: string;
+    'span.name'?: string;
   };
   metrics?: {
     service_summary?: number;

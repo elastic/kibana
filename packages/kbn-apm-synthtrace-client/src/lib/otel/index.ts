@@ -18,6 +18,7 @@ export interface SharedAttributes {
   'agent.name'?: string;
   'agent.version'?: string;
   'metricset.interval'?: string;
+  'metricset.name'?: string;
   'service.instance.id'?: string;
   'telemetry.sdk.language'?: string;
   'telemetry.sdk.name'?: string;
@@ -50,9 +51,9 @@ export interface OtelDocument extends Fields {
   };
   name?: string;
   trace_id?: string;
-  trace?: { id: string }; // / I saw in fields this two representacion of trace id
+  trace?: { id: string };
   span_id?: string;
-  span?: { id: string }; // / I saw in fields this two representacion of span id
+  span?: { id: string };
   dropped_attributes_count?: number;
   dropped_events_count?: number;
   dropped_links_count?: number;
@@ -72,8 +73,9 @@ class Otel extends Serializable<OtelDocument> {
       attributes: {
         'exception.message': 'boom',
         'exception.type': '*errors.errorString',
+        'error.stack_trace': 'Error: INTERNAL: Boom',
         'processor.event': 'error',
-        'timestamp.us': 1725633628036123,
+        'timestamp.us': 1726580752010657,
         'event.name': 'exception',
       },
       data_stream: {
@@ -103,8 +105,6 @@ class Otel extends Serializable<OtelDocument> {
         name: 'sendotlp-synth',
       },
       span_id: spanId,
-      span: { id: spanId },
-      timestamp_us: 1725633628036123,
     });
   }
 
@@ -112,12 +112,15 @@ class Otel extends Serializable<OtelDocument> {
     return new OtelMetric({
       ...this.fields,
       attributes: {
-        'metricset.interval': '1m',
-        'metricset.name': 'service_summary',
+        'metricset.name': 'service_destination',
         'processor.event': 'metric',
+        'event.outcome': 'success',
+        'service.target.name': 'foo_service',
+        'service.target.type': 'http',
+        'span.name': 'child1',
       },
       data_stream: {
-        dataset: 'generic.otel',
+        dataset: 'service_destination.10m.otel',
         namespace: 'default',
         type: 'metrics',
       },
@@ -127,17 +130,16 @@ class Otel extends Serializable<OtelDocument> {
       resource: {
         attributes: {
           'agent.name': 'otlp',
-          'agent.version': 'unknown',
-          'metricset.interval': '1m',
+          'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
           'service.name': 'sendotlp-synth',
-          'some.resource.attribute': 'resource.attr',
+          'metricset.interval': '10m',
         },
         dropped_attributes_count: 0,
       },
       scope: {
         dropped_attributes_count: 0,
-        name: 'github.com/open-telemetry/opentelemetry-collector-contrib/connector/countconnector',
+        name: 'github.com/elastic/opentelemetry-collector-components/connector/spanmetricsconnectorv2',
       },
     });
   }
@@ -173,7 +175,6 @@ class Otel extends Serializable<OtelDocument> {
           'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
           'service.name': 'sendotlp-synth',
-          'some.resource.attribute': 'resource.attr',
         },
         dropped_attributes_count: 0,
         schema_url: 'https://opentelemetry.io/schemas/1.26.0',
