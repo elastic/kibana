@@ -78,7 +78,11 @@ describe('field and variable escaping', () => {
         command: 'ROW `funky`.`stri#$ng` = "lolz" | DISSECT `funky`.`stri#$ng` "%{WORD:firstWord}"',
       },
       { name: 'DROP', command: 'FROM index | DROP kubernetes.`something`.`something`' },
-      // { name: 'ENRICH', command: 'ENRICH' },
+      {
+        name: 'ENRICH',
+        command:
+          'FROM index | ENRICH policy WITH `new`.name1 = `otherField`, `new.name2` = `yetAnotherField`',
+      },
       { name: 'EVAL', command: 'FROM index | EVAL kubernetes.`something`.`something` + 12' },
       {
         name: 'GROK',

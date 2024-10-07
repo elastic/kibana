@@ -41,8 +41,7 @@ function addToVariables(
     };
     // Now workout the exact type
     // it can be a rename of another variable as well
-    const oldRef =
-      fields.get(oldArg.name) || variables.get(oldArg.quoted ? oldArg.text : oldArg.name);
+    const oldRef = fields.get(oldArg.parts.join('.')) || variables.get(oldArg.parts.join('.'));
     if (oldRef) {
       addToVariableOccurrences(variables, newVariable);
       newVariable.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
