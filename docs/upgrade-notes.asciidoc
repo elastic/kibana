@@ -25,7 +25,7 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 ====
 ////
 
-This page summarizes all breaking changes and deprecation notices introduced to {kib} version 8 since 8.0. Review these changes before upgrading Kibana to mitigate the impact to your application.
+Before you upgrade, review the breaking changes and deprecations introduced in {kib} 8.x, then mitigate the impact. 
 
 For Elastic Security release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
