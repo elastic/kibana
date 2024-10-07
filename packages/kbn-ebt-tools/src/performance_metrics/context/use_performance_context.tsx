@@ -20,18 +20,11 @@ export interface PerformanceApi {
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
-export function usePerformanceContext({
-  suppressMissingProviderError,
-}: { suppressMissingProviderError?: boolean } = {}) {
+export function usePerformanceContext() {
   const api = useContext(PerformanceContext);
 
   if (!api) {
-    if (suppressMissingProviderError) {
-      // helpful for unit tests
-      return { onPageReady: () => {} };
-    } else {
-      throw new Error('No performance context provided');
-    }
+    throw new Error('No performance context provided');
   }
 
   return api;

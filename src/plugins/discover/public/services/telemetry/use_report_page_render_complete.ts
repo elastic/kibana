@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useCallback, useEffect, useContext } from 'react';
+import { PerformanceContext } from '@kbn/ebt-tools';
 
 let isInitialRenderComplete = false;
 
 export const useReportPageRenderComplete = (isReady: boolean = false) => {
-  const context = usePerformanceContext({ suppressMissingProviderError: true });
+  const context = useContext(PerformanceContext);
   const onPageReady = context?.onPageReady;
 
   const onInitialRenderComplete = useCallback(() => {
