@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-export const getArtifactName = ({
-  productName,
-  productVersion,
-}: {
-  productName: string;
-  productVersion: string;
-}): string => {
-  return `kibana-kb-${productName}-${productVersion}.zip`.toLowerCase();
-};
+export enum DocumentationProduct {
+  kibana = 'kibana',
+  elasticsearch = 'elasticsearch',
+  observability = 'observability',
+  security = 'security',
+}
+
+export type ProductName = keyof typeof DocumentationProduct;

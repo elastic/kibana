@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { type ProductName, DocumentationProduct } from './product';
+
+// kibana-kb-elasticsearch-8.15.zip
+const artifactNameRegexp = /^kibana-kb-([a-zA-Z]+)-([0-9]+\.[0-9]+)(\.zip)?$/;
+const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
+
+export const getArtifactName = ({
+  productName,
+  productVersion,
+  excludeExtension = false,
+}: {
+  productName: string;
+  productVersion: string;
+  excludeExtension?: boolean;
+}): string => {
+  const ext = excludeExtension ? '' : '.zip';
+  return `kibana-kb-${productName}-${productVersion}${ext}`.toLowerCase();
+};
+
+export const parseArtifactName = (artifactName: string) => {
+  const match = artifactNameRegexp.exec(artifactName);
+  if (match) {
+    const productName = match[1].toLowerCase() as ProductName;
+    const productVersion = match[2].toLowerCase();
+    if (allowedProductNames.includes(productName)) {
+      return {
+        productName,
+        productVersion,
+      };
+    }
+  }
+};

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ZipArchive } from './zip_archive';
+import { isArtifactContentFilePath } from '@kbn/product-doc-common';
+import type { ZipArchive } from '../utils/zip_archive';
 
 type ValidationResult = { valid: true } | { valid: false; error: string };
-
-const contentFileRegexp = /^content\/content-[0-9]+\.ndjson$/;
 
 export const validateArtifactArchive = (archive: ZipArchive): ValidationResult => {
   if (!archive.hasEntry('manifest.json')) {
@@ -18,7 +17,7 @@ export const validateArtifactArchive = (archive: ZipArchive): ValidationResult =
   if (!archive.hasEntry('mappings.json')) {
     return { valid: false, error: 'Mapping file not found' };
   }
-  if (!archive.getEntryPaths().some((entryPath) => contentFileRegexp.test(entryPath))) {
+  if (!archive.getEntryPaths().some(isArtifactContentFilePath)) {
     return { valid: false, error: 'No content files were found' };
   }
   return { valid: true };

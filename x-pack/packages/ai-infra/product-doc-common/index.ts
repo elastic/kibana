@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { getArtifactName, parseArtifactName } from './src/artifact';
+export { type ArtifactManifest } from './src/manifest';
+export { DocumentationProduct, type ProductName } from './src/product';
+export { isArtifactContentFilePath } from './src/artifact_content';

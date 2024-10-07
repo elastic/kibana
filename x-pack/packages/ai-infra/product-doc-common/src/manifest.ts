@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { createIndex } from './create_index';
-export { populateIndex } from './populate_index';
-export { validateArtifactArchive } from './validate_artifact_archive';
-export { fetchArtifactVersions } from './fetch_artifact_versions';
+export interface ArtifactManifest {
+  formatVersion: string;
+  productName: string;
+  productVersion: string;
+}

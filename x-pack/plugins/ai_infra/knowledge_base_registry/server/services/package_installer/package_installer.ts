@@ -7,21 +7,23 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DocumentationProduct } from '../../../common/consts';
-import type { ProductName } from '../../../common/saved_objects';
+import { getArtifactName, DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
 import type { ProductDocInstallClient } from '../../dao/doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
 import {
   downloadToDisk,
   openZipArchive,
-  validateArtifactArchive,
   loadManifestFile,
   loadMappingFile,
-  fetchArtifactVersions,
   type ZipArchive,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
-import { createIndex, populateIndex } from './steps';
+import {
+  validateArtifactArchive,
+  fetchArtifactVersions,
+  createIndex,
+  populateIndex,
+} from './steps';
 
 interface PackageInstallerOpts {
   artifactsFolder: string;
@@ -175,17 +177,6 @@ export class PackageInstaller {
     await this.productDocClient.setUninstalled(productName);
   }
 }
-
-// need to be factorized with the script
-const getArtifactName = ({
-  productName,
-  productVersion,
-}: {
-  productName: string;
-  productVersion: string;
-}): string => {
-  return `kibana-kb-${productName}-${productVersion}.zip`.toLowerCase();
-};
 
 const getIndexName = ({
   productName,

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { DocumentationProduct } from './consts';
-
-export type ProductName = keyof typeof DocumentationProduct;
+import type { ProductName } from '@kbn/product-doc-common';
 
 export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 

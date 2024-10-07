@@ -9,8 +9,9 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  // TODO: use elastic.co subdomain once available
-  artifactRepositoryUrl: schema.string({ defaultValue: 'http://34.120.162.240' }),
+  artifactRepositoryUrl: schema.string({
+    defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
+  }),
 });
 
 export const config: PluginConfigDescriptor<KnowledgeBaseRegistryConfig> = {

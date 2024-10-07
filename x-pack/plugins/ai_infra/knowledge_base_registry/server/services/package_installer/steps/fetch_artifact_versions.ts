@@ -7,14 +7,9 @@
 
 import fetch from 'node-fetch';
 import { parseString } from 'xml2js';
-import type { ProductName } from '../../../../common/saved_objects';
-import { DocumentationProduct } from '../../../../common/consts';
+import { type ProductName, DocumentationProduct, parseArtifactName } from '@kbn/product-doc-common';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
-
-// TODO: extract to common package
-// kibana-kb-elasticsearch-8.15.zip
-const artifactNameRegexp = /^kibana-kb-([a-zA-Z]+)-([0-9]+\.[0-9]+)\.zip$/;
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
@@ -43,13 +38,10 @@ export const fetchArtifactVersions = async ({
 
       result.ListBucketResult.Contents.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
-        const match = artifactNameRegexp.exec(artifactName);
-        if (match) {
-          const productName = match[1].toLowerCase() as ProductName;
-          const productVersion = match[2].toLowerCase();
-          if (allowedProductNames.includes(productName)) {
-            record[productName]!.push(productVersion);
-          }
+        const parsed = parseArtifactName(artifactName);
+        if (parsed) {
+          const { productName, productVersion } = parsed;
+          record[productName]!.push(productVersion);
         }
       });
 

@@ -8,11 +8,9 @@
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isArtifactContentFilePath } from '@kbn/product-doc-common';
 import { internalElserInferenceId } from '../../../../common/consts';
 import type { ZipArchive } from '../utils/zip_archive';
-
-// TODO: factorize with utils/validate_artifact_archive
-const contentFileRegexp = /^content\/content-[0-9]+\.ndjson$/;
 
 export const populateIndex = async ({
   esClient,
@@ -27,9 +25,7 @@ export const populateIndex = async ({
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
-  const contentEntries = archive
-    .getEntryPaths()
-    .filter((entryPath) => contentFileRegexp.test(entryPath));
+  const contentEntries = archive.getEntryPaths().filter(isArtifactContentFilePath);
 
   for (let i = 0; i < contentEntries.length; i++) {
     const entryPath = contentEntries[i];
@@ -77,7 +73,6 @@ const indexContentFile = async ({
   }
 };
 
-// TODO: extract
 const rewriteInferenceId = (document: Record<string, any>, inferenceId: string) => {
   // we don't need to handle nested fields, we don't have any and won't.
   Object.values(document).forEach((field) => {

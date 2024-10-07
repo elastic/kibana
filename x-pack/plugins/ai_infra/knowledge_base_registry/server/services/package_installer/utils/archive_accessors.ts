@@ -6,14 +6,8 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ArtifactManifest } from '@kbn/product-doc-common';
 import type { ZipArchive } from './zip_archive';
-
-// TODO: factorize with script
-export interface ArtifactManifest {
-  formatVersion: string;
-  productName: string;
-  productVersion: string;
-}
 
 const manifestEntryPath = 'manifest.json';
 const mappingsEntryPath = 'mappings.json';
