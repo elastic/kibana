@@ -32,7 +32,6 @@ const expectedValidEsqlQuery = 'from auditbeat* METADATA _id';
 describe(
   'Detection rules, preview',
   {
-    // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
     tags: ['@ess', '@serverless'],
     env: {
       kbnServerArgs: [

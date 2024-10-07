@@ -42,7 +42,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
   describe('@ess @serverless manual_rule_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
