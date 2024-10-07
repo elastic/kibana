@@ -12,12 +12,16 @@ import { MutationKeys, QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 import { INDEX_SEARCH_POLLING, IndexDocuments } from './use_document_search';
 
+interface DeleteDocumentParams {
+  id: string;
+}
+
 export const useDeleteDocument = (indexName: string) => {
   const { http } = useKibana().services;
   const queryClient = useQueryClient();
 
   const result = useMutation(
-    async ({ id }: { id: string }) => {
+    async ({ id }: DeleteDocumentParams) => {
       const response = await http.delete<AcknowledgedResponseBase>(
         `/internal/search_indices/${indexName}/documents/${id}`
       );
@@ -25,7 +29,7 @@ export const useDeleteDocument = (indexName: string) => {
     },
     {
       mutationKey: [MutationKeys.SearchIndicesDeleteDocument, indexName],
-      onMutate: async ({ id }: { id: string }) => {
+      onMutate: async ({ id }: DeleteDocumentParams) => {
         await queryClient.cancelQueries([QueryKeys.SearchDocuments, indexName]);
 
         const previousData = queryClient.getQueryData<IndexDocuments>([
@@ -54,6 +58,13 @@ export const useDeleteDocument = (indexName: string) => {
         setTimeout(() => {
           queryClient.invalidateQueries([QueryKeys.SearchDocuments, indexName]);
         }, INDEX_SEARCH_POLLING);
+      },
+
+      onError: (error, _, context) => {
+        if (context?.previousData) {
+          queryClient.setQueryData([QueryKeys.SearchDocuments, indexName], context.previousData);
+        }
+        return error;
       },
     }
   );
