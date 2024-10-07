@@ -51,7 +51,7 @@ describe('useStatusAction', () => {
         },
         Object {
           "data-test-subj": "cases-bulk-action-status-in-progress",
-          "disabled": false,
+          "disabled": true,
           "icon": "empty",
           "key": "cases-bulk-action-status-in-progress",
           "name": "In progress",
@@ -59,7 +59,7 @@ describe('useStatusAction', () => {
         },
         Object {
           "data-test-subj": "cases-bulk-action-status-closed",
-          "disabled": false,
+          "disabled": true,
           "icon": "empty",
           "key": "cases-bulk-status-action",
           "name": "Closed",
