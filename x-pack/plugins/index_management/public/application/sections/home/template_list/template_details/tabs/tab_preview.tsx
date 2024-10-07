@@ -8,14 +8,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
-import { TemplateDeserialized } from '../../../../../../../common';
 import { SimulateTemplate } from '../../../../../components/index_templates';
 
 interface Props {
-  templateDetails: TemplateDeserialized;
+  templateName: string;
 }
 
-export const TabPreview = ({ templateDetails }: Props) => {
+export const TabPreview = ({ templateName }: Props) => {
   return (
     <div data-test-subj="previewTabContent">
       <EuiText>
@@ -29,7 +28,7 @@ export const TabPreview = ({ templateDetails }: Props) => {
 
       <EuiSpacer size="m" />
 
-      <SimulateTemplate template={templateDetails} />
+      <SimulateTemplate templateName={templateName} />
     </div>
   );
 };

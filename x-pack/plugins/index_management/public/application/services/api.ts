@@ -319,11 +319,23 @@ export async function updateTemplate(template: TemplateDeserialized) {
   return result;
 }
 
-export function simulateIndexTemplate(template: { [key: string]: any }) {
+export function simulateIndexTemplate({
+  template,
+  templateName,
+}: {
+  template?: { [key: string]: any };
+  templateName?: string;
+}) {
+  const path = templateName
+    ? `${API_BASE_PATH}/index_templates/simulate/${templateName}`
+    : `${API_BASE_PATH}/index_templates/simulate`;
+
+  const body = templateName ? undefined : JSON.stringify(template);
+
   return sendRequest({
-    path: `${API_BASE_PATH}/index_templates/simulate`,
+    path,
     method: 'post',
-    body: JSON.stringify(template),
+    body,
   }).then((result) => {
     uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_SIMULATE);
     return result;
