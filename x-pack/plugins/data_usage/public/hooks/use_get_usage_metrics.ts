@@ -37,7 +37,6 @@ export const useGetDataUsageMetrics = (
           from: query.from,
           to: query.to,
           metricTypes: query.metricTypes,
-          size: query.size,
           dataStreams: query.dataStreams,
         },
       });

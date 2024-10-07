@@ -65,7 +65,6 @@ export const getUsageMetricsHandler = (
       const metrics = await fetchMetricsFromAutoOps({
         from,
         to,
-        size,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
         dataStreams: formatStringParams(userDsNames),
       });
@@ -85,13 +84,11 @@ export const getUsageMetricsHandler = (
 const fetchMetricsFromAutoOps = async ({
   from,
   to,
-  size,
   metricTypes,
   dataStreams,
 }: {
   from: string;
   to: string;
-  size?: number;
   metricTypes: MetricTypes[];
   dataStreams: string[];
 }) => {
@@ -102,7 +99,6 @@ const fetchMetricsFromAutoOps = async ({
       to: Date.parse(to),
       metric_types: metricTypes,
       allowed_indices: dataStreams,
-      size: size || 10,
     });
     const { data } = response;*/
   // mock data from autoOps https://github.com/elastic/autoops-services/blob/master/monitoring/service/specs/serverless_project_metrics_api.yaml

@@ -38,7 +38,6 @@ export const UsageMetricsRequestSchema = {
   query: schema.object({
     from: DateSchema,
     to: DateSchema,
-    size: schema.maybe(schema.number()), // should be same as dataStreams.length
     metricTypes: schema.oneOf([
       schema.arrayOf(schema.string(), {
         minSize: 1,
