@@ -82,8 +82,8 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
 
   appContextValue.embeddingOrigin = AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
 
-  const CasesContext = appDependencies.cases?.ui.getCasesContext() ?? React.Fragment;
-  const casesPermissions = appDependencies.cases?.helpers.canUseCases();
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
     <KibanaThemeProvider theme={appContextValue.theme}>
