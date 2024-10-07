@@ -21,7 +21,11 @@ export function appendWhereClauseToESQLQuery(
   value: unknown,
   operation: '+' | '-' | 'is_not_null' | 'is_null',
   fieldType?: string
-): string {
+): string | undefined {
+  // multivalues filtering is not supported yet
+  if (Array.isArray(value)) {
+    return undefined;
+  }
   let operator;
   switch (operation) {
     case 'is_not_null':

@@ -8,6 +8,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { AssetCriticalityUpsert } from '../../../../../common/entity_analytics/asset_criticality/types';
 import {
   CreateAssetCriticalityRecordRequestBody,
   type CreateAssetCriticalityRecordResponse,
@@ -58,7 +59,7 @@ export const assetCriticalityPublicUpsertRoute = (
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
-          const assetCriticalityRecord = {
+          const assetCriticalityRecord: AssetCriticalityUpsert = {
             idField: request.body.id_field,
             idValue: request.body.id_value,
             criticalityLevel: request.body.criticality_level,

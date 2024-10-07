@@ -33,6 +33,9 @@ export function getSystemMessageInstructions({
     IMPORTANT: make sure you start and end a tool call with the ${TOOL_USE_START} and ${TOOL_USE_END} markers, it MUST
     be included in the tool call.
 
+    You can only call A SINGLE TOOL at a time. Do not call multiple tools, or multiple times the same tool, in the same
+    response.
+
     You may call tools like this:
 
     ${TOOL_USE_START}

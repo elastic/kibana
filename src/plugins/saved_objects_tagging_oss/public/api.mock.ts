@@ -55,8 +55,6 @@ type SavedObjectsTaggingApiUiMock = Omit<jest.Mocked<SavedObjectsTaggingApiUi>, 
 const createApiUiMock = () => {
   const mock: SavedObjectsTaggingApiUiMock = {
     components: createApiUiComponentsMock(),
-    // TS is very picky with type guards
-    hasTagDecoration: jest.fn() as any,
     getSearchBarFilter: jest.fn(),
     getTableColumnDefinition: jest.fn(),
     convertNameToReference: jest.fn(),

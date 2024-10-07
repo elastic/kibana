@@ -394,12 +394,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
 
   const kafkaAuthUsernameInput = useInput(
-    kafkaOutput?.username,
+    kafkaOutput?.username ?? undefined,
     kafkaAuthMethodInput.value === kafkaAuthType.Userpass ? validateKafkaUsername : undefined,
     isDisabled('username')
   );
   const kafkaAuthPasswordInput = useInput(
-    kafkaOutput?.password,
+    kafkaOutput?.password ?? undefined,
     kafkaAuthMethodInput.value === kafkaAuthType.Userpass ? validateKafkaPassword : undefined,
     isDisabled('password')
   );

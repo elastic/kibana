@@ -4728,14 +4728,10 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/package_policy"
-                    },
-                    "sucess": {
-                      "type": "boolean"
                     }
                   },
                   "required": [
-                    "item",
-                    "sucess"
+                    "item"
                   ]
                 }
               }
@@ -7592,6 +7588,56 @@
               },
               "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
             }
+          },
+          "monitoring_pprof_enabled": {
+            "type": "boolean"
+          },
+          "monitoring_http": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "host": {
+                "type": "string"
+              },
+              "port": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          },
+          "monitoring_diagnostics": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "object",
+                "properties": {
+                  "interval": {
+                    "type": "string"
+                  },
+                  "burst": {
+                    "type": "number"
+                  }
+                }
+              },
+              "uploader": {
+                "type": "object",
+                "properties": {
+                  "max_retries": {
+                    "type": "number"
+                  },
+                  "init_dur": {
+                    "type": "string"
+                  },
+                  "max_dur": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         },
         "required": [
@@ -7766,6 +7812,23 @@
           "force": {
             "type": "boolean",
             "description": "Force agent policy creation even if packages are not verified."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [
@@ -7873,6 +7936,93 @@
                 }
               }
             }
+          },
+          "monitoring": {
+            "type": "object",
+            "properties": {
+              "namespace": {
+                "type": "string"
+              },
+              "use_output": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "metrics": {
+                "type": "boolean"
+              },
+              "logs": {
+                "type": "boolean"
+              },
+              "traces": {
+                "type": "boolean"
+              },
+              "pprof": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "http": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              },
+              "diagnostics": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "object",
+                    "properties": {
+                      "interval": {
+                        "type": "string"
+                      },
+                      "burst": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "uploader": {
+                    "type": "object",
+                    "properties": {
+                      "max_retries": {
+                        "type": "number"
+                      },
+                      "init_dur": {
+                        "type": "string"
+                      },
+                      "max_dur": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "enabled",
+              "metrics",
+              "logs",
+              "traces"
+            ]
           },
           "fleet": {
             "oneOf": [

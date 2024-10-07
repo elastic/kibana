@@ -6,7 +6,7 @@
  */
 
 import { TaskStore } from './task_store';
-import { ConcreteTaskInstance } from './task';
+import { ConcreteTaskInstance, PartialConcreteTaskInstance } from './task';
 import { Updatable } from './task_running';
 import { createBuffer, Operation, BufferOptions, Entity } from './lib/bulk_operation_buffer';
 import { unwrapPromise, asErr, asOk } from './lib/result_type';
@@ -15,6 +15,7 @@ import { unwrapPromise, asErr, asOk } from './lib/result_type';
 const DEFAULT_BUFFER_MAX_DURATION = 50;
 
 export class BufferedTaskStore implements Updatable {
+  private bufferedPartialUpdate: Operation<PartialConcreteTaskInstance>;
   private bufferedUpdate: Operation<ConcreteTaskInstance>;
   private bufferedRemove: Operation<Entity>;
 
@@ -26,6 +27,13 @@ export class BufferedTaskStore implements Updatable {
       // to .bulkUpdate per doc, but the required changes to the bulk_operation_buffer
       // to track the values are high and deffered for now.
       (docs) => taskStore.bulkUpdate(docs, { validate: false }),
+      {
+        bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
+        ...options,
+      }
+    );
+    this.bufferedPartialUpdate = createBuffer<PartialConcreteTaskInstance>(
+      (docs) => taskStore.bulkPartialUpdate(docs),
       {
         bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
         ...options,
@@ -58,6 +66,25 @@ export class BufferedTaskStore implements Updatable {
     return this.taskStore.taskValidator.getValidatedTaskInstanceFromReading(result, {
       validate: options.validate,
     });
+  }
+
+  public async partialUpdate(
+    partialDoc: PartialConcreteTaskInstance,
+    options: { validate: boolean; doc: ConcreteTaskInstance }
+  ): Promise<ConcreteTaskInstance> {
+    // merge the partial updates with the doc and validate
+    this.taskStore.taskValidator.getValidatedTaskInstanceForUpdating(
+      { ...options.doc, ...partialDoc },
+      { validate: options.validate }
+    );
+
+    const result = await unwrapPromise(this.bufferedPartialUpdate(partialDoc));
+
+    // merge the partial update result with the doc and validate
+    return this.taskStore.taskValidator.getValidatedTaskInstanceFromReading(
+      { ...options.doc, ...result },
+      { validate: options.validate }
+    );
   }
 
   public async remove(id: string): Promise<void> {

@@ -9,8 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
+  DocumentEntryCreateFields,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  Metadata,
 } from '@kbn/elastic-assistant-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema } from './types';
@@ -21,7 +23,9 @@ export interface CreateKnowledgeBaseEntryParams {
   logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
-  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+  knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
+  global?: boolean;
+  isV2?: boolean;
 }
 
 export const createKnowledgeBaseEntry = async ({
@@ -31,9 +35,25 @@ export const createKnowledgeBaseEntry = async ({
   user,
   knowledgeBaseEntry,
   logger,
+  global = false,
+  isV2 = false,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateSchema(createdAt, spaceId, user, knowledgeBaseEntry);
+  const body = isV2
+    ? transformToCreateSchema({
+        createdAt,
+        spaceId,
+        user,
+        entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
+        global,
+      })
+    : transformToLegacyCreateSchema({
+        createdAt,
+        spaceId,
+        user,
+        entry: knowledgeBaseEntry as unknown as TransformToLegacyCreateSchemaProps['entry'],
+        global,
+      });
   try {
     const response = await esClient.create({
       body,
@@ -57,25 +77,38 @@ export const createKnowledgeBaseEntry = async ({
   }
 };
 
-export const transformToCreateSchema = (
-  createdAt: string,
-  spaceId: string,
-  user: AuthenticatedUser,
-  entry: KnowledgeBaseEntryCreateProps
-): CreateKnowledgeBaseEntrySchema => {
+interface TransformToCreateSchemaProps {
+  createdAt: string;
+  spaceId: string;
+  user: AuthenticatedUser;
+  entry: KnowledgeBaseEntryCreateProps;
+  global?: boolean;
+}
+
+export const transformToCreateSchema = ({
+  createdAt,
+  spaceId,
+  user,
+  entry,
+  global = false,
+}: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
   const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user.profile_uid ?? 'unknown',
     updated_at: createdAt,
     updated_by: user.profile_uid ?? 'unknown',
+    name: entry.name,
     namespace: spaceId,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
+    type: entry.type,
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
   };
 
   if (entry.type === 'index') {
@@ -93,5 +126,54 @@ export const transformToCreateSchema = (
       output_fields: outputFields ?? undefined,
     };
   }
-  return { ...base, ...entry, vector: undefined };
+  return {
+    ...base,
+    kb_resource: entry.kbResource,
+    required: entry.required ?? false,
+    source: entry.source,
+    text: entry.text,
+    vector: undefined,
+  };
+};
+
+export type LegacyKnowledgeBaseEntryCreateProps = Omit<
+  DocumentEntryCreateFields,
+  'kbResource' | 'source'
+> & {
+  metadata: Metadata;
+};
+
+interface TransformToLegacyCreateSchemaProps {
+  createdAt: string;
+  spaceId: string;
+  user: AuthenticatedUser;
+  entry: LegacyKnowledgeBaseEntryCreateProps;
+  global?: boolean;
+}
+
+export const transformToLegacyCreateSchema = ({
+  createdAt,
+  spaceId,
+  user,
+  entry,
+  global = false,
+}: TransformToLegacyCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
+  return {
+    '@timestamp': createdAt,
+    created_at: createdAt,
+    created_by: user.profile_uid ?? 'unknown',
+    updated_at: createdAt,
+    updated_by: user.profile_uid ?? 'unknown',
+    namespace: spaceId,
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
+    ...entry,
+    vector: undefined,
+  };
 };

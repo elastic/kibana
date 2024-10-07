@@ -36,7 +36,6 @@ journey('OverviewSorting', async ({ page, params }) => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Alphabetical")');
-    await page.waitForSelector(`[data-test-subj="syntheticsOverviewMonitorsLoading"]`);
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);

@@ -22,6 +22,7 @@ import type {
   BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
+  GetNotesResult,
 } from '../../../../../common/api/timeline';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
@@ -133,7 +134,7 @@ export const createNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
+}): Promise<ResponseNote> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
@@ -201,7 +202,7 @@ export const updateNote = async ({
   noteId: string;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
+}): Promise<ResponseNote> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
@@ -261,7 +262,7 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
 export const getAllSavedNote = async (
   request: FrameworkRequest,
   options: SavedObjectsFindOptions
-) => {
+): Promise<GetNotesResult> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>(options);
 
