@@ -224,7 +224,7 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argType: string, item: ESQLLiteral) {
+function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === 'null') {
     return true;
   }
@@ -245,7 +245,7 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date', 'date', 'date_period'].includes(argType);
+  return ['string', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -435,7 +435,7 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = compareLiteralType(argType as string, arg);
+    const matched = doesLiteralMatchParameterType(argType, arg);
     return matched;
   }
   if (arg.type === 'function') {
