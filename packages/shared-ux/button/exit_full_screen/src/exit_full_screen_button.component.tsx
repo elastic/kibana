@@ -15,15 +15,19 @@ import {
   EuiIcon,
   EuiImage,
   useEuiTheme,
+  useEuiShadow,
   makeHighContrastColor,
 } from '@elastic/eui';
+// EUI allows reaching into internal folders for component-specific exports, but they aren't typed in Kibana
+// @ts-ignore
+import { useEuiButtonFocusCSS } from '@elastic/eui/lib/themes/amsterdam/global_styling/mixins/button';
+// @ts-ignore
+import { euiButtonDisplayStyles } from '@elastic/eui/lib/components/button/button_display/_button_display.styles';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import cx from 'classnames';
 
 import type { ExitFullScreenButtonComponentProps as Props } from '../types';
-
-import './exit_full_screen_button.scss';
 
 const text = i18n.translate('sharedUXPackages.exitFullScreenButton.exitFullScreenModeButtonText', {
   defaultMessage: 'Exit full screen',
@@ -40,17 +44,23 @@ const description = i18n.translate(
  * A presentational component that renders a button designed to exit "full screen" mode.
  */
 export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const { colors, size, border } = euiTheme;
+  const euiThemeContext = useEuiTheme();
+  const { euiButtonDisplay } = euiButtonDisplayStyles(euiThemeContext);
+  const { colors, size, border } = euiThemeContext.euiTheme;
 
-  const buttonCSS = css`
-    padding: ${size.xs} ${size.s};
-    background: ${colors.fullShade};
-    border-radius: ${border.radius.small};
-    height: ${size.xl};
-    color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
-    outline-color: ${colors.emptyShade};
-  `;
+  const buttonCSS = [
+    euiButtonDisplay,
+    css`
+      padding: ${size.xs} ${size.s};
+      background: ${colors.fullShade};
+      border-radius: ${border.radius.small};
+      height: ${size.xl};
+      color: ${makeHighContrastColor(colors.emptyShade)(colors.fullShade)};
+      outline-color: ${colors.emptyShade};
+    `,
+    useEuiShadow('l'),
+    useEuiButtonFocusCSS(),
+  ];
 
   return (
     <div>
