@@ -12,19 +12,27 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-import type { UseMisconfigurationOptions } from '../../type';
+import type { UseCspOptions } from '../../type';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
   doc_count?: number;
 }
 
-type AggregationBuckets = Record<string, AggregationBucket>;
+export type AggregationBuckets = Record<string, AggregationBucket>;
 
 const RESULT_EVALUATION = {
   PASSED: 'passed',
   FAILED: 'failed',
   UNKNOWN: 'unknown',
+};
+
+export const VULNERABILITIES_RESULT_EVALUATION = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+  NONE: 'NONE',
 };
 
 export const getFindingsCountAggQueryMisconfiguration = () => ({
@@ -64,7 +72,7 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseMisconfigurationOptions,
+  { query }: UseCspOptions,
   rulesStates: CspBenchmarkRulesStates,
   isPreview = false
 ) => {
@@ -81,7 +89,7 @@ export const buildMisconfigurationsFindingsQuery = (
 };
 
 const buildMisconfigurationsFindingsQueryWithFilters = (
-  query: UseMisconfigurationOptions['query'],
+  query: UseCspOptions['query'],
   mutedRulesFilterQuery: estypes.QueryDslQueryContainer[]
 ) => {
   return {
@@ -103,3 +111,53 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
     },
   };
 };
+
+export const getVulnerabilitiesAggregationCount = (
+  buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
+) => {
+  const defaultBuckets: AggregationBuckets = {
+    [VULNERABILITIES_RESULT_EVALUATION.LOW]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.HIGH]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: { doc_count: 0 },
+    [VULNERABILITIES_RESULT_EVALUATION.NONE]: { doc_count: 0 },
+  };
+
+  // if buckets are undefined we will use default buckets
+  const usedBuckets = buckets || defaultBuckets;
+  return Object.entries(usedBuckets).reduce(
+    (evaluation, [key, value]) => {
+      evaluation[key] = (evaluation[key] || 0) + (value.doc_count || 0);
+      return evaluation;
+    },
+    {
+      [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
+      [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
+    }
+  );
+};
+
+export const getFindingsCountAggQueryVulnerabilities = () => ({
+  count: {
+    filters: {
+      other_bucket_key: VULNERABILITIES_RESULT_EVALUATION.NONE,
+      filters: {
+        [VULNERABILITIES_RESULT_EVALUATION.LOW]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.LOW },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.MEDIUM },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.HIGH]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.HIGH },
+        },
+        [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: {
+          match: { 'vulnerability.severity': VULNERABILITIES_RESULT_EVALUATION.CRITICAL },
+        },
+      },
+    },
+  },
+});
