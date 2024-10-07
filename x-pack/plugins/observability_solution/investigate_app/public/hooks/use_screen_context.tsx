@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { alertOriginSchema } from '@kbn/investigation-shared';
 import { ALERT_REASON, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import dedent from 'dedent';
 import { useEffect } from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useInvestigation } from '../contexts/investigation_context';
+import { useKibana } from './use_kibana';
+import { useInvestigation } from '../pages/details/contexts/investigation_context';
 import { useFetchAlert } from './use_fetch_alert';
 
 export function useScreenContext() {
@@ -22,9 +21,7 @@ export function useScreenContext() {
   } = useKibana();
 
   const { investigation } = useInvestigation();
-  const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
-  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
-  const { data: alertDetails, isLoading: isAlertDetailsLoading } = useFetchAlert({ id: alertId });
+  const { data: alertDetails, isLoading: isAlertDetailsLoading } = useFetchAlert({ investigation });
 
   useEffect(() => {
     if (!investigation || isAlertDetailsLoading) {
