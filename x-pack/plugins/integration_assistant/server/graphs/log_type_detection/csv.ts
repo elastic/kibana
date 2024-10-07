@@ -73,6 +73,50 @@ function prefixColumns(columns: string[], prefixes: string[]): string[] {
   return columns.map((column) => [...prefixes, column].join('.'));
 }
 
+/**
+ * Generates a list of unique column names based on preferred and fallback names.
+ *
+ * @generator
+ * @param {number} count - The number of unique column names to generate.
+ * @param {Array<Array<string | undefined>>} preferredNames - A 2D array where each sub-array contains a list of names.
+ * @param {string[]} fallbackNames - An array of fallback names to use if no preferred name is defined.
+ * @yields {string} - A list of column names, such that no two are the same.
+ */
+function* yieldUniqueColumnNames(
+  count: number,
+  preferredNames: Array<Array<string | undefined>>,
+  fallbackNames: string[]
+): Generator<string, void> {
+  const knownNames = new Set<string>();
+
+  for (let i = 0; i < count; i++) {
+    let selectedName: string = fallbackNames[i];
+
+    for (const nameList of preferredNames) {
+      const name = nameList[i];
+      if (name) {
+        selectedName = name;
+        break;
+      }
+    }
+
+    let postfixString = '';
+
+    if (knownNames.has(selectedName)) {
+      for (let postfix = 2; ; postfix++) {
+        postfixString = `_${postfix}`;
+        if (!knownNames.has(selectedName + postfixString)) {
+          break;
+        }
+      }
+    }
+
+    selectedName += postfixString;
+    knownNames.add(selectedName);
+    yield selectedName;
+  }
+}
+
 // Converts CSV samples into JSON samples.
 export async function handleCSV({
   state,
@@ -100,12 +144,11 @@ export async function handleCSV({
   const headerColumns = state.samplesFormat.header
     ? columnsFromHeader(temporaryColumns, tempResults[0])
     : [];
+  const llmProvidedColumns = (state.samplesFormat.columns || []).map(toSafeColumnName);
   const needColumns = totalColumnCount(temporaryColumns, tempResults);
-  const columns: string[] = [];
-
-  for (let i = 0; i < needColumns; i++) {
-    columns[i] = headerColumns[i] || temporaryColumns[i];
-  }
+  const columns: string[] = Array.from(
+    yieldUniqueColumnNames(needColumns, [llmProvidedColumns, headerColumns], temporaryColumns)
+  );
 
   const prefix = [packageName, dataStreamName];
   const prefixedColumns = prefixColumns(columns, prefix);
