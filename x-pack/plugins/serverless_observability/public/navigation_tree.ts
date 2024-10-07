@@ -156,7 +156,7 @@ export const navigationTree: NavigationTreeDefinition = {
         {
           id: 'machine_learning-landing',
           renderAs: 'panelOpener',
-          title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+          title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
             defaultMessage: 'Machine learning',
           }),
           children: [
@@ -170,24 +170,30 @@ export const navigationTree: NavigationTreeDefinition = {
                 },
                 {
                   link: 'ml:memoryUsage',
-                  title: i18n.translate('xpack.observability.obltNav.machineLearning.memoryUsage', {
-                    defaultMessage: 'Memory usage',
-                  }),
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.machineLearning.memoryUsage',
+                    {
+                      defaultMessage: 'Memory usage',
+                    }
+                  ),
                 },
               ],
             },
             {
               id: 'category-anomaly_detection',
-              title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.anomaly_detection', {
                 defaultMessage: 'Anomaly detection',
               }),
               breadcrumbStatus: 'hidden',
               children: [
                 {
                   link: 'ml:anomalyDetection',
-                  title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
-                    defaultMessage: 'Jobs',
-                  }),
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.anomaly_detection.jobs',
+                    {
+                      defaultMessage: 'Jobs',
+                    }
+                  ),
                 },
                 {
                   link: 'ml:anomalyExplorer',
@@ -205,7 +211,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
             {
               id: 'category-data_frame analytics',
-              title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.data_frame_analytics', {
                 defaultMessage: 'Data frame analytics',
               }),
               breadcrumbStatus: 'hidden',
@@ -213,7 +219,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:dataFrameAnalytics',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
+                    'xpack.serverlessObservability.nav.ml.data_frame_analytics.jobs',
                     {
                       defaultMessage: 'Jobs',
                     }
@@ -229,7 +235,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
             {
               id: 'category-model_management',
-              title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.model_management', {
                 defaultMessage: 'Model management',
               }),
               breadcrumbStatus: 'hidden',
@@ -237,7 +243,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:nodesOverview',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.model_management.trainedModels',
+                    'xpack.serverlessObservability.nav.ml.model_management.trainedModels',
                     {
                       defaultMessage: 'Trained models',
                     }
@@ -247,7 +253,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
             {
               id: 'category-data_visualizer',
-              title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.data_visualizer', {
                 defaultMessage: 'Data visualizer',
               }),
               breadcrumbStatus: 'hidden',
@@ -255,7 +261,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:fileUpload',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.file_data_visualizer',
                     {
                       defaultMessage: 'File data visualizer',
                     }
@@ -264,7 +270,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:indexDataVisualizer',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.data_visualizer.data_view_data_visualizer',
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.data_view_data_visualizer',
                     {
                       defaultMessage: 'Data view data visualizer',
                     }
@@ -273,7 +279,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:dataDrift',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.data_visualizer.data_drift',
+                    'xpack.serverlessObservability.nav.ml.data_visualizer.data_drift',
                     {
                       defaultMessage: 'Data drift',
                     }
@@ -283,7 +289,7 @@ export const navigationTree: NavigationTreeDefinition = {
             },
             {
               id: 'category-aiops_labs',
-              title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
+              title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
                 defaultMessage: 'Aiops labs',
               }),
               breadcrumbStatus: 'hidden',
@@ -291,7 +297,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:logRateAnalysis',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.log_rate_analysis',
                     {
                       defaultMessage: 'Log rate analysis',
                     }
@@ -300,7 +306,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:logPatternAnalysis',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
                     {
                       defaultMessage: 'Log pattern analysis',
                     }
@@ -309,7 +315,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 {
                   link: 'ml:changePointDetections',
                   title: i18n.translate(
-                    'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
+                    'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
                     {
                       defaultMessage: 'Change point detection',
                     }
