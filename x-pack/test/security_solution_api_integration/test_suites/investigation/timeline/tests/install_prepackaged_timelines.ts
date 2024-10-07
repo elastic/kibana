@@ -14,7 +14,6 @@ import { deleteAllTimelines } from '../utils';
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const log = getService('log');
 
   describe('install_prepackaged_timelines', () => {
     describe('creating prepackaged rules', () => {
