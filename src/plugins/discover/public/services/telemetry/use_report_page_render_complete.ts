@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { PerformanceContext } from '@kbn/ebt-tools';
 
 let isInitialRenderComplete = false;
@@ -24,11 +24,9 @@ export const useReportPageRenderComplete = (isReady: boolean = false) => {
     onPageReady?.();
   }, [onPageReady]);
 
-  useEffect(() => {
-    if (isReady) {
-      onInitialRenderComplete();
-    }
-  }, [isReady, onInitialRenderComplete]);
+  if (isReady) {
+    onInitialRenderComplete();
+  }
 
   return onInitialRenderComplete;
 };
