@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
-import { GridData } from '../content_management';
+import type { GridData } from '../../server/dashboard_saved_object';
 
 interface KibanaAttributes {
   kibanaSavedObjectMeta: {

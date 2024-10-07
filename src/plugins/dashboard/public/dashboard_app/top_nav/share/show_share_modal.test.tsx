@@ -8,7 +8,7 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../../common';
+import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 
 import { shareService } from '../../../services/kibana_services';
@@ -143,7 +143,7 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToSavedPanels(unsavedDashboardState.panels),
+      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(

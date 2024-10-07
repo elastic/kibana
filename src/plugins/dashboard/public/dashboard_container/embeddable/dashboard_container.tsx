@@ -25,7 +25,7 @@ import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -69,12 +69,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
-import {
-  DashboardAttributes,
-  DashboardContainerInput,
-  DashboardPanelMap,
-  DashboardPanelState,
-} from '../../../common';
+import type { DashboardAttributes } from '../../../server/content_management';
+import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -886,15 +882,19 @@ export class DashboardContainer
   public getSerializedStateForControlGroup = () => {
     return {
       rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
+        ? this.controlGroupInput
+        : {
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
+            panels: [],
+            ignoreParentSettings: {
+              ignoreFilters: false,
+              ignoreQuery: false,
+              ignoreTimerange: false,
+              ignoreValidations: false,
+            },
+          },
       references: getReferencesForControls(this.savedObjectReferences),
     };
   };

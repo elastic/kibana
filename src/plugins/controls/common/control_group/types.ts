@@ -9,10 +9,12 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
+import { CONTROL_CHAINING_OPTIONS } from '../constants';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
 
-export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
+export type ControlGroupChainingSystem =
+  (typeof CONTROL_CHAINING_OPTIONS)[keyof typeof CONTROL_CHAINING_OPTIONS];
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
@@ -45,9 +47,11 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
 }
 
 export interface ControlGroupSerializedState
-  extends Pick<ControlGroupRuntimeState, 'chainingSystem' | 'editorConfig'> {
-  panelsJSON: string; // stringified version of ControlSerializedState
-  ignoreParentSettingsJSON: string;
+  extends Pick<
+    ControlGroupRuntimeState,
+    'chainingSystem' | 'editorConfig' | 'ignoreParentSettings'
+  > {
+  panels: Array<ControlPanelState & { id: string }>;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlLabelPosition;
