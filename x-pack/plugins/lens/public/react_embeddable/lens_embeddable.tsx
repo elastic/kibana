@@ -109,6 +109,7 @@ export const createLensEmbeddableFactory = (
         uuid,
         initialState,
         getState,
+        parentApi,
         dashboardConfig.api,
         visualizationContextHelper,
         services

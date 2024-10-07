@@ -20,6 +20,8 @@ import {
 import {
   PublishingSubject,
   StateComparators,
+  apiPublishesTimeslice,
+  apiPublishesUnifiedSearch,
   getUnchangingComparator,
 } from '@kbn/presentation-publishing';
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
@@ -39,6 +41,7 @@ import type {
   ViewUnderlyingDataArgs,
   VisualizationContextHelper,
 } from '../types';
+import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
@@ -123,17 +126,24 @@ function getViewUnderlyingDataArgs({
 function computeViewUnderlyingDataArgs(
   state: LensRuntimeState,
   { getVisualizationContext }: VisualizationContextHelper,
-  { capabilities, uiSettings, injectFilterReferences, data }: LensEmbeddableStartServices
+  parentApi: unknown,
+  {
+    capabilities,
+    uiSettings,
+    injectFilterReferences,
+    data,
+    datasourceMap,
+    visualizationMap,
+  }: LensEmbeddableStartServices
 ) {
-  const {
-    doc,
-    activeData,
-    activeDatasource,
-    activeDatasourceState,
-    activeVisualizationState,
-    activeVisualization,
-    indexPatterns,
-  } = getVisualizationContext();
+  const { doc, activeData, activeDatasourceState, activeVisualizationState, indexPatterns } =
+    getVisualizationContext();
+  const activeVisualizationId = getActiveVisualizationIdFromDoc(doc);
+  const activeDatasourceId = getActiveDatasourceIdFromDoc(doc);
+  const activeVisualization = activeVisualizationId
+    ? visualizationMap[activeVisualizationId]
+    : undefined;
+  const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : undefined;
   if (
     !doc ||
     !activeData ||
@@ -145,13 +155,19 @@ function computeViewUnderlyingDataArgs(
     return;
   }
 
+  const { filters$, query$, timeRange$ } = apiPublishesUnifiedSearch(parentApi)
+    ? parentApi
+    : { filters$: undefined, query$: undefined, timeRange$: undefined };
+
+  const { timeslice$ } = apiPublishesTimeslice(parentApi) ? parentApi : { timeslice$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
-      filters: state.filters,
-      query: state.query,
-      timeRange: state.timeRange,
-      timeslice: state.timeslice,
+      filters: filters$?.getValue(),
+      query: query$?.getValue(),
+      timeRange: timeRange$?.getValue(),
+      timeslice: timeslice$?.getValue(),
     },
     {
       data,
@@ -189,6 +205,7 @@ function computeViewUnderlyingDataArgs(
 function createViewUnderlyingDataApis(
   getState: GetStateType,
   visualizationContextHelper: VisualizationContextHelper,
+  parentApi: unknown,
   services: LensEmbeddableStartServices
 ): ViewInDiscoverCallbacks {
   let viewUnderlyingDataArgs: undefined | ViewUnderlyingDataArgs;
@@ -198,6 +215,7 @@ function createViewUnderlyingDataApis(
       viewUnderlyingDataArgs = computeViewUnderlyingDataArgs(
         getState(),
         visualizationContextHelper,
+        parentApi,
         services
       );
       return Boolean(viewUnderlyingDataArgs);
@@ -216,6 +234,7 @@ export function initializeActionApi(
   uuid: string,
   initialState: LensRuntimeState,
   getLatestState: GetStateType,
+  parentApi: unknown,
   titleApi: { panelTitle: PublishingSubject<string | undefined> },
   visualizationContextHelper: VisualizationContextHelper,
   services: LensEmbeddableStartServices
@@ -235,7 +254,12 @@ export function initializeActionApi(
   return {
     api: {
       ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-      ...createViewUnderlyingDataApis(getLatestState, visualizationContextHelper, services),
+      ...createViewUnderlyingDataApis(
+        getLatestState,
+        visualizationContextHelper,
+        parentApi,
+        services
+      ),
     },
     comparators: {
       ...(dynamicActionsApi?.dynamicActionsComparator ?? {

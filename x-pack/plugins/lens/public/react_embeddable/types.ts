@@ -68,14 +68,12 @@ import type {
 } from '../async_services';
 import type {
   AddUserMessages,
-  Datasource,
   DatasourceMap,
   IndexPatternMap,
   IndexPatternRef,
   LensTableRowContextMenuEvent,
   Simplify,
   UserMessage,
-  Visualization,
   VisualizationMap,
 } from '../types';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -99,9 +97,7 @@ export interface VisualizationContext {
   mergedSearchContext: ExecutionContextSearch;
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
-  activeVisualization: Visualization | undefined;
   activeVisualizationState: unknown;
-  activeDatasource: Datasource | undefined;
   activeDatasourceState: unknown;
   activeData?: TableInspectorAdapter;
 }

@@ -14,9 +14,7 @@ export function initializeVisualizationContext(): VisualizationContextHelper {
     mergedSearchContext: {},
     indexPatterns: {},
     indexPatternRefs: [],
-    activeVisualization: undefined,
     activeVisualizationState: undefined,
-    activeDatasource: undefined,
     activeDatasourceState: undefined,
     activeData: undefined,
   };
