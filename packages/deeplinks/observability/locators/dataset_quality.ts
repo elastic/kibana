@@ -27,7 +27,6 @@ type TimeRangeConfig = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Filters = {
   timeRange: TimeRangeConfig;
-  query?: string;
 };
 
 export interface DataQualityLocatorParams extends SerializableRecord {

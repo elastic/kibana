@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
-import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import {
+  DataQualityDetailsLocatorParams,
+  DATA_QUALITY_DETAILS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 
@@ -24,17 +27,14 @@ export const DatasetQualityLink: React.FC<DatasetQualityLinkProps> = React.memo(
       },
     } = useKibanaContextForPlugin();
     const { startDate, endDate } = dateRangePickerState;
-    const locator = url.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
+    const locator = url.locators.get<DataQualityDetailsLocatorParams>(
+      DATA_QUALITY_DETAILS_LOCATOR_ID
+    );
     const onClickDataQuality = async () => {
-      const locatorParams: DataQualityLocatorParams = {
-        filters: {
-          timeRange: { from: startDate, to: endDate, refresh: { pause: true, value: 0 } },
-        },
+      const locatorParams: DataQualityDetailsLocatorParams = {
+        dataStream: dataStreamName,
+        timeRange: { from: startDate, to: endDate, refresh: { pause: true, value: 0 } },
       };
-      const dataset = getDatasetFromDataStream(dataStreamName);
-      if (locatorParams?.filters && dataset) {
-        locatorParams.filters.query = dataset;
-      }
       if (locator) {
         await locator.navigate(locatorParams);
       }
@@ -42,11 +42,3 @@ export const DatasetQualityLink: React.FC<DatasetQualityLinkProps> = React.memo(
     return <EuiListGroupItem label="View data quality" onClick={onClickDataQuality} />;
   }
 );
-
-function getDatasetFromDataStream(dataStreamName: string): string | null {
-  const parts = dataStreamName.split('-');
-  if (parts.length !== 3) {
-    return null;
-  }
-  return parts[1];
-}
