@@ -156,14 +156,16 @@ export const getUrlPathCompletionItems = (
     filterTermsWithoutName(autoCompleteSet)
       // map autocomplete items to completion items
       .map((item) => {
-        return {
-          label: item.name + '',
-          insertText: item.name + '',
-          detail: item.meta ?? i18nTexts.endpoint,
-          // the kind is only used to configure the icon
-          kind: monaco.languages.CompletionItemKind.Constant,
-          range,
-        };
+        if (!item.name.startsWith('.') || lineContent.trim().endsWith('.')) {
+          return {
+            label: item.name + '',
+            insertText: item.name + '',
+            detail: item.meta ?? i18nTexts.endpoint,
+            // the kind is only used to configure the icon
+            kind: monaco.languages.CompletionItemKind.Constant,
+            range,
+          };
+        }
       })
   );
 };
