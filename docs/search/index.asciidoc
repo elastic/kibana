@@ -31,9 +31,9 @@ Use the following table to find links to the appropriate documentation, API refe
 | {ref}/es-connectors-release-notes.html[Elasticsearch guide]
 
 | Web crawler
-| link:https://www.elastic.co/guide/en/app-search/current/web-crawler-api-reference.html[API reference]
-| link:https://www.elastic.co/guide/en/enterprise-search/current/crawler.html[Documentation]
-| link:https://www.elastic.co/guide/en/enterprise-search/current/changelog.html[Enterprise Search Guide]
+| N/A
+| {enterprise-search-ref}/crawler.html[Documentation]
+| {enterprise-search-ref}/changelog.html[Enterprise Search Guide]
 
 | Playground
 | N/A
