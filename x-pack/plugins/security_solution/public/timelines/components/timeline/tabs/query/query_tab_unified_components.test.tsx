@@ -299,8 +299,8 @@ describe('query tab with unified timeline', () => {
 
   describe('pagination', () => {
     beforeEach(() => {
-      // should return all the records instead just 3
-      // as the case in the default mock
+      // pagination tests need more than 1 record so here
+      // we return 5 records instead of just 1.
       useTimelineEventsMock = jest.fn(() => [
         false,
         {
@@ -310,6 +310,13 @@ describe('query tab with unified timeline', () => {
             totalPages: 5,
           },
           refreshedAt: Date.now(),
+          /*
+           * `totalCount` could be any number w.r.t this test
+           * and actually means total hits on elastic search
+           * and not the fecthed number of records.
+           *
+           * This helps in testing `sampleSize` and `loadMore`
+           */
           totalCount: 50,
           loadPage: loadPageMock,
         },
@@ -332,6 +339,7 @@ describe('query tab with unified timeline', () => {
             timelineById: {
               [TimelineId.test]: {
                 ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                /* 1 record for each page */
                 itemsPerPage: 1,
                 itemsPerPageOptions: [1, 2, 3, 4, 5],
                 savedObjectId: 'timeline-1', // match timelineId in mocked notes data
@@ -382,6 +390,10 @@ describe('query tab with unified timeline', () => {
               [TimelineId.test]: {
                 ...mockGlobalState.timeline.timelineById[TimelineId.test],
                 itemsPerPage: 1,
+                /*
+                 * `sampleSize` is the max number of records that are fetched from elasticsearch
+                 * in one request. If hits > sampleSize, you can fetch more records ( <= sampleSize)
+                 */
                 sampleSize: 5,
                 itemsPerPageOptions: [1, 2, 3, 4, 5],
                 savedObjectId: 'timeline-1', // match timelineId in mocked notes data
