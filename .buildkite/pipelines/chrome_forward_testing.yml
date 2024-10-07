@@ -31,18 +31,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/quick_checks.sh
-    label: 'Quick Checks'
-    agents:
-      machineType: n2-highcpu-8
-      preemptible: true
-    key: quick_checks
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
@@ -80,7 +68,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -95,7 +82,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -110,7 +96,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -125,7 +110,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -140,7 +124,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -155,7 +138,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -170,7 +152,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -185,7 +166,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -200,7 +180,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -215,7 +194,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 5
     retry:
@@ -230,7 +208,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -245,7 +222,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -260,7 +236,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 1
     retry:
@@ -275,7 +250,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -290,7 +264,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
     retry:
@@ -305,7 +278,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:
@@ -320,7 +292,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -335,7 +306,6 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -352,7 +322,6 @@ steps:
       machineType: n2-standard-4
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 20
     retry:
@@ -369,7 +338,6 @@ steps:
       machineType: n2-standard-4
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
     parallelism: 14
     retry:
