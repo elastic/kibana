@@ -12,10 +12,10 @@ import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
 import webpack, { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
+// @ts-expect-error
+import nodeLibsBrowser from 'node-libs-browser';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
-//@ts-expect-error
-import nodeLibsBrowser from 'node-libs-browser';
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 

@@ -9,7 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
-//@ts-expect-error
+// @ts-expect-error
 const nodeLibsBrowser = require('node-libs-browser');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');

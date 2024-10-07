@@ -13,7 +13,7 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
-//@ts-expect-error
+// @ts-expect-error
 const nodeLibsBrowser = require('node-libs-browser');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');

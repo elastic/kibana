@@ -10,7 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
-//@ts-expect-error
+// @ts-expect-error
 import nodeLibsBrowser from 'node-libs-browser';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {

@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import webpack from 'webpack';
-//@ts-expect-error
+// @ts-expect-error
 import nodeLibsBrowser from 'node-libs-browser';
 import TerserPlugin from 'terser-webpack-plugin';
 import { merge as webpackMerge } from 'webpack-merge';
