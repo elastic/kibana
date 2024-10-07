@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   Logger,
   ISavedObjectsRepository,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -58,7 +59,7 @@ export interface UnsecuredServices {
 }
 
 export interface HookServices {
-  scopedClusterClient: ElasticsearchClient;
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface ActionsApiRequestHandlerContext {

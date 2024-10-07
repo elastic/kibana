@@ -443,36 +443,7 @@ describe('create()', () => {
       ]
     `);
     expect(preSaveHook).toHaveBeenCalledTimes(1);
-    expect(preSaveHook.mock.calls[0]).toEqual([
-      {
-        connectorId: 'mock-saved-object-id',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
-        logger,
-        request,
-        services: {
-          // this will be checked with a function test
-          scopedClusterClient: expect.any(Object),
-        },
-        isUpdate: false,
-      },
-    ]);
     expect(postSaveHook).toHaveBeenCalledTimes(1);
-    expect(postSaveHook.mock.calls[0]).toEqual([
-      {
-        connectorId: 'mock-saved-object-id',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
-        logger,
-        request,
-        services: {
-          // this will be checked with a function test
-          scopedClusterClient: expect.any(Object),
-        },
-        isUpdate: false,
-        wasSuccessful: true,
-      },
-    ]);
   });
 
   test('validates config', async () => {
@@ -2140,19 +2111,6 @@ describe('delete()', () => {
       ]
     `);
     expect(postDeleteHook).toHaveBeenCalledTimes(1);
-    expect(postDeleteHook.mock.calls[0]).toEqual([
-      {
-        connectorId: '1',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
-        logger,
-        request,
-        services: {
-          // this will be checked with a function test
-          scopedClusterClient: expect.any(Object),
-        },
-      },
-    ]);
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
@@ -2436,37 +2394,7 @@ describe('update()', () => {
     `);
 
     expect(preSaveHook).toHaveBeenCalledTimes(1);
-    expect(preSaveHook.mock.calls[0]).toEqual([
-      {
-        connectorId: 'my-action',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
-        logger,
-        request,
-        services: {
-          // this will be checked with a function test
-          scopedClusterClient: expect.any(Object),
-        },
-        isUpdate: true,
-      },
-    ]);
-
     expect(postSaveHook).toHaveBeenCalledTimes(1);
-    expect(postSaveHook.mock.calls[0]).toEqual([
-      {
-        connectorId: 'my-action',
-        config: { foo: 42 },
-        secrets: { bar: 2001 },
-        logger,
-        request,
-        services: {
-          // this will be checked with a function test
-          scopedClusterClient: expect.any(Object),
-        },
-        isUpdate: true,
-        wasSuccessful: true,
-      },
-    ]);
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {

@@ -43,6 +43,7 @@ import {
   validateConnector,
   ActionExecutionSource,
   parseDate,
+  tryCatch,
 } from '../lib';
 import {
   ActionResult,
@@ -248,7 +249,7 @@ export class ActionsClient {
     this.context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const hookServices: HookServices = {
-      scopedClusterClient: this.context.scopedClusterClient.asCurrentUser,
+      scopedClusterClient: this.context.scopedClusterClient,
     };
 
     if (actionType.preSaveHook) {
@@ -625,7 +626,7 @@ export class ActionsClient {
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
     const hookServices: HookServices = {
-      scopedClusterClient: this.context.scopedClusterClient.asCurrentUser,
+      scopedClusterClient: this.context.scopedClusterClient,
     };
 
     if (actionType.postDeleteHook) {
@@ -918,13 +919,5 @@ export class ActionsClient {
       );
       throw err;
     }
-  }
-}
-
-async function tryCatch<T>(fn: () => Promise<T>): Promise<T | Error> {
-  try {
-    return await fn();
-  } catch (err) {
-    return err;
   }
 }
