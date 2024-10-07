@@ -18,5 +18,8 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
+    "@kbn/product-doc-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/utils",
   ]
 }
