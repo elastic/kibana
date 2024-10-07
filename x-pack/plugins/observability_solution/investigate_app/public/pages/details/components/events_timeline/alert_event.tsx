@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LineAnnotation } from '@elastic/charts';
+import { LineAnnotation, AnnotationDomainType } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
@@ -15,23 +15,11 @@ export const AlertEvent = ({ event }: { event: EventSchema }) => {
   return (
     <LineAnnotation
       id={event.id}
-      domainType="xDomain"
+      domainType={AnnotationDomainType.XDomain}
       marker={
-        <>
-          <div
-            style={{
-              marginTop: -10,
-              backgroundColor: 'red',
-              borderRadius: 4,
-              padding: 4,
-              display: 'flex',
-              height: 20,
-              width: 20,
-            }}
-          >
-            <EuiIcon type="warning" size="s" color="white" />
-          </div>
-        </>
+        <span>
+          <EuiIcon style={{ marginTop: -16 }} type="dot" size="l" color="danger" />
+        </span>
       }
       markerPosition="bottom"
       dataValues={[

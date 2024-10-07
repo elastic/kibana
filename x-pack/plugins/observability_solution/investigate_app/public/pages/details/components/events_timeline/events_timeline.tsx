@@ -94,6 +94,7 @@ export const EventsTimeLine = () => {
             { x: moment(globalParams.timeRange.from).valueOf(), y: 0 },
             { x: moment(globalParams.timeRange.to).valueOf(), y: 0 },
           ]}
+          filterSeriesInTooltip={() => false}
         />
       </Chart>
     </>

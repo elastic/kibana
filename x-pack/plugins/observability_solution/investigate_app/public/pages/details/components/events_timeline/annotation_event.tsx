@@ -27,7 +27,7 @@ export function AnnotationEvent({ event }: { event: EventSchema }) {
       ]}
       marker={
         <span>
-          <EuiIcon style={{ marginTop: -16 }} type={'dot'} size="l" />
+          <EuiIcon style={{ marginTop: -16 }} type="dot" size="l" />
         </span>
       }
       markerPosition="bottom"
