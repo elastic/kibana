@@ -10,14 +10,17 @@ import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { last, omit } from 'lodash';
+import { castArray, last, omit } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMConfig } from '../..';
 import {
   AGENT_NAME,
   CHILD_ID,
-  ERROR_EXCEPTION,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_ID,
   ERROR_LOG_LEVEL,
@@ -95,6 +98,17 @@ export async function getTraceItems({
     PROCESSOR_EVENT,
   ] as const);
 
+  const optionalFields = asMutableArray([
+    PARENT_ID,
+    TRANSACTION_ID,
+    SPAN_ID,
+    ERROR_CULPRIT,
+    ERROR_LOG_MESSAGE,
+    ERROR_EXC_MESSAGE,
+    ERROR_EXC_HANDLED,
+    ERROR_EXC_TYPE,
+  ] as const);
+
   const errorResponsePromise = apmEventClient.search('get_errors_docs', {
     apm: {
       sources: [
@@ -113,8 +127,8 @@ export async function getTraceItems({
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
-      fields: [...requiredFields, PARENT_ID, TRANSACTION_ID, SPAN_ID],
-      _source: [ERROR_LOG_MESSAGE, ERROR_EXCEPTION],
+      fields: [...requiredFields, ...optionalFields],
+      _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
     },
   });
 
@@ -146,11 +160,16 @@ export async function getTraceItems({
     const waterfallErrorEvent: WaterfallError = {
       ...event,
       error: {
-        ...event.error,
+        ...(event.error ?? {}),
+        exception: castArray(
+          errorSource?.error.exception && errorSource?.error.exception?.length > 1
+            ? errorSource?.error.exception
+            : event?.error.exception
+        ),
         log: errorSource?.error.log,
-        exception: errorSource?.error.exception,
       },
     };
+
     return waterfallErrorEvent;
   });
 

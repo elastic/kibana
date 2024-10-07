@@ -143,7 +143,11 @@ export async function getMobileErrorGroupMainStatistics({
         ...event,
         error: {
           ...(event.error ?? {}),
-          exception: castArray(errorSource?.error.exception ?? event?.error.exception),
+          exception: castArray(
+            errorSource?.error.exception && errorSource?.error.exception?.length > 1
+              ? errorSource?.error.exception
+              : event?.error.exception
+          ),
         },
       };
 
