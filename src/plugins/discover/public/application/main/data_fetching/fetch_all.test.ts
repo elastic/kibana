@@ -69,6 +69,7 @@ describe('test fetchAll', () => {
       getAppState: () => ({}),
       getInternalState: () => ({
         dataView: undefined,
+        isLoading: false,
         isDataViewLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
@@ -262,6 +263,7 @@ describe('test fetchAll', () => {
       getInternalState: () => ({
         dataView: undefined,
         isDataViewLoading: false,
+        isLoading: false,
         savedDataViews: [],
         adHocDataViews: [],
         expandedDoc: undefined,
@@ -384,6 +386,7 @@ describe('test fetchAll', () => {
         getInternalState: () => ({
           dataView: undefined,
           isDataViewLoading: false,
+          isLoading: false,
           savedDataViews: [],
           adHocDataViews: [],
           expandedDoc: undefined,

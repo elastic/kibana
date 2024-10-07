@@ -42,12 +42,18 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
+
+// enabled for debugging
+if (window) {
+  // @ts-ignore
+  window.ELASTIC_DISCOVER_LOGGER = `debug`;
+}
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -180,17 +186,45 @@ export const useDiscoverHistogram = ({
           totalHitsResult &&
           typeof result !== 'number'
         ) {
-          // ignore the histogram initial loading state if discover state already has a total hits value
+          addLog(
+            '[UnifiedHistogram] ignore the histogram initial loading state if discover state already has a total hits value',
+            { status, result }
+          );
           return;
+        }
+
+        const fetchStatus = status.toString() as FetchStatus;
+        if (
+          fetchStatus === FetchStatus.COMPLETE &&
+          savedSearchData$.totalHits$.getValue().fetchStatus === FetchStatus.COMPLETE &&
+          result !== savedSearchData$.totalHits$.getValue().result
+        ) {
+          // this is a workaround to make sure the new total hits value is displayed
+          // a different value without a loading state in between would lead to be ignored by useDataState
+          addLog(
+            '[UnifiedHistogram] send loading state to total hits$ to make sure the new value is displayed',
+            { status, result }
+          );
+          savedSearchData$.totalHits$.next({
+            fetchStatus: FetchStatus.LOADING,
+          });
         }
 
         // Sync the totalHits$ observable with the unified histogram state
         savedSearchData$.totalHits$.next({
-          fetchStatus: status.toString() as FetchStatus,
+          fetchStatus,
           result,
         });
 
-        if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
+        if (
+          (status !== UnifiedHistogramFetchStatus.complete &&
+            status !== UnifiedHistogramFetchStatus.partial) ||
+          typeof result !== 'number'
+        ) {
+          addLog(
+            '[UnifiedHistogram] ignore the histogram complete/partial state if discover state already has a total hits value',
+            { status, result }
+          );
           return;
         }
 

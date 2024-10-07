@@ -369,14 +369,14 @@ export function DiscoverMainLoading({
   mainContent: JSX.Element;
 }) {
   const loading = useInternalStateSelector((state) => state.isLoading);
-  if (loading && !showNoDataPage) {
-    return <LoadingIndicator />;
-  }
 
   return (
     <>
-      <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={showNoDataPage} />
-      {mainContent}
+      <DiscoverTopNavInline
+        stateContainer={stateContainer}
+        hideNavMenuItems={showNoDataPage || loading}
+      />
+      {loading && !showNoDataPage ? <LoadingIndicator /> : mainContent}
     </>
   );
 }
