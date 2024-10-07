@@ -11,13 +11,6 @@ import { ToastInputFields } from '@kbn/core/public';
 import { formatMsg } from '../lib/format_msg';
 import { coreServices } from './kibana_services';
 
-interface CanvasNotifyService {
-  error: (err: string | Error, opts?: ToastInputFields) => void;
-  warning: (err: string | Error, opts?: ToastInputFields) => void;
-  info: (err: string | Error, opts?: ToastInputFields) => void;
-  success: (err: string | Error, opts?: ToastInputFields) => void;
-}
-
 const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   const errData = (get(err, 'response') || err) as Error | string;
   const errBody = get(err, 'body', undefined);
@@ -35,6 +28,13 @@ const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
     text,
   };
 };
+
+export interface CanvasNotifyService {
+  error: (err: string | Error, opts?: ToastInputFields) => void;
+  warning: (err: string | Error, opts?: ToastInputFields) => void;
+  info: (err: string | Error, opts?: ToastInputFields) => void;
+  success: (err: string | Error, opts?: ToastInputFields) => void;
+}
 
 export const getCanvasNotifyService = (): CanvasNotifyService => {
   const toasts = coreServices.notifications.toasts;
