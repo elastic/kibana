@@ -10,7 +10,7 @@ import type { EntityType } from '../../../../common/api/entity_analytics/entity_
 import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import { ENTITY_STORE_DEFAULT_SOURCE_INDICES } from './constants';
-import { buildEntityDefinitionId } from './utils/utils';
+import { buildEntityDefinitionId } from './utils';
 
 const RISK_FIELDS = ['calculated_level', 'calculated_score', 'calculated_score_norm'];
 

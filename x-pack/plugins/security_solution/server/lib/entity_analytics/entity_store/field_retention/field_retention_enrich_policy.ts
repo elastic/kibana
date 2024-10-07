@@ -16,7 +16,7 @@ import {
   type FieldRetentionDefinition,
   getFieldRetentionDefinitionWithDefaults,
 } from './field_retention_definitions';
-import { getEntitiesIndexName } from '../utils/utils';
+import { getEntitiesIndexName } from '../utils';
 import { buildFieldRetentionIngestPipeline } from './build_field_retention_ingest_pipeline';
 
 const getEnrichPolicyName = (namespace: string, entityType: EntityType) => {

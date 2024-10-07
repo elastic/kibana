@@ -7,7 +7,7 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldRetentionDefinition } from './field_retention_definitions';
-import { getIdentityFieldForEntityType } from '../utils/utils';
+import { getIdentityFieldForEntityType } from '../utils';
 import {
   debugDeepCopyContextStep,
   getDotExpanderSteps,
