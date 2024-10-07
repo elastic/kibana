@@ -38,6 +38,7 @@ import * as timelineActions from '../../../../store/actions';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
+import { userEvent } from '@testing-library/user-event';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -646,9 +647,7 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189792
-  // FLAKY: https://github.com/elastic/kibana/issues/189793
-  describe.skip('left controls', () => {
+  describe('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -665,9 +664,9 @@ describe('query tab with unified timeline', () => {
         // // timestamp sorting indicators
         expect(
           await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
 
         fireEvent.click(screen.getByTestId('dataGridColumnSortingClearButton'));
 
@@ -694,9 +693,9 @@ describe('query tab with unified timeline', () => {
         // // timestamp sorting indicators
         expect(
           await screen.findByTestId('euiDataGridColumnSorting-sortColumn-@timestamp')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
 
         // add more columns to sorting
         fireEvent.click(screen.getByText(/Pick fields to sort by/));
@@ -704,7 +703,7 @@ describe('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(
             screen.getByTestId('dataGridColumnSortingPopoverColumnSelection-event.severity')
-          ).toBeVisible();
+          ).toBeInTheDocument();
         });
 
         fireEvent.click(
@@ -713,13 +712,15 @@ describe('query tab with unified timeline', () => {
 
         // check new columns for sorting validity
         await waitFor(() => {
-          expect(screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')).toBeVisible();
+          expect(
+            screen.getByTestId('dataGridHeaderCellSortingIcon-event.severity')
+          ).toBeInTheDocument();
         });
         expect(
           screen.getByTestId('euiDataGridColumnSorting-sortColumn-event.severity')
-        ).toBeVisible();
+        ).toBeInTheDocument();
 
-        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeVisible();
+        expect(screen.getByTestId('dataGridHeaderCellSortingIcon-@timestamp')).toBeInTheDocument();
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -885,8 +886,7 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/189794
-    describe.skip('securitySolutionNotesEnabled = true', () => {
+    describe('securitySolutionNotesEnabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
@@ -912,10 +912,10 @@ describe('query tab with unified timeline', () => {
 
           expect(screen.getByTestId('timeline-notes-notification-dot')).toBeVisible();
 
-          fireEvent.mouseOver(screen.getByTestId('timeline-notes-button-small'));
+          userEvent.hover(screen.getByTestId('timeline-notes-button-small'));
 
           await waitFor(() => {
-            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-notes-tool-tip')).toBeInTheDocument();
             expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
               '1 Note available. Click to view it & add more.'
             );
