@@ -6,6 +6,7 @@
  */
 
 import { defaultConfig } from '@kbn/storybook';
+import { Configuration } from 'webpack';
 
 module.exports = {
   ...defaultConfig,
@@ -13,8 +14,8 @@ module.exports = {
   reactOptions: {
     strictMode: true,
   },
-  webpack: async (config) => {
-    config.module.rules.push({
+  webpack: (config: Configuration) => {
+    config.module?.rules.push({
       test: /\.js$/,
       include: /node_modules[\\\/]@dagrejs/,
       use: {
@@ -25,7 +26,7 @@ module.exports = {
         },
       },
     });
-    config.module.rules.push({
+    config.module?.rules.push({
       test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
       loaders: 'babel-loader',
       options: {
