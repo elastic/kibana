@@ -28,7 +28,7 @@ const READ_SCENARIOS = [
   },
   {
     user: testUsers.fleet_agent_policies_read_only,
-    statusCode: 403,
+    statusCode: 200,
   },
   {
     user: testUsers.fleet_agent_policies_all_only,
