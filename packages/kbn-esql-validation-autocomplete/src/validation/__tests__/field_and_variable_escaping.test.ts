@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FunctionParameterType } from '../../definitions/types';
+import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 
 describe('field and variable escaping', () => {
@@ -99,6 +101,105 @@ describe('field and variable escaping', () => {
     it.each(cases)('$name accepts escaped fields', async ({ command }) => {
       const { expectErrors } = await setup();
       await expectErrors(command, []);
+    });
+  });
+});
+
+describe('variable support', () => {
+  describe('variable data type detection', () => {
+    beforeAll(() => {
+      setTestFunctions([
+        // this test function is just used to test the type of the variable
+        {
+          type: 'eval',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          name: 'test',
+          signatures: [
+            { params: [{ name: 'arg', type: 'cartesian_point' }], returnType: 'cartesian_point' },
+          ],
+        },
+        // this test function is used to check that the correct return type is used
+        // when determining variable types
+        {
+          type: 'eval',
+          description: 'Test function',
+          supportedCommands: ['eval'],
+          name: 'return_value',
+          signatures: [
+            { params: [{ name: 'arg', type: 'text' }], returnType: 'text' },
+            { params: [{ name: 'arg', type: 'double' }], returnType: 'double' },
+            {
+              params: [
+                { name: 'arg', type: 'double' },
+                { name: 'arg', type: 'text' },
+              ],
+              returnType: 'long',
+            },
+          ],
+        },
+      ]);
+    });
+
+    afterAll(() => {
+      setTestFunctions([]);
+    });
+
+    const expectType = (type: FunctionParameterType) =>
+      `Argument of [test] must be [cartesian_point], found value [var] type [${type}]`;
+
+    test('literals', async () => {
+      const { expectErrors } = await setup();
+      // literal assignment
+      await expectErrors('FROM index | EVAL var = 1, TEST(var)', [expectType('integer')]);
+      // literal expression
+      await expectErrors('FROM index | EVAL 1, TEST(`1`)', [expectType('integer')]);
+    });
+
+    test('fields', async () => {
+      const { expectErrors } = await setup();
+      // field assignment
+      await expectErrors('FROM index | EVAL var = textField, TEST(var)', [expectType('text')]);
+    });
+
+    test('inline casting', async () => {
+      const { expectErrors } = await setup();
+      // inline cast assignment
+      await expectErrors('FROM index | EVAL var = doubleField::long, TEST(var)', [
+        expectType('long'),
+      ]);
+      // inline cast expression
+      await expectErrors('FROM index | EVAL doubleField::long, TEST(`doubleField::long`)', [
+        expectType('long'),
+      ]);
+    });
+
+    test('function results', async () => {
+      const { expectErrors } = await setup();
+      // function assignment
+      await expectErrors('FROM index | EVAL var = RETURN_VALUE(doubleField), TEST(var)', [
+        expectType('double'),
+      ]);
+      await expectErrors('FROM index | EVAL var = RETURN_VALUE(textField), TEST(var)', [
+        expectType('text'),
+      ]);
+      await expectErrors(
+        'FROM index | EVAL var = RETURN_VALUE(doubleField, textField), TEST(var)',
+        [expectType('long')]
+      );
+      // function expression
+      await expectErrors(
+        'FROM index | EVAL RETURN_VALUE(doubleField), TEST(`RETURN_VALUE(doubleField)`)',
+        [expectType('double')]
+      );
+      await expectErrors(
+        'FROM index | EVAL RETURN_VALUE(textField), TEST(`RETURN_VALUE(textField)`)',
+        [expectType('text')]
+      );
+      await expectErrors(
+        'FROM index | EVAL RETURN_VALUE(doubleField, textField), TEST(`RETURN_VALUE(doubleField, textField)`)',
+        [expectType('long')]
+      );
     });
   });
 });
