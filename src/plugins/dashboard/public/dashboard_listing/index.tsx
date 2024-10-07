@@ -25,13 +25,10 @@ const LazyDashboardListing = React.lazy(() =>
     return {
       default: module.DashboardListingTable,
     };
-  })().then((module) => {
-    return module;
-  })
+  })().then((module) => module)
 );
 
 export const DashboardListingTable = (props: DashboardListingProps) => {
-  console.log('HERE!!');
   return (
     <Suspense fallback={<ListingTableLoadingIndicator />}>
       <LazyDashboardListing {...props} />
