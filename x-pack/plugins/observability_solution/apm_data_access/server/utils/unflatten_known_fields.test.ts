@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// unflatten_known_fields.test.ts
 import { unflattenKnownApmEventFields } from './unflatten_known_fields';
 
 describe('unflattenKnownApmEventFields', () => {
