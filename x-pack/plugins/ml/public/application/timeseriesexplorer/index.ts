@@ -6,3 +6,4 @@
  */
 
 export { TimeSeriesExplorer } from './timeseriesexplorer';
+export { getTimeseriesExplorerStyles } from './styles';

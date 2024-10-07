@@ -15,7 +15,7 @@ const mlAnnotationBorderWidth = '2px';
 const mlAnnotationRectDefaultStrokeOpacity = 0.2;
 const mlAnnotationRectDefaultFillOpacity = 0.05;
 
-export const getTimeseriesExplorerStyle = () =>
+export const getTimeseriesExplorerStyles = () =>
   css({
     color: euiThemeVars.euiColorDarkShade,
 

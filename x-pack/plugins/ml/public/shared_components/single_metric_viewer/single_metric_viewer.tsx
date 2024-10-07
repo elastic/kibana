@@ -26,7 +26,7 @@ import type { MlDependencies } from '../../application/app';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import type { SingleMetricViewerServices, MlEntity } from '../../embeddables/types';
-import { getTimeseriesExplorerStyle } from '../../application/timeseriesexplorer/styles';
+import { getTimeseriesExplorerStyles } from '../../application/timeseriesexplorer';
 
 const containerPadding = 20;
 const minElemAndChartDiff = 20;
@@ -204,7 +204,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     }
   };
 
-  const style = getTimeseriesExplorerStyle();
+  const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -219,7 +219,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           }}
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
           ref={resizeRef}
-          css={style}
+          css={timeseriesExplorerStyles}
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
           data-rendering-count={1}
         >

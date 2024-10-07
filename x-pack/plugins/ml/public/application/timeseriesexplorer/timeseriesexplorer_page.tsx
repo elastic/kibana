@@ -19,7 +19,7 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { getTimeseriesExplorerStyle } from './styles';
+import { getTimeseriesExplorerStyles } from './styles';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -41,10 +41,10 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
   const casesPermissions = cases?.helpers.canUseCases();
   const helpLink = docLinks.links.ml.anomalyDetection;
 
-  const style = getTimeseriesExplorerStyle();
+  const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
   return (
     <>
-      <div css={style} ref={resizeRef} data-test-subj="mlPageSingleMetricViewer">
+      <div css={timeseriesExplorerStyles} ref={resizeRef} data-test-subj="mlPageSingleMetricViewer">
         <MlPageHeader>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
