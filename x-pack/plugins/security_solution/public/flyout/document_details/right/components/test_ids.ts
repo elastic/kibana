@@ -33,7 +33,15 @@ export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue`
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 
-export const ASSIGNEES_HEADER_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesHeader` as const;
+export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
+export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
+export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesAddNoteIconButton` as const;
+export const NOTES_COUNT_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesCount` as const;
+export const NOTES_LOADING_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesLoading` as const;
+
+export const ASSIGNEES_EMPTY_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesEmpty` as const;
+export const ASSIGNEES_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Assignees` as const;
 export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
 export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
 

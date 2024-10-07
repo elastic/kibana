@@ -45,9 +45,7 @@ export function investigationRepositoryFactory({
   logger: Logger;
 }): InvestigationRepository {
   function toInvestigation(stored: StoredInvestigation): Investigation | undefined {
-    const result = investigationSchema.safeParse({
-      ...stored,
-    });
+    const result = investigationSchema.safeParse(stored);
 
     if (!result.success) {
       logger.error(`Invalid stored Investigation with id [${stored.id}]`);

@@ -17,7 +17,7 @@ export function getLogDocumentOverview(
 ): LogDocumentOverview {
   const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
     return (
-      field in doc.flattened
+      doc.flattened[field] !== undefined && doc.flattened[field] !== null
         ? formatFieldValue(
             doc.flattened[field],
             doc.raw,
@@ -32,19 +32,9 @@ export function getLogDocumentOverview(
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
   const level =
     Array.isArray(levelArray) && levelArray.length ? levelArray[0].toLowerCase() : levelArray;
-  const messageArray = doc.flattened[fieldConstants.MESSAGE_FIELD];
-  const message =
-    Array.isArray(messageArray) && messageArray.length ? messageArray[0] : messageArray;
-  const errorMessageArray = doc.flattened[fieldConstants.ERROR_MESSAGE_FIELD];
-  const errorMessage =
-    Array.isArray(errorMessageArray) && errorMessageArray.length
-      ? errorMessageArray[0]
-      : errorMessageArray;
-  const eventOriginalArray = doc.flattened[fieldConstants.EVENT_ORIGINAL_FIELD];
-  const eventOriginal =
-    Array.isArray(eventOriginalArray) && eventOriginalArray.length
-      ? eventOriginalArray[0]
-      : eventOriginalArray;
+  const message = formatField(fieldConstants.MESSAGE_FIELD);
+  const errorMessage = formatField(fieldConstants.ERROR_MESSAGE_FIELD);
+  const eventOriginal = formatField(fieldConstants.EVENT_ORIGINAL_FIELD);
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);
 
   // Service

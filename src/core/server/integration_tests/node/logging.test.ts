@@ -29,6 +29,7 @@ function createRootWithRoles(roles: string[]) {
         level: 'info',
       },
     },
+    server: { restrictInternalApis: false },
   });
 }
 

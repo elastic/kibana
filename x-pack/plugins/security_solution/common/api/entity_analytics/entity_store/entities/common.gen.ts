@@ -16,6 +16,9 @@
 
 import { z } from '@kbn/zod';
 
+import { EntityRiskScoreRecord } from '../../common/common.gen';
+import { AssetCriticalityLevel } from '../../asset_criticality/common.gen';
+
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z.object({
   user: z
@@ -27,6 +30,7 @@ export const UserEntity = z.object({
       id: z.array(z.string()).optional(),
       email: z.array(z.string()).optional(),
       hash: z.array(z.string()).optional(),
+      risk: EntityRiskScoreRecord.optional(),
     })
     .optional(),
   entity: z
@@ -40,6 +44,12 @@ export const UserEntity = z.object({
       type: z.literal('node'),
       firstSeenTimestamp: z.string().datetime(),
       definitionId: z.string(),
+      source: z.string(),
+    })
+    .optional(),
+  asset: z
+    .object({
+      criticality: AssetCriticalityLevel,
     })
     .optional(),
 });
@@ -56,6 +66,7 @@ export const HostEntity = z.object({
       type: z.array(z.string()).optional(),
       mac: z.array(z.string()).optional(),
       architecture: z.array(z.string()).optional(),
+      risk: EntityRiskScoreRecord.optional(),
     })
     .optional(),
   entity: z
@@ -69,6 +80,12 @@ export const HostEntity = z.object({
       type: z.literal('node'),
       firstSeenTimestamp: z.string().datetime(),
       definitionId: z.string(),
+      source: z.string().optional(),
+    })
+    .optional(),
+  asset: z
+    .object({
+      criticality: AssetCriticalityLevel,
     })
     .optional(),
 });

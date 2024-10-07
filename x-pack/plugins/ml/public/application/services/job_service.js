@@ -7,7 +7,8 @@
 
 import { cloneDeep, each, find, get } from 'lodash';
 
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { createDatafeedId } from '../../../common/util/job_utils';
 
 import { isWebUrl } from '../util/url_utils';

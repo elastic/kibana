@@ -44,7 +44,7 @@ describe('getConnectorCompatibility', () => {
   it('returns the compatibility list for valid feature ids', () => {
     expect(
       getConnectorCompatibility(['alerting', 'cases', 'uptime', 'siem', 'generativeAIForSecurity'])
-    ).toEqual(['Alerting Rules', 'Cases', 'Generative AI for Security']);
+    ).toEqual(['Alerting Rules', 'Cases', 'Security Solution', 'Generative AI for Security']);
   });
 
   it('skips invalid feature ids', () => {

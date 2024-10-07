@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AddFromLibraryButton } from '../add_from_library_button';
@@ -67,7 +67,7 @@ export function AddInvestigationItem() {
           <EuiPanel color="subdued" hasShadow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <TextBasedLangEditor
+                <ESQLLangEditor
                   query={query}
                   onTextLangQueryChange={setQuery}
                   onTextLangQuerySubmit={async (nextSubmittedQuery) => {

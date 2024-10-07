@@ -57,7 +57,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     ruleAuditEvent({
       action: RuleAuditAction.CREATE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rawRule.name },
     })
   );
 
@@ -141,13 +141,15 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     return createdAlert as SavedObject<RuleAttributes>;
   }
 
-  return getAlertFromRaw<Params>(
-    context,
-    createdAlert.id,
-    createdAlert.attributes.alertTypeId,
-    createdAlert.attributes,
+  return getAlertFromRaw<Params>({
+    excludeFromPublicApi: true,
+    id: createdAlert.id,
+    includeLegacyId: false,
+    isSystemAction: context.isSystemAction,
+    logger: context.logger,
+    rawRule: createdAlert.attributes,
     references,
-    false,
-    true
-  );
+    ruleTypeId: createdAlert.attributes.alertTypeId,
+    ruleTypeRegistry: context.ruleTypeRegistry,
+  });
 }

@@ -13,10 +13,10 @@ import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ClearControlAction } from './actions/clear_control_action';
 import { DeleteControlAction } from './actions/delete_control_action';
 import { EditControlAction } from './actions/edit_control_action';
-import { registerControlGroupEmbeddable } from './react_controls/control_group/register_control_group_embeddable';
-import { registerOptionsListControl } from './react_controls/controls/data_controls/options_list_control/register_options_list_control';
-import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
-import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
+import { registerControlGroupEmbeddable } from './control_group/register_control_group_embeddable';
+import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
+import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
+import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 

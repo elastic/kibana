@@ -10,8 +10,6 @@ import { screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../../common/constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const inferenceEndpoints = [
   {
@@ -56,39 +54,26 @@ jest.mock('../../hooks/use_delete_endpoint', () => ({
 }));
 
 describe('When the tabular page is loaded', () => {
-  beforeEach(() => {
-    const queryClient = new QueryClient();
-    queryClient.setQueryData([TRAINED_MODEL_STATS_QUERY_KEY], {
-      trained_model_stats: [
-        {
-          model_id: '.elser_model_2',
-          deployment_stats: { deployment_id: 'my-elser-model-05', state: 'started' },
-        },
-        {
-          model_id: '.own_model',
-          deployment_stats: { deployment_id: 'local-model', state: 'started' },
-        },
-      ],
-    });
-    const wrapper = ({ children }: { children: React.ReactNode }) => {
-      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-    };
-    render(wrapper({ children: <TabularPage inferenceEndpoints={inferenceEndpoints} /> }));
-  });
+  it('should display all inference ids in the table', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-  it('should display all model_ids in the table', () => {
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('local-model');
     expect(rows[2]).toHaveTextContent('my-elser-model-05');
     expect(rows[3]).toHaveTextContent('third-party-model');
   });
-  it('should render deployment status for inference endpoints with local trained models', () => {
-    const deploymentStatusStarted = screen.getAllByTestId('table-column-deployment-started');
-    expect(deploymentStatusStarted).toHaveLength(2);
-  });
-  it('should not render deployment status for third-party endpoints', () => {
-    expect(screen.queryByTestId('table-column-deployment-undefined')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('table-column-deployment-starting')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('table-column-deployment-stopping')).not.toBeInTheDocument();
+
+  it('should display all service and model ids in the table', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).toHaveTextContent('Elasticsearch');
+    expect(rows[1]).toHaveTextContent('.own_model');
+
+    expect(rows[2]).toHaveTextContent('Elasticsearch');
+    expect(rows[2]).toHaveTextContent('.elser_model_2');
+
+    expect(rows[3]).toHaveTextContent('OpenAI');
+    expect(rows[3]).toHaveTextContent('.own_model');
   });
 });
