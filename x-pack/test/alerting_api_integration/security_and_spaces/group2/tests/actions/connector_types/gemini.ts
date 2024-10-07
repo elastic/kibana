@@ -330,26 +330,10 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               contents: [
                 {
                   role: 'user',
-                  parts: [{ text: 'Hello' }],
-                },
-                {
-                  parts: [
-                    {
-                      text: 'Hi there, how can I help you today?',
-                    },
-                  ],
-                  role: 'model',
-                },
-                {
-                  role: 'user',
                   parts: [{ text: 'Hello world!' }],
                 },
               ],
               generation_config: { temperature: 0, maxOutputTokens: 8192 },
-              safety_settings: {
-                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                threshold: 'BLOCK_ONLY_HIGH',
-              },
             });
             expect(body).to.eql({
               status: 'ok',
