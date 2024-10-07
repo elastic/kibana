@@ -98,17 +98,16 @@ const getMockLensApi = (
   updateAttributes: jest.fn(),
   updateSavedObjectId: jest.fn(),
   updateOverrides: jest.fn(),
-
-  // make it pass the isFilterable check for now
-  getFilters: jest.fn(),
-  getQuery: jest.fn(),
 });
 
 const getMockEmbeddable = (type: string): IEmbeddable =>
   ({
     type,
-    getFilters: jest.fn(),
-    getQuery: jest.fn(),
+    filters$: new BehaviorSubject<Filter[] | undefined>([]),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
+      query: 'test',
+      language: 'kuery',
+    }),
   } as unknown as IEmbeddable);
 
 const lensEmbeddable = getMockLensApi();
