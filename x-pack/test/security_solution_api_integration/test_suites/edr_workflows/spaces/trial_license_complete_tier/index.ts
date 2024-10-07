@@ -56,8 +56,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       }
     });
 
-    loadTestFile(require.resolve('./agent_status'));
-    loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./policy_response'));
+    loadTestFile(require.resolve('./space_awareness'));
   });
 }
