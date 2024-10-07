@@ -51,7 +51,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
-import { ESQLMenuPopover } from './esql_menu_popover';
+import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -186,6 +186,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
+  onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -774,7 +775,11 @@ export const QueryBarTopRow = React.memo(
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
-              {Boolean(isQueryLangSelected) && <ESQLMenuPopover />}
+              {Boolean(isQueryLangSelected) && (
+                <ESQLMenuPopover
+                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+                />
+              )}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

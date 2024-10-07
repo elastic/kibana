@@ -31,7 +31,7 @@
         "signature": [
           "({ value, children }: ",
           "ProviderProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
@@ -68,7 +68,7 @@
           "\nDraggable component"
         ],
         "signature": [
-          "({ reorderableGroup, ...props }: DraggableProps) => JSX.Element"
+          "({ reorderableGroup, ...props }: DraggableProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/draggable.tsx",
         "deprecated": false,
@@ -105,7 +105,7 @@
           "\nThis prevents the in-place droppable styles (under children) and allows to rather show an overlay with droppable styles (on top of children)"
         ],
         "signature": [
-          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/dom-drag-drop",
             "scope": "common",
@@ -113,7 +113,7 @@
             "section": "def-common.DropOverlayWrapperProps",
             "text": "DropOverlayWrapperProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
         "deprecated": false,
@@ -127,7 +127,7 @@
             "label": "{\n  isVisible,\n  children,\n  overlayProps,\n  className,\n  ...otherProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/dom-drag-drop",
                 "scope": "common",
@@ -135,7 +135,7 @@
                 "section": "def-common.DropOverlayWrapperProps",
                 "text": "DropOverlayWrapperProps"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,
@@ -166,7 +166,7 @@
             "section": "def-common.DroppableProps",
             "text": "DroppableProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/droppable.tsx",
         "deprecated": false,
@@ -205,7 +205,7 @@
         "label": "ReorderProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          "({\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
         "deprecated": false,
@@ -230,7 +230,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "deprecated": false,
@@ -288,7 +288,7 @@
             "section": "def-common.DragContextState",
             "text": "DragContextState"
           },
-          "> | undefined; }) => JSX.Element"
+          "> | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
         "deprecated": false,
@@ -313,7 +313,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
                 "deprecated": false,

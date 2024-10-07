@@ -17,6 +17,7 @@ import type {
   InventorySetupDependencies,
   InventoryStartDependencies,
 } from './types';
+import { INVENTORY_SERVER_FEATURE } from './feature';
 
 export class InventoryPlugin
   implements
@@ -55,6 +56,9 @@ export class InventoryPlugin
         }) as unknown as InventoryRouteHandlerResources['plugins'],
       },
     });
+
+    pluginsSetup.features.registerKibanaFeature(INVENTORY_SERVER_FEATURE);
+
     return {};
   }
 
