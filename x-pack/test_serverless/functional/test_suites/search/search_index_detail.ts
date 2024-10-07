@@ -97,7 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('With data', () => {
         before(async () => {
-          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
           await es.index({
             index: indexName,
             body: {
@@ -168,6 +167,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
           await pageObjects.svlSearchIndexDetailPage.clickConfirmingDeleteIndex();
         });
+      });
+    });
+    describe('as Viewer', () => {
+      before(async () => {
+        await pageObjects.svlCommonPage.loginWithRole('viewer');
+        await pageObjects.svlApiKeys.deleteAPIKeys();
+        await es.index({
+          index: indexName,
+          body: {
+            my_field: [1, 0, 1],
+          },
+        });
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+      });
+
+      after(async () => {
+        await esDeleteAllIndices(indexName);
+      });
+
+      it('should not be able to delete document', async () => {
+        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+        await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
+        await pageObjects.svlSearchIndexDetailPage.expectDeleteDocumentActionNotVisible();
       });
     });
   });
