@@ -89,6 +89,7 @@ describe('unflattenKnownApmEventFields', () => {
   it('should retain unknown fields in the output', () => {
     const input = {
       'service.name': 'node-svc',
+      'unknown.texts': ['foo', 'bar'],
       'unknown.field': 'foo',
       unknonwField: 'bar',
     };
@@ -98,6 +99,7 @@ describe('unflattenKnownApmEventFields', () => {
       },
       unknown: {
         field: 'foo',
+        texts: ['foo', 'bar'],
       },
       unknonwField: 'bar',
     };
