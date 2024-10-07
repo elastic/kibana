@@ -242,14 +242,6 @@ export function useModelActions({
                   : {}),
               }
             );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
-                defaultMessage: 'Deployment for "{modelId}" has been started successfully.',
-                values: {
-                  modelId: item.model_id,
-                },
-              })
-            );
             await fetchModels();
           } catch (e) {
             displayErrorToast(
@@ -381,16 +373,6 @@ export function useModelActions({
               {
                 force: requireForceStop,
               }
-            );
-            displaySuccessToast(
-              i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
-                defaultMessage:
-                  '{numberOfDeployments, plural, one {Deployment} other {Deployments}}  for "{modelId}" has been stopped successfully.',
-                values: {
-                  modelId: item.model_id,
-                  numberOfDeployments: deploymentIds.length,
-                },
-              })
             );
             if (Object.values(results).some((r) => r.error !== undefined)) {
               Object.entries(results).forEach(([id, r]) => {
