@@ -200,19 +200,19 @@ This content has moved. See <<known-kibana-plugins>>.
 [[trigger-picker]]
 === Picking a trigger for a URL drilldown
 
-This page has moved. Refer to <<url-drilldowns>>.
+This page has moved. Refer to <<create-url-drilldowns>>.
 
 [float]
 [[templating]]
 === URL templating
 
-This page has moved. Refer to <<url_templating-language>>.
+This page has moved. Refer to <<url-templating-language>>.
 
 [float]
 [[variables]]
 === Variables
 
-This page has moved. Refer to <<url-template-variables>>.
+This page has moved. Refer to <<url-template-variable>>.
 
 [float]
 [[time-series-visual-builder]]
@@ -438,6 +438,20 @@ For the most up-to-date API details, refer to the
 == Add connectors to cases
 
 This content has moved. Refer to <<manage-cases-settings>>.
+
+[role="exclude", id="create-drilldowns"]
+== Create drilldowns
+
+[[url-drilldowns]]
+[[url_templating-language]]
+[[url-template-variables]]
+This content has moved. Refer to <<drilldowns>>.
+
+[role="exclude", id="tsvb"]
+== TSVB
+
+[[tsvb-index-pattern-mode]]
+This content has moved. Refer to <<tsvb-panel>>.
 
 ////
 APM redirects
@@ -1133,4 +1147,3 @@ Refer to {api-kibana}/group/endpoint-cases[cases API].
 == Sync {ml} saved objects API
 
 Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].
-

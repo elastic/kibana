@@ -16,11 +16,11 @@ export async function deleteInvestigationItem(
   const investigation = await repository.findById(investigationId);
   const item = investigation.items.find((currItem) => currItem.id === itemId);
   if (!item) {
-    throw new Error('Note not found');
+    throw new Error('Item not found');
   }
 
-  if (item.createdBy !== user.username) {
-    throw new Error('User does not have permission to delete note');
+  if (item.createdBy !== user.profile_uid) {
+    throw new Error('User does not have permission to delete item');
   }
 
   investigation.items = investigation.items.filter((currItem) => currItem.id !== itemId);

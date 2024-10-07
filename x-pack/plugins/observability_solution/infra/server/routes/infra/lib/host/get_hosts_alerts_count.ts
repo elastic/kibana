@@ -6,6 +6,7 @@
  */
 
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -40,7 +41,7 @@ export async function getHostsAlertsCount({
     query: {
       bool: {
         filter: [
-          ...termQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID),
+          ...termsQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID, observabilityFeatureId),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(HOST_NAME_FIELD, ...hostNames),
           ...rangeQuery,

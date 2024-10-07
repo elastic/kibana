@@ -4578,7 +4578,7 @@ For more information about osquery tables, see the https://osquery.io/schema[osq
 
 *process* - keyword, text.text
 
-* _alf_explicit_auths.process_ - Process name explicitly allowed
+* _alf_explicit_auths.process_ - Process name that is explicitly allowed
 * _unified_log.process_ - the name of the process that made the entry
 
 *process_being_tapped* - keyword, number.long

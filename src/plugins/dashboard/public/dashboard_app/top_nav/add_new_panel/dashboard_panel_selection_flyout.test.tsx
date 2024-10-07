@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { type ComponentProps } from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DashboardPanelSelectionListFlyout } from './dashboard_panel_selection_flyout';
@@ -90,12 +91,10 @@ describe('DashboardPanelSelectionListFlyout', () => {
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
 
-    act(() => {
-      userEvent.type(
-        screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
-        'non existent panel'
-      );
-    });
+    await userEvent.type(
+      screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
+      'non existent panel'
+    );
 
     expect(await screen.findByTestId('dashboardPanelSelectionNoPanelMessage')).toBeInTheDocument();
   });

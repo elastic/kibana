@@ -230,7 +230,14 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "cURL",
+            "label": "Import with createNewCopies",
+            "source": "curl \\\n  -X POST api/saved_objects/_import?createNewCopies=true\n  -H \"kbn-xsrf: true\"\n  --form file=@file.ndjson\n"
+          }
+        ]
       }
     }
   },

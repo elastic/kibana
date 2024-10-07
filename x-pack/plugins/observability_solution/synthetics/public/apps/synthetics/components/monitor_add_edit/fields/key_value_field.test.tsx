@@ -41,7 +41,7 @@ describe('<KeyValuePairsField />', () => {
     expect(getByText('Add pair')).toBeInTheDocument();
   });
 
-  it('calls onBlur', () => {
+  it('calls onBlur', async () => {
     const { getByText, getByTestId } = render(<WrappedComponent />);
     const addPair = getByText('Add pair');
     fireEvent.click(addPair);
@@ -49,8 +49,8 @@ describe('<KeyValuePairsField />', () => {
     const keyInput = getByTestId('keyValuePairsKey0') as HTMLInputElement;
     const valueInput = getByTestId('keyValuePairsValue0') as HTMLInputElement;
 
-    userEvent.type(keyInput, 'some-key');
-    userEvent.type(valueInput, 'some-value');
+    await userEvent.type(keyInput, 'some-key');
+    await userEvent.type(valueInput, 'some-value');
     fireEvent.blur(valueInput);
 
     expect(onBlur).toHaveBeenCalledTimes(2);

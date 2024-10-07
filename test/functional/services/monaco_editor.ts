@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { type monaco } from '@kbn/monaco';
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -61,6 +63,11 @@ export class MonacoEditorService extends FtrService {
         value
       );
     });
+    const newCodeEditorValue = await this.getCodeEditorValue(nthIndex);
+    expect(newCodeEditorValue).equal(
+      value,
+      `Expected value was: ${value}, but got: ${newCodeEditorValue}`
+    );
   }
 
   public async getCurrentMarkers(testSubjId: string) {

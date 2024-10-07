@@ -1,8 +1,18 @@
-## LTRIM
+# LTRIM
 
-Removes leading whitespaces from a string.
+The LTRIM function is used to remove leading whitespaces from a string.
 
-### Examples
+## Syntax
+
+`LTRIM(string)`
+
+### Parameters
+
+#### string
+
+This is the string expression from which you want to remove leading whitespaces. If the string is `null`, the function will return `null`.
+
+## Examples
 
 ```esql
 ROW message = "   some text  ",  color = " red "

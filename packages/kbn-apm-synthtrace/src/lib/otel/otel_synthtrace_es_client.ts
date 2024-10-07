@@ -1,9 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+<<<<<<< HEAD
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0 and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
+=======
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+>>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -23,7 +31,11 @@ export class OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
       ...options,
       pipeline: otelPipeline(),
     });
+<<<<<<< HEAD
     this.dataStreams = ['.otel-*-synth', '*-synth-*'];
+=======
+    this.dataStreams = ['metrics-generic.otel*', 'traces-generic.otel*'];
+>>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
   }
 }
 
@@ -53,6 +65,7 @@ export function getRoutingTransform() {
       switch (document?.attributes?.['processor.event']) {
         case 'transaction':
         case 'span':
+<<<<<<< HEAD
           index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
           // document._index = `.ds-traces-generic.otel-${namespace}-synth-2024.09.09-000001`;
           break;
@@ -60,10 +73,18 @@ export function getRoutingTransform() {
         case 'error':
           index = `.logs-otel.error-${namespace}-synth-2024.09.09-000001`;
           // document._index = `logs-otel.error-${namespace}-synth-2024.09.09-000001`;
+=======
+          index = `traces-generic.otel-${namespace}-synth`;
+          break;
+
+        case 'error':
+          index = `.logs-generic-otel-${namespace}-synth`;
+>>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
           break;
 
         case 'metric':
           const metricsetName = document.attributes['metricset.name'];
+<<<<<<< HEAD
           document._index = `.ds-metrics-otel.service_summary.${document.attributes[
             'metricset.interval'
           ]!}-${namespace}-synth-2024.09.09-000001`;
@@ -71,15 +92,23 @@ export function getRoutingTransform() {
           // if (metricsetName === 'app') {
           //   index = `metrics-otel.app.${document?.attributes?.['service.name']}-${namespace}-2024.09.09-000001`;
           // } else 
+=======
+>>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
           if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||
             metricsetName === 'service_destination' ||
             metricsetName === 'service_summary'
           ) {
+<<<<<<< HEAD
             index = `.ds-metrics-otel.${metricsetName}.${document.attributes[
               'metricset.interval'
             ]!}-${namespace}-2024.09.09-000001`;
+=======
+            index = `metrics-otel.${metricsetName}.${document.attributes[
+              'metricset.interval'
+            ]!}-${namespace}-synth`;
+>>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
           } else {
             index = `metrics-otel.internal-${namespace}`;
           }

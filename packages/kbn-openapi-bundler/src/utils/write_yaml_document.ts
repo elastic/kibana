@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs/promises';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { dirname } from 'path';
 
 export async function writeYamlDocument(filePath: string, document: unknown): Promise<void> {
@@ -25,14 +26,14 @@ function stringifyToYaml(document: unknown): string {
   try {
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return safeDump(document, {
+    return dump(document, {
       noRefs: true,
       sortKeys: sortYamlKeys,
       skipInvalid: true, // Skip invalid types like `undefined`
     });
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
-    return safeDump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
+    return dump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
   }
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Position } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +27,8 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiPopover, EuiSelectable } from '@elastic/eui';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -37,7 +39,7 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './xy_config_panel';
+import { XyToolbar, updateLayer } from './xy_config_panel';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -60,6 +62,7 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
+  visualizationSubtypes,
   visualizationTypes,
 } from './types';
 import {
@@ -161,11 +164,12 @@ export const getXyVisualization = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
-  visualizationTypes,
-  getVisualizationTypeId(state) {
-    const type = getVisualizationType(state);
+  getVisualizationTypeId(state, layerId) {
+    const type = getVisualizationType(state, layerId);
     return type === 'mixed' ? type : type.id;
   },
+
+  visualizationTypes,
 
   getLayerIds(state) {
     return getLayersByType(state).map((l) => l.layerId);
@@ -259,14 +263,30 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+    const dataLayer = state.layers.find((l) => l.layerId === layerId);
+    if (dataLayer && !isDataLayer(dataLayer)) {
+      throw new Error('Cannot switch series type for non-data layer');
+    }
+    if (!dataLayer) {
+      return state;
+    }
+    // todo: test how they switch between percentage etc
+    const currentStackingType = stackingTypes.find(({ subtypes }) =>
+      subtypes.includes(dataLayer.seriesType)
+    );
+    const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
+
+    const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
+      seriesType) as SeriesType;
+
     return {
       ...state,
-      preferredSeriesType: seriesType as SeriesType,
+      preferredSeriesType: compatibleSeriesType,
       layers: layerId
         ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: seriesType as SeriesType } : layer
+            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
           )
-        : state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
+        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
     };
   },
 
@@ -670,6 +690,23 @@ export const getXyVisualization = ({
     return (
       (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+    );
+  },
+  getSubtypeSwitch({ state, setState, layerId }) {
+    const index = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[index];
+
+    if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
+      return null;
+    }
+
+    return () => (
+      <SubtypeSwitch
+        layer={layer}
+        setLayerState={(newLayer: XYDataLayerConfig) =>
+          setState(updateLayer(state, newLayer, index))
+        }
+      />
     );
   },
 
@@ -1137,9 +1174,9 @@ function getVisualizationInfo(
 
     if (isDataLayer(layer)) {
       chartType = layer.seriesType;
-      const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+      const layerVisType = visualizationSubtypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
-      label = layerVisType?.fullLabel || layerVisType?.label;
+      label = layerVisType?.label;
 
       if (layer.xAccessor) {
         dimensions.push({
@@ -1295,3 +1332,97 @@ function getNotifiableFeatures(
     },
   ];
 }
+
+const defaultSeriesTypesByIndex = ['bar', 'area', 'bar_horizontal'];
+
+export const stackingTypes = [
+  {
+    type: 'stacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.stacked', {
+      defaultMessage: 'Stacked',
+    }),
+    subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+  },
+  {
+    type: 'unstacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.unstacked', {
+      defaultMessage: 'Unstacked',
+    }),
+    subtypes: ['bar', 'area', 'bar_horizontal'],
+  },
+  {
+    type: 'percentage',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.percentage', {
+      defaultMessage: 'Percentage',
+    }),
+    subtypes: [
+      'bar_percentage_stacked',
+      'area_percentage_stacked',
+      'bar_horizontal_percentage_stacked',
+    ],
+  },
+];
+
+const SubtypeSwitch = ({
+  layer,
+  setLayerState,
+}: {
+  layer: XYDataLayerConfig;
+  setLayerState: (l: XYDataLayerConfig) => void;
+}): JSX.Element | null => {
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+
+  const stackingType = stackingTypes.find(({ subtypes }) => subtypes.includes(layer.seriesType));
+  if (!stackingType) {
+    return null;
+  }
+  const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
+  const options = stackingTypes.map(({ label, subtypes }) => ({
+    label,
+    value: subtypes[subTypeIndex],
+    checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+  }));
+
+  return (
+    <>
+      <EuiPopover
+        ownFocus
+        panelPaddingSize="none"
+        button={
+          <ToolbarButton
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
+              defaultMessage: 'Stacking',
+            })}
+            onClick={() => setFlyoutOpen(true)}
+            fullWidth
+            size="s"
+            label={stackingType.label}
+          />
+        }
+        isOpen={flyoutOpen}
+        closePopover={() => setFlyoutOpen(false)}
+        anchorPosition="downLeft"
+      >
+        <EuiSelectable
+          css={{ width: 200 }}
+          singleSelection
+          data-test-subj="lnsChartSwitchList"
+          options={options}
+          onChange={(newOptions) => {
+            setFlyoutOpen(false);
+            const chosenType = newOptions.find(({ checked }) => checked === 'on');
+            if (!chosenType) {
+              return;
+            }
+            setLayerState({
+              ...layer,
+              seriesType: chosenType.value as SeriesType,
+            });
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    </>
+  );
+};

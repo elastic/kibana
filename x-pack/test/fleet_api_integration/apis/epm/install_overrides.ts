@@ -61,6 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
+        'logs@custom',
         `${templateName}@custom`,
         `ecs@mappings`,
         '.fleet_globals-1',
@@ -162,6 +163,10 @@ export default function (providerContext: FtrProviderContext) {
           {
             name: 'logs',
             index_patterns: ['logs-*-*'],
+          },
+          {
+            index_patterns: ['logs-*.otel-*'],
+            name: 'logs-otel@template',
           },
         ],
       });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
@@ -21,7 +22,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -55,6 +60,7 @@ export const RuleDefinition = () => {
     canShowConsumerSelection = false,
   } = useRuleFormState();
 
+  const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins;
@@ -78,6 +84,12 @@ export const RuleDefinition = () => {
       return false;
     }
     if (!authorizedConsumers.length) {
+      return false;
+    }
+    if (
+      authorizedConsumers.length <= 1 ||
+      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
+    ) {
       return false;
     }
     return (
@@ -173,24 +185,26 @@ export const RuleDefinition = () => {
             <EuiFlexGroup gutterSize="none" direction="column">
               <EuiFlexItem>
                 <EuiErrorBoundary>
-                  <RuleParamsExpressionComponent
-                    id={id}
-                    ruleParams={params}
-                    ruleInterval={schedule.interval}
-                    ruleThrottle={''}
-                    alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={paramsErrors || {}}
-                    setRuleParams={onSetRuleParams}
-                    setRuleProperty={onSetRuleProperty}
-                    defaultActionGroupId={selectedRuleType.defaultActionGroupId}
-                    actionGroups={selectedRuleType.actionGroups}
-                    metadata={metadata}
-                    charts={charts}
-                    data={data}
-                    dataViews={dataViews}
-                    unifiedSearch={unifiedSearch}
-                    onChangeMetaData={onChangeMetaData}
-                  />
+                  <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+                    <RuleParamsExpressionComponent
+                      id={id}
+                      ruleParams={params}
+                      ruleInterval={schedule.interval}
+                      ruleThrottle={''}
+                      alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
+                      errors={paramsErrors || {}}
+                      setRuleParams={onSetRuleParams}
+                      setRuleProperty={onSetRuleProperty}
+                      defaultActionGroupId={selectedRuleType.defaultActionGroupId}
+                      actionGroups={selectedRuleType.actionGroups}
+                      metadata={metadata}
+                      charts={charts}
+                      data={data}
+                      dataViews={dataViews}
+                      unifiedSearch={unifiedSearch}
+                      onChangeMetaData={onChangeMetaData}
+                    />
+                  </EuiThemeProvider>
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>

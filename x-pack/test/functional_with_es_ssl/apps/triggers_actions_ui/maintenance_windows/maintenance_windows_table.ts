@@ -9,22 +9,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createMaintenanceWindow, createObjectRemover } from './utils';
+import { createMaintenanceWindow } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
   const pageObjects = getPageObjects(['common', 'maintenanceWindows', 'header']);
   const retry = getService('retry');
   const toasts = getService('toasts');
-
-  let objectRemover: ObjectRemover;
+  const objectRemover = new ObjectRemover(supertest);
   const browser = getService('browser');
 
   describe('Maintenance windows table', function () {
-    before(async () => {
-      objectRemover = await createObjectRemover({ getService });
-    });
-
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });

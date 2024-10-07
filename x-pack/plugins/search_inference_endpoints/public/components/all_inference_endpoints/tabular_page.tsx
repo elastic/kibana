@@ -7,26 +7,18 @@
 
 import React, { useCallback } from 'react';
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  HorizontalAlignment,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { isLocalModel } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
-import { FilterOptions, InferenceEndpointUI, ServiceProviderKeys } from './types';
+import { FilterOptions, InferenceEndpointUI } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
-import { DeploymentStatus } from './render_table_columns/render_deployment_status/deployment_status';
 import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_info';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { TaskType } from './render_table_columns/render_task_type/task_type';
@@ -58,37 +50,31 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const tableColumns: Array<EuiBasicTableColumn<InferenceEndpointUI>> = [
     {
-      name: '',
-      render: ({ endpoint, deployment }: InferenceEndpointUI) =>
-        isLocalModel(endpoint) ? <DeploymentStatus status={deployment} /> : null,
-      align: 'center' as HorizontalAlignment,
-      width: '64px',
-    },
-    {
       field: 'endpoint',
       name: i18n.ENDPOINT,
-      render: (endpoint: InferenceAPIConfigResponse) => {
+      render: (endpoint: string) => {
         if (endpoint) {
-          return <EndpointInfo endpoint={endpoint} />;
+          return <EndpointInfo inferenceId={endpoint} />;
         }
 
         return null;
       },
       sortable: true,
       truncateText: true,
+      width: '400px',
     },
     {
       field: 'provider',
       name: i18n.SERVICE_PROVIDER,
-      render: (provider: ServiceProviderKeys) => {
+      render: (provider: InferenceAPIConfigResponse) => {
         if (provider) {
-          return <ServiceProvider providerKey={provider} />;
+          return <ServiceProvider providerEndpoint={provider} />;
         }
 
         return null;
       },
       sortable: false,
-      width: '185px',
+      width: '592px',
     },
     {
       field: 'type',
@@ -107,7 +93,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       actions: [
         {
           render: (inferenceEndpoint: InferenceEndpointUI) => (
-            <CopyIDAction inferenceId={inferenceEndpoint.endpoint.inference_id} />
+            <CopyIDAction inferenceId={inferenceEndpoint.endpoint} />
           ),
         },
         {

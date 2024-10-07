@@ -207,6 +207,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
           await pageObjects.searchPlayground.session.expectInSession('question', undefined);
         });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
+        });
       });
 
       after(async () => {

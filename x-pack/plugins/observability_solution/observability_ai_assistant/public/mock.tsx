@@ -60,6 +60,7 @@ export const mockService: ObservabilityAIAssistantService = {
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
+  scope: 'all',
 };
 
 function createSetupContract(): ObservabilityAIAssistantPublicSetup {

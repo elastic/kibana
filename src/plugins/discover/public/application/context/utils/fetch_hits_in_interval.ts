@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -97,11 +99,11 @@ export async function fetchHitsInInterval(
 
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
-  const rows = rawResponse.hits?.hits.map((hit) =>
-    profilesManager.resolveDocumentProfile({
-      record: buildDataTableRecord(hit, dataView!),
-    })
-  );
+  const rows = buildDataTableRecordList({
+    records: rawResponse.hits?.hits,
+    dataView,
+    processRecord: (record) => profilesManager.resolveDocumentProfile({ record }),
+  });
   const interceptedWarnings: SearchResponseWarning[] = [];
   services.data.search.showWarnings(adapter, (warning) => {
     interceptedWarnings.push(warning);

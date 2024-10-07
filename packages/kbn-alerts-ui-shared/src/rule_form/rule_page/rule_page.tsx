@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -50,6 +51,8 @@ export const RulePage = (props: RulePageProps) => {
     multiConsumerSelection,
   } = useRuleFormState();
 
+  const canReadConnectors = !!application.capabilities.actions?.show;
+
   const styles = useEuiBackgroundColorCSS().transparent;
 
   const onCancel = useCallback(() => {
@@ -63,22 +66,31 @@ export const RulePage = (props: RulePageProps) => {
     });
   }, [onSave, formData, multiConsumerSelection]);
 
+  const actionComponent = useMemo(() => {
+    if (canReadConnectors) {
+      return [
+        {
+          title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+          children: (
+            <>
+              <RuleActions />
+              <EuiSpacer />
+              <EuiHorizontalRule margin="none" />
+            </>
+          ),
+        },
+      ];
+    }
+    return [];
+  }, [canReadConnectors]);
+
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
         title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         children: <RuleDefinition />,
       },
-      {
-        title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-        children: (
-          <>
-            <RuleActions onClick={() => {}} />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
-      },
+      ...actionComponent,
       {
         title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         children: (
@@ -90,7 +102,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, []);
+  }, [actionComponent]);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>

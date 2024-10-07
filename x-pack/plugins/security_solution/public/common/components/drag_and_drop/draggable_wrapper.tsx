@@ -45,7 +45,7 @@ DragEffects.displayName = 'DragEffects';
  * writing, there's no hook equivalent for `componentDidCatch`, per
  * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
  */
-class DragDropErrorBoundary extends React.PureComponent {
+class DragDropErrorBoundary extends React.PureComponent<React.PropsWithChildren<{}>> {
   componentDidCatch() {
     this.forceUpdate(); // required for recovery
   }

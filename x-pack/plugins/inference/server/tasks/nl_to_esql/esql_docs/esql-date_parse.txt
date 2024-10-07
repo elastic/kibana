@@ -1,15 +1,28 @@
-## DATE_PARSE
+# DATE_PARSE
 
-The `DATE_PARSE` function returns a date by parsing the second argument using the format specified in the first argument.
+The DATE_PARSE function is used to convert a date string into a date format based on the provided pattern.
 
-### Examples
+## Syntax
+
+`DATE_PARSE(datePattern, dateString)`
+
+### Parameters
+
+#### datePattern
+
+This is the format of the date. If `null` is provided, the function will return `null`.
+
+#### dateString
+
+This is the date expression in string format.
+
+## Examples
 
 ```esql
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
 
-```esql
 ROW date_string = "2023-12-25"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```

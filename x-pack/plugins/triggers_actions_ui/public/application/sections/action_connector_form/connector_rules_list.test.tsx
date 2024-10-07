@@ -151,7 +151,7 @@ describe('Connector rules list', () => {
       expect(screen.queryAllByTestId('connectorRuleRow')).toHaveLength(mockedRulesData.length);
     });
 
-    userEvent.type(screen.getByTestId('connectorRulesListSearch'), 'test{enter}');
+    await userEvent.type(screen.getByTestId('connectorRulesListSearch'), 'test{enter}');
 
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({

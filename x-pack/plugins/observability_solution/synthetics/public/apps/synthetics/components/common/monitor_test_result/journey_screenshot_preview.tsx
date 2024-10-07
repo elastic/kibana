@@ -47,21 +47,21 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   // Only render the dialog if the image is at least once clicked
   const [isImageEverClick, setIsImageEverClicked] = useState(false);
 
-  const onImgFocus: ScreenshotImageProps['onFocus'] = useCallback(
+  const onImgFocus = useCallback<NonNullable<ScreenshotImageProps['onFocus']>>(
     (_evt) => {
       setIsImagePopoverOpen(true);
     },
     [setIsImagePopoverOpen]
   );
 
-  const onImgBlur: ScreenshotImageProps['onBlur'] = useCallback(
+  const onImgBlur = useCallback<NonNullable<ScreenshotImageProps['onBlur']>>(
     (_evt) => {
       setIsImagePopoverOpen(false);
     },
     [setIsImagePopoverOpen]
   );
 
-  const onImgClick: ScreenshotImageProps['onClick'] = useCallback(
+  const onImgClick = useCallback<NonNullable<ScreenshotImageProps['onClick']>>(
     (evt) => {
       evt.stopPropagation();
 

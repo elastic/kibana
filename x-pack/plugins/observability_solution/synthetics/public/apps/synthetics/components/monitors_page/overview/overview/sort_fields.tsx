@@ -15,16 +15,13 @@ import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { selectOverviewState, setOverviewPageStateAction } from '../../../../state/overview';
 import { SortMenu } from './sort_menu';
 
-export const SortFields = ({ onSortChange }: { onSortChange?: () => void }) => {
+export const SortFields = () => {
   const {
     pageState: { sortOrder, sortField },
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
   const { asc, desc, label } = getOrderContent(sortField);
   const handleSortChange = (payloadAction: PayloadAction<unknown>) => {
-    if (onSortChange) {
-      onSortChange();
-    }
     dispatch(payloadAction);
   };
 

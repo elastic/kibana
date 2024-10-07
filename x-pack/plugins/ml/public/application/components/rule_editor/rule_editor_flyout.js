@@ -81,10 +81,7 @@ class RuleEditorFlyoutUI extends Component {
     this.partitioningFieldNames = [];
     this.canGetFilters = checkPermission('canGetFilters');
 
-    this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
-      props.kibana.services.mlServices.mlApi
-    );
+    this.mlJobService = mlJobServiceFactory(props.kibana.services.mlServices.mlApi);
   }
 
   componentDidMount() {

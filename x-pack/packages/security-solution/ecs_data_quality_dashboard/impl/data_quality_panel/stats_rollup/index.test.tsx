@@ -122,7 +122,7 @@ describe('StatsRollup', () => {
           </TestExternalProviders>
         );
 
-        userEvent.hover(screen.getByText(statLabelText));
+        await userEvent.hover(screen.getByText(statLabelText));
 
         await waitFor(() =>
           expect(screen.getByRole('tooltip')).toHaveTextContent(
@@ -148,7 +148,7 @@ describe('StatsRollup', () => {
           </TestExternalProviders>
         );
 
-        userEvent.hover(screen.getByText(statLabelText));
+        await userEvent.hover(screen.getByText(statLabelText));
 
         await waitFor(() =>
           expect(screen.getByRole('tooltip')).toHaveTextContent(noPatternTooltipText)

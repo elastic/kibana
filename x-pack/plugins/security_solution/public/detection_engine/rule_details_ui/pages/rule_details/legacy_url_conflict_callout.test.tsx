@@ -31,6 +31,7 @@ const mockSpacesApi: SpacesApi = {
     useSpaces: jest.fn(),
   },
   hasOnlyDefaultSpace: false,
+  isSolutionViewEnabled: true,
 };
 
 describe('<LegacyUrlConflictCallOut />', () => {

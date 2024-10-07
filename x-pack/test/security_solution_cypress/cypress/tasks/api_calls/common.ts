@@ -11,8 +11,8 @@ import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connect
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
-import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { getSpaceUrl } from '../space';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
 export const API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),

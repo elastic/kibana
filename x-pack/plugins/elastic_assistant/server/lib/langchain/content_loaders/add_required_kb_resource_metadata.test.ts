@@ -17,6 +17,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc, i) => {
@@ -31,6 +32,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {
@@ -38,14 +40,29 @@ describe('addRequiredKbResourceMetadata', () => {
     });
   });
 
-  test('it adds the expected `required` metadata to each document', () => {
+  test('it adds the expected `required` metadata to each document, defaulting to true', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {
       expect(doc.metadata).toHaveProperty('required', true);
+    });
+  });
+
+  test('it sets the `required` metadata to the provided value', () => {
+    const required = false;
+
+    const transformedDocs = addRequiredKbResourceMetadata({
+      docs: mockExampleQueryDocsFromDirectoryLoader,
+      kbResource,
+      required,
+    });
+
+    transformedDocs.forEach((doc) => {
+      expect(doc.metadata).toHaveProperty('required', required);
     });
   });
 });

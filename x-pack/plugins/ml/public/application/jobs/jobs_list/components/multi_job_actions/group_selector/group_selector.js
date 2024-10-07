@@ -158,8 +158,8 @@ export class GroupSelectorUI extends Component {
     }
 
     const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
-    const ml = this.props.kibana.services.mlServices.mlApi;
-    ml.jobs
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    mlApi.jobs
       .updateGroups(tempJobs)
       .then((resp) => {
         let success = true;

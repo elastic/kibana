@@ -53,7 +53,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     logger,
     getTimeRange,
   } = options;
-  const { alertsClient, scopedClusterClient, share } = services;
+  const { alertsClient, ruleResultService, scopedClusterClient, share } = services;
 
   if (!alertsClient) {
     throw new AlertsClientError();
@@ -89,6 +89,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           getSearchSourceClient: services.getSearchSourceClient,
           logger,
           getDataViews: services.getDataViews,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
@@ -119,6 +120,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         services: {
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,

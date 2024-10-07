@@ -12,7 +12,7 @@ import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plu
 import { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
-import { SignalTypes } from '../../../../common/entities/types';
+import { EntityDataStreamType } from '../../../../common/entities/types';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
@@ -23,7 +23,7 @@ const stories: Meta<{}> = {
       const transactionType = 'type';
       const transactionTypeStatus = FETCH_STATUS.SUCCESS;
       const serviceEntitySummary = {
-        signalTypes: [SignalTypes.METRICS, SignalTypes.LOGS],
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
       };
 
       mockApmApiCallResponse(
@@ -42,6 +42,7 @@ const stories: Meta<{}> = {
         transactionType,
         transactionTypeStatus,
         serviceEntitySummary,
+        transactionTypes: ['type'],
       } as unknown as APMServiceContextValue;
 
       return (

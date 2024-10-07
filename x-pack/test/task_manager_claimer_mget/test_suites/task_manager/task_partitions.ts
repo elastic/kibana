@@ -115,8 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       .then((result) => (result as unknown as SearchResults).hits.hits);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/192023
-  describe.skip('task partitions', () => {
+  describe('task partitions', () => {
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {

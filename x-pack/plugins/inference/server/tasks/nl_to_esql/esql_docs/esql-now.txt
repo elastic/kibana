@@ -1,8 +1,16 @@
-## NOW
+# NOW
 
-The `NOW` function returns the current date and time.
+The NOW function returns the current date and time.
 
-### Examples
+## Syntax
+
+`NOW()`
+
+### Parameters
+
+This function does not require any parameters.
+
+## Examples
 
 ```esql
 ROW current_date = NOW()

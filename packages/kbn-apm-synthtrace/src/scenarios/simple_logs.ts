@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Scenario } from '../cli/scenario';
@@ -17,6 +19,7 @@ import {
   getCluster,
   getCloudProvider,
   getCloudRegion,
+  getAgentName,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
@@ -42,7 +45,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
     const commonLongEntryFields: LogDocument = {
       'trace.id': generateShortId(),
-      'agent.name': 'nodejs',
+      'agent.name': getAgentName(),
       'orchestrator.cluster.name': clusterName,
       'orchestrator.cluster.id': clusterId,
       'orchestrator.namespace': namespace,
@@ -80,7 +83,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .fill(0)
             .map(() => {
               const {
-                serviceName,
                 logMessage: { level, message },
                 commonLongEntryFields,
               } = constructLogsCommonData();
@@ -89,7 +91,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceName)
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
                 .defaults(commonLongEntryFields)

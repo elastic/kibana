@@ -235,36 +235,7 @@ export type TSVBMetricModelCreator = (
   interval: string
 ) => TSVBMetricModel;
 
-export const ESBasicMetricAggRT = rt.record(
-  rt.string,
-  rt.union([
-    rt.undefined,
-    rt.type({
-      field: rt.string,
-    }),
-  ])
-);
-
-export const ESDerivativeAggRT = rt.type({
-  derivative: rt.type({
-    buckets_path: rt.string,
-    gap_policy: rt.keyof({ skip: null, insert_zeros: null }),
-    unit: rt.string,
-  }),
-});
-
-export const ESSumBucketAggRT = rt.type({
-  sum_bucket: rt.type({
-    buckets_path: rt.string,
-  }),
-});
-
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
-
-export const ESTermsWithAggregationRT = rt.type({
-  terms: rt.type({ field: rt.string }),
-  aggregations: rt.UnknownRecord,
-});
 
 export const SnapshotMetricTypeKeys = {
   count: null,

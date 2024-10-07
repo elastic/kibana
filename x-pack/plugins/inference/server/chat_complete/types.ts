@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  FunctionCallingMode,
   Message,
 } from '../../common/chat_complete';
 import type { ToolOptions } from '../../common/chat_complete/tools';
@@ -24,9 +25,10 @@ import type { InferenceExecutor } from './utils';
 export interface InferenceConnectorAdapter {
   chatComplete: (
     options: {
+      executor: InferenceExecutor;
       messages: Message[];
       system?: string;
-      executor: InferenceExecutor;
+      functionCalling?: FunctionCallingMode;
       logger: Logger;
     } & ToolOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;

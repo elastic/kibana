@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { TemplateFields } from './template_fields';
 
 describe('Template fields', () => {
+  let user: UserEvent;
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
   const formDefaultValue = { templateTags: [] };
@@ -22,8 +23,18 @@ describe('Template fields', () => {
     configurationTemplateTags: [],
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRenderer = createAppMockRenderer();
   });
 
@@ -80,19 +91,19 @@ describe('Template fields', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+    await user.click(await screen.findByTestId('template-name-input'));
+    await user.paste('Template 1');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
-    userEvent.keyboard('{enter}');
+    await user.click(await within(templateTags).findByRole('combobox'));
+    await user.paste('first');
+    await user.keyboard('{enter}');
 
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
+    await user.click(await screen.findByTestId('template-description-input'));
+    await user.paste('this is a first template');
 
-    userEvent.click(screen.getByText('Submit'));
+    await user.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -120,16 +131,19 @@ describe('Template fields', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), '!!');
+    await user.click(await screen.findByTestId('template-name-input'));
+    await user.paste('!!');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
-    userEvent.keyboard('{enter}');
+    await user.click(await within(templateTags).findByRole('combobox'));
+    await user.paste('first');
+    await user.keyboard('{enter}');
 
-    userEvent.paste(await screen.findByTestId('template-description-input'), '..');
+    await user.click(await screen.findByTestId('template-description-input'));
+    await user.paste('..');
 
-    userEvent.click(screen.getByText('Submit'));
+    await user.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

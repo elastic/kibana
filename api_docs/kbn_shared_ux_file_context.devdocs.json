@@ -27,7 +27,7 @@
         "label": "FilesContext",
         "description": [],
         "signature": [
-          "({ client, children }: React.PropsWithChildren<React.PropsWithChildren<ContextProps>>) => JSX.Element"
+          "({ client, children }: React.PropsWithChildren<ContextProps>) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/file/context/src/index.tsx",
         "deprecated": false,
@@ -41,7 +41,7 @@
             "label": "{ client, children }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<ContextProps>>"
+              "React.PropsWithChildren<ContextProps>"
             ],
             "path": "packages/shared-ux/file/context/src/index.tsx",
             "deprecated": false,

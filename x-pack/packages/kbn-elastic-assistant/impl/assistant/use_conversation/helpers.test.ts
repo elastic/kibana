@@ -120,10 +120,10 @@ describe('useConversation helpers', () => {
       expect(result).toEqual(systemPrompts[1]);
     });
 
-    test('should return the fallback prompt if default new system prompt do not exist', () => {
+    test('should return undefined if default new system prompt do not exist', () => {
       const result = getDefaultNewSystemPrompt([systemPrompts[0]]);
 
-      expect(result).toEqual(systemPrompts[0]);
+      expect(result).toEqual(undefined);
     });
 
     test('should return undefined if default (starred) isNewConversationDefault system prompt does not exist and there are no system prompts', () => {

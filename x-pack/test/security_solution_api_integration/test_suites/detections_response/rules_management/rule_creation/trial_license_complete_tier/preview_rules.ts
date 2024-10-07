@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless @ess preview_rules', () => {
+  describe('@serverless @ess @serverlessQA preview_rules', () => {
     describe('previewing rules', () => {
       before(async () => {
         await esArchiver.load(path);

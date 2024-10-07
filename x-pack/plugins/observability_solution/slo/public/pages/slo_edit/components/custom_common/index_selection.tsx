@@ -16,6 +16,8 @@ import { SloPublicPluginsStart } from '../../../..';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 
+const BTN_MAX_WIDTH = 515;
+
 export const DATA_VIEW_FIELD = 'indicator.params.dataViewId';
 const INDEX_FIELD = 'indicator.params.index';
 const TIMESTAMP_FIELD = 'indicator.params.timestampField';
@@ -53,7 +55,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   ]);
 
   return (
-    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid}>
+    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid} fullWidth>
       <Controller
         defaultValue=""
         name={DATA_VIEW_FIELD}
@@ -64,10 +66,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             adHocDataViews={adHocDataViews}
             trigger={{
               label: currentIndexPattern || SELECT_DATA_VIEW,
-              fullWidth: true,
-              color: fieldState.invalid ? 'danger' : 'text',
+              color: fieldState.invalid ? 'danger' : 'primary',
               isLoading: isDataViewsLoading,
               'data-test-subj': 'indexSelection',
+              style: { width: '100%', maxWidth: BTN_MAX_WIDTH },
             }}
             onChangeDataView={(newId: string) => {
               setValue(

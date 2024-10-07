@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { format as formatUrl } from 'url';
@@ -53,6 +54,18 @@ export class TestUser extends FtrService {
       return;
     }
 
+    /*
+     * When running in FIPS mode, security must be enabled. Many suites expect that there will be no authc/authz.
+     * Test user is configured to get `defaultRole` which is being overridden in `fips_overrides.ts` to the most privileged
+     * roles available so that more tests can be run successfully
+     */
+    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true') {
+      this.log.debug(
+        `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
+      );
+      return;
+    }
+
     this.log.debug(`set roles = ${roles}`);
     await this.user.create(TEST_USER_NAME, {
       password: TEST_USER_PASSWORD,
@@ -78,7 +91,6 @@ export class TestUser extends FtrService {
 export async function createTestUserService(ctx: FtrProviderContext, role: Role, user: User) {
   const log = ctx.getService('log');
   const config = ctx.getService('config');
-
   const enabled =
     !config
       .get('esTestCluster.serverArgs')

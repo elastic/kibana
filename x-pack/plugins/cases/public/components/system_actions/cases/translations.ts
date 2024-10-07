@@ -53,3 +53,10 @@ export const WEEKS = (timeValue: string) =>
     defaultMessage: '{timeValue, plural, one {week} other {weeks}}',
     values: { timeValue },
   });
+
+export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.defaultEmptyTemplateName',
+  {
+    defaultMessage: 'No template selected',
+  }
+);

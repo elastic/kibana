@@ -61,9 +61,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, 'My new description');
+    await userEvent.click(description);
+    await userEvent.paste('My new description');
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({ description: 'My new description' }, true);
@@ -86,9 +87,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, '  ');
+    await userEvent.click(description);
+    await userEvent.paste('  ');
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({}, false);
@@ -115,9 +117,10 @@ describe('Description', () => {
 
     const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.paste(description, longDescription);
+    await userEvent.click(description);
+    await userEvent.paste(longDescription);
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({}, false);

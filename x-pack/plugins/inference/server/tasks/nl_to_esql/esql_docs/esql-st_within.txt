@@ -1,8 +1,22 @@
-## ST_WITHIN
+# ST_WITHIN
 
-The `ST_WITHIN` function returns whether the first geometry is within the second geometry. This is the inverse of the `ST_CONTAINS` function.
+The ST_WITHIN function checks if the first geometry is located within the second geometry.
 
-### Examples
+## Syntax
+
+`ST_WITHIN(geomA, geomB)`
+
+### Parameters
+
+#### geomA
+
+This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If the value is `null`, the function will return `null`.
+
+#### geomB
+
+This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If the value is `null`, the function will return `null`. It's important to note that the second parameter must have the same coordinate system as the first. This means you cannot combine `geo_*` and `cartesian_*` parameters.
+
+## Examples
 
 ```esql
 FROM airport_city_boundaries

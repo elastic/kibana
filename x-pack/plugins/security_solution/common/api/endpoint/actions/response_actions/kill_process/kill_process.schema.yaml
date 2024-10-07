@@ -15,7 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../../../model/schema/common.schema.yaml#/components/schemas/KillOrSuspendActionSchema'
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
       responses:
         '200':
           description: OK
@@ -23,3 +23,23 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    KillProcessRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - $ref: "../../../model/schema/common.schema.yaml#/components/schemas/Pid"
+                - $ref: "../../../model/schema/common.schema.yaml#/components/schemas/EntityId"
+                - type: object
+                  properties:
+                    process_name:
+                      type: string
+                      minLength: 1
+                      description: Valid for SentinelOne agent type only

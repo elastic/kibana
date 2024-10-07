@@ -12,14 +12,25 @@ import { SubmitCaseButton } from './submit_button';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 describe('SubmitCaseButton', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRender = createAppMockRenderer();
   });
 
@@ -40,21 +51,27 @@ describe('SubmitCaseButton', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('create-case-submit'));
+    await user.click(await screen.findByTestId('create-case-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
 
   it('disables when submitting', async () => {
     appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
+      <FormTestComponent
+        // We need to pass in an async variant in here,
+        // otherwise the assertion will fail
+        onSubmit={jest.fn(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        })}
+      >
         <SubmitCaseButton />
       </FormTestComponent>
     );
 
     const button = await screen.findByTestId('create-case-submit');
-    userEvent.click(button);
+    await user.click(button);
 
-    await waitFor(() => expect(button).toBeDisabled());
+    expect(await screen.findByTestId('create-case-submit')).toBeDisabled();
   });
 });

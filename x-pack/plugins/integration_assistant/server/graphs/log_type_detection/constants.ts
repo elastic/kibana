@@ -7,4 +7,5 @@
 
 export const EX_ANSWER_LOG_TYPE = {
   log_type: 'structured',
+  header: true,
 };

@@ -47,6 +47,7 @@
     "@kbn/utility-types",
     "@kbn/timelines-plugin",
     "@kbn/dev-cli-runner",
+    "@kbn/elastic-assistant-common",
     "@kbn/search-types",
     "@kbn/security-plugin",
     "@kbn/ftr-common-functional-ui-services",

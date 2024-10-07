@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -270,6 +271,22 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
+                    ...(rawResponse?.took && {
+                      queryTime: {
+                        label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                          defaultMessage: 'Query time',
+                        }),
+                        value: i18n.translate('data.search.es_search.queryTimeValue', {
+                          defaultMessage: '{queryTime}ms',
+                          values: { queryTime: rawResponse.took },
+                        }),
+                        description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                          defaultMessage:
+                            'The time it took to process the query. ' +
+                            'Does not include the time to send the request or parse it in the browser.',
+                        }),
+                      },
+                    }),
                   })
                   .json(params)
                   .ok({ json: rawResponse, requestParams });

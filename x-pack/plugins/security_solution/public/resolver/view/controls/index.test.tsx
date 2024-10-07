@@ -102,6 +102,68 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     await expect(originNodeStyle()).toYieldObjectEqualTo(originalPositionStyle);
   });
 
+  it('should not display the view button by default', async () => {
+    await expect(
+      simulator.map(() => ({
+        showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button').length,
+      }))
+    ).toYieldEqualTo({ showPanelButton: 0 });
+  });
+
+  describe('when split mode is enabled', () => {
+    it('should display the view button when callback is available', async () => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = noAncestorsTwoChildren();
+
+      const showPanelOnClick = jest.fn();
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        indices: [],
+        shouldUpdate: false,
+        filters: {},
+        isSplitPanel: true,
+        showPanelOnClick,
+      });
+
+      await expect(
+        simulator.map(() => ({
+          showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button')
+            .length,
+        }))
+      ).toYieldEqualTo({ showPanelButton: 1 });
+      (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
+      expect(showPanelOnClick).toHaveBeenCalled();
+    });
+
+    it('should not display the view button when callback is not available', async () => {
+      const {
+        metadata: { databaseDocumentID },
+        dataAccessLayer,
+      } = noAncestorsTwoChildren();
+
+      simulator = new Simulator({
+        dataAccessLayer,
+        databaseDocumentID,
+        resolverComponentInstanceID,
+        indices: [],
+        shouldUpdate: false,
+        filters: {},
+        isSplitPanel: true,
+      });
+
+      await expect(
+        simulator.map(() => ({
+          showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button')
+            .length,
+        }))
+      ).toYieldEqualTo({ showPanelButton: 0 });
+    });
+  });
+
   describe('when the user clicks the west panning button', () => {
     beforeEach(async () => {
       (await simulator.resolve('resolver:graph-controls:west-button'))?.simulate('click');
