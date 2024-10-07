@@ -19,7 +19,7 @@ import type {
   InspectQuery,
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { getEntitiesIndexName } from './utils/utils';
+import { getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getDefinitionForEntityType } from './definition';
