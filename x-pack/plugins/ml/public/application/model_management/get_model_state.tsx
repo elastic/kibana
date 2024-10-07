@@ -96,8 +96,20 @@ export const getModelStateColor = (
       return {
         color: 'accent',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.stoppingName', {
-          defaultMessage: 'Stopping deployment...',
+          defaultMessage: 'Stopping',
         }),
+        get component() {
+          return (
+            <EuiBadge color={'hollow'}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{this.name}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          );
+        },
       };
     case MODEL_STATE.NOT_DOWNLOADED:
       return null;
