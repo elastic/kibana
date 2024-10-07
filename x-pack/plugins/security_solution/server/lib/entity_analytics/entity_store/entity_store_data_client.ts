@@ -35,8 +35,9 @@ import {
   deleteEntityIndex,
   createPlatformPipeline,
   deletePlatformPipeline,
+  createEntityIndexComponentTemplate,
+  deleteEntityIndexComponentTemplate,
 } from './assets';
-import { getEntityIndexMapping } from './index_mappings';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -108,7 +109,11 @@ export class EntityStoreDataClient {
 
     // the index must be in place with the correct mapping before the enrich policy is created
     // this is because the enrich policy will fail if the index does not exist with the correct fields
-    await this.createEntityIndexComponentTemplate(entityType);
+    await createEntityIndexComponentTemplate({
+      entityType,
+      esClient,
+      namespace,
+    });
     debugLog(`Created entity index component template`);
     await createEntityIndex({
       entityType,
@@ -177,31 +182,6 @@ export class EntityStoreDataClient {
     }
   }
 
-  private async createEntityIndexComponentTemplate(entityType: EntityType) {
-    const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-
-    await this.options.esClient.cluster.putComponentTemplate({
-      name: `${definition.id}-latest@platform`,
-      body: {
-        template: {
-          mappings: getEntityIndexMapping(entityType),
-        },
-      },
-    });
-  }
-
-  private async deleteEntityIndexComponentTemplate(entityType: EntityType) {
-    const templateName = `${
-      getDefinitionForEntityType(entityType, this.options.namespace).id
-    }-latest@platform`;
-    await this.options.esClient.cluster.deleteComponentTemplate(
-      { name: templateName },
-      {
-        ignore: [404],
-      }
-    );
-  }
-
   public async start(entityType: EntityType, options?: { force: boolean }) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
@@ -255,7 +235,11 @@ export class EntityStoreDataClient {
     logger.info(`Deleting entity store for ${entityType}`);
     try {
       await entityClient.deleteEntityDefinition({ id, deleteData });
-      await this.deleteEntityIndexComponentTemplate(entityType);
+      await deleteEntityIndexComponentTemplate({
+        entityType,
+        esClient,
+        namespace,
+      });
       await deletePlatformPipeline({
         entityType,
         namespace,
