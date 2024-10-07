@@ -8,3 +8,4 @@
 export * from './entity_index';
 export * from './ingest_pipeline';
 export * from './component_template';
+export * from './enrich_policy';

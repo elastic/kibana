@@ -6,7 +6,7 @@
  */
 
 import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
-import { isFieldMissingOrEmpty } from '../painless_utils';
+import { isFieldMissingOrEmpty } from '../../painless';
 
 export interface PreferNewestValue extends BaseFieldRetentionOperator {
   operation: 'prefer_newest_value';
