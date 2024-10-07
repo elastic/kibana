@@ -210,7 +210,7 @@ const RerankParamsFields: React.FunctionComponent<{
             editSubActionParams({ input: [] });
           }
         }}
-        dataTestSubj="inference-rerank-inputJsonEditor"
+        dataTestSubj="inference-inputJsonEditor"
       />
       <EuiSpacer size="s" />
       <EuiFormRow fullWidth error={errors.input} isInvalid={false} label={i18n.QUERY}>

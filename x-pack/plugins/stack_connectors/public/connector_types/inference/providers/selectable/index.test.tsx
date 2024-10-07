@@ -8,13 +8,13 @@
 import type { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { SelectableProvider } from '.';
 
-const mockGetProviders = jest.fn();
 describe('SelectableProvider', () => {
   const props = {
+    isLoading: false,
     onClosePopover: jest.fn(),
     onProviderChange: jest.fn(),
     getSelectableOptions: jest.fn().mockReturnValue([]),
@@ -36,7 +36,7 @@ describe('SelectableProvider', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-provider-input"]')
           .prop('searchProps');
-        expect(searchProps?.placeholder).toEqual('');
+        expect(searchProps?.placeholder).toEqual('Search');
       });
     });
 
@@ -55,26 +55,6 @@ describe('SelectableProvider', () => {
           .prop('searchProps');
         expect(searchProps?.placeholder).toEqual('Search');
       });
-    });
-  });
-
-  describe('getProviders', () => {
-    const args = {
-      pageInfo: {
-        pageIndex: 1,
-      },
-      search: '',
-    };
-    beforeAll(() => {
-      mount(<SelectableProvider {...props} />);
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-    });
-
-    test('should be called with correct args', () => {
-      expect(mockGetProviders).toBeCalledWith(args);
     });
   });
 });

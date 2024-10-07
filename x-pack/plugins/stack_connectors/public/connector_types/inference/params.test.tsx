@@ -18,6 +18,18 @@ describe('Inference Params Fields renders', () => {
           subAction: SUB_ACTION.COMPLETION,
           subActionParams: { input: 'What is Elastic?' },
         }}
+        actionConnector={{
+          actionTypeId: '.inference',
+          config: {
+            taskType: 'completion',
+          },
+          id: 'test',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          secrets: {},
+          name: 'AI Connector',
+        }}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
@@ -51,6 +63,7 @@ describe('Inference Params Fields renders', () => {
           providerConfig: {
             url: 'https://api.openai.com/v1/embeddings',
           },
+          taskType: 'completion',
         },
       };
       render(
@@ -91,7 +104,24 @@ describe('Inference Params Fields renders', () => {
     const editAction = jest.fn();
     const errors = {};
     render(
-      <ParamsFields actionParams={actionParams} editAction={editAction} index={0} errors={errors} />
+      <ParamsFields
+        actionParams={actionParams}
+        editAction={editAction}
+        index={0}
+        errors={errors}
+        actionConnector={{
+          actionTypeId: '.inference',
+          config: {
+            taskType: 'completion',
+          },
+          id: 'test',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          secrets: {},
+          name: 'AI Connector',
+        }}
+      />
     );
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
@@ -105,19 +135,32 @@ describe('Inference Params Fields renders', () => {
         actionParams={{
           subAction: SUB_ACTION.RERANK,
           subActionParams: {
-            input: '{"key": "value"}',
+            input: ['apple', 'banana', 'cherry'],
+            query: 'test',
           },
         }}
         editAction={editAction}
         index={0}
         errors={errors}
+        actionConnector={{
+          actionTypeId: '.inference',
+          config: {
+            taskType: 'rerank',
+          },
+          id: 'test',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          secrets: {},
+          name: 'AI Connector',
+        }}
       />
     );
-    const jsonEditor = getByTestId('bodyJsonEditor');
-    fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
+    const jsonEditor = getByTestId('inputJsonEditor');
+    fireEvent.change(jsonEditor, { target: { value: `[\"apple\",\"banana\",\"tomato\"]` } });
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
-      { body: '{"new_key": "new_value"}' },
+      { input: '["apple","banana","tomato"]', query: 'test' },
       0
     );
   });

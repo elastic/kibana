@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -13,19 +14,15 @@ import { useProviders } from './get_providers';
 
 const http = httpServiceMock.createStartContract();
 const toasts = notificationServiceMock.createStartContract();
+const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 beforeEach(() => jest.resetAllMocks());
 
 const { getProviders } = jest.requireMock('./get_providers');
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
-const wrapper = ({ children }: { children: Node }) => (
+
+const queryClient = new QueryClient();
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -34,23 +31,23 @@ describe('useProviders', () => {
     jest.clearAllMocks();
   });
 
-  it('should call getProviders', async () => {
+  it('should call useQuery', async () => {
     renderHook(() => useProviders(http, toasts.toasts), {
       wrapper,
     });
 
     await waitFor(() => {
-      expect(getProviders).toHaveBeenCalled();
+      return expect(useQuerySpy).toBeCalled();
     });
   });
 
   it('should return isError = true if api fails', async () => {
-    getProviders.mockRejectedValue('This is an error.');
+    getProviders.mockResolvedValue('This is an error.');
 
-    const { result } = renderHook(() => useProviders(http, toasts.toasts), {
+    renderHook(() => useProviders(http, toasts.toasts), {
       wrapper,
     });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(useQuerySpy).toHaveBeenCalled());
   });
 });

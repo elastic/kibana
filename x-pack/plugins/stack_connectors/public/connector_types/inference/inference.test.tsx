@@ -8,13 +8,15 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/inference/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const ACTION_TYPE_ID = '.inference';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
@@ -27,9 +29,9 @@ describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.selectMessage).toBe(
-      'Send a request to an OpenAI or Azure OpenAI service.'
+      'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.'
     );
-    expect(actionTypeModel.actionTypeTitle).toBe('OpenAI');
+    expect(actionTypeModel.actionTypeTitle).toBe('AI Connector');
   });
 });
 
@@ -41,7 +43,7 @@ describe('OpenAI action params validation', () => {
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { input: [], subAction: [] },
+      errors: { input: [], subAction: [], inputType: [], query: [] },
     });
   });
 
@@ -52,7 +54,7 @@ describe('OpenAI action params validation', () => {
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: ['Body does not have a valid JSON format.'], subAction: [] },
+      errors: { input: ['Input is required.'], inputType: [], query: [], subAction: [] },
     });
   });
 
@@ -63,7 +65,9 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: [],
+        input: [],
+        inputType: [],
+        query: [],
         subAction: ['Action is required.'],
       },
     });
@@ -77,7 +81,9 @@ describe('OpenAI action params validation', () => {
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        input: ['Input is required.'],
+        input: ['Input is required.', 'Input does not have a valid Array format.'],
+        inputType: [],
+        query: ['Query is required.'],
         subAction: [],
       },
     });
