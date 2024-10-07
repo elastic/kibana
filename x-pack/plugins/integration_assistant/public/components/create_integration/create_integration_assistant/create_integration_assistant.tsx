@@ -13,12 +13,11 @@ import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
+import { CelInputStep, isCelInputStepReady } from './steps/cel_input_step';
 import { ReviewCelStep, isCelReviewStepReady } from './steps/review_cel_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
-import { isCelInputStepReady } from './steps/cel_input_step/is_step_ready';
-import { CelInputStep } from './steps/cel_input_step/cel_input_step';
 import { ExperimentalFeaturesService } from '../../../services';
 
 export const CreateIntegrationAssistant = React.memo(() => {
@@ -45,9 +44,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
-      setHasCelInput: (payload) => {
-        dispatch({ type: 'SET_HAS_CEL_INPUT', payload });
-      },
       setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
       },
@@ -67,13 +63,13 @@ export const CreateIntegrationAssistant = React.memo(() => {
       return isDataStreamStepReady(state);
     } else if (state.step === 4) {
       return isReviewStepReady(state);
-    } else if (state.hasCelInput && state.step === 5) {
+    } else if (isGenerateCelEnabled && state.step === 5) {
       return isCelInputStepReady(state);
-    } else if (state.hasCelInput && state.step === 6) {
+    } else if (isGenerateCelEnabled && state.step === 6) {
       return isCelReviewStepReady(state);
     }
     return false;
-  }, [state]);
+  }, [state, isGenerateCelEnabled]);
 
   return (
     <ActionsProvider value={actions}>
@@ -96,29 +92,28 @@ export const CreateIntegrationAssistant = React.memo(() => {
               result={state.result}
             />
           )}
-          {(!isGenerateCelEnabled || !state.hasCelInput) && state.step === 5 && (
-            <DeployStep
-              integrationSettings={state.integrationSettings}
-              result={state.result}
-              connector={state.connector}
-            />
-          )}
+          {state.step === 5 &&
+            (!isGenerateCelEnabled ? (
+              <DeployStep
+                integrationSettings={state.integrationSettings}
+                result={state.result}
+                connector={state.connector}
+              />
+            ) : (
+              <CelInputStep
+                integrationSettings={state.integrationSettings}
+                connector={state.connector}
+                isGenerating={state.isGenerating}
+              />
+            ))}
 
-          {isGenerateCelEnabled && state.hasCelInput && state.step === 5 && (
-            <CelInputStep
-              integrationSettings={state.integrationSettings}
-              connector={state.connector}
-              isGenerating={state.isGenerating}
-            />
-          )}
-          {isGenerateCelEnabled && state.hasCelInput && state.step === 6 && (
+          {isGenerateCelEnabled && state.step === 6 && (
             <ReviewCelStep
-              integrationSettings={state.integrationSettings}
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
             />
           )}
-          {isGenerateCelEnabled && state.hasCelInput && state.step === 7 && (
+          {isGenerateCelEnabled && state.step === 7 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
@@ -130,7 +125,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <Footer
           currentStep={state.step}
           isGenerating={state.isGenerating}
-          hasCelInput={state.hasCelInput}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate>

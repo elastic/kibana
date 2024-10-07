@@ -12,6 +12,7 @@ import { useActions, type State } from '../../state';
 import type { OnComplete } from './generation_modal';
 import { GenerationModal } from './generation_modal';
 import { ApiDefinitionInput } from './api_definition_input';
+import * as i18n from './translations';
 
 interface CelInputStepProps {
   integrationSettings: State['integrationSettings'];
@@ -40,7 +41,7 @@ export const CelInputStep = React.memo<CelInputStepProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
         <EuiFlexItem>
-          <StepContentWrapper title={'Title'} subtitle={'Subtitle'}>
+          <StepContentWrapper title={i18n.CEL_INPUT_TITLE} subtitle={i18n.CEL_INPUT_DESCRIPTION}>
             <EuiPanel hasShadow={false} hasBorder>
               <EuiForm component="form" fullWidth>
                 <ApiDefinitionInput integrationSettings={integrationSettings} />

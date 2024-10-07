@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ApiDefinitionInput } from './api_definition_input';
+export { CelInputStep } from './cel_input_step';
 export * from './is_step_ready';

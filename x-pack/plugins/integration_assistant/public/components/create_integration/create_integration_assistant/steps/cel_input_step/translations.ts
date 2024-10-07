@@ -11,6 +11,20 @@ export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStr
   defaultMessage: 'Analyzing',
 });
 
+export const CEL_INPUT_TITLE = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.dataStreamTitle',
+  {
+    defaultMessage: 'Define CEL input configuration',
+  }
+);
+export const CEL_INPUT_DESCRIPTION = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.dataStreamDescription',
+  {
+    defaultMessage:
+      'OpenAPI specifications are analyzed and CEL configurations are automatically created',
+  }
+);
+
 export const API_DEFINITION_LABEL = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.apiDefinition.label',
   {

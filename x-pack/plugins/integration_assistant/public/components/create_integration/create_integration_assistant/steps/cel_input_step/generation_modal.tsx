@@ -51,7 +51,7 @@ export const useGeneration = ({
   connector,
   onComplete,
 }: UseGenerationProps) => {
-  const { reportGenerationComplete } = useTelemetry();
+  const { reportCelGenerationComplete } = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
   const [error, setError] = useState<null | string>(null);
@@ -89,7 +89,7 @@ export const useGeneration = ({
           throw new Error('Results not found in response');
         }
 
-        reportGenerationComplete({
+        reportCelGenerationComplete({
           connector,
           integrationSettings,
           durationMs: Date.now() - generationStartedAt,
@@ -108,7 +108,7 @@ export const useGeneration = ({
           e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
         }`;
 
-        reportGenerationComplete({
+        reportCelGenerationComplete({
           connector,
           integrationSettings,
           durationMs: Date.now() - generationStartedAt,
@@ -130,7 +130,7 @@ export const useGeneration = ({
     connector,
     http,
     integrationSettings,
-    reportGenerationComplete,
+    reportCelGenerationComplete,
     notifications?.toasts,
   ]);
 

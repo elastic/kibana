@@ -129,7 +129,7 @@ describe('createDataStream', () => {
     };
 
     // // Manifest files
-    expect(Utils.createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
-    expect(nunjucks.render).toHaveBeenCalledWith(`cel_manifest.yml.njk`, expectedMappedValues);
+    expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
+    expect(render).toHaveBeenCalledWith(`cel_manifest.yml.njk`, expectedMappedValues);
   });
 });
