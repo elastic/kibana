@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './field_retention_enrich_policy';
-export * from './task';
-export { getFieldRetentionDefinition } from './field_retention_definitions';
+export * from './delete.gen';
+export * from './get.gen';
+export * from './init.gen';
+export * from './list.gen';
+export * from './start.gen';
+export * from './stats.gen';
+export * from './stop.gen';

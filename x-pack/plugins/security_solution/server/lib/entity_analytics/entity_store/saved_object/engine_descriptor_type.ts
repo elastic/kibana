@@ -25,6 +25,10 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
     status: {
       type: 'keyword', // EngineStatus: installing | started | stopped
     },
+    fieldHistoryLength: {
+      type: 'integer',
+      index: false,
+    },
   },
 };
 export const entityEngineDescriptorType: SavedObjectsType = {

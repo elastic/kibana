@@ -15,20 +15,38 @@ export interface FieldRetentionDefinition {
   fields: FieldRetentionOperator[];
 }
 
-const DEFAULT_FIELD_RETENTION_COUNT = 10;
+export type FieldRetentionDefinitionMetadata = Omit<FieldRetentionDefinition, 'fields'>;
 
-const collectValuesForFields = (fields: string[]): FieldRetentionOperator[] =>
+const HOST_METADATA: FieldRetentionDefinitionMetadata = {
+  version: 1,
+  entityType: 'host',
+  matchField: 'host.name',
+};
+
+const USER_METADATA: FieldRetentionDefinitionMetadata = {
+  version: 1,
+  entityType: 'user',
+  matchField: 'user.name',
+};
+
+const collectValuesForFields = (
+  fields: string[],
+  fieldHistoryLength: number
+): FieldRetentionOperator[] =>
   fields.map((field) => ({
     field,
     operation: 'collect_values',
-    maxLength: DEFAULT_FIELD_RETENTION_COUNT,
+    maxLength: fieldHistoryLength,
   }));
 
-const getBaseFields = (entityType: EntityType): FieldRetentionOperator[] => [
+const getBaseFields = (
+  entityType: EntityType,
+  fieldHistoryLength: number
+): FieldRetentionOperator[] => [
   {
     field: 'entity.source',
     operation: 'collect_values',
-    maxLength: DEFAULT_FIELD_RETENTION_COUNT,
+    maxLength: fieldHistoryLength,
   },
   {
     field: 'asset.criticality',
@@ -48,46 +66,72 @@ const getBaseFields = (entityType: EntityType): FieldRetentionOperator[] => [
   },
 ];
 
-const HOST_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
-  entityType: 'host',
-  version: 1,
-  matchField: 'host.name',
+type DefinitionBuilder = (args: { fieldHistoryLength: number }) => FieldRetentionDefinition;
+
+const getHostDefinition: DefinitionBuilder = ({ fieldHistoryLength }) => ({
+  ...HOST_METADATA,
   fields: [
-    ...getBaseFields('host'),
-    ...collectValuesForFields([
-      'host.domain',
-      'host.hostname',
-      'host.id',
-      'host.ip',
-      'host.mac',
-      'host.type',
-      'host.architecture',
-    ]),
+    ...getBaseFields('host', fieldHistoryLength),
+    ...collectValuesForFields(
+      [
+        'host.domain',
+        'host.hostname',
+        'host.id',
+        'host.ip',
+        'host.mac',
+        'host.type',
+        'host.architecture',
+      ],
+      fieldHistoryLength
+    ),
   ],
+});
+
+const getUserDefinition: DefinitionBuilder = ({ fieldHistoryLength }) => ({
+  ...USER_METADATA,
+  fields: [
+    ...getBaseFields('user', fieldHistoryLength),
+    ...collectValuesForFields(
+      [
+        'user.domain',
+        'user.email',
+        'user.full_name',
+        'user.hash',
+        'user.id',
+        'user.name',
+        'user.roles',
+      ],
+      fieldHistoryLength
+    ),
+  ],
+});
+
+const definitions: Record<EntityType, DefinitionBuilder> = {
+  host: getHostDefinition,
+  user: getUserDefinition,
 };
 
-const USER_FIELD_RETENTION_DEFINITION: FieldRetentionDefinition = {
-  entityType: 'user',
-  version: 1,
-  matchField: 'user.name',
-  fields: [
-    ...getBaseFields('user'),
-    ...collectValuesForFields([
-      'user.domain',
-      'user.email',
-      'user.full_name',
-      'user.hash',
-      'user.id',
-      'user.name',
-      'user.roles',
-    ]),
-  ],
+export const getFieldRetentionDefinition = ({
+  entityType,
+  fieldHistoryLength,
+}: {
+  entityType: EntityType;
+  fieldHistoryLength: number;
+}): FieldRetentionDefinition => definitions[entityType]({ fieldHistoryLength });
+
+export const getFieldRetentionDefinitionWithDefaults = (
+  entityType: EntityType
+): FieldRetentionDefinition =>
+  getFieldRetentionDefinition({
+    entityType,
+    fieldHistoryLength: 10,
+  });
+
+export const getFieldRetentionDefinitionMetadata = (
+  entityType: EntityType
+): FieldRetentionDefinitionMetadata => {
+  return entityType === 'host' ? HOST_METADATA : USER_METADATA;
 };
 
-export const getFieldRetentionDefinition = (entityType: EntityType) =>
-  entityType === 'host' ? HOST_FIELD_RETENTION_DEFINITION : USER_FIELD_RETENTION_DEFINITION;
-
-export const getFieldRetentionDefinitions = () => [
-  HOST_FIELD_RETENTION_DEFINITION,
-  USER_FIELD_RETENTION_DEFINITION,
-];
+export const getFieldRetentionDefinitionEntityTypes = () =>
+  Object.keys(definitions) as EntityType[];
