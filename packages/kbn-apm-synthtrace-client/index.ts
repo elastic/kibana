@@ -37,8 +37,4 @@ export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator }
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { type AssetDocument } from './src/lib/assets';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
-<<<<<<< HEAD
-export { otel, type OtelDocument, type OtelTrace } from './src/lib/otel';
-=======
 export { otel, type OtelDocument } from './src/lib/otel';
->>>>>>> 46b62aa3664b26f4a589e4d58e39fc542d15b9a5
