@@ -216,6 +216,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   );
 
   useEffect(() => {
+    if (selectedForecastIdProp !== selectedForecastId) {
+      setSelectedForecastIdProp(undefined);
+    }
+
     if (
       autoZoomDuration !== undefined &&
       boundsMinMs !== undefined &&
@@ -223,9 +227,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       selectedJob !== undefined &&
       selectedForecastId !== undefined
     ) {
-      if (selectedForecastIdProp !== selectedForecastId) {
-        setSelectedForecastIdProp(undefined);
-      }
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
         .then((resp) => {
@@ -257,7 +258,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedForecastId]);
+  }, [selectedForecastId, selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
