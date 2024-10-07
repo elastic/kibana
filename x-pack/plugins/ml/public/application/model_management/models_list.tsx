@@ -547,7 +547,6 @@ export const ModelsList: FC<Props> = ({
     if (itemIdToExpandedRowMapValues[item.model_id]) {
       delete itemIdToExpandedRowMapValues[item.model_id];
     } else {
-      await fetchModelsStats([item]);
       itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
