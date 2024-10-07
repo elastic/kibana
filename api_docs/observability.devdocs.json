@@ -5,41 +5,6 @@
     "functions": [
       {
         "parentPluginId": "observability",
-        "id": "def-public.AlertSummary",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertSummary",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "AlertSummaryProps",
-          ") => React.JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.AlertSummary.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "AlertSummaryProps"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.AutocompleteField",
         "type": "Function",
         "tags": [],
@@ -967,6 +932,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.Threshold",
+        "type": "Function",
+        "tags": [],
+        "label": "Threshold",
+        "description": [],
+        "signature": [
+          "({\n  chartProps: { theme, baseTheme },\n  comparator,\n  id,\n  threshold,\n  title,\n  value,\n  valueFormatter = (d) => String(d),\n}: ",
+          "Props",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/public/components/custom_threshold/components/threshold.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.Threshold.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  chartProps: { theme, baseTheme },\n  comparator,\n  id,\n  threshold,\n  title,\n  value,\n  valueFormatter = (d) => String(d),\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/components/custom_threshold/components/threshold.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.toQuery",
         "type": "Function",
         "tags": [],
@@ -1273,42 +1273,47 @@
     "interfaces": [
       {
         "parentPluginId": "observability",
-        "id": "def-public.AlertSummaryField",
+        "id": "def-public.AlertDetailsAppSectionProps",
         "type": "Interface",
         "tags": [],
-        "label": "AlertSummaryField",
+        "label": "AlertDetailsAppSectionProps",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
+        "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.AlertSummaryField.label",
-            "type": "CompoundType",
+            "id": "def-public.AlertDetailsAppSectionProps.setSources",
+            "type": "Function",
             "tags": [],
-            "label": "label",
+            "label": "setSources",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "(value: React.SetStateAction<",
+              "AlertDetailsSource",
+              "[] | undefined>) => void"
             ],
-            "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
+            "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/types.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.AlertSummaryField.value",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.AlertDetailsAppSectionProps.setSources.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
