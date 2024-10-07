@@ -49,7 +49,6 @@
     "@kbn/alerts-grouping",
     "@kbn/grouping",
     "@kbn/data-views-plugin",
-    "@kbn/core-http-browser",
     "@kbn/timelines-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/event-annotation-components",

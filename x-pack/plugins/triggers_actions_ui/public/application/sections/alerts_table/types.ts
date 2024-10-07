@@ -11,8 +11,8 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { Dispatch, ReducerAction, ReducerState } from 'react';
-import { Alert, AlertsTableProps } from '../../../types';
+import { ComponentProps, Dispatch, ReducerAction, ReducerState } from 'react';
+import { AlertsTableProps } from '../../../types';
 import type { bulkActionsReducer } from './bulk_actions/reducer';
 
 export interface Consumer {
@@ -22,17 +22,9 @@ export interface Consumer {
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export interface CellComponentProps {
-  alert?: Alert;
-  cases: AlertsTableProps['cases']['data'];
-  maintenanceWindows: AlertsTableProps['maintenanceWindows']['data'];
-  columnId: SystemCellId;
-  isLoading: boolean;
-  showAlertStatusWithFlapping: boolean;
-  caseAppId?: string;
-}
+export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
 
-export type CellComponent = React.FC<CellComponentProps>;
+export type CellComponentProps = ComponentProps<CellComponent>;
 
 export interface SystemCellComponentMap {
   [ALERT_STATUS]: CellComponent;
@@ -42,12 +34,14 @@ export interface SystemCellComponentMap {
 
 export type SystemCellId = keyof SystemCellComponentMap;
 
-type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown>) => {
+type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
   open: ({ attachments }: { attachments: any[] }) => void;
   close: () => void;
 };
 
-type UseCasesAddToExistingCaseModal = (props?: Record<string, unknown>) => {
+type UseCasesAddToExistingCaseModal = (
+  props?: Record<string, unknown> & { onSuccess: () => void }
+) => {
   open: ({
     getAttachments,
   }: {

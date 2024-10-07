@@ -4,24 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import {
-  AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
   BulkActionsReducerAction,
-  UseBulkActionsRegistry,
+  PublicAlertsDataGridProps,
 } from '../../../../types';
-import {
-  getLeadingControlColumn as getBulkActionsLeadingControlColumn,
-  GetLeadingControlColumn,
-} from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
@@ -35,18 +30,17 @@ import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
+  featureIds?: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
-  casesConfig?: AlertsTableConfigurationRegistry['cases'];
-  useBulkActionsConfig?: UseBulkActionsRegistry;
+  casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
+  getBulkActions?: PublicAlertsDataGridProps['getBulkActions'];
   refresh: () => void;
-  featureIds?: ValidFeatureId[];
   hideBulkActions?: boolean;
 }
 
 export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
-  getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
   bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
@@ -276,14 +270,14 @@ export function useBulkActions({
   casesConfig,
   query,
   refresh,
-  useBulkActionsConfig = () => [],
+  getBulkActions = () => [],
   featureIds,
   hideBulkActions,
 }: BulkActionsProps): UseBulkActions {
   const {
-    bulkActions: [bulkActionsState, updateBulkActionsState],
-  } = useContext(AlertsTableContext);
-  const configBulkActionPanels = useBulkActionsConfig(query, refresh);
+    bulkActionsStore: [bulkActionsState, updateBulkActionsState],
+  } = useAlertsTableContext();
+  const configBulkActionPanels = getBulkActions(query, refresh);
 
   const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
@@ -332,7 +326,6 @@ export function useBulkActions({
   return useMemo(() => {
     return {
       isBulkActionsColumnActive,
-      getBulkActionsLeadingControlColumn,
       bulkActionsState,
       bulkActions,
       setIsBulkActionsLoading,

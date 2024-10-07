@@ -12,8 +12,9 @@ import { ALERT_END, ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
+import { AlertActions } from '../../alerts/components/alert_actions';
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
-import { TopAlert } from '../../..';
+import { ObservabilityAlertsTable, TopAlert } from '../../..';
 import {
   AlertSearchBarContainerState,
   DEFAULT_STATE,
@@ -31,7 +32,6 @@ import {
   useAlertSearchBarStateContainer,
 } from '../../../components/alert_search_bar/containers';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID, SEARCH_BAR_URL_STORAGE_KEY } from '../../../constants';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { mergeBoolQueries } from '../../alerts/helpers/merge_bool_queries';
@@ -50,13 +50,7 @@ const DEFAULT_FILTERS: Filter[] = [];
 
 export function InternalRelatedAlerts({ alert, kuery }: Props) {
   const kibanaServices = useKibana().services;
-  const {
-    http,
-    notifications,
-    dataViews,
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-  } = kibanaServices;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
+  const { http, notifications, dataViews } = kibanaServices;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(SEARCH_BAR_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -119,15 +113,13 @@ export function InternalRelatedAlerts({ alert, kuery }: Props) {
                 filters: groupingFilters,
               });
               return (
-                <AlertsStateTable
+                <ObservabilityAlertsTable
                   id={ALERTS_TABLE_ID}
                   featureIds={observabilityAlertFeatureIds}
-                  configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                   query={mergeBoolQueries(esQuery, groupQuery)}
-                  showAlertStatusWithFlapping
                   initialPageSize={ALERTS_PER_PAGE}
-                  cellContext={{ observabilityRuleTypeRegistry }}
-                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                  renderActionsCell={AlertActions}
+                  showInspectButton
                 />
               );
             }}
