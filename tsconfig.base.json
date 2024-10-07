@@ -1184,6 +1184,8 @@
       "@kbn/management-storybook-config/*": ["packages/kbn-management/storybook/config/*"],
       "@kbn/management-test-plugin": ["test/plugin_functional/plugins/management_test_plugin"],
       "@kbn/management-test-plugin/*": ["test/plugin_functional/plugins/management_test_plugin/*"],
+      "@kbn/manifest": ["packages/kbn-manifest"],
+      "@kbn/manifest/*": ["packages/kbn-manifest/*"],
       "@kbn/mapbox-gl": ["packages/kbn-mapbox-gl"],
       "@kbn/mapbox-gl/*": ["packages/kbn-mapbox-gl/*"],
       "@kbn/maps-custom-raster-source-plugin": ["x-pack/examples/third_party_maps_source_example"],
