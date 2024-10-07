@@ -109,7 +109,10 @@ describe('PackageListGrid', () => {
 
   it('updates the search term when the search input changes', async () => {
     const mockSetSearchTermToStorage = jest.fn();
-    (useStoredIntegrationSearchTerm as jest.Mock).mockReturnValue(['', mockSetSearchTermToStorage]);
+    (useStoredIntegrationSearchTerm as jest.Mock).mockReturnValue([
+      'new search term',
+      mockSetSearchTermToStorage,
+    ]);
 
     mockUseAvailablePackages.mockReturnValue({
       isLoading: false,

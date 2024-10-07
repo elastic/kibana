@@ -28,7 +28,7 @@ import {
 } from './constants';
 import { INTEGRATION_TABS, INTEGRATION_TABS_BY_ID } from './integration_tabs_configs';
 import { useIntegrationCardList } from './use_integration_card_list';
-import type { IntegrationTabId } from './types';
+import { IntegrationTabId } from './types';
 
 interface WrapperProps {
   useAvailablePackages: AvailablePackagesHookType;
@@ -42,11 +42,12 @@ const emptyStateStyles = { paddingTop: '16px' };
 export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProps) => {
   const { spaceId } = useOnboardingContext();
   const scrollElement = useRef<HTMLDivElement>(null);
-  const [selectedTabId, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
+  const [selectedTabIdFromStorage, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
     spaceId,
     DEFAULT_TAB.id
   );
-  const [toggleIdSelected, setToggleIdSelected] = useState<IntegrationTabId>(selectedTabId);
+  const [toggleIdSelected, setToggleIdSelected] =
+    useState<IntegrationTabId>(selectedTabIdFromStorage);
   const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
   const onTabChange = useCallback(
     (id: string) => {
@@ -71,14 +72,18 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     prereleaseIntegrationsEnabled: false,
   });
 
-  const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[selectedTabId], [selectedTabId]);
+  const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
 
   const onSearchTermChanged = useCallback(
     (searchQuery: string) => {
       setSearchTerm(searchQuery);
-      setSearchTermToStorage(searchQuery);
+      // Search term is preserved across VISIBLE tabs
+      // As we want user to be able to see the same search results when coming back from Fleet
+      if (selectedTab.showSearchTools) {
+        setSearchTermToStorage(searchQuery);
+      }
     },
-    [setSearchTerm, setSearchTermToStorage]
+    [selectedTab.showSearchTools, setSearchTerm, setSearchTermToStorage]
   );
 
   useEffect(() => {
@@ -89,7 +94,11 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
       onSearchTermChanged('');
     }
 
-    if (selectedTab.showSearchTools && searchTermFromStorage) {
+    if (
+      selectedTab.showSearchTools &&
+      searchTermFromStorage &&
+      toggleIdSelected !== IntegrationTabId.recommended
+    ) {
       setSearchTerm(searchTermFromStorage);
     }
   }, [
@@ -101,6 +110,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
     setCategory,
     setSearchTerm,
     setSelectedSubCategory,
+    toggleIdSelected,
   ]);
 
   const list: IntegrationCardItem[] = useIntegrationCardList({
@@ -162,7 +172,7 @@ export const PackageListGrid = React.memo(({ useAvailablePackages }: WrapperProp
             setUrlandReplaceHistory={noop}
             showCardLabels={false}
             showControls={false}
-            showSearchTools={selectedTab.showSearchTools ?? true}
+            showSearchTools={selectedTab.showSearchTools}
             spacer={false}
           />
         </Suspense>

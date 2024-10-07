@@ -14,6 +14,7 @@ export const INTEGRATION_TABS: Tab[] = [
     id: IntegrationTabId.recommended,
     label: 'Recommended',
     overflow: 'hidden',
+    showSearchTools: false,
   },
   {
     category: 'security',
