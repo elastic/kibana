@@ -208,7 +208,7 @@ export const isOpenSourceModel = (connector?: Connector): boolean => {
     ? (connector.config?.apiProvider as OpenAiProviderType)
     : undefined;
 
-  const isOpeAiType = llmType === 'openai';
+  const isOpenAiType = llmType === 'openai';
   const isOpenAI =
     isOpeAiType &&
     (!connectorApiUrl ||
