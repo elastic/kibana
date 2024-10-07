@@ -668,10 +668,13 @@ export const ModelsList: FC<Props> = ({
         const config = getModelStateColor(state);
         if (!config) return null;
 
-        const isProgressbarVisible =
-          (state === MODEL_STATE.DOWNLOADING && downloadState) || state === MODEL_STATE.DOWNLOADED;
+        const isProgressbarVisible = state === MODEL_STATE.DOWNLOADING && downloadState;
 
-        const label = <EuiBadge color={'hollow'}>{config.name}</EuiBadge>;
+        const label = (
+          <EuiText size="xs" color={config.color}>
+            {config.name}
+          </EuiText>
+        );
 
         return (
           <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>

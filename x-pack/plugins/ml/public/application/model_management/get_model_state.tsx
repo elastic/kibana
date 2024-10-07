@@ -14,6 +14,7 @@ import {
   type EuiHealthProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ModelItem } from './models_list';
@@ -47,7 +48,7 @@ export const getModelStateColor = (
       return {
         color: 'success',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadedName', {
-          defaultMessage: 'Downloaded. Ready to deploy.',
+          defaultMessage: 'Ready to deploy',
         }),
       };
     case MODEL_STATE.DOWNLOADING:
@@ -81,14 +82,14 @@ export const getModelStateColor = (
         }),
         get component() {
           return (
-            <EuiBadge color={'hollow'}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{this.name}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiBadge>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{this.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       };
@@ -100,19 +101,18 @@ export const getModelStateColor = (
         }),
         get component() {
           return (
-            <EuiBadge color={'hollow'}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{this.name}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiBadge>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{this.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       };
     case MODEL_STATE.NOT_DOWNLOADED:
-      return null;
     default:
       return null;
   }
