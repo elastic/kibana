@@ -451,5 +451,36 @@ export function MachineLearningCommonUIProvider({
     async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
       await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
     },
+
+    /** Set value for OptionListWithFieldStats component */
+    async setOptionsListWithFieldStatsValue(selector: string, value: string) {
+      await testSubjects.click(selector);
+      await testSubjects.existOrFail('optionsListControlAvailableOptions');
+
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.find('optionsListFilterInput');
+
+        await testSubjects.setValue('optionsListFilterInput', value);
+        await testSubjects.click(`optionsListControlSelection-${value}`);
+      });
+    },
+
+    async assertOptionsListWithFieldStatsValue(
+      selector: string,
+      expectedIdentifiers?: string[] | string,
+      label?: string
+    ) {
+      const expectedValue =
+        (Array.isArray(expectedIdentifiers) ? expectedIdentifiers.join('') : expectedIdentifiers) ??
+        '';
+      const actualValue = await testSubjects.getAttribute(
+        `${selector} > comboBoxSearchInput`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `${label ?? selector} value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
   };
 }

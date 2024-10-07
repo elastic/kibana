@@ -53,11 +53,12 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const _selectableOptions = (options ?? []).map((suggestion) => {
+      const key = suggestion.label ?? suggestion.field?.id;
       return {
         ...suggestion,
-        key: suggestion.label ?? suggestion.field?.id,
+        key,
         checked: undefined,
-        'data-test-subj': `optionsList-control-selection-${suggestion.key}`,
+        'data-test-subj': `optionsListControlSelection-${key}`,
       };
     });
     setSelectableOptions(_selectableOptions);
@@ -65,6 +66,7 @@ const OptionsListPopoverSuggestions: FC<OptionsListPopoverSuggestionsProps> = ({
 
   return (
     <EuiSelectable
+      searchProps={{ 'data-test-subj': 'optionsListFilterInput' }}
       singleSelection={Boolean(singleSelection)}
       searchable
       options={selectableOptions as Array<EuiSelectableOption<string>>}
@@ -133,10 +135,10 @@ export const OptionsListPopover = ({
     <div
       id={`control-popover-${id}`}
       className={'optionsList__popover'}
-      data-test-subj={`optionsList-control-popover`}
+      data-test-subj={`optionsListControlPopover`}
     >
       <EuiFlexItem
-        data-test-subj={`optionsList-control-available-options`}
+        data-test-subj={`optionsListControlAvailableOptions`}
         css={css({ width: '100%', height: '100%' })}
       >
         <OptionsListPopoverSuggestions

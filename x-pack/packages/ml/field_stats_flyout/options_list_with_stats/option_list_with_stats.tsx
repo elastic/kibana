@@ -43,6 +43,7 @@ interface OptionListWithFieldStatsProps {
   isLoading?: boolean;
   isClearable?: boolean;
   isInvalid?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
@@ -56,6 +57,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   isLoading,
   isClearable = true,
   'aria-label': ariaLabel,
+  'data-test-subj': dataTestSubj,
 }) => {
   const { renderOption } = useFieldStatsTrigger<DropDownLabel>();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -79,6 +81,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
 
   return (
     <EuiInputPopover
+      data-test-subj={dataTestSubj}
       id={popoverId}
       input={
         <EuiFormControlLayout

@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
-export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardGeoProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
@@ -29,7 +33,11 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
     },
 
     async selectGeoField(identifier: string) {
-      await comboBox.set('mlGeoFieldNameSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlGeoFieldNameSelect > comboBoxInput',
+        identifier
+      );
+
       await this.assertGeoFieldSelection([identifier]);
     },
 
