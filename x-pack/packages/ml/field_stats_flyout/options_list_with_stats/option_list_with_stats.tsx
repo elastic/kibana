@@ -79,12 +79,15 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   );
   const hasSelections = useMemo(() => selectedOptions?.length ?? 0 > 0, [selectedOptions]);
 
+  const value = singleSelection && selectedOptions?.[0]?.label ? selectedOptions?.[0]?.label : '';
   return (
     <EuiInputPopover
+      fullWidth={fullWidth}
       data-test-subj={dataTestSubj}
       id={popoverId}
       input={
         <EuiFormControlLayout
+          fullWidth={fullWidth}
           // Adding classname to make functional tests similar to EuiComboBox
           className={singleSelection ? 'euiComboBox__inputWrap--plainText' : ''}
           data-test-subj="comboBoxInput"
@@ -92,21 +95,23 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
           isDropdown={true}
         >
           <EuiFieldText
+            fullWidth={fullWidth}
+            disabled={isDisabled}
+            placeholder={placeholder}
             data-test-subj="comboBoxSearchInput"
             onClick={setPopoverOpen.bind(null, true)}
             type="text"
             role="combobox"
             controlOnly
-            aria-label={i18n.translate(
-              'xpack.ml.controls.optionsList.popover.selectOptionAriaLabel',
-              {
+            aria-expanded={isPopoverOpen ? 'true' : 'false'}
+            aria-label={
+              placeholder ??
+              i18n.translate('xpack.ml.controls.optionsList.popover.selectOptionAriaLabel', {
                 defaultMessage: 'Select an option',
-              }
-            )}
-            onChange={() => {}}
-            value={
-              singleSelection && selectedOptions?.[0]?.label ? selectedOptions?.[0]?.label : ''
+              })
             }
+            onChange={() => {}}
+            value={value}
           />
         </EuiFormControlLayout>
       }
