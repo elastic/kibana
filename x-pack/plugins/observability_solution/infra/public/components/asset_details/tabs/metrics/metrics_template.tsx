@@ -171,6 +171,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
                 {quickAccessItems.map(([sectionId, label]) => (
                   <EuiListGroupItem
                     data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
+                    key={sectionId}
                     onClick={() => onQuickAccessItemClick(sectionId)}
                     color="text"
                     size="s"
