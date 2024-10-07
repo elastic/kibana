@@ -91,8 +91,11 @@ export function extractWarningMessages(warnings: string) {
   });
 }
 
+// To avoid double unescaping, the best approach is to process the backslash escape sequence last.
+// This ensures that any escaped characters are correctly handled first, preventing premature
+// interpretation of the backslash itself as part of another escape sequence.
 export function unescape(s: string) {
-  return s.replace(/\\\\/g, '\\').replace(/\\"/g, '"');
+  return s.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
 }
 
 export function splitOnUnquotedCommaSpace(s: string) {

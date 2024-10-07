@@ -14,7 +14,6 @@ import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
-import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../../utils/get_path_for_feedback';
@@ -27,6 +26,7 @@ import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { getNoDataConfig } from '../no_data_config';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EntitiesInventoryCallout } from './entities_inventory_callout';
+import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -77,7 +77,7 @@ export function ApmMainTemplate({
     true
   );
 
-  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
@@ -146,7 +146,7 @@ export function ApmMainTemplate({
             <FeatureFeedbackButton
               data-test-subj="infraApmFeedbackLink"
               formUrl={
-                isEntityCentricExperienceViewEnabled && sanitizedPath.includes('service')
+                isEntityCentricExperienceEnabled && sanitizedPath.includes('service')
                   ? APM_NEW_EXPERIENCE_FEEDBACK_LINK
                   : APM_FEEDBACK_LINK
               }

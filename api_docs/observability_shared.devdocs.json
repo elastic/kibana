@@ -6714,6 +6714,111 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY",
+        "description": [],
+        "signature": [
+          "\"entity\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_DEFINITION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_DEFINITION_ID",
+        "description": [],
+        "signature": [
+          "\"entity.definitionId\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_DISPLAY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_DISPLAY_NAME",
+        "description": [],
+        "signature": [
+          "\"entity.displayName\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_FIRST_SEEN",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_FIRST_SEEN",
+        "description": [],
+        "signature": [
+          "\"entity.firstSeenTimestamp\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_ID",
+        "description": [],
+        "signature": [
+          "\"entity.id\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_LAST_SEEN",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_LAST_SEEN",
+        "description": [],
+        "signature": [
+          "\"entity.lastSeenTimestamp\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ENTITY_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITY_TYPE",
+        "description": [],
+        "signature": [
+          "\"entity.type\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.ERROR_CULPRIT",
         "type": "string",
         "tags": [],
@@ -8040,6 +8145,21 @@
           "\"slo\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SOURCE_DATA_STREAM_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SOURCE_DATA_STREAM_TYPE",
+        "description": [],
+        "signature": [
+          "\"source_data_stream.type\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

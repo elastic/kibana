@@ -160,7 +160,12 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   }, [timeline.description, timeline.updated, timeline.updatedBy]);
 
   return (
-    <EuiPanel>
+    <EuiPanel
+      css={css`
+        height: 100%;
+        overflow: auto;
+      `}
+    >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiTitle>

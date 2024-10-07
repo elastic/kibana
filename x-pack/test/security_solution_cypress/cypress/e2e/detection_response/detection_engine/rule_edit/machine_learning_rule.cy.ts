@@ -42,7 +42,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Machine Learning Detection Rules - Editing',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;

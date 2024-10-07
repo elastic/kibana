@@ -2256,6 +2256,56 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.hasPartialCodeSignatureEntry",
+        "type": "Function",
+        "tags": [],
+        "label": "hasPartialCodeSignatureEntry",
+        "description": [
+          "\nEvent filters helper where given an exceptions list,\ndetermine if both 'subject_name' and 'trusted' are\nincluded in an entry with 'code_signature'"
+        ],
+        "signature": [
+          "(items: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.ExceptionsBuilderReturnExceptionItem",
+            "text": "ExceptionsBuilderReturnExceptionItem"
+          },
+          "[]) => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.hasPartialCodeSignatureEntry.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-utils",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+                "section": "def-common.ExceptionsBuilderReturnExceptionItem",
+                "text": "ExceptionsBuilderReturnExceptionItem"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.hasWrongOperatorWithWildcard",
         "type": "Function",
         "tags": [],

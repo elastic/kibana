@@ -43,13 +43,15 @@ export const getRuleList = (
       defaultMessage: 'Alerts',
     }),
     description:
-      ruleState === 'unmuted' && rule?.benchmark?.name ? (
-        <RulesDetectionRuleCounter benchmarkRule={rule} />
-      ) : (
+      ruleState === 'muted' ? (
         <FormattedMessage
           id="xpack.csp.findings.findingsFlyout.ruleTab.disabledRuleText"
           defaultMessage="Disabled"
         />
+      ) : rule?.benchmark?.name ? (
+        <RulesDetectionRuleCounter benchmarkRule={rule} />
+      ) : (
+        EMPTY_VALUE
       ),
   },
   {

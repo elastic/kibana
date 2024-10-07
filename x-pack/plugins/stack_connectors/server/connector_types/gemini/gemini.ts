@@ -395,9 +395,7 @@ const formatGeminiPayload = ({
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
-    ...(systemInstruction
-      ? { system_instruction: { role: 'user', parts: [{ text: systemInstruction }] } }
-      : {}),
+    ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     ...(toolConfig
       ? {
           tool_config: {
