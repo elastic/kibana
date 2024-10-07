@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RecursivePartial, Theme, PartialTheme } from '@elastic/charts';
+import { PartialTheme } from '@elastic/charts';
 import {
   ChartTypes,
   LabelPositions,
@@ -25,7 +25,6 @@ type GetThemeByTypeFn = (
 type GetThemeFn = (
   chartType: ChartTypes,
   visParams: PartitionVisParams,
-  chartTheme: RecursivePartial<Theme>,
   dimensions?: PieContainerDimensions,
   rescaleFactor?: number,
   hasOpenedOnAggBasedEditor?: boolean
@@ -118,7 +117,6 @@ const getSpecificTheme: GetThemeByTypeFn = (chartType, visParams, dimensions, re
 export const getPartitionTheme: GetThemeFn = (
   chartType,
   visParams,
-  chartTheme,
   dimensions,
   rescaleFactor = 1,
   hasOpenedOnAggBasedEditor
