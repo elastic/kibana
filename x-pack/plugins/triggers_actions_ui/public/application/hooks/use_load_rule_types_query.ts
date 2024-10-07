@@ -79,17 +79,31 @@ export const useLoadRuleTypesQuery = ({
     authorizedToCreateAnyRules ||
     authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.read);
 
-  return {
-    ruleTypesState: {
-      initialLoad: isLoading || isInitialLoading,
-      isLoading: isLoading || isFetching,
-      data: filteredIndex,
+  return useMemo(
+    () => ({
+      ruleTypesState: {
+        initialLoad: isLoading || isInitialLoading,
+        isLoading: isLoading || isFetching,
+        data: filteredIndex,
+        error,
+      },
+      hasAnyAuthorizedRuleType,
+      authorizedRuleTypes,
+      authorizedToReadAnyRules,
+      authorizedToCreateAnyRules,
+      isSuccess,
+    }),
+    [
+      authorizedRuleTypes,
+      authorizedToCreateAnyRules,
+      authorizedToReadAnyRules,
       error,
-    },
-    hasAnyAuthorizedRuleType,
-    authorizedRuleTypes,
-    authorizedToReadAnyRules,
-    authorizedToCreateAnyRules,
-    isSuccess,
-  };
+      filteredIndex,
+      hasAnyAuthorizedRuleType,
+      isFetching,
+      isInitialLoading,
+      isLoading,
+      isSuccess,
+    ]
+  );
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { Pagination, RulesListFilters } from '../../types';
@@ -97,15 +98,28 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
 
   const hasData = Boolean(rulesResponse && rulesResponse.data.length > 0);
 
-  return {
-    rulesState: {
-      isLoading: enabled && (isLoading || isFetching),
-      data: rulesResponse?.data ?? [],
-      totalItemCount: rulesResponse?.total ?? 0,
-      initialLoad: isLoading || isInitialLoading,
-    },
-    lastUpdate: moment(dataUpdatedAt).format(),
-    hasData,
-    loadRules: refetch,
-  };
+  return useMemo(
+    () => ({
+      rulesState: {
+        isLoading: enabled && (isLoading || isFetching),
+        data: rulesResponse?.data ?? [],
+        totalItemCount: rulesResponse?.total ?? 0,
+        initialLoad: isLoading || isInitialLoading,
+      },
+      lastUpdate: moment(dataUpdatedAt).format(),
+      hasData,
+      loadRules: refetch,
+    }),
+    [
+      dataUpdatedAt,
+      enabled,
+      hasData,
+      isFetching,
+      isInitialLoading,
+      isLoading,
+      refetch,
+      rulesResponse?.data,
+      rulesResponse?.total,
+    ]
+  );
 };
