@@ -80,7 +80,6 @@ export async function getServiceMetadataIcons({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: false,
       query: { bool: { filter, should } },
       fields,
     },

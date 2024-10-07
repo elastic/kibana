@@ -39,7 +39,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
-  TIMESTAMP,
+  TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
@@ -87,7 +87,7 @@ export async function getTraceItems({
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
   const requiredFields = asMutableArray([
-    TIMESTAMP,
+    TIMESTAMP_US,
     TRACE_ID,
     SERVICE_NAME,
     ERROR_ID,
@@ -246,7 +246,7 @@ async function getTraceDocsPerPage({
 
   const requiredFields = asMutableArray([
     AGENT_NAME,
-    TIMESTAMP,
+    TIMESTAMP_US,
     TRACE_ID,
     SERVICE_NAME,
     PROCESSOR_EVENT,

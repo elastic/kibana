@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TIMESTAMP = 'timestamp.us';
+export const TIMESTAMP_US = 'timestamp.us';
 export const AT_TIMESTAMP = '@timestamp';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
