@@ -27,6 +27,7 @@ import {
 } from '../dashboard_constants';
 import { getDashboardPanelPlacementSetting } from '../dashboard_container/panel_placement/panel_placement_registry';
 import { UnsavedPanelState } from '../dashboard_container/types';
+import { DashboardState } from './types';
 
 export function initializePanelsManager(
   initialPanels: DashboardPanelMap,
@@ -193,7 +194,8 @@ export function initializePanelsManager(
           [api.uuid]: api,
         });
       },
-      reset: () => {
+      reset: (lastSavedState: DashboardState) => {
+        panels$.next(lastSavedState.panels);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;

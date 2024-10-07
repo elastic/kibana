@@ -20,5 +20,10 @@ export function initializeSettingsManager(initialState: DashboardState) {
       timeRestore$,
       ...titleManager.titlesApi,
     },
+    internalApi: {
+      reset: (lastSavedState: DashboardState) => {
+        timeRestore$.next(lastSavedState.timeRestore);
+      },
+    },
   };
 }

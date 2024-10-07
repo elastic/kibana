@@ -46,13 +46,13 @@ import { Observable } from 'rxjs';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { DashboardOptions, DashboardPanelMap, DashboardPanelState } from '../../common';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
 import { DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../dashboard_container/types';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 

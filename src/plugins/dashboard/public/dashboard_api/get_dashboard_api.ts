@@ -12,6 +12,7 @@ import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -27,7 +28,6 @@ import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
-import { ViewMode } from '@kbn/presentation-publishing';
 
 export function getDashboardApi({
   creationOptions,
@@ -72,7 +72,7 @@ export function getDashboardApi({
   // --------------------------------------------------------------------------------------
   // Start animating panel transforms 500 ms after dashboard is created.
   // --------------------------------------------------------------------------------------
-  setTimeout(() => animatePanelTransforms$.next(true), 500)
+  setTimeout(() => animatePanelTransforms$.next(true), 500);
 
   return {
     api: {
@@ -85,15 +85,14 @@ export function getDashboardApi({
       ...initializeTrackOverlay(trackPanel.setFocusedPanelId),
       ...initializeUnsavedChanges({
         anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
+        controlGroupApi$,
         lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
           ...DEFAULT_DASHBOARD_INPUT,
           id: v4(),
         },
-        resetControlGroup: async () => {
-          await controlGroupApi$.value?.asyncResetUnsavedChanges();
-        },
-        resetPanels: panelsManager.internalApi.reset,
-        resetUnifiedSearch: unifiedSearchManager.internalApi.reset,
+        panelsManager,
+        settingsManager,
+        unifiedSearchManager,
       }),
       fullScreenMode$,
       getAppContext: () => {

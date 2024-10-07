@@ -8,19 +8,27 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DashboardState } from './types';
+import { initializePanelsManager } from './panels_manager';
+import { initializeSettingsManager } from './settings_manager';
+import { initializeUnifiedSearchManager } from './unified_search_manager';
 
 export function initializeUnsavedChanges({
   anyMigrationRun,
+  controlGroupApi$,
   lastSavedInput,
-  resetControlGroup,
-  resetPanels,
+  panelsManager,
+  settingsManager,
+  unifiedSearchManager,
 }: {
   anyMigrationRun: boolean;
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedInput: DashboardState;
-  resetControlGroup: () => Promise<void>;
-  resetPanels: () => void;
-  resetUnifiedSearch: (lastSavedState: DashboardState) => void;
+  panelsManager: ReturnType<typeof initializePanelsManager>;
+  settingsManager: ReturnType<typeof initializeSettingsManager>;
+  unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }) {
   const hasRunMigrations$ = new BehaviorSubject(anyMigrationRun);
   const hasUnsavedChanges$ = new BehaviorSubject(false);
@@ -28,22 +36,10 @@ export function initializeUnsavedChanges({
 
   return {
     asyncResetToLastSavedState: async () => {
-      this.dispatch.resetToLastSavedInput(this.lastSavedInput$.value);
-      const {
-        explicitInput: { timeRange, refreshInterval },
-      } = this.getState();
-
-      const { timeRestore: lastSavedTimeRestore } = lastSavedInput$.value;
-
-      await resetControlGroup();
-
-      // if we are using the unified search integration, we need to force reset the time picker.
-      if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
-        const timeFilterService = dataService.query.timefilter.timefilter;
-        if (timeRange) timeFilterService.setTime(timeRange);
-        if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
-      }
-      resetPanels();
+      panelsManager.internalApi.reset(lastSavedInput$.value);
+      settingsManager.internalApi.reset(lastSavedInput$.value);
+      unifiedSearchManager.internalApi.reset(lastSavedInput$.value);
+      await controlGroupApi$.value?.asyncResetUnsavedChanges();
     },
     hasRunMigrations$,
     hasUnsavedChanges$,

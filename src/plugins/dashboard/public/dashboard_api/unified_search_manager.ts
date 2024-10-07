@@ -81,7 +81,7 @@ export function initializeUnifiedSearchManager(
       filterManager,
       timefilter: { timefilter: timefilterService },
     } = dataService.query;
-    
+
     // Set unified search to dashboard state
     filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
     queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
@@ -153,9 +153,7 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       panelsReload$,
-      reset: (lastSavedState: DashboardState) => {
-
-      }
+      reset: (lastSavedState: DashboardState) => {},
     },
     cleanup: () => {
       stopSyncingWithControlGroup();
