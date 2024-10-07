@@ -28,7 +28,7 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
-import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import type { PreviewMappingsProperties } from '../../../server/routes/api_schemas/transforms';
 
 import { getErrorMessage } from '../../../common/utils/errors';
 

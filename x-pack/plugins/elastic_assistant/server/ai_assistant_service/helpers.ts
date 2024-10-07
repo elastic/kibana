@@ -81,6 +81,7 @@ export const createPipeline = async ({
 
     return response.acknowledged;
   } catch (e) {
+    // TODO: log error or just use semantic_text already
     return false;
   }
 };

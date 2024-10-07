@@ -7,7 +7,7 @@
 
 import { finished } from 'stream/promises';
 
-import tar from 'tar';
+import * as tar from 'tar';
 import yauzl from 'yauzl';
 
 import { bufferToStream, streamToBuffer } from '../streams';

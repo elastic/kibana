@@ -1,7 +1,7 @@
 [[dashboard-api]]
 == Import and export dashboard APIs
 
-deprecated::[7.15.0,Both of these APIs have been deprecated in favor of <<saved-objects-api-import>> and <<saved-objects-api-export>>.]
+deprecated::[7.15.0,Both of these APIs have been deprecated and will be removed in 9.0.0]
 
 Import and export dashboards with the corresponding saved objects, such as visualizations, saved
 searches, and data views.

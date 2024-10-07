@@ -6,14 +6,12 @@
  */
 
 import { get, last, first, isArray } from 'lodash';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import {
-  SnapshotRequest,
-  SnapshotNodePath,
-  SnapshotNode,
-  MetricsAPISeries,
-  MetricsAPIRow,
-} from '../../../../common/http_api';
+  type MetricsAPIRow,
+  type MetricsAPISeries,
+  findInventoryFields,
+} from '@kbn/metrics-data-access-plugin/common';
+import { SnapshotRequest, SnapshotNodePath, SnapshotNode } from '../../../../common/http_api';
 import { META_KEY } from './constants';
 
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);

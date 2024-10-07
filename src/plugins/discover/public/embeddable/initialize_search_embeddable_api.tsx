@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pick } from 'lodash';
@@ -20,7 +21,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { DiscoverServices } from '../build_services';
@@ -93,6 +94,7 @@ export const initializeSearchEmbeddableApi = async (
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
+  const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
@@ -129,6 +131,7 @@ export const initializeSearchEmbeddableApi = async (
     sort: sort$,
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
+    density: density$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -169,6 +172,7 @@ export const initializeSearchEmbeddableApi = async (
     comparators: {
       sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
       columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
+      grid: [grid$, (value) => grid$.next(value), (a, b) => deepEqual(a, b)],
       sampleSize: [
         sampleSize$,
         (value) => sampleSize$.next(value),
@@ -196,7 +200,7 @@ export const initializeSearchEmbeddableApi = async (
         (value) => serializedSearchSource$.next(value),
       ],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
-      grid: [grid$, (value) => grid$.next(value)],
+      density: [density$, (value) => density$.next(value)],
     },
   };
 };

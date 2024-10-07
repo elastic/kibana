@@ -149,7 +149,7 @@ TimeBuckets.prototype.getDuration = function () {
  *
  * Input can be one of the following:
  *  - "auto"
- *  - an interval String, such as 7d, 1h or 30m which can be parsed to a moment duration using ml/common/util/parse_interval
+ *  - an interval String, such as 7d, 1h or 30m which can be parsed to a moment duration using @kbn/ml-parse-interval
  *  - a moment.duration object.
  *
  * @param {string|moment.duration} input - see desc

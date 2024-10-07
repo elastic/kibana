@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,15 +22,16 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
-import { useDataSource } from '../../../../contexts/ml/data_source_context';
-import type { ModuleJobUI } from '../page';
-import { SAVE_STATE } from '../page';
 import {
   composeValidators,
   maxLengthValidator,
   patternValidator,
-} from '../../../../../../common/util/validators';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+  JOB_ID_MAX_LENGTH,
+} from '@kbn/ml-validators';
+
+import { useDataSource } from '../../../../contexts/ml/data_source_context';
+import type { ModuleJobUI } from '../page';
+import { SAVE_STATE } from '../page';
 import type { TimeRange } from '../../common/components';
 import { TimeRangePicker } from '../../common/components';
 

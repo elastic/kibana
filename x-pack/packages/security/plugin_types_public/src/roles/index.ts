@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export type { RolePutPayload, RolesAPIClient } from './roles_api_client';
+export type {
+  BulkUpdatePayload,
+  BulkUpdateRoleResponse,
+  RolePutPayload,
+  RolesAPIClient,
+} from './roles_api_client';

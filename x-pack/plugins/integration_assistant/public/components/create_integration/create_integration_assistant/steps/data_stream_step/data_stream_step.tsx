@@ -20,7 +20,7 @@ import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import type { OnComplete } from './generation_modal';
+import type { OnComplete } from './use_generation';
 import { GenerationModal } from './generation_modal';
 import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
@@ -36,7 +36,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'filestream', label: 'File Stream' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
   { value: 'gcs', label: 'Google Cloud Storage' },
-  { value: 'http-endpoint', label: 'HTTP Endpoint' },
+  { value: 'http_endpoint', label: 'HTTP Endpoint' },
   { value: 'journald', label: 'Journald' },
   { value: 'kafka', label: 'Kafka' },
   { value: 'tcp', label: 'TCP' },

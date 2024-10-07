@@ -27,10 +27,21 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
   }
 };
 
+const RENDER_EVENT_PREFIX = `render_lens_`;
+
+const SAVE_EVENT_PREFIX = `save_lens_`;
+
+/** @internal **/
+export const trackSaveUiCounterEvents = (
+  events: string | string[],
+  context?: KibanaExecutionContext
+) => trackUiCounterEvents(events, context, SAVE_EVENT_PREFIX);
+
 /** @internal **/
 export const trackUiCounterEvents = (
   events: string | string[],
-  context?: KibanaExecutionContext
+  context?: KibanaExecutionContext,
+  eventPrefix = RENDER_EVENT_PREFIX
 ) => {
   const usageCollection = getUsageCollectionStart();
   const containerType = extractContainerType(context) ?? 'application';
@@ -39,7 +50,7 @@ export const trackUiCounterEvents = (
     usageCollection?.reportUiCounter(
       containerType,
       METRIC_TYPE.COUNT,
-      `render_lens_${key}`,
+      `${eventPrefix}${key}`,
       counter.length
     );
   });

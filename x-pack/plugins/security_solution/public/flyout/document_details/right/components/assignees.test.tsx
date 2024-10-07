@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
+  ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TITLE_TEST_ID,
-  ASSIGNEES_HEADER_TEST_ID,
 } from './test_ids';
 import { Assignees } from './assignees';
 
@@ -180,6 +180,6 @@ describe('<Assignees />', () => {
     );
 
     expect(queryByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(ASSIGNEES_HEADER_TEST_ID)).toHaveTextContent('Assignees—');
+    expect(getByTestId(ASSIGNEES_EMPTY_TEST_ID)).toHaveTextContent('—');
   });
 });

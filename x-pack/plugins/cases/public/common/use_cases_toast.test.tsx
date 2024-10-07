@@ -46,12 +46,12 @@ describe('Use cases toast hook', () => {
     expect(el).toHaveTextContent(content);
   }
 
-  function navigateToCase() {
+  async function navigateToCase() {
     const mockParams = successMock.mock.calls[0][0];
     const el = document.createElement('div');
     mockParams.text(el);
     const button = getByTestId(el, 'toaster-content-case-view-link');
-    userEvent.click(button);
+    await userEvent.click(button);
   }
 
   useToastsMock.mockImplementation(() => {
@@ -215,12 +215,12 @@ describe('Use cases toast hook', () => {
         expect(onViewCaseClick).not.toHaveBeenCalled();
       });
 
-      it('Calls the onViewCaseClick when clicked', () => {
+      it('Calls the onViewCaseClick when clicked', async () => {
         const result = appMockRender.render(
           <CaseToastSuccessContent onViewCaseClick={onViewCaseClick} />
         );
 
-        userEvent.click(result.getByTestId('toaster-content-case-view-link'));
+        await userEvent.click(result.getByTestId('toaster-content-case-view-link'));
         expect(onViewCaseClick).toHaveBeenCalled();
       });
 
@@ -237,30 +237,33 @@ describe('Use cases toast hook', () => {
         ownerInfo.appId,
       ]);
 
-      it.each(tests)('should navigate correctly with owner %s and appId %s', (owner, appId) => {
-        const { result } = renderHook(
-          () => {
-            return useCasesToast();
-          },
-          { wrapper: TestProviders }
-        );
+      it.each(tests)(
+        'should navigate correctly with owner %s and appId %s',
+        async (owner, appId) => {
+          const { result } = renderHook(
+            () => {
+              return useCasesToast();
+            },
+            { wrapper: TestProviders }
+          );
 
-        result.current.showSuccessAttach({
-          theCase: { ...mockCase, owner },
-          title: 'Custom title',
-        });
+          result.current.showSuccessAttach({
+            theCase: { ...mockCase, owner },
+            title: 'Custom title',
+          });
 
-        navigateToCase();
+          await navigateToCase();
 
-        expect(getUrlForApp).toHaveBeenCalledWith(appId, {
-          deepLinkId: 'cases',
-          path: '/mock-id',
-        });
+          expect(getUrlForApp).toHaveBeenCalledWith(appId, {
+            deepLinkId: 'cases',
+            path: '/mock-id',
+          });
 
-        expect(navigateToUrl).toHaveBeenCalledWith('/app/cases/mock-id');
-      });
+          expect(navigateToUrl).toHaveBeenCalledWith('/app/cases/mock-id');
+        }
+      );
 
-      it('navigates to the current app if the owner is invalid', () => {
+      it('navigates to the current app if the owner is invalid', async () => {
         const { result } = renderHook(
           () => {
             return useCasesToast();
@@ -273,7 +276,7 @@ describe('Use cases toast hook', () => {
           title: 'Custom title',
         });
 
-        navigateToCase();
+        await navigateToCase();
 
         expect(getUrlForApp).toHaveBeenCalledWith('testAppId', {
           deepLinkId: 'cases',

@@ -23,11 +23,26 @@ export interface ErrorResponse {
 const isValidationErrorType = (type: unknown): boolean =>
   type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE || type === MAPPING_ERROR_TYPE;
 
+const isParsingErrorType = (type: unknown): boolean => type === PARSING_ERROR_TYPE;
+
+const isVerificationErrorType = (type: unknown): boolean => type === VERIFICATION_ERROR_TYPE;
+
+const isMappingErrorType = (type: unknown): boolean => type === MAPPING_ERROR_TYPE;
+
 export const isErrorResponse = (response: unknown): response is ErrorResponse =>
   has(response, 'error.type');
 
 export const isValidationErrorResponse = (response: unknown): response is ErrorResponse =>
   isErrorResponse(response) && isValidationErrorType(get(response, 'error.type'));
+
+export const isParsingErrorResponse = (response: unknown): response is ErrorResponse =>
+  isErrorResponse(response) && isParsingErrorType(get(response, 'error.type'));
+
+export const isVerificationErrorResponse = (response: unknown): response is ErrorResponse =>
+  isErrorResponse(response) && isVerificationErrorType(get(response, 'error.type'));
+
+export const isMappingErrorResponse = (response: unknown): response is ErrorResponse =>
+  isErrorResponse(response) && isMappingErrorType(get(response, 'error.type'));
 
 export const getValidationErrors = (response: ErrorResponse): string[] =>
   response.error.root_cause

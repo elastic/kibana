@@ -38,6 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -232,11 +233,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const {
-    sourcererDataView,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
@@ -760,7 +759,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         hasIndexWrite={hasIndexWrite ?? false}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={runtimeMappings}
+                        runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
                         signalIndexName={signalIndexName}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         to={to}

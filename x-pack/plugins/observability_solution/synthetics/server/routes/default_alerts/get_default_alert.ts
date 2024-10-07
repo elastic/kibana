@@ -12,19 +12,20 @@ import {
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
-  handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
+  handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const statusRule = defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE);
     const tlsRule = defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE);
     const [status, tls] = await Promise.all([statusRule, tlsRule]);
     return {
-      statusRule: status,
-      tlsRule: tls,
+      statusRule: status || null,
+      tlsRule: tls || null,
     };
   },
 });

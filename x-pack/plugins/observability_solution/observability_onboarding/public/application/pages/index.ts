@@ -11,3 +11,4 @@ export { KubernetesPage } from './kubernetes';
 export { LandingPage } from './landing';
 export { OtelLogsPage } from './otel_logs';
 export { SystemLogsPage } from './system_logs';
+export { FirehosePage } from './firehose';

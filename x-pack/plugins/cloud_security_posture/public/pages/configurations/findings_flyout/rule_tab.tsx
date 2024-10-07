@@ -9,7 +9,7 @@ import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
 import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 
@@ -43,13 +43,15 @@ export const getRuleList = (
       defaultMessage: 'Alerts',
     }),
     description:
-      ruleState === 'unmuted' && rule?.benchmark?.name ? (
-        <RulesDetectionRuleCounter benchmarkRule={rule} />
-      ) : (
+      ruleState === 'muted' ? (
         <FormattedMessage
           id="xpack.csp.findings.findingsFlyout.ruleTab.disabledRuleText"
           defaultMessage="Disabled"
         />
+      ) : rule?.benchmark?.name ? (
+        <RulesDetectionRuleCounter benchmarkRule={rule} />
+      ) : (
+        EMPTY_VALUE
       ),
   },
   {

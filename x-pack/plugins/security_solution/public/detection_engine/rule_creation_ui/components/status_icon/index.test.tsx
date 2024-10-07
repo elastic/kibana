@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { RuleStatusIcon } from '.';
@@ -15,7 +15,7 @@ jest.mock('../../../../common/lib/kibana');
 describe('RuleStatusIcon', () => {
   it('renders correctly', () => {
     const wrapper = shallow(<RuleStatusIcon name="name" type="active" />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(wrapper.find('EuiAvatar')).toHaveLength(1);

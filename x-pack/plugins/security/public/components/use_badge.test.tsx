@@ -17,7 +17,7 @@ import { useBadge } from './use_badge';
 describe('useBadge', () => {
   it('should add badge to chrome', async () => {
     const coreStart = coreMock.createStart();
-    const badge: ChromeBadge = {
+    const badge: React.PropsWithChildren<ChromeBadge> = {
       text: 'text',
       tooltip: 'text',
     };
@@ -33,7 +33,7 @@ describe('useBadge', () => {
 
   it('should remove badge from chrome on unmount', async () => {
     const coreStart = coreMock.createStart();
-    const badge: ChromeBadge = {
+    const badge: React.PropsWithChildren<ChromeBadge> = {
       text: 'text',
       tooltip: 'text',
     };
@@ -53,7 +53,7 @@ describe('useBadge', () => {
 
   it('should update chrome when badge changes', async () => {
     const coreStart = coreMock.createStart();
-    const badge1: ChromeBadge = {
+    const badge1: React.PropsWithChildren<ChromeBadge> = {
       text: 'text',
       tooltip: 'text',
     };

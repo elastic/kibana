@@ -76,7 +76,7 @@ describe('createInitialState', () => {
 
     test('indicesExist should be TRUE if patternList is NOT empty', async () => {
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={createMockStore(initState)}>{children}</TestProviders>
         ),
       });
@@ -113,7 +113,7 @@ describe('createInitialState', () => {
         initialNotesState
       );
       const { result } = renderHook(() => useSourcererDataView(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders store={createMockStore(state)}>{children}</TestProviders>
         ),
       });

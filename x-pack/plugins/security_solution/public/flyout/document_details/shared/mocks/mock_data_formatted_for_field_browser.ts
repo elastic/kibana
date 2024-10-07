@@ -17,6 +17,20 @@ export const ruleTypeField: TimelineEventsDetailsItem = {
 
 export const baseFields: TimelineEventsDetailsItem[] = [
   {
+    category: 'agent',
+    field: 'agent.id',
+    values: ['agent.id'],
+    originalValue: ['agent.id'],
+    isObjectArray: false,
+  },
+  {
+    category: '_id',
+    field: '_id',
+    values: ['_id'],
+    originalValue: ['_id'],
+    isObjectArray: false,
+  },
+  {
     category: 'base',
     field: '@timestamp',
     values: ['2023-01-01T01:01:01.000Z'],
@@ -67,6 +81,13 @@ export const baseFields: TimelineEventsDetailsItem[] = [
   },
   {
     category: 'kibana',
+    field: 'kibana.alert.url',
+    values: ['alert-url'],
+    originalValue: ['alert-url'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
     field: 'kibana.alert.rule.uuid',
     values: ['rule-uuid'],
     originalValue: ['rule-uuid'],
@@ -84,6 +105,27 @@ export const baseFields: TimelineEventsDetailsItem[] = [
     field: 'process.entity_id',
     values: ['process-entity_id'],
     originalValue: ['process-entity_id'],
+    isObjectArray: false,
+  },
+  {
+    category: 'host',
+    field: 'host.name',
+    values: ['host-name'],
+    originalValue: ['host-name'],
+    isObjectArray: false,
+  },
+  {
+    category: 'user',
+    field: 'user.name',
+    values: ['user-name'],
+    originalValue: ['user-name'],
+    isObjectArray: false,
+  },
+  {
+    category: '_index',
+    field: '_index',
+    values: ['index'],
+    originalValue: ['index'],
     isObjectArray: false,
   },
 ];

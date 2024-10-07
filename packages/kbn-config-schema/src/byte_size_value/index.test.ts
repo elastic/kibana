@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ByteSizeValue } from '.';
@@ -35,8 +36,37 @@ describe('parsing units', () => {
     expect(ByteSizeValue.parse('1Mb').getValueInBytes()).toBe(1024 * 1024);
   });
 
+  test('parses the max safe integer', () => {
+    expect(ByteSizeValue.parse('9007199254740991').getValueInBytes()).toBe(9007199254740991);
+    expect(ByteSizeValue.parse('9007199254740991b').getValueInBytes()).toBe(9007199254740991);
+  });
+
   test('throws an error when unsupported unit specified', () => {
     expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingInlineSnapshot(
+      `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    );
+  });
+
+  test('throws an error when unsafe integer', () => {
+    expect(() => ByteSizeValue.parse('9007199254740992')).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+  });
+
+  test('throws an error on unusually long input', () => {
+    expect(() => ByteSizeValue.parse('19007199254740991kb')).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+  });
+
+  test('throws when string does not start with a digit', () => {
+    expect(() => ByteSizeValue.parse(' 1kb')).toThrowErrorMatchingInlineSnapshot(
+      `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    );
+  });
+
+  test('throws when string does not end with a digit or unit', () => {
+    expect(() => ByteSizeValue.parse('1kb ')).toThrowErrorMatchingInlineSnapshot(
       `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
     );
   });

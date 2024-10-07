@@ -27,6 +27,7 @@ export const getFeatureIdsByRegistrationContexts = (router: IRouter<RacRequestHa
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },

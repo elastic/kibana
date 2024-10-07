@@ -13,9 +13,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "ContentEditorKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
@@ -29,9 +29,9 @@
             "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "ContentEditorKibanaDependencies",
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
@@ -52,9 +52,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
@@ -68,9 +68,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "Services",
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
@@ -170,7 +170,7 @@
           "Item",
           "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
           "CustomValidators",
-          " | undefined; showActivityView?: boolean | undefined; }"
+          " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,

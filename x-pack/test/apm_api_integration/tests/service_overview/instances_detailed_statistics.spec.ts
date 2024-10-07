@@ -75,9 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start,
             end,
           });
-        });
 
-        beforeEach(async () => {
           response = await apmApiClient.readUser({
             endpoint:
               'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
@@ -135,9 +133,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start,
             end,
           });
-        });
-
-        beforeEach(async () => {
           response = await apmApiClient.readUser({
             endpoint:
               'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',

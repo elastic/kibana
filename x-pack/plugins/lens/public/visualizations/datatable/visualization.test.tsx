@@ -7,13 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import {
-  createMockDatasource,
-  createMockFramePublicAPI,
-  DatasourceMock,
-  generateActiveData,
-} from '../../mocks';
-import faker from 'faker';
+import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -27,6 +21,20 @@ import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { ColorMapping, CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import {
+  ColumnState,
+  DatatableColumnFn,
+  DatatableExpressionFunction,
+} from '../../../common/expressions';
+import { getColorStops } from '../../shared_components/coloring';
+
+jest.mock('../../shared_components/coloring', () => {
+  return {
+    ...jest.requireActual('../../shared_components/coloring'),
+    getColorStops: jest.fn().mockReturnValue([]),
+  };
+});
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -35,12 +43,18 @@ function mockFrame(): FramePublicAPI {
   };
 }
 
-const datatableVisualization = getDatatableVisualization({
+const mockServices = {
   paletteService: chartPluginMock.createPaletteRegistry(),
-  theme: themeServiceMock.createStartContract(),
-});
+  kibanaTheme: themeServiceMock.createStartContract(),
+};
+
+const datatableVisualization = getDatatableVisualization(mockServices);
 
 describe('Datatable Visualization', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
       expect(datatableVisualization.initialize(() => 'aaa', undefined)).toEqual({
@@ -417,64 +431,122 @@ describe('Datatable Visualization', () => {
     });
 
     describe('with palette', () => {
+      const mockStops = ['red', 'white', 'blue'];
+      const datasource = createMockDatasource('test');
       let params: VisualizationConfigProps<DatatableVisualizationState>;
+
       beforeEach(() => {
-        const datasource = createMockDatasource('test');
-        datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
-        params = {
-          layerId: 'a',
-          state: {
-            layerId: 'a',
-            layerType: LayerTypes.DATA,
-            columns: [
-              {
-                columnId: 'b',
-                palette: {
-                  type: 'palette' as const,
-                  name: '',
-                  params: { stops: [{ color: 'blue', stop: 0 }] },
-                },
-              },
-            ],
-          },
-          frame: {
-            ...mockFrame(),
-            activeData: generateActiveData([
-              {
-                id: 'a',
-                rows: Array(3).fill({
-                  b: faker.random.number(),
-                }),
-              },
-            ]),
-            datasourceLayers: { a: datasource.publicAPIMock },
-          },
-        };
+        (getColorStops as jest.Mock).mockReturnValue(mockStops);
       });
 
-      it('does include palette for accessor config if the values are numeric and palette exists', () => {
-        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
-          { columnId: 'b', palette: ['blue'], triggerIconType: 'colorBy' },
-        ]);
+      describe('rows', () => {
+        beforeEach(() => {
+          datasource.publicAPIMock.getOperationForColumnId.mockReturnValueOnce({
+            dataType: 'string',
+            isBucketed: true,
+            label: 'label',
+            isStaticValue: false,
+            hasTimeShift: false,
+            hasReducedTimeRange: false,
+          });
+          datasource.publicAPIMock.getTableSpec.mockReturnValue([
+            { columnId: 'b', fields: [] },
+            { columnId: 'c', fields: [] },
+          ]);
+
+          params = {
+            layerId: 'a',
+            state: {
+              layerId: 'a',
+              layerType: LayerTypes.DATA,
+              columns: [{ columnId: 'b' }, { columnId: 'c' }],
+            },
+            frame: {
+              ...mockFrame(),
+              datasourceLayers: { a: datasource.publicAPIMock },
+            },
+          };
+        });
+
+        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+          'should include palette if colorMode is %s and has stops',
+          (colorMode) => {
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[0].accessors).toEqual([
+              { columnId: 'b', palette: mockStops, triggerIconType: 'colorBy' },
+            ]);
+          }
+        );
+
+        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+          'should not include palette if colorMode is %s but stops is empty',
+          (colorMode) => {
+            (getColorStops as jest.Mock).mockReturnValue([]);
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[0].accessors).toEqual([
+              { columnId: 'b' },
+            ]);
+          }
+        );
+
+        it.each<ColumnState['colorMode']>(['none', undefined])(
+          'should not include palette if colorMode is %s even if stops exist',
+          (colorMode) => {
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[0].accessors).toEqual([
+              { columnId: 'b' },
+            ]);
+          }
+        );
       });
-      it('does not include palette for accessor config if the values are not numeric and palette exists', () => {
-        params.frame.activeData = generateActiveData([
-          {
-            id: 'a',
-            rows: Array(3).fill({
-              b: faker.random.word(),
-            }),
-          },
-        ]);
-        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
-          { columnId: 'b' },
-        ]);
-      });
-      it('does not include palette for accessor config if the values are numeric but palette exists', () => {
-        params.state.columns[0].palette = undefined;
-        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
-          { columnId: 'b' },
-        ]);
+
+      describe('metrics', () => {
+        beforeEach(() => {
+          datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
+          params = {
+            layerId: 'a',
+            state: {
+              layerId: 'a',
+              layerType: LayerTypes.DATA,
+              columns: [{ columnId: 'b' }],
+            },
+            frame: {
+              ...mockFrame(),
+              datasourceLayers: { a: datasource.publicAPIMock },
+            },
+          };
+        });
+
+        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+          'should include palette if colorMode is %s and has stops',
+          (colorMode) => {
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b', palette: mockStops, triggerIconType: 'colorBy' },
+            ]);
+          }
+        );
+
+        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+          'should not include palette if colorMode is %s but stops is empty',
+          (colorMode) => {
+            (getColorStops as jest.Mock).mockReturnValue([]);
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b' },
+            ]);
+          }
+        );
+
+        it.each<ColumnState['colorMode']>(['none', undefined])(
+          'should not include palette if colorMode is %s even if stops exist',
+          (colorMode) => {
+            params.state.columns[0].colorMode = colorMode;
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b' },
+            ]);
+          }
+        );
       });
     });
 
@@ -629,13 +701,12 @@ describe('Datatable Visualization', () => {
         datatableVisualization.toExpression(
           state,
           frame.datasourceLayers,
-
           {},
           { '1': { type: 'expression', chain: [] } }
         ) as Ast
-      ).findFunction('lens_datatable')[0].arguments;
+      ).findFunction<DatatableExpressionFunction>('lens_datatable')[0].arguments;
 
-    const defaultExpressionTableState = {
+    const defaultExpressionTableState: DatatableVisualizationState = {
       layerId: 'a',
       layerType: LayerTypes.DATA,
       columns: [{ columnId: 'b' }, { columnId: 'c' }],
@@ -879,6 +950,104 @@ describe('Datatable Visualization', () => {
         expect.not.objectContaining({
           alignment: [],
         })
+      );
+    });
+
+    describe('palette/colorMapping/colorMode', () => {
+      const colorMapping: ColorMapping.Config = {
+        paletteId: 'default',
+        colorMode: { type: 'categorical' },
+        assignments: [],
+        specialAssignments: [],
+      };
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'default',
+      };
+      const colorExpressionTableState = (
+        colorMode?: 'cell' | 'text' | 'none'
+      ): DatatableVisualizationState => ({
+        ...defaultExpressionTableState,
+        columns: [{ columnId: 'b', colorMapping, palette, colorMode }],
+      });
+
+      beforeEach(() => {
+        datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
+      });
+
+      it.each<[DataType, string]>([
+        ['string', palette.name],
+        ['number', CUSTOM_PALETTE], // required to property handle toExpression
+      ])(
+        'should call paletteService.get with correct palette name for %s dataType',
+        (dataType, paletteName) => {
+          datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+            dataType,
+            isBucketed: false,
+            label: 'label',
+            hasTimeShift: false,
+            hasReducedTimeRange: false,
+          });
+
+          getDatatableExpressionArgs(colorExpressionTableState());
+
+          expect(mockServices.paletteService.get).toBeCalledWith(paletteName);
+        }
+      );
+
+      describe.each<'cell' | 'text' | 'none' | undefined>(['cell', 'text', 'none', undefined])(
+        'colorMode - %s',
+        (colorMode) => {
+          it.each<{ dataType: DataType; disallowed?: boolean }>([
+            // allowed types
+            { dataType: 'document' },
+            { dataType: 'ip' },
+            { dataType: 'histogram' },
+            { dataType: 'geo_point' },
+            { dataType: 'geo_shape' },
+            { dataType: 'counter' },
+            { dataType: 'gauge' },
+            { dataType: 'murmur3' },
+            { dataType: 'string' },
+            { dataType: 'number' },
+            { dataType: 'boolean' },
+            // disallowed types
+            { dataType: 'date', disallowed: true },
+          ])(
+            'should apply correct palette, colorMapping & colorMode for $dataType',
+            ({ dataType, disallowed = false }) => {
+              datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+                dataType,
+                isBucketed: false,
+                label: 'label',
+                hasTimeShift: false,
+                hasReducedTimeRange: false,
+              });
+
+              const expression = datatableVisualization.toExpression(
+                colorExpressionTableState(colorMode),
+                frame.datasourceLayers,
+                {},
+                { '1': { type: 'expression', chain: [] } }
+              ) as Ast;
+
+              const columnArgs =
+                buildExpression(expression).findFunction<DatatableColumnFn>(
+                  'lens_datatable_column'
+                )[0].arguments;
+
+              if (disallowed) {
+                expect(columnArgs.colorMode).toEqual(['none']);
+                expect(columnArgs.palette).toBeUndefined();
+                expect(columnArgs.colorMapping).toBeUndefined();
+              } else {
+                expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
+                expect(columnArgs.palette).toEqual([expect.any(Object)]);
+                expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
+              }
+            }
+          );
+        }
       );
     });
   });

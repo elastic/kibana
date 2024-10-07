@@ -22,6 +22,7 @@ const configSchema = schema.object({
   apm: schema.maybe(apmConfigSchema),
   base_url: schema.maybe(schema.string()),
   cname: schema.maybe(schema.string()),
+  csp: schema.maybe(schema.string()),
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
@@ -59,6 +60,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     base_url: true,
     cname: true,
+    csp: true,
     deployments_url: true,
     deployment_url: true,
     id: true,

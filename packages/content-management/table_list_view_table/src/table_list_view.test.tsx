@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -268,8 +269,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1Item 1 description', updatedAtValues[0].format('LL')],
-        ['Item 2Item 2 description', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 description', updatedAtValues[0].format('ll')],
+        ['Item 2Item 2 description', updatedAtValues[1].format('ll')],
       ]);
     });
 
@@ -1052,7 +1053,7 @@ describe('TableListView', () => {
   });
 
   describe('search', () => {
-    const updatedAt = new Date('2023-07-15').toISOString();
+    const updatedAt = moment('2023-07-15').toISOString();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1131,11 +1132,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);
@@ -1146,7 +1147,7 @@ describe('TableListView', () => {
           {
             id: 'item-from-search',
             type: 'dashboard',
-            updatedAt: new Date('2023-07-01').toISOString(),
+            updatedAt: moment('2023-07-01').toISOString(),
             attributes: {
               title: 'Item from search',
             },
@@ -1165,7 +1166,7 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item from search",
-            "July 1, 2023",
+            "Jul 1, 2023",
           ],
         ]
       `);
@@ -1207,11 +1208,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);
@@ -1221,37 +1222,41 @@ describe('TableListView', () => {
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
-      WithServices<TableListViewTableProps>(TableListViewTable, {
-        getTagList: () => [
-          {
-            id: 'id-tag-1',
-            name: 'tag-1',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
+    const setupInitialUrl = (initialSearchQuery: string = '') =>
+      registerTestBed<string, TableListViewTableProps>(
+        WithServices<TableListViewTableProps>(TableListViewTable, {
+          getTagList: () => [
+            {
+              id: 'id-tag-1',
+              name: 'tag-1',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+            {
+              id: 'id-tag-2',
+              name: 'tag-2',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+          ],
+        }),
+        {
+          defaultProps: { ...requiredProps, urlStateEnabled: true },
+          memoryRouter: {
+            wrapComponent: true,
+            initialEntries: [{ search: initialSearchQuery }],
+            onRouter: (_router: Router) => {
+              router = _router;
+            },
           },
-          {
-            id: 'id-tag-2',
-            name: 'tag-2',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
-          },
-        ],
-      }),
-      {
-        defaultProps: { ...requiredProps, urlStateEnabled: true },
-        memoryRouter: {
-          wrapComponent: true,
-          onRouter: (_router: Router) => {
-            router = _router;
-          },
-        },
-      }
-    );
+        }
+      );
+
+    const setupTagFiltering = setupInitialUrl();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1276,13 +1281,13 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should read search term from URL', async () => {
+    test('should read the initial search term from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl('?s=hello')({
           findItems,
         });
       });
@@ -1293,22 +1298,23 @@ describe('TableListView', () => {
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
       // Start with empty search box
-      expect(getSearchBoxValue()).toBe('');
-      expect(router?.history.location?.search).toBe('');
+      expect(getSearchBoxValue()).toBe('hello');
+      expect(router?.history.location?.search).toBe('?s=hello');
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'hello' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
+
       component.update();
 
-      // Search box is updated
+      // Search box is not updated
       expect(getSearchBoxValue()).toBe('hello');
-      expect(router?.history.location?.search).toBe('?s=hello');
+      expect(router?.history.location?.search).toBe('?s=');
     });
 
     test('should update the URL when changing the search term', async () => {
@@ -1337,13 +1343,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=search-changed');
     });
 
-    test('should filter by tag from the URL', async () => {
+    test('should filter by initial tag from the URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`
+        )({
           findItems,
         });
       });
@@ -1356,7 +1364,7 @@ describe('TableListView', () => {
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
-      let expected = '';
+      let expected = 'tag:(tag-2)';
       let [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
@@ -1365,13 +1373,13 @@ describe('TableListView', () => {
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
       component.update();
 
-      // The search bar should be updated
+      // The search bar shouldn't be updated
       expected = 'tag:(tag-2)';
       [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
@@ -1412,13 +1420,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
     });
 
-    test('should set sort column and direction from URL', async () => {
+    test('should set initial sort column and direction from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`
+        )({
           findItems,
         });
       });
@@ -1426,21 +1436,18 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      // Start with empty search box
-      expect(router?.history.location?.search).toBe('');
-
       let { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString],
       ]);
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`,
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'desc' })}`,
           });
         }
       });
@@ -1449,24 +1456,8 @@ describe('TableListView', () => {
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([
-        ['Item 2tag-2', twoDaysAgoToString], // Sort got inverted
-        ['Item 1tag-1', yesterdayToString],
-      ]);
-
-      await act(async () => {
-        if (router?.history.push) {
-          router.history.push({
-            search: `?${queryString.stringify({ sort: 'title' })}`, // if dir not specified, asc by default
-          });
-        }
-      });
-      component.update();
-
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
-
-      expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString], // Sort stayed the same
       ]);
     });
 

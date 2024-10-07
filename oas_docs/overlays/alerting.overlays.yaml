@@ -1,0 +1,150 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the alerting rule examples and parameters
+  version: 0.0.1
+actions:
+  # Add some alerting API examples
+  - target: "$.paths['/api/alerting/rule/{id}']['post']"
+    description: "Add examples to create rule API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createEsQueryEsqlRuleRequest:
+                $ref: "../examples/create_es_query_esql_rule_request.yaml"
+              createEsQueryRuleRequest:
+                $ref: "../examples/create_es_query_rule_request.yaml"
+              createEsQueryKqlRuleRequest:
+                $ref: "../examples/create_es_query_kql_rule_request.yaml"
+              createIndexThresholdRuleRequest:
+                $ref: "../examples/create_index_threshold_rule_request.yaml"
+              createTrackingContainmentRuleRequest:
+                $ref: "../examples/create_tracking_containment_rule_request.yaml"
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                createEsQueryEsqlRuleResponse:
+                  $ref: "../examples/create_es_query_esql_rule_response.yaml"
+                createEsQueryRuleResponse:
+                  $ref: "../examples/create_es_query_rule_response.yaml"
+                createEsQueryKqlRuleResponse:
+                  $ref: "../examples/create_es_query_kql_rule_response.yaml"
+                createIndexThresholdRuleResponse:
+                  $ref: "../examples/create_index_threshold_rule_response.yaml"
+                createTrackingContainmentRuleResponse:
+                  $ref: "../examples/create_tracking_containment_rule_response.yaml"
+  - target: "$.paths['/api/alerting/rule/{id}']['put']"
+    description: "Add examples to update rule API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateRuleRequest:
+                $ref: '../examples/update_rule_request.yaml'
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                updateRuleResponse:
+                  $ref: '../examples/update_rule_response.yaml'
+  - target: "$.paths['/api/alerting/rules/_find']['get']"
+    description: "Add examples to find rules API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                findRulesResponse:
+                  $ref: '../examples/find_rules_response.yaml'
+                findConditionalActionRulesResponse:
+                  $ref: '../examples/find_rules_response_conditional_action.yaml'
+  # Fix some optional path parameters
+  - target: "$.paths['/api/alerting/rule/{id}']['post'].parameters[?(@.name=='id')]"
+    description: Remove optional indicator from path parameter
+    update:
+      required: true
+  # Remove the alerting rule parameters
+  - target: "$.paths['/api/alerting/rule/{id}']['post'].requestBody.content.*.schema.properties.params"
+    description: "Remove params type in create rule API"
+    remove: true
+  # Add some alerting rule parameters
+  - target: "$.paths['/api/alerting/rule/{id}']['post']"
+    description: "Add params to create rule API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              properties:
+                params:
+                  additionalProperties: {}
+                  default: {}
+                  description: The parameters for the rule.
+                  anyOf:
+                    # APM anomaly rule (apm.anomaly)
+                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
+                    # APM error count rule (apm.error_rate)
+                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_error_count.yaml'
+                    # APM transaction duration rule (apm.transaction_duration)
+                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
+                    # APM transaction error rate rule (apm.transaction_error_rate)
+                    - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
+                    # Elasticsearch DSL query rule (.es-query)
+                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
+                    # Elasticsearch ES|QL query rule (.es-query)
+                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
+                    # Elasticsearch KQL query rule (.es-query)
+                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
+                    # Index threshold rule ()
+                    - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
+                    # Infra inventory rule (metrics.alert.inventory.threshold)
+                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
+                    # Log threshold rule (logs.alert.document.count)
+                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
+                    # Infra metric threshold rule (metrics.alert.threshold)
+                    - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
+                    # SLO burn rate (slo.rules.burnRate)
+                    - $ref:  '../../x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
+                    # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)
+                    - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
+                    # Uptime monitor status rule (xpack.uptime.alerts.monitorStatus)
+                    - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
+                  # TBD
+                    # Anomaly detection alert rule (xpack.ml.anomaly_detection_alert)
+                    # Anomaly detection jobs health rule (xpack.ml.anomaly_detection_jobs_health)
+                    # Tracking containment rule (.geo-containment)
+                    # Infrastructure anomaly rule (metrics.alert.anomaly)
+                    # CCR read exceptions rule (monitoring_ccr_read_exceptions)
+                    # Cluster health rule (monitoring_alert_cluster_health)
+                    # CPU usage rule (monitoring_alert_cpu_usage)
+                    # Custom query rule (siem.queryRule)
+                    # Disk usage rule (monitoring_alert_disk_usage)
+                    # Elasticsearch version mismatch rule (monitoring_alert_elasticsearch_version_mismatch)
+                    # Event correlation rule (siem.eqlRule)
+                    # Indicator match rule (siem.indicatorRule)
+                    # JVM memory usage rule (monitoring_alert_jvm_memory_usage)
+                    # Kibana version mismatch rule ( monitoring_alert_kibana_version_mismatch)
+                    # License expiration rule (monitoring_alert_license_expiration)
+                    # Logstash version mismatch rule (monitoring_alert_logstash_version_mismatch)
+                    # Machine learning rule (siem.mlRule)
+                    # Missing monitoring data rule (monitoring_alert_missing_monitoring_data)
+                    # New terms rule (siem.newTermsRule)
+                    # Nodes changed rule (monitoring_alert_nodes_changed)
+                    # Saved query rule (siem.savedQueryRule)
+                    # Security solution notification (legacy) rule (siem.notifications)
+                    # Shard size rule (monitoring_shard_size)
+                    # Synthetics monitor status rule (xpack.synthetics.alerts.monitorStatus)
+                    # Synthetics uptime duration anomaly rule (xpack.uptime.alerts.durationAnomaly)
+                    # Thread pool search rejections rule (monitoring_alert_thread_pool_search_rejections)
+                    # Thread pool write rejections rule (monitoring_alert_thread_pool_write_rejections)
+                    # Threshold rule (siem.thresholdRule)
+                    # TLS certificate rule (xpack.uptime.alerts.tlsCertificate)
+                    # Transform health (transform_health)
+  

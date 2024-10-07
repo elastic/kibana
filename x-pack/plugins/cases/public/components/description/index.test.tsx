@@ -27,14 +27,17 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/185879
-describe.skip('Description', () => {
+describe('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders description correctly', async () => {
@@ -47,13 +50,13 @@ describe.skip('Description', () => {
   it('hides and shows the description correctly when collapse button clicked', async () => {
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(await screen.findByTestId('description-collapse-icon'));
+    await userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
     await waitFor(() => {
       expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
     });
 
-    userEvent.click(await screen.findByTestId('description-collapse-icon'));
+    await userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
@@ -61,7 +64,7 @@ describe.skip('Description', () => {
   it('shows textarea on edit click', async () => {
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(await screen.findByTestId('description-edit-icon'));
+    await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
     expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
   });
@@ -70,12 +73,13 @@ describe.skip('Description', () => {
     const editedDescription = 'New updated description';
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(await screen.findByTestId('description-edit-icon'));
+    await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(editedDescription);
 
-    userEvent.click(await screen.findByTestId('editable-save-markdown'));
+    await userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).toHaveBeenCalledWith({
@@ -89,14 +93,15 @@ describe.skip('Description', () => {
     const editedDescription = 'New updated description';
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(await screen.findByTestId('description-edit-icon'));
+    await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(editedDescription);
 
     expect(await screen.findByText(editedDescription)).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
+    await userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
@@ -110,10 +115,11 @@ describe.skip('Description', () => {
 
     appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
-    userEvent.click(await screen.findByTestId('description-edit-icon'));
+    await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), longDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(longDescription);
 
     expect(
       await screen.findByText(

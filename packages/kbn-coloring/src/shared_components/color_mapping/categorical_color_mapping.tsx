@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,22 +16,26 @@ import { Container } from './components/container/container';
 import { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
 
+export interface ColorMappingInputCategoricalData {
+  type: 'categories';
+  /** an ORDERED array of categories rendered in the visualization  */
+  categories: Array<string | string[]>;
+}
+
+export interface ColorMappingInputContinuousData {
+  type: 'ranges';
+  min: number;
+  max: number;
+  bins: number;
+}
+
 /**
  * A configuration object that is required to populate correctly the visible categories
  * or the ranges in the CategoricalColorMapping component
  */
 export type ColorMappingInputData =
-  | {
-      type: 'categories';
-      /** an ORDERED array of categories rendered in the visualization  */
-      categories: Array<string | string[]>;
-    }
-  | {
-      type: 'ranges';
-      min: number;
-      max: number;
-      bins: number;
-    };
+  | ColorMappingInputCategoricalData
+  | ColorMappingInputContinuousData;
 
 /**
  * The props of the CategoricalColorMapping component

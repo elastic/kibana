@@ -7,9 +7,10 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { TaskTypes } from '../../types';
-export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
+export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum ServiceProviderKeys {
+  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
   azureopenai = 'azureopenai',
   azureaistudio = 'azureaistudio',
@@ -55,16 +56,8 @@ export interface EuiBasicTableSortTypes {
   field: string;
 }
 
-export enum DeploymentStatusEnum {
-  deployed = 'deployed',
-  notDeployed = 'not_deployed',
-  notDeployable = 'not_deployable',
-  notApplicable = 'not_applicable',
-}
-
 export interface InferenceEndpointUI {
-  deployment: DeploymentStatusEnum;
-  endpoint: InferenceAPIConfigResponse;
-  provider: string;
+  endpoint: string;
+  provider: InferenceAPIConfigResponse;
   type: string;
 }

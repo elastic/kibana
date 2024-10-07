@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiButton,
@@ -24,11 +25,10 @@ import {
 
 import { cloneDeep } from 'lodash';
 
-import { ml } from '../../../../../services/ml_api_service';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { getToastNotificationService } from '../../../../../services/toast_notification_service';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map((j) => j.id);
@@ -54,15 +54,15 @@ function createSelectedGroups(jobs, groups) {
   return selectedGroups;
 }
 
-export class GroupSelector extends Component {
+export class GroupSelectorUI extends Component {
   static propTypes = {
     jobs: PropTypes.array.isRequired,
     allJobIds: PropTypes.array.isRequired,
     refreshJobs: PropTypes.func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
 
     this.state = {
       isPopoverOpen: false,
@@ -73,6 +73,9 @@ export class GroupSelector extends Component {
 
     this.refreshJobs = this.props.refreshJobs;
     this.canUpdateJob = checkPermission('canUpdateJob');
+    this.toastNotificationsService = toastNotificationServiceProvider(
+      props.kibana.services.notifications.toasts
+    );
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -88,7 +91,8 @@ export class GroupSelector extends Component {
     if (this.state.isPopoverOpen) {
       this.closePopover();
     } else {
-      ml.jobs
+      const mlApi = this.props.kibana.services.mlServices.mlApi;
+      mlApi.jobs
         .groups()
         .then((groups) => {
           const selectedGroups = createSelectedGroups(this.props.jobs, groups);
@@ -133,6 +137,7 @@ export class GroupSelector extends Component {
   };
 
   applyChanges = () => {
+    const toastNotificationsService = this.toastNotificationsService;
     const { selectedGroups } = this.state;
     const { jobs } = this.props;
     const newJobs = jobs.map((j) => ({
@@ -153,7 +158,8 @@ export class GroupSelector extends Component {
     }
 
     const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
-    ml.jobs
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+    mlApi.jobs
       .updateGroups(tempJobs)
       .then((resp) => {
         let success = true;
@@ -161,7 +167,7 @@ export class GroupSelector extends Component {
           // check success of each job update
           if (Object.hasOwn(resp, jobId)) {
             if (resp[jobId].success === false) {
-              getToastNotificationService().displayErrorToast(resp[jobId].error);
+              toastNotificationsService.displayErrorToast(resp[jobId].error);
               success = false;
             }
           }
@@ -176,7 +182,7 @@ export class GroupSelector extends Component {
         }
       })
       .catch((error) => {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationsService.displayErrorToast(error);
         console.error(error);
       });
   };
@@ -271,3 +277,5 @@ export class GroupSelector extends Component {
     );
   }
 }
+
+export const GroupSelector = withKibana(GroupSelectorUI);

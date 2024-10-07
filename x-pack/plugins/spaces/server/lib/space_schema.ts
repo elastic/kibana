@@ -44,7 +44,7 @@ const spaceSchema = schema.object({
   ),
 });
 
-const solutionSchema = schema.oneOf([
+export const solutionSchema = schema.oneOf([
   schema.literal('security'),
   schema.literal('oblt'),
   schema.literal('es'),

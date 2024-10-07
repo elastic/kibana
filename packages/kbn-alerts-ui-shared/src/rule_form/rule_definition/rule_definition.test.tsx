@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -161,6 +162,58 @@ describe('Rule Definition', () => {
       },
       selectedRuleType: ruleType,
       selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
+  });
+
+  test('Hides consumer selection if there is only 1 consumer to select', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      canShowConsumerSelect: true,
+      validConsumers: ['logs'],
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
+  });
+
+  test('Hides consumer selection if valid consumers contain observability', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      canShowConsumerSelect: true,
+      validConsumers: ['logs', 'observability'],
     });
 
     render(<RuleDefinition />);

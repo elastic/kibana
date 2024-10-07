@@ -72,7 +72,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT
-  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION
+  | typeof ML_PAGES.SUPPLIED_CONFIGURATIONS,
   MlGenericUrlPageState | undefined
 >;
 export interface AnomalyDetectionQueryState {

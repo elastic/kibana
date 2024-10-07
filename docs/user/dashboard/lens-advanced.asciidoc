@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Analyze time series data
+== Create a dashboard with time series charts
 
 In this tutorial, you'll use the ecommerce sample data to analyze sales trends, but you can use any type of data to complete the tutorial.
 

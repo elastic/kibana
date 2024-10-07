@@ -15,7 +15,10 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { IndexManagementPluginSetup, IndexManagementPluginStart } from '@kbn/index-management';
+import {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -23,8 +26,9 @@ import { ClientConfigType, SetupDependencies, StartDependencies } from './types'
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
-import { IndexMapping } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
+import { IndexMapping } from './application/sections/home/index_list/details_page/with_context_components/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
+import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 
 export class IndexMgmtUIPlugin
   implements
@@ -42,6 +46,7 @@ export class IndexMgmtUIPlugin
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
     enableDataStreamStats: boolean;
+    enableSizeAndDocCount: boolean;
     editableIndexSettings: 'all' | 'limited';
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
@@ -60,6 +65,7 @@ export class IndexMgmtUIPlugin
       enableLegacyTemplates,
       enableIndexStats,
       enableDataStreamStats,
+      enableSizeAndDocCount,
       editableIndexSettings,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
@@ -71,6 +77,7 @@ export class IndexMgmtUIPlugin
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
       enableDataStreamStats: enableDataStreamStats ?? true,
+      enableSizeAndDocCount: enableSizeAndDocCount ?? false,
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
@@ -151,6 +158,44 @@ export class IndexMgmtUIPlugin
         };
         return (props: any) => {
           return IndexMapping({ dependencies: appDependencies, core: coreStart, ...props });
+        };
+      },
+      getIndexSettingsComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+            ml,
+            licensing,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
+          config: this.config,
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+        };
+        return (props: any) => {
+          return IndexSettings({ dependencies: appDependencies, core: coreStart, ...props });
         };
       },
     };

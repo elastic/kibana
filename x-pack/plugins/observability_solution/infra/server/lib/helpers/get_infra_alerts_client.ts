@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { KibanaRequest } from '@kbn/core/server';
-import type { InfraPluginStartServicesAccessor } from '../../types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = ESSearchRequest & {
   size: number;
@@ -18,13 +18,13 @@ type RequiredParams = ESSearchRequest & {
 export type InfraAlertsClient = Awaited<ReturnType<typeof getInfraAlertsClient>>;
 
 export async function getInfraAlertsClient({
-  getStartServices,
+  libs,
   request,
 }: {
-  getStartServices: InfraPluginStartServicesAccessor;
+  libs: InfraBackendLibs;
   request: KibanaRequest;
 }) {
-  const [, { ruleRegistry }] = await getStartServices();
+  const [, { ruleRegistry }] = await libs.getStartServices();
   const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
   const infraAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(['infrastructure']);
 

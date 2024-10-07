@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -91,7 +92,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
       if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message}`);
+        log.debug(`--- onRetryBlock error: ${before.error.message} - Attempt #: ${attemptCounter}`);
       }
     }
 
@@ -103,9 +104,13 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
     if ('error' in attempt) {
       if (lastError && lastError.message === attempt.error.message) {
-        log.debug(`--- ${methodName} failed again with the same message...`);
+        log.debug(
+          `--- ${methodName} failed again with the same message... - Attempt #: ${attemptCounter}`
+        );
       } else {
-        log.debug(`--- ${methodName} error: ${attempt.error.message}`);
+        log.debug(
+          `--- ${methodName} error: ${attempt.error.message} - Attempt #: ${attemptCounter}`
+        );
       }
 
       lastError = attempt.error;

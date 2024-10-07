@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -24,6 +25,7 @@ const iconMap: Record<string, string> = {
   boolean: 'tokenBoolean',
   date: 'tokenDate',
   date_range: 'tokenDate',
+  dense_vector: 'tokenVectorDense',
   double: 'tokenNumber',
   double_range: 'tokenDate',
   flattened: 'tokenObject',
@@ -48,8 +50,10 @@ const iconMap: Record<string, string> = {
   rank_features: 'tokenRankFeatures',
   scaled_float: 'tokenNumber',
   search_as_you_type: 'tokenSearchType',
+  semantic_text: 'tokenSemanticText',
   shape: 'tokenShape',
   short: 'tokenNumber',
+  sparse_vector: 'tokenVectorSparse',
   text: 'tokenString',
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',

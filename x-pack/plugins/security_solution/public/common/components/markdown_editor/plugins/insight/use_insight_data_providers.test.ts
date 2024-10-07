@@ -11,7 +11,7 @@ import {
   useInsightDataProviders,
   type UseInsightDataProvidersResult,
 } from './use_insight_data_providers';
-import { mockAlertDetailsData } from '../../../event_details/__mocks__';
+import { mockAlertDetailsData } from '../../../event_details/mocks';
 
 const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
   return {

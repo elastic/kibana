@@ -14,9 +14,9 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -43,10 +43,10 @@ export interface AgentExecutorParams<T extends boolean> {
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
-  esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
+  inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;
@@ -54,6 +54,7 @@ export interface AgentExecutorParams<T extends boolean> {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   response?: KibanaResponseFactory;
   size?: number;
+  systemPrompt?: string;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
 }

@@ -17,7 +17,7 @@ const mockOpenFieldEditor = jest.fn();
 const mockOnHide = jest.fn();
 
 const renderUseCreateFieldButton = (props: Partial<UseCreateFieldButtonProps> = {}) =>
-  renderHook<UseCreateFieldButtonProps, ReturnType<UseCreateFieldButton>>(
+  renderHook<React.PropsWithChildren<UseCreateFieldButtonProps>, ReturnType<UseCreateFieldButton>>(
     () =>
       useCreateFieldButton({
         isAllowed: true,

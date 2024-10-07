@@ -206,7 +206,7 @@ export const FixSnapshotsFlyout = ({
               iconType="warning"
               data-test-subj="resolveSnapshotError"
             >
-              {snapshotState.error.message}
+              {snapshotState.error.message as string}
             </EuiCallOut>
             <EuiSpacer />
           </>

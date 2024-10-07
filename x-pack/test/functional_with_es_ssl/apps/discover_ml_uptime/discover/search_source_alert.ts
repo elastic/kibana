@@ -13,7 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'settings',
+    'common',
+    'header',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -56,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dateNow = new Date();
     const dateToSet = new Date(dateNow);
     dateToSet.setMinutes(dateNow.getMinutes() - 10);
-    for await (const message of mockMessages) {
-      es.transport.request({
+    for (const message of mockMessages) {
+      await es.transport.request({
         path: `/${SOURCE_DATA_VIEW}/_doc`,
         method: 'POST',
         body: {
@@ -156,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '1');
+    await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
@@ -325,8 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/190090
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
@@ -463,7 +469,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '1');
+      await testSubjects.setValue('alertThresholdInput0', '1');
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -527,7 +533,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
+      await retry.try(async () => {
+        expect(await PageObjects.unifiedFieldList.getAllFieldNames()).to.contain(
+          'runtime-message-field'
+        );
+      });
 
       // create an alert
       await openDiscoverAlertFlyout();

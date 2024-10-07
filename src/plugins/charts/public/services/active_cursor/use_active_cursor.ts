@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { intersection } from 'lodash';
@@ -11,7 +12,7 @@ import { animationFrameScheduler } from 'rxjs';
 import { useCallback, useEffect, RefObject } from 'react';
 import { filter, debounceTime } from 'rxjs';
 
-import type { Chart } from '@elastic/charts';
+import type { Chart, PointerUpdateListener } from '@elastic/charts';
 
 import { parseSyncOptions } from './active_cursor_utils';
 
@@ -24,9 +25,9 @@ export const useActiveCursor = (
   activeCursor: ActiveCursor,
   chartRef: RefObject<Chart>,
   syncOptions: ActiveCursorSyncOption
-) => {
+): PointerUpdateListener => {
   const { accessors, isDateHistogram } = parseSyncOptions(syncOptions);
-  const handleCursorUpdate = useCallback(
+  const handleCursorUpdate = useCallback<PointerUpdateListener>(
     (cursor) => {
       activeCursor.activeCursor$?.next({
         cursor,

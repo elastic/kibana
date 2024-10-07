@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -69,5 +70,28 @@ export class InfraSynthtraceKibanaClient {
     }
 
     this.logger.info(`Installed System package ${packageVersion}`);
+  }
+
+  async uninstallSystemPackage(packageVersion: string) {
+    this.logger.debug(`Uninstalling System package ${packageVersion}`);
+
+    const url = join(this.target, `/api/fleet/epm/packages/system/${packageVersion}`);
+    const response = await pRetry(() => {
+      return fetch(url, {
+        method: 'DELETE',
+        headers: kibanaHeaders(),
+        body: '{"force":true}',
+      });
+    });
+
+    const responseJson = await response.json();
+
+    if (!responseJson.items) {
+      throw new Error(
+        `Failed to uninstall System package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
+      );
+    }
+
+    this.logger.info(`System package ${packageVersion} uninstalled`);
   }
 }

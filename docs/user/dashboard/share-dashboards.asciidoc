@@ -1,0 +1,26 @@
+= Share dashboards
+
+[float]
+[[share-the-dashboard]]
+== Share dashboards
+
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+
+TIP: When sharing a dashboard with a link while a panel is in maximized view, the generated link will also open the dashboard on the same maximized panel view.
+
+[float]
+//Seems like a wrong ID (import instead of export). Adding export one while checking that removing "import" doesn't break links
+[[import-dashboards]]
+[[export-dashboards]]
+== Export dashboards
+
+You can export dashboards from **Stack Management** > **Saved Objects**. To configure and start the export: 
+
+. Select the dashboard that you want, then select **Export**.
+. Enable **Include related objects** if you want that objects associated to the selected dashboard, such as data views and visualizations, also get exported. This option is enabled by default and recommended if you plan to import that dashboard again in a different space or cluster.
+. Select **Export**.
+
+image:images/dashboard-export-saved-object.png[Option to export a dashboard]
+
+
+To automate {kib}, you can export dashboards as NDJSON using the {api-kibana}/group/endpoint-saved-objects[Export saved objects API]. It is important to export dashboards with all necessary references.

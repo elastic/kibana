@@ -101,7 +101,7 @@ describe('TemplatesList', () => {
       <TemplatesList {...{ ...props, templates: [templatesConfigurationMock[0]] }} />
     );
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
     );
 
@@ -115,7 +115,7 @@ describe('TemplatesList', () => {
 
     const list = await screen.findByTestId('templates-list');
 
-    userEvent.click(
+    await userEvent.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
     );
 
@@ -129,13 +129,13 @@ describe('TemplatesList', () => {
 
     const list = await screen.findByTestId('templates-list');
 
-    userEvent.click(
+    await userEvent.click(
       await within(list).findByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
     );
 
     expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText('Delete'));
+    await userEvent.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();

@@ -26,7 +26,6 @@ import { AnomalyDetails } from './anomaly_details';
 
 import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
-import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
 
 export class AnomaliesTableInternal extends Component {
@@ -69,6 +68,7 @@ export class AnomaliesTableInternal extends Component {
   }
 
   toggleRow = async (item, tab = ANOMALIES_TABLE_TABS.DETAILS) => {
+    const mlApi = this.context.services.mlServices.mlApi;
     const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMap[item.rowId]) {
       delete itemIdToExpandedRowMap[item.rowId];
@@ -81,7 +81,7 @@ export class AnomaliesTableInternal extends Component {
 
       if (examples !== undefined) {
         try {
-          definition = await ml.results.getCategoryDefinition(
+          definition = await mlApi.results.getCategoryDefinition(
             item.jobId,
             item.source.mlcategory[0]
           );

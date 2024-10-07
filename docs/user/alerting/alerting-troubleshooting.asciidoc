@@ -55,7 +55,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the HTTP endpoints available for actions is the <<execute-connector-api,run connector API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
+One of the HTTP endpoints available for actions is the run connector API. You can use this to “test” an action. For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
@@ -197,7 +197,7 @@ If cluster performance becomes degraded from excessive or expensive rules and {k
 
 [source,txt]
 --------------------------------------------------
-xpack.task_manager.max_workers: 1
+xpack.task_manager.capacity: 5
 xpack.task_manager.poll_interval: 1h
 --------------------------------------------------
 
@@ -219,8 +219,7 @@ the {kib} {alert-features}:
 
 If you create a rule in the {observability} or {security-app}, its alerts are
 not visible in *{stack-manage-app} > {rules-ui}*. You can view them only in the
-{kib} app where you created the rule. If you use the
-<<create-rule-api,create rule API>>, the visibility of the alerts is related to
+{kib} app where you created the rule. If you use the create rule API, the visibility of the alerts is related to
 the `consumer` property.
 
 include::troubleshooting/alerting-common-issues.asciidoc[]

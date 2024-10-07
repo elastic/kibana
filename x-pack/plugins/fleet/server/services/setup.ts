@@ -40,8 +40,8 @@ import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -250,9 +250,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  const packagePolicyUpgradeErrors = (
-    await upgradeManagedPackagePolicies(soClient, esClient)
-  ).filter((result) => (result.errors ?? []).length > 0);
+  await setupUpgradeManagedPackagePolicies(soClient, esClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
@@ -294,7 +292,6 @@ async function createSetupSideEffects(
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
-    ...packagePolicyUpgradeErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
   ];
 

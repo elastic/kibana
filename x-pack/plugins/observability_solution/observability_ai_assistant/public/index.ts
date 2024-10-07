@@ -78,6 +78,8 @@ export type {
   ShortIdTable,
 } from '../common';
 
+export { KnowledgeBaseType } from '../common';
+
 export type { TelemetryEventTypeWithPayload } from './analytics';
 export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';
 
@@ -91,13 +93,12 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
-export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from '../common/ui_settings/language_options';
 
 export {
-  aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<

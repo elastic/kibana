@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
 import {
-  APP_WRAPPER_CLASS,
   AppMountParameters,
   AppStatus,
   CoreSetup,
@@ -106,17 +104,8 @@ export class InvestigateAppPlugin
           appMountParameters.element
         );
 
-        const appWrapperClassName = css`
-          overflow: auto;
-        `;
-
-        const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
-
-        appWrapperElement.classList.add(appWrapperClassName);
-
         return () => {
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
-          appWrapperElement.classList.remove(appWrapperClassName);
         };
       },
     });
@@ -125,28 +114,25 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    pluginsSetup.investigate.register((registerWidget) =>
-      Promise.all([
-        pluginsStartPromise,
-        import('./widgets/register_widgets').then((m) => m.registerWidgets),
-        getCreateEsqlService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
-        registerWidgets({
-          dependencies: {
-            setup: pluginsSetup,
-            start: pluginsStart,
-          },
-          services: {
-            esql: createEsqlService({
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              lens: pluginsStart.lens,
-            }),
-          },
-          registerWidget,
-        });
-      })
-    );
+    Promise.all([
+      pluginsStartPromise,
+      import('./items/register_items').then((m) => m.registerItems),
+      getCreateEsqlService(),
+    ]).then(([pluginsStart, registerItems, createEsqlService]) => {
+      registerItems({
+        dependencies: {
+          setup: pluginsSetup,
+          start: pluginsStart,
+        },
+        services: {
+          esql: createEsqlService({
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            lens: pluginsStart.lens,
+          }),
+        },
+      });
+    });
 
     return {};
   }

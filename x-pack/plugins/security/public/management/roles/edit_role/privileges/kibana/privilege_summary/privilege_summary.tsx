@@ -17,11 +17,11 @@ import {
 import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Role } from '@kbn/security-plugin-types-common';
+import type { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import type { Role } from '../../../../../../../common';
-import type { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;

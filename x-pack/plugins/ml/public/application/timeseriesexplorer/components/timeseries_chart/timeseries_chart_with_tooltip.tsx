@@ -61,7 +61,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -86,7 +86,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   useEffect(() => {
     let unmounted = false;
-    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob.job_id);
+    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob);
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
       : undefined;
@@ -103,7 +103,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
      */
     const loadAnnotations = async (jobId: string) => {
       try {
-        const resp = await mlApiServices.annotations.getAnnotations({
+        const resp = await mlApi.annotations.getAnnotations({
           jobIds: [jobId],
           earliestMs: searchBounds.min.valueOf(),
           latestMs: searchBounds.max.valueOf(),

@@ -78,7 +78,6 @@ import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import type { EndpointAppContext } from '../../types';
-import type { ExperimentalFeatures } from '../../../../common';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -135,13 +134,6 @@ describe('Response actions', () => {
 
     const docGen = new EndpointDocGenerator();
 
-    const setFeatureFlag = (ff: Partial<ExperimentalFeatures>) => {
-      endpointContext.experimentalFeatures = {
-        ...endpointContext.experimentalFeatures,
-        ...ff,
-      };
-    };
-
     beforeEach(() => {
       // instantiate... everything
       const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -150,7 +142,9 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
-      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+      (
+        startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
+      ).mockImplementation(() => {
         return {
           data: 'thisisthedata',
           signature: 'thisisasignature',
@@ -171,10 +165,9 @@ describe('Response actions', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
+        esClient: mockScopedClient.asInternalUser,
         licenseService,
       });
-
-      setFeatureFlag({ responseActionScanEnabled: true });
 
       // add the host isolation route handlers to routerMock
       registerResponseActionRoutes(routerMock, endpointContext);

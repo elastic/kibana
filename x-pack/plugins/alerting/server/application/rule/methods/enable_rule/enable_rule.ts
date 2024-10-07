@@ -105,7 +105,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.ENABLE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -116,7 +116,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     ruleAuditEvent({
       action: RuleAuditAction.ENABLE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

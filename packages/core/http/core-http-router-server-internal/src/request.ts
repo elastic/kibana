@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { URL } from 'url';
@@ -30,6 +31,8 @@ import {
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
+  RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -44,6 +47,12 @@ import { patchRequest } from './patch_requests';
 patchRequest();
 
 const requestSymbol = Symbol('request');
+
+const isRouteSecurityGetter = (
+  security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
+): security is RouteSecurityGetter => {
+  return typeof security === 'function';
+};
 
 /**
  * Core internal implementation of {@link KibanaRequest}
@@ -136,6 +145,8 @@ export class CoreKibanaRequest<
   public readonly httpVersion: string;
   /** {@inheritDoc KibanaRequest.protocol} */
   public readonly protocol: HttpProtocol;
+  /** {@inheritDoc KibanaRequest.authzResult} */
+  public readonly authzResult?: Record<string, boolean>;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -158,6 +169,7 @@ export class CoreKibanaRequest<
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
+    this.authzResult = appState?.authzResult;
 
     this.url = request.url ?? new URL('https://fake-request/url');
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
@@ -203,6 +215,7 @@ export class CoreKibanaRequest<
         isAuthenticated: this.auth.isAuthenticated,
       },
       route: this.route,
+      authzResult: this.authzResult,
     };
   }
 
@@ -255,6 +268,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
+      security: this.getSecurity(request),
       timeout: {
         payload: payloadTimeout,
         idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
@@ -276,6 +290,13 @@ export class CoreKibanaRequest<
     };
   }
 
+  private getSecurity(request: RawRequest): RouteSecurity | undefined {
+    const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.security;
+
+    return isRouteSecurityGetter(securityConfig) ? securityConfig(request) : securityConfig;
+  }
+
   /** set route access to internal if not declared */
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
@@ -286,6 +307,12 @@ export class CoreKibanaRequest<
   private getAuthRequired(request: RawRequest): boolean | 'optional' {
     if (isFakeRawRequest(request)) {
       return true;
+    }
+
+    const security = this.getSecurity(request);
+
+    if (security?.authc !== undefined) {
+      return security.authc?.enabled ?? true;
     }
 
     const authOptions = request.route.settings.auth;
@@ -367,6 +394,7 @@ function isCompleted(request: Request) {
  */
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+
   return {
     query,
     params: req.params,

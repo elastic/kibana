@@ -45,6 +45,29 @@
 {
   "type": "_doc",
   "value": {
+    "id": "space:space_3",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the third test space",
+        "solution": "es",
+        "disabledFeatures": [],
+        "name": "Space 3"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
     "id": "isolatedtype:my_isolated_object",
     "index": ".kibana",
     "source": {

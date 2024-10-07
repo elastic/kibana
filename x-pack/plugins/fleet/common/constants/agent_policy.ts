@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
+export const LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
+export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'fleet-agent-policies';
+
 export const AGENT_POLICY_INDEX = '.fleet-policies';
 export const agentPolicyStatuses = {
   Active: 'active',

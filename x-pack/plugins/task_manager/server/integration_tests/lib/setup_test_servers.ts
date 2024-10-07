@@ -21,14 +21,6 @@ function createRoot(settings = {}) {
               name: 'plugins.taskManager',
               level: 'all',
             },
-            {
-              name: 'plugins.taskManager.metrics-debugger',
-              level: 'warn',
-            },
-            {
-              name: 'plugins.taskManager.metrics-subscribe-debugger',
-              level: 'warn',
-            },
           ],
         },
       },

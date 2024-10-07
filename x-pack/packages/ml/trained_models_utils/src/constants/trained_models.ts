@@ -266,6 +266,19 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'alibabacloud-ai-search';
+      service_settings: {
+        api_key: string;
+        service_id: string;
+        host: string;
+        workspace: string;
+        http_schema: 'https' | 'http';
+        rate_limit: {
+          requests_per_minute: number;
+        };
+      };
+    }
+  | {
       service: 'amazonbedrock';
       service_settings: {
         access_key: string;
@@ -278,9 +291,15 @@ export type InferenceServiceSettings =
 
 export type InferenceAPIConfigResponse = {
   // Refers to a deployment id
-  model_id: string;
+  inference_id: string;
   task_type: 'sparse_embedding' | 'text_embedding';
   task_settings: {
     model?: string;
   };
 } & InferenceServiceSettings;
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

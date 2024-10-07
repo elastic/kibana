@@ -9,12 +9,12 @@ import { handleCategorizationValidation } from './validate';
 import type { CategorizationState } from '../../types';
 import { categorizationTestState } from '../../../__jest__/fixtures/categorization';
 
-const testState: CategorizationState = categorizationTestState;
+const state: CategorizationState = categorizationTestState;
 
 describe('Testing categorization invalid category', () => {
   it('handleCategorizationValidation()', async () => {
-    testState.pipelineResults = [{ test: 'testresult', event: { category: ['foo'] } }];
-    const response = handleCategorizationValidation(testState);
+    state.pipelineResults = [{ test: 'testresult', event: { category: ['foo'] } }];
+    const response = handleCategorizationValidation({ state });
     expect(response.invalidCategorization).toEqual([
       {
         error:
@@ -27,8 +27,8 @@ describe('Testing categorization invalid category', () => {
 
 describe('Testing categorization invalid type', () => {
   it('handleCategorizationValidation()', async () => {
-    testState.pipelineResults = [{ test: 'testresult', event: { type: ['foo'] } }];
-    const response = handleCategorizationValidation(testState);
+    state.pipelineResults = [{ test: 'testresult', event: { type: ['foo'] } }];
+    const response = handleCategorizationValidation({ state });
     expect(response.invalidCategorization).toEqual([
       {
         error:
@@ -41,10 +41,10 @@ describe('Testing categorization invalid type', () => {
 
 describe('Testing categorization invalid compatibility', () => {
   it('handleCategorizationValidation()', async () => {
-    testState.pipelineResults = [
+    state.pipelineResults = [
       { test: 'testresult', event: { category: ['authentication'], type: ['access'] } },
     ];
-    const response = handleCategorizationValidation(testState);
+    const response = handleCategorizationValidation({ state });
     expect(response.invalidCategorization).toEqual([
       {
         error: 'event.type (access) not compatible with any of the event.category (authentication)',

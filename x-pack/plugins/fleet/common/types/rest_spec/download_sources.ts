@@ -10,7 +10,7 @@ import type { DownloadSourceBase, DownloadSource } from '../models';
 import type { ListResult } from './common';
 
 export interface GetOneDownloadSourceResponse {
-  item: DownloadSourceBase;
+  item: DownloadSource;
 }
 
 export interface DeleteDownloadSourceResponse {

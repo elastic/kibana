@@ -64,7 +64,7 @@ interface ImportExceptionListAndItemsAsStreamOptions {
 }
 export type ExceptionsImport = Array<ImportExceptionListItemSchema | ImportExceptionsListSchema>;
 
-export const CHUNK_PARSED_OBJECT_SIZE = 100;
+export const CHUNK_PARSED_OBJECT_SIZE = 1000;
 
 /**
  * Import exception lists parent containers and items as stream. The shape of the list and items

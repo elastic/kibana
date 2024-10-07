@@ -27,7 +27,12 @@ const mockedInvalidateAPIKeys = invalidateAPIKeys as jest.MockedFunction<typeof 
 
 describe('unenroll', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   afterEach(() => {

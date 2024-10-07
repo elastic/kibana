@@ -8,8 +8,8 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: PerformPromptsBulkAction
-      summary: Applies a bulk action to multiple prompts
-      description: The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
+      summary: Apply a bulk action to prompts
+      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
       tags:
         - Bulk API
       requestBody:

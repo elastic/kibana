@@ -164,7 +164,7 @@ export interface PackagePolicyClient {
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string,
-    logger?: Logger
+    options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -226,9 +226,9 @@ export interface PackagePolicyClient {
    * @param outputId
    */
   removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    outputId: string
+    outputId: string,
+    options?: { force?: boolean }
   ): Promise<void>;
 
   /**
@@ -239,7 +239,7 @@ export interface PackagePolicyClient {
   fetchAllItemIds(
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemIdsOptions
-  ): AsyncIterable<string[]>;
+  ): Promise<AsyncIterable<string[]>>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policies
@@ -249,7 +249,7 @@ export interface PackagePolicyClient {
   fetchAllItems(
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
-  ): AsyncIterable<PackagePolicy[]>;
+  ): Promise<AsyncIterable<PackagePolicy[]>>;
 }
 
 export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { ApmDataAccessServicesWrapper } from '../../../lib/helpers/get_apm_data_access_client';
 import { GetInfraMetricsRequestBodyPayload } from '../../../../common/http_api/infra';
 import { InfraAlertsClient } from '../../../lib/helpers/get_infra_alerts_client';
 import { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_client';
 
-export interface GetHostsArgs {
+export interface GetHostParameters extends GetInfraMetricsRequestBodyPayload {
   infraMetricsClient: InfraMetricsClient;
   alertsClient: InfraAlertsClient;
-  params: GetInfraMetricsRequestBodyPayload;
+  apmDataAccessServices?: ApmDataAccessServicesWrapper;
 }

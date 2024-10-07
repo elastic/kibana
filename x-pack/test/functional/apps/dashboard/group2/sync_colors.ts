@@ -7,18 +7,12 @@
 
 import { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
+import chroma from 'chroma-js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'spaceSelector',
-    'header',
-    'lens',
-    'timePicker',
-  ]);
+  const { dashboard, header, lens } = getPageObjects(['dashboard', 'header', 'lens']);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardSettings = getService('dashboardSettings');
   const filterBar = getService('filterBar');
@@ -51,83 +45,114 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should sync colors on dashboard by default', async function () {
-      await PageObjects.dashboard.navigateToApp();
+    it('should sync colors on dashboard for legacy default palette', async function () {
+      await dashboard.navigateToApp();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.dashboard.clickCreateDashboardPrompt();
-      await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.lens.goToTimeRange();
+      await dashboard.clickCreateDashboardPrompt();
 
-      await PageObjects.lens.configureDimension({
+      // create non-filtered xy chart
+      await dashboardAddPanel.clickCreateNewLink();
+      await lens.goToTimeRange();
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
-
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
         palette: { mode: 'legacy', id: 'default' },
       });
+      await lens.saveAndReturn();
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.lens.save('vis1', false, true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // create filtered xy chart
       await dashboardAddPanel.clickCreateNewLink();
-
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'count',
         field: 'Records',
       });
-
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
         palette: { mode: 'legacy', id: 'default' },
       });
-
       await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
+      await lens.saveAndReturn();
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.lens.save('vis2', false, true);
-      await PageObjects.dashboard.openSettingsFlyout();
+      // create datatable vis
+      await dashboardAddPanel.clickCreateNewLink();
+      await lens.switchToVisualization('lnsDatatable');
+      await lens.configureDimension({
+        dimension: 'lnsDatatable_rows > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+        keepOpen: true,
+      });
+      await lens.setTermsNumberOfValues(5);
+      await lens.setTableDynamicColoring('cell');
+      await lens.setPalette('default', true);
+      await lens.closeDimensionEditor();
+      await lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'count',
+        field: 'Records',
+      });
+      await lens.saveAndReturn();
+
+      // Set dashboard to sync colors
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleSyncColors(true);
       await dashboardSettings.clickApplyButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
-      const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
-      const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+      const colorMappings1 = Object.entries(
+        getColorMapping(await dashboard.getPanelChartDebugState(0))
+      );
+      const colorMappings2 = Object.entries(
+        getColorMapping(await dashboard.getPanelChartDebugState(1))
+      );
 
-      expect(Object.keys(colorMapping1)).to.have.length(6);
-      expect(Object.keys(colorMapping1)).to.have.length(6);
-      const panel1Keys = ['CN'];
-      const panel2Keys = ['PK'];
-      const sharedKeys = ['IN', 'US', 'ID', 'BR', 'Other'];
-      // colors for keys exclusive to panel 1 should not occur in panel 2
-      panel1Keys.forEach((panel1Key) => {
-        const assignedColor = colorMapping1[panel1Key];
-        expect(Object.values(colorMapping2)).not.to.contain(assignedColor);
+      const els = await lens.getDatatableCellsByColumn(0);
+      const colorMappings3 = await Promise.all(
+        els.map(async (el) => [
+          await el.getVisibleText(),
+          chroma((await lens.getStylesFromCell(el))['background-color']).hex(), // eui converts hex to rgb
+        ])
+      );
+
+      expect(colorMappings1).to.have.length(6);
+      expect(colorMappings2).to.have.length(6);
+      expect(colorMappings3).to.have.length(6);
+
+      const mergedColorAssignments = new Map<string, Set<string>>();
+
+      [...colorMappings1, ...colorMappings2, ...colorMappings3].forEach(([key, color]) => {
+        if (!mergedColorAssignments.has(key)) mergedColorAssignments.set(key, new Set());
+        mergedColorAssignments.get(key)?.add(color);
       });
-      // colors for keys exclusive to panel 2 should not occur in panel 1
-      panel2Keys.forEach((panel2Key) => {
-        const assignedColor = colorMapping2[panel2Key];
-        expect(Object.values(colorMapping1)).not.to.contain(assignedColor);
-      });
-      // colors for keys used in both panels should be synced
-      sharedKeys.forEach((sharedKey) => {
-        expect(colorMapping1[sharedKey]).to.eql(colorMapping2[sharedKey]);
+
+      // Each key should have only been assigned one color across all 3 visualizations
+      mergedColorAssignments.forEach((colors, key) => {
+        expect(colors.size).eql(
+          1,
+          `Key "${key}" was assigned multiple colors: ${JSON.stringify([...colors])}`
+        );
       });
     });
 
     it('should be possible to disable color sync', async () => {
-      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboard.openSettingsFlyout();
       await dashboardSettings.toggleSyncColors(false);
       await dashboardSettings.clickApplyButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
-      const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+      await header.waitUntilLoadingHasFinished();
+      const colorMapping1 = getColorMapping(await dashboard.getPanelChartDebugState(0));
+      const colorMapping2 = getColorMapping(await dashboard.getPanelChartDebugState(1));
       const colorsByOrder1 = Object.values(colorMapping1);
       const colorsByOrder2 = Object.values(colorMapping2);
       // colors by order of occurence have to be the same

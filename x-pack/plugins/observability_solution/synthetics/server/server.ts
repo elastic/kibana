@@ -138,16 +138,6 @@ export const initSyntheticsServer = (
     }
   });
 
-  const { alerting } = plugins;
-
-  registerSyntheticsStatusCheckRule(server, plugins, syntheticsMonitorClient, alerting);
-
-  const tlsRule = registerSyntheticsTLSCheckRule(
-    server,
-    plugins,
-    syntheticsMonitorClient,
-    ruleDataClient
-  );
-
-  alerting.registerType(tlsRule);
+  registerSyntheticsStatusCheckRule(server, plugins, syntheticsMonitorClient);
+  registerSyntheticsTLSCheckRule(server, plugins, syntheticsMonitorClient);
 };

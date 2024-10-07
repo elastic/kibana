@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 import { createApiKey } from './create_api_key';
 
 describe('createApiKey lib function', () => {
-  const security = securityMock.createStart();
-  const request = {} as KibanaRequest;
+  const security = securityServiceMock.createRequestHandlerContext();
 
   const indexName = 'my-index';
   const keyName = '{indexName}-key';
@@ -31,11 +29,9 @@ describe('createApiKey lib function', () => {
   });
 
   it('should create an api key via the security plugin', async () => {
-    await expect(createApiKey(request, security, indexName, keyName)).resolves.toEqual(
-      createResponse
-    );
+    await expect(createApiKey(security, indexName, keyName)).resolves.toEqual(createResponse);
 
-    expect(security.authc.apiKeys.create).toHaveBeenCalledWith(request, {
+    expect(security.authc.apiKeys.create).toHaveBeenCalledWith({
       name: keyName,
       role_descriptors: {
         [`${indexName}-key-role`]: {

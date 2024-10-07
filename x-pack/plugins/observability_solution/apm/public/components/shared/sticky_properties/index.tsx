@@ -70,7 +70,7 @@ function getPropertyValue({ val, truncated = false }: Partial<IStickyProperty>) 
     );
   }
 
-  return <PropertyValue>{val}</PropertyValue>;
+  return <PropertyValue>{val as React.ReactNode}</PropertyValue>;
 }
 
 export function StickyProperties({ stickyProperties }: { stickyProperties: IStickyProperty[] }) {
