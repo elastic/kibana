@@ -63,6 +63,10 @@ describe('field and variable escaping', () => {
       'ROW variable.`wi#th`.separator = "lolz" | RENAME variable . /* lolz */ `wi#th` . separator AS foo',
       []
     );
+    // await expectErrors(
+    //   'FROM index | ENRICH policy WITH `new`.name1 = `otherField`, `new.name2` = `yetAnotherField`',
+    //   []
+    // );
     // function argument
     await expectErrors(
       'ROW variable.`wi#th`.separator = "lolz" | EVAL TRIM(variable . /* lolz */ `wi#th` . separator)',

@@ -99,10 +99,6 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
   return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
 
-export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name !== '=';
-}
-
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
