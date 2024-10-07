@@ -2,12 +2,7 @@
 == Upgrade notes
 
 ////
-USE THE FOLLOWING TEMPLATE to add entries to this document.
-1. Copy from "[discrete]" to the last "====" included.
-2. Paste and edit the template in the right area section. Most recent entries should be at the top of the section. 
-3. Make sure to edit the anchor ID [[REPO-PR]] with proper values, then add the corresponding entry to the doc link service https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts:
-
-codeId: `${KIBANA_DOCS}breaking-changes-summary.html#REPO-PR` // replace `codeId` with the ID of your choice that you want to call in the Upgrade Assistant code, and replace `REPO-PR` with the corresponding values you edited in this document.
+USE THE FOLLOWING TEMPLATE to add entries to this document, from "[discrete]" to the last "====" included.
 
 [discrete]
 [[REPO-PR]]
@@ -23,6 +18,25 @@ ADD INFORMATION ABOUT WHAT THIS CHANGE WILL BREAK FOR USERS
 *Action* +
 ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 ====
+
+
+1. Copy and edit the template in the right area section of this file. Most recent entries should be at the top of the section. 
+2. Edit the anchor ID [[REPO-PR]] of the template with proper values. 
+3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
+  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
+  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
+
+The entry in the main links file should look like this:
+
+id: `${KIBANA_DOCS}breaking-changes-summary.html#REPO-PR`
+
+Where:
+      - `id` is the ID of your choice.   
+      - `REPO-PR` is the anchor ID that you assigned to the entry in this upgrade document.
+
+4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
+Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
+
 ////
 
 Before you upgrade, review the breaking changes and deprecations introduced in {kib} 8.x, then mitigate the impact. 
