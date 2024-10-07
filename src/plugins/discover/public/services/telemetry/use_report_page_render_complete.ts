@@ -13,7 +13,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 let isInitialRenderComplete = false;
 
 export const useReportPageRenderComplete = (isReady: boolean = false) => {
-  const context = usePerformanceContext({ suppressMissingProvider: true });
+  const context = usePerformanceContext({ suppressMissingProviderError: true });
   const onPageReady = context?.onPageReady;
 
   const onInitialRenderComplete = useCallback(() => {

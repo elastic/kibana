@@ -21,12 +21,12 @@ export interface PerformanceApi {
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
 
 export function usePerformanceContext({
-  suppressMissingProvider,
-}: { suppressMissingProvider?: boolean } = {}) {
+  suppressMissingProviderError,
+}: { suppressMissingProviderError?: boolean } = {}) {
   const api = useContext(PerformanceContext);
 
   if (!api) {
-    if (!suppressMissingProvider) {
+    if (suppressMissingProviderError) {
       // helpful for unit tests
       return { onPageReady: () => {} };
     } else {
