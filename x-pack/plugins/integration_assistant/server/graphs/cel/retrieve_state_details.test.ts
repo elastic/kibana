@@ -18,8 +18,6 @@ import {
 import type { CelInputState } from '../../types';
 import { handleGetStateDetails } from './retrieve_state_details';
 
-const stateDetails = [{ name: 'config1' }];
-
 const model = new FakeLLM({
   response: JSON.stringify(celStateDetailsMockedResponse, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
