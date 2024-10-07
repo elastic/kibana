@@ -19,7 +19,10 @@ export const celTestState = {
   results: { test: 'testResults' },
 };
 
-export const celQuerySummaryMockedResponse = ``;
+export const celQuerySummaryMockedResponse = `To cover all events in a chronological manner for the device_tasks endpoint, you should use the /v1/device_tasks GET route with pagination parameters. Specifically, use the pageSize and pageToken query parameters. Start with a large pageSize and use the nextPageToken from each response to fetch subsequent pages until all events are retrieved.
+Sample URL path:
+/v1/device_tasks?pageSize=1000&pageToken={nextPageToken}
+Replace {nextPageToken} with the actual token received from the previous response. Repeat this process, updating the pageToken each time, until you've retrieved all events.`;
 
 export const celProgramMockedResponse = `Based on the provided context and requirements, here's the CEL program section for the device_tasks datastream:
 
