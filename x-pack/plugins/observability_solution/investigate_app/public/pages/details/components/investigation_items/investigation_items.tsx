@@ -13,9 +13,10 @@ import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
 import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
+import { AssistantHypothesis } from '../assistant_hypothesis/assistant_hypothesis';
 
 export function InvestigationItems() {
-  const { globalParams, updateInvestigationParams } = useInvestigation();
+  const { globalParams, updateInvestigationParams, investigation } = useInvestigation();
 
   return (
     <>
@@ -37,6 +38,11 @@ export function InvestigationItems() {
           <EventsTimeLine />
         </EuiFlexItem>
 
+        {investigation?.id && (
+          <EuiFlexItem grow={false}>
+            <AssistantHypothesis investigationId={investigation.id} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <InvestigationItemsList />
         </EuiFlexItem>

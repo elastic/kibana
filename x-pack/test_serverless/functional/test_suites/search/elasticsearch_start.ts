@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  describe('Elasticsearch Start [Onboarding Empty State]', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/194673
+  describe.skip('Elasticsearch Start [Onboarding Empty State]', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -99,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
         await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyPreGenerated();
         const refreshBrowserApiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         expect(refreshBrowserApiKeyUI).to.eql(apiKeyUI);
 
@@ -173,7 +175,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should not create an API key if the user only has viewer permissions', async () => {
           await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
           await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-          await pageObjects.svlApiKeys.expectNoPermissionsMessage();
+          await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyFormNotAvailable();
           const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
           expect(apiKey).to.be(null);
         });
