@@ -14,6 +14,7 @@ export function MachineLearningJobWizardGeoProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
+  const retry = getService('retry');
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
 
@@ -23,22 +24,21 @@ export function MachineLearningJobWizardGeoProvider(
     },
 
     async assertGeoFieldSelection(expectedIdentifier: string[]) {
-      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
-        'mlGeoFieldNameSelect > comboBoxInput'
-      );
-      expect(comboBoxSelectedOptions).to.eql(
+      await mlCommonUI.assertOptionsListWithFieldStatsValue(
+        'mlGeoFieldNameSelect > comboBoxInput',
         expectedIdentifier,
-        `Expected geo field selection to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        'geo field selection'
       );
     },
 
     async selectGeoField(identifier: string) {
-      await mlCommonUI.setOptionsListWithFieldStatsValue(
-        'mlGeoFieldNameSelect > comboBoxInput',
-        identifier
-      );
-
-      await this.assertGeoFieldSelection([identifier]);
+      await retry.tryForTime(5 * 1000, async () => {
+        await mlCommonUI.setOptionsListWithFieldStatsValue(
+          'mlGeoFieldNameSelect > comboBoxInput',
+          identifier
+        );
+        await this.assertGeoFieldSelection([identifier]);
+      });
     },
 
     async assertSplitCardWithMapExampleExists() {
@@ -48,13 +48,15 @@ export function MachineLearningJobWizardGeoProvider(
     async assertDetectorPreviewExists(detectorDescription: string) {
       await testSubjects.existOrFail('mlGeoMap > mlDetectorTitle');
       const actualDetectorTitle = await testSubjects.getVisibleText('mlGeoMap > mlDetectorTitle');
-      expect(actualDetectorTitle).to.eql(
-        detectorDescription,
-        `Expected detector title to be '${detectorDescription}' (got '${actualDetectorTitle}')`
-      );
+      await retry.tryForTime(5 * 1000, async () => {
+        expect(actualDetectorTitle).to.eql(
+          detectorDescription,
+          `Expected detector title to be '${detectorDescription}' (got '${actualDetectorTitle}')`
+        );
 
-      await testSubjects.existOrFail('mlGeoJobWizardMap');
-      await testSubjects.existOrFail('mapContainer');
+        await testSubjects.existOrFail('mlGeoJobWizardMap');
+        await testSubjects.existOrFail('mapContainer');
+      });
     },
   };
 }

@@ -479,7 +479,7 @@ export function MachineLearningCommonUIProvider({
       );
       expect(actualValue).to.eql(
         expectedValue,
-        `${label ?? selector} value should be '${expectedValue}' (got '${actualValue}')`
+        `Expected ${label ?? selector} value should be '${expectedValue}' (got '${actualValue}')`
       );
     },
   };
