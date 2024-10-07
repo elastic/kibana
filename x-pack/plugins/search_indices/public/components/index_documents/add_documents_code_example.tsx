@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
 import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
@@ -58,6 +59,7 @@ export const AddDocumentsCodeExample = ({
     // TODO: implement smart document generation
     return generateSampleDocument(codeSampleMappings);
   }, [codeSampleMappings]);
+  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
@@ -65,8 +67,17 @@ export const AddDocumentsCodeExample = ({
       sampleDocument,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
+      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
     };
-  }, [indexName, elasticsearchUrl, sampleDocument, codeSampleMappings, indexHasMappings]);
+  }, [
+    indexName,
+    elasticsearchUrl,
+    sampleDocument,
+    codeSampleMappings,
+    indexHasMappings,
+    apiKeyIsVisible,
+    apiKey,
+  ]);
 
   return (
     <EuiPanel
