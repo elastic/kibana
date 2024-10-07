@@ -29,7 +29,6 @@ steps:
         ENVIRONMENT: ${ENVIRONMENT}
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-steps:
   - label: ":rocket: Run serverless synthetics check"
     trigger: "serverless-quality-gates"
     build:
