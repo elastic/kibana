@@ -48,6 +48,10 @@ describe('field and variable escaping', () => {
       'ROW `var$iable` = 1, variable.`wi#th`.separator = "lolz" | EVAL ABS(`var$iable`), TRIM(variable.`wi#th`.`separator`)',
       []
     );
+
+    // expression variable
+    await expectErrors('FROM index | EVAL doubleField + 20 | EVAL `doubleField + 20`', []);
+    await expectErrors('ROW 21 + 20 | STATS AVG(`21 + 20`)', []);
   });
 
   it('recognizes variables with spaces and comments', async () => {
