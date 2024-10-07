@@ -32,6 +32,7 @@ import {
   removeEntityStoreFieldRetentionEnrichTask,
   getFieldRetentionDefinition,
 } from './field_retention';
+import { createEntityIndex, deleteEntityIndex } from './assets';
 import { getEntityIndexMapping } from './index_mappings';
 
 interface EntityStoreClientOpts {
@@ -106,7 +107,12 @@ export class EntityStoreDataClient {
     // this is because the enrich policy will fail if the index does not exist with the correct fields
     await this.createEntityIndexComponentTemplate(entityType);
     debugLog(`Created entity index component template`);
-    await this.createEntityIndex(entityType);
+    await createEntityIndex({
+      entityType,
+      esClient: this.options.esClient,
+      namespace: this.options.namespace,
+      logger,
+    });
     debugLog(`Created entity index`);
 
     // we must create and execute the enrich policy before the pipeline is created
@@ -227,32 +233,6 @@ export class EntityStoreDataClient {
     );
   }
 
-  private async createEntityIndex(entityType: EntityType) {
-    try {
-      await this.options.esClient.indices.create({
-        index: getEntitiesIndexName(entityType, this.options.namespace),
-        body: {},
-      });
-    } catch (e) {
-      if (e.meta.body.error.type === 'resource_already_exists_exception') {
-        this.options.logger.debug(`Index for ${entityType} already exists, skipping creation.`);
-      } else {
-        throw e;
-      }
-    }
-  }
-
-  private async deleteEntityIndex(entityType: EntityType) {
-    await this.options.esClient.indices.delete(
-      {
-        index: getEntitiesIndexName(entityType, this.options.namespace),
-      },
-      {
-        ignore: [404],
-      }
-    );
-  }
-
   private async createEntityIndexComponentTemplate(entityType: EntityType) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
@@ -335,7 +315,12 @@ export class EntityStoreDataClient {
       await this.deleteFieldRetentionEnrichPolicy(entityType);
 
       if (deleteData) {
-        await this.deleteEntityIndex(entityType);
+        await deleteEntityIndex({
+          entityType,
+          esClient: this.options.esClient,
+          namespace: this.options.namespace,
+          logger: this.options.logger,
+        });
       }
       // if the last engine then stop the task
       const { engines } = await this.engineClient.list();
