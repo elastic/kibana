@@ -23,8 +23,6 @@ spec:
         USE_CHROME_BETA: 'true'
         # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
         LIMIT_CONFIG_TYPE: 'functional'
-        # We're using the same pipeline as the PRs, but it's not a real PR, so let's skip that check
-        PREVENT_SKIP_CHECK: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
 
@@ -32,7 +30,7 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
+      pipeline_file: .buildkite/pipelines/chrome_forward_testing.yml
       skip_intermediate_builds: true
       provider_settings:
         prefix_pull_request_fork_branch_names: false

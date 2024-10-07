@@ -22,7 +22,6 @@ if (!prConfig) {
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
-const PREVENT_SKIP_CHECK = process.env.PREVENT_SKIP_CHECK?.match(/(1|true)/i);
 
 const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
@@ -33,7 +32,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
   const pipeline: string[] = [];
 
   try {
-    const skippable = !PREVENT_SKIP_CHECK && await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
+    const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
       console.log(emptyStep);
