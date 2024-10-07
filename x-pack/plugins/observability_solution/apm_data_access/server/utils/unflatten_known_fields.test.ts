@@ -25,14 +25,82 @@ describe('unflattenKnownApmEventFields', () => {
     expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
   });
 
-  it('should correctly unflatten nested fields', () => {
+  it('should override unknown fields', () => {
     const input = {
       'service.name': 'node-svc',
+      'service.name.text': 'node-svc',
     };
     const expectedOutput = {
       service: {
         name: 'node-svc',
       },
+    };
+
+    expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
+  });
+
+  it('should correctly unflatten multiple nested fields', () => {
+    const input = {
+      'service.name': 'node-svc',
+      'service.version': '1.0.0',
+      'service.environment': 'production',
+      'agent.name': 'nodejs',
+    };
+    const expectedOutput = {
+      service: {
+        name: 'node-svc',
+        version: '1.0.0',
+        environment: 'production',
+      },
+      agent: {
+        name: 'nodejs',
+      },
+    };
+    expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
+  });
+
+  it('should handle multiple values for multi-valued fields', () => {
+    const input = {
+      'service.name': 'node-svc',
+      'service.tags': ['foo', 'bar'],
+    };
+    const expectedOutput = {
+      service: {
+        name: 'node-svc',
+        tags: ['foo', 'bar'],
+      },
+    };
+    expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
+  });
+
+  it('should correctly unflatten with empty multi-valued fields', () => {
+    const input = {
+      'service.name': 'node-svc',
+      'service.tags': [],
+    };
+    const expectedOutput = {
+      service: {
+        name: 'node-svc',
+        tags: [],
+      },
+    };
+    expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
+  });
+
+  it('should retain unknown fields in the output', () => {
+    const input = {
+      'service.name': 'node-svc',
+      'unknown.field': 'foo',
+      unknonwField: 'bar',
+    };
+    const expectedOutput = {
+      service: {
+        name: 'node-svc',
+      },
+      unknown: {
+        field: 'foo',
+      },
+      unknonwField: 'bar',
     };
     expect(unflattenKnownApmEventFields(input)).toEqual(expectedOutput);
   });
@@ -51,5 +119,18 @@ describe('unflattenKnownApmEventFields', () => {
       },
     };
     expect(unflattenKnownApmEventFields(input, requiredFields)).toEqual(expectedOutput);
+  });
+
+  it('should throw an exception when mandatory field is not in the input', () => {
+    const input = {
+      'service.environment': 'PROD',
+    };
+
+    const requiredFields: ['service.name'] = ['service.name'];
+
+    // @ts-expect-error
+    expect(() => unflattenKnownApmEventFields(input, requiredFields)).toThrowError(
+      'Missing required fields service.name in event'
+    );
   });
 });
