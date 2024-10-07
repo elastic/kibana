@@ -1110,6 +1110,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 ### Observability Plugins
 
+
 # Observability AI Assistant
 x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
@@ -1170,12 +1171,10 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
-# Observability
-/x-pack/test/functional/es_archives/cases/default @elastic/observability
-
 # Observability UX management team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 /x-pack/test/observability_functional @elastic/obs-ux-management-team
+/x-pack/test/functional/es_archives/cases/default @elastic/obs-ux-management-team
 /x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-management-team
 /x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
