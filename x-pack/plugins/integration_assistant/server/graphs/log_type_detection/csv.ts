@@ -76,13 +76,19 @@ function prefixColumns(columns: string[], prefixes: string[]): string[] {
 /**
  * Generates a list of unique column names based on preferred and fallback names.
  *
+ * The preferred names are used first, followed by the fallback names. It is required that
+ * there are enough fallback names to cover the number of unique column names needed.
+ *
+ * The resulting column names are guaranteed to be unique. If a column name is already in use,
+ * a postfix like _2, _3 and so on is added to the name to make it unique.
+ *
  * @generator
  * @param {number} count - The number of unique column names to generate.
  * @param {Array<Array<string | undefined>>} preferredNames - A 2D array where each sub-array contains a list of names.
  * @param {string[]} fallbackNames - An array of fallback names to use if no preferred name is defined.
- * @yields {string} - A list of column names, such that no two are the same.
+ * @yields {string} - A sequence of column names, such that no two are the same.
  */
-function* yieldUniqueColumnNames(
+export function* yieldUniqueColumnNames(
   count: number,
   preferredNames: Array<Array<string | undefined>>,
   fallbackNames: string[]

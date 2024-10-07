@@ -11,6 +11,7 @@ import {
   columnsFromHeader,
   totalColumnCount,
   toSafeColumnName,
+  yieldUniqueColumnNames,
 } from './csv';
 
 describe('upperBoundForColumnCount', () => {
@@ -178,5 +179,65 @@ describe('totalColumnCount', () => {
       expect(toSafeColumnName('1ABC')).toBe('Column1ABC');
       expect(toSafeColumnName(123)).toBe('Column123');
     });
+  });
+});
+
+describe('yieldUniqueColumnNames', () => {
+  it('should yield unique column names based on preferred and fallback names', () => {
+    const count = 5;
+    const preferredNames = [
+      ['name1', 'name2', undefined, 'name4', undefined],
+      [undefined, 'altName2', 'altName3', undefined, 'altName5'],
+    ];
+    const fallbackNames = ['fallback1', 'fallback2', 'fallback3', 'fallback4', 'fallback5'];
+
+    const result = Array.from(yieldUniqueColumnNames(count, preferredNames, fallbackNames));
+    expect(result).toEqual(['name1', 'name2', 'altName3', 'name4', 'altName5']);
+  });
+
+  it('should use fallback names when preferred names are not provided', () => {
+    const count = 3;
+    const preferredNames = [['name1', undefined, 'name3']];
+    const fallbackNames = ['fallback1', 'fallback2', 'fallback3'];
+
+    const result = Array.from(yieldUniqueColumnNames(count, preferredNames, fallbackNames));
+    expect(result).toEqual(['name1', 'fallback2', 'name3']);
+  });
+
+  it('should append postfix to duplicate names to ensure uniqueness', () => {
+    const count = 4;
+    const preferredNames = [['name', 'name', 'name', 'name']];
+    const fallbackNames = ['fallback1', 'fallback2', 'fallback3', 'fallback4'];
+
+    const result = Array.from(yieldUniqueColumnNames(count, preferredNames, fallbackNames));
+    expect(result).toEqual(['name', 'name_2', 'name_3', 'name_4']);
+  });
+
+  it('should handle mixed preferred and fallback names with duplicates', () => {
+    const count = 6;
+    const preferredNames = [
+      ['name', undefined, 'name', undefined, undefined, undefined],
+      [undefined, 'altName', undefined, 'altName', undefined, 'altName'],
+    ];
+    const fallbackNames = [
+      'fallback1',
+      'fallback2',
+      'fallback3',
+      'fallback4',
+      'fallback5',
+      'fallback6',
+    ];
+
+    const result = Array.from(yieldUniqueColumnNames(count, preferredNames, fallbackNames));
+    expect(result).toEqual(['name', 'altName', 'name_2', 'altName_2', 'fallback5', 'altName_3']);
+  });
+
+  it('should handle empty preferred names', () => {
+    const count = 3;
+    const preferredNames: Array<Array<string | undefined>> = [];
+    const fallbackNames: string[] = ['fallback1', 'fallback2', 'fallback3'];
+
+    const result = Array.from(yieldUniqueColumnNames(count, preferredNames, fallbackNames));
+    expect(result).toEqual(['fallback1', 'fallback2', 'fallback3']);
   });
 });
