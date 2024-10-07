@@ -217,20 +217,40 @@ export class EntityStoreDataClient {
       getDefinitionForEntityType(entityType, this.options.namespace).id
     }-latest@platform`;
     this.options.logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
-    await this.options.esClient.ingest.deletePipeline({ id: pipelineId });
+    await this.options.esClient.ingest.deletePipeline(
+      {
+        id: pipelineId,
+      },
+      {
+        ignore: [404],
+      }
+    );
   }
 
   private async createEntityIndex(entityType: EntityType) {
-    await this.options.esClient.indices.create({
-      index: getEntitiesIndexName(entityType, this.options.namespace),
-      body: {},
-    });
+    try {
+      await this.options.esClient.indices.create({
+        index: getEntitiesIndexName(entityType, this.options.namespace),
+        body: {},
+      });
+    } catch (e) {
+      if (e.meta.body.error.type === 'resource_already_exists_exception') {
+        this.options.logger.debug(`Index for ${entityType} already exists, skipping creation.`);
+      } else {
+        throw e;
+      }
+    }
   }
 
   private async deleteEntityIndex(entityType: EntityType) {
-    await this.options.esClient.indices.delete({
-      index: getEntitiesIndexName(entityType, this.options.namespace),
-    });
+    await this.options.esClient.indices.delete(
+      {
+        index: getEntitiesIndexName(entityType, this.options.namespace),
+      },
+      {
+        ignore: [404],
+      }
+    );
   }
 
   private async createEntityIndexComponentTemplate(entityType: EntityType) {
@@ -250,7 +270,12 @@ export class EntityStoreDataClient {
     const templateName = `${
       getDefinitionForEntityType(entityType, this.options.namespace).id
     }-latest@platform`;
-    await this.options.esClient.cluster.deleteComponentTemplate({ name: templateName });
+    await this.options.esClient.cluster.deleteComponentTemplate(
+      { name: templateName },
+      {
+        ignore: [404],
+      }
+    );
   }
 
   public async start(entityType: EntityType, options?: { force: boolean }) {
