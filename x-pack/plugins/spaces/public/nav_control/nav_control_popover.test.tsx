@@ -8,7 +8,6 @@
 import {
   EuiFieldSearch,
   EuiHeaderSectionItemButton,
-  EuiPopover,
   EuiSelectable,
   EuiSelectableListItem,
 } from '@elastic/eui';

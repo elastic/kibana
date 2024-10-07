@@ -106,9 +106,13 @@ class NavControlPopoverUI extends Component<Props, State> {
         <SpacesDescription
           id={popoutContentId}
           isLoading={this.state.loading}
-          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
+          onClickManageSpaceBtn={() => {
+            // No need to show the tour anymore, the user is taking action
+            this.props.onFinishTour();
+            this.toggleSpaceSelector();
+          }}
         />
       );
     } else {
@@ -124,6 +128,11 @@ class NavControlPopoverUI extends Component<Props, State> {
           activeSpace={this.state.activeSpace}
           allowSolutionVisibility={this.props.allowSolutionVisibility}
           eventTracker={this.props.eventTracker}
+          onClickManageSpaceBtn={() => {
+            // No need to show the tour anymore, the user is taking action
+            this.props.onFinishTour();
+            this.toggleSpaceSelector();
+          }}
         />
       );
     }
@@ -134,7 +143,7 @@ class NavControlPopoverUI extends Component<Props, State> {
           <EuiText>
             <p>{tourTexts.content}</p>
             <p>
-              <EuiLink href={tourLearnMoreLink} external>
+              <EuiLink href={tourLearnMoreLink} target="_blank" external>
                 {tourTexts.learnMore}
               </EuiLink>
             </p>
@@ -272,13 +281,13 @@ export const NavControlPopover = withEuiTheme(NavControlPopoverUI);
 function getTourTexts(solution?: SolutionView) {
   const solutionMap: Record<SolutionView, string> = {
     es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
-      defaultMessage: 'search',
+      defaultMessage: 'Search',
     }),
     security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
-      defaultMessage: 'security',
+      defaultMessage: 'Security',
     }),
     oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
-      defaultMessage: 'observability',
+      defaultMessage: 'Observability',
     }),
     classic: '', // Tour is not shown for the classic solution
   };
