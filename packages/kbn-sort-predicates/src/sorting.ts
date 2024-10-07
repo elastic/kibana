@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import versionCompare from 'compare-versions';
 import valid from 'semver/functions/valid';
+import semVerCompare from 'semver/functions/compare';
 import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import moment from 'moment';
@@ -154,7 +154,7 @@ const versionComparison: CompareFn<string> = (v1, v2, direction) => {
   if (bInvalid) {
     return direction * -1;
   }
-  return versionCompare(valueA, valueB);
+  return semVerCompare(valueA, valueB);
 };
 
 const openRange = { gte: -Infinity, lt: Infinity };
