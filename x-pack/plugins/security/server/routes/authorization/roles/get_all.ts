@@ -20,7 +20,6 @@ export function defineGetAllRolesRoutes({
   subFeaturePrivilegeIterator,
   logger,
   buildFlavor,
-  config,
 }: RouteDefinitionParams) {
   router.versioned
     .get({
@@ -35,9 +34,11 @@ export function defineGetAllRolesRoutes({
       {
         version: API_VERSIONS.roles.public.v1,
         validate: {
-          query: schema.maybe(
-            schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
-          ),
+          request: {
+            query: schema.maybe(
+              schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
+            ),
+          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {

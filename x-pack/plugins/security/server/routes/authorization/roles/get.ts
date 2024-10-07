@@ -35,10 +35,10 @@ export function defineGetRolesRoutes({
         validate: {
           request: {
             params: schema.object({ name: schema.string({ minLength: 1 }) }),
+            query: schema.maybe(
+              schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
+            ),
           },
-          query: schema.maybe(
-            schema.object({ replaceDeprecatedPrivileges: schema.maybe(schema.boolean()) })
-          ),
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
