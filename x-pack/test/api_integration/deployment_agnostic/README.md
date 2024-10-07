@@ -97,6 +97,20 @@ export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typ
 
 3. Add Tests
 
+API Authentication in Kibana: Public vs. Internal APIs
+
+Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
+
+- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflect how end user call these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
+
+- Internal APIs: Direct HTTP requests to internal APIs are generally not expected. However, for testing purposes, authentication should be performed using the Cookie header. This approach simulates client-side behavior during browser interactions, mirroring how internal APIs are indirectly invoked.
+
+Recommendations:
+- use `roleScopedSupertest` service to create supertest instance scoped to specific role and pre-defined request headers
+- `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticate requests with API key by default
+- pass `withCookieHeader: true` to use Cookie header for requests authentication
+- don't forget to invalidate API key using `destroy()` on supertest scoped instance in `after` hook
+
 Add test files to `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/apis/<my_api>`:
 
 test example
@@ -191,6 +205,28 @@ Note: The FTR (Functional Test Runner) does not have the capability to provision
 We do not recommend use of custom server arguments because it may lead to unexpected test failures on MKI.
 
 6. Add FTR Configs Path to FTR Manifest Files Located in `.buildkite/`
+
+## Running the tests
+
+### Stateful
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts --grep=$
+```
+
+### Serverless
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts --grep=$
+```
 
 ## Tagging and Skipping the Tests
 Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required. If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.

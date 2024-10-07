@@ -59,7 +59,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   }, [binsAvailableByWidth, initialSizeRef]);
 
   useEffect(() => {
-    if (monitor?.id && location?.label && debouncedBinsCount !== null && minsPerBin !== null) {
+    if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
       dispatch(
         quietGetMonitorStatusHeatmapAction.get({
           monitorId: monitor.id,

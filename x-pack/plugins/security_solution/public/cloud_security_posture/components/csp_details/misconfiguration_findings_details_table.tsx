@@ -17,6 +17,12 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import {
+  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
@@ -102,12 +108,16 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const navToFindings = useNavigateFindings();
 
-    const navToFindingsByHostName = (hostName: string) => {
-      navToFindings({ 'host.name': hostName }, ['rule.name']);
-    };
-
     const navToFindingsByRuleAndResourceId = (ruleId: string, resourceId: string) => {
       navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
+    };
+
+    const navToFindingsByName = (name: string, queryField: 'host.name' | 'user.name') => {
+      uiMetricService.trackUiMetric(
+        METRIC_TYPE.CLICK,
+        NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+      );
+      navToFindings({ [queryField]: name }, ['rule.name']);
     };
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
@@ -154,13 +164,17 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <EuiLink
             onClick={() => {
-              navToFindingsByHostName(queryName);
+              uiMetricService.trackUiMetric(
+                METRIC_TYPE.CLICK,
+                NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+              );
+              navToFindingsByName(queryName, fieldName);
             }}
           >
             {i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle',
               {
-                defaultMessage: 'Misconfigurations',
+                defaultMessage: 'Misconfigurations ',
               }
             )}
             <EuiIcon type={'popout'} />

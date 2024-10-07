@@ -51,6 +51,7 @@ describe('Prebuilt rule asset schema', () => {
     // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
     const omittedBaseFields = [
       'actions',
+      'response_actions',
       'throttle',
       'meta',
       'output_index',

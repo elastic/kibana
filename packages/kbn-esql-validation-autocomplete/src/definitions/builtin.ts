@@ -641,6 +641,20 @@ const otherDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'order-expression',
+    type: 'builtin',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
+      defaultMessage: 'Specify column sorting modifiers',
+    }),
+    supportedCommands: ['sort'],
+    signatures: [
+      {
+        params: [{ name: 'column', type: 'any' }],
+        returnType: 'void',
+      },
+    ],
+  },
 ];
 
 export const builtinFunctions: FunctionDefinition[] = [

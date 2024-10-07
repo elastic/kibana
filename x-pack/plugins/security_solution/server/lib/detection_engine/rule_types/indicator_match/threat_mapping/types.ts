@@ -77,7 +77,6 @@ export interface CreateThreatSignalsOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;

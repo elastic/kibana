@@ -8,8 +8,9 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { FieldReadOnly } from '../../field_readonly';
-import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
+import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatIndicatorPathReadOnly } from './threat_indicator_path';
+import { mockThreatMatchRule } from '../../storybook/mocks';
 
 export default {
   component: ThreatIndicatorPathReadOnly,
@@ -18,22 +19,19 @@ export default {
 };
 
 interface TemplateProps {
-  finalDiffableRule: Partial<DiffableAllFields>;
+  finalDiffableRule: DiffableRule;
 }
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FieldReadOnly
-      fieldName="threat_indicator_path"
-      finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
-    />
+    <FieldReadOnly fieldName="threat_indicator_path" finalDiffableRule={args.finalDiffableRule} />
   );
 };
 
 export const Default = Template.bind({});
 
 Default.args = {
-  finalDiffableRule: {
+  finalDiffableRule: mockThreatMatchRule({
     threat_indicator_path: 'threat.indicator',
-  },
+  }),
 };

@@ -907,8 +907,8 @@ describe('AlertsTableState', () => {
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
         expect(
-          getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[2]
+          queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)!
+            .querySelector('.euiDataGridHeaderCell__content')!
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });

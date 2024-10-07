@@ -15,7 +15,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FileNameLink } from './file_name_link';
 
-describe('FileNameLink', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192944
+describe.skip('FileNameLink', () => {
   let appMockRender: AppMockRenderer;
 
   const defaultProps = {

@@ -67,6 +67,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.security.authc.providers.oidc.oidc1.order=0',
         '--xpack.security.authc.providers.oidc.oidc1.realm=oidc1',
         '--xpack.security.authc.providers.basic.basic1.order=1',
+        '--server.restrictInternalApis=false',
       ],
     },
     uiSettings: {

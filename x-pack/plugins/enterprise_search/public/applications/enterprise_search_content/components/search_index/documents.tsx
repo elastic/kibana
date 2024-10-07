@@ -122,7 +122,7 @@ export const SearchIndexDocuments: React.FC = () => {
               docs={docs}
               docsPerPage={pagination.pageSize ?? 10}
               isLoading={status !== Status.SUCCESS && mappingStatus !== Status.SUCCESS}
-              mappings={mappingData?.mappings?.properties ?? {}}
+              mappings={mappingData ? { [indexName]: mappingData } : undefined}
               meta={data?.meta ?? DEFAULT_PAGINATION}
               onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
               setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
@@ -133,6 +133,7 @@ export const SearchIndexDocuments: React.FC = () => {
       accessControlSwitch={
         shouldShowAccessControlSwitcher ? (
           <AccessControlIndexSelector
+            fullWidth
             onChange={setSelectedIndexType}
             valueOfSelected={selectedIndexType}
           />

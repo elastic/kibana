@@ -12,6 +12,7 @@ import { ILicenseState, validateEmptyStrings } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
+import { connectorResponseSchemaV1 } from '../../common/routes/connector/response';
 
 export const bodySchema = schema.object({
   name: schema.string({
@@ -68,7 +69,9 @@ export const createActionRoute = (
         request: {
           params: schema.maybe(
             schema.object({
-              id: schema.maybe(schema.string()),
+              id: schema.maybe(
+                schema.string({ meta: { description: 'An identifier for the connector.' } })
+              ),
             })
           ),
           body: bodySchema,
@@ -76,6 +79,7 @@ export const createActionRoute = (
         response: {
           200: {
             description: 'Indicates a successful call.',
+            body: () => connectorResponseSchemaV1,
           },
         },
       },

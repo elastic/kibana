@@ -28,8 +28,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     esTestCluster: {
       ...config.esTestCluster,
-      serverArgs: [...config.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
+      serverArgs: [
+        ...config.esTestCluster.serverArgs,
+        'http.host=0.0.0.0',
+        // Enable custom roles
+        'xpack.security.authc.native_roles.enabled=true',
+      ],
     },
+
     esServerlessOptions: {
       ...(config.esServerlessOptions ?? {}),
       resources: Object.values(ES_RESOURCES),
@@ -51,6 +57,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,
+
+        // Enable spaces UI capabilities
+        '--xpack.spaces.maxSpaces=100',
+
+        // Enable UI to create custom roles in kibana
+        `--xpack.security.roleManagementEnabled=true`,
 
         // Enable Fleet server standalone so that no checks are done to see if fleet-server has
         // registered with Kibana and we are able to access the Agents page of Fleet

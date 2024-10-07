@@ -224,6 +224,7 @@ export const EqlOptionalFields = z.object({
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
@@ -521,6 +522,7 @@ export const NewTermsRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type NewTermsRuleDefaultableFields = z.infer<typeof NewTermsRuleDefaultableFields>;
@@ -574,6 +576,7 @@ export const EsqlRuleRequiredFields = z.object({
 export type EsqlRuleOptionalFields = z.infer<typeof EsqlRuleOptionalFields>;
 export const EsqlRuleOptionalFields = z.object({
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;

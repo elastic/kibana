@@ -10,7 +10,7 @@ import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
-import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
+import { _IGNORED, INDEX, TIMESTAMP } from '../../../../common/es_fields';
 import { getFieldIntervalInSeconds } from './get_interval';
 
 export async function getDegradedFields({
@@ -41,6 +41,15 @@ export async function getDegradedFields({
         lastOccurrence: {
           max: {
             field: TIMESTAMP,
+          },
+        },
+        index: {
+          terms: {
+            size: 1,
+            field: INDEX,
+            order: {
+              _key: 'desc',
+            },
           },
         },
         timeSeries: {
@@ -80,6 +89,7 @@ export async function getDegradedFields({
           x: timeSeriesBucket.key,
           y: timeSeriesBucket.doc_count,
         })),
+        indexFieldWasLastPresentIn: bucket.index.buckets[0].key as string,
       })) ?? [],
   };
 }

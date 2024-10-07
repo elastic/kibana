@@ -30,7 +30,7 @@ export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj=
 export const EVENT_DETAILS_ALERT_STATUS_POPOVER =
   '[data-test-subj="event-details-alertStatusPopover"]';
 
-export const TABLE_CELL = '.euiTableRowCell';
+export const TABLE_CELL = '.euiTableRowCell .euiTableCellContent';
 
 export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]';
 

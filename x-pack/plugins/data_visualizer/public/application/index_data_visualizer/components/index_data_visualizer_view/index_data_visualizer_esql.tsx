@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
-import { TextBasedLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
 import {
@@ -259,14 +259,25 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
-        <TextBasedLangEditor
-          query={localQuery}
-          onTextLangQueryChange={onTextLangQueryChange}
-          onTextLangQuerySubmit={onTextLangQuerySubmit}
-          detectedTimestamp={currentDataView?.timeFieldName}
-          hideRunQueryText={false}
-          isLoading={queryHistoryStatus ?? false}
-        />
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="DataVisualizerESQLEditor"
+          css={css({
+            borderTop: euiTheme.euiBorderThin,
+            borderLeft: euiTheme.euiBorderThin,
+            borderRight: euiTheme.euiBorderThin,
+          })}
+        >
+          <ESQLLangEditor
+            query={localQuery}
+            onTextLangQueryChange={onTextLangQueryChange}
+            onTextLangQuerySubmit={onTextLangQuerySubmit}
+            detectedTimestamp={currentDataView?.timeFieldName}
+            hideRunQueryText={false}
+            isLoading={queryHistoryStatus ?? false}
+            displayDocumentationAsFlyout
+          />
+        </EuiFlexItem>
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>

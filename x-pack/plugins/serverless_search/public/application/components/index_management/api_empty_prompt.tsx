@@ -42,13 +42,10 @@ import { LanguageGrid } from '../languages/language_grid';
 import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
 import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
 
-import {
-  API_KEY_PLACEHOLDER,
-  CLOUD_ID_PLACEHOLDER,
-  ELASTICSEARCH_URL_PLACEHOLDER,
-} from '../../constants';
+import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../../constants';
 
 import { ApiKeyPanel } from '../api_key/api_key';
+import { useElasticsearchUrl } from '../../hooks/use_elastisearch_url';
 
 export interface APIIndexEmptyPromptProps {
   indexName: string;
@@ -63,14 +60,14 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
 
   const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { elasticsearchURL, cloudId } = useMemo(() => {
+  const { elasticsearchUrl } = useElasticsearchUrl();
+  const { cloudId } = useMemo(() => {
     return {
-      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
+    url: elasticsearchUrl,
     apiKey: clientApiKey,
     cloudId,
     indexName,

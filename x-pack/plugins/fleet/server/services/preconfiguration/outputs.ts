@@ -9,7 +9,7 @@ import crypto from 'crypto';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 import type {
   PreconfiguredOutput,
@@ -82,7 +82,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
       const { id, config, ...outputData } = output;
 
-      const configYaml = config ? safeDump(config) : undefined;
+      const configYaml = config ? dump(config) : undefined;
 
       const data: NewOutput = {
         ...outputData,

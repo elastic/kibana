@@ -24,7 +24,6 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -40,11 +39,14 @@ import {
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
@@ -64,6 +66,10 @@ export interface ElasticAssistantPluginStart {
    * Actions plugin start contract.
    */
   actions: ActionsPluginStart;
+  /**
+   * Inference plugin start contract.
+   */
+  inference: InferenceServerStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -104,6 +110,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   licensing: LicensingPluginStart;
@@ -120,11 +127,12 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
-    v2KnowledgeBaseEnabled?: boolean
+    params: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -223,13 +231,15 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI
   | ActionsClientSimpleChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
+  inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
-  chain?: RetrievalQAChain;
+  connectorId?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

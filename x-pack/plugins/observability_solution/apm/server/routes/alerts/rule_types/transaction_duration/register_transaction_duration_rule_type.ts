@@ -140,7 +140,7 @@ export function registerTransactionDurationRuleType({
       >
     ) => {
       const { params: ruleParams, services, spaceId, getTimeRange } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -221,6 +221,7 @@ export function registerTransactionDurationRuleType({
 
       const response = await alertingEsClient({
         scopedClusterClient,
+        uiSettingsClient,
         params: searchParams,
       });
 

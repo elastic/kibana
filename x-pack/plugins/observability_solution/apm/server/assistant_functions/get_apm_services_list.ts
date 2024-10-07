@@ -84,6 +84,7 @@ export function registerGetApmServicesListFunction({
           arguments: args,
         }),
       };
-    }
+    },
+    ['observability']
   );
 }
