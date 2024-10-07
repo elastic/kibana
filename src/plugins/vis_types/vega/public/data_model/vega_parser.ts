@@ -10,6 +10,7 @@
 import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import semVerCompare from 'semver/functions/compare';
+import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -559,8 +560,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const schema = schemaParser(spec.$schema);
       const isVegaLite = schema.library === 'vega-lite';
       const libVersion = isVegaLite ? vegaLiteVersion : vegaVersion;
+      const schemaSemVer = semVerCoerce(schema.version) ?? '';
+      const libSemVersion = semVerCoerce(libVersion) ?? '';
 
-      if (semVerCompare(schema.version, libVersion) > 0) {
+      if (semVerCompare(schemaSemVer, libSemVersion) > 0) {
         this._onWarning(
           i18n.translate(
             'visTypeVega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage',
