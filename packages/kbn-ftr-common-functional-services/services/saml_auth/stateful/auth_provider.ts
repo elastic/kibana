@@ -35,6 +35,10 @@ export class StatefulAuthProvider implements AuthProvider {
     return 'editor';
   }
 
+  isCustomRoleEnabled() {
+    return true;
+  }
+
   getCustomRole() {
     return 'customRole';
   }

@@ -14,6 +14,7 @@ import { StatefulAuthProvider } from './stateful/auth_provider';
 export interface AuthProvider {
   getSupportedRoleDescriptors(): Map<string, any>;
   getDefaultRole(): string;
+  isCustomRoleEnabled(): boolean;
   getCustomRole(): string;
   getRolesDefinitionPath(): string;
   getCommonRequestHeader(): { [key: string]: string };

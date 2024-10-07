@@ -74,6 +74,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
   const CUSTOM_ROLE = authRoleProvider.getCustomRole();
+  const isCustomRoleEnabled = authRoleProvider.isCustomRoleEnabled();
 
   const getAdminCredentials = async () => {
     return await sessionManager.getApiCredentialsForRole('admin');
@@ -121,11 +122,14 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       let roleDescriptors = {};
 
       if (role !== 'admin') {
+        if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+          throw new Error(`Custom roles are not supported for the current deployment`);
+        }
         const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
-              ? `Update privileges for '${CUSTOM_ROLE}' using 'samlAuth.setCustomRole' before creating API key`
+              ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
               : `Cannot create API key for non-existent role "${role}"`
           );
         }
@@ -168,6 +172,9 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
 
     async setCustomRole(descriptors: KibanaRoleDescriptors) {
+      if (!isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
       log.debug(`Updating role ${CUSTOM_ROLE}`);
       const adminCookieHeader = await getAdminCredentials();
 

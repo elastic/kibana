@@ -58,8 +58,8 @@ export class ServerlessAuthProvider implements AuthProvider {
         readRolesDescriptorsFromResource(this.rolesDefinitionPath) as Record<string, unknown>
       )
     );
-    // Adding custom role to the map without privileges, so it can defined and used in the tests
-    if (projectTypesWithCustomRolesEnabled.includes(this.projectType)) {
+    // Adding custom role to the map without privileges, so it can be later updated and used in the tests
+    if (this.isCustomRoleEnabled()) {
       roleDescriptors.set(this.getCustomRole(), null);
     }
     return roleDescriptors;
@@ -67,6 +67,10 @@ export class ServerlessAuthProvider implements AuthProvider {
 
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);
+  }
+
+  isCustomRoleEnabled() {
+    return projectTypesWithCustomRolesEnabled.includes(this.projectType);
   }
 
   getCustomRole() {
