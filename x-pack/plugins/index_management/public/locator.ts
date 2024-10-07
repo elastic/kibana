@@ -17,7 +17,9 @@ export interface IndexManagementLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class IndexManagementLocatorDefinition implements LocatorDefinition<IndexManagementLocatorParams> {
+export class IndexManagementLocatorDefinition
+  implements LocatorDefinition<IndexManagementLocatorParams>
+{
   constructor(protected readonly deps: IndexManagementLocatorDefinitionDependencies) {}
 
   public readonly id = INDEX_MANAGEMENT_LOCATOR_ID;
