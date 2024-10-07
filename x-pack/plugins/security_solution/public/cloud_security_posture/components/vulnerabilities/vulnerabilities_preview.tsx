@@ -30,34 +30,6 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-const VulnerabilitiesEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{}> }) => {
-  return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h1>{'-'}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText
-            size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            data-test-subj="noVulnerabilitiesDataTestSubj"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.vulnerabilities.noVulnerabilitiesDescription"
-              defaultMessage="No vulnerabilities"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
-
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
   euiTheme,
@@ -191,14 +163,10 @@ export const VulnerabilitiesPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasVulnerabilitiesFindings ? (
-          <VulnerabilitiesCount
-            vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)}
-            euiTheme={euiTheme}
-          />
-        ) : (
-          <VulnerabilitiesEmptyState euiTheme={euiTheme} />
-        )}
+        <VulnerabilitiesCount
+          vulnerabilitiesTotal={getAbbreviatedNumber(totalVulnerabilities)}
+          euiTheme={euiTheme}
+        />
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

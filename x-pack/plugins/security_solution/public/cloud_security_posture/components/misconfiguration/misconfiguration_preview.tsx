@@ -56,34 +56,6 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
   ];
 };
 
-const MisconfigurationEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{}> }) => {
-  return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h1>{'-'}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText
-            size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            data-test-subj="noFindingsDataTestSubj"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
-              defaultMessage="No Findings"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
-
 const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
@@ -244,15 +216,12 @@ export const MisconfigurationsPreview = ({
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasMisconfigurationFindings ? (
-          <MisconfigurationPreviewScore
-            passedFindings={passedFindings}
-            failedFindings={failedFindings}
-            euiTheme={euiTheme}
-          />
-        ) : (
-          <MisconfigurationEmptyState euiTheme={euiTheme} />
-        )}
+        <MisconfigurationPreviewScore
+          passedFindings={passedFindings}
+          failedFindings={failedFindings}
+          euiTheme={euiTheme}
+        />
+
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

@@ -210,6 +210,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
           columns={columns}
           pagination={pagination}
           onChange={onTableChange}
+          data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
         />
       </EuiPanel>
     </>
