@@ -156,9 +156,9 @@ export function DiscoverMainRoute({
       initialAppState,
     }: { nextDataView?: DataView; initialAppState?: LoadParams['initialAppState'] } = {}) => {
       const loadSavedSearchStartTime = window.performance.now();
-      stateContainer.internalState.transitions.setIsLoading(true);
+      stateContainer.actions.setIsLoading(true);
       if (!nextDataView && !(await checkData())) {
-        stateContainer.internalState.transitions.setIsLoading(false);
+        stateContainer.actions.setIsLoading(false);
         return;
       }
       try {
@@ -181,7 +181,7 @@ export function DiscoverMainRoute({
 
           setBreadcrumbs({ services, titleBreadcrumbText: currentSavedSearch?.title ?? undefined });
         }
-        stateContainer.internalState.transitions.setIsLoading(false);
+        stateContainer.actions.setIsLoading(false);
         if (services.analytics) {
           const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -231,7 +231,7 @@ export function DiscoverMainRoute({
 
   useEffect(() => {
     if (!isCustomizationServiceInitialized) return;
-    stateContainer.internalState.transitions.setIsLoading(true);
+    stateContainer.actions.setIsLoading(true);
     setHasESData(false);
     setHasUserDataView(false);
     setShowNoDataPage(false);
@@ -257,7 +257,7 @@ export function DiscoverMainRoute({
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
-        stateContainer.internalState.transitions.setIsLoading(true);
+        stateContainer.actions.setIsLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch({ nextDataView: nextDataView as DataView });

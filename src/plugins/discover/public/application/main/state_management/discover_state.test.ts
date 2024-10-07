@@ -956,6 +956,15 @@ describe('Test discover state actions', () => {
     expect(setTime).toHaveBeenCalledWith({ from: 'now-15d', to: 'now-10d' });
     expect(setRefreshInterval).toHaveBeenCalledWith({ pause: false, value: 1000 });
   });
+
+  test('setIsLoading', async () => {
+    const { state } = await getState('/');
+    expect(state.internalState.getState().isLoading).toBe(true);
+    await state.actions.setIsLoading(false);
+    expect(state.internalState.getState().isLoading).toBe(false);
+    await state.actions.setIsLoading(true);
+    expect(state.internalState.getState().isLoading).toBe(true);
+  });
 });
 
 describe('Test discover state with embedded mode', () => {

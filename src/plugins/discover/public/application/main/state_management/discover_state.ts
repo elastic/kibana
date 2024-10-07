@@ -211,6 +211,11 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
+     * Set Discover to loading state on the highest level, this cleans up all internal UI state
+     * @param value
+     */
+    setIsLoading: (value: boolean) => void;
+    /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */
     undoSavedSearchChanges: () => Promise<SavedSearch>;
@@ -407,8 +412,12 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const setIsLoading = (value: boolean) => {
+    internalStateContainer.transitions.setIsLoading(value);
+  };
+
   const onDataViewEdited = async (editedDataView: DataView) => {
-    internalStateContainer.transitions.setIsLoading(true);
+    setIsLoading(true);
     const edited = editedDataView.id;
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
@@ -594,6 +603,7 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
+      setIsLoading,
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
