@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiButton, EuiLink, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface DeprecationCalloutProps {
@@ -42,12 +42,25 @@ export const EnterpriseSearchDeprecationCallout: React.FC<DeprecationCalloutProp
       </p>
       <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiButton href="#placeholder-for-link" color="warning" iconType="popout" iconSide="right" target="_blank" fill>
+          <EuiButton
+            href="#placeholder-for-link"
+            color="warning"
+            iconType="popout"
+            iconSide="right"
+            target="_blank"
+            data-test-subj="ent-search-deprecation-callout-cta"
+            fill
+          >
             Learn more
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" onClick={onDismissAction} color="warning">
+          <EuiLink
+            target="_blank"
+            onClick={onDismissAction}
+            color="warning"
+            data-test-subj="dismiss-ent-search-deprecation-callout"
+          >
             {i18n.translate('xpack.enterpriseSearch.deprecationCallout.dissmissLink', {
               defaultMessage: 'Dismiss',
             })}
