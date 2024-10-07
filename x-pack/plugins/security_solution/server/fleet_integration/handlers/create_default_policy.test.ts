@@ -36,12 +36,19 @@ describe('Create Default Policy tests ', () => {
   let productFeaturesService: ProductFeaturesService;
 
   const createDefaultPolicyCallback = async (
-    config: AnyPolicyCreateConfig | undefined
+    config: AnyPolicyCreateConfig | undefined,
+    cloudService = cloud
   ): Promise<PolicyConfig> => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, productFeaturesService);
+    return createDefaultPolicy(
+      licenseService,
+      config,
+      cloudService,
+      esClientInfo,
+      productFeaturesService
+    );
   };
 
   beforeEach(() => {
@@ -52,64 +59,92 @@ describe('Create Default Policy tests ', () => {
     productFeaturesService = createProductFeaturesServiceMock();
   });
 
-  describe('When no config is set', () => {
-    it('Should return PolicyConfig for events only when license is at least platinum', async () => {
-      const defaultPolicy = policyFactory();
-      set(defaultPolicy, 'linux.events.session_data', true);
+  describe.each([true, false])('When no config is set', (isCloudEnvironment) => {
+    const cloudConfig = isCloudEnvironment
+      ? cloud
+      : {
+          ...cloud,
+          isCloudEnabled: false,
+          isServerlessEnabled: false,
+        };
 
-      const policy = await createDefaultPolicyCallback(undefined);
+    const parseTestName = (testName: string) => `${isCloudEnvironment ? 'Cloud: ' : ''}${testName}`;
 
-      // events are the same
-      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
-      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
-      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+    const generateDefaultPolicy = () => {
+      const policy = policyFactory('', isCloudEnvironment);
+      if (isCloudEnvironment) {
+        set(policy, 'linux.events.session_data', true);
+      }
+      return policy;
+    };
 
-      // check some of the protections to be disabled
-      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
-      const disabledButSupportedBehaviorProtection = {
-        mode: ProtectionModes.off,
-        supported: true,
-        reputation_service: true,
-      };
-      expect(policy.windows.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
-      expect(policy.mac.memory_protection).toEqual(disabledButSupported);
-      expect(policy.linux.behavior_protection).toEqual(disabledButSupportedBehaviorProtection);
+    it(
+      parseTestName('Should return PolicyConfig for events only when license is at least platinum'),
+      async () => {
+        const defaultPolicy = generateDefaultPolicy();
 
-      // malware popups should be disabled
-      expect(policy.windows.popup.malware.enabled).toBeFalsy();
-      expect(policy.mac.popup.malware.enabled).toBeFalsy();
-      expect(policy.linux.popup.malware.enabled).toBeFalsy();
-    });
+        const policy = await createDefaultPolicyCallback(undefined, cloudConfig);
 
-    it('Should return PolicyConfig for events only without paid features when license is below platinum', async () => {
-      const defaultPolicy = policyFactory();
-      set(defaultPolicy, 'linux.events.session_data', true);
+        // events are the same
+        expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+        expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+        expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
 
-      licenseEmitter.next(Gold);
+        // check some of the protections to be disabled
+        const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+        const disabledButSupportedBehaviorProtection = () => ({
+          mode: ProtectionModes.off,
+          supported: true,
+          reputation_service: isCloudEnvironment,
+        });
+        expect(policy.windows.behavior_protection).toEqual(
+          disabledButSupportedBehaviorProtection()
+        );
+        expect(policy.mac.memory_protection).toEqual(disabledButSupported);
+        expect(policy.linux.behavior_protection).toEqual(disabledButSupportedBehaviorProtection());
 
-      const policy = await createDefaultPolicyCallback(undefined);
+        // malware popups should be disabled
+        expect(policy.windows.popup.malware.enabled).toBeFalsy();
+        expect(policy.mac.popup.malware.enabled).toBeFalsy();
+        expect(policy.linux.popup.malware.enabled).toBeFalsy();
+      }
+    );
 
-      // events are the same
-      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
-      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
-      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+    it(
+      parseTestName(
+        'Should return PolicyConfig for events only without paid features when license is below platinum'
+      ),
+      async () => {
+        const defaultPolicy = generateDefaultPolicy();
 
-      // check some of the protections to be disabled and unsupported
-      const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
-      const disabledAndUnsupportedBehaviorProtection = {
-        mode: ProtectionModes.off,
-        supported: false,
-        reputation_service: false,
-      };
-      expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupportedBehaviorProtection);
-      expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
-      expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupportedBehaviorProtection);
+        licenseEmitter.next(Gold);
 
-      // malware popups are enabled on unpaid license
-      expect(policy.windows.popup.malware.enabled).toBeTruthy();
-      expect(policy.mac.popup.malware.enabled).toBeTruthy();
-      expect(policy.linux.popup.malware.enabled).toBeTruthy();
-    });
+        const policy = await createDefaultPolicyCallback(undefined, cloudConfig);
+
+        // events are the same
+        expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+        expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+        expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+        // check some of the protections to be disabled and unsupported
+        const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
+        const disabledAndUnsupportedBehaviorProtection = {
+          mode: ProtectionModes.off,
+          supported: false,
+          reputation_service: false,
+        };
+        expect(policy.windows.behavior_protection).toEqual(
+          disabledAndUnsupportedBehaviorProtection
+        );
+        expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
+        expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupportedBehaviorProtection);
+
+        // malware popups are enabled on unpaid license
+        expect(policy.windows.popup.malware.enabled).toBeTruthy();
+        expect(policy.mac.popup.malware.enabled).toBeTruthy();
+        expect(policy.linux.popup.malware.enabled).toBeTruthy();
+      }
+    );
   });
 
   describe('When endpoint config is set', () => {

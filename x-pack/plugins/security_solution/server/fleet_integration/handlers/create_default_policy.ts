@@ -50,16 +50,21 @@ export const createDefaultPolicy = (
   );
 
   const getDefaultPolicy = (): PolicyConfig => {
-    // Cloud workload protection
+    // Please keep explicit structure for better readability
+    // Cloud Protection (not the environment)
     if (config?.type === 'cloud') {
       return getCloudPolicyConfig(factoryPolicy);
     }
-    // Traditional endpoint protection
+    // Endpoint Protection
     if (config?.type === 'endpoint') {
       return getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
     }
-    // In case config is not defined (i.e. on managed cloud onboarding), defaults to Cloud Policy Config
-    return getCloudPolicyConfig(factoryPolicy);
+    // Cloud environment, managed onboarding hence no inputs and therefore no config.type
+    if (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) {
+      return getCloudPolicyConfig(factoryPolicy);
+    }
+    // Default to Endpoint Protection if no type is provided
+    return getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
   };
 
   let defaultPolicyPerType = getDefaultPolicy();
