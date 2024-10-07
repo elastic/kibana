@@ -304,7 +304,7 @@ describe('runSaveLensVisualization', () => {
     it('should throw if something goes wrong when saving', async () => {
       const attributeServiceMock = {
         ...makeAttributeService(defaultDoc),
-        saveToLibrary: jest.fn().mockImplementation(() => Promise.reject('failed to save')),
+        saveToLibrary: jest.fn().mockImplementation(() => Promise.reject(Error('failed to save'))),
       };
       const { props, saveProps, options, toasts } = getDefaultArgs(
         {
