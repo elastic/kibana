@@ -408,10 +408,9 @@ export const ModelsList: FC<Props> = ({
    */
   const fetchDownloadStatus = useCallback(
     /**
-     * @param initRequest If true, resolves with the first download status
      * @param downloadInProgress Set of model ids that reports download in progress
      */
-    async (initRequest: boolean = true, downloadInProgress: Set<string> = new Set<string>()) => {
+    async (downloadInProgress: Set<string> = new Set<string>()) => {
       // Allows only single fetch to be in progress
       if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
 
@@ -469,7 +468,7 @@ export const ModelsList: FC<Props> = ({
         }
 
         await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
-        await fetchDownloadStatus(false, downloadInProgress);
+        await fetchDownloadStatus(downloadInProgress);
       } catch (e) {
         downLoadStatusFetchInProgress.current = false;
       }
