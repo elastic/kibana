@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { getDefinitionForEntityType } from '../definition';
-import { getFieldRetentionDefinition, getFieldRetentionEnrichPolicyName } from '../field_retention';
+import { getFieldRetentionDefinition } from '../field_retention';
 import type { FieldRetentionDefinition } from '../field_retention/field_retention_definitions';
 import {
   debugDeepCopyContextStep,
@@ -19,6 +19,7 @@ import {
   retentionDefinitionToIngestProcessorSteps,
 } from './ingest_processor_steps';
 import { getIdentityFieldForEntityType } from '../utils';
+import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 
 const getPlatformPipelineId = (definition: ReturnType<typeof getDefinitionForEntityType>) => {
   return `${definition.id}-latest@platform`;

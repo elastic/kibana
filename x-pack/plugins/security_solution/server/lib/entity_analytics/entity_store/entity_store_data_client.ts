@@ -24,9 +24,6 @@ import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getDefinitionForEntityType } from './definition';
 import {
-  createFieldRetentionEnrichPolicy,
-  executeFieldRetentionEnrichPolicy,
-  deleteFieldRetentionEnrichPolicy,
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
 } from './field_retention';
@@ -37,7 +34,10 @@ import {
   deletePlatformPipeline,
   createEntityIndexComponentTemplate,
   deleteEntityIndexComponentTemplate,
-} from './assets';
+  createFieldRetentionEnrichPolicy,
+  executeFieldRetentionEnrichPolicy,
+  deleteFieldRetentionEnrichPolicy,
+} from './elasticsearch_assets';
 
 interface EntityStoreClientOpts {
   logger: Logger;

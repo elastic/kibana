@@ -11,7 +11,7 @@ import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   getFieldRetentionDefinitionMetadata,
   getFieldRetentionDefinitionWithDefaults,
-} from './field_retention_definitions';
+} from '../field_retention';
 import { getEntitiesIndexName } from '../utils';
 
 export const getFieldRetentionEnrichPolicyName = (namespace: string, entityType: EntityType) => {
