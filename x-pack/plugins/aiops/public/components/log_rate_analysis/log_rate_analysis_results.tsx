@@ -38,7 +38,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
-// import { useStorage } from '@kbn/ml-local-storage';
 import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
@@ -51,11 +50,6 @@ import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rat
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-// import {
-//   AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS,
-//   type AiOpsKey,
-//   type AiOpsStorageMapped,
-// } from '../../types/storage';
 
 import {
   getGroupTableItems,
@@ -134,11 +128,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     undefined
   );
   const [shouldStart, setShouldStart] = useState(false);
-  // TOOD: Fix to store in local storage using redux toolkit
-  // const [skippedColumns, setSkippedColumns] = useStorage<
-  //   AiOpsKey,
-  //   AiOpsStorageMapped<typeof AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS>
-  // >(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS, ['p-value', 'Baseline rate', 'Deviation rate']);
   const [embeddableOptionsVisible, setEmbeddableOptionsVisible] = useState(false);
 
   const onEmbeddableOptionsClickHandler = () => {

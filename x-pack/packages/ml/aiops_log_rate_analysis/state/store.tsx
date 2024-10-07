@@ -15,12 +15,19 @@ import { streamSlice } from '@kbn/ml-response-stream/client';
 import { logRateAnalysisResultsSlice } from '../api/stream_reducer';
 
 import { logRateAnalysisSlice } from './log_rate_analysis_slice';
-import { logRateAnalysisTableSlice } from './log_rate_analysis_table_slice';
+import {
+  logRateAnalysisTableSlice,
+  getPreloadedState,
+  localStorageListenerMiddleware,
+} from './log_rate_analysis_table_slice';
 import { logRateAnalysisFieldCandidatesSlice } from './log_rate_analysis_field_candidates_slice';
 import type { InitialAnalysisStart } from './log_rate_analysis_slice';
 
 const getReduxStore = () =>
   configureStore({
+    preloadedState: {
+      logRateAnalysisTable: getPreloadedState(),
+    },
     reducer: {
       // General page state
       logRateAnalysis: logRateAnalysisSlice.reducer,
@@ -33,6 +40,8 @@ const getReduxStore = () =>
       // Handles hovering and pinning table rows and column selection
       logRateAnalysisTable: logRateAnalysisTableSlice.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().prepend(localStorageListenerMiddleware.middleware),
   });
 
 interface LogRateAnalysisReduxProviderProps {
