@@ -6,8 +6,12 @@
  */
 
 import {
+  CreateSLOInput,
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
+  FindSLODefinitionsResponse,
+  findSloDefinitionsResponseSchema,
+  UpdateSLOInput,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
 import type { RoleCredentials } from '../../shared/services';
@@ -40,30 +44,6 @@ export interface SloBurnRateRuleParams {
   dependencies?: Dependency[];
 }
 
-interface SloParams {
-  id?: string;
-  name: string;
-  description: string;
-  indicator: {
-    type: 'sli.kql.custom';
-    params: {
-      index: string;
-      good: string;
-      total: string;
-      timestampField: string;
-    };
-  };
-  timeWindow: {
-    duration: string;
-    type: string;
-  };
-  budgetingMethod: string;
-  objective: {
-    target: number;
-  };
-  groupBy: string;
-}
-
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body
 >;
@@ -77,9 +57,22 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
   const retryTimeout = 180 * 1000;
 
   return {
-    async create(slo: SloParams, roleAuthc: RoleCredentials) {
+    async create(slo: CreateSLOInput, roleAuthc: RoleCredentials) {
       const { body } = await supertest
         .post(`/api/observability/slos`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(slo);
+
+      return body;
+    },
+
+    async update(
+      { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertest
+        .put(`/api/observability/slos/${sloId}`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(slo);
@@ -93,6 +86,16 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       return response;
+    },
+
+    async findDefinitions(): Promise<FindSLODefinitionsResponse> {
+      const response = await supertest
+        .get(`/api/observability/slos/_definitions`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return findSloDefinitionsResponseSchema.encode(response as unknown as any);
     },
 
     async fetchHistoricalSummary(
@@ -193,6 +196,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         return response;
       });
     },
+
     async deleteAllSLOs() {
       const response = await supertest
         .get(`/api/observability/slos/_definitions`)
