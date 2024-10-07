@@ -17,10 +17,12 @@ components:
       properties:
         type:
           $ref: '#/components/schemas/EntityType'
-        indexPattern:
-          $ref: '#/components/schemas/IndexPattern'
         status:
           $ref: '#/components/schemas/EngineStatus'
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        dataViewId:
+          type: string
         filter:
           type: string
 

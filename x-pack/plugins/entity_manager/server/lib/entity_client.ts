@@ -9,6 +9,7 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { installEntityDefinition } from './entities/install_entity_definition';
 import { startTransforms } from './entities/start_transforms';
 import { findEntityDefinitions } from './entities/find_entity_definition';
@@ -22,6 +23,7 @@ export class EntityClient {
     private options: {
       esClient: ElasticsearchClient;
       soClient: SavedObjectsClientContract;
+      dataViewsService: DataViewsService;
       logger: Logger;
     }
   ) {}
@@ -37,6 +39,7 @@ export class EntityClient {
       definition,
       soClient: this.options.soClient,
       esClient: this.options.esClient,
+      dataViewsService: this.options.dataViewsService,
       logger: this.options.logger,
     });
 

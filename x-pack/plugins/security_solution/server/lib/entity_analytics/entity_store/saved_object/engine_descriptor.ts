@@ -9,7 +9,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { EntityDefinition } from '@kbn/entities-schema';
+import { isEntityDefinitionWithIndexPattern, type EntityDefinition } from '@kbn/entities-schema';
 import type {
   EngineDescriptor,
   EngineStatus,
@@ -34,12 +34,16 @@ export class EngineDescriptorClient {
     if (engineDescriptor.total > 0)
       throw new Error(`Entity engine for ${entityType} already exists`);
 
+    const dataSourceAttribute = isEntityDefinitionWithIndexPattern(definition)
+      ? { indexPatterns: definition.indexPatterns.join(',') }
+      : { dataViewId: definition.data_view_id };
+
     const { attributes } = await this.deps.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       {
         status: ENGINE_STATUS.INSTALLING,
         type: entityType,
-        indexPattern: definition.indexPatterns.join(','),
+        ...dataSourceAttribute,
         filter,
       },
       { id: definition.id }

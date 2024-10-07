@@ -18,14 +18,21 @@ import {
   durationSchemaWithMinimum,
 } from './common';
 
-export const entityDefinitionSchema = z.object({
+const IndexPatternsSchema = z.object({
+  indexPatterns: arrayOfStringsSchema,
+});
+
+const DataViewIdSchema = z.object({
+  data_view_id: z.string(),
+});
+
+const baseEntityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
   version: semVerSchema,
   name: z.string(),
   description: z.optional(z.string()),
   type: z.string(),
   filter: filterSchema,
-  indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
   displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
@@ -59,20 +66,59 @@ export const entityDefinitionSchema = z.object({
   installStartedAt: z.optional(z.string()),
 });
 
-export const entityDefinitionUpdateSchema = entityDefinitionSchema
+const entityDefinitionSchemaWithIndexPatterns =
+  baseEntityDefinitionSchema.merge(IndexPatternsSchema);
+const entityDefinitionSchemaWithDataViewId = baseEntityDefinitionSchema.merge(DataViewIdSchema);
+
+export const entityDefinitionSchema = z.union([
+  entityDefinitionSchemaWithIndexPatterns,
+  entityDefinitionSchemaWithDataViewId,
+]);
+
+// TODO do wer need to add this check for the update schema?
+// can we change indexpatterns during update?
+// export const entityDefinitionSchema = baseEntityDefinitionSchema.superRefine((data, ctx) => {
+//   if (!data.indexPatterns && !data.data_view_id) {
+//     ctx.addIssue({
+//       code: z.ZodIssueCode.custom,
+//       path: ['data_view_id'],
+//       message: "data_view_id should be set if indexPatterns isn't",
+//     });
+//   }
+// });
+// I couldn't use union because it doesn't support partial and merge
+// z.union([z.object({ indexPatterns: arrayOfStringsSchema }), z.object({ data_view_id: z.string() })]);
+// .or(z.object({ data_view_id: z.string() }));
+
+export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
   .omit({
     id: true,
     managed: true,
     installStatus: true,
     installStartedAt: true,
   })
+  .merge(IndexPatternsSchema)
+  .merge(DataViewIdSchema)
   .partial()
   .merge(
     z.object({
-      history: z.optional(entityDefinitionSchema.shape.history.partial()),
+      history: z.optional(baseEntityDefinitionSchema.shape.history.partial()),
       version: semVerSchema,
     })
   );
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
 export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;
+
+export type EntityDefinitionSchemaWithIndexPatterns = z.infer<
+  typeof entityDefinitionSchemaWithIndexPatterns
+>;
+export type EntityDefinitionSchemaWithDataViewId = z.infer<
+  typeof entityDefinitionSchemaWithDataViewId
+>;
+
+export const isEntityDefinitionWithIndexPattern = (
+  definition: EntityDefinition
+): definition is EntityDefinitionSchemaWithIndexPatterns => {
+  return (definition as EntityDefinitionSchemaWithIndexPatterns).indexPatterns !== undefined;
+};

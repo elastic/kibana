@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, isEntityDefinitionWithIndexPattern } from '@kbn/entities-schema';
 import {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { generateHistoryMetricAggregations } from './generate_metric_aggregations';
 import {
@@ -26,8 +27,9 @@ import {
 import { isBackfillEnabled } from '../helpers/is_backfill_enabled';
 
 export function generateHistoryTransform(
-  definition: EntityDefinition
-): TransformPutTransformRequest {
+  definition: EntityDefinition,
+  dataViewsService: DataViewsService
+): Promise<TransformPutTransformRequest> {
   const filter: QueryDslQueryContainer[] = [];
 
   if (definition.filter) {
@@ -56,12 +58,14 @@ export function generateHistoryTransform(
     transformId: generateHistoryTransformId(definition),
     frequency: definition.history.settings.frequency,
     syncDelay: definition.history.settings.syncDelay,
+    dataViewsService,
   });
 }
 
-export function generateBackfillHistoryTransform(
-  definition: EntityDefinition
-): TransformPutTransformRequest {
+export async function generateBackfillHistoryTransform(
+  definition: EntityDefinition,
+  dataViewsService: DataViewsService
+): Promise<TransformPutTransformRequest> {
   if (!isBackfillEnabled(definition)) {
     throw new Error(
       'generateBackfillHistoryTransform called without history.settings.backfillSyncDelay set'
@@ -92,27 +96,32 @@ export function generateBackfillHistoryTransform(
       });
   }
 
-  return generateTransformPutRequest({
+  const putRequest = await generateTransformPutRequest({
     definition,
     filter,
     transformId: generateHistoryBackfillTransformId(definition),
     frequency: definition.history.settings.backfillFrequency,
     syncDelay: definition.history.settings.backfillSyncDelay,
+    dataViewsService,
   });
+
+  return putRequest;
 }
 
-const generateTransformPutRequest = ({
+const generateTransformPutRequest = async ({
   definition,
   filter,
   transformId,
   frequency,
   syncDelay,
+  dataViewsService,
 }: {
   definition: EntityDefinition;
   transformId: string;
   filter: QueryDslQueryContainer[];
   frequency?: string;
   syncDelay?: string;
+  dataViewsService: DataViewsService;
 }) => {
   return {
     transform_id: transformId,
@@ -122,7 +131,7 @@ const generateTransformPutRequest = ({
     },
     defer_validation: true,
     source: {
-      index: definition.indexPatterns,
+      index: await getIndexPatterns(definition, dataViewsService),
       ...(filter.length > 0 && {
         query: {
           bool: {
@@ -175,4 +184,24 @@ const generateTransformPutRequest = ({
       },
     },
   };
+};
+
+// TODO ADD UNIT TESTS
+const getIndexPatterns = async (
+  definition: EntityDefinition,
+  dataViewsService: DataViewsService
+): Promise<string | string[]> => {
+  if (isEntityDefinitionWithIndexPattern(definition)) {
+    return definition.indexPatterns; // data_view_id or indexPatterns must be defined
+  }
+
+  try {
+    const dataView = await dataViewsService.get(definition.data_view_id);
+    return [dataView.getIndexPattern()];
+  } catch (e) {
+    throw new Error(
+      `Data view '${definition.data_view_id}' not found for entity definition '${definition.id}'.` +
+        e.message
+    );
+  }
 };

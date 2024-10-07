@@ -55,7 +55,7 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
+    { filter = '' }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
     const { entityClient, assetCriticalityMigrationClient, logger } = this.options;
     const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
@@ -75,9 +75,6 @@ export class EntityStoreDataClient {
       definition: {
         ...definition,
         filter,
-        indexPatterns: indexPattern
-          ? [...definition.indexPatterns, ...indexPattern.split(',')]
-          : definition.indexPatterns,
       },
     });
     const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
