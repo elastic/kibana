@@ -33502,33 +33502,42 @@ tags:
     x-displayName: Saved objects
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
+    x-displayName: Security AI assistant
   - description: >-
       You can create rules that automatically turn events and external alerts
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
     name: Security Detections API
+    x-displayName: Security detections
   - description: >-
       Endpoint Exceptions API allows you to manage detection rule endpoint
       exceptions to prevent a rule from generating an alert from incoming events
       even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
+    x-displayName: Security endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
+    x-displayName: Security endpoint management
   - description: ''
     name: Security Entity Analytics API
+    x-displayName: Security entity analytics
   - description: >-
       Exceptions API allows you to manage detection rule exceptions to prevent a
       rule from generating an alert from incoming events even when the rule's
       other criteria are met.
     name: Security Exceptions API
+    x-displayName: Security exceptions
   - description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
     name: Security Lists API
+    x-displayName: Security lists
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
+    x-displayName: Security Osquery
   - description: >-
       You can create Timelines and Timeline templates via the API, as well as
       import new Timelines from an ndjson file.
     name: Security Timeline API
+    x-displayName: Security timeline
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
   - name: spaces

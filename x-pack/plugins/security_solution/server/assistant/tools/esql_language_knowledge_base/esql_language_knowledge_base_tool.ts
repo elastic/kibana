@@ -17,7 +17,7 @@ import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
   description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Do not add any additional text to describe your output.',
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the user query on a single line, with no other text. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Do not add any additional text to describe your output.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
