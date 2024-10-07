@@ -210,10 +210,10 @@ export const isOpenSourceModel = (connector?: Connector): boolean => {
 
   const isOpenAiType = llmType === 'openai';
   const isOpenAI =
-    isOpeAiType &&
+    isOpenAiType &&
     (!connectorApiUrl ||
       connectorApiUrl === OPENAI_CHAT_URL ||
       connectorApiProvider === OpenAiProviderType.AzureAi);
 
-  return isOpeAiType && !isOpenAI;
+  return isOpenAiType && !isOpenAI;
 };
