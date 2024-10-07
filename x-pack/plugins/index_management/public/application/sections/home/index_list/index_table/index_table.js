@@ -58,6 +58,7 @@ const getColumnConfigs = ({
   extensionsService,
   location,
   application,
+  http,
 }) => {
   const columns = [
     {
@@ -76,7 +77,7 @@ const getColumnConfigs = ({
                   history.push(getIndexDetailsLink(index.name, location.search || ''));
                 } else {
                   const route = extensionsService.indexDetailsPageRoute.renderRoute(index.name);
-                  application.navigateToUrl(route);
+                  application.navigateToUrl(http.basePath.prepend(route));
                 }
               }}
             >
@@ -545,7 +546,7 @@ export class IndexTable extends Component {
       <AppContextConsumer>
         {({ services, config, core }) => {
           const { extensionsService } = services;
-          const { application } = core;
+          const { application, http } = core;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
@@ -554,6 +555,7 @@ export class IndexTable extends Component {
             history,
             location,
             application,
+            http,
           });
           const columnsCount = columnConfigs.length + 1;
           return (
