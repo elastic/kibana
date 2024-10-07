@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { DocumentationProduct } from './consts';
+
+export type ProductName = keyof typeof DocumentationProduct;
+
 export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
 export interface ProductDocInstallStatus {
   id: string;
-  productName: string;
+  productName: ProductName;
   productVersion: string;
   installationStatus: InstallationStatus;
   lastInstallationDate: Date | undefined;

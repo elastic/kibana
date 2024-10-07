@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { InstallationStatus, ProductDocInstallStatus } from '../../../common/saved_objects';
+import type { InstallationStatus, ProductName, ProductDocInstallStatus } from '../../../common/saved_objects';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { KnowledgeBaseProductDocInstallAttributes as TypeAttributes } from '../../saved_objects';
 import { soToModel } from './model_conversion';
@@ -31,7 +31,7 @@ export class ProductDocInstallClient {
   }
   */
 
-  async setInstallationStarted(fields: { productName: string; productVersion: string }) {
+  async setInstallationStarted(fields: { productName: ProductName; productVersion: string }) {
     const { productName, productVersion } = fields;
     const objectId = getObjectIdFromProductName(productName);
     const attributes = {
@@ -45,7 +45,7 @@ export class ProductDocInstallClient {
     });
   }
 
-  async setInstallationSuccessful(productName: string, indexName: string) {
+  async setInstallationSuccessful(productName: ProductName, indexName: string) {
     const objectId = getObjectIdFromProductName(productName);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'installed',
@@ -53,7 +53,7 @@ export class ProductDocInstallClient {
     });
   }
 
-  async setInstallationFailed(productName: string, failureReason: string) {
+  async setInstallationFailed(productName: ProductName, failureReason: string) {
     const objectId = getObjectIdFromProductName(productName);
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'error',
@@ -61,7 +61,7 @@ export class ProductDocInstallClient {
     });
   }
 
-  async setUninstalled(productName: string) {
+  async setUninstalled(productName: ProductName) {
     const objectId = getObjectIdFromProductName(productName);
     try {
       await this.soClient.update<TypeAttributes>(typeName, objectId, {
@@ -76,5 +76,5 @@ export class ProductDocInstallClient {
   }
 }
 
-const getObjectIdFromProductName = (productName: string) =>
+const getObjectIdFromProductName = (productName: ProductName) =>
   `kb-product-doc-${productName}-status`.toLowerCase();

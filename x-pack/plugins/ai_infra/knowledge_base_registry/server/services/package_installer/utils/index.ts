@@ -9,3 +9,4 @@ export { downloadToDisk } from './download';
 export { openZipArchive, type ZipArchive } from './zip_archive';
 export { validateArtifactArchive } from './validate_artifact_archive';
 export { loadManifestFile, loadMappingFile } from './archive_accessors';
+export { fetchArtifactVersions } from './fetch_artifact_versions';

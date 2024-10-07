@@ -77,11 +77,13 @@ const indexContentFile = async ({
   }
 };
 
-// TODO: extract / do it right.
+// TODO: extract
 const rewriteInferenceId = (document: Record<string, any>, inferenceId: string) => {
-  document.ai_questions_answered.inference.inference_id = inferenceId;
-  document.ai_subtitle.inference.inference_id = inferenceId;
-  document.ai_summary.inference.inference_id = inferenceId;
-  document.content_body.inference.inference_id = inferenceId;
+  // we don't need to handle nested fields, we don't have any and won't.
+  Object.values(document).forEach((field) => {
+    if (field.inference) {
+      field.inference.inference_id = inferenceId;
+    }
+  });
   return document;
 };

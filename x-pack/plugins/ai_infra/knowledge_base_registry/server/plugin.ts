@@ -67,18 +67,17 @@ export class KnowledgeBaseRegistryPlugin
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       endpointManager,
+      kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       logger: this.logger.get('package-installer'),
     });
 
     delay(10)
-      .then(() => {
-        console.log('*** test installating package');
-        return packageInstaller.installPackage({
-          productName: 'Kibana',
-          productVersion: '8.15',
-        });
+      .then(async () => {
+        console.log('*** test installating packages');
+
+        return packageInstaller.installAll({});
       })
       .catch((e) => {
         console.log('*** ERROR', e);

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DocumentationProduct } from '../../../common/consts';
+import type { ProductName } from '../../../common/saved_objects';
 import type { ProductDocInstallClient } from '../../dao/doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
 import {
@@ -15,8 +17,10 @@ import {
   validateArtifactArchive,
   loadManifestFile,
   loadMappingFile,
+  fetchArtifactVersions,
   type ZipArchive,
 } from './utils';
+import { majorMinor, latestVersion } from './utils/semver';
 import { createIndex, populateIndex } from './steps';
 
 interface PackageInstallerOpts {
@@ -26,6 +30,7 @@ interface PackageInstallerOpts {
   productDocClient: ProductDocInstallClient;
   endpointManager: InferenceEndpointManager;
   artifactRepositoryUrl: string;
+  kibanaVersion: string;
 }
 
 export class PackageInstaller {
@@ -35,6 +40,7 @@ export class PackageInstaller {
   private readonly productDocClient: ProductDocInstallClient;
   private readonly endpointManager: InferenceEndpointManager;
   private readonly artifactRepositoryUrl: string;
+  private readonly currentVersion: string;
 
   constructor({
     artifactsFolder,
@@ -43,24 +49,48 @@ export class PackageInstaller {
     productDocClient,
     endpointManager,
     artifactRepositoryUrl,
+    kibanaVersion,
   }: PackageInstallerOpts) {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
     this.endpointManager = endpointManager;
     this.artifactRepositoryUrl = artifactRepositoryUrl;
+    this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
+  }
+
+  async installAll({}: {}) {
+    const artifactVersions = await fetchArtifactVersions({
+      artifactRepositoryUrl: this.artifactRepositoryUrl,
+    });
+    const allProducts = Object.values(DocumentationProduct) as ProductName[];
+    for (const productName of allProducts) {
+      const availableVersions = artifactVersions[productName];
+      if (!availableVersions || !availableVersions.length) {
+        this.log.warn(`No version found for product [${productName}]`);
+        continue;
+      }
+      const selectedVersion = availableVersions.includes(this.currentVersion)
+        ? this.currentVersion
+        : latestVersion(availableVersions);
+
+      await this.installPackage({
+        productName,
+        productVersion: selectedVersion,
+      });
+    }
   }
 
   async installPackage({
     productName,
     productVersion,
   }: {
-    productName: string;
+    productName: ProductName;
     productVersion: string;
   }) {
     this.log.info(
-      `Starting pkg installation for product [${productName}] and version [${productVersion}]`
+      `Starting installing documentation for product [${productName}] and version [${productVersion}]`
     );
 
     await this.uninstallPackage({
@@ -109,11 +139,11 @@ export class PackageInstaller {
       await this.productDocClient.setInstallationSuccessful(productName, indexName);
 
       this.log.info(
-        `Pkg installation successful for product [${productName}] and version [${productVersion}]`
+        `Documentation installation successful for product [${productName}] and version [${productVersion}]`
       );
     } catch (e) {
       this.log.error(
-        `Error during pkg installation of product [${productName}]/[${productVersion}] : ${e.message}`
+        `Error during documentation installation of product [${productName}]/[${productVersion}] : ${e.message}`
       );
 
       await this.productDocClient.setInstallationFailed(productName, e.message);
@@ -129,7 +159,7 @@ export class PackageInstaller {
     productName,
     productVersion,
   }: {
-    productName: string;
+    productName: ProductName;
     productVersion: string;
   }) {
     // TODO: retrieve entry to check installed version instead
@@ -164,5 +194,6 @@ const getIndexName = ({
   productName: string;
   productVersion: string;
 }): string => {
+  // TODO: '.kibana-product-doc-*'
   return `.kibana-ai-kb-${productName}-${productVersion}`.toLowerCase();
 };

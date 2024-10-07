@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { internalElserInferenceId } from '../../../../common/consts';
 
 export const createIndex = async ({
@@ -23,11 +23,7 @@ export const createIndex = async ({
 }) => {
   log.debug(`Creating index ${indexName}`);
 
-  // TODO: extract / do it right
-  mappings.properties.ai_questions_answered.inference_id = internalElserInferenceId;
-  mappings.properties.ai_subtitle.inference_id = internalElserInferenceId;
-  mappings.properties.ai_summary.inference_id = internalElserInferenceId;
-  mappings.properties.content_body.inference_id = internalElserInferenceId;
+  overrideInferenceId(mappings, internalElserInferenceId);
 
   await esClient.indices.create({
     index: indexName,
@@ -37,4 +33,18 @@ export const createIndex = async ({
       auto_expand_replicas: '0-1',
     },
   });
+};
+
+const overrideInferenceId = (mappings: MappingTypeMapping, inferenceId: string) => {
+  const recursiveOverride = (current: MappingTypeMapping | MappingProperty) => {
+    if ('type' in current && current.type === 'semantic_text') {
+      current.inference_id = inferenceId;
+    }
+    if ('properties' in current && current.properties) {
+      for (const prop of Object.values(current.properties)) {
+        recursiveOverride(prop);
+      }
+    }
+  };
+  recursiveOverride(mappings);
 };

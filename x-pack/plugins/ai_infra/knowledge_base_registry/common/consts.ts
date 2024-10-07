@@ -8,3 +8,10 @@
 export const productDocInstallStatusSavedObjectTypeName = 'kb_product_doc_install_status';
 
 export const internalElserInferenceId = 'kibana-internal-elser2';
+
+export enum DocumentationProduct {
+  kibana = 'kibana',
+  elasticsearch = 'elasticsearch',
+  observability = 'observability',
+  security = 'security',
+}
