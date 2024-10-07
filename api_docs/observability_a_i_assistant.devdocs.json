@@ -108,7 +108,7 @@
         "signature": [
           "({ size = 's', css, className }: ",
           "AssistantAvatarProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
         "deprecated": false,
@@ -149,7 +149,7 @@
             "section": "def-public.Feedback",
             "text": "Feedback"
           },
-          ") => void; onRegenerateClick: () => void; onStopGeneratingClick: () => void; }) => JSX.Element | null"
+          ") => void; onRegenerateClick: () => void; onStopGeneratingClick: () => void; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
         "deprecated": false,
@@ -338,7 +338,7 @@
         "signature": [
           "(props: ",
           "UseGenAIConnectorsResult",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
         "deprecated": false,
@@ -609,7 +609,7 @@
         "label": "FailedToLoadResponse",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/failed_to_load_response.tsx",
         "deprecated": false,
@@ -626,7 +626,7 @@
         "label": "FeedbackButtons",
         "description": [],
         "signature": [
-          "({ onClickFeedback }: FeedbackButtonsProps) => JSX.Element"
+          "({ onClickFeedback }: FeedbackButtonsProps) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "deprecated": false,
@@ -692,7 +692,7 @@
         "label": "MessageText",
         "description": [],
         "signature": [
-          "({ loading, content, onActionClick }: Props) => JSX.Element"
+          "({ loading, content, onActionClick }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
         "deprecated": false,
@@ -9520,7 +9520,15 @@
             "text": "ChatCompletionErrorEvent"
           },
           " | ",
-          "TokenCountEvent"
+          "TokenCountEvent",
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.BufferFlushEvent",
+            "text": "BufferFlushEvent"
+          }
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -9567,7 +9575,15 @@
             "text": "ChatCompletionChunkEvent"
           },
           " | ",
-          "TokenCountEvent"
+          "TokenCountEvent",
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.BufferFlushEvent",
+            "text": "BufferFlushEvent"
+          }
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
