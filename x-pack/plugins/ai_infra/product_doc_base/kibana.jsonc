@@ -1,12 +1,12 @@
 {
   "type": "plugin",
-  "id": "@kbn/knowledge-base-registry-plugin",
+  "id": "@kbn/product-doc-base-plugin",
   "owner": "@elastic/appex-ai-infra",
   "plugin": {
-    "id": "knowledgeBaseRegistry",
+    "id": "productDocBase",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "knowledgeBaseRegistry"],
+    "configPath": ["xpack", "productDocBase"],
     "requiredPlugins": [],
     "requiredBundles": [],
     "optionalPlugins": [],

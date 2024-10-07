@@ -5479,7 +5479,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/knowledge-base-registry-plugin@link:x-pack/plugins/ai_infra/knowledge_base_registry":
+"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
   version "0.0.0"
   uid ""
 

@@ -9,14 +9,14 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/public',
-    '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/server',
-    '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/common',
+    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/public',
+    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/server',
+    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/common',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/ai_infra/knowledge_base_registry/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/{public,server,common}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],
