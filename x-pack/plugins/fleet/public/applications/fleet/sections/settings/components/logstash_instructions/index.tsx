@@ -21,7 +21,7 @@ import type { EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useStartServices } from '../../../../hooks';
+import { useStartServices, useAuthz } from '../../../../hooks';
 
 import { getLogstashPipeline, LOGSTASH_CONFIG_PIPELINES } from './helpers';
 import { useLogstashApiKey } from './hooks';
@@ -64,7 +64,8 @@ export const LogstashInstructions = () => {
 
 const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children, ...props }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const authz = useAuthz();
+  const hasAllSettings = authz.fleet.allSettings;
   return (
     <EuiCallOut {...props}>
       <EuiSpacer size="s" />
@@ -76,7 +77,7 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
           />
         </EuiButton>
       ) : (
-        <EuiButton onClick={() => setIsOpen(true)} fill={true}>
+        <EuiButton onClick={() => setIsOpen(true)} fill={true} disabled={!hasAllSettings}>
           <FormattedMessage
             id="xpack.fleet.settings.logstashInstructions.viewInstructionButtonLabel"
             defaultMessage="View steps"
@@ -96,6 +97,8 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
 const LogstashInstructionSteps = () => {
   const { docLinks } = useStartServices();
   const logstashApiKey = useLogstashApiKey();
+  const authz = useAuthz();
+  const hasAllSettings = authz.fleet.allSettings;
 
   const steps = useMemo(
     () => [
@@ -120,6 +123,7 @@ const LogstashInstructionSteps = () => {
                           onClick={copy}
                           iconType="copyClipboard"
                           color="text"
+                          disabled={!hasAllSettings}
                           aria-label={i18n.translate(
                             'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
                             {
@@ -136,6 +140,7 @@ const LogstashInstructionSteps = () => {
               <EuiButton
                 isLoading={logstashApiKey.isLoading}
                 onClick={logstashApiKey.generateApiKey}
+                disabled={!hasAllSettings}
               >
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.generateApiKeyButtonLabel"
@@ -214,7 +219,7 @@ const LogstashInstructionSteps = () => {
         ),
       },
     ],
-    [logstashApiKey, docLinks]
+    [logstashApiKey, docLinks, hasAllSettings]
   );
 
   return (
