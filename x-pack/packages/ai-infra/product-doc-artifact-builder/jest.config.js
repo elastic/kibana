@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ai-infra/kb-artifact-builder'],
+  roots: ['<rootDir>/x-pack/packages/ai-infra/product-doc-artifact-builder'],
 };

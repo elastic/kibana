@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/kb-artifact-builder').runScript();
+require('@kbn/product-doc-artifact-builder').runScript();

@@ -5435,7 +5435,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kb-artifact-builder@link:x-pack/packages/ai-infra/kb-artifact-builder":
+"@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
   version "0.0.0"
   uid ""
 
