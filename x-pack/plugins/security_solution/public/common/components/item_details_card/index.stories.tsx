@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
+import { addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { ItemDetailsAction, ItemDetailsCard, ItemDetailsPropertySummary } from '.';
@@ -16,7 +16,11 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components/ItemDetailsCard', module).add('default', () => {
+export default {
+  title: 'Components/ItemDetailsCard',
+};
+
+export const Default = () => {
   return (
     <ItemDetailsCard>
       <ItemDetailsPropertySummary name={'property 1'} value={'value 1'} />
@@ -37,4 +41,8 @@ storiesOf('Components/ItemDetailsCard', module).add('default', () => {
       </ItemDetailsAction>
     </ItemDetailsCard>
   );
-});
+};
+
+Default.story = {
+  name: 'default',
+};

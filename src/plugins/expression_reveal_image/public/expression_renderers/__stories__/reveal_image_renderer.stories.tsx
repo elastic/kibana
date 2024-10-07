@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRevealImageRenderer } from '..';
@@ -30,10 +29,15 @@ const Renderer = ({
   return <Render renderer={getRevealImageRenderer()} config={config} />;
 };
 
-storiesOf('renderers/revealImage', module).add(
-  'default',
-  (_, props) => (
-    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
-  ),
-  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
+export default {
+  title: 'renderers/revealImage',
+};
+
+export const Default = (_, props) => (
+  <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
 );
+
+Default.story = {
+  name: 'default',
+  decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
+};

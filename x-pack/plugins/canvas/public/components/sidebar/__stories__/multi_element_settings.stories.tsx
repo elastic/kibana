@@ -6,9 +6,14 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { MultiElementSettings } from '../multi_element_settings';
 
-storiesOf('components/Sidebar/MultiElementSettings', module).add('default', () => (
-  <MultiElementSettings />
-));
+export default {
+  title: 'components/Sidebar/MultiElementSettings',
+};
+
+export const Default = () => <MultiElementSettings />;
+
+Default.story = {
+  name: 'default',
+};

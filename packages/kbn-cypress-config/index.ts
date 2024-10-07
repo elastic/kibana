@@ -10,6 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({
@@ -43,6 +44,12 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                   },
                 ],
               },
+              plugins: [
+                // TODO: remove non needed polyfills
+                new NodePolyfillPlugin({
+                  additionalAliases: ['process'],
+                }),
+              ],
             },
           })(file);
         });

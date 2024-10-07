@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPickerPopover } from '../color_picker_popover';
 
@@ -53,8 +52,10 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/Color/ColorPickerPopover', module)
-  .addParameters({
+export default {
+  title: 'components/Color/ColorPickerPopover',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -67,35 +68,57 @@ storiesOf('components/Color/ColorPickerPopover', module)
         },
       },
     },
-  })
-  .add('three colors', () => (
-    <ColorPickerPopover
-      value="#fff"
-      anchorPosition="downCenter"
-      onChange={action('onChange')}
-      colors={THREE_COLORS}
-      ariaLabel="Color Picker"
-    />
-  ))
-  .add('six colors', () => (
-    <ColorPickerPopover
-      value="#fff"
-      anchorPosition="downCenter"
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      ariaLabel="Color Picker"
-    />
-  ))
-  .add('six colors, value missing', () => (
-    <ColorPickerPopover
-      value="#a1b2c3"
-      anchorPosition="downCenter"
-      onChange={action('onChange')}
-      colors={SIX_COLORS}
-      ariaLabel="Color Picker"
-    />
-  ))
-  .add('interactive', () => <Interactive />, {
+  },
+};
+
+export const ThreeColors = () => (
+  <ColorPickerPopover
+    value="#fff"
+    anchorPosition="downCenter"
+    onChange={action('onChange')}
+    colors={THREE_COLORS}
+    ariaLabel="Color Picker"
+  />
+);
+
+ThreeColors.story = {
+  name: 'three colors',
+};
+
+export const SixColors = () => (
+  <ColorPickerPopover
+    value="#fff"
+    anchorPosition="downCenter"
+    onChange={action('onChange')}
+    colors={SIX_COLORS}
+    ariaLabel="Color Picker"
+  />
+);
+
+SixColors.story = {
+  name: 'six colors',
+};
+
+export const SixColorsValueMissing = () => (
+  <ColorPickerPopover
+    value="#a1b2c3"
+    anchorPosition="downCenter"
+    onChange={action('onChange')}
+    colors={SIX_COLORS}
+    ariaLabel="Color Picker"
+  />
+);
+
+SixColorsValueMissing.story = {
+  name: 'six colors, value missing',
+};
+
+export const _Interactive = () => <Interactive />;
+
+_Interactive.story = {
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -110,4 +133,5 @@ storiesOf('components/Color/ColorPickerPopover', module)
         },
       },
     },
-  });
+  },
+};

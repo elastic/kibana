@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -21,17 +13,34 @@ const withTheme = (storyFn: () => ReactNode) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
-storiesOf('Components/AndOrBadge', module)
-  .addDecorator(withTheme)
-  .add('and', () => <AndOrBadge type="and" />)
-  .add('or', () => <AndOrBadge type="or" />)
-  .add('antennas', () => (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <AndOrBadge type="and" includeAntennas />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <p>{sampleText}</p>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ));
+export default {
+  title: 'Components/AndOrBadge',
+  decorators: [withTheme],
+};
+
+export const And = () => <AndOrBadge type="and" />;
+
+And.story = {
+  name: 'and',
+};
+
+export const Or = () => <AndOrBadge type="or" />;
+
+Or.story = {
+  name: 'or',
+};
+
+export const Antennas = () => (
+  <EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      <AndOrBadge type="and" includeAntennas />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <p>{sampleText}</p>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+Antennas.story = {
+  name: 'antennas',
+};

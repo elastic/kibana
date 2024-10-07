@@ -6,22 +6,29 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 import { Asset, AssetComponent } from '..';
 import { AIRPLANE, MARKER, assets } from './assets';
 
-storiesOf('components/Assets/Asset', module)
-  .addDecorator((story) => <div style={{ width: '215px' }}>{story()}</div>)
-  .addDecorator(reduxDecorator({ assets }))
-  .addParameters(getAddonPanelParameters())
-  .add('redux: Asset', () => {
-    return <Asset asset={AIRPLANE} />;
-  })
-  .add('airplane', () => (
-    <AssetComponent asset={AIRPLANE} onCreate={action('onCreate')} onDelete={action('onDelete')} />
-  ))
-  .add('marker', () => (
-    <AssetComponent asset={MARKER} onCreate={action('onCreate')} onDelete={action('onDelete')} />
-  ));
+export default {
+  title: 'components/Assets/Asset',
+  decorators: [
+    (story) => <div style={{ width: '215px' }}>{story()}</div>,
+    reduxDecorator({ assets }),
+  ],
+  parameters: getAddonPanelParameters(),
+};
+
+export const ReduxAsset = () => <Asset asset={AIRPLANE} />;
+ReduxAsset.story = { name: 'redux: Asset' };
+
+export const Airplane = () => (
+  <AssetComponent asset={AIRPLANE} onCreate={action('onCreate')} onDelete={action('onDelete')} />
+);
+Airplane.story = { name: 'airplane' };
+
+export const Marker = () => (
+  <AssetComponent asset={MARKER} onCreate={action('onCreate')} onDelete={action('onDelete')} />
+);
+Marker.story = { name: 'marker' };

@@ -6,34 +6,46 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMarkdownRenderer } from '..';
 import { Render } from '../../__stories__/render';
 
 const markdown = getMarkdownRenderer(coreMock.createStart());
-storiesOf('renderers/markdown', module)
-  .add('default', () => {
-    const config = {
-      content: '# This is Markdown',
-      font: {
-        css: '',
-        spec: {},
-        type: 'style' as 'style',
-      },
-      openLinksInNewTab: false,
-    };
-    return <Render renderer={markdown} config={config} />;
-  })
-  .add('links in new tab', () => {
-    const config = {
-      content: '[Elastic.co](https://elastic.co)',
-      font: {
-        css: '',
-        spec: {},
-        type: 'style' as 'style',
-      },
-      openLinksInNewTab: true,
-    };
-    return <Render renderer={markdown} config={config} />;
-  });
+
+export default {
+  title: 'renderers/markdown',
+};
+
+export const Default = () => {
+  const config = {
+    content: '# This is Markdown',
+    font: {
+      css: '',
+      spec: {},
+      type: 'style' as 'style',
+    },
+    openLinksInNewTab: false,
+  };
+  return <Render renderer={markdown} config={config} />;
+};
+
+Default.story = {
+  name: 'default',
+};
+
+export const LinksInNewTab = () => {
+  const config = {
+    content: '[Elastic.co](https://elastic.co)',
+    font: {
+      css: '',
+      spec: {},
+      type: 'style' as 'style',
+    },
+    openLinksInNewTab: true,
+  };
+  return <Render renderer={markdown} config={config} />;
+};
+
+LinksInNewTab.story = {
+  name: 'links in new tab',
+};

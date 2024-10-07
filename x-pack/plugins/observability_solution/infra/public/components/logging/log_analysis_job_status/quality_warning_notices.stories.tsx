@@ -6,32 +6,43 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { QualityWarning } from '../../../../common/log_analysis';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
-storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
-  .addDecorator(decorateWithGlobalStorybookThemeProviders)
-  .add('Partitioned warnings', () => {
-    return (
-      <CategoryQualityWarnings
-        hasSetupCapabilities={true}
-        onRecreateMlJob={action('on-recreate-ml-job')}
-        qualityWarnings={partitionedQualityWarnings}
-      />
-    );
-  })
-  .add('Unpartitioned warnings', () => {
-    return (
-      <CategoryQualityWarnings
-        hasSetupCapabilities={true}
-        onRecreateMlJob={action('on-recreate-ml-job')}
-        qualityWarnings={unpartitionedQualityWarnings}
-      />
-    );
-  });
+export default {
+  title: 'infra/logAnalysis/CategoryQualityWarnings',
+  decorators: [decorateWithGlobalStorybookThemeProviders],
+};
+
+export const PartitionedWarnings = () => {
+  return (
+    <CategoryQualityWarnings
+      hasSetupCapabilities={true}
+      onRecreateMlJob={action('on-recreate-ml-job')}
+      qualityWarnings={partitionedQualityWarnings}
+    />
+  );
+};
+
+PartitionedWarnings.story = {
+  name: 'Partitioned warnings',
+};
+
+export const UnpartitionedWarnings = () => {
+  return (
+    <CategoryQualityWarnings
+      hasSetupCapabilities={true}
+      onRecreateMlJob={action('on-recreate-ml-job')}
+      qualityWarnings={unpartitionedQualityWarnings}
+    />
+  );
+};
+
+UnpartitionedWarnings.story = {
+  name: 'Unpartitioned warnings',
+};
 
 const partitionedQualityWarnings: QualityWarning[] = [
   {

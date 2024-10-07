@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ElementSpec } from '../../../../../types';
@@ -134,6 +126,14 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   },
 };
 
-storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
+export default {
+  title: 'components/WorkpadHeader/ElementMenu',
+};
+
+export const Default = () => (
   <ElementMenu elements={testElements} addElement={action('addElement')} />
-));
+);
+
+Default.story = {
+  name: 'default',
+};

@@ -9,6 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -19,14 +20,11 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
+/** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
 
   return {
-    node: {
-      child_process: 'empty',
-      fs: 'empty',
-    },
     externals: {
       module: 'module',
     },
@@ -104,6 +102,7 @@ module.exports = (_, argv) => {
     },
     context: __dirname,
     devtool: 'cheap-source-map',
+    target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
@@ -111,7 +110,6 @@ module.exports = (_, argv) => {
       devtoolModuleFilenameTemplate: (info) =>
         `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
-      futureEmitAssets: true,
     },
 
     module: {
@@ -145,11 +143,19 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
+      mainFields: ['browser', 'main'],
+      // conditionNames: ['require', 'default', 'node', 'module', 'import'],
+      fallback: {
+        child_process: false,
+        fs: false,
+      },
     },
 
     optimization: {
+      moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+      chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
       minimize: false,
-      noEmitOnErrors: true,
+      emitOnErrors: false,
     },
 
     performance: {
@@ -160,6 +166,9 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
+      new NodePolyfillPlugin({
+        additionalAliases: ['process'],
+      }),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [

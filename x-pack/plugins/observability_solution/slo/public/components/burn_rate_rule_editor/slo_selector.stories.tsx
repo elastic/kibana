@@ -19,7 +19,7 @@ export default {
 
 const Template: ComponentStory<typeof Component> = () => (
   // eslint-disable-next-line no-console
-  <Component onSelected={(slo: SLODefinitionResponse | undefined) => console.log(slo)} />
+  (<Component onSelected={(slo: SLODefinitionResponse | undefined) => console.log(slo)} />)
 );
 const defaultProps = {};
 

@@ -8,7 +8,6 @@
  */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TriggerPicker } from '.';
 
@@ -36,69 +35,83 @@ const Demo: React.FC = () => {
   );
 };
 
-storiesOf('components/TriggerPicker', module)
-  .add('Default', () => {
-    return (
-      <TriggerPicker
-        items={[
-          {
-            id: 'RANGE_SELECT_TRIGGER',
-            title: 'Range selected',
-            description: 'On chart brush.',
-          },
-          {
-            id: 'VALUE_CLICK_TRIGGER',
-            title: 'Value click',
-            description: 'On point click in chart',
-          },
-        ]}
-        selected={[]}
-        onChange={action('onChange')}
-      />
-    );
-  })
-  .add('With docs', () => {
-    return (
-      <TriggerPicker
-        docs={'http://example.com'}
-        items={[
-          {
-            id: 'RANGE_SELECT_TRIGGER',
-            title: 'Range selected',
-            description: 'On chart brush.',
-          },
-          {
-            id: 'VALUE_CLICK_TRIGGER',
-            title: 'Value click',
-            description: 'On point click in chart',
-          },
-        ]}
-        selected={[]}
-        onChange={action('onChange')}
-      />
-    );
-  })
-  .add('Selected trigger', () => {
-    return (
-      <TriggerPicker
-        docs={'http://example.com'}
-        items={[
-          {
-            id: 'RANGE_SELECT_TRIGGER',
-            title: 'Range selected',
-            description: 'On chart brush.',
-          },
-          {
-            id: 'VALUE_CLICK_TRIGGER',
-            title: 'Value click',
-            description: 'On point click in chart',
-          },
-        ]}
-        selected={['VALUE_CLICK_TRIGGER']}
-        onChange={action('onChange')}
-      />
-    );
-  })
-  .add('Interactive', () => {
-    return <Demo />;
-  });
+export default {
+  title: 'components/TriggerPicker',
+};
+
+export const Default = () => {
+  return (
+    <TriggerPicker
+      items={[
+        {
+          id: 'RANGE_SELECT_TRIGGER',
+          title: 'Range selected',
+          description: 'On chart brush.',
+        },
+        {
+          id: 'VALUE_CLICK_TRIGGER',
+          title: 'Value click',
+          description: 'On point click in chart',
+        },
+      ]}
+      selected={[]}
+      onChange={action('onChange')}
+    />
+  );
+};
+
+export const WithDocs = () => {
+  return (
+    <TriggerPicker
+      docs={'http://example.com'}
+      items={[
+        {
+          id: 'RANGE_SELECT_TRIGGER',
+          title: 'Range selected',
+          description: 'On chart brush.',
+        },
+        {
+          id: 'VALUE_CLICK_TRIGGER',
+          title: 'Value click',
+          description: 'On point click in chart',
+        },
+      ]}
+      selected={[]}
+      onChange={action('onChange')}
+    />
+  );
+};
+
+WithDocs.story = {
+  name: 'With docs',
+};
+
+export const SelectedTrigger = () => {
+  return (
+    <TriggerPicker
+      docs={'http://example.com'}
+      items={[
+        {
+          id: 'RANGE_SELECT_TRIGGER',
+          title: 'Range selected',
+          description: 'On chart brush.',
+        },
+        {
+          id: 'VALUE_CLICK_TRIGGER',
+          title: 'Value click',
+          description: 'On point click in chart',
+        },
+      ]}
+      selected={['VALUE_CLICK_TRIGGER']}
+      onChange={action('onChange')}
+    />
+  );
+};
+
+SelectedTrigger.story = {
+  name: 'Selected trigger',
+};
+
+export const Interactive = () => {
+  return <Demo />;
+};

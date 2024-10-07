@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { ExampleContext } from '../../../test/context_example';
@@ -14,24 +13,41 @@ import { PageControls, PageControlsComponent } from '../page_controls';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Footer/PageControls', module)
-  .add('contextual: hello', () => (
-    <ExampleContext source="austin" {...{ style }}>
-      <PageControls />
-    </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
-    <ExampleContext source="austin" {...{ style }}>
-      <PageControls />
-    </ExampleContext>
-  ))
-  .add('component', () => (
-    <div {...{ style }}>
-      <PageControlsComponent
-        page={0}
-        totalPages={10}
-        onSetPageNumber={action('onSetPageNumber')}
-        onToggleScrubber={action('onToggleScrubber')}
-      />
-    </div>
-  ));
+export default {
+  title: 'shareables/Footer/PageControls',
+};
+
+export const ContextualHello = () => (
+  <ExampleContext source="austin" {...{ style }}>
+    <PageControls />
+  </ExampleContext>
+);
+
+ContextualHello.story = {
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = () => (
+  <ExampleContext source="austin" {...{ style }}>
+    <PageControls />
+  </ExampleContext>
+);
+
+ContextualAustin.story = {
+  name: 'contextual: austin',
+};
+
+export const Component = () => (
+  <div {...{ style }}>
+    <PageControlsComponent
+      page={0}
+      totalPages={10}
+      onSetPageNumber={action('onSetPageNumber')}
+      onToggleScrubber={action('onToggleScrubber')}
+    />
+  </div>
+);
+
+Component.story = {
+  name: 'component',
+};

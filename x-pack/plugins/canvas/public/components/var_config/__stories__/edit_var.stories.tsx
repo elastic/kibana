@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 import { CanvasVariable } from '../../../../types';
@@ -31,36 +30,58 @@ const variables: CanvasVariable[] = [
   },
 ];
 
-storiesOf('components/Variables/EditVar', module)
-  .add('new variable', () => (
-    <EditVar
-      variables={variables}
-      selectedVar={null}
-      onSave={action('onSave')}
-      onCancel={action('onCancel')}
-    />
-  ))
-  .add('edit variable (string)', () => (
-    <EditVar
-      variables={variables}
-      selectedVar={variables[0]}
-      onSave={action('onSave')}
-      onCancel={action('onCancel')}
-    />
-  ))
-  .add('edit variable (number)', () => (
-    <EditVar
-      variables={variables}
-      selectedVar={variables[1]}
-      onSave={action('onSave')}
-      onCancel={action('onCancel')}
-    />
-  ))
-  .add('edit variable (boolean)', () => (
-    <EditVar
-      variables={variables}
-      selectedVar={variables[2]}
-      onSave={action('onSave')}
-      onCancel={action('onCancel')}
-    />
-  ));
+export default {
+  title: 'components/Variables/EditVar',
+};
+
+export const NewVariable = () => (
+  <EditVar
+    variables={variables}
+    selectedVar={null}
+    onSave={action('onSave')}
+    onCancel={action('onCancel')}
+  />
+);
+
+NewVariable.story = {
+  name: 'new variable',
+};
+
+export const EditVariableString = () => (
+  <EditVar
+    variables={variables}
+    selectedVar={variables[0]}
+    onSave={action('onSave')}
+    onCancel={action('onCancel')}
+  />
+);
+
+EditVariableString.story = {
+  name: 'edit variable (string)',
+};
+
+export const EditVariableNumber = () => (
+  <EditVar
+    variables={variables}
+    selectedVar={variables[1]}
+    onSave={action('onSave')}
+    onCancel={action('onCancel')}
+  />
+);
+
+EditVariableNumber.story = {
+  name: 'edit variable (number)',
+};
+
+export const EditVariableBoolean = () => (
+  <EditVar
+    variables={variables}
+    selectedVar={variables[2]}
+    onSave={action('onSave')}
+    onCancel={action('onCancel')}
+  />
+);
+
+EditVariableBoolean.story = {
+  name: 'edit variable (boolean)',
+};

@@ -6,51 +6,72 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { ElementCard } from '../element_card';
 
-storiesOf('components/Elements/ElementCard', module)
-  .addDecorator((story) => (
-    <div
-      style={{
-        width: '210px',
-      }}
-    >
-      {story()}
-    </div>
-  ))
-  .add('with title and description', () => (
-    <ElementCard
-      title="Element 1"
-      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-    />
-  ))
-  .add(
-    'with image',
-    (_, props) => (
-      <ElementCard
-        title="Element 1"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-        image={props?.elasticLogo}
-      />
+export default {
+  title: 'components/Elements/ElementCard',
+
+  decorators: [
+    (story) => (
+      <div
+        style={{
+          width: '210px',
+        }}
+      >
+        {story()}
+      </div>
     ),
-    { decorators: [waitFor(getElasticLogo())] }
-  )
-  .add('with tags', () => (
-    <ElementCard
-      title="Element 1"
-      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-      tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']}
-      onClick={action('onClick')}
-    />
-  ))
-  .add('with click handler', () => (
-    <ElementCard
-      title="Element 1"
-      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-      onClick={action('onClick')}
-    />
-  ));
+  ],
+};
+
+export const WithTitleAndDescription = () => (
+  <ElementCard
+    title="Element 1"
+    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+  />
+);
+
+WithTitleAndDescription.story = {
+  name: 'with title and description',
+};
+
+export const WithImage = (_, props) => (
+  <ElementCard
+    title="Element 1"
+    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+    image={props?.elasticLogo}
+  />
+);
+
+WithImage.story = {
+  name: 'with image',
+  decorators: [waitFor(getElasticLogo())],
+};
+
+export const WithTags = () => (
+  <ElementCard
+    title="Element 1"
+    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+    tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6']}
+    onClick={action('onClick')}
+  />
+);
+
+WithTags.story = {
+  name: 'with tags',
+};
+
+export const WithClickHandler = () => (
+  <ElementCard
+    title="Element 1"
+    description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
+    onClick={action('onClick')}
+  />
+);
+
+WithClickHandler.story = {
+  name: 'with click handler',
+};

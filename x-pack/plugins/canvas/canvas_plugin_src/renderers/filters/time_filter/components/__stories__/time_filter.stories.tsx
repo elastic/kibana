@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { TimeFilter } from '../time_filter';
 
@@ -23,45 +22,69 @@ const timeRanges = [
   { start: 'now-1y', end: 'now', label: 'Last 1 year' },
 ];
 
-storiesOf('renderers/TimeFilter', module)
-  .addDecorator((story) => (
-    <div
-      style={{
-        width: '600px',
-      }}
-    >
-      {story()}
-    </div>
-  ))
-  .add('default', () => (
-    <TimeFilter
-      filter="timefilter from=now-1y to=now column=@timestamp"
-      commit={action('commit')}
-    />
-  ))
-  .add('with relative time bounds', () => (
-    <TimeFilter
-      filter="timefilter from=now/w to=now/w column=@timestamp"
-      commit={action('commit')}
-    />
-  ))
-  .add('with absolute time bounds', () => (
-    <TimeFilter
-      filter="timefilter from='01/01/2019' to='12/31/2019' column=@timestamp"
-      commit={action('commit')}
-    />
-  ))
-  .add('with dateFormat', () => (
-    <TimeFilter
-      filter="timefilter from=now-24h to=now column=@timestamp"
-      commit={action('commit')}
-      dateFormat="MM/DD/YY HH:MM:SSA"
-    />
-  ))
-  .add('with commonlyUsedRanges', () => (
-    <TimeFilter
-      filter="timefilter from=now-30d to=now column=@timestamp"
-      commit={action('commit')}
-      commonlyUsedRanges={timeRanges}
-    />
-  ));
+export default {
+  title: 'renderers/TimeFilter',
+
+  decorators: [
+    (story) => (
+      <div
+        style={{
+          width: '600px',
+        }}
+      >
+        {story()}
+      </div>
+    ),
+  ],
+};
+
+export const Default = () => (
+  <TimeFilter filter="timefilter from=now-1y to=now column=@timestamp" commit={action('commit')} />
+);
+
+Default.story = {
+  name: 'default',
+};
+
+export const WithRelativeTimeBounds = () => (
+  <TimeFilter filter="timefilter from=now/w to=now/w column=@timestamp" commit={action('commit')} />
+);
+
+WithRelativeTimeBounds.story = {
+  name: 'with relative time bounds',
+};
+
+export const WithAbsoluteTimeBounds = () => (
+  <TimeFilter
+    filter="timefilter from='01/01/2019' to='12/31/2019' column=@timestamp"
+    commit={action('commit')}
+  />
+);
+
+WithAbsoluteTimeBounds.story = {
+  name: 'with absolute time bounds',
+};
+
+export const WithDateFormat = () => (
+  <TimeFilter
+    filter="timefilter from=now-24h to=now column=@timestamp"
+    commit={action('commit')}
+    dateFormat="MM/DD/YY HH:MM:SSA"
+  />
+);
+
+WithDateFormat.story = {
+  name: 'with dateFormat',
+};
+
+export const WithCommonlyUsedRanges = () => (
+  <TimeFilter
+    filter="timefilter from=now-30d to=now column=@timestamp"
+    commit={action('commit')}
+    commonlyUsedRanges={timeRanges}
+  />
+);
+
+WithCommonlyUsedRanges.story = {
+  name: 'with commonlyUsedRanges',
+};
