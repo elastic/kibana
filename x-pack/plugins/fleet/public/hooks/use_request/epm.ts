@@ -20,6 +20,7 @@ import type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
@@ -270,13 +271,17 @@ export const sendBulkInstallPackages = (
   });
 };
 
-export const sendRemovePackage = (pkgName: string, pkgVersion: string) => {
+export function sendRemovePackage(
+  { pkgName, pkgVersion }: DeletePackageRequest['params'],
+  query?: DeletePackageRequest['query']
+) {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,
+    query,
   });
-};
+}
 
 export const sendRequestReauthorizeTransforms = (
   pkgName: string,
