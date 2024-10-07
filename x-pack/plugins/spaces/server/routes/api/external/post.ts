@@ -34,6 +34,11 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
           request: {
             body: getSpaceSchema(isServerless),
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
+          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
