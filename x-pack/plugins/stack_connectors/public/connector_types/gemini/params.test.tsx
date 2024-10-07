@@ -50,7 +50,7 @@ describe('Gemini Params Fields renders', () => {
     const errors = {};
     const actionConnector = {
       secrets: {
-        credentialsJSON: JSON.stringify({
+        credentialsJson: JSON.stringify({
           type: 'service_account',
           project_id: '',
           private_key_id: '',
