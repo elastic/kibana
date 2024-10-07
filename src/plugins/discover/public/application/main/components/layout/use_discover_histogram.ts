@@ -49,12 +49,6 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
-// enabled for debugging
-if (window) {
-  // @ts-ignore
-  window.ELASTIC_DISCOVER_LOGGER = `debug`;
-}
-
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
   inspectorAdapters: InspectorAdapters;
@@ -186,10 +180,7 @@ export const useDiscoverHistogram = ({
           totalHitsResult &&
           typeof result !== 'number'
         ) {
-          addLog(
-            '[UnifiedHistogram] ignore the histogram initial loading state if discover state already has a total hits value',
-            { status, result }
-          );
+          addLog(`[UnifiedHistogram] skip ${status}: total hits > 0 in Discover`, result);
           return;
         }
 
@@ -202,7 +193,7 @@ export const useDiscoverHistogram = ({
           // this is a workaround to make sure the new total hits value is displayed
           // a different value without a loading state in between would lead to be ignored by useDataState
           addLog(
-            '[UnifiedHistogram] send loading state to total hits$ to make sure the new value is displayed',
+            '[UnifiedHistogram] send loading to totalHits$ to make sure the new value is displayed',
             { status, result }
           );
           savedSearchData$.totalHits$.next({
@@ -216,11 +207,7 @@ export const useDiscoverHistogram = ({
           result,
         });
 
-        if (
-          (status !== UnifiedHistogramFetchStatus.complete &&
-            status !== UnifiedHistogramFetchStatus.partial) ||
-          typeof result !== 'number'
-        ) {
+        if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
           addLog(
             '[UnifiedHistogram] ignore the histogram complete/partial state if discover state already has a total hits value',
             { status, result }
