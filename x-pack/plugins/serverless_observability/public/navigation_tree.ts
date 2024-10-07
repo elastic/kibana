@@ -71,7 +71,7 @@ export const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'observabilityAIAssistant',
-          title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
+          title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
             defaultMessage: 'AI Assistant',
           }),
         },
@@ -81,12 +81,16 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
-          // link: 'apm:services',
           renderAs: 'panelOpener',
           children: [
             {
               children: [
-                { link: 'apm:services' },
+                {
+                  link: 'apm:services',
+                  title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
+                    defaultMessage: 'Service inventory',
+                  }),
+                },
                 { link: 'apm:traces' },
                 { link: 'apm:dependencies' },
                 { link: 'apm:settings' },
@@ -112,7 +116,7 @@ export const navigationTree: NavigationTreeDefinition = {
                       title: i18n.translate(
                         'xpack.serverlessObservability.nav.synthetics.certificatesItem',
                         {
-                          defaultMessage: 'TLS Certificates',
+                          defaultMessage: 'TLS certificates',
                         }
                       ),
                       id: 'synthetics-certificates',
@@ -129,12 +133,19 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
-          // link: 'metrics:inventory',
           renderAs: 'panelOpener',
           children: [
             {
               children: [
-                { link: 'metrics:inventory' },
+                {
+                  link: 'metrics:inventory',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.infrastructureInventory',
+                    {
+                      defaultMessage: 'Infrastructure inventory',
+                    }
+                  ),
+                },
                 { link: 'metrics:hosts' },
                 { link: 'metrics:settings' },
                 { link: 'metrics:assetDetails' },
@@ -159,12 +170,9 @@ export const navigationTree: NavigationTreeDefinition = {
                 },
                 {
                   link: 'ml:memoryUsage',
-                  title: i18n.translate(
-                    'xpack.observability.obltNav.machineLearning.memoryUsage',
-                    {
-                      defaultMessage: 'Memory usage',
-                    }
-                  ),
+                  title: i18n.translate('xpack.observability.obltNav.machineLearning.memoryUsage', {
+                    defaultMessage: 'Memory usage',
+                  }),
                 },
               ],
             },
