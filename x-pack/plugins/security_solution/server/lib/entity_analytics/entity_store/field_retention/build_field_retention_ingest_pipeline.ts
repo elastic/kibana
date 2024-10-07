@@ -15,7 +15,9 @@ import {
   removeEntityDefinitionFieldsStep,
   retentionDefinitionToIngestProcessorSteps,
 } from './ingest_processor_steps';
-import { DEBUG_MODE, ENRICH_FIELD } from './constants';
+
+// the field that the enrich processor writes to
+export const ENRICH_FIELD = 'historical';
 
 /**
  * Builds the ingest pipeline for the field retention policy.
@@ -23,21 +25,23 @@ import { DEBUG_MODE, ENRICH_FIELD } from './constants';
  * then applies the field retention policy to the entity fields, and finally removes
  * the enrich field and any empty fields.
  *
- * While developing, be sure to set DEBUG_MODE to true this will keep the enrich field
+ * While developing, be sure to set debugMode to true this will keep the enrich field
  * and the context field in the document to help with debugging.
  */
 export const buildFieldRetentionIngestPipeline = ({
   fieldRetentionDefinition,
   enrichPolicyName,
   allEntityFields,
+  debugMode,
 }: {
   fieldRetentionDefinition: FieldRetentionDefinition;
   enrichPolicyName: string;
   allEntityFields: string[];
+  debugMode?: boolean;
 }): IngestProcessorContainer[] => {
   const { entityType, matchField } = fieldRetentionDefinition;
   return [
-    ...(DEBUG_MODE ? [debugDeepCopyContextStep()] : []),
+    ...(debugMode ? [debugDeepCopyContextStep()] : []),
     {
       enrich: {
         policy_name: enrichPolicyName,
@@ -63,7 +67,7 @@ export const buildFieldRetentionIngestPipeline = ({
     }),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),
-    ...(!DEBUG_MODE
+    ...(!debugMode
       ? [
           {
             remove: {

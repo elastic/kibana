@@ -30,6 +30,7 @@ import {
   deleteFieldRetentionEnrichPolicy,
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
+  getFieldRetentionDefinition,
 } from './field_retention';
 import { getEntityIndexMapping } from './index_mappings';
 
@@ -64,7 +65,7 @@ export class EntityStoreDataClient {
     entityType: EntityType,
     taskManager: TaskManagerStartContract,
     assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient,
-    { indexPattern = '', filter = '' }: InitEntityEngineRequestBody
+    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
     const { entityClient, logger } = this.options;
     const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
@@ -82,7 +83,10 @@ export class EntityStoreDataClient {
     const debugLog = (message: string) =>
       logger.debug(`[Entity Engine] [${entityType}] ${message}`);
 
-    const descriptor = await this.engineClient.init(entityType, definition, filter);
+    const descriptor = await this.engineClient.init(entityType, definition, {
+      filter,
+      fieldHistoryLength,
+    });
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
@@ -111,7 +115,7 @@ export class EntityStoreDataClient {
     debugLog(`Created field retention enrich policy`);
     await this.executeFieldRetentionEnrichPolicy(entityType);
     debugLog(`Executed field retention enrich policy`);
-    await this.createPlatformPipeline(entityType);
+    await this.createPlatformPipeline(entityType, { fieldHistoryLength });
     debugLog(`Created @platform pipeline`);
 
     // finally start the entity definition now that everything is in place
@@ -170,9 +174,15 @@ export class EntityStoreDataClient {
     });
   }
 
-  private async createPlatformPipeline(entityType: EntityType) {
+  private async createPlatformPipeline(
+    entityType: EntityType,
+    { fieldHistoryLength }: { fieldHistoryLength: number }
+  ) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
-
+    const fieldRetentionDefinition = getFieldRetentionDefinition({
+      entityType,
+      fieldHistoryLength,
+    });
     const allEntityFields: string[] = (definition?.metadata || []).map((m) => {
       if (typeof m === 'string') {
         return m;
@@ -191,7 +201,7 @@ export class EntityStoreDataClient {
         description: `Ingest pipeline for entity defiinition ${definition.id}`,
         processors: getFieldRetentionPipelineSteps({
           namespace: this.options.namespace,
-          entityType,
+          fieldRetentionDefinition,
           allEntityFields,
         }),
       },

@@ -22,7 +22,7 @@ import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { EntityStoreDataClient } from '../../entity_store_data_client';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
-import { getFieldRetentionDefinitions } from '../field_retention_definitions';
+import { getFieldRetentionDefinitionEntityTypes } from '../field_retention_definitions';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -173,7 +173,7 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getFieldRetentionDefinitions().map((def) => def.entityType);
+    const entityTypes = getFieldRetentionDefinitionEntityTypes();
     for (const entityType of entityTypes) {
       const start = Date.now();
       debugLog(`executing field retention enrich policy for ${entityType}`);

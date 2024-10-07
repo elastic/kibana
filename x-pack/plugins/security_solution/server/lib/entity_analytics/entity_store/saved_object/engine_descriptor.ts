@@ -29,7 +29,11 @@ interface EngineDescriptorDependencies {
 export class EngineDescriptorClient {
   constructor(private readonly deps: EngineDescriptorDependencies) {}
 
-  async init(entityType: EntityType, definition: EntityDefinition, filter: string) {
+  async init(
+    entityType: EntityType,
+    definition: EntityDefinition,
+    { filter, fieldHistoryLength }: { filter: string; fieldHistoryLength: number }
+  ) {
     const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 0)
@@ -42,6 +46,7 @@ export class EngineDescriptorClient {
         type: entityType,
         indexPattern: definition.indexPatterns.join(','),
         filter,
+        fieldHistoryLength,
       },
       { id: definition.id }
     );
