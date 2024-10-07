@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     const removeGlobalSettings = async () => {
       version = version ?? (await kibanaServer.version.get());
+      version = version.replace(/-SNAPSHOT$/, '');
 
       log.debug(`Deleting [config-global:${version}] doc from the .kibana index`);
 
