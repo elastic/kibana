@@ -43,14 +43,17 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/authentication/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/authentication/alerts/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/date_numeric_types/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/ips/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/keyword/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/long/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/operators_data_types/text/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/workflows/basic_license_essentials_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/authentication/exceptions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_gaps/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/basic_license_essentials_tier/configs/serverless.config.ts
