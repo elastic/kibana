@@ -190,6 +190,31 @@ const CasesAll: User = {
   },
 };
 
+export const StackAlertsOnly: User = {
+  username: 'stack_alerts_only',
+  fullName: 'stack_alerts_only',
+  password: 'stack_alerts_only-password',
+  role: {
+    name: 'stack_alerts_only_role',
+    kibana: [
+      {
+        feature: {
+          stackAlerts: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -198,6 +223,7 @@ export const Users: User[] = [
   Space1AllWithRestrictedFixture,
   Space1AllAlertingNoneActions,
   CasesAll,
+  StackAlertsOnly,
 ];
 
 const Space1: Space = {
@@ -256,14 +282,6 @@ const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
   space: Space1,
 };
 
-interface Space1AllAtSpace1 extends Scenario {
-  id: 'space_1_all at space1';
-}
-const Space1AllAtSpace1: Space1AllAtSpace1 = {
-  id: 'space_1_all at space1',
-  user: Space1All,
-  space: Space1,
-};
 interface Space1AllWithRestrictedFixtureAtSpace1 extends Scenario {
   id: 'space_1_all_with_restricted_fixture at space1';
 }
@@ -298,6 +316,15 @@ interface SystemActionSpace1 extends Scenario {
 export const systemActionScenario: SystemActionSpace1 = {
   id: 'system_actions at space1',
   user: CasesAll,
+  space: Space1,
+};
+
+interface Space1AllAtSpace1 extends Scenario {
+  id: 'space_1_all at space1';
+}
+const Space1AllAtSpace1: Space1AllAtSpace1 = {
+  id: 'space_1_all at space1',
+  user: Space1All,
   space: Space1,
 };
 
