@@ -130,9 +130,6 @@ export function collectVariables(
       const [oldArg, newArg] = ctx.node.args;
       addToVariables(oldArg, newArg, fields, variables);
     })
-    .on('visitRenameCommand', (ctx) => {
-      return [...ctx.visitArguments()];
-    })
     .on('visitFunctionCallExpression', (ctx) => {
       if (ctx.node.name === '=') {
         addVariableFromAssignment(ctx.node, variables, fields);
@@ -147,6 +144,7 @@ export function collectVariables(
         for (const assignFn of ctx.node.args) {
           if (isFunctionItem(assignFn)) {
             const [newArg, oldArg] = assignFn?.args || [];
+            // TODO why is oldArg an array?
             if (Array.isArray(oldArg)) {
               addToVariables(oldArg[0], newArg, fields, variables);
             }
@@ -156,10 +154,11 @@ export function collectVariables(
     })
     .on('visitCommand', (ctx) => {
       const ret = [];
-      if (['row', 'eval', 'stats', 'inlinestats', 'metrics'].includes(ctx.node.name)) {
+      if (['row', 'eval', 'stats', 'inlinestats', 'metrics', 'rename'].includes(ctx.node.name)) {
         ret.push(...ctx.visitArgs());
       }
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
+        // BY and WITH can contain variables
         ret.push(...ctx.visitOptions());
       }
       return ret;
