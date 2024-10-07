@@ -11,6 +11,7 @@ import type { RuleResponse } from '../../../../../../../common/api/detection_eng
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizableUpdateFields } from '../../../utils/validate';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -48,6 +49,11 @@ export const updateRule = async ({
   if (existingRule == null) {
     const error = getIdError({ id, ruleId });
     throw new ClientError(error.message, error.statusCode);
+  }
+
+  // We don't allow non-customizable fields to be changed for prebuilt rules
+  if (existingRule.rule_source && existingRule.rule_source.type === 'external') {
+    validateNonCustomizableUpdateFields(ruleUpdate, existingRule);
   }
 
   const ruleWithUpdates = await applyRuleUpdate({

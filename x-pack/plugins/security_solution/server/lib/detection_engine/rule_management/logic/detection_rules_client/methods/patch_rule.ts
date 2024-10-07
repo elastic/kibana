@@ -16,6 +16,7 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
+import { validateNonCustomizablePatchFields } from '../../../utils/validate';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
@@ -50,6 +51,11 @@ export const patchRule = async ({
   }
 
   await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
+
+  // We don't allow non-customizable fields to be changed for prebuilt rules
+  if (existingRule.rule_source && existingRule.rule_source.type === 'external') {
+    validateNonCustomizablePatchFields(rulePatch, existingRule);
+  }
 
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,
