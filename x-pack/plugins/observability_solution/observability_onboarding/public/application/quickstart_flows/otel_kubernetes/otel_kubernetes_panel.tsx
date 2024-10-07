@@ -30,7 +30,7 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
-const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-70c709ff-59b9-43b7-8ef4-4c34d8890bde';
+const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
@@ -47,17 +47,19 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
-  const addRepoCommand = `helm repo add open-telemetry 'https://open-telemetry.github.io/opentelemetry-helm-charts' --force-update`;
+  const namespace = 'opentelemetry-operator-system';
   const valuesFile =
-    'https://raw.githubusercontent.com/elastic/opentelemetry-dev/main/docs/ingest/dev-docs/elastic-otel-collector/operator/onprem_kube_stack_values.yaml';
+    'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/main/resources/kubernetes/operator/helm/values.yaml';
+
+  const addRepoCommand = `helm repo add open-telemetry 'https://open-telemetry.github.io/opentelemetry-helm-charts' --force-update`;
   const installStackCommand = data
-    ? `kubectl create namespace opentelemetry-operator-system
+    ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
-  --namespace opentelemetry-operator-system \\
+  --namespace ${namespace} \\
   --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
-  --namespace opentelemetry-operator-system \\
+  --namespace ${namespace} \\
   --create-namespace \\
   --values '${valuesFile}'`
     : undefined;
@@ -90,7 +92,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
             title: i18n.translate(
               'xpack.observability_onboarding.otelKubernetesPanel.installStackStepTitle',
               {
-                defaultMessage: 'Install the OpenTelemetry Kube Stack',
+                defaultMessage: 'Install the OpenTelemetry Operator',
               }
             ),
             children: installStackCommand ? (
@@ -98,7 +100,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
-                    defaultMessage="Upgrade the kube-stack Helm chart using the values file. For automatic certificate renewal, we recommend installing {link}."
+                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link}."
                     values={{
                       link: (
                         <EuiLink
@@ -142,8 +144,8 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     <EuiButtonEmpty
                       iconType="download"
                       href={valuesFile}
-                      download
                       flush="left"
+                      target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
                     >
                       {i18n.translate(
@@ -162,7 +164,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
             title: i18n.translate(
               'xpack.observability_onboarding.otelKubernetesPanel.instrumentApplicationStepTitle',
               {
-                defaultMessage: 'Instrument your applications',
+                defaultMessage: 'Instrument your application (optional)',
               }
             ),
             children: (
@@ -172,7 +174,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
-                        'The operator automates the injection of auto-instrumentation libraries for pods annotated as follows:',
+                        'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
                     }
                   )}
                 </p>
@@ -261,7 +263,7 @@ spec:
                     'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
                     {
                       defaultMessage:
-                        'Once your Kubernetes infrastructure and application data is collected, you can start analyzing it.',
+                        'Analyse your Kubernetes cluster’s health and monitor your container workloads.',
                     }
                   )}
                 </p>
@@ -312,7 +314,9 @@ spec:
                   ]}
                 />
               </>
-            ) : undefined,
+            ) : (
+              <EuiSkeletonText lines={6} />
+            ),
           },
         ]}
       />
