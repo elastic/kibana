@@ -9,8 +9,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import { getDefinitionForEntityType } from '../definition';
-import { getFieldRetentionDefinition } from '../field_retention';
-import type { FieldRetentionDefinition } from '../field_retention/field_retention_definitions';
+import {
+  type FieldRetentionDefinition,
+  getFieldRetentionDefinition,
+} from '../field_retention_definitions';
 import {
   debugDeepCopyContextStep,
   getDotExpanderSteps,
