@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import { useRef } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
@@ -22,46 +19,37 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   type EuiSearchBarProps,
-  EuiText,
 } from '@elastic/eui';
-import { groupBy, isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { usePageUrlState } from '@kbn/ml-url-state';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import type { DeploymentState } from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { useStorage } from '@kbn/ml-local-storage';
 import {
   BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
-  DEPLOYMENT_STATE,
-  ELASTIC_MODEL_DEFINITIONS,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
   ELSER_ID_V1,
   MODEL_STATE,
   type ModelState,
 } from '@kbn/ml-trained-models-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { useStorage } from '@kbn/ml-local-storage';
-import { dynamic } from '@kbn/shared-ux-utility';
-import useMountedState from 'react-use/lib/useMountedState';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { getModelStateColor, getModelDeploymentState } from './get_model_state';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { cloneDeep, groupBy, isEmpty, memoize } from 'lodash';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-import { useModelActions } from './model_actions';
-import { ModelsTableToConfigMapping } from './config_mapping';
-import type { ModelsBarStats } from '../components/stats_bar';
-import { StatsBar } from '../components/stats_bar';
-import { useMlKibana } from '../contexts/kibana';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type {
   ModelDownloadState,
   ModelPipelines,
@@ -69,17 +57,23 @@ import type {
   TrainedModelDeploymentStatsResponse,
   TrainedModelStat,
 } from '../../../common/types/trained_models';
-import { DeleteModelsModal } from './delete_models_modal';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { useToastNotificationService } from '../services/toast_notification_service';
-import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
-import { useRefresh } from '../routing/use_refresh';
-import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { TestModelAndPipelineCreationFlyout } from './test_models';
-import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
+import { SavedObjectsWarning } from '../components/saved_objects_warning';
+import type { ModelsBarStats } from '../components/stats_bar';
+import { StatsBar } from '../components/stats_bar';
+import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
+import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
+import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
+import { useRefresh } from '../routing/use_refresh';
+import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
+import { useToastNotificationService } from '../services/toast_notification_service';
+import { ModelsTableToConfigMapping } from './config_mapping';
+import { DeleteModelsModal } from './delete_models_modal';
+import { getModelDeploymentState, getModelStateColor } from './get_model_state';
+import { useModelActions } from './model_actions';
+import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
+import { TestModelAndPipelineCreationFlyout } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -166,8 +160,6 @@ export const ModelsList: FC<Props> = ({
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
-  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
-
   // allow for an internally controlled page state which stores the state in the URL
   // or an external page state, which is passed in as a prop.
   // external page state is used on the management page.
@@ -189,7 +181,7 @@ export const ModelsList: FC<Props> = ({
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
+  const { displayErrorToast } = useToastNotificationService();
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -220,28 +212,9 @@ export const ModelsList: FC<Props> = ({
   }, [items]);
 
   /**
-   * Checks if the model download complete.
+   * Fetch of model definitions available for download needs to happen only once
    */
-  const isDownloadComplete = useCallback(
-    async (modelId: string): Promise<boolean> => {
-      try {
-        const response = await trainedModelsApiService.getTrainedModels(modelId, {
-          include: 'definition_status',
-        });
-        // @ts-ignore
-        return !!response[0]?.fully_defined;
-      } catch (error) {
-        displayErrorToast(
-          error,
-          i18n.translate('xpack.ml.trainedModels.modelsList.downloadStatusCheckErrorMessage', {
-            defaultMessage: 'Failed to check download status',
-          })
-        );
-      }
-      return false;
-    },
-    [trainedModelsApiService, displayErrorToast]
-  );
+  const getTrainedModelDownloads = memoize(trainedModelsApiService.getTrainedModelDownloads);
 
   /**
    * Fetches trained models.
@@ -289,7 +262,11 @@ export const ModelsList: FC<Props> = ({
         const idMap = new Map<string, ModelItem>(
           resultItems.map((model) => [model.model_id, model])
         );
-        const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
+        /**
+         * Fetches model definitions available for download
+         */
+        const forDownload = await getTrainedModelDownloads();
+
         const notDownloaded: ModelItem[] = forDownload
           .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
             if (idMap.has(modelId)) {
@@ -323,18 +300,17 @@ export const ModelsList: FC<Props> = ({
         resultItems = [...resultItems, ...notDownloaded];
       }
 
-      setItems(resultItems);
-
-      if (expandedItemsToRefresh.length > 0) {
-        await fetchModelsStats(expandedItemsToRefresh);
-
-        setItemIdToExpandedRowMap(
-          expandedItemsToRefresh.reduce((acc, item) => {
-            acc[item.model_id] = <ExpandedRow item={item as ModelItemFull} />;
-            return acc;
-          }, {} as Record<string, JSX.Element>)
-        );
-      }
+      setItems((prevItems) => {
+        // Need to merge existing items with new items
+        // to preserve state and download status
+        return resultItems.map((item) => {
+          return {
+            ...item,
+            state: item.state ?? prevItems.find((i) => i.model_id === item.model_id)?.state,
+            downloadState: prevItems.find((i) => i.model_id === item.model_id)?.downloadState,
+          };
+        });
+      });
     } catch (error) {
       displayErrorToast(
         error,
@@ -343,7 +319,9 @@ export const ModelsList: FC<Props> = ({
         })
       );
     }
+
     setIsInitialized(true);
+
     setIsLoading(false);
 
     await fetchDownloadStatus();
@@ -402,20 +380,6 @@ export const ModelsList: FC<Props> = ({
             return c.reason ?? '';
           }, '');
         });
-
-        const elasticModels = models.filter((model) =>
-          Object.hasOwn(ELASTIC_MODEL_DEFINITIONS, model.model_id)
-        );
-        if (elasticModels.length > 0) {
-          for (const model of elasticModels) {
-            if (Object.values(DEPLOYMENT_STATE).includes(model.state as DeploymentState)) {
-              // no need to check for the download status if the model has been deployed
-              continue;
-            }
-            const isDownloaded = await isDownloadComplete(model.model_id);
-            model.state = isDownloaded ? MODEL_STATE.DOWNLOADED : MODEL_STATE.DOWNLOADING;
-          }
-        }
       }
 
       return true;
@@ -432,6 +396,8 @@ export const ModelsList: FC<Props> = ({
   }, []);
 
   const downLoadStatusFetchInProgress = useRef(false);
+  const abortedDownload = useRef(new Set<string>());
+
   /**
    * Updates model list with download status
    */
@@ -451,46 +417,43 @@ export const ModelsList: FC<Props> = ({
         if (isMounted()) {
           setItems((prevItems) => {
             return prevItems.map((item) => {
-              const newItem = { ...item };
+              if (item.model_type !== 'pytorch') {
+                return item;
+              }
+              const newItem = cloneDeep(item);
               if (downloadStatus[item.model_id]) {
+                newItem.state = MODEL_STATE.DOWNLOADING;
                 newItem.downloadState = downloadStatus[item.model_id];
               } else {
-                if (downloadInProgress.has(item.model_id)) {
+                /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
+                 * 1. Model is not downloaded at all
+                 * 2. Model download was in progress and finished
+                 * 3. Model download was in progress and aborted
+                 */
+                delete newItem.downloadState;
+
+                if (abortedDownload.current.has(item.model_id)) {
+                  // Change downloading state to not downloaded
+                  newItem.state = MODEL_STATE.NOT_DOWNLOADED;
+                  abortedDownload.current.delete(item.model_id);
+                } else if (downloadInProgress.has(item.model_id) || !newItem.state) {
                   // Change downloading state to downloaded
-                  delete newItem.downloadState;
                   newItem.state = MODEL_STATE.DOWNLOADED;
                 }
+
+                downloadInProgress.delete(item.model_id);
               }
               return newItem;
             });
           });
-        }
 
-        const downloadedModelIds = Array.from<string>(downloadInProgress).filter(
-          (v) => !downloadStatus[v]
-        );
-
-        if (downloadedModelIds.length > 0) {
-          // Show success toast
-          displaySuccessToast(
-            i18n.translate('xpack.ml.trainedModels.modelsList.downloadCompleteSuccess', {
-              defaultMessage:
-                '"{modelIds}" {modelIdsLength, plural, one {has} other {have}} been downloaded successfully.',
-              values: {
-                modelIds: downloadedModelIds.join(', '),
-                modelIdsLength: downloadedModelIds.length,
-              },
-            })
-          );
+          // setIsLoading(false);
         }
 
         Object.keys(downloadStatus).forEach((modelId) => {
           if (downloadStatus[modelId]) {
             downloadInProgress.add(modelId);
           }
-        });
-        downloadedModelIds.forEach((v) => {
-          downloadInProgress.delete(v);
         });
 
         if (isEmpty(downloadStatus)) {
@@ -504,7 +467,7 @@ export const ModelsList: FC<Props> = ({
         downLoadStatusFetchInProgress.current = false;
       }
     },
-    [trainedModelsApiService, displaySuccessToast, isMounted]
+    [trainedModelsApiService, isMounted]
   );
 
   /**
@@ -695,6 +658,7 @@ export const ModelsList: FC<Props> = ({
         defaultMessage: 'State',
       }),
       truncateText: false,
+      width: '200px',
       render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
         if (!config) return null;
@@ -740,6 +704,7 @@ export const ModelsList: FC<Props> = ({
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
+      width: '200px',
       actions,
       'data-test-subj': 'mlModelsTableColumnActions',
     },
@@ -966,7 +931,14 @@ export const ModelsList: FC<Props> = ({
       {modelsToDelete.length > 0 && (
         <DeleteModelsModal
           onClose={(refreshList) => {
+            modelsToDelete.forEach((model) => {
+              if (model.state === MODEL_STATE.DOWNLOADING) {
+                abortedDownload.current.add(model.model_id);
+              }
+            });
+
             setModelsToDelete([]);
+
             if (refreshList) {
               fetchModelsData();
             }
