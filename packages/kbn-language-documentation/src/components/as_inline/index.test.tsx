@@ -61,7 +61,9 @@ jest.mock('../../sections', () => {
 
 describe('###Documentation flyout component', () => {
   const renderInlineComponent = (searchInDescription = false) => {
-    return render(<LanguageDocumentationInline searchInDescription={searchInDescription} />);
+    return render(
+      <LanguageDocumentationInline searchInDescription={searchInDescription} height={80} />
+    );
   };
   it('has a header element for navigation through the sections', () => {
     renderInlineComponent();

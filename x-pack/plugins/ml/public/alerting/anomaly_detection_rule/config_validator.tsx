@@ -10,7 +10,7 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../../common/constants/states';
 import { type MlAnomalyDetectionAlertParams } from '../../../common/types/alerts';

@@ -90,8 +90,11 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationId,
     http,
     promptContexts,
+    setCurrentUserAvatar,
     setLastConversationId,
   } = useAssistantContext();
+
+  setCurrentUserAvatar(currentUserAvatar);
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>

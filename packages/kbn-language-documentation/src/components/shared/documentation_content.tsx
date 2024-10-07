@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
 
+import './documentation.scss';
+
 interface DocumentationContentProps {
   searchText: string;
   scrollTargets: React.MutableRefObject<{ [key: string]: HTMLElement }>;
@@ -29,7 +31,12 @@ function DocumentationContent({
 }: DocumentationContentProps) {
   return (
     <>
-      <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        direction="column"
+        className="documentation__docsText"
+      >
         <EuiText size="s">
           {!searchText && (
             <section
@@ -38,6 +45,7 @@ function DocumentationContent({
                   scrollTargets.current[sections.groups[0].label] = el;
                 }
               }}
+              className="documentation__docsTextIntro"
             >
               {sections?.initialSection}
             </section>
@@ -46,6 +54,7 @@ function DocumentationContent({
             return (
               <section
                 key={helpGroup.label}
+                className="documentation__docsTextGroup"
                 ref={(el) => {
                   if (el) {
                     scrollTargets.current[helpGroup.label] = el;
@@ -59,6 +68,7 @@ function DocumentationContent({
                 {filteredGroups?.[index].options.map((helpItem) => {
                   return (
                     <article
+                      className="documentation__docsTextItem"
                       key={helpItem.label}
                       ref={(el) => {
                         if (el) {

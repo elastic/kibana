@@ -125,7 +125,7 @@ export const createFilterFromOptions = (
             if (!value) {
               return null;
             }
-            return `${field}: "${value.replace(/"/g, '\\"')}"`;
+            return `${field}: "${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
           })
           .join(' and ')
       : `${options.groupBy} : "${id}"`;

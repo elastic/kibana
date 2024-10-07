@@ -67,6 +67,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
       ConfigKey.NAME,
       ConfigKey.TAGS,
       ConfigKey.PROJECT_ID,
+      ConfigKey.ALERT_CONFIG,
     ],
   });
 
@@ -94,15 +95,16 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     to: 'now',
   };
 
-  const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus({
-    range,
-    monitors: allMonitors,
-    monitorLocationsMap,
-    monitorQueryIdToConfigIdMap,
-    esClient: syntheticsEsClient,
-    monitorLocationIds: listOfLocationAfterFilter,
-    monitorQueryIds: enabledMonitorQueryIds,
-  });
+  const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
+    await queryMonitorStatus({
+      range,
+      monitors: allMonitors,
+      monitorLocationsMap,
+      monitorQueryIdToConfigIdMap,
+      esClient: syntheticsEsClient,
+      monitorLocationIds: listOfLocationAfterFilter,
+      monitorQueryIds: enabledMonitorQueryIds,
+    });
 
   return {
     allIds,
@@ -118,6 +120,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     upConfigs,
     downConfigs,
     pendingConfigs,
+    disabledConfigs,
   };
 }
 

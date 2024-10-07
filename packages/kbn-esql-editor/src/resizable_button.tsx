@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
-  editorIsInline,
 }: {
   onMouseDownResizeHandler: (
     mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
@@ -30,10 +29,7 @@ export function ResizableButton({
       onTouchStart={onMouseDownResizeHandler}
       indicator="border"
       css={css`
-        position: ${editorIsInline ? 'relative' : 'absolute'};
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: relative;
       `}
     />
   );

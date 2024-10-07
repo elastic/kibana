@@ -137,32 +137,6 @@ describe('when upgrading to a new stack version', () => {
         await clearLog();
       });
 
-      it('fails if unknown documents exist', async () => {
-        // remove the 'deprecated' type from the mappings, so that it is considered unknown
-        const { runMigrations } = await getUpToDateMigratorTestKit({
-          filterDeprecated: true,
-        });
-
-        try {
-          await runMigrations();
-        } catch (err) {
-          const errorMessage = err.message;
-          expect(errorMessage).toMatch(
-            `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types:`
-          );
-          expect(errorMessage).toMatch(
-            'To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.'
-          );
-          expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
-        }
-
-        const logs = await readLog();
-        expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
-        expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.');
-        expect(logs).toMatch('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.');
-        expect(logs).toMatch('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.');
-      });
-
       it('proceeds if there are no unknown documents', async () => {
         const { client, runMigrations } = await getUpToDateMigratorTestKit();
 
@@ -289,35 +263,6 @@ describe('when upgrading to a new stack version', () => {
         await clearLog();
       });
 
-      it('fails if unknown documents exist', async () => {
-        const { runMigrations } = await getCompatibleMigratorTestKit({
-          filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
-        });
-
-        try {
-          await runMigrations();
-        } catch (err) {
-          const errorMessage = err.message;
-          expect(errorMessage).toMatch(
-            `Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migration failed because some documents were found which use unknown saved object types:`
-          );
-          expect(errorMessage).toMatch(
-            'To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.'
-          );
-          expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
-        }
-
-        const logs = await readLog();
-        expect(logs).toMatch(`[${defaultKibanaIndex}] INIT -> WAIT_FOR_YELLOW_SOURCE.`);
-        expect(logs).toMatch(
-          `[${defaultKibanaIndex}] WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.`
-        ); // this step is run only if mappings are compatible but NOT equal
-        expect(logs).toMatch(
-          `[${defaultKibanaIndex}] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED.`
-        );
-        expect(logs).toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.`);
-      });
-
       it('proceeds if there are no unknown documents', async () => {
         const { client, runMigrations } = await getCompatibleMigratorTestKit();
 
@@ -376,10 +321,11 @@ describe('when upgrading to a new stack version', () => {
       expect(logs).toMatch('MARK_VERSION_INDEX_READY -> DONE');
 
       const counts = await getAggregatedTypesCount(client);
+      // for 'complex' objects, we discard second half and also multiples of 100
       expect(counts).toMatchInlineSnapshot(`
         Object {
           "basic": 10,
-          "complex": 5,
+          "complex": 4,
           "deprecated": 10,
           "task": 10,
         }

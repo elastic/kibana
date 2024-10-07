@@ -12,7 +12,7 @@ import { isStatusEnabled } from '../../../common/runtime_types/monitor_managemen
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -25,7 +25,11 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
       }),
       query: schema.object({
-        decrypted: schema.maybe(schema.boolean()),
+        internal: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
       }),
     },
   },
@@ -34,36 +38,36 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     response,
     server: { encryptedSavedObjects, coreStart },
     savedObjectsClient,
+    spaceId,
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      const { decrypted } = request.query;
+      const { internal } = request.query;
 
-      if (!decrypted) {
-        return mapSavedObjectToMonitor(
-          await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-            syntheticsMonitorType,
-            monitorId
-          )
-        );
-      } else {
+      const canSave =
+        (
+          await coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.save ?? false;
+
+      if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
-        const canSave =
-          (
-            await coreStart?.capabilities.resolveCapabilities(request, {
-              capabilityPath: 'uptime.*',
-            })
-          ).uptime.save ?? false;
-        if (!canSave) {
-          return response.forbidden();
-        }
-
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return await getSyntheticsMonitor({
+        const monitor = await getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
-          savedObjectsClient,
+          spaceId,
+        });
+        return mapSavedObjectToMonitor({ monitor, internal });
+      } else {
+        return mapSavedObjectToMonitor({
+          monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+            syntheticsMonitorType,
+            monitorId
+          ),
+          internal,
         });
       }
     } catch (getErr) {

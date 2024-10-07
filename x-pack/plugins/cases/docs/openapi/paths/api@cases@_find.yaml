@@ -8,7 +8,7 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/assignees.yaml'
+    - $ref: '../components/parameters/assignees_filter.yaml'
     - $ref: '../components/parameters/category.yaml'
     - $ref: '../components/parameters/defaultSearchOperator.yaml'
     - $ref: '../components/parameters/from.yaml'
