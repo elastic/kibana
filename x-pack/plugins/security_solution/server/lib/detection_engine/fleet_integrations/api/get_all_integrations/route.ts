@@ -41,7 +41,7 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
 
           const [packages, packagePolicies] = await Promise.all([
             fleet.packages.getPackages(),
-            fleet.packagePolicy.list(fleet.internalReadonlySoClient, {}),
+            fleet.packagePolicy.list(fleet.savedObjects.createInternalScopedSoClient(), {}),
           ]);
           // Elastic prebuilt rules is a special package and should be skipped
           const packagesWithoutPrebuiltSecurityRules = packages.filter(
