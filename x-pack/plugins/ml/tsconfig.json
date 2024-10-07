@@ -37,7 +37,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-visualizer-plugin",
-    "@kbn/datemath",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/es-types",
@@ -70,7 +69,6 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-url-state",
     "@kbn/monaco",
-    "@kbn/react-field",
     "@kbn/rison",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -130,6 +128,9 @@
     "@kbn/esql-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/json-schemas"
+    "@kbn/json-schemas",
+    "@kbn/ml-field-stats-flyout",
+    "@kbn/ml-parse-interval",
+    "@kbn/ml-validators"
   ]
 }

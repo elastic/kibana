@@ -120,7 +120,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
             ? i18n.translate(
                 'xpack.enterpriseSearch.content.searchIndices.ingestionmethod.nativeConnector',
                 {
-                  defaultMessage: 'Native connector',
+                  defaultMessage: 'Elastic managed connector',
                 }
               )
             : ingestionMethodToText(index.ingestionMethod)}

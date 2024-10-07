@@ -70,6 +70,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${samlIdPPlugin}`,
         `--plugin-path=${testEndpointsPlugin}`,
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
+        '--server.restrictInternalApis=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--xpack.security.loginHelp="Some-login-help."`,
         `--xpack.security.authc.providers=${JSON.stringify({

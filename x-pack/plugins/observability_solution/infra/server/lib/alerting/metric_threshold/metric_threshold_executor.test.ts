@@ -2384,7 +2384,7 @@ describe('The metric threshold rule type', () => {
     });
     expect(services.alertsClient.setAlertData).toHaveBeenNthCalledWith(index, {
       context: {
-        alertDetailsUrl: '',
+        alertDetailsUrl: `http://localhost:5601/app/observability/alerts/uuid-${id}`,
         alertState,
         group: id,
         reason,

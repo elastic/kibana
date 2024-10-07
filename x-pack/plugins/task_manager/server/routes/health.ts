@@ -62,6 +62,7 @@ export interface HealthRouteParams {
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
   docLinks: DocLinksServiceSetup;
+  numOfKibanaInstances$: Observable<number>;
 }
 
 export function healthRoute(params: HealthRouteParams): {
@@ -80,14 +81,26 @@ export function healthRoute(params: HealthRouteParams): {
     usageCounter,
     shouldRunTasks,
     docLinks,
+    numOfKibanaInstances$,
   } = params;
+
+  let numOfKibanaInstances = 1;
+  numOfKibanaInstances$.subscribe((updatedNumber) => {
+    // if there are no active nodes right now, assume there's at least 1
+    numOfKibanaInstances = Math.max(updatedNumber, 1);
+  });
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
   // consider the system unhealthy
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
-    const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
+    const summarizedStats = summarizeMonitoringStats(
+      logger,
+      monitoredStats,
+      config,
+      numOfKibanaInstances
+    );
     const { status, reason } = calculateHealthStatus(
       summarizedStats,
       config,

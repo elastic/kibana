@@ -40,6 +40,7 @@ import {
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
+import type { PartialEndpointPolicyData } from './data_generators/fleet_package_policy_generator';
 import { FleetPackagePolicyGenerator } from './data_generators/fleet_package_policy_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -1581,8 +1582,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackagePolicy(seed: string = 'seed'): PolicyData {
-    return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy();
+  public generatePolicyPackagePolicy({
+    seed,
+    overrides,
+  }: {
+    seed?: string;
+    overrides?: PartialEndpointPolicyData;
+  } = {}): PolicyData {
+    return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy(overrides);
   }
 
   /**

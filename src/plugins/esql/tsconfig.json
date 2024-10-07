@@ -10,7 +10,7 @@
     "server/**/*",
   ],
   "kbn_references": [
-    "@kbn/text-based-editor",
+    "@kbn/esql-editor",
     "@kbn/kibana-react-plugin",
     "@kbn/core",
     "@kbn/expressions-plugin",

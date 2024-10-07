@@ -10,10 +10,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
+import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import {
-  InitEntityStoreRequestBody,
-  InitEntityStoreRequestParams,
+  InitEntityEngineRequestBody,
+  InitEntityEngineRequestParams,
 } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -35,25 +35,25 @@ export const initEntityEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(InitEntityStoreRequestParams),
-            body: buildRouteValidationWithZod(InitEntityStoreRequestBody),
+            params: buildRouteValidationWithZod(InitEntityEngineRequestParams),
+            body: buildRouteValidationWithZod(InitEntityEngineRequestBody),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<InitEntityStoreResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
           const secSol = await context.securitySolution;
 
-          const body: InitEntityStoreResponse = await secSol
+          const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
             .init(request.params.entityType, request.body);
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in InitEntityStore:', e);
+          logger.error('Error in InitEntityEngine:', e);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

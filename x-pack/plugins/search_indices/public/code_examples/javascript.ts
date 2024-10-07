@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, CreateIndexLanguageExamples } from '../types';
+import { CodeLanguage, IngestDataCodeDefinition } from '../types';
+import { CreateIndexLanguageExamples } from './types';
 
 export const JAVASCRIPT_INFO: CodeLanguage = {
   id: 'javascript',
@@ -20,7 +21,7 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
 
 const SERVERLESS_INSTALL_CMD = `npm install @elastic/elasticsearch-serverless`;
 
-export const JavascriptServerlessExamples: CreateIndexLanguageExamples = {
+export const JavascriptServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
     installCommand: SERVERLESS_INSTALL_CMD,
     createIndex: ({
@@ -65,4 +66,59 @@ client.indices.create({
   },
 });`,
   },
+};
+
+export const JSServerlessIngestVectorDataExample: IngestDataCodeDefinition = {
+  installCommand: SERVERLESS_INSTALL_CMD,
+  ingestCommand: ({
+    apiKey,
+    elasticsearchURL,
+    sampleDocument,
+    indexName,
+  }) => `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+  },
+});
+
+const index = "${indexName}";
+const docs = [
+${JSON.stringify(sampleDocument, null, 2)},
+]
+
+const bulkIngestResponse = await client.helpers.bulk({
+  index,
+  datasource: docs,
+  onDocument() {
+    return {
+      index: {},
+    };
+  }
+});
+console.log(bulkIngestResponse);`,
+  updateMappingsCommand: ({
+    apiKey,
+    elasticsearchURL,
+    indexName,
+    mappingProperties,
+  }) => `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+node: '${elasticsearchURL}',
+auth: {
+  apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+}
+});
+
+const index = "${indexName}";
+const mapping = ${JSON.stringify(mappingProperties, null, 2)};
+
+const updateMappingResponse = await client.indices.putMapping({
+  index,
+  properties: mapping,
+});
+console.log(updateMappingResponse);`,
 };

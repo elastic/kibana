@@ -1,0 +1,590 @@
+---
+id: kibDevTutorialsSolutionNavigation
+slug: /kibana-dev-docs/solution-navigation
+title: Solution navigation
+description: Solution navigation replaces the default Kibana navigation in serverless mode or in stateful mode when a space solution is set, providing a more tailored experience for each solution. Learn how to build a custom navigation for your space solution or serverless project.
+date: 2023-07-26
+tags: ['kibana', 'serverless', 'solution', 'navigation']
+---
+
+## Introduction
+
+Welcome to the solution navigation documentation. Our tools help teams build customizable and flexible navigation for their solution (in stateful) or serverless projects. Solution navigation replaces the classic Kibana navigation in serverless mode or in stateful mode when a "space solution" is set, providing a more tailored experience for each solution.
+
+- [Solution navigation](#solution-navigation)
+  - [Left Side Navigation](#left-side-navigation)
+    - [Navigation Tree Definition](#navigation-tree-definition)
+      - [Example](#example)
+      - [Navigation tree API](#navigation-tree-api)
+        - [`NavigationTreeDefinition`](#navigationtreedefinition)
+        - [`GroupDefinition`](#groupdefinition)
+        - [`RecentlyAccessedDefinition`](#recentlyaccesseddefinition)
+    - [Important concepts](#important-concepts)
+      - [Deep links](#deep-links)
+      - [Cloud link](#cloud-links)
+      - [Preconfigured navigation sections](#preconfigured-navigation-sections)
+      - [Active navigation path](#active-navigation-path)
+  - [Breadcrumbs](#breadcrumbs)
+  - [Header action menu](#header-action-menu)
+  - [Global Search](#global-search)
+- [Testing](#testing)
+
+### Building Blocks
+
+The solution navigation is composed of several key building blocks that work together to form a comprehensive navigation system. These building blocks include:
+
+1. **Left Side Navigation**: Allow users to navigate through different sections of the solution.
+2. **Breadcrumbs**: A visual representation of the user's current location within the navigation hierarchy.
+3. **Header action menu**: A customizable toolbar that provides quick access to important actions and features.
+4. **Global Search**: A navigational search input that enables users to quickly access specific content within the solution.
+
+In the following sections, we will explore each of these building blocks in detail.
+
+## Left Side Navigation
+
+> **Note**
+> Left Side Navigation is available in shared_ux storybook under the `Chrome/Navigation` section. You can explore the components and their properties there.
+> `yarn storybook shared_ux`
+
+The left side navigation is a primary way for users to navigate through different sections of the solution. It consists of a tree of navigation items that can be expanded/collapsed or opened in a side panel. Apart from the navigation tree it also supports special pre-built blocks like recently accessed items. The main part of the navigation tree is solution's navigation: this is fully configured and supported by the solution teams (e.g. Observability). We also provide pre-configured platform sections as presets that solutions can use as part of their navigation (e.g. `ml`, `analytics`). Solutions can customize those sections to their needs.
+
+### Navigation Tree Definition
+
+Use the `NavigationTreeDefinition` interface to create your left side navigation using a tree definition. This interface allows you to define the complete navigation tree, including the **body** and **footer** of the navigation.
+
+#### Example
+
+Let's start by seeing an example, and we'll detail the different properties below.
+
+```ts
+import { type NavigationTreeDefinition, getPresets } from '@kbn/shared-ux-chrome-navigation';
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    { type: 'recentlyAccessed' }, // Add the recently accessed items
+    {
+      type: 'navGroup', // A top level group for the solution's navigation the main part of the navigation tree
+      id: 'search_nav',
+      title: 'Elasticsearch',
+      icon: 'logoElasticsearch',
+      defaultIsCollapsed: false, // ensures this section is automatically expanded when users first load the page
+      breadcrumbStatus: 'hidden', // this node of the navigation tree does not need to appear in the breadcrumbs, since the home logo icon navigates to the same link
+      children: [
+        {
+          id: 'search_getting_started',
+          title: 'Getting started',
+          link: 'serverlessElasticsearch', // All **internal** links must be deepLinks (core's `app.deepLinks`), learn more in #deep-links section
+        },
+        {
+          id: 'explore',
+          title: 'Explore', // A nested group with its children
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+            },
+            {
+              link: 'visualize',
+            },
+          ],
+        },
+        {
+          id: 'search',
+          title: 'Search',
+          renderAs: 'accordion', // This group will be rendered as an accordion
+          children: [
+            {
+              link: 'foo',
+            },
+            {
+              link: 'bar',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'preset',
+      preset: 'ml', // Insert all the machine learning links, learn more in #preconfigured-navigation-presets section
+    },
+  ],
+  footer: [
+    {
+      type: 'navGroup',
+      id: 'project_settings_nav',
+      title: 'Project settings',
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          renderAs: 'accordion',
+          children: [
+            {
+              link: 'management',
+              title: 'Management',
+            },
+            {
+              id: 'cloudLinkUserAndRoles',
+              cloudLink: 'userAndRoles', // Add an external link to Cloud, learn more in #cloud-links section
+            },
+            {
+              id: 'cloudLinkPerformance',
+              cloudLink: 'performance',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+```
+
+Once the navigation tree is defined we need to
+
+1. Convert it to an `Observable`
+2. (a) Initiate the navigation in the `serverless` plugin (Serverless Kibana)
+   (b) or Initiate the navigation in the `navigation` plugin (Stateful Kibana)
+
+```tsx
+// Serverless Kibana
+
+import { of } from 'rxjs';
+
+// plugin.ts (public) "start()"
+const navigationTree$ = of(navigationTree);
+
+serverless.initNavigation(navigationTree$, /* optional */ {
+  // Optional: pass a test subject for the navigation
+  dataTestSubj: 'myNavigation'
+});
+```
+
+```tsx
+// Stateful Kibana
+
+import { of } from 'rxjs';
+
+// plugin.ts (public) "start()"
+const navigationTree$ = of(navigationTree);
+
+navigation.addSolutionNavigation({
+  id: 'oblt',
+  title,
+  icon: 'logoObservability',
+  navigationTree$,
+  dataTestSubj: 'myNavigation',
+});
+```
+
+#### Navigation tree API
+
+> **Warning**
+> The API reference is manually maintained and might be out of date. Please refer [to the source](https://github.com/elastic/kibana/blob/main/packages/core/chrome/core-chrome-browser/src/project_navigation.ts) for the most up-to-date information, until we have automated the API reference.
+
+##### `NavigationTreeDefinition`
+
+| Property | Type                             | Description                                                                                                                          |
+| -------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `body`   | `RootNavigationItemDefinition[]` | The main content of the navigation, which can contain various types of items such as `cloudLink`, `recentlyAccessed`, or `navGroup`. |
+| `footer` | `RootNavigationItemDefinition[]` | The footer content of the navigation, which can contain additional items similar to the `body` section.                              |
+
+Each item in the `body` or `footer` arrays can have its own unique structure defined by the `RootNavigationItemDefinition` interface.
+
+The `RootNavigationItemDefinition` is one of:
+
+- `GroupDefinition`
+- `RecentlyAccessedDefinition`
+- `PresetDefinition`
+- `ItemDefinition`
+
+All those interfaces extend the `NodeDefinition` which has the following **common properties**:
+
+### `NodeDefinition`
+
+| Property             | Type                     | Description|
+| -------------------- | -------------------------| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | `Id` (extends `string`)  | Optional ID of the navigation node.|
+| `title`              | `string`                 | Optional title of the navigation node. If not provided and a "link" is provided, the title will be the Deep link title.|
+| `link`               | `LinkId`                 | Optional App ID or deep link ID for the navigation node. [More about deep links](#deep-links)|
+| `icon`               | `string`                 | Optional icon for the navigation node. Note that not all navigation depths will render the icon.|
+| `href`               | `string`                 | Use `href` for absolute links only. Internal links should use "link".|
+| `getIsActive`        | `function`               | Optional function to control the active state. This function is called whenever the location changes.|
+| `sideNavStatus`   | `'hidden'\|'visible'`    | Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree). |
+| `breadcrumbStatus`   | `'hidden'\|'visible'`    | An optional flag to indicate if the breadcrumb should be hidden when this node is active. The default value is `'visible'`.|
+| `spaceBefore`          | `EuiThemeSize\|null`   | Optional vertical space to add before this node. It defaults to `null` except for group node at **tree depth 1** where it defaults to `"m"`. |
+
+
+##### `GroupDefinition`
+
+The `GroupDefinition` interface represents a group of items in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
+
+| Property             | Type                    | Description|
+| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`               | `'navGroup'`            | Indicates that this item is a navigation group.|
+| `children`           | `NodeDefinition[]`      | Children of the group navigation node. This is recursive, groups can contain other groups. |
+| `defaultIsCollapsed` | `boolean \| undefined`  | Determines if the group is initially collapsed or expanded. Use `undefined` (recommended) to open the group if any of its children nodes match the current URL, `false` to always open the group, or `true` to always collapse it.|
+| `cloudLink`          | `CloudLinkId`           | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)|
+| `renderAs`          | `'block'\|'accordion'\|'panelOpener'\|'item'`| Property to indicate how the group should be rendered.<br/>* `'block'`: this is the default, renders the group as a block of items.<br />* `'accordion'`: wraps the items in an `EuiAccordion`.<br />* `'panelOpener'`: renders as an item with a `link` (required) + an icon button to open a panel on the right of the side nav.<br />* `'item'`: renders the group as an item in the side nav. This is useful when you want to declare descendant links of a node that will be displayed in the breadcrumb as such but you don't want to render any of the `children` in the side nav. |
+| `appendHorizontalRule`          | `boolean`           | Optional flag to indicate if a horizontal rule should be rendered after the node. <br />Note: this property is currently only available for group nodes in the navigation **panel** opening on the right of the side nav. |
+| `isCollapsible`          | `boolean`           | Optional flag to indicate if the accordion is collapsible (when `renderAs` is set to `'accordion'`.|
+
+##### `RecentlyAccessedDefinition`
+
+| Property             | Type                       | Description                                                                                                                            |
+| -------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`               | `'recentlyAccessed'`       | Indicates that this item represents the recently accessed section.                                                                     |
+| `recentlyAccessed$`  | `Observable<RecentItem[]>` | An optional observable for recently accessed items. If not provided, the recently accessed items from the Chrome service will be used. |
+| `defaultIsCollapsed` | `boolean`                  | If set to `true`, the recently accessed list will be collapsed by default. The default value is `false`.                               |
+
+##### `PresetDefinition`
+
+The `PresetDefinition` interface represents a group of items which are prepopulated based on a preset. It extends the `GroupDefinition` interface (without `children` as those are pre-defined) and has the following additional properties:
+
+| Property             | Type                    | Description|
+| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`               | `'preset'`            | Indicates that this item is a navigation group.|
+| `preset`             | `NavigationGroupPreset` | A preset value for the group, such as `'analytics'`, `'devtools'`, `'ml'`, or `'management'`.|                                                                                                      |
+
+##### `ItemDefinition`
+
+The `ItemDefinition` interface represents a top level item in the side navigation. It extends the `NodeDefinition` interface and has the following additional properties:
+
+
+| Property             | Type                    | Description|
+| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`               | `'navItem'`            | Indicates that this item is a navigation item.|
+| `cloudLink`          | `CloudLinkId`           | Optional cloud link ID for the navigation node. [More about cloud links](#cloud-links)|
+| `openInNewTab`          | `boolean`           | Optional flag to indicate if the target page should be opened in a new Browser tab.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav.|
+| `withBadge`          | `boolean`           | Optional flag to indicate if a badge should be rendered next to the text.<br />Note: this property is currently only used in the navigation **panel** opening on the right of the side nav.|
+| `badgeOptions`          | `{ text?: string; }`           | If `withBadge` is true, this object can be used to customize the badge. |
+
+### Panels
+
+As seen in the API above, the `renderAs` property can be used to render a group as a panel opener. This is useful when you want to display a group of links in the side navigation and display its content in a panel on the right of the side navigation.
+The content of the panel can be auto-generaged (based on the group's children) or manually provided.
+
+#### Auto-generated panels
+
+When the panel content is auto-generated, the group's children will be rendered in the panel. Those `children` can be items or other groups (that render as `'block' (default) or `'accordion'`). 
+The panel will be opened when the user clicks on the group's icon button. The panel will be closed when the user clicks on the group's icon again or when the user clicks outside of the panel.
+
+#### Manually provided panels
+
+When the panel content is manually provided, the group's `children` are used for the navigation tree definition (and the breadcrumbs) but the actual UI content rendered inside the panel is provided through JSX.
+
+```tsx
+// 1. Define the PanelContentProvider
+// -----------------------------------
+const panelContentProvider: PanelContentProvider = (id: string) => {
+  // The full ID of the node icon button that was clicked is provided (e.g. "root.group1.itemA")
+  // You can use this ID to determine which panel content to render
+
+  if (id === 'foo1') {
+    // Return the JSX to render in the panel for this node.
+    return {
+      content: ({
+        /** Handler to close the panel */
+        closePanel,
+        /** ChromeNavigationNode - The node that has been clicked in the main nav */
+        selectedNode,
+        /** ChromeProjectNavigationNode[][] - Active nodes that match the current URL location */
+        activeNodes,
+      }) => {
+        return (
+          <div>
+            <EuiText>This is a custom component to render in the panel.</EuiText>
+            <EuiButton onClick={() => closePanel()}>Close panel</EuiButton>
+          </div>
+        );
+      },
+    };
+  }
+
+  if (id === 'foo2') {
+    // If need be you can only customize the "Title" of the panel and leave the content
+    // to be auto-generated.
+    return {
+      title: <div style={{ backgroundColor: 'yellow', fontWeight: 600 }}>Custom title</div>,
+    };
+  }
+
+  // All other nodes content ids that haven't match will be auto-generated
+};
+
+// 2a. Provide it when initiating the navigation (serverless)
+// ----------------------------------------------------------
+serverless.initNavigation(navigationTree$, { panelContentProvider });
+
+// 2b. Provide it when initiating the navigation (stateful)
+// --------------------------------------------------------
+navigation.addSolutionNavigation({
+  ...
+  navigationTree$,
+  panelContentProvider
+});
+```
+
+### Important Concepts
+
+#### Deep links
+
+[Deep links](https://github.com/elastic/kibana/blob/f5034e60a501e7b61a3e1bff34e64c9b94c71344/packages/core/application/core-application-browser/src/application.ts#L281-L314) are a Kibana core's mechanism for registering sub-pages within an app. In "classic" Kibana they are used for the default side navigation, navigation APIs and the global search. Teams can register the deep links when they register their app. They can also update their registered deep links, or unregister deep links dynamically.
+
+The solution navigation API uses the same deep links mechanism to configure the navigation tree. The `link` property of the `NodeDefinition` interface refers to the deep links registered by apps. The `link` property can be either can be either the ID of an app, or a deep link ID.
+
+There are multiple benefits of using deep links instead of the hardcoded URLs when configuring the navigation tree:
+
+- Validation: the deep links are validated when the tree is built. If the deep link wasn't registered by any of the apps, an error will be thrown.
+- Type safety: the list of deep links is typed, and we don't rely on static URLs that can break.
+- Dynamic updates: the deep links can be updated or removed dynamically by apps that own them. The navigation tree will be updated accordingly.
+
+Internal navigation should be configured using deep links. The `href` property should be used only for external links. There is also a special type of external links for links pointing to the cloud console - `cloudLink`.
+
+#### Cloud links
+
+The `cloudLink` property of the `NodeDefinition` interface refers to the predefined list of cloud links that are configured in `kibana.yml`.
+Currently available pages are `'userAndRoles' | 'performance' | 'billingAndSub'`
+
+```ts
+import { type NavigationTreeDefinition, getPresets } from '@kbn/shared-ux-chrome-navigation';
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      type: 'navGroup',
+      id: 'topNav',
+      children: [
+        {
+          id: 'cloudLinkUserAndRoles',
+          cloudLink: 'userAndRoles',
+        },
+        {
+          id: 'cloudLinkPerformance',
+          cloudLink: 'performance',
+        },
+      ],
+    },
+  ],
+};
+```
+
+#### Preconfigured navigation sections
+
+When configuring the navigation tree you can use the preconfigured sections for areas of the Kibana platform, like `devtools`, `management`, `ml`, `analytics`:
+
+```ts
+import { type NavigationTreeDefinition, getPresets } from '@kbn/shared-ux-chrome-navigation';
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      type: 'preset',
+      preset: 'ml', // Insert all the machine learning links
+    },
+  ],
+};
+```
+
+The benefit of using the preset instead of building the platform sections manually is that the team who owns the platform area can update the preset as they see fit.
+
+#### Active Navigation Path
+
+Active navigation path is automatically tracked by the side navigation component. The active path is determined by the current URL and the deep links registered by apps. The active path is used to highlight the active navigation items and to determine the breadcrumbs.
+
+By default, the path matching logic uses `startsWith` against the path from the deep link and then picks the longest match. This can be overridden using `getIsActive` predicate.
+
+```ts
+import { type NavigationTreeDefinition } from '@kbn/shared-ux-chrome-navigation';
+
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      title: `Dashboards`,
+      link: 'dashboards',
+      getIsActive: ({ pathNameSerialized, prepend }) => {
+        return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+      },
+    },
+  ],
+};
+```
+
+Technically, multiple paths can be active simultaneously and multiple nodes can be highlighted in the side navigation. However, this is not recommended as it can be confusing for the user.
+
+## Breadcrumbs
+
+Breadcrumbs is a list of links that represent the current navigation path. Solution navigation breadcrumbs are automatically generated based on the navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+
+Solution breadcrumbs are built from 3 sections:
+
+1. **Project name / Deployment**
+2. **Solution navigation:** automatically set based on the solution's navigation tree and the currently active navigation path
+3. **Deeper context:** manually set by currently active application
+
+### Solution breadcrumbs sections
+
+#### Project name/Deployment breadcrumb
+
+Project name / Deployment breadcrumb is always displayed as the first breadcrumb. It displays either the project name (in serverless) or the deployment and opens a popup with either (a) links to manage the project and view all projects (serverless) or (b) the deployment and view all deployments (stateful).
+
+#### Solution navigation breadcrumbs
+
+Solution navigation breadcrumbs are automatically generated based on the solution's navigation tree set for the [side navigation](#left-side-navigation) and the currently active navigation path.
+
+> **Note**
+> If you have static pages that are accessible from an app and should display breadcrumbs but shouldn't be visible in the sidenav, you can add such pages to the navigation tree with `sideNavStatus: 'hidden'`.
+
+#### Deeper context breadcrumbs
+
+Most of the applications are already setting the complete breadcrumb path for stateful Kibana navigation using the `chrome.setBreadcrumbs` API. It is possible to reuse the existing breadcrumbs for deeper context breadcrumbs in the solution navigation. For this, apps need to add a deepLinkId to the breadcrumb object. This `deepLinkId` will be used to match and merge the solution navigation breadcrumbs with the deeper context breadcrumbs set in `chrome.setBreadcrumbs`.
+
+For example, consider the navigation tree:
+
+```ts
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    {
+      type: 'navGroup',
+      id: 'aiops',
+      title: 'AI Ops',
+      children: [
+        {
+          link: 'ml:anomalyexplorer',
+          title: 'Anomaly Explorer',
+        },
+      ],
+    },
+  ],
+};
+```
+
+When on `ml:anomalyexplorer` page, the solution navigation breadcrumbs will be:
+
+```ts
+[
+  {
+    text: 'AI Ops'
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+  },
+];
+```
+
+The ml app sets the stateless Kibana breadcrumbs using `chrome.setBreadcrumbs`:
+
+```ts
+chrome.setBreadcrumbs([
+  {
+    text: 'Kibana',
+  },
+  {
+    text: 'Machine Learning',
+    href: '/app/ml',
+    deepLinkId: 'ml',
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+    deepLinkId: 'ml:anomalyexplorer',
+  },
+  {
+    text: 'Jobs'
+  }
+])
+```
+
+The resulting breadcrumbs list will be:
+
+```ts
+[
+  {}, // project name/deployment breadcrumb
+  {
+      text: 'AI Ops'
+  },
+  {
+    text: 'Anomaly Explorer',
+    link: 'ml:anomalyexplorer',
+  },
+  {
+      text: 'Jobs'
+  }
+]
+```
+
+Alternatively, the deeper context breadcrumbs can be manually (only in Serverless) set using the `serverless.setBreadcrumbs` API.
+
+```ts
+serverless.setBreadcrumbs([
+  {
+    text: 'Deeper Context',
+    href: '/some/deeper/context',
+  },
+]);
+```
+
+These breadcrumbs are removed when the active navigation path changes.
+
+### Overriding breadcrumbs (serverless)
+
+In serverless, apps can override navigation breadcrumbs. This will override navigation breadcrumbs keeping the root "project name/deployment" breadcrumb:
+
+```ts
+pluginsStart.serverless.setBreadcrumbs([b1, b2, b3], { absolute: true });
+```
+
+The override is automatically reset when the active navigation path changes.
+
+## Header Action Menu
+
+The Header Action Menu, aka application toolbar, is a horizontal bar that is **conditionally** displayed at the top of the page below the header where apps can put their custom actions. Like the header, the toolbar has fixed position. Unlike the header however, this bar only appears when an application has registered content to show. Another UI difference, is the toolbar could be covered by flyouts or full-page overlays on the page. There might be other slight styling and positioning changes comparing to the toolbar in the classic Kibana navigation.
+There is no specific API or behavior change for the toolbar. To set custom content in this area, use the same API as in the classic Kibana `setHeaderActionMenu` [source](https://github.com/elastic/kibana/blob/188009f9376d5976b5db37e04c52a2b5bdaf9771/packages/core/application/core-application-browser/src/app_mount.ts#L176-L205). To unset content, call `setHeaderActionMenu` with `undefined`.
+
+> **Note**
+> The display of the toolbar container is conditional, based on whether there is toolbar content to show. Make sure to pass `undefined` to `setHeaderActionMenu` if there is no application content to show. In classic layout, passing an empty `span` or `div` element suffices to "clear" the toolbar, but in the solution navigation it will cause a large empty container to show below the header.
+
+## Global Search
+
+The global search (navigational search) is a search bar that can be opened from the header. It allows users to search for apps, pages, and other resources. Unlike the classic layout, the user must click a magnifying glass icon to reveal the search text input, but everything else in the solution navigation layout is the same.
+There is no specific API or behavior changes for this: refer to [the global search plugin](https://github.com/elastic/kibana/blob/bd778221dcf8b934f2947d6be3173f8a2796ef74/x-pack/plugins/global_search/README.md) to learn about the API.
+
+# Testing
+
+> **Note**
+> For the general guidance on functional testing serverless projects refer to [the doc](https://docs.google.com/document/d/1tiax7xoDYwFXYZjRTgVKkVMjN-SQzBWk4yn1JY6Z5UY/edit#heading=h.t3qzojfbvfj4)
+
+To test solution navigation in functional tests use `solutionNavigation` page object:
+
+```ts
+const solutionNavigation = getPageObject('solutionNavigation');
+```
+
+The page object exposes helpers for using links in the sidenav and breadcrumbs, as well as using page-level components such as global search, recent items, the Elastic logo icon. There are also utilities to check that no page reload happened during the navigation.
+
+Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
+
+- `solutionNavigation.expectExists()` checks that solution navigation is displayed and not the classic one
+- `solutionNavigation.sideNav.expectLinkExists({ deepLinkId: 'discover'})` checks that the link is visible. Can check by deepLinkId, text or navId
+- `solutionNavigation.sideNav.clickLink({ deepLinkId: 'discover'})` clicks the link. Use to navigate using the sidenav as the users would. Can be used with deepLinkId, text or navId
+- `solutionNavigation.sideNav.openSection(sectionId)` opens navigation section.
+- `solutionNavigation.sideNav.openPanel(sectionId)` opens navigation side panel.
+- `solutionNavigation.breadcrumbs.expectBreadcrumbExists({deepLinkId: 'discover'})` check that breadcrumbs is in the list using deepLinkId or text
+
+For each serverless project there is a navigation test suite that does a shared navigation smoke check and can be used as an example of using the shared navigation page object.
+
+- x-pack/test_serverless/functional/test_suites/
+  - search/navigation
+  - observability/navigation
+  - security/navigation
+
+Similarily for stateful you will find smoe tests with setup examples in the following directories:
+
+- x-pack/test/functional_solution_sidenav/tests
+  - observability_sidenav.ts
+  - search_sidenav.ts
+  - security_sidenav.ts
+

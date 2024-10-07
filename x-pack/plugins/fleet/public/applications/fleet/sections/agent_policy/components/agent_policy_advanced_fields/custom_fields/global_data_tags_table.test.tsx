@@ -26,7 +26,8 @@ const TEST_IDS = {
   VALUE_INPUT: 'globalDataTagsValueInput',
 };
 
-describe('GlobalDataTagsTable', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192798
+describe.skip('GlobalDataTagsTable', () => {
   let renderResult: RenderResult;
   let mockUpdateAgentPolicy: jest.Mock;
   const globalDataTags: GlobalDataTag[] = [

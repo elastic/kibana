@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { PersistTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 
 export interface Timeline {
   title: string;
@@ -69,7 +69,7 @@ export const getTimelineNonValidQuery = (): CompleteTimeline => ({
 });
 
 export const expectedExportedTimelineTemplate = (
-  templateResponse: Cypress.Response<TimelineResponse>
+  templateResponse: Cypress.Response<PersistTimelineResponse>
 ) => {
   const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
 
@@ -113,7 +113,9 @@ export const expectedExportedTimelineTemplate = (
   };
 };
 
-export const expectedExportedTimeline = (timelineResponse: Cypress.Response<TimelineResponse>) => {
+export const expectedExportedTimeline = (
+  timelineResponse: Cypress.Response<PersistTimelineResponse>
+) => {
   const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
 
   return {

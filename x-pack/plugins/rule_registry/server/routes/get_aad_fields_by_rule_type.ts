@@ -27,6 +27,7 @@ export const getAADFieldsByRuleType = (router: IRouter<RacRequestHandlerContext>
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },

@@ -24,6 +24,14 @@ import {
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
+import {
+  composeValidators,
+  maxLengthValidator,
+  memoryInputValidator,
+  requiredValidator,
+  JOB_ID_MAX_LENGTH,
+  ALLOWED_DATA_UNITS,
+} from '@kbn/ml-validators';
 
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
@@ -35,16 +43,6 @@ import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
 } from '../../../../../../../common/util/job_utils';
-import {
-  composeValidators,
-  maxLengthValidator,
-  memoryInputValidator,
-  requiredValidator,
-} from '../../../../../../../common/util/validators';
-import {
-  JOB_ID_MAX_LENGTH,
-  ALLOWED_DATA_UNITS,
-} from '../../../../../../../common/constants/validation';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const { collapseLiteralStrings } = XJson;

@@ -8,29 +8,18 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
-import { SavedObjectSetup } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 import { SavedObjectsTaggingApi } from './api';
-import { tagDecoratorConfig } from './decorator';
-
-interface SetupDeps {
-  savedObjects?: SavedObjectSetup;
-}
 
 export class SavedObjectTaggingOssPlugin
-  implements
-    Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, SetupDeps, {}>
+  implements Plugin<SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart, {}>
 {
   private apiRegistered = false;
   private api?: SavedObjectsTaggingApi;
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup({}: CoreSetup, { savedObjects }: SetupDeps) {
-    if (savedObjects) {
-      savedObjects.registerDecorator(tagDecoratorConfig);
-    }
-
+  public setup({}: CoreSetup) {
     return {
       registerTaggingApi: (provider: Promise<SavedObjectsTaggingApi>) => {
         if (this.apiRegistered) {

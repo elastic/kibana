@@ -11,7 +11,10 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  MappingProperty,
+  MappingPropertyBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 
 export interface SearchIndicesPluginSetup {
@@ -74,13 +77,34 @@ export interface CreateIndexCodeDefinition {
 }
 
 export interface CreateIndexCodeExamples {
+  exampleType: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
   javascript: CreateIndexCodeDefinition;
 }
 
-export interface CreateIndexLanguageExamples {
-  default: CreateIndexCodeDefinition;
-  dense_vector: CreateIndexCodeDefinition;
+export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
+  indexName: string;
+  sampleDocument: object;
+  mappingProperties: Record<string, MappingProperty>;
+}
+
+export type IngestCodeSnippetFunction = (params: IngestCodeSnippetParameters) => string;
+
+export interface IngestDataCodeDefinition {
+  installCommand?: string;
+  ingestCommand: IngestCodeSnippetFunction;
+  updateMappingsCommand: IngestCodeSnippetFunction;
+}
+
+export interface IngestDataCodeExamples {
+  title: string;
+  ingestTitle: string;
+  description: string;
+  defaultMapping: Record<string, MappingProperty>;
+  sense: IngestDataCodeDefinition;
+  curl: IngestDataCodeDefinition;
+  python: IngestDataCodeDefinition;
+  javascript: IngestDataCodeDefinition;
 }

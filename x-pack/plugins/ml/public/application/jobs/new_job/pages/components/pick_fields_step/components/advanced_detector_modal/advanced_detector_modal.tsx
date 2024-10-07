@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect } from 'react';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
@@ -17,13 +18,15 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+
 import {
   type Field,
   type Aggregation,
   EVENT_RATE_FIELD_ID,
   mlCategory,
 } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import { useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ManageSpacePage } from './manage_space_page';
+export { EditSpacePage } from './edit_space_page';

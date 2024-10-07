@@ -13,13 +13,10 @@ import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
-import type { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
-import {
-  getMockedBuildApi,
-  getMockedControlGroupApi,
-} from '../react_controls/controls/mocks/control_mocks';
-import { getTimesliderControlFactory } from '../react_controls/controls/timeslider_control/get_timeslider_control_factory';
+import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
+import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getTimesliderControlFactory } from '../controls/timeslider_control/get_timeslider_control_factory';
 import { dataService } from '../services/kibana_services';
 import { EditControlAction } from './edit_control_action';
 

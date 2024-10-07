@@ -15,6 +15,8 @@ import {
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { omitMonitorKeys } from './add_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { LOCAL_LOCATION } from './get_filters';
@@ -26,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -189,22 +192,45 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map((mon) => ({ ...mon, name: mon.name + '4' })).map(saveMonitor)
         );
 
-        const apiResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id1) +
-              '?decrypted=true'
-          )
-          .expect(200);
+        const apiResponse = await monitorTestService.getMonitor(id1);
 
-        expect(apiResponse.body).eql({
-          ...monitors[0],
-          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-          revision: 1,
-          locations: [LOCAL_LOCATION],
-          name: 'Test HTTP Monitor 044',
-          labels: {},
-        });
+        expect(apiResponse.body).eql(
+          omitMonitorKeys({
+            ...monitors[0],
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            revision: 1,
+            locations: [LOCAL_LOCATION],
+            name: 'Test HTTP Monitor 044',
+            labels: {},
+          })
+        );
+      });
+
+      it('should get by id with ui query param', async () => {
+        const [{ id: id1 }] = await Promise.all(
+          monitors.map((mon) => ({ ...mon, name: mon.name + '5' })).map(saveMonitor)
+        );
+
+        const apiResponse = await monitorTestService.getMonitor(id1, { internal: true });
+
+        expect(apiResponse.body).eql(
+          omit(
+            {
+              ...monitors[0],
+              form_monitor_type: 'icmp',
+              revision: 1,
+              locations: [LOCAL_LOCATION],
+              name: 'Test HTTP Monitor 045',
+              hosts: '192.33.22.111:3333',
+              hash: '',
+              journey_id: '',
+              max_attempts: 2,
+              labels: {},
+            },
+            ['config_id', 'id', 'form_monitor_type']
+          )
+        );
       });
 
       it('returns 404 if monitor id is not found', async () => {

@@ -28,6 +28,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
@@ -36,7 +37,7 @@ export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitorWithId | EncryptedSyntheticsSavedMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;

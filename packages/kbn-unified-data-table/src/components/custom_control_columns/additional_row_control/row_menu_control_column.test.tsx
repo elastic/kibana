@@ -66,6 +66,6 @@ describe('getRowMenuControlColumn', () => {
     expect(button).toBeInTheDocument();
 
     button.click();
-    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.rows[1], rowIndex: 1 });
+    expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });
 });

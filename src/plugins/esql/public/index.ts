@@ -8,9 +8,9 @@
  */
 
 import { EsqlPlugin } from './plugin';
-export type { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
+export type { ESQLEditorProps } from '@kbn/esql-editor';
 export type { EsqlPluginStart } from './types';
-export { TextBasedLangEditor } from './create_editor';
+export { ESQLLangEditor } from './create_editor';
 
 export function plugin() {
   return new EsqlPlugin();

@@ -57,6 +57,13 @@ Array [
           "value": "*",
         },
       },
+      Object {
+        "pipeline": Object {
+          "ignore_failure": true,
+          "ignore_missing_pipeline": true,
+          "name": "slo-unique-id@custom",
+        },
+      },
     ],
   },
 ]

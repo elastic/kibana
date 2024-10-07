@@ -28,7 +28,7 @@ const monitor850UI = {
     tags: [],
     timeout: '16',
     name: 'Dominique Clarke',
-    locations: [{ id: 'us_central', isServiceManaged: true }],
+    locations: [{ id: 'us_central', isServiceManaged: true }] as any,
     namespace: 'default',
     origin: 'ui',
     journey_id: '',

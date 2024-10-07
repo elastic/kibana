@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   LanguageDocumentationPopover,
   LanguageDocumentationPopoverContent,
-} from '@kbn/language-documentation-popover';
+} from '@kbn/language-documentation';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -849,7 +849,7 @@ export function FormulaEditor({
                       buttonProps={{
                         color: 'text',
                         className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'TextBasedLangEditor-documentation',
+                        'data-test-subj': 'ESQLEditor-documentation',
                         'aria-label': i18n.translate(
                           'xpack.lens.formula.editorHelpInlineShowToolTip',
                           {

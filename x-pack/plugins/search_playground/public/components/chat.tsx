@@ -198,6 +198,7 @@ export const Chat = () => {
                     button={
                       isSubmitting || isRegenerating ? (
                         <EuiButtonIcon
+                          data-test-subj="stopRequestButton"
                           aria-label={i18n.translate(
                             'xpack.searchPlayground.chat.stopButtonAriaLabel',
                             {

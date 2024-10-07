@@ -65,6 +65,9 @@ export const getRuleAlertSummaryRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_alert_summary`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
         query: querySchema,

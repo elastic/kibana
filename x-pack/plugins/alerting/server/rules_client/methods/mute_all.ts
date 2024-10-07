@@ -44,7 +44,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.MUTE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -55,7 +55,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     ruleAuditEvent({
       action: RuleAuditAction.MUTE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

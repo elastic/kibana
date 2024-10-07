@@ -37,6 +37,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
+import { useStorage } from '@kbn/ml-local-storage';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
@@ -53,6 +54,11 @@ import {
   commonColumns,
   significantItemColumns,
 } from '../log_rate_analysis_results_table/use_columns';
+import {
+  AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
 
 import {
   getGroupTableItems,
@@ -62,7 +68,7 @@ import {
 
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
 import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
-import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
+import { LogRateAnalysisInfoPopover } from './log_rate_analysis_info_popover';
 import type { ColumnNames } from '../log_rate_analysis_results_table';
 
 const groupResultsMessage = i18n.translate(
@@ -187,11 +193,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
-  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>([
-    'p-value',
-    'Baseline rate',
-    'Deviation rate',
-  ]);
+  const [skippedColumns, setSkippedColumns] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS>
+  >(AIOPS_LOG_RATE_ANALYSIS_RESULT_COLUMNS, ['p-value', 'Baseline rate', 'Deviation rate']);
   // null is used as the uninitialized state to identify the first load.
   const [skippedFields, setSkippedFields] = useState<string[] | null>(null);
 
@@ -425,6 +430,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onCancel={cancelHandler}
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
+        analysisInfo={<LogRateAnalysisInfoPopover />}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -480,8 +486,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </EuiFlexItem>
       </ProgressControls>
 
-      <LogRateAnalysisTypeCallOut />
-
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
@@ -530,7 +534,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
         </>
       )}
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {!isRunning && !showLogRateAnalysisResultsTable && (
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"

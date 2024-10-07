@@ -21,7 +21,7 @@
             "section": "def-public.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/theme_provider.tsx",
         "deprecated": false,
@@ -69,7 +69,7 @@
             "section": "def-public.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/with_theme.tsx",
         "deprecated": false,

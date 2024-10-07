@@ -39,6 +39,7 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_ASSET_CRITICALITY_SETTING,
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -209,6 +210,24 @@ export const initUiSettings = (
           defaultMessage:
             '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel', {
+        defaultMessage: 'Enable visualizations in flyout',
+      }),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
+        {
+          defaultMessage:
+            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
+          values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
       type: 'boolean',

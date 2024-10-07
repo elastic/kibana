@@ -27,6 +27,7 @@ import {
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
+  selectDocumentNotesBySavedObjectId,
   selectNotesPagination,
   selectNotesTablePendingDeleteIds,
   selectNotesTableSearch,
@@ -42,6 +43,9 @@ import {
   userSelectedRowForDeletion,
   userSortedNotes,
   selectSortedNotesByDocumentId,
+  fetchNotesBySavedObjectIds,
+  selectNotesBySavedObjectId,
+  selectSortedNotesBySavedObjectId,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -72,11 +76,18 @@ const initialNonEmptyState = {
   ids: [mockNote1.noteId, mockNote2.noteId],
   status: {
     fetchNotesByDocumentIds: ReqStatus.Idle,
+    fetchNotesBySavedObjectIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNotes: ReqStatus.Idle,
     fetchNotes: ReqStatus.Idle,
   },
-  error: { fetchNotesByDocumentIds: null, createNote: null, deleteNotes: null, fetchNotes: null },
+  error: {
+    fetchNotesByDocumentIds: null,
+    fetchNotesBySavedObjectIds: null,
+    createNote: null,
+    deleteNotes: null,
+    fetchNotes: null,
+  },
   pagination: {
     page: 1,
     perPage: 10,
@@ -175,6 +186,88 @@ describe('notesSlice', () => {
           error: {
             ...initalEmptyState.error,
             fetchNotesByDocumentIds: 'error',
+          },
+        });
+      });
+    });
+
+    describe('fetchNotesBySavedObjectIds', () => {
+      it('should set correct status state when fetching notes by saved object ids', () => {
+        const action = { type: fetchNotesBySavedObjectIds.pending.type };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Loading,
+          },
+        });
+      });
+
+      it('should set correct state when success on fetch notes by saved object id ids on an empty state', () => {
+        const action = {
+          type: fetchNotesBySavedObjectIds.fulfilled.type,
+          payload: {
+            entities: {
+              notes: {
+                [mockNote1.noteId]: mockNote1,
+              },
+            },
+            result: [mockNote1.noteId],
+          },
+        };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          entities: action.payload.entities.notes,
+          ids: action.payload.result,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+          },
+        });
+      });
+
+      it('should replace notes when success on fetch notes by saved object id ids on a non-empty state', () => {
+        const newMockNote = { ...mockNote1, timelineId: 'timelineId' };
+        const action = {
+          type: fetchNotesBySavedObjectIds.fulfilled.type,
+          payload: {
+            entities: {
+              notes: {
+                [newMockNote.noteId]: newMockNote,
+              },
+            },
+            result: [newMockNote.noteId],
+          },
+        };
+
+        expect(notesReducer(initialNonEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          entities: {
+            [newMockNote.noteId]: newMockNote,
+            [mockNote2.noteId]: mockNote2,
+          },
+          ids: [newMockNote.noteId, mockNote2.noteId],
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+          },
+        });
+      });
+
+      it('should set correct error state when failing to fetch notes by saved object ids', () => {
+        const action = { type: fetchNotesBySavedObjectIds.rejected.type, error: 'error' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Failed,
+          },
+          error: {
+            ...initalEmptyState.error,
+            fetchNotesBySavedObjectIds: 'error',
           },
         });
       });
@@ -516,7 +609,31 @@ describe('notesSlice', () => {
       expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
     });
 
-    it('should return all notes sorted dor an existing document id', () => {
+    it('should return no notes if no notes is found with specified document id and saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'wrong-savedObjectId',
+        })
+      ).toHaveLength(0);
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: 'wrong-document-id',
+          savedObjectId: 'some-timeline-id',
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should return all notes for an existing document id and existing saved object id', () => {
+      expect(
+        selectDocumentNotesBySavedObjectId(mockGlobalState, {
+          documentId: '1',
+          savedObjectId: 'timeline-1',
+        })
+      ).toHaveLength(1);
+    });
+
+    it('should return all notes sorted for an existing document id', () => {
       const oldestNote = {
         eventId: '1', // should be a valid id based on mockTimelineData
         noteId: '1',
@@ -565,6 +682,89 @@ describe('notesSlice', () => {
       expect(
         selectSortedNotesByDocumentId(mockGlobalState, {
           documentId: 'wrong-document-id',
+          sort: {
+            field: 'created',
+            direction: 'desc',
+          },
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should return all notes for an existing saved object id', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, 'timeline-1')).toEqual([
+        mockGlobalState.notes.entities['1'],
+      ]);
+    });
+
+    it('should return no notes if saved object id does not exist', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, 'wrong-saved-object-id')).toHaveLength(0);
+    });
+
+    it('should return no notes if saved object id is empty string', () => {
+      expect(selectNotesBySavedObjectId(mockGlobalState, '')).toHaveLength(0);
+    });
+
+    it('should return all notes sorted for an existing saved object id', () => {
+      const oldestNote = {
+        eventId: '1', // should be a valid id based on mockTimelineData
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      };
+      const newestNote = {
+        ...oldestNote,
+        noteId: '2',
+        created: 1663882689000,
+      };
+
+      const state = {
+        ...mockGlobalState,
+        notes: {
+          ...mockGlobalState.notes,
+          entities: {
+            '1': oldestNote,
+            '2': newestNote,
+          },
+          ids: ['1', '2'],
+        },
+      };
+
+      const ascResult = selectSortedNotesBySavedObjectId(state, {
+        savedObjectId: 'timeline-1',
+        sort: { field: 'created', direction: 'asc' },
+      });
+      expect(ascResult[0]).toEqual(oldestNote);
+      expect(ascResult[1]).toEqual(newestNote);
+
+      const descResult = selectSortedNotesBySavedObjectId(state, {
+        savedObjectId: 'timeline-1',
+        sort: { field: 'created', direction: 'desc' },
+      });
+      expect(descResult[0]).toEqual(newestNote);
+      expect(descResult[1]).toEqual(oldestNote);
+    });
+
+    it('should also return no notes if saved object id does not exist', () => {
+      expect(
+        selectSortedNotesBySavedObjectId(mockGlobalState, {
+          savedObjectId: 'wrong-document-id',
+          sort: {
+            field: 'created',
+            direction: 'desc',
+          },
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should also return no notes if saved object id is empty string', () => {
+      expect(
+        selectSortedNotesBySavedObjectId(mockGlobalState, {
+          savedObjectId: '',
           sort: {
             field: 'created',
             direction: 'desc',

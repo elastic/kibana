@@ -64,7 +64,8 @@ const querySchema = schema.object({
 export const findAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
@@ -73,6 +74,7 @@ export const findAlertRoute = (
         query: querySchema,
       },
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Find alerts',
         tags: ['oas-tag:alerting'],
         description:

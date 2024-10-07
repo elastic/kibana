@@ -45,6 +45,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -245,6 +246,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: urlTrackerMock,
     profilesManager: profilesManagerMock,
+    ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }

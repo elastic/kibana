@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/esql-editor",
+  "owner": "@elastic/kibana-esql",
+}

@@ -129,7 +129,6 @@ export class ShareMenuManager {
           snapshotShareWarning,
           disabledShareUrl,
           isDirty,
-          isEmbedded: allowEmbed,
           shareMenuItems: menuItems,
           toasts,
           onClose: () => {

@@ -59,6 +59,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   it('formats successful response', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(result.body).toEqual({ success: true });
@@ -67,6 +68,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   it('calls upon esClient.deleteByQuery', async () => {
     await supertest(httpSetup.server.listener)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     expect(elasticsearchClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);

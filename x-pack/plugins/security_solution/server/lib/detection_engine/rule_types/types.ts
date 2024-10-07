@@ -32,7 +32,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -104,7 +104,6 @@ export interface RunOpts<TParams extends RuleParams> {
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
-  inputIndexFields: DataViewFieldBase[];
   experimentalFeatures?: ExperimentalFeatures;
 }
 

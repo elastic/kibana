@@ -47,7 +47,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNMUTE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -58,7 +58,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: strin
     ruleAuditEvent({
       action: RuleAuditAction.UNMUTE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

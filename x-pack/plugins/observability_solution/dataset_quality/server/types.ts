@@ -6,26 +6,26 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;
-  analytics: AnalyticsServiceSetup;
   telemetry: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
   fleet: FleetStartContract;
   telemetry: TelemetryPluginStart;
-  analytics: AnalyticsServiceStart;
   taskManager: TaskManagerStartContract;
+  usageCollection?: UsageCollectionStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

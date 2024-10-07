@@ -1237,3 +1237,4 @@ security:
 tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
+    x-displayName: Security AI assistant

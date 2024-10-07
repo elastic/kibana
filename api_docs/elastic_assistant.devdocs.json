@@ -257,21 +257,6 @@
           },
           {
             "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.chain",
-            "type": "Object",
-            "tags": [],
-            "label": "chain",
-            "description": [],
-            "signature": [
-              "RetrievalQAChain",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.esClient",
             "type": "Object",
             "tags": [],

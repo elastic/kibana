@@ -64,6 +64,13 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
                 .join(','),
       },
     },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        ignore_failure: true,
+        name: `slo-${slo.id}@custom`,
+      },
+    },
   ],
   _meta: {
     description: 'Ingest pipeline for SLO rollup data',

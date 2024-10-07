@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 import { parseMessages } from '../../../../common/constants/messages';
-import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';

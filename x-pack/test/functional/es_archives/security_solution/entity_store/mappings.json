@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".entities.v1.latest.ea_host_entity_store",
+    "index": ".entities.v1.latest.ea_default_host_entity_store",
     "mappings": {
       "date_detection": false,
       "dynamic_templates": [
@@ -162,7 +162,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".entities.v1.latest.ea_user_entity_store",
+    "index": ".entities.v1.latest.ea_default_user_entity_store",
     "mappings": {
       "date_detection": false,
       "dynamic_templates": [

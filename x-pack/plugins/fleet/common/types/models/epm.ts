@@ -156,9 +156,9 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 // and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
 interface RegistryAdditionalProperties {
   assets?: string[];
-  download: string;
+  download?: string;
   signature_path?: string;
-  path: string;
+  path?: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
@@ -317,9 +317,9 @@ export interface AssetParts {
 export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
-  KibanaAssetTypeToParts
+  KibanaAssetTypeToParts | undefined
 > &
-  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts | undefined>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -534,7 +534,7 @@ export type PackageInfo =
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 export interface PackageMetadata {
-  has_policies: true;
+  has_policies: boolean;
 }
 
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';

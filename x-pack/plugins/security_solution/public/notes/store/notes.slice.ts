@@ -14,6 +14,7 @@ import {
   deleteNotes as deleteNotesApi,
   fetchNotes as fetchNotesApi,
   fetchNotesByDocumentIds as fetchNotesByDocumentIdsApi,
+  fetchNotesBySaveObjectIds as fetchNotesBySaveObjectIdsApi,
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
@@ -26,7 +27,7 @@ export enum ReqStatus {
   Failed = 'failed',
 }
 
-interface HttpError {
+export interface HttpError {
   type: 'http';
   status: number;
 }
@@ -34,12 +35,14 @@ interface HttpError {
 export interface NotesState extends EntityState<Note> {
   status: {
     fetchNotesByDocumentIds: ReqStatus;
+    fetchNotesBySavedObjectIds: ReqStatus;
     createNote: ReqStatus;
     deleteNotes: ReqStatus;
     fetchNotes: ReqStatus;
   };
   error: {
     fetchNotesByDocumentIds: SerializedError | HttpError | null;
+    fetchNotesBySavedObjectIds: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
     deleteNotes: SerializedError | HttpError | null;
     fetchNotes: SerializedError | HttpError | null;
@@ -66,12 +69,14 @@ const notesAdapter = createEntityAdapter<Note>({
 export const initialNotesState: NotesState = notesAdapter.getInitialState({
   status: {
     fetchNotesByDocumentIds: ReqStatus.Idle,
+    fetchNotesBySavedObjectIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNotes: ReqStatus.Idle,
     fetchNotes: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentIds: null,
+    fetchNotesBySavedObjectIds: null,
     createNote: null,
     deleteNotes: null,
     fetchNotes: null,
@@ -98,6 +103,16 @@ export const fetchNotesByDocumentIds = createAsyncThunk<
 >('notes/fetchNotesByDocumentIds', async (args) => {
   const { documentIds } = args;
   const res = await fetchNotesByDocumentIdsApi(documentIds);
+  return normalizeEntities(res.notes);
+});
+
+export const fetchNotesBySavedObjectIds = createAsyncThunk<
+  NormalizedEntities<Note>,
+  { savedObjectIds: string[] },
+  {}
+>('notes/fetchNotesBySavedObjectIds', async (args) => {
+  const { savedObjectIds } = args;
+  const res = await fetchNotesBySaveObjectIdsApi(savedObjectIds);
   return normalizeEntities(res.notes);
 });
 
@@ -198,6 +213,17 @@ const notesSlice = createSlice({
         state.status.fetchNotesByDocumentIds = ReqStatus.Failed;
         state.error.fetchNotesByDocumentIds = action.payload ?? action.error;
       })
+      .addCase(fetchNotesBySavedObjectIds.pending, (state) => {
+        state.status.fetchNotesBySavedObjectIds = ReqStatus.Loading;
+      })
+      .addCase(fetchNotesBySavedObjectIds.fulfilled, (state, action) => {
+        notesAdapter.upsertMany(state, action.payload.entities.notes);
+        state.status.fetchNotesBySavedObjectIds = ReqStatus.Succeeded;
+      })
+      .addCase(fetchNotesBySavedObjectIds.rejected, (state, action) => {
+        state.status.fetchNotesBySavedObjectIds = ReqStatus.Failed;
+        state.error.fetchNotesBySavedObjectIds = action.payload ?? action.error;
+      })
       .addCase(createNote.pending, (state) => {
         state.status.createNote = ReqStatus.Loading;
       })
@@ -253,6 +279,12 @@ export const selectFetchNotesByDocumentIdsStatus = (state: State) =>
 export const selectFetchNotesByDocumentIdsError = (state: State) =>
   state.notes.error.fetchNotesByDocumentIds;
 
+export const selectFetchNotesBySavedObjectIdsStatus = (state: State) =>
+  state.notes.status.fetchNotesBySavedObjectIds;
+
+export const selectFetchNotesBySavedObjectIdsError = (state: State) =>
+  state.notes.error.fetchNotesBySavedObjectIds;
+
 export const selectCreateNoteStatus = (state: State) => state.notes.status.createNote;
 
 export const selectCreateNoteError = (state: State) => state.notes.error.createNote;
@@ -280,6 +312,24 @@ export const selectNotesByDocumentId = createSelector(
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
 );
 
+export const selectNotesBySavedObjectId = createSelector(
+  [selectAllNotes, (state: State, savedObjectId: string) => savedObjectId],
+  (notes, savedObjectId) =>
+    savedObjectId.length > 0 ? notes.filter((note) => note.timelineId === savedObjectId) : []
+);
+
+export const selectDocumentNotesBySavedObjectId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      { documentId, savedObjectId }: { documentId: string; savedObjectId: string }
+    ) => ({ documentId, savedObjectId }),
+  ],
+  (notes, { documentId, savedObjectId }) =>
+    notes.filter((note) => note.eventId === documentId && note.timelineId === savedObjectId)
+);
+
 export const selectSortedNotesByDocumentId = createSelector(
   [
     selectAllNotes,
@@ -295,6 +345,34 @@ export const selectSortedNotesByDocumentId = createSelector(
     const { field, direction } = sort;
     return notes
       .filter((note: Note) => note.eventId === documentId)
+      .sort((first: Note, second: Note) => {
+        const a = first[field];
+        const b = second[field];
+        if (a == null) return 1;
+        if (b == null) return -1;
+        return direction === 'asc' ? (a > b ? 1 : -1) : a > b ? -1 : 1;
+      });
+  }
+);
+
+export const selectSortedNotesBySavedObjectId = createSelector(
+  [
+    selectAllNotes,
+    (
+      state: State,
+      {
+        savedObjectId,
+        sort,
+      }: { savedObjectId: string; sort: { field: keyof Note; direction: 'asc' | 'desc' } }
+    ) => ({ savedObjectId, sort }),
+  ],
+  (notes, { savedObjectId, sort }) => {
+    const { field, direction } = sort;
+    if (savedObjectId.length === 0) {
+      return [];
+    }
+    return notes
+      .filter((note: Note) => note.timelineId === savedObjectId)
       .sort((first: Note, second: Note) => {
         const a = first[field];
         const b = second[field];

@@ -15,7 +15,7 @@ export interface EntityLatestServiceRaw {
   agent: {
     name: AgentName[];
   };
-  data_stream: {
+  source_data_stream: {
     type: string[];
   };
   service: {

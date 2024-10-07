@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Utils from '../util';
+import { ensureDirSync, createSync } from '../util';
 import { createAgentInput } from './agent';
 import { InputType } from '../../common';
 
@@ -27,13 +27,13 @@ describe('createAgentInput', () => {
 
     createAgentInput(dataStreamPath, inputTypes);
 
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
+    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
 
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${dataStreamPath}/agent/stream/aws-s3.yml.hbs`,
       expect.any(String)
     );
-    expect(Utils.createSync).toHaveBeenCalledWith(
+    expect(createSync).toHaveBeenCalledWith(
       `${dataStreamPath}/agent/stream/filestream.yml.hbs`,
       expect.any(String)
     );
@@ -42,7 +42,7 @@ describe('createAgentInput', () => {
   it('Should not create agent files if there are no input types', async () => {
     createAgentInput(dataStreamPath, []);
 
-    expect(Utils.ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
-    expect(Utils.createSync).not.toHaveBeenCalled();
+    expect(ensureDirSync).toHaveBeenCalledWith(`${dataStreamPath}/agent/stream`);
+    expect(createSync).not.toHaveBeenCalled();
   });
 });

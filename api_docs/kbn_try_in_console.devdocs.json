@@ -29,7 +29,7 @@
         "signature": [
           "({ request, application, consolePlugin, sharePlugin, content, showIcon, type, }: ",
           "TryInConsoleButtonProps",
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
         "deprecated": false,

@@ -19,7 +19,7 @@ import { COLORS } from './constants';
 
 /*
   Finds an element with a text content that exactly matches the passed argument.
-  Handly because React Testing Library's doesn't provide an easy way to search by
+  Handy because React Testing Library's doesn't provide an easy way to search by
   text if the text is split into multiple DOM elements.
 */
 function findChildByTextContent(parent: Element, textContent: string): HTMLElement {

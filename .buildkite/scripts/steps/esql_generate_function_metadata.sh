@@ -2,7 +2,7 @@
 set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="packages/kbn-esql-validation-autocomplete"
-EDITOR_PACKAGE_DIR="packages/kbn-language-documentation-popover"
+EDITOR_PACKAGE_DIR="packages/kbn-language-documentation"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {

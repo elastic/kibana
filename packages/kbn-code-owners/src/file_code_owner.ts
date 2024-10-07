@@ -81,7 +81,7 @@ export async function runGetOwnersForFileCli() {
   run(
     async ({ flags, log }) => {
       const targetFile = flags.file as string;
-      if (!targetFile) throw createFlagError(`Missing --flag argument`);
+      if (!targetFile) throw createFlagError(`Missing --file argument`);
       existOrThrow(targetFile); // This call is duplicated in getPathsWithOwnersReversed(), so this is a short circuit
       const result = getCodeOwnersForFile(targetFile);
       if (result) log.success(result);

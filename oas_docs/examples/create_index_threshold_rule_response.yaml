@@ -1,4 +1,5 @@
-summary: The create rule API returns a JSON object that contains details about the rule.
+summary: Index threshold rule
+description: The response for successfully creating an index threshold rule.
 value:
   actions:
     - group: threshold met

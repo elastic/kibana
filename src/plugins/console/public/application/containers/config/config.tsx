@@ -8,16 +8,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
 
-export interface Props {
-  isVerticalLayout: boolean;
-}
+export function Config() {
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-export function Config({ isVerticalLayout }: Props) {
   return (
     <EuiPanel
       color="subdued"

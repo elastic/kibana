@@ -17,3 +17,14 @@ export interface SecurityServiceConfigType {
     };
   };
 }
+
+export interface PKCS12ConfigType {
+  ssl?: {
+    keystore?: {
+      path?: string;
+    };
+    truststore?: {
+      path?: string;
+    };
+  };
+}

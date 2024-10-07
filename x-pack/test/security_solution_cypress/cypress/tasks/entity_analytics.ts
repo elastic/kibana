@@ -65,7 +65,6 @@ export const mockRiskEngineEnabled = () => {
     body: {
       risk_engine_status: 'ENABLED',
       legacy_risk_engine_status: 'INSTALLED',
-      is_max_amount_of_risk_engines_reached: false,
     },
   }).as('riskEngineStatus');
 

@@ -66,3 +66,14 @@ export interface SpacesApi {
    */
   isSolutionViewEnabled: boolean;
 }
+
+/**
+ * The API for retrieving content associated with a space returns an array of summary data for each type of
+ * saved object content. SpaceContentTypeSummaryItem is the format of the items included in this summary data.
+ */
+export interface SpaceContentTypeSummaryItem {
+  displayName: string;
+  icon?: string;
+  count: number;
+  type: string; // the type of saved object content (dashboard, search, config, etc)
+}

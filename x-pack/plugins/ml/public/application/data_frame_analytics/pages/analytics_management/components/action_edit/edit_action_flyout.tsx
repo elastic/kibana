@@ -35,11 +35,11 @@ import {
   type DataFrameAnalyticsConfig,
   type UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { MemoryInputValidatorResult } from '@kbn/ml-validators';
+import { memoryInputValidator } from '@kbn/ml-validators';
 
 import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
-import { memoryInputValidator } from '../../../../../../../common/util/validators';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 import type { EditAction } from './use_edit_action';

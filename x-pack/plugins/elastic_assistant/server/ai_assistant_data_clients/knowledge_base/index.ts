@@ -25,19 +25,36 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { StructuredTool } from '@langchain/core/tools';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { AssistantToolParams, GetElser } from '../../types';
-import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
+import {
+  createKnowledgeBaseEntry,
+  LegacyKnowledgeBaseEntryCreateProps,
+  transformToCreateSchema,
+  transformToLegacyCreateSchema,
+} from './create_knowledge_base_entry';
 import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
+import {
+  ESQL_DOCS_LOADED_QUERY,
+  SECURITY_LABS_RESOURCE,
+} from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
   isModelAlreadyExistsError,
 } from './helpers';
 import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
+import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
+
+/**
+ * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
+ * configuration after initial plugin start
+ */
+export interface GetAIAssistantKnowledgeBaseDataClientParams {
+  modelIdOverride?: string;
+  v2KnowledgeBaseEnabled?: boolean;
+}
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
@@ -182,17 +199,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * See ml-team issue for providing 'dry run' flag to perform these checks: https://github.com/elastic/ml-team/issues/1208
    *
    * @param options
-   * @param options.esStore ElasticsearchStore for loading ES|QL docs via LangChain loaders
    * @param options.soClient SavedObjectsClientContract for installing ELSER so that ML SO's are in sync
+   * @param options.installEsqlDocs Whether to install ESQL documents as part of setup (e.g. not needed in test env)
    *
    * @returns Promise<void>
    */
   public setupKnowledgeBase = async ({
-    esStore,
     soClient,
+    installEsqlDocs = true,
+    installSecurityLabsDocs = true,
   }: {
-    esStore: ElasticsearchStore;
     soClient: SavedObjectsClientContract;
+    installEsqlDocs?: boolean;
+    installSecurityLabsDocs?: boolean;
   }): Promise<void> => {
     if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
@@ -235,12 +254,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      const kbDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
-      if (!kbDocsLoaded) {
-        this.options.logger.debug(`Loading KB docs...`);
-        await loadESQL(esStore, this.options.logger);
-      } else {
-        this.options.logger.debug(`Knowledge Base docs already loaded!`);
+      if (installEsqlDocs) {
+        const kbDocsLoaded = await this.isESQLDocsLoaded();
+        if (!kbDocsLoaded) {
+          this.options.logger.debug(`Loading KB docs...`);
+          await loadESQL(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Knowledge Base docs already loaded!`);
+        }
+      }
+
+      if (installSecurityLabsDocs) {
+        const labsDocsLoaded = await this.isSecurityLabsDocsLoaded();
+        if (!labsDocsLoaded) {
+          this.options.logger.debug(`Loading Security Labs KB docs...`);
+          await loadSecurityLabs(this, this.options.logger);
+        } else {
+          this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
+        }
       }
     } catch (e) {
       this.options.setIsKBSetupInProgress(false);
@@ -254,15 +285,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * Adds LangChain Documents to the knowledge base
    *
    * @param {Array<Document<Metadata>>} documents - LangChain Documents to add to the knowledge base
+   * @param global whether these entries should be added globally, i.e. empty users[]
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
+    global = false,
   }: {
     documents: Array<Document<Metadata>>;
+    global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
@@ -270,27 +305,40 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) => {
-        // v1 schema has metadata nested in a `metadata` object, and kbResource vs kb_resource
-        const body = this.options.v2KnowledgeBaseEnabled
-          ? {
-              kb_resource: doc.metadata.kbResource ?? 'unknown',
+        // v1 schema has metadata nested in a `metadata` object
+        if (this.options.v2KnowledgeBaseEnabled) {
+          return transformToCreateSchema({
+            createdAt: changedAt,
+            spaceId: this.spaceId,
+            user: authenticatedUser,
+            entry: {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              text: doc.pageContent,
+              kbResource: doc.metadata.kbResource ?? 'unknown',
               required: doc.metadata.required ?? false,
               source: doc.metadata.source ?? 'unknown',
-            }
-          : {
+            },
+            global,
+          });
+        } else {
+          return transformToLegacyCreateSchema({
+            createdAt: changedAt,
+            spaceId: this.spaceId,
+            user: authenticatedUser,
+            entry: {
+              type: DocumentEntryType.value,
+              name: 'unknown',
+              text: doc.pageContent,
               metadata: {
                 kbResource: doc.metadata.kbResource ?? 'unknown',
                 required: doc.metadata.required ?? false,
                 source: doc.metadata.source ?? 'unknown',
               },
-            };
-        // @ts-ignore Transform only explicitly supports v2 schema, but technically still supports v1
-        return transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          type: DocumentEntryType.value,
-          name: 'unknown',
-          text: doc.pageContent,
-          ...body,
-        });
+            },
+            global,
+          });
+        }
       }),
       authenticatedUser,
     });
@@ -306,6 +354,30 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(() => `errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
+  };
+
+  /**
+   * Returns if ES|QL KB docs have been loaded
+   */
+  public isESQLDocsLoaded = async (): Promise<boolean> => {
+    const esqlDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: ESQL_DOCS_LOADED_QUERY,
+      // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
+      required: true,
+    });
+    return esqlDocs.length > 0;
+  };
+
+  /**
+   * Returns if Security Labs KB docs have been loaded
+   */
+  public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
+    const securityLabsDocs = await this.getKnowledgeBaseDocumentEntries({
+      query: '',
+      kbResource: SECURITY_LABS_RESOURCE,
+      required: false,
+    });
+    return securityLabsDocs.length > 0;
   };
 
   /**
@@ -386,13 +458,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * Creates a new Knowledge Base Entry.
    *
    * @param knowledgeBaseEntry
+   * @param global
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    global = false,
   }: {
-    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps | LegacyKnowledgeBaseEntryCreateProps;
+    global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
@@ -410,6 +486,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       spaceId: this.spaceId,
       user: authenticatedUser,
       knowledgeBaseEntry,
+      global,
+      isV2: this.options.v2KnowledgeBaseEnabled,
     });
   };
 

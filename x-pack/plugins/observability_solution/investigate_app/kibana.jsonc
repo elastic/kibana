@@ -9,7 +9,6 @@
     "configPath": ["xpack", "investigateApp"],
     "requiredPlugins": [
       "investigate",
-      "observabilityAIAssistant",
       "observabilityShared",
       "lens",
       "dataViews",
@@ -28,7 +27,7 @@
       "kibanaReact",
       "kibanaUtils",
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }

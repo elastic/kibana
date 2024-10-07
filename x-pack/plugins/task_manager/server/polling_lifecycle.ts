@@ -84,7 +84,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
   private readonly executionContext: ExecutionContextStart;
-  private readonly pollIntervalConfiguration$: Observable<number>;
 
   private logger: Logger;
   public pool: TaskPool;
@@ -95,6 +94,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
+  private currentPollInterval: number;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -123,7 +123,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
-    this.pollIntervalConfiguration$ = pollIntervalConfiguration$;
+    this.currentPollInterval = config.poll_interval;
+    pollIntervalConfiguration$.subscribe((pollInterval) => {
+      this.currentPollInterval = pollInterval;
+    });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -196,6 +199,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // start polling for work
         poller.start();
       } else if (!areESAndSOAvailable) {
+        this.logger.info(
+          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
+        );
         poller.stop();
         this.pool.cancelRunningTasks();
       }
@@ -225,7 +231,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
-      pollIntervalConfiguration$: this.pollIntervalConfiguration$,
+      getPollInterval: () => this.currentPollInterval,
     });
   };
 
@@ -282,7 +288,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
                 mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
               );
             }
-            this.logger.error(error.message);
+            this.logger.error(error.message, { error: { stack_trace: error.stack } });
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy

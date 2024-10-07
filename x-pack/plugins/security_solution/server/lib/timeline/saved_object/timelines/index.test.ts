@@ -23,8 +23,8 @@ import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
-  AllTimelinesResponse,
-  ResolvedTimelineWithOutcomeSavedObject,
+  GetTimelinesResponse,
+  ResolvedTimeline,
   SavedTimeline,
 } from '../../../../../common/api/timeline';
 import {
@@ -141,7 +141,7 @@ describe('saved_object', () => {
       pageSize: 10,
       pageIndex: 1,
     };
-    let result = null as unknown as AllTimelinesResponse;
+    let result = null as unknown as GetTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest
@@ -275,7 +275,7 @@ describe('saved_object', () => {
   describe('resolveTimelineOrNull', () => {
     let mockResolveSavedObject: jest.Mock;
     let mockRequest: FrameworkRequest;
-    let result: ResolvedTimelineWithOutcomeSavedObject | null = null;
+    let result: ResolvedTimeline | null = null;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
       mockResolveSavedObject = jest.fn().mockReturnValue(mockResolvedSavedObject);

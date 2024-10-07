@@ -12,23 +12,20 @@ import { ControlsPlugin } from './plugin';
 export {
   controlGroupStateBuilder,
   type ControlGroupStateBuilder,
-} from './react_controls/control_group/utils/control_group_state_builder';
+} from './control_group/utils/control_group_state_builder';
 
-export type { ControlGroupApi, ControlStateTransform } from './react_controls/control_group/types';
+export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
 
 export { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './actions';
 
-export type {
-  DataControlApi,
-  DataControlFactory,
-} from './react_controls/controls/data_controls/types';
+export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
 
 export {
   ControlGroupRenderer,
   type ControlGroupCreationOptions,
   type ControlGroupRendererApi,
   type ControlGroupRendererProps,
-} from './react_controls/external_api';
+} from './control_group/control_group_renderer';
 
 export {
   CONTROL_GROUP_TYPE,

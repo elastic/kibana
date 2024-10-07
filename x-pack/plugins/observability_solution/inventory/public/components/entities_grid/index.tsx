@@ -5,13 +5,11 @@
  * 2.0.
  */
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
@@ -24,12 +22,20 @@ import {
   ENTITY_DISPLAY_NAME,
   ENTITY_LAST_SEEN,
   ENTITY_TYPE,
-} from '../../../common/es_fields/entities';
+} from '@kbn/observability-shared-plugin/common';
 import { APIReturnType } from '../../api';
+import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
+import { EntityName } from './entity_name';
+import { EntityType } from '../../../common/entities';
+import { getEntityTypeLabel } from '../../utils/get_entity_type_label';
 
 type InventoryEntitiesAPIReturnType = APIReturnType<'GET /internal/inventory/entities'>;
+type LatestEntities = InventoryEntitiesAPIReturnType['entities'];
 
-type EntityColumnIds = typeof ENTITY_DISPLAY_NAME | typeof ENTITY_LAST_SEEN | typeof ENTITY_TYPE;
+export type EntityColumnIds =
+  | typeof ENTITY_DISPLAY_NAME
+  | typeof ENTITY_LAST_SEEN
+  | typeof ENTITY_TYPE;
 
 const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipContent: string }) => (
   <>
@@ -98,12 +104,13 @@ const columns: EuiDataGridColumn[] = [
 
 interface Props {
   loading: boolean;
-  entities: InventoryEntitiesAPIReturnType['entities'];
+  entities: LatestEntities;
   sortDirection: 'asc' | 'desc';
   sortField: string;
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
+  onFilterByType: (entityType: EntityType) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -116,6 +123,7 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
+  onFilterByType,
 }: Props) {
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
@@ -139,7 +147,15 @@ export function EntitiesGrid({
       const columnEntityTableId = columnId as EntityColumnIds;
       switch (columnEntityTableId) {
         case ENTITY_TYPE:
-          return <EuiBadge color="hollow">{entity[columnEntityTableId]}</EuiBadge>;
+          const entityType = entity[columnEntityTableId];
+          return (
+            <BadgeFilterWithPopover
+              field={ENTITY_TYPE}
+              value={entityType}
+              label={getEntityTypeLabel(entityType)}
+              onFilter={() => onFilterByType(entityType)}
+            />
+          );
         case ENTITY_LAST_SEEN:
           return (
             <FormattedMessage
@@ -167,17 +183,12 @@ export function EntitiesGrid({
             />
           );
         case ENTITY_DISPLAY_NAME:
-          return (
-            // TODO: link to the appropriate page based on entity type https://github.com/elastic/kibana/issues/192676
-            <EuiLink data-test-subj="inventoryCellValueLink" className="eui-textTruncate">
-              {entity[columnEntityTableId]}
-            </EuiLink>
-          );
+          return <EntityName entity={entity} />;
         default:
           return entity[columnId as EntityColumnIds] || '';
       }
     },
-    [entities]
+    [entities, onFilterByType]
   );
 
   if (loading) {

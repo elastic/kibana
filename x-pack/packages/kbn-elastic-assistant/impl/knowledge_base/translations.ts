@@ -13,6 +13,14 @@ export const ALERTS_LABEL = i18n.translate(
     defaultMessage: 'Alerts',
   }
 );
+
+export const SEND_ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.sendAlertsLabel',
+  {
+    defaultMessage: 'Send Alerts',
+  }
+);
+
 export const LATEST_AND_RISKIEST_OPEN_ALERTS = (alertsCount: number) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',

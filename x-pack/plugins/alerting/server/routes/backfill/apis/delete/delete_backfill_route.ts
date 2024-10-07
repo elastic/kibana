@@ -20,6 +20,9 @@ export const deleteBackfillRoute = (
   router.delete(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/{id}`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: deleteParamsSchemaV1,
       },

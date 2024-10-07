@@ -34,6 +34,7 @@ const createToolkitMock = (): ToolkitMock => {
     render: jest.fn(),
     next: jest.fn(),
     rewriteUrl: jest.fn(),
+    authzResultNext: jest.fn(),
   };
 };
 

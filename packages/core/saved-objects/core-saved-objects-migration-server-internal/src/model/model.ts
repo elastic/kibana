@@ -559,13 +559,21 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         deleteByQueryTaskId: res.right.taskId,
       };
     } else {
+      const reason = extractUnknownDocFailureReason(
+        stateP.migrationDocLinks.resolveMigrationFailures,
+        res.left.unknownDocs
+      );
       return {
         ...stateP,
         controlState: 'FATAL',
-        reason: extractUnknownDocFailureReason(
-          stateP.migrationDocLinks.resolveMigrationFailures,
-          res.left.unknownDocs
-        ),
+        reason,
+        logs: [
+          ...logs,
+          {
+            level: 'error',
+            message: reason,
+          },
+        ],
       };
     }
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
@@ -700,13 +708,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (isTypeof(res.right, 'unknown_docs_found')) {
       if (!stateP.discardUnknownObjects) {
+        const reason = extractUnknownDocFailureReason(
+          stateP.migrationDocLinks.resolveMigrationFailures,
+          res.right.unknownDocs
+        );
+
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            res.right.unknownDocs
-          ),
+          reason,
+          logs: [
+            ...logs,
+            {
+              level: 'error',
+              message: reason,
+            },
+          ],
         };
       }
 
@@ -879,6 +896,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         corruptDocumentIds: [],
         transformErrors: [],
         progress: createInitialProgress(),
+        logs: [
+          ...logs,
+          {
+            level: 'info',
+            message: `REINDEX_SOURCE_TO_TEMP_OPEN_PIT PitId:${res.right.pitId}`,
+          },
+        ],
       };
     } else {
       throwBadResponse(stateP, res);

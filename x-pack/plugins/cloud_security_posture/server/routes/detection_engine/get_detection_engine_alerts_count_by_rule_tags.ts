@@ -69,10 +69,6 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody = request.query;
         const cspContext = await context.csp;
 

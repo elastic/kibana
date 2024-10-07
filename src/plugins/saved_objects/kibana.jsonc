@@ -9,9 +9,6 @@
     "requiredPlugins": [
       "data",
       "dataViews"
-    ],
-    "requiredBundles": [
-      "kibanaUtils"
     ]
   }
 }

@@ -1,22 +1,22 @@
 openapi: 3.0.0
 
 info:
-  title: Init Entity Store types
+  title: Init Entity Engine
   version: '2023-10-31'
 paths:
    /api/entity_store/engines/{entityType}/init:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: InitEntityStore
-      summary: Initialize the Entity Store
+      operationId: InitEntityEngine
+      summary: Initialize an Entity Engine
       parameters:
         - name: entityType
           in: path
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
-          description: The entity type of the store (either 'user' or 'host').
+          description: The entity type of the engine (either 'user' or 'host').
       requestBody:
         description: Schema for the engine initialization
         required: true

@@ -124,5 +124,5 @@ export const formatMaxRedirects = (value?: string | number): string => {
 
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.HTTP];
 
-  return value ?? defaultFields[ConfigKey.MAX_REDIRECTS];
+  return value ?? String(defaultFields[ConfigKey.MAX_REDIRECTS]);
 };

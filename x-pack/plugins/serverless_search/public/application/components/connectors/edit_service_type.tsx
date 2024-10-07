@@ -7,14 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiForm,
-  EuiFormLabel,
-  EuiIcon,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector } from '@kbn/search-connectors';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -69,12 +62,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
   });
 
   return (
-    <EuiForm>
-      <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
-        {i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
-          defaultMessage: 'Connector type',
-        })}
-      </EuiFormLabel>
+    <EuiFormRow
+      label={i18n.translate('xpack.serverlessSearch.connectors.serviceTypeLabel', {
+        defaultMessage: 'Connector type',
+      })}
+      data-test-subj="serverlessSearchEditConnectorType"
+      fullWidth
+    >
       <EuiSuperSelect
         // We only want to allow people to set the service type once to avoid weird conflicts
         disabled={Boolean(connector.service_type)}
@@ -83,7 +77,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
         onChange={(event) => mutate(event)}
         options={options}
         valueOfSelected={connector.service_type || undefined}
+        fullWidth
       />
-    </EuiForm>
+    </EuiFormRow>
   );
 };

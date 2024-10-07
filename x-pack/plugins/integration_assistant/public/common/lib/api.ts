@@ -29,7 +29,7 @@ import {
 import { ANALYZE_LOGS_PATH, FLEET_PACKAGES_PATH } from '../../../common/constants';
 
 export interface EpmPackageResponse {
-  response: [{ id: string; name: string }];
+  items: [{ id: string; type: string }];
 }
 
 const defaultHeaders = {

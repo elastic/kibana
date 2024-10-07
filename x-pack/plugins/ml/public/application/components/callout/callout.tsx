@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CalloutMessage } from '../../../../common/constants/validation';
-import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import type { CalloutMessage } from '@kbn/ml-validators';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 export const defaultIconType = 'questionInCircle';
 

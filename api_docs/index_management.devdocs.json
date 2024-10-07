@@ -552,6 +552,73 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginStart.getIndexSettingsComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "getIndexSettingsComponent",
+          "description": [],
+          "signature": [
+            "(deps: { history: ",
+            {
+              "pluginId": "@kbn/core-application-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreApplicationBrowserPluginApi",
+              "section": "def-public.ScopedHistory",
+              "text": "ScopedHistory"
+            },
+            "<unknown>; }) => React.FC<",
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.IndexSettingProps",
+              "text": "IndexSettingProps"
+            },
+            ">"
+          ],
+          "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "indexManagement",
+              "id": "def-public.IndexManagementPluginStart.getIndexSettingsComponent.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "deps",
+              "description": [],
+              "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "indexManagement",
+                  "id": "def-public.IndexManagementPluginStart.getIndexSettingsComponent.$1.history",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "history",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "@kbn/core-application-browser",
+                      "scope": "public",
+                      "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                      "section": "def-public.ScopedHistory",
+                      "text": "ScopedHistory"
+                    },
+                    "<unknown>"
+                  ],
+                  "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

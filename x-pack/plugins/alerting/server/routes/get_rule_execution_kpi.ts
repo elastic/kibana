@@ -38,6 +38,9 @@ export const getRuleExecutionKPIRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_execution_kpi`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
         query: querySchema,

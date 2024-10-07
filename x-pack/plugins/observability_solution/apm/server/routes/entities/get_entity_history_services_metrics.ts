@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { EntityMetrics } from '../../../common/entities/types';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ENTITY_ID,
+  ENTITY_LAST_SEEN,
+} from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
+import { EntityMetrics } from '../../../common/entities/types';
+import {
   ENTITY_METRICS_FAILED_TRANSACTION_RATE,
   ENTITY_METRICS_LATENCY,
   ENTITY_METRICS_LOG_ERROR_RATE,
   ENTITY_METRICS_LOG_RATE,
   ENTITY_METRICS_THROUGHPUT,
-  LAST_SEEN,
 } from '../../../common/es_fields/entities';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
 
@@ -39,7 +41,10 @@ export async function getEntityHistoryServicesMetrics({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...rangeQuery(start, end, LAST_SEEN), ...termsQuery(ENTITY_ID, ...entityIds)],
+          filter: [
+            ...rangeQuery(start, end, ENTITY_LAST_SEEN),
+            ...termsQuery(ENTITY_ID, ...entityIds),
+          ],
         },
       },
       aggs: {

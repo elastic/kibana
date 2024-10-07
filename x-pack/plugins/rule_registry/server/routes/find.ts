@@ -38,6 +38,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         ),
       },
       options: {
+        access: 'internal',
         tags: ['access:rac'],
       },
     },

@@ -523,7 +523,7 @@ describe('IndexPattern', () => {
           },
         },
       });
-      expect(dataView.getFieldAttrs()).toMatchInlineSnapshot(`
+      expect(Object.fromEntries(dataView.getFieldAttrs().entries())).toMatchInlineSnapshot(`
         Object {
           "test1": Object {
             "count": 5,
@@ -555,7 +555,7 @@ describe('IndexPattern', () => {
           },
         },
       });
-      expect(dataView.getFieldAttrs()).toMatchInlineSnapshot(`
+      expect(Object.fromEntries(dataView.getFieldAttrs().entries())).toMatchInlineSnapshot(`
         Object {
           "test1": Object {
             "count": 2,

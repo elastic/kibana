@@ -34,7 +34,7 @@ import { FindResponse } from '../ai_assistant_data_clients/find';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_DOCS_LOADED_QUERY } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -44,7 +44,6 @@ import {
 import { executeAction, StaticResponse } from '../lib/executor';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
-import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
@@ -381,27 +380,17 @@ export const langChainExecute = async ({
   // convert the assistant messages to LangChain messages:
   const langChainMessages = getLangChainMessages(messages);
 
-  const elserId = await getElser();
-
   const anonymizationFieldsDataClient =
     await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
   const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
-    (await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled)) ??
-    undefined;
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+      v2KnowledgeBaseEnabled,
+    })) ?? undefined;
   const bedrockChatEnabled =
     assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
-  const esStore = new ElasticsearchStore(
-    esClient,
-    kbDataClient?.indexTemplateAndPattern?.alias ?? '',
-    logger,
-    telemetry,
-    elserId,
-    ESQL_RESOURCE,
-    kbDataClient
-  );
 
   const dataClients: AssistantDataClients = {
     anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
@@ -420,7 +409,6 @@ export const langChainExecute = async ({
     conversationId,
     connectorId,
     esClient,
-    esStore,
     inference,
     isStream,
     llmType: getLlmType(actionTypeId),

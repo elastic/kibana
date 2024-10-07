@@ -95,13 +95,13 @@ export const getMockDefendForContainersHeartbeats = ({
     mockDefendForContainersHeartbeats(isBlockActionEnables)
   );
 };
-const mockDefendForContainersHeartbeats = (isBlockActionEnables: boolean) => {
+const mockDefendForContainersHeartbeats = (isBlockActionEnabled: boolean) => {
   return {
     agent: {
       id: chance.guid(),
     },
     cloud_defend: {
-      block_action_enabled: isBlockActionEnables,
+      block_action_enabled: isBlockActionEnabled,
     },
     event: {
       ingested: new Date().toISOString(),

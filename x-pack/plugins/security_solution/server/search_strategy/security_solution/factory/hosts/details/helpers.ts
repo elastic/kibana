@@ -170,14 +170,13 @@ export const getHostEndpoint = async (
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
-    const fleetServices = endpointContext.service.getInternalFleetServices();
     const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
     const endpointData = await endpointMetadataService
       // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
       // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
       // here until proper RBOC controls are implemented
-      .getEnrichedHostMetadata(esClient.asInternalUser, fleetServices, id);
+      .getEnrichedHostMetadata(id);
 
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 

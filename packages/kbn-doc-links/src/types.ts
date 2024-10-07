@@ -564,6 +564,7 @@ export interface DocLinks {
     roleAndPrivileges: string;
     proxiesSettings: string;
     unprivilegedMode: string;
+    httpMonitoring: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

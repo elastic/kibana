@@ -51,6 +51,8 @@ export const RulePage = (props: RulePageProps) => {
     multiConsumerSelection,
   } = useRuleFormState();
 
+  const canReadConnectors = !!application.capabilities.actions?.show;
+
   const styles = useEuiBackgroundColorCSS().transparent;
 
   const onCancel = useCallback(() => {
@@ -64,22 +66,31 @@ export const RulePage = (props: RulePageProps) => {
     });
   }, [onSave, formData, multiConsumerSelection]);
 
+  const actionComponent = useMemo(() => {
+    if (canReadConnectors) {
+      return [
+        {
+          title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+          children: (
+            <>
+              <RuleActions />
+              <EuiSpacer />
+              <EuiHorizontalRule margin="none" />
+            </>
+          ),
+        },
+      ];
+    }
+    return [];
+  }, [canReadConnectors]);
+
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
         title: RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         children: <RuleDefinition />,
       },
-      {
-        title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-        children: (
-          <>
-            <RuleActions onClick={() => {}} />
-            <EuiSpacer />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ),
-      },
+      ...actionComponent,
       {
         title: RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         children: (
@@ -91,7 +102,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, []);
+  }, [actionComponent]);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>

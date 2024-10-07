@@ -27,6 +27,15 @@ export const KnowledgeBaseResponse = z.object({
   success: z.boolean().optional(),
 });
 
+export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
+export const CreateKnowledgeBaseRequestQuery = z.object({
+  /**
+   * Optional ELSER modelId to use when setting up the Knowledge Base
+   */
+  modelId: z.string().optional(),
+});
+export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
+
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
 export const CreateKnowledgeBaseRequestParams = z.object({
   /**
@@ -72,4 +81,5 @@ export const ReadKnowledgeBaseResponse = z.object({
   is_setup_available: z.boolean().optional(),
   is_setup_in_progress: z.boolean().optional(),
   pipeline_exists: z.boolean().optional(),
+  security_labs_exists: z.boolean().optional(),
 });

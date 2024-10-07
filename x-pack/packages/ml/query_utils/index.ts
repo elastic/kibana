@@ -20,4 +20,4 @@ export type {
   SearchQueryVariant,
   SimpleQuery,
 } from './src/types';
-export { getDefaultDSLQuery } from './src/get_default_query';
+export { getDefaultDSLQuery } from './src/get_default_dsl_query';
