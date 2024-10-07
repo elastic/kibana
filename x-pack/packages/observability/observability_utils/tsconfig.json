@@ -21,5 +21,6 @@
     "@kbn/es-types",
     "@kbn/apm-utils",
     "@kbn/es-query",
+    "@kbn/safer-lodash-set",
   ]
 }
