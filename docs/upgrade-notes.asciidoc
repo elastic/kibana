@@ -55,18 +55,19 @@ For Elastic Security release information, refer to {security-guide}/release-note
 [%collapsible]
 ====
 *Details* +
-Access to internal Kibana HTTP APIs will be restricted from 9.0.0. This is to ensure
-a HTTP API integrations with Kibana avoid unexpected breaking changes. See {kibana-pull}193792[#193792].
+Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure
+that HTTP API integrations with Kibana avoid unexpected breaking changes. 
+Refer to {kibana-pull}193792[#193792].
 
 *Impact* +
 Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting
-from 9.0.0.
+from version 9.0.0.
 
 *Action* +
-**Do not integrate with internal HTTP APIs**. They may change or be removed without notice
-or lead to unexpected behavior. If you would like some capability to be exposed over
-HTTP API please create an issue:https://github.com/elastic/kibana/issues/new/choose,
-we would love to discuss your use case.
+**Do not integrate with internal HTTP APIs**. They may change or be removed without notice, 
+and lead to unexpected behaviors. If you would like some capability to be exposed over an
+HTTP API, https://github.com/elastic/kibana/issues/new/choose[create an issue].
+We would love to discuss your use case.
 
 ====
 
