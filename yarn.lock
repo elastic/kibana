@@ -5479,10 +5479,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
-  version "0.0.0"
-  uid ""
-
 "@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
@@ -6008,6 +6004,10 @@
   uid ""
 
 "@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
   version "0.0.0"
   uid ""
 
