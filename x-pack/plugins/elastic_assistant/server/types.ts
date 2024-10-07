@@ -24,7 +24,6 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -40,6 +39,7 @@ import {
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
@@ -231,6 +231,7 @@ export type AssistantToolLlm =
   | ActionsClientBedrockChatModel
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI
   | ActionsClientSimpleChatModel;
 
 export interface AssistantToolParams {
@@ -239,7 +240,6 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
