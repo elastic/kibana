@@ -25,6 +25,8 @@ import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
+import { hasMetrics } from '../../utils/get_data_stream_types';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -36,6 +38,10 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
+  const { dataStreams } = useAssetEntitySummary({
+    entityType: asset.type,
+    entityId: asset.type === 'host' ? asset.name : asset.id,
+  });
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
@@ -55,7 +61,8 @@ export const Overview = () => {
     false
   );
 
-  const showAddMetricsCallout = true && !dismissedAddMetricsCallout && renderMode.mode === 'page'; // TODO integrate proper logic from #193701s
+  const showAddMetricsCallout =
+    !hasMetrics(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
