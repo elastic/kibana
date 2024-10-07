@@ -32,6 +32,12 @@ export function initializeUnifiedSearchManager(
   waitForPanelsToLoad$: Observable<void>,
   creationOptions?: DashboardCreationOptions
 ) {
+  const {
+    queryString,
+    filterManager,
+    timefilter: { timefilter: timefilterService },
+  } = dataService.query;
+
   const controlGroupReload$ = new Subject<void>();
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const panelsReload$ = new Subject<void>();
@@ -76,12 +82,6 @@ export function initializeUnifiedSearchManager(
     creationOptions?.useUnifiedSearchIntegration &&
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
   ) {
-    const {
-      queryString,
-      filterManager,
-      timefilter: { timefilter: timefilterService },
-    } = dataService.query;
-
     // Set unified search to dashboard state
     filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
     queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
@@ -153,7 +153,28 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       panelsReload$,
-      reset: (lastSavedState: DashboardState) => {},
+      reset: (lastSavedState: DashboardState) => {
+        if (!fastIsEqual(lastSavedState.filters, unifiedSearchFilters$.value)) {
+          unifiedSearchFilters$.next(lastSavedState.filters);
+          filterManager.setAppFilters(cloneDeep(lastSavedState.filters ?? []));
+        }
+        if (!fastIsEqual(lastSavedState.query, query$.value)) {
+          query$.next(lastSavedState.query);
+          queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
+        }
+
+        if (creationOptions?.useUnifiedSearchIntegration && lastSavedState.timeRestore) {
+          if (!fastIsEqual(lastSavedState.timeRange, timeRange$.value)) {
+            timeRange$.next(lastSavedState.timeRange);
+            if (lastSavedState.timeRange) timefilterService.setTime(lastSavedState.timeRange);
+          }
+          if (!fastIsEqual(lastSavedState.refreshInterval, refreshInterval$.value)) {
+            refreshInterval$.next(lastSavedState.refreshInterval);
+            if (lastSavedState.refreshInterval)
+              timefilterService.setRefreshInterval(lastSavedState.refreshInterval);
+          }
+        }
+      },
     },
     cleanup: () => {
       stopSyncingWithControlGroup();
