@@ -26,6 +26,7 @@ import { PLUGIN_NAME } from '../../common';
 import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
 import { useDateRangePicker } from './hooks/use_date_picker';
 import { useDataUsageMetricsUrlParams } from './hooks/use_charts_url_params';
+import { MetricsResponse } from './types';
 
 export const DataUsage = () => {
   const {
@@ -38,6 +39,8 @@ export const DataUsage = () => {
   const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
     dataStreams: [],
+    from: 'now-24h/h',
+    to: 'now',
   });
 
   useEffect(() => {
@@ -109,7 +112,7 @@ export const DataUsage = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        {isFetched && data ? <Charts data={data} /> : <EuiLoadingElastic />}
+        {isFetched && data ? <Charts data={data as MetricsResponse} /> : <EuiLoadingElastic />}
       </EuiPageSection>
     </>
   );
