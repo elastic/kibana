@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import expect from '@kbn/expect';
+import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('dashboards', () => {
-    loadTestFile(require.resolve('./create_dashboard'));
-    loadTestFile(require.resolve('./delete_dashboard'));
-    loadTestFile(require.resolve('./get_dashboard'));
-    loadTestFile(require.resolve('./update_dashboard'));
-    loadTestFile(require.resolve('./list_dashboards'));
-  });
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('validation', () => {});
 }

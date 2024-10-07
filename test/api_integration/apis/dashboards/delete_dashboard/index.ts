@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  describe('dashboards - create', () => {
+  describe('dashboards - delete', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'

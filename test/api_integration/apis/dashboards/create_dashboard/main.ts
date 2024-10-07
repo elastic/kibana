@@ -109,6 +109,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.item.id).match(/^[0-9a-f-]{36}$/);
       // saved object stores controls panels as an object, but the API should return as an array
       expect(response.body.item.attributes.controlGroupInput.panels).to.be.an('array');
+
+      expect(response.body.item.attributes.controlGroupInput.ignoreParentSettings).to.eql(
+        DEFAULT_IGNORE_PARENT_SETTINGS
+      );
     });
 
     it('can create a dashboard with a specific id', async () => {
@@ -167,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.item.attributes.panels[0].embeddableConfig.id).to.eql('bizz');
     });
 
+    // TODO Move this test to x-pack/test/api_integration/dashboards
     it('in a defined space', async () => {
       const title = `foo-${Date.now()}-${Math.random()}`;
 
