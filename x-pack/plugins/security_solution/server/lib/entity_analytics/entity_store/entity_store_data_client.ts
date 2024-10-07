@@ -9,6 +9,7 @@ import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@k
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type {
   InitEntityEngineRequestBody,
@@ -72,7 +73,7 @@ export class EntityStoreDataClient {
     assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-    const { entityClient, logger, esClient, namespace } = this.options;
+    const { logger } = this.options;
     const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
 
     if (requiresMigration) {
@@ -85,18 +86,28 @@ export class EntityStoreDataClient {
 
     logger.info(`Initializing entity store for ${entityType}`);
 
-    const debugLog = (message: string) =>
-      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
-
     const descriptor = await this.engineClient.init(entityType, definition, {
       filter,
       fieldHistoryLength,
     });
+
     logger.debug(`Initialized engine for ${entityType}`);
-    // first create the entity definition without starting it
-    // so that the index template is created which we can add a component template to
-    await entityClient
-      .createEntityDefinition({
+
+    this.asyncSetup(definition);
+
+    return descriptor;
+  }
+
+  private async asyncSetup(definition: EntityDefinition) {
+    const { entityType } = definition;
+    const { logger, taskManager, entityClient } = this.options;
+    const debugLog = (message: string) =>
+      logger.debug(`[Entity Engine] [${entityType}] ${message}`);
+
+    try {
+      // first create the entity definition without starting it
+      // so that the index template is created which we can add a component template to
+      await entityClient.createEntityDefinition({
         definition: {
           ...definition,
           filter,
@@ -105,68 +116,66 @@ export class EntityStoreDataClient {
             : definition.indexPatterns,
         },
         installOnly: true,
-      })
-      .catch((err) => {
-        this.options.logger.error(
-          `Error initializing entity store for ${entityType}: ${err.message}`
-        );
-
-        this.engineClient.update(definition.id, ENGINE_STATUS.ERROR);
       });
-    debugLog(`Created entity definition`);
 
-    // the index must be in place with the correct mapping before the enrich policy is created
-    // this is because the enrich policy will fail if the index does not exist with the correct fields
-    await createEntityIndexComponentTemplate({
-      entityType,
-      esClient,
-      namespace,
-    });
-    debugLog(`Created entity index component template`);
-    await createEntityIndex({
-      entityType,
-      esClient,
-      namespace,
-      logger,
-    });
-    debugLog(`Created entity index`);
+      // the index must be in place with the correct mapping before the enrich policy is created
+      // this is because the enrich policy will fail if the index does not exist with the correct fields
+      await createEntityIndexComponentTemplate({
+        entityType,
+        esClient,
+        namespace,
+      });
+      debugLog(`Created entity index component template`);
+      await createEntityIndex({
+        entityType,
+        esClient,
+        namespace,
+        logger,
+      });
+      debugLog(`Created entity index`);
 
-    // we must create and execute the enrich policy before the pipeline is created
-    // this is because the pipeline will fail if the enrich index does not exist
-    await createFieldRetentionEnrichPolicy({
-      entityType,
-      esClient,
-      namespace,
-    });
-    debugLog(`Created field retention enrich policy`);
-    await this.executeFieldRetentionEnrichPolicy(entityType);
-    debugLog(`Executed field retention enrich policy`);
-    await createPlatformPipeline({
-      entityType,
-      fieldHistoryLength,
-      namespace,
-      logger,
-      esClient,
-    });
-    debugLog(`Created @platform pipeline`);
+      // we must create and execute the enrich policy before the pipeline is created
+      // this is because the pipeline will fail if the enrich index does not exist
+      await createFieldRetentionEnrichPolicy({
+        entityType,
+        esClient,
+        namespace,
+      });
+      debugLog(`Created field retention enrich policy`);
+      await this.executeFieldRetentionEnrichPolicy(entityType);
+      debugLog(`Executed field retention enrich policy`);
+      await createPlatformPipeline({
+        entityType,
+        fieldHistoryLength,
+        namespace,
+        logger,
+        esClient,
+      });
+      debugLog(`Created @platform pipeline`);
 
-    // finally start the entity definition now that everything is in place
-    await this.start(entityType, { force: true });
-    debugLog(`Started entity definition`);
+      // the task will execute the enrich policy on a schedule
+      await startEntityStoreFieldRetentionEnrichTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      debugLog(`Started entity store field retention enrich task`);
 
-    // the task will execute the enrich policy on a schedule
-    await startEntityStoreFieldRetentionEnrichTask({
-      namespace,
-      logger,
-      taskManager,
-    });
-    debugLog(`Started entity store field retention enrich task`);
+      // and finally update the engine status to started once everything is in place
+      const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
+      debugLog(`Updated engine status to 'started', initialisation complete`);
+      logger.info(`Entity store initialized`);
 
-    // and finally update the engine status to started once everything is in place
-    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
-    debugLog(`Updated engine status to 'started', initialisation complete`);
-    logger.info(`Entity store initialized`);
-    return { ...descriptor, ...updated };
+      return updated;
+    } catch (err) {
+      this.options.logger.error(
+        `Error initializing entity store for ${entityType}: ${err.message}`
+      );
+
+      await this.engineClient.update(definition.id, ENGINE_STATUS.ERROR);
+
+      await this.delete(entityType, taskManager, true);
+    }
   }
 
   public async executeFieldRetentionEnrichPolicy(

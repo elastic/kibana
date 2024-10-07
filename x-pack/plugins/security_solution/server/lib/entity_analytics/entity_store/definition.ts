@@ -86,7 +86,10 @@ export const buildUserEntityDefinition = (namespace: string): EntityDefinition =
     managed: true,
   });
 
-export const getDefinitionForEntityType = (entityType: EntityType, namespace: string) => {
+export const getDefinitionForEntityType = (
+  entityType: EntityType,
+  namespace: string
+): EntityDefinition => {
   const definitionBuilder =
     entityType === 'host' ? buildHostEntityDefinition : buildUserEntityDefinition;
   const entityDefinition = { ...definitionBuilder(namespace) };
