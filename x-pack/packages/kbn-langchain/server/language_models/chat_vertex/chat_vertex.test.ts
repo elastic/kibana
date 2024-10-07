@@ -27,21 +27,21 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
   setTimeout(() => {
     passThrough.write(
       Buffer.from(
-        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token1"}]}}],"modelVersion": "gemini-1.5-pro-002"}`
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token1"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
       )
     );
   });
   setTimeout(() => {
     passThrough.write(
       Buffer.from(
-        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token2"}]}}],"modelVersion": "gemini-1.5-pro-002"}`
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token2"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
       )
     );
   });
   setTimeout(() => {
     passThrough.write(
       Buffer.from(
-        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token3"}]}}],"modelVersion": "gemini-1.5-pro-002"}`
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token3"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
       )
     );
     // End the stream

@@ -40,7 +40,7 @@ export const MODELS: ModelProvider[] = [
   },
   {
     name: 'Google Gemini 1.5 Pro',
-    model: 'gemini-1.5-pro-002',
+    model: 'gemini-1.5-pro-001',
     promptTokenLimit: 2097152,
     provider: LLMs.gemini,
   },
