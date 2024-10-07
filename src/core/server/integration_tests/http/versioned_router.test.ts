@@ -293,31 +293,31 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual('1');
   });
 
-  it('requires version headers to be set for internal HTTP APIs', async () => {
+  it('defaults to v1 for internal HTTP APIs to allow gracefully onboarding internal routes to versioned router', async () => {
     await setupServer({ dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({ path: '/my-internal-path', access: 'internal' })
       .addVersion(
         { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        async (ctx, req, res) => res.ok({ body: 'v1' })
       )
       .addVersion(
         { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        async (ctx, req, res) => res.ok({ body: 'v2' })
       );
     await server.start();
 
     await expect(
       supertest
-        .get('/my-path')
+        .get('/my-internal-path')
         .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
+        .expect(200)
+        .then(({ text }) => text)
+    ).resolves.toMatch('v1');
   });
 
-  it('requires version headers to be set for public endpoints when in dev', async () => {
+  it('requires version headers to be set for internal and public endpoints when in dev', async () => {
     await setupServer({ dev: true });
     router.versioned
       .get({
@@ -325,6 +325,14 @@ describe('Routing versioned requests', () => {
         access: 'public',
       })
       .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
+
+    router.versioned
+      .get({
+        path: '/my-internal-path',
+        access: 'internal',
+      })
+      .addVersion({ version: '1', validate: false }, async (ctx, req, res) => res.ok());
+
     await server.start();
 
     await expect(
@@ -334,6 +342,18 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-path').set('Elastic-Api-Version', '2023-10-31').expect(200);
+
+    await expect(
+      supertest
+        .get('/my-internal-path')
+        .unset('Elastic-Api-Version')
+        .expect(400)
+        .then(({ body }) => body.message)
+    ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-internal-path').set('Elastic-Api-Version', '1').expect(200);
   });
 
   it('errors when no handler could be found', async () => {
