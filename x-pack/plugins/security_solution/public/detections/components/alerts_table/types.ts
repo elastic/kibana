@@ -102,3 +102,4 @@ export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTab
 export type SecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> = NonNullable<
   SecurityAlertsTableProps[PropKey]
 >;
+export type { SelectedAlertWithLegacyFormats } from '@kbn/triggers-actions-ui-plugin/public/types';

@@ -10,6 +10,7 @@ import React, {
   FC,
   lazy,
   memo,
+  PropsWithChildren,
   Suspense,
   useCallback,
   useEffect,
@@ -33,6 +34,7 @@ import {
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { BulkActionsCell } from './bulk_actions/components/row_cell';
 import { BulkActionsHeader } from './bulk_actions/components';
 import { useAlertsTableContext } from './contexts/alerts_table_context';
@@ -95,7 +97,7 @@ const ControlColumnHeaderRenderCell = memo(() => {
   );
 });
 
-const CustomCellWrapper: FC = ({ children }) => (
+const CustomCellWrapper = ({ children }: PropsWithChildren) => (
   <EuiFlexGroup gutterSize="none" responsive={false}>
     {children}
   </EuiFlexGroup>
@@ -250,7 +252,7 @@ const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
   return null;
 };
 
-const CellPopoverHost: EuiDataGridProps['renderCellPopover'] = (props) => {
+const CellPopoverHost = (props: EuiDataGridCellPopoverElementProps) => {
   const { rowIndex, DefaultCellPopover } = props;
   const renderContext = useAlertsTableContext();
   const { pageSize, pageIndex, alerts, renderCellPopover: CellPopover } = renderContext;
