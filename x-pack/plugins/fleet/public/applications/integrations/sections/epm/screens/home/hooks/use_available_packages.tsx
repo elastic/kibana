@@ -30,6 +30,11 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../../common/services';
 
+import {
+  isOnlyAgentlessPolicyTemplate,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../../common/services/agentless_helper';
+
 import type { IntegrationCardItem } from '..';
 
 import { ALL_CATEGORY } from '../category_facets';
@@ -105,6 +110,22 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
+// Return filtered packages based on deployment mode,
+// Currently filters out agentless only packages and policy templates if agentless is not available
+const filterPackageListDeploymentModes = (packages: PackageList, isAgentlessEnabled: boolean) => {
+  return isAgentlessEnabled
+    ? packages
+    : packages
+        .filter((pkg) => {
+          return !isOnlyAgentlessIntegration(pkg);
+        })
+        .forEach((pkg) => {
+          pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
+            return !isOnlyAgentlessPolicyTemplate(policyTemplate);
+          });
+        });
+};
+
 export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
@@ -115,8 +136,7 @@ export const useAvailablePackages = ({
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
   const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
-  const { isAgentlessEnabled, isOnlyAgentlessIntegration, isOnlyAgentlessPolicyTemplate } =
-    useAgentless();
+  const { isAgentlessEnabled } = useAgentless();
 
   const {
     initialSelectedCategory,
@@ -151,27 +171,11 @@ export const useAvailablePackages = ({
   }
 
   const eprIntegrationList = useMemo(() => {
-    // Filter out agentless only packages and policy templates if agentless is not available
-    const packages = isAgentlessEnabled
-      ? eprPackages?.items
-      : eprPackages?.items
-          .filter((pkg) => {
-            return !isOnlyAgentlessIntegration(pkg);
-          })
-          .forEach((pkg) => {
-            pkg.policy_templates = (pkg.policy_templates || []).filter((policyTemplate) => {
-              return !isOnlyAgentlessPolicyTemplate(policyTemplate);
-            });
-          });
-
-    const integrations = packageListToIntegrationsList(packages || []);
+    const filteredPackageList =
+      filterPackageListDeploymentModes(eprPackages?.items || [], isAgentlessEnabled) || [];
+    const integrations = packageListToIntegrationsList(filteredPackageList);
     return integrations;
-  }, [
-    eprPackages?.items,
-    isAgentlessEnabled,
-    isOnlyAgentlessIntegration,
-    isOnlyAgentlessPolicyTemplate,
-  ]);
+  }, [eprPackages?.items, isAgentlessEnabled]);
 
   const {
     data: replacementCustomIntegrations,
