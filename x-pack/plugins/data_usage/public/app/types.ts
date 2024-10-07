@@ -7,20 +7,18 @@
 
 import { MetricTypes } from '../../common/rest_types';
 
-export interface DataPoint {
-  x: number;
-  y: number;
-}
+export type DataPoint = [number, number]; // [timestamp, value]
 
-export interface Series {
-  streamName: string;
-  data: DataPoint[];
+export interface MetricSeries {
+  name: string; // Name of the data stream
+  data: DataPoint[]; // Array of data points in tuple format [timestamp, value]
 }
-export interface Chart {
-  key: MetricTypes;
-  series: Series[];
-}
+// Use MetricTypes dynamically as keys for the Metrics interface
+export type Metrics = Partial<Record<MetricTypes, MetricSeries[]>>;
 
 export interface MetricsResponse {
-  charts: Chart[];
+  metrics: Metrics;
+}
+export interface MetricsResponse {
+  metrics: Metrics;
 }

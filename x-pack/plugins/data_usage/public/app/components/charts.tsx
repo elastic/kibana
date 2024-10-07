@@ -7,6 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { MetricsResponse } from '../types';
+import { MetricTypes } from '../../../common/rest_types';
 import { ChartPanel } from './chart_panel';
 interface ChartsProps {
   data: MetricsResponse;
@@ -20,10 +21,11 @@ export const Charts: React.FC<ChartsProps> = ({ data }) => {
 
   return (
     <EuiFlexGroup direction="column">
-      {data.charts.map((chart, idx) => (
+      {Object.entries(data.metrics).map(([metricType, series], idx) => (
         <ChartPanel
-          key={chart.key}
-          data={chart}
+          key={metricType}
+          metricType={metricType as MetricTypes}
+          series={series}
           idx={idx}
           popoverOpen={popoverOpen}
           togglePopover={togglePopover}

@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
 import { MetricTypes } from '../../../common/rest_types';
-import { Chart as ChartData } from '../types';
+import { MetricSeries } from '../types';
 
 // TODO: Remove this when we have a title for each metric type
 type ChartKey = Extract<MetricTypes, 'ingest_rate' | 'storage_retained'>;
@@ -34,21 +34,23 @@ export const chartKeyToTitleMap: Record<ChartKey, string> = {
 };
 
 interface ChartPanelProps {
-  data: ChartData;
+  metricType: MetricTypes;
+  series: MetricSeries[];
   idx: number;
   popoverOpen: string | null;
   togglePopover: (streamName: string | null) => void;
 }
 
 export const ChartPanel: React.FC<ChartPanelProps> = ({
-  data,
+  metricType,
+  series,
   idx,
   popoverOpen,
   togglePopover,
 }) => {
   const theme = useEuiTheme();
 
-  const chartTimestamps = data.series.flatMap((series) => series.data.map((d) => d.x));
+  const chartTimestamps = series.flatMap((stream) => stream.data.map((d) => d[0]));
 
   const [minTimestamp, maxTimestamp] = [Math.min(...chartTimestamps), Math.max(...chartTimestamps)];
 
@@ -71,10 +73,10 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     [idx, popoverOpen, togglePopover]
   );
   return (
-    <EuiFlexItem grow={false} key={data.key}>
+    <EuiFlexItem grow={false} key={metricType}>
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiTitle size="xs">
-          <h5>{chartKeyToTitleMap[data.key as ChartKey] || data.key}</h5>
+          <h5>{chartKeyToTitleMap[metricType as ChartKey] || metricType}</h5>
         </EuiTitle>
         <Chart size={{ height: 200 }}>
           <Settings
@@ -84,16 +86,16 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
             xDomain={{ min: minTimestamp, max: maxTimestamp }}
             legendAction={renderLegendAction}
           />
-          {data.series.map((stream, streamIdx) => (
+          {series.map((stream, streamIdx) => (
             <BarSeries
               key={streamIdx}
-              id={`${data.key}-${stream.streamName}`}
-              name={`${stream.streamName}`}
-              data={stream.data.map((point) => [point.x, point.y])}
+              id={`${metricType}-${stream.name}`}
+              name={stream.name}
+              data={stream.data}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
+              xAccessor={0} // x is the first element in the tuple
+              yAccessors={[1]} // y is the second element in the tuple
               stackAccessors={[0]}
             />
           ))}
