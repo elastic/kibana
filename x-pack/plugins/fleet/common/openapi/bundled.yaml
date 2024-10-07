@@ -5571,6 +5571,7 @@ components:
               type: boolean
       required:
         - name
+        - type
     output_create_request_kafka:
       title: kafka
       type: object
@@ -5832,6 +5833,7 @@ components:
               type: string
       required:
         - name
+        - type
     output_create_request:
       title: Output
       oneOf:
@@ -6062,6 +6064,7 @@ components:
           type: number
       required:
         - name
+        - type
     output_update_request_logstash:
       title: logstash
       type: object
@@ -6124,6 +6127,7 @@ components:
               type: boolean
       required:
         - name
+        - type
     output_update_request:
       title: Output
       oneOf:

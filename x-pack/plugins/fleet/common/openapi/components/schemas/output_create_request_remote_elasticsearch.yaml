@@ -27,3 +27,4 @@ properties:
           type: string
 required:
   - name
+  - type

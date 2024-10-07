@@ -8624,7 +8624,8 @@
           }
         },
         "required": [
-          "name"
+          "name",
+          "type"
         ]
       },
       "output_create_request_kafka": {
@@ -9013,7 +9014,8 @@
           }
         },
         "required": [
-          "name"
+          "name",
+          "type"
         ]
       },
       "output_create_request": {
@@ -9358,7 +9360,8 @@
           }
         },
         "required": [
-          "name"
+          "name",
+          "type"
         ]
       },
       "output_update_request_logstash": {
@@ -9452,7 +9455,8 @@
           }
         },
         "required": [
-          "name"
+          "name",
+          "type"
         ]
       },
       "output_update_request": {
