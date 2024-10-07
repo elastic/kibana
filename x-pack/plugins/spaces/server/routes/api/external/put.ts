@@ -36,6 +36,11 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
             }),
             body: getSpaceSchema(isServerless),
           },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
+          },
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {

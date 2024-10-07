@@ -542,3 +542,12 @@ actions:
             examples:
               createSpaceRequest:
                 $ref: "../examples/create_space_request.yaml"
+  - target: "$.paths['/api/spaces/space/{id}']['put']"
+    description: "Add example to update space API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              updateSpaceRequest:
+                $ref: "../examples/update_space_request.yaml"
