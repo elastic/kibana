@@ -10,7 +10,6 @@
 const Path = require('path');
 const Fs = require('fs');
 const { inspect } = require('util');
-const { difference } = require('lodash');
 
 const {
   isSomeString,
@@ -237,7 +236,9 @@ function validatePackageManifest(parsed, repoRoot, path) {
 
   const { plugin, sharedBrowserBundle } = parsed;
 
-  const extraKeys = difference(Object.keys(extra), ['plugin', 'sharedBrowserBundle']);
+  const extraKeys = Object.keys(extra).filter(
+    (key) => !['plugin', 'sharedBrowserBundle'].includes(key)
+  );
   if (extraKeys.length) {
     throw new Error(`unexpected keys in package manifest [${extraKeys.join(', ')}]`);
   }
