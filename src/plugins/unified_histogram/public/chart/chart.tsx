@@ -396,9 +396,9 @@ export function Chart({
           visContext={visContext}
           lensAdapters={lensAdapters}
           dataLoading$={dataLoading$}
-          isFlyoutVisible
+          isFlyoutVisible={isFlyoutVisible}
           setIsFlyoutVisible={setIsFlyoutVisible}
-          isPlainRecord
+          isPlainRecord={isPlainRecord}
           query={query}
           currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
           onSuggestionContextEdit={onSuggestionContextEdit}
