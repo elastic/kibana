@@ -12,7 +12,17 @@ export function mergeEntityDefinitionUpdate(
   definition: EntityDefinition,
   update: EntityDefinitionUpdate
 ) {
-  const updatedDefinition = mergeWith(definition, update, (value, other) => {
+  const validatedDefinition: EntityDefinitionUpdate = { ...definition };
+
+  // TODO add unit tests for this
+
+  // Make sure that if the users sets the dataViewId or indexPatterns we delete the other one
+  if (update.dataViewId) {
+    delete validatedDefinition.indexPatterns;
+  } else if (update.indexPatterns) {
+    delete validatedDefinition.dataViewId;
+  }
+  const updatedDefinition = mergeWith(validatedDefinition, update, (value, other) => {
     // we don't want to merge arrays (metrics, metadata..) but overwrite them
     if (Array.isArray(value)) {
       return other;

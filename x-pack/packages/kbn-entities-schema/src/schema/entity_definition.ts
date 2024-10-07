@@ -23,7 +23,7 @@ const IndexPatternsSchema = z.object({
 });
 
 const DataViewIdSchema = z.object({
-  data_view_id: z.string(),
+  dataViewId: z.string(),
 });
 
 const baseEntityDefinitionSchema = z.object({
@@ -75,21 +75,6 @@ export const entityDefinitionSchema = z.union([
   entityDefinitionSchemaWithDataViewId,
 ]);
 
-// TODO do wer need to add this check for the update schema?
-// can we change indexpatterns during update?
-// export const entityDefinitionSchema = baseEntityDefinitionSchema.superRefine((data, ctx) => {
-//   if (!data.indexPatterns && !data.data_view_id) {
-//     ctx.addIssue({
-//       code: z.ZodIssueCode.custom,
-//       path: ['data_view_id'],
-//       message: "data_view_id should be set if indexPatterns isn't",
-//     });
-//   }
-// });
-// I couldn't use union because it doesn't support partial and merge
-// z.union([z.object({ indexPatterns: arrayOfStringsSchema }), z.object({ data_view_id: z.string() })]);
-// .or(z.object({ data_view_id: z.string() }));
-
 export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
   .omit({
     id: true,
@@ -105,7 +90,17 @@ export const entityDefinitionUpdateSchema = baseEntityDefinitionSchema
       history: z.optional(baseEntityDefinitionSchema.shape.history.partial()),
       version: semVerSchema,
     })
-  );
+  )
+  // TODO test it
+  .superRefine((data, ctx) => {
+    if (data.indexPatterns && data.dataViewId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['dataViewId'],
+        message: "dataViewId can't bet set if indexPatterns is defined",
+      });
+    }
+  });
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;
 export type EntityDefinitionUpdate = z.infer<typeof entityDefinitionUpdateSchema>;

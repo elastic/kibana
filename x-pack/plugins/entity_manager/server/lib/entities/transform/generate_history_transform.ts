@@ -192,15 +192,15 @@ const getIndexPatterns = async (
   dataViewsService: DataViewsService
 ): Promise<string | string[]> => {
   if (isEntityDefinitionWithIndexPattern(definition)) {
-    return definition.indexPatterns; // data_view_id or indexPatterns must be defined
+    return definition.indexPatterns; // dataViewId or indexPatterns must be defined
   }
 
   try {
-    const dataView = await dataViewsService.get(definition.data_view_id);
+    const dataView = await dataViewsService.get(definition.dataViewId);
     return [dataView.getIndexPattern()];
   } catch (e) {
     throw new Error(
-      `Data view '${definition.data_view_id}' not found for entity definition '${definition.id}'.` +
+      `Data view '${definition.dataViewId}' not found for entity definition '${definition.id}'.` +
         e.message
     );
   }

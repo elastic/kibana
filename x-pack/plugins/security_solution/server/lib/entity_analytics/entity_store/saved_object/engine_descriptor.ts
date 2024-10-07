@@ -36,7 +36,7 @@ export class EngineDescriptorClient {
 
     const dataSourceAttribute = isEntityDefinitionWithIndexPattern(definition)
       ? { indexPatterns: definition.indexPatterns.join(',') }
-      : { dataViewId: definition.data_view_id };
+      : { dataViewId: definition.dataViewId };
 
     const { attributes } = await this.deps.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
