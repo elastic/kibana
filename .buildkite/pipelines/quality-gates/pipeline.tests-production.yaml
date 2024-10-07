@@ -17,6 +17,7 @@ steps:
     soft_fail: true
 
   - label: ":rocket: Run serverless synthetics check"
+    if: build.env("ENVIRONMENT") == "production-canary"
     trigger: "serverless-quality-gates"
     build:
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
