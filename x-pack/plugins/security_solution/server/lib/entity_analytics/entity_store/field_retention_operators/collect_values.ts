@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isFieldMissingOrEmpty } from '../../painless';
+import { isFieldMissingOrEmpty } from '../painless';
 import type { BaseFieldRetentionOperator, FieldRetentionOperatorBuilder } from './types';
 
 export interface CollectValues extends BaseFieldRetentionOperator {

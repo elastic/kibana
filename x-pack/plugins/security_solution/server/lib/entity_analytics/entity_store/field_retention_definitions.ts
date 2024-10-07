@@ -6,7 +6,7 @@
  */
 
 import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import type { FieldRetentionOperator } from './field_retention/operators';
+import type { FieldRetentionOperator } from './field_retention_operators';
 
 export interface FieldRetentionDefinition {
   version: number;
