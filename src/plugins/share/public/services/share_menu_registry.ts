@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ShareContext, ShareMenuProvider } from '../types';
+import {
+  ShareContext,
+  ShareMenuProvider,
+  ShareMenuProviderV2,
+  ShareMenuProviderLegacy,
+} from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
@@ -35,7 +40,10 @@ export class ShareMenuRegistry {
     return {
       getShareMenuItems: (context: ShareContext) =>
         Array.from(this.shareMenuProviders.values()).flatMap((shareActionProvider) =>
-          shareActionProvider.getShareMenuItems(context)
+          (
+            (shareActionProvider as ShareMenuProviderV2).getShareMenuItems ??
+            (shareActionProvider as ShareMenuProviderLegacy).getShareMenuItemsLegacy
+          ).call(shareActionProvider, context)
         ),
     };
   }
