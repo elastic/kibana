@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { useDateRangePicker } from '../hooks/use_date_picker';
 
 interface DatasetQualityLinkProps {
   dataStreamName: string;
@@ -16,19 +17,18 @@ interface DatasetQualityLinkProps {
 
 export const DatasetQualityLink: React.FC<DatasetQualityLinkProps> = React.memo(
   ({ dataStreamName }) => {
+    const { dateRangePickerState } = useDateRangePicker();
     const {
       services: {
         share: { url },
       },
     } = useKibanaContextForPlugin();
-
+    const { startDate, endDate } = dateRangePickerState;
     const locator = url.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
-
     const onClickDataQuality = async () => {
       const locatorParams: DataQualityLocatorParams = {
         filters: {
-          // TODO: get time range from our page state
-          timeRange: { from: 'now-15m', to: 'now', refresh: { pause: true, value: 0 } },
+          timeRange: { from: startDate, to: endDate, refresh: { pause: true, value: 0 } },
         },
       };
       const dataset = getDatasetFromDataStream(dataStreamName);
