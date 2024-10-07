@@ -155,7 +155,7 @@ function getHookedActionType() {
   const result: ActionType<ConfigType, SecretsType, ParamsType> = {
     id: 'test.connector-with-hooks',
     name: 'Test: Connector with hooks',
-    minimumLicenseRequired: 'basic',
+    minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
       params: { schema: paramsSchema },
