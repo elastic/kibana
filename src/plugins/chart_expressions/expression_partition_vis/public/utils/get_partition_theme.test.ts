@@ -30,7 +30,6 @@ const column: ExpressionValueVisDimension = {
 const splitRows = [column];
 const splitColumns = [column];
 const chartTheme: RecursivePartial<Theme> = {
-  barSeriesStyle: { displayValue: { fontFamily: 'Arial' } },
   lineSeriesStyle: { point: { fill: '#fff' } },
   axes: { axisTitle: { fill: '#000' } },
 };
@@ -52,12 +51,10 @@ const getStaticThemePartition = (
   theme: RecursivePartial<Theme>,
   visParams: PartitionVisParams
 ) => ({
-  fontFamily: theme.barSeriesStyle?.displayValue?.fontFamily,
   outerSizeRatio: 1,
   minFontSize: 10,
   maxFontSize: 16,
   emptySizeRatio: visParams.emptySizeRatio ?? 0,
-  sectorLineStroke: theme.lineSeriesStyle?.point?.fill,
   sectorLineWidth: 1.5,
   circlePadding: 4,
 });
@@ -70,7 +67,6 @@ const getStaticThemeOptions = (theme: RecursivePartial<Theme>, visParams: Partit
 const getDefaultLinkLabel = (visParams: PartitionVisParams, theme: RecursivePartial<Theme>) => ({
   maxCount: 5,
   fontSize: 11,
-  textColor: theme.axes?.axisTitle?.fill,
   maxTextLength: visParams.labels.truncate ?? undefined,
 });
 
@@ -85,31 +81,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
     ...visParams,
     dimensions: { ...visParams.dimensions, splitColumn: splitColumns },
   };
-
-  it('should return correct default theme options', () => {
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, dimensions);
-    expect(theme).toEqual({
-      ...getStaticThemeOptions(chartTheme, visParams),
-      partition: {
-        ...getStaticThemePartition(chartTheme, visParams),
-        outerSizeRatio: undefined,
-        linkLabel: getDefaultLinkLabel(visParams, chartTheme),
-      },
-    });
-  });
-
-  it('should not return padding settings if dimensions are not specified', () => {
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, dimensions);
-
-    expect(theme).toEqual({
-      ...getStaticThemeOptions(chartTheme, visParams),
-      partition: {
-        ...getStaticThemePartition(chartTheme, visParams),
-        outerSizeRatio: undefined,
-        linkLabel: getDefaultLinkLabel(visParams, chartTheme),
-      },
-    });
-  });
 
   it('should not return padding settings if split column or row are specified', () => {
     const themeForSplitColumns = getPartitionTheme(
@@ -207,23 +178,6 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       },
     });
   });
-
-  it(
-    'should return undefined outerSizeRatio for not specified dimensions, visible labels,' +
-      'and default labels position and not split chart',
-    () => {
-      const theme = getPartitionTheme(chartType, visParams, chartTheme, dimensions);
-
-      expect(theme).toEqual({
-        ...getStaticThemeOptions(chartTheme, visParams),
-        partition: {
-          ...getStaticThemePartition(chartTheme, visParams),
-          outerSizeRatio: undefined,
-          linkLabel: getDefaultLinkLabel(visParams, chartTheme),
-        },
-      });
-    }
-  );
 
   it(
     'should return rescaleFactor value for outerSizeRatio if dimensions are specified,' +
@@ -379,18 +333,6 @@ const runTreemapMosaicTestSuites = (chartType: ChartTypes, visParams: PartitionV
     });
   });
 
-  it('should return empty padding settings if dimensions are not specified', () => {
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, dimensions);
-
-    expect(theme).toEqual({
-      ...getStaticThemeOptions(chartTheme, visParams),
-      partition: {
-        ...getStaticThemePartition(chartTheme, visParams),
-        linkLabel: getDefaultLinkLabel(visParams, chartTheme),
-      },
-    });
-  });
-
   it('should return padding settings if split column or row are specified', () => {
     const themeForSplitColumns = getPartitionTheme(
       chartType,
@@ -437,17 +379,6 @@ const runTreemapMosaicTestSuites = (chartType: ChartTypes, visParams: PartitionV
     expect(theme).toEqual({
       ...getStaticThemeOptions(chartTheme, visParams),
       chartPaddings: { top: 500, bottom: 500, left: 500, right: 500 },
-      partition: {
-        ...getStaticThemePartition(chartTheme, visParams),
-        linkLabel: getDefaultLinkLabel(visParams, chartTheme),
-      },
-    });
-  });
-
-  it('should return settings for the theme related fields', () => {
-    const theme = getPartitionTheme(chartType, visParams, chartTheme, dimensions);
-    expect(theme).toEqual({
-      ...getStaticThemeOptions(chartTheme, visParams),
       partition: {
         ...getStaticThemePartition(chartTheme, visParams),
         linkLabel: getDefaultLinkLabel(visParams, chartTheme),

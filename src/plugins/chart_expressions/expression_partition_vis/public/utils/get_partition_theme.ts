@@ -137,18 +137,15 @@ export const getPartitionTheme: GetThemeFn = (
         }
       : null;
   const partition = {
-    fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     minFontSize: 10,
     maxFontSize: 16,
     emptySizeRatio: 0,
-    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
     circlePadding: 4,
     linkLabel: {
       maxCount: 5,
       fontSize: 11,
-      textColor: chartTheme.axes?.axisTitle?.fill,
       maxTextLength: visParams.labels.truncate ?? undefined,
     },
   };
