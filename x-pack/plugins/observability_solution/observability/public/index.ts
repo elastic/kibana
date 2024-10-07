@@ -108,3 +108,4 @@ export type {
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './components/alerts_table/types';
+export { AlertActions } from './pages/alerts/components/alert_actions';

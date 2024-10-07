@@ -457,12 +457,12 @@ export interface FetchAlertData {
 }
 
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
-  ? (args: Props & AP) => JSX.Element | null
+  ? (args: Props & AP) => ReactNode
   : T extends ComponentClass<infer Props>
   ? ComponentClass<Props & AP>
   : never;
 
-interface SelectedAlertWithLegacyFormats {
+export interface SelectedAlertWithLegacyFormats {
   alert: Alert;
   /**
    * @deprecated
