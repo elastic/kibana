@@ -6011,6 +6011,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
