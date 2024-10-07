@@ -6027,6 +6027,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-data-access-plugin@link:x-pack/plugins/observability_solution/profiling_data_access":
   version "0.0.0"
   uid ""
