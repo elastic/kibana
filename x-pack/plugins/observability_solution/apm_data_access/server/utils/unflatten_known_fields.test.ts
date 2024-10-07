@@ -40,7 +40,7 @@ describe('unflattenKnownApmEventFields', () => {
   it('should correctly unflatten nested fields with mandatory field', () => {
     const input = {
       'service.name': 'node-svc',
-      'service.environment': 'production',
+      'service.environment': undefined,
     };
 
     const requiredFields: ['service.name'] = ['service.name'];
@@ -48,7 +48,6 @@ describe('unflattenKnownApmEventFields', () => {
     const expectedOutput = {
       service: {
         name: 'node-svc',
-        environment: 'production',
       },
     };
     expect(unflattenKnownApmEventFields(input, requiredFields)).toEqual(expectedOutput);

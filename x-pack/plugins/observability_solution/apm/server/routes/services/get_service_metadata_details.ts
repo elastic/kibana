@@ -11,23 +11,16 @@ import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server
 import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  AGENT,
-  CONTAINER,
-  CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  HOST,
-  KUBERNETES,
-  SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
-  LABEL_TELEMETRY_AUTO_VERSION,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -108,7 +101,6 @@ export async function getServiceMetadataDetails({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD, LABEL_TELEMETRY_AUTO_VERSION],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -162,6 +154,7 @@ export async function getServiceMetadataDetails({
         },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
+      fields: ['*'],
     },
   };
 
