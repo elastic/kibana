@@ -65,6 +65,8 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     <aiopsService.PatternAnalysisComponent
       props={patternAnalysisComponentProps}
       appContextValue={
+        // TODO We shouldn't cast to `unknown` here, goal is to use feature specific contexts.
+        // See https://github.com/elastic/kibana/pull/194442
         { embeddingOrigin: 'discover', ...services } as unknown as AiopsAppContextValue
       }
     />
