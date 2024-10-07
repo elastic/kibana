@@ -27,7 +27,7 @@ export const NoGroupCrossingRule: Rule.RuleModule = {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
     messages: {
-      PLUGIN_GROUP_MISMATCH: `The plugin "{{ownId}}" (from the {{ownGroup}} group) has specified dependencies on private modules.\n{{reason}}\n{{suggestion}}`,
+      PLUGIN_GROUP_MISMATCH: `The plugin "{{ownId}}" (from the "{{ownGroup}}" group) has specified dependencies on private modules.\n{{reason}}\n{{suggestion}}`,
     },
   },
   create(context) {
@@ -54,8 +54,8 @@ export const NoGroupCrossingRule: Rule.RuleModule = {
         const dependency = allPlugins.find(({ manifest }) => manifest.plugin.id === pluginId);
         if (dependency) {
           // at this point, we know the dependency is a plugin
-          const { group, visibility } = dependency.getPluginCategories();
-          if (!isImportableFrom(moduleId.group, group, visibility)) {
+          const { group, visibility } = dependency;
+          if (moduleId.manifest && !isImportableFrom(moduleId.group, group, visibility)) {
             groupViolations.push({ pluginId, group, visibility });
           }
         }
@@ -80,7 +80,7 @@ export const NoGroupCrossingRule: Rule.RuleModule = {
                 'The following dependencies have been found in the manifest, which are not allowed:\n',
                 ...groupViolations.map(
                   ({ pluginId, group, visibility }) =>
-                    `⚠ Cannot depend on "${pluginId}" from ${visibility} group ${group}.`
+                    `⚠ Cannot depend on "${pluginId}" from ${visibility} group "${group}".`
                 ),
               ].join('\n'),
               suggestion: formatSuggestions([
@@ -119,7 +119,7 @@ export const NoGroupCrossingRule: Rule.RuleModule = {
                 'The following dependencies have been found in the manifest, which are not allowed:\n',
                 ...groupViolations.map(
                   ({ pluginId, group, visibility }) =>
-                    `⚠ Cannot depend on "${pluginId}" from ${visibility} group ${group}.`
+                    `⚠ Cannot depend on "${pluginId}" from ${visibility} group "${group}".`
                 ),
               ].join('\n'),
               suggestion: formatSuggestions([

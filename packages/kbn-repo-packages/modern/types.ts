@@ -45,7 +45,7 @@ export type KibanaPackageType =
   | 'functional-tests'
   | 'test-helper';
 
-interface PackageManifestBaseFields {
+export interface PackageManifestBaseFields {
   /**
    * The type of this package. Package types define how a package can and should
    * be used/built. Some package types also change the way that packages are
@@ -205,8 +205,4 @@ export interface PluginCategoryInfo {
   example: boolean;
   /** is this a test plugin? */
   testPlugin: boolean;
-  /** Specifies the group to which this plugin belongs */
-  group: ModuleGroup;
-  /** Specifies the plugin visibility, i.e. whether it can be accessed by everybody or only plugins in the same group */
-  visibility: ModuleVisibility;
 }
