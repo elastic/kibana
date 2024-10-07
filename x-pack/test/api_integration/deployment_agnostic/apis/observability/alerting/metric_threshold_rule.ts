@@ -7,46 +7,51 @@
 
 import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  InfraRuleType,
-  MetricThresholdParams,
-} from '@kbn/infra-plugin/common/alerting/metrics';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { Aggregators, InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import {
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-  waitForRuleStatus,
-} from './helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../common/ftr_provider_context';
-import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const supertest = getService('supertest');
+  const alertingApi = getService('alertingApi');
+  const dataViewApi = getService('dataViewApi');
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const logger = getService('log');
-  const retryService = getService('retry');
+  const expectedConsumer = 'infrastructure';
 
   describe('Metric threshold rule >', () => {
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW_ID = 'data-view-id';
+
     let ruleId: string;
     let alertId: string;
     let actionId: string;
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
+    let adminRoleAuthc: RoleCredentials;
+    let internalHeaders: InternalRequestHeader;
 
     const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 
     describe('alert and action creation', () => {
       before(async () => {
-        await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
-          anomalyThreshold: 50,
-          description: '',
-          metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
-          name: 'Default',
-        });
+        adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+        internalHeaders = samlAuth.getInternalRequestHeader();
+        await supertestWithoutAuth
+          .patch(`/api/metrics/source/default`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .send({
+            anomalyThreshold: 50,
+            description: '',
+            metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+            name: 'Default',
+          });
+
         dataForgeConfig = {
           schedule: [
             {
@@ -59,25 +64,54 @@ export default function ({ getService }: FtrProviderContext) {
           indexing: { dataset: 'fake_hosts' as Dataset },
         };
         dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-        await waitForDocumentInIndex({
-          esClient,
+        await alertingApi.waitForDocumentInIndex({
           indexName: dataForgeIndices.join(','),
           docCountTarget: 45,
-          retryService,
-          logger,
         });
-        actionId = await createIndexConnector({
-          supertest,
+        await dataViewApi.create({
+          roleAuthc: adminRoleAuthc,
+          name: DATA_VIEW,
+          id: DATA_VIEW_ID,
+          title: DATA_VIEW,
+        });
+      });
+
+      after(async () => {
+        await supertestWithoutAuth
+          .delete(`/api/alerting/rule/${ruleId}`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders);
+        await supertestWithoutAuth
+          .delete(`/api/actions/connector/${actionId}`)
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders);
+        await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+        await esClient.deleteByQuery({
+          index: METRICS_ALERTS_INDEX,
+          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        });
+        await esClient.deleteByQuery({
+          index: '.kibana-event-log-*',
+          query: { term: { 'kibana.alert.rule.consumer': expectedConsumer } },
+        });
+        await dataViewApi.delete({
+          roleAuthc: adminRoleAuthc,
+          id: DATA_VIEW_ID,
+        });
+        await cleanup({ client: esClient, config: dataForgeConfig, logger });
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+      });
+
+      it('creates rule successfully', async () => {
+        actionId = await alertingApi.createIndexConnector({
+          roleAuthc: adminRoleAuthc,
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
-          logger,
         });
-        const createdRule = await createRule<MetricThresholdParams>({
-          supertest,
-          logger,
-          esClient,
+        const createdRule = await alertingApi.createRule2({
+          roleAuthc: adminRoleAuthc,
           ruleTypeId: InfraRuleType.MetricThreshold,
-          consumer: 'infrastructure',
+          consumer: expectedConsumer,
           tags: ['infrastructure'],
           name: 'Metric threshold rule',
           params: {
@@ -120,41 +154,22 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
         ruleId = createdRule.id;
-      });
-
-      after(async () => {
-        await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-        await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-        await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
-        await esClient.deleteByQuery({
-          index: METRICS_ALERTS_INDEX,
-          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-        });
-        await esClient.deleteByQuery({
-          index: '.kibana-event-log-*',
-          query: { term: { 'kibana.alert.rule.consumer': 'infrastructure' } },
-        });
-        await cleanup({ client: esClient, config: dataForgeConfig, logger });
+        expect(ruleId).not.to.be(undefined);
       });
 
       it('rule should be active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc: adminRoleAuthc,
+          ruleId,
           expectedStatus: 'active',
-          supertest,
-          retryService,
-          logger,
         });
-        expect(executionStatus.status).to.be('active');
+        expect(executionStatus).to.be('active');
       });
 
       it('should set correct information in the alert document', async () => {
-        const resp = await waitForAlertInIndex({
-          esClient,
+        const resp = await alertingApi.waitForAlertInIndex({
           indexName: METRICS_ALERTS_INDEX,
           ruleId,
-          retryService,
-          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
         expect(resp.hits.hits[0]._source).property(
@@ -207,15 +222,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const resp = await waitForDocumentInIndex<{
+        const resp = await alertingApi.waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
           reason: string;
         }>({
-          esClient,
           indexName: ALERT_ACTION_INDEX,
-          retryService,
-          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
