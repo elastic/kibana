@@ -61,9 +61,9 @@ Use the following table to find links to the appropriate documentation, API refe
 | <<release-notes, Kibana guide>>
 
 | Search UI
-| link:https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
-| link:https://www.elastic.co/docs/current/search-ui[Documentation]
-| link:https://www.elastic.co/docs/current/search-ui[Search UI]
+| https://www.elastic.co/docs/current/search-ui/api/architecture[API reference]
+| https://www.elastic.co/docs/current/search-ui[Documentation]
+| https://www.elastic.co/docs/current/search-ui[Search UI]
 
 |===
 
