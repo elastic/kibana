@@ -422,7 +422,7 @@ export const ModelsList: FC<Props> = ({
         if (isMounted()) {
           setItems((prevItems) => {
             return prevItems.map((item) => {
-              if (item.model_type !== 'pytorch') {
+              if (!item.type?.includes('pytorch')) {
                 return item;
               }
               const newItem = cloneDeep(item);
@@ -452,8 +452,6 @@ export const ModelsList: FC<Props> = ({
               return newItem;
             });
           });
-
-          // setIsLoading(false);
         }
 
         Object.keys(downloadStatus).forEach((modelId) => {
@@ -663,7 +661,7 @@ export const ModelsList: FC<Props> = ({
         defaultMessage: 'State',
       }),
       truncateText: false,
-      width: '200px',
+      width: '150px',
       render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
         if (!config) return null;
