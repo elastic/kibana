@@ -329,7 +329,7 @@ export class DashboardStorage {
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
     const response = {
-      hits: soResponse.saved_objects.map((so) => savedObjectToItem(so, false)),
+      hits: soResponse.saved_objects.map((so) => savedObjectToItem(so, false, soQuery.fields)),
       pagination: {
         total: soResponse.total,
       },

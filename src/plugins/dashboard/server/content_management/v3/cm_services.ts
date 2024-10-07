@@ -437,7 +437,7 @@ export const dashboardSearchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
-      allFields: schema.maybe(schema.boolean()),
+      fields: schema.maybe(schema.arrayOf(schema.string())),
       kuery: schema.maybe(schema.string()),
       cursor: schema.maybe(schema.number()),
       limit: schema.maybe(schema.number()),

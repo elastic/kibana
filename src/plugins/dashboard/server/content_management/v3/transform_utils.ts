@@ -8,6 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash';
 import {
   type ControlGroupChainingSystem,
   type ControlLabelPosition,
@@ -255,18 +256,22 @@ type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
 
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
-  partial: false
+  partial: false,
+  allowedAttributes?: string[]
 ): DashboardItem;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
-  partial: true
+  partial: true,
+  allowedAttributes?: string[]
 ): PartialDashboardItem;
 
 export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
-    | PartialSavedObject<DashboardSavedObjectAttributes>
+    | PartialSavedObject<DashboardSavedObjectAttributes>,
+  partial: boolean,
+  allowedAttributes?: string[]
 ): DashboardItem | PartialDashboardItem {
   const {
     id,
@@ -290,7 +295,9 @@ export function savedObjectToItem(
     updatedBy,
     createdAt,
     createdBy,
-    attributes: dashboardAttributesOut(attributes),
+    attributes: allowedAttributes
+      ? pick(dashboardAttributesOut(attributes), allowedAttributes)
+      : dashboardAttributesOut(attributes),
     error,
     namespaces,
     references,
