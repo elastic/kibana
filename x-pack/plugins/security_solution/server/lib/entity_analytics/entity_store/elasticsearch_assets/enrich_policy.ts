@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
@@ -57,13 +57,24 @@ export const executeFieldRetentionEnrichPolicy = async ({
   namespace,
   esClient,
   entityType,
+  logger,
 }: {
   namespace: string;
   esClient: ElasticsearchClient;
   entityType: EntityType;
-}) => {
+  logger: Logger;
+}): Promise<{ executed: boolean }> => {
   const name = getFieldRetentionEnrichPolicyName(namespace, entityType);
-  return esClient.enrich.executePolicy({ name });
+  try {
+    await esClient.enrich.executePolicy({ name });
+    return { executed: true };
+  } catch (e) {
+    if (e.statusCode === 404) {
+      return { executed: false };
+    }
+    logger.error(`Error executing field retention enrich policy for ${entityType}: ${e.message}`);
+    throw e;
+  }
 };
 
 export const deleteFieldRetentionEnrichPolicy = async ({

@@ -12,17 +12,16 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
+import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { EntityStoreDataClient } from '../entity_store_data_client';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { getFieldRetentionDefinitionEntityTypes } from '../field_retention_definitions';
+import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -38,7 +37,10 @@ const getTaskName = (): string => TYPE;
 
 const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
 
-type GetEntityStoreDataClient = (namespace: string) => Promise<EntityStoreDataClient>;
+type ExecuteEnrichPolicy = (
+  namespace: string,
+  entityType: EntityType
+) => ReturnType<typeof executeFieldRetentionEnrichPolicy>;
 
 export const registerEntityStoreFieldRetentionEnrichTask = ({
   getStartServices,
@@ -54,21 +56,18 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     return;
   }
 
-  const getEntityStoreDataClient: GetEntityStoreDataClient = async (namespace: string) => {
+  const executeEnrichPolicy: ExecuteEnrichPolicy = async (
+    namespace: string,
+    entityType: EntityType
+  ): ReturnType<typeof executeFieldRetentionEnrichPolicy> => {
     const [coreStart, _] = await getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-    const entityClient = new EntityClient({
-      esClient,
-      soClient,
-      logger,
-    });
-    return new EntityStoreDataClient({
-      esClient,
-      logger,
+
+    return executeFieldRetentionEnrichPolicy({
+      entityType,
       namespace,
-      entityClient,
-      soClient,
+      esClient,
+      logger,
     });
   };
 
@@ -79,7 +78,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       stateSchemaByVersion,
       createTaskRunner: createTaskRunnerFactory({
         logger,
-        getEntityStoreDataClient,
+        executeEnrichPolicy,
       }),
     },
   });
@@ -136,14 +135,14 @@ export const removeEntityStoreFieldRetentionEnrichTask = async ({
 };
 
 export const runTask = async ({
-  getEntityStoreDataClient,
+  executeEnrichPolicy,
   isCancelled,
   logger,
   taskInstance,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
-  getEntityStoreDataClient: GetEntityStoreDataClient;
+  executeEnrichPolicy: ExecuteEnrichPolicy;
   taskInstance: ConcreteTaskInstance;
 }): Promise<{
   state: EntityStoreFieldRetentionTaskState;
@@ -167,20 +166,12 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const entityStoreDataClient = await getEntityStoreDataClient(state.namespace);
-    if (!EntityStoreDataClient) {
-      log('entity store data client is not available; exiting task');
-      return { state: updatedState };
-    }
-
     const entityTypes = getFieldRetentionDefinitionEntityTypes();
     for (const entityType of entityTypes) {
       const start = Date.now();
       debugLog(`executing field retention enrich policy for ${entityType}`);
       try {
-        const { executed } = await entityStoreDataClient.executeFieldRetentionEnrichPolicy(
-          entityType
-        );
+        const { executed } = await executeEnrichPolicy(state.namespace, entityType);
         if (!executed) {
           debugLog(`Field retention encrich policy for ${entityType} does not exist`);
         } else {
@@ -207,20 +198,14 @@ export const runTask = async ({
 };
 
 const createTaskRunnerFactory =
-  ({
-    logger,
-    getEntityStoreDataClient,
-  }: {
-    logger: Logger;
-    getEntityStoreDataClient: GetEntityStoreDataClient;
-  }) =>
+  ({ logger, executeEnrichPolicy }: { logger: Logger; executeEnrichPolicy: ExecuteEnrichPolicy }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
       run: async () =>
         runTask({
-          getEntityStoreDataClient,
+          executeEnrichPolicy,
           isCancelled,
           logger,
           taskInstance,

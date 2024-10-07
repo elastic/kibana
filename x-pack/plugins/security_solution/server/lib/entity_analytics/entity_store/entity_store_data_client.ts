@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
+import type {
+  Logger,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  AuditLogger,
+} from '@kbn/core/server';
+import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
@@ -21,7 +26,7 @@ import type {
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntitiesIndexName } from './utils';
 import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
-import type { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
+import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getDefinitionForEntityType } from './definition';
 import {
   startEntityStoreFieldRetentionEnrichTask,
@@ -38,13 +43,16 @@ import {
   executeFieldRetentionEnrichPolicy,
   deleteFieldRetentionEnrichPolicy,
 } from './elasticsearch_assets';
+import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 
 interface EntityStoreClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
-  entityClient: EntityClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
+  taskManager?: TaskManagerStartContract;
+  auditLogger?: AuditLogger;
+  kibanaVersion: string;
 }
 
 interface SearchEntitiesParams {
@@ -58,22 +66,53 @@ interface SearchEntitiesParams {
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
+  private assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient;
+  private entityClient: EntityClient;
+  private riskScoreDataClient: RiskScoreDataClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
+    const { esClient, logger, soClient, auditLogger, kibanaVersion, namespace } = options;
+
+    this.entityClient = new EntityClient({
+      esClient,
+      soClient,
+      logger,
+    });
+
     this.engineClient = new EngineDescriptorClient({
-      soClient: options.soClient,
-      namespace: options.namespace,
+      soClient,
+      namespace,
+    });
+
+    this.assetCriticalityMigrationClient = new AssetCriticalityEcsMigrationClient({
+      esClient,
+      logger,
+      auditLogger,
+    });
+
+    this.riskScoreDataClient = new RiskScoreDataClient({
+      soClient,
+      esClient,
+      logger,
+      namespace,
+      kibanaVersion,
     });
   }
 
   public async init(
     entityType: EntityType,
-    taskManager: TaskManagerStartContract,
-    assetCriticalityMigrationClient: AssetCriticalityEcsMigrationClient,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody
   ): Promise<InitEntityEngineResponse> {
-    const { entityClient, logger, esClient, namespace } = this.options;
-    const requiresMigration = await assetCriticalityMigrationClient.isEcsDataMigrationRequired();
+    if (!this.options.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    const { logger, esClient, namespace, taskManager } = this.options;
+
+    await this.riskScoreDataClient.createRiskScoreLatestIndex();
+
+    const requiresMigration =
+      await this.assetCriticalityMigrationClient.isEcsDataMigrationRequired();
 
     if (requiresMigration) {
       throw new Error(
@@ -95,7 +134,7 @@ export class EntityStoreDataClient {
     logger.debug(`Initialized engine for ${entityType}`);
     // first create the entity definition without starting it
     // so that the index template is created which we can add a component template to
-    await entityClient.createEntityDefinition({
+    await this.entityClient.createEntityDefinition({
       definition: {
         ...definition,
         filter,
@@ -131,7 +170,12 @@ export class EntityStoreDataClient {
       namespace,
     });
     debugLog(`Created field retention enrich policy`);
-    await this.executeFieldRetentionEnrichPolicy(entityType);
+    await executeFieldRetentionEnrichPolicy({
+      entityType,
+      namespace,
+      esClient,
+      logger,
+    });
     debugLog(`Executed field retention enrich policy`);
     await createPlatformPipeline({
       entityType,
@@ -161,27 +205,6 @@ export class EntityStoreDataClient {
     return { ...descriptor, ...updated };
   }
 
-  public async executeFieldRetentionEnrichPolicy(
-    entityType: EntityType
-  ): Promise<{ executed: boolean }> {
-    try {
-      await executeFieldRetentionEnrichPolicy({
-        namespace: this.options.namespace,
-        esClient: this.options.esClient,
-        entityType,
-      });
-      return { executed: true };
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return { executed: false };
-      }
-      this.options.logger.error(
-        `Error executing field retention enrich policy for ${entityType}: ${e.message}`
-      );
-      throw e;
-    }
-  }
-
   public async start(entityType: EntityType, options?: { force: boolean }) {
     const definition = getDefinitionForEntityType(entityType, this.options.namespace);
 
@@ -194,7 +217,7 @@ export class EntityStoreDataClient {
     }
 
     this.options.logger.info(`Starting entity store for ${entityType}`);
-    await this.options.entityClient.startEntityDefinition(definition);
+    await this.entityClient.startEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
   }
@@ -211,7 +234,7 @@ export class EntityStoreDataClient {
     }
 
     this.options.logger.info(`Stopping entity store for ${entityType}`);
-    await this.options.entityClient.stopEntityDefinition(definition);
+    await this.entityClient.stopEntityDefinition(definition);
 
     return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
   }
@@ -229,12 +252,12 @@ export class EntityStoreDataClient {
     taskManager: TaskManagerStartContract,
     deleteData: boolean
   ) {
-    const { namespace, logger, esClient, entityClient } = this.options;
+    const { namespace, logger, esClient } = this.options;
     const { id } = getDefinitionForEntityType(entityType, namespace);
 
     logger.info(`Deleting entity store for ${entityType}`);
     try {
-      await entityClient.deleteEntityDefinition({ id, deleteData });
+      await this.entityClient.deleteEntityDefinition({ id, deleteData });
       await deleteEntityIndexComponentTemplate({
         entityType,
         esClient,
