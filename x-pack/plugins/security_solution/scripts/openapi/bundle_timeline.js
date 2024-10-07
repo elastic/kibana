@@ -29,6 +29,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Timeline API',
+            'x-displayName': 'Security timeline',
             description:
               'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
           },
@@ -54,6 +55,7 @@ const ROOT = resolve(__dirname, '../..');
         tags: [
           {
             name: 'Security Timeline API',
+            'x-displayName': 'Security timeline',
             description:
               'You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.',
           },
