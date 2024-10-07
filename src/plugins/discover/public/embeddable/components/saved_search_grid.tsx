@@ -17,6 +17,8 @@ import {
   type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
+  getDataGridDensity,
+  getRowHeight,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../../components/discover_grid';
 import './saved_search_grid.scss';
@@ -25,8 +27,7 @@ import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useProfileAccessor } from '../../context_awareness';
 
-export interface DiscoverGridEmbeddableProps
-  extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
+interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
   query?: AggregateQuery | Query;
@@ -36,15 +37,11 @@ export interface DiscoverGridEmbeddableProps
   savedSearchId?: string;
 }
 
-export type DiscoverGridEmbeddableSearchProps = Omit<
-  DiscoverGridEmbeddableProps,
-  'sampleSizeState' | 'loadingState' | 'query'
->;
-
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, ...gridProps } = props;
+
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   const renderDocumentView = useCallback(
@@ -94,8 +91,27 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers();
-  }, [getCellRenderersAccessor]);
+    return getCellRenderers({
+      actions: { addFilter: props.onFilter },
+      dataView: props.dataView,
+      density:
+        gridProps.dataGridDensityState ?? getDataGridDensity(props.services.storage, 'discover'),
+      rowHeight: getRowHeight({
+        storage: props.services.storage,
+        consumer: 'discover',
+        rowHeightState: gridProps.rowHeightState,
+        configRowHeight: props.configRowHeight,
+      }),
+    });
+  }, [
+    getCellRenderersAccessor,
+    props.onFilter,
+    props.dataView,
+    props.services.storage,
+    props.configRowHeight,
+    gridProps.dataGridDensityState,
+    gridProps.rowHeightState,
+  ]);
 
   return (
     <SavedSearchEmbeddableBase

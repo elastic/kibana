@@ -11,12 +11,6 @@ import {
   EuiPageTemplate,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiText,
-  EuiIcon,
   EuiButtonEmpty,
   EuiTabbedContent,
   EuiTabbedContentTab,
@@ -26,6 +20,7 @@ import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { ApiKeyForm } from '@kbn/search-api-keys-components';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
@@ -37,18 +32,47 @@ import { IndexloadingError } from './details_page_loading_error';
 import { SearchIndexDetailsTabs } from '../../routes';
 import { SearchIndexDetailsMappings } from './details_page_mappings';
 import { SearchIndexDetailsSettings } from './details_page_settings';
+import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item';
+import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
+import { DEFAULT_PAGE_SIZE } from '../index_documents/constants';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const { console: consolePlugin, docLinks, application, history } = useKibana().services;
-  const { data: index, refetch, isError: isIndexError, isInitialLoading } = useIndex(indexName);
+  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
+  const {
+    data: index,
+    refetch,
+    isError: isIndexError,
+    isInitialLoading,
+    error: indexLoadingError,
+  } = useIndex(indexName);
   const {
     data: mappings,
     isError: isMappingsError,
     isInitialLoading: isMappingsInitialLoading,
+    error: mappingsError,
   } = useIndexMapping(indexName);
+  const { data: indexDocuments, isInitialLoading: indexDocumentsIsInitialLoading } =
+    useIndexDocumentSearch(indexName, {
+      pageSize: DEFAULT_PAGE_SIZE,
+      pageIndex: 0,
+    });
+
+  const navigateToPlayground = useCallback(async () => {
+    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
+    if (playgroundLocator && index) {
+      await playgroundLocator.navigate({ 'default-index': index.name });
+    }
+  }, [share, index]);
+
+  const [isDocumentsExists, setDocumentsExists] = useState<boolean>(false);
+  const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    setDocumentsLoading(isInitialLoading);
+    setDocumentsExists(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
+  }, [indexDocuments, isInitialLoading, setDocumentsExists, setDocumentsLoading]);
 
   const detailsPageTabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
@@ -57,7 +81,13 @@ export const SearchIndexDetailsPage = () => {
         name: i18n.translate('xpack.searchIndices.documentsTabLabel', {
           defaultMessage: 'Data',
         }),
-        content: <IndexDocuments indexName={indexName} />,
+        content: (
+          <IndexDocuments
+            indexName={indexName}
+            indexDocuments={indexDocuments}
+            isInitialLoading={indexDocumentsIsInitialLoading}
+          />
+        ),
         'data-test-subj': `${SearchIndexDetailsTabs.DATA}Tab`,
       },
       {
@@ -77,7 +107,7 @@ export const SearchIndexDetailsPage = () => {
         'data-test-subj': `${SearchIndexDetailsTabs.SETTINGS}Tab`,
       },
     ];
-  }, [index, indexName]);
+  }, [index, indexName, indexDocuments, indexDocumentsIsInitialLoading]);
   const [selectedTab, setSelectedTab] = useState(detailsPageTabs[0]);
 
   useEffect(() => {
@@ -86,7 +116,7 @@ export const SearchIndexDetailsPage = () => {
   }, [detailsPageTabs, tabId]);
 
   const handleTabClick = useCallback(
-    (tab) => {
+    (tab: EuiTabbedContentTab) => {
       history.push(`index_details/${indexName}/${tab.id}`);
     },
 
@@ -103,47 +133,24 @@ export const SearchIndexDetailsPage = () => {
   const refetchIndex = useCallback(() => {
     refetch();
   }, [refetch]);
-  const [showMoreOptions, setShowMoreOptions] = useState<boolean>(false);
-  const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
-  const moreOptionsPopover = (
-    <EuiPopover
-      isOpen={showMoreOptions}
-      closePopover={() => setShowMoreOptions(!showMoreOptions)}
-      button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          onClick={() => setShowMoreOptions(!showMoreOptions)}
-          size="m"
-          data-test-subj="moreOptionsActionButton"
-          aria-label={i18n.translate('xpack.searchIndices.moreOptions.ariaLabel', {
-            defaultMessage: 'More options',
-          })}
-        />
-      }
-    >
-      <EuiContextMenuPanel
-        data-test-subj="moreOptionsContextMenu"
-        items={[
-          <EuiContextMenuItem
-            key="trash"
-            icon={<EuiIcon type="trash" color="danger" />}
-            onClick={() => {
-              setShowDeleteIndexModal(!isShowingDeleteModal);
-            }}
-            size="s"
-            color="danger"
-            data-test-subj="moreOptionsDeleteIndex"
-          >
-            <EuiText size="s" color="danger">
-              {i18n.translate('xpack.searchIndices.moreOptions.deleteIndexLabel', {
-                defaultMessage: 'Delete Index',
-              })}
-            </EuiText>
-          </EuiContextMenuItem>,
-        ]}
-      />
-    </EuiPopover>
+  const indexError = useMemo(
+    () =>
+      isIndexError
+        ? {
+            title: indexLoadingError ? indexLoadingError.body?.error : '',
+            message: indexLoadingError ? indexLoadingError.body?.message : '',
+          }
+        : {
+            title: mappingsError ? mappingsError.body?.error : '',
+            message: mappingsError ? mappingsError.body?.message : '',
+          },
+    [isIndexError, indexLoadingError, mappingsError]
   );
+  const [isShowingDeleteModal, setShowDeleteIndexModal] = useState<boolean>(false);
+  const handleDeleteIndexModal = useCallback(() => {
+    setShowDeleteIndexModal(!isShowingDeleteModal);
+  }, [isShowingDeleteModal]);
+
   if (isInitialLoading || isMappingsInitialLoading) {
     return (
       <SectionLoading>
@@ -165,7 +172,7 @@ export const SearchIndexDetailsPage = () => {
     >
       {isIndexError || isMappingsError || !index || !mappings ? (
         <IndexloadingError
-          indexName={indexName}
+          error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
           reloadFunction={refetchIndex}
         />
@@ -188,31 +195,60 @@ export const SearchIndexDetailsPage = () => {
             data-test-subj="searchIndexDetailsHeader"
             pageTitle={index?.name}
             rightSideItems={[
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem>
-                  <EuiButtonEmpty
-                    href={docLinks.links.apiReference}
-                    target="_blank"
-                    iconType="documentation"
-                    data-test-subj="ApiReferenceDoc"
-                  >
-                    {i18n.translate('xpack.searchIndices.indexActionsMenu.apiReference.docLink', {
-                      defaultMessage: 'API Reference',
-                    })}
-                  </EuiButtonEmpty>
+                  {!isDocumentsExists ? (
+                    <EuiButtonEmpty
+                      href={docLinks.links.apiReference}
+                      target="_blank"
+                      isLoading={isDocumentsLoading}
+                      iconType="documentation"
+                      data-test-subj="ApiReferenceDoc"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchIndices.indexAction.ApiReferenceButtonLabel"
+                        defaultMessage="{buttonLabel}"
+                        values={{
+                          buttonLabel: isDocumentsLoading ? 'Loading' : 'API Reference',
+                        }}
+                      />
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiButtonEmpty
+                      isLoading={isDocumentsLoading}
+                      iconType="launch"
+                      data-test-subj="useInPlaygroundLink"
+                      onClick={navigateToPlayground}
+                    >
+                      <FormattedMessage
+                        id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
+                        defaultMessage="{buttonLabel}"
+                        values={{
+                          buttonLabel: isDocumentsLoading ? 'Loading' : 'Use in Playground',
+                        }}
+                      />
+                    </EuiButtonEmpty>
+                  )}
                 </EuiFlexItem>
-                <EuiFlexItem>{moreOptionsPopover}</EuiFlexItem>
+                <EuiFlexItem>
+                  <SearchIndexDetailsPageMenuItemPopover
+                    handleDeleteIndexModal={handleDeleteIndexModal}
+                    navigateToPlayground={navigateToPlayground}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>,
             ]}
           />
           <EuiPageTemplate.Section grow={false}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
+                <EuiFlexGroup css={{ overflow: 'auto' }}>
+                  <EuiFlexItem css={{ flexShrink: 0 }}>
                     <ConnectionDetails />
                   </EuiFlexItem>
-                  <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
+                  <EuiFlexItem css={{ flexShrink: 0 }}>
+                    <ApiKeyForm />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>

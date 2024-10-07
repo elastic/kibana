@@ -66,6 +66,9 @@ export const getOAuthAccessToken = (
       validate: {
         body: bodySchema,
       },
+      options: {
+        access: 'internal',
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {

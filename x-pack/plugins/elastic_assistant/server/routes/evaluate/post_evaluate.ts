@@ -29,16 +29,13 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { RetrievalQAChain } from 'langchain/chains';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
-import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
@@ -88,7 +85,6 @@ export const postEvaluateRoute = (
         const assistantContext = ctx.elasticAssistant;
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
-        const telemetry = assistantContext.telemetry;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
@@ -147,9 +143,6 @@ export const postEvaluateRoute = (
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
-          // Default ELSER model
-          const elserId = await getElser();
-
           const inference = ctx.elasticAssistant.inference;
 
           // Data clients
@@ -158,25 +151,14 @@ export const postEvaluateRoute = (
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
-              v2KnowledgeBaseEnabled
-            )) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              v2KnowledgeBaseEnabled,
+            })) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,
             kbDataClient,
           };
-
-          // esStore
-          const esStore = new ElasticsearchStore(
-            esClient,
-            kbDataClient?.indexTemplateAndPattern?.alias ?? '',
-            logger,
-            telemetry,
-            elserId,
-            ESQL_RESOURCE,
-            kbDataClient
-          );
 
           // Actions
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -221,11 +203,6 @@ export const postEvaluateRoute = (
                 ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
                 : undefined;
 
-              const modelExists = await esStore.isModelInstalled();
-
-              // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-              const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
-
               // Check if KB is available
               const isEnabledKnowledgeBase =
                 (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
@@ -251,13 +228,12 @@ export const postEvaluateRoute = (
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
-                chain,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
                 llm,
                 logger,
-                modelExists,
+                modelExists: isEnabledKnowledgeBase,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
