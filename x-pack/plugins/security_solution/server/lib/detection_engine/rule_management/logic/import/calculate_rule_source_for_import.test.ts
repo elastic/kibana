@@ -14,7 +14,7 @@ describe('calculateRuleSourceForImport', () => {
     const result = calculateRuleSourceForImport({
       rule: getRulesSchemaMock(),
       prebuiltRuleAssetsByRuleId: {},
-      ruleIdExists: false,
+      isKnownPrebuiltRule: false,
     });
 
     expect(result).toEqual({
@@ -32,7 +32,7 @@ describe('calculateRuleSourceForImport', () => {
     const result = calculateRuleSourceForImport({
       rule,
       prebuiltRuleAssetsByRuleId: {},
-      ruleIdExists: true,
+      isKnownPrebuiltRule: true,
     });
 
     expect(result).toEqual({
@@ -52,7 +52,7 @@ describe('calculateRuleSourceForImport', () => {
     const result = calculateRuleSourceForImport({
       rule,
       prebuiltRuleAssetsByRuleId,
-      ruleIdExists: true,
+      isKnownPrebuiltRule: true,
     });
 
     expect(result).toEqual({
@@ -72,7 +72,7 @@ describe('calculateRuleSourceForImport', () => {
     const result = calculateRuleSourceForImport({
       rule,
       prebuiltRuleAssetsByRuleId,
-      ruleIdExists: true,
+      isKnownPrebuiltRule: true,
     });
 
     expect(result).toEqual({

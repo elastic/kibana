@@ -83,7 +83,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     return calculateRuleSourceForImport({
       rule,
       prebuiltRuleAssetsByRuleId: this.matchingAssetsByRuleId,
-      ruleIdExists: this.availableRuleAssetIds.has(rule.rule_id),
+      isKnownPrebuiltRule: this.availableRuleAssetIds.has(rule.rule_id),
     });
   }
 

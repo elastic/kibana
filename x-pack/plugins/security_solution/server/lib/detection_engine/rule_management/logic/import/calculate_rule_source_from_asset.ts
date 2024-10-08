@@ -16,20 +16,20 @@ import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_so
  *
  * @param rule The rule for which rule_source is being calculated
  * @param assetWithMatchingVersion The prebuilt rule asset that matches the specified rule_id and version
- * @param ruleIdExists Whether a prebuilt rule with the specified rule_id is currently installed
+ * @param isKnownPrebuiltRule Whether a prebuilt rule with the specified rule_id is currently installed
  *
  * @returns The calculated rule_source
  */
 export const calculateRuleSourceFromAsset = ({
   rule,
   assetWithMatchingVersion,
-  ruleIdExists,
+  isKnownPrebuiltRule,
 }: {
   rule: RuleResponse;
   assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
-  ruleIdExists: boolean;
+  isKnownPrebuiltRule: boolean;
 }): RuleSource => {
-  if (!ruleIdExists) {
+  if (!isKnownPrebuiltRule) {
     return {
       type: 'internal',
     };

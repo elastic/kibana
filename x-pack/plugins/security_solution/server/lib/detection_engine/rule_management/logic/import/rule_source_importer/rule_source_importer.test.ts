@@ -139,7 +139,7 @@ describe('ruleSourceImporter', () => {
       expect(calculatorSpy).toHaveBeenCalledWith({
         rule,
         prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-        ruleIdExists: true,
+        isKnownPrebuiltRule: true,
       });
     });
 
@@ -167,7 +167,7 @@ describe('ruleSourceImporter', () => {
         expect(calculatorSpy).toHaveBeenCalledWith({
           rule,
           prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-          ruleIdExists: true,
+          isKnownPrebuiltRule: true,
         });
       });
     });

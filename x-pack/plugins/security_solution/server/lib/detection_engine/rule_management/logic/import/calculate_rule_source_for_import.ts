@@ -19,7 +19,7 @@ import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset
  * @param rule The rule to be imported
  * @param prebuiltRuleAssets A list of prebuilt rule assets, which may include
  * the installed version of the specified prebuilt rule.
- * @param ruleIdExists {boolean} Whether the rule's rule_id is available as a
+ * @param isKnownPrebuiltRule {boolean} Whether the rule's rule_id is available as a
  * prebuilt asset (independent of the specified version).
  *
  * @returns The calculated rule_source and immutable fields for the rule
@@ -27,11 +27,11 @@ import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset
 export const calculateRuleSourceForImport = ({
   rule,
   prebuiltRuleAssetsByRuleId,
-  ruleIdExists,
+  isKnownPrebuiltRule,
 }: {
   rule: ValidatedRuleToImport;
   prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
-  ruleIdExists: boolean;
+  isKnownPrebuiltRule: boolean;
 }): { ruleSource: RuleSource; immutable: boolean } => {
   const assetWithMatchingVersion = prebuiltRuleAssetsByRuleId[rule.rule_id];
   // We convert here so that RuleSource calculation can
@@ -42,7 +42,7 @@ export const calculateRuleSourceForImport = ({
   const ruleSource = calculateRuleSourceFromAsset({
     rule: ruleResponseForImport,
     assetWithMatchingVersion,
-    ruleIdExists,
+    isKnownPrebuiltRule,
   });
 
   return {
