@@ -7,10 +7,12 @@
 
 import type { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { API_AUTH, COMMON_API_HEADERS } from '../common';
 
-export const bedrockId = '23933aeb-a3cb-476f-8465-3235085a9dd8';
-export const azureId = 'e68f5cbe-3604-468f-a5e1-809b80b614aa';
+export const bedrockId = uuidv4();
+export const azureId = uuidv4();
 
 // Replaces request - adds baseline authentication + global headers
 export const request = <T = unknown>({

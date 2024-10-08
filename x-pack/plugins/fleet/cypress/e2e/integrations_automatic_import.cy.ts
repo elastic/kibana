@@ -19,11 +19,20 @@ import {
   DATASTREAM_NAME_INPUT,
   DATA_COLLECTION_METHOD_INPUT,
   LOGS_SAMPLE_FILE_PICKER,
+  EDIT_PIPELINE_BUTTON,
+  SAVE_PIPELINE_BUTTON,
+  VIEW_INTEGRATION_BUTTON,
+  INTEGRATION_SUCCESS_SECTION,
+  SAVE_ZIP_BUTTON,
 } from '../screens/integrations_automatic_import';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
-import { login } from '../tasks/login';
+import { login, logout } from '../tasks/login';
 import { createBedrockConnector, deleteConnectors } from '../tasks/api_calls/connectors';
-import { results } from '../tasks/api_calls/graph_calls';
+import {
+  ecsResultsForJson,
+  categorizationResultsForJson,
+  relatedResultsForJson,
+} from '../tasks/api_calls/graph_results';
 
 describe('Add Integration - Automatic Import', () => {
   beforeEach(() => {
@@ -39,24 +48,29 @@ describe('Add Integration - Automatic Import', () => {
     cy.intercept('POST', '/api/integration_assistant/ecs', {
       statusCode: 200,
       body: {
-        results,
+        results: ecsResultsForJson,
       },
     });
     cy.intercept('POST', '/api/integration_assistant/categorization', {
       statusCode: 200,
       body: {
-        results,
+        results: categorizationResultsForJson,
       },
     });
     cy.intercept('POST', '/api/integration_assistant/related', {
       statusCode: 200,
       body: {
-        results,
+        results: relatedResultsForJson,
       },
     });
   });
 
-  afterEach(() => {});
+  afterEach(() => {
+    deleteConnectors();
+    cleanupAgentPolicies();
+    deleteIntegrations();
+    logout();
+  });
 
   it('should create an integration', () => {
     cy.visit(CREATE_INTEGRATION_LANDING_PAGE);
@@ -78,11 +92,24 @@ describe('Add Integration - Automatic Import', () => {
     cy.getBySel(DATASTREAM_TITLE_INPUT).type('Audit');
     cy.getBySel(DATASTREAM_DESCRIPTION_INPUT).type('Test Datastream Description');
     cy.getBySel(DATASTREAM_NAME_INPUT).type('audit');
-    cy.getBySel(DATA_COLLECTION_METHOD_INPUT).type('file stream').trigger('mousemove').click();
+    cy.getBySel(DATA_COLLECTION_METHOD_INPUT).type('file stream');
+    cy.get('body').click(0, 0);
 
     // Select sample logs file and Analyze logs
     cy.fixture('teleport.ndjson', null).as('myFixture');
     cy.getBySel(LOGS_SAMPLE_FILE_PICKER).selectFile('@myFixture');
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
+
+    // Edit Pipeline
+    cy.getBySel(EDIT_PIPELINE_BUTTON).click();
+    cy.getBySel(SAVE_PIPELINE_BUTTON).click();
+
+    // Deploy
+    cy.getBySel(BUTTON_FOOTER_NEXT).click();
+    cy.getBySel(INTEGRATION_SUCCESS_SECTION).should('exist');
+    cy.getBySel(SAVE_ZIP_BUTTON).should('exist');
+
+    // View Integration
+    cy.getBySel(VIEW_INTEGRATION_BUTTON).click();
   });
 });
