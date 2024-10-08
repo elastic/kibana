@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { memo, useState, useCallback } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
 import { EventMergingBanner } from './components/event_merging_banner';
