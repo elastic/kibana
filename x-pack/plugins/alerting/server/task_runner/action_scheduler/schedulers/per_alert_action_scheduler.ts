@@ -163,24 +163,8 @@ export class PerAlertActionScheduler<
     summarizedAlerts: CombinedSummarizedAlerts | null;
   }) {
     const alertId = alert.getId();
-    const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
-    if (alertMaintenanceWindowIds.length !== 0) {
-      this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
-          this.context.taskInstance.params.alertId
-        }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
-      );
-      return false;
-    }
 
-    const actionGroup =
-      alert.getScheduledActionOptions()?.actionGroup ||
-      this.context.ruleType.recoveryActionGroup.id;
-
-    if (!this.ruleTypeActionGroups!.has(actionGroup)) {
-      this.context.logger.error(
-        `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
-      );
+    if (this.hasActiveMaintenanceWindow({ alert, action })) {
       return false;
     }
 
@@ -213,23 +197,6 @@ export class PerAlertActionScheduler<
     return true;
   }
 
-  private isAlertMuted(alertId: string) {
-    const muted = this.mutedAlertIdsSet.has(alertId);
-    if (muted) {
-      if (
-        !this.skippedAlerts[alertId] ||
-        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
-      ) {
-        this.context.logger.debug(
-          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: rule is muted`
-        );
-      }
-      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
-      return true;
-    }
-    return false;
-  }
-
   private isExecutableActiveAlert({
     alert,
     action,
@@ -237,7 +204,13 @@ export class PerAlertActionScheduler<
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
     action: RuleAction;
   }) {
-    if (action.group !== alert.getScheduledActionOptions()?.actionGroup) {
+    const alertsActionGroup = alert.getScheduledActionOptions()?.actionGroup;
+
+    if (!this.isValidActionGroup(alertsActionGroup as ActionGroupIds)) {
+      return false;
+    }
+
+    if (action.group !== alertsActionGroup) {
       return false;
     }
 
@@ -289,5 +262,52 @@ export class PerAlertActionScheduler<
 
   private isRecoveredAction(actionGroup: string) {
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
+  }
+
+  private isAlertMuted(alertId: string) {
+    const muted = this.mutedAlertIdsSet.has(alertId);
+    if (muted) {
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.MUTED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: rule is muted`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+    return false;
+  }
+
+  private isValidActionGroup(actionGroup: ActionGroupIds | RecoveryActionGroupId) {
+    if (!this.ruleTypeActionGroups!.has(actionGroup)) {
+      this.context.logger.error(
+        `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
+      );
+      return false;
+    }
+    return true;
+  }
+
+  private hasActiveMaintenanceWindow({
+    alert,
+    action,
+  }: {
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    action: RuleAction;
+  }) {
+    const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+    if (alertMaintenanceWindowIds.length !== 0) {
+      this.context.logger.debug(
+        `no scheduling of summary actions "${action.id}" for rule "${
+          this.context.taskInstance.params.alertId
+        }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+      );
+      return true;
+    }
+
+    return false;
   }
 }
