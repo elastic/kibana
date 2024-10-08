@@ -346,7 +346,7 @@ async function getTraceDocsPerPage({
       const sort = hit.sort;
       const spanLinksSource = 'span' in hit._source ? hit._source.span?.links : undefined;
 
-      if (hit.fields['processor.event']?.[0] === ProcessorEvent.span) {
+      if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
         const spanEvent = unflattenKnownApmEventFields(hit.fields, [
           ...requiredFields,
           ...requiredSpanFields,

@@ -21,7 +21,6 @@ import {
   LABEL_TELEMETRY_AUTO_VERSION,
   AGENT_VERSION,
   SERVICE_FRAMEWORK_NAME,
-  KUBERNETES,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
@@ -62,7 +61,7 @@ export async function getServiceMetadataIcons({
   const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
   const fields = asMutableArray([
-    KUBERNETES,
+    KUBERNETES_POD_NAME,
     CLOUD_PROVIDER,
     CONTAINER_ID,
     AGENT_NAME,

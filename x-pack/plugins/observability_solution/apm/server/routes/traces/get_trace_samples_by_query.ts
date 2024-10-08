@@ -92,7 +92,7 @@ export async function getTraceSamplesByQuery({
           filter_path: 'hits.sequences.events._source.trace.id',
         })
       ).hits?.sequences?.flatMap((sequence) =>
-        sequence.events.map((event) => (event.fields as { 'trace.id': [string] })['trace.id'][0])
+        sequence.events.map((event) => (event.fields as { [TRACE_ID]: [string] })[TRACE_ID][0])
       ) ?? [];
   }
 

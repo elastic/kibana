@@ -119,7 +119,7 @@ async function fetchSpanLinksDetails({
     .filter((hit) => {
       // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
       // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
-      if (hit.fields['processor.event']?.[0] === ProcessorEvent.span) {
+      if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
         const spanLink = unflattenKnownApmEventFields(hit.fields, [
           ...requiredFields,
           ...requiredSpanFields,

@@ -131,7 +131,7 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: TransactionDetailRedirectInfo | undefined;
+    transaction?: TransactionDetailRedirectInfo;
   }> => {
     const {
       params: {
@@ -158,7 +158,7 @@ const transactionByIdRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: Transaction | undefined;
+    transaction?: Transaction;
   }> => {
     const {
       params: {
@@ -194,7 +194,7 @@ const transactionByNameRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    transaction: TransactionDetailRedirectInfo | undefined;
+    transaction?: TransactionDetailRedirectInfo;
   }> => {
     const {
       params: {
