@@ -176,7 +176,7 @@ export const EDIT_CUSTOM_FIELD = i18n.translate(
 );
 
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
-  defaultMessage: 'Create template',
+  defaultMessage: 'Add template',
 });
 
 export const EDIT_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.editTemplate', {
