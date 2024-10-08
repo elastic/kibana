@@ -28,7 +28,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
-  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
@@ -50,7 +49,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
-  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
+  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -133,7 +132,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         prompt: formatPrompt(systemPrompts.openai, systemPrompt),
         streamRunnable: isStream,
       })
-    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
+    : llmType && ['bedrock', 'gemini'].includes(llmType)
     ? await createToolCallingAgent({
         llm: createLlmInstance(),
         tools,
@@ -162,7 +161,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
   });
   const inputs: GraphInputs = {
-    bedrockChatEnabled,
     responseLanguage,
     conversationId,
     llmType,

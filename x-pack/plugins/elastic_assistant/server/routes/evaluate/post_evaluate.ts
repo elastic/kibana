@@ -302,7 +302,6 @@ export const postEvaluateRoute = (
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  bedrockChatEnabled: true,
                   isStreaming: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type

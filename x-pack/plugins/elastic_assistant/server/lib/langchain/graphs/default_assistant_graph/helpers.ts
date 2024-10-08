@@ -82,10 +82,7 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if (
-    inputs.isOssModel ||
-    ((inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') && inputs?.bedrockChatEnabled)
-  ) {
+  if (inputs.isOssModel || inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {

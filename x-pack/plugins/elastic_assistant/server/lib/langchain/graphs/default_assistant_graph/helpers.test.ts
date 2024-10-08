@@ -98,7 +98,6 @@ describe('streamGraph', () => {
         assistantGraph: mockAssistantGraph,
         inputs: {
           input: 'input',
-          bedrockChatEnabled: false,
           llmType: 'openai',
           responseLanguage: 'English',
         },
@@ -182,7 +181,6 @@ describe('streamGraph', () => {
         assistantGraph: mockAssistantGraph,
         inputs: {
           input: 'input',
-          bedrockChatEnabled: false,
           responseLanguage: 'English',
           llmType: 'gemini',
         },

@@ -186,14 +186,15 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
-export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
+export const getLlmClass = (llmType?: string) =>
   llmType === 'openai'
     ? ActionsClientChatOpenAI
-    : llmType === 'bedrock' && bedrockChatEnabled
+    : llmType === 'bedrock'
     ? ActionsClientBedrockChatModel
-    : llmType === 'gemini' && bedrockChatEnabled
+    : llmType === 'gemini'
     ? ActionsClientChatVertexAI
-    : ActionsClientSimpleChatModel;
+    : // Fallback, unused
+      ActionsClientSimpleChatModel;
 
 export const isOpenSourceModel = (connector?: Connector): boolean => {
   if (connector == null) {
