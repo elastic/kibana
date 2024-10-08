@@ -28,7 +28,10 @@ export const isMetricType = (type: string): type is MetricTypes =>
 // @ts-ignore
 const isValidMetricType = (value: string) => METRIC_TYPE_VALUES.includes(value);
 
-const DateSchema = schema.string();
+const DateSchema = schema.string({
+  minLength: 1,
+  validate: (v) => (v.trim().length ? undefined : 'Date ISO string must not be empty'),
+});
 
 const metricTypesSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call

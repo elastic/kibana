@@ -136,4 +136,44 @@ describe('usage_metrics schemas', () => {
       '[metricTypes] must be one of storage_retained, ingest_rate, search_vcu, ingest_vcu, ml_vcu, index_latency, index_rate, search_latency, search_rate'
     );
   });
+
+  it('should error if `from` is not a valid input', () => {
+    expect(() =>
+      UsageMetricsRequestSchema.query.validate({
+        from: 1010,
+        to: new Date().toISOString(),
+        metricTypes: ['storage_retained', 'foo'],
+      })
+    ).toThrow('[from]: expected value of type [string] but got [number]');
+  });
+
+  it('should error if `to` is not a valid input', () => {
+    expect(() =>
+      UsageMetricsRequestSchema.query.validate({
+        from: new Date().toISOString(),
+        to: 1010,
+        metricTypes: ['storage_retained', 'foo'],
+      })
+    ).toThrow('[to]: expected value of type [string] but got [number]');
+  });
+
+  it('should error if `from` is empty string', () => {
+    expect(() =>
+      UsageMetricsRequestSchema.query.validate({
+        from: ' ',
+        to: new Date().toISOString(),
+        metricTypes: ['storage_retained', 'foo'],
+      })
+    ).toThrow('[from]: Date ISO string must not be empty');
+  });
+
+  it('should error if `to` is empty string', () => {
+    expect(() =>
+      UsageMetricsRequestSchema.query.validate({
+        from: new Date().toISOString(),
+        to: '   ',
+        metricTypes: ['storage_retained', 'foo'],
+      })
+    ).toThrow('[to]: Date ISO string must not be empty');
+  });
 });
