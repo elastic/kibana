@@ -112,7 +112,8 @@
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/entityManager-plugin",
     "@kbn/observability-utils",
-    "@kbn/entities-schema"
+    "@kbn/entities-schema",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }
