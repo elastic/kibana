@@ -6,9 +6,18 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from '@kbn/core/server';
 
-export const config = schema.object({
+export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
 });
 
-export type DataUsageConfig = TypeOf<typeof config>;
+export type DataUsageConfigType = TypeOf<typeof configSchema>;
+
+export const createConfig = (context: PluginInitializerContext): DataUsageConfigType => {
+  const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
+
+  return {
+    ...pluginConfig,
+  };
+};
