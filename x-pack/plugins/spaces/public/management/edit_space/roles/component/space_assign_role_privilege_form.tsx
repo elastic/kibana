@@ -81,7 +81,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     storeDispatch,
     getUrlForApp,
   } = props;
-  const { logger, notifications } = useEditSpaceServices();
+  const { logger, notifications, license } = useEditSpaceServices();
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
   const [kibanaPrivileges, setKibanaPrivileges] = useState<RawKibanaPrivileges | null>(null);
@@ -530,7 +530,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                           )
                         }
                         allSpacesSelected={false}
-                        canCustomizeSubFeaturePrivileges={false}
+                        canCustomizeSubFeaturePrivileges={
+                          license?.getFeatures().allowSubFeaturePrivileges ?? false
+                        }
                       />
                     )}
                   </React.Fragment>

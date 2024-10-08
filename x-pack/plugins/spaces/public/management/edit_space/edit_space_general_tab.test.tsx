@@ -23,7 +23,7 @@ import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
-import { EditSpaceProvider } from './provider/edit_space_provider';
+import { EditSpaceProviderRoot } from './provider/edit_space_provider';
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
@@ -64,7 +64,7 @@ describe('EditSpaceSettings', () => {
   const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
       <IntlProvider locale="en">
-        <EditSpaceProvider
+        <EditSpaceProviderRoot
           capabilities={{
             navLinks: {},
             management: {},
@@ -85,7 +85,7 @@ describe('EditSpaceSettings', () => {
           logger={logger}
         >
           {children}
-        </EditSpaceProvider>
+        </EditSpaceProviderRoot>
       </IntlProvider>
     );
   };
