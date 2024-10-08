@@ -66,7 +66,6 @@ import {
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
 import {
@@ -425,6 +424,11 @@ export class DashboardContainer
         }
       })
     );
+
+    // not sure where this belongs
+    coreServices.chrome.getIsVisible$().subscribe((chromeIsVisible) => {
+      this.setFullScreenMode(!chromeIsVisible);
+    });
   }
 
   public setControlGroupApi(controlGroupApi: ControlGroupApi) {
@@ -469,13 +473,9 @@ export class DashboardContainer
         i18n={coreServices.i18n}
         theme={coreServices.theme}
       >
-        <ExitFullScreenButtonKibanaProvider
-          coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
-        >
-          <DashboardContext.Provider value={this as DashboardApi}>
-            <DashboardViewport />
-          </DashboardContext.Provider>
-        </ExitFullScreenButtonKibanaProvider>
+        <DashboardContext.Provider value={this as DashboardApi}>
+          <DashboardViewport />
+        </DashboardContext.Provider>
       </KibanaRenderContextProvider>,
       dom
     );

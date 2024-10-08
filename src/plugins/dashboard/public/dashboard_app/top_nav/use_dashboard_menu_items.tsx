@@ -138,14 +138,6 @@ export const useDashboardMenuItems = ({
 
   const menuItems = useMemo(() => {
     return {
-      fullScreen: {
-        ...topNavStrings.fullScreen,
-        id: 'full-screen',
-        testId: 'dashboardFullScreenMode',
-        run: () => dashboardApi.setFullScreenMode(true),
-        disableButton: disableTopNav,
-      } as TopNavMenuData,
-
       labs: {
         ...topNavStrings.labs,
         id: 'labs',
@@ -278,7 +270,6 @@ export const useDashboardMenuItems = ({
 
     return [
       ...labsMenuItem,
-      menuItems.fullScreen,
       ...shareMenuItem,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
