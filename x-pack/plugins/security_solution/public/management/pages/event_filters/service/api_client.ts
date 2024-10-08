@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   CreateExceptionListItemSchema,
@@ -33,7 +33,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
     super(
       http,
-      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       EVENT_FILTER_LIST_DEFINITION,
       undefined,
       writeTransform
@@ -43,7 +43,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(
       http,
-      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       EVENT_FILTER_LIST_DEFINITION,
       undefined,
       writeTransform

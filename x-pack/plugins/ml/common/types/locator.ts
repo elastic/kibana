@@ -11,8 +11,8 @@ import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { JobId } from './anomaly_detection_jobs/job';
-import type { ListingPageUrlState } from './common';
 import type { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
@@ -56,7 +56,9 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
   | typeof ML_PAGES.OVERVIEW
   | typeof ML_PAGES.CALENDARS_MANAGE
+  | typeof ML_PAGES.CALENDARS_DST_MANAGE
   | typeof ML_PAGES.CALENDARS_NEW
+  | typeof ML_PAGES.CALENDARS_DST_NEW
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
@@ -72,7 +74,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS
   | typeof ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT
-  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+  | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION
+  | typeof ML_PAGES.SUPPLIED_CONFIGURATIONS,
   MlGenericUrlPageState | undefined
 >;
 export interface AnomalyDetectionQueryState {
@@ -246,6 +249,14 @@ export type CalendarEditUrlState = MLPageState<
   }
 >;
 
+export type CalendarDstEditUrlState = MLPageState<
+  typeof ML_PAGES.CALENDARS_DST_EDIT,
+  {
+    calendarId: string;
+    globalState?: MlCommonGlobalState;
+  }
+>;
+
 export type FilterEditUrlState = MLPageState<
   typeof ML_PAGES.FILTER_LISTS_EDIT,
   {
@@ -276,6 +287,7 @@ export type MlLocatorState =
   | DataFrameAnalyticsUrlState
   | DataFrameAnalyticsExplorationUrlState
   | CalendarEditUrlState
+  | CalendarDstEditUrlState
   | FilterEditUrlState
   | MlGenericUrlState
   | NotificationsUrlState

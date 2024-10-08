@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (metadata) {
             expect(metadata.features.length).to.be(4);
             expect(metadata.name).to.equal('serverless-host');
+            expect(metadata.hasSystemIntegration).to.equal(true);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.above(timeRange.from);
             expect(new Date(metadata.info?.timestamp ?? '')?.getTime()).to.be.below(timeRange.to);
             expect(metadata.info?.agent).to.eql({

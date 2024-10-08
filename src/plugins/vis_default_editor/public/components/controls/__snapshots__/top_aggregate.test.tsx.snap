@@ -2,11 +2,8 @@
 
 exports[`TopAggregateParamEditor should init with the default set of props 1`] = `
 <EuiFormRow
-  describedByIds={Array []}
   display="rowCompressed"
   fullWidth={true}
-  hasChildLabel={true}
-  hasEmptyLabelSpace={false}
   isInvalid={false}
   label={
     <React.Fragment>
@@ -22,7 +19,6 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
       />
     </React.Fragment>
   }
-  labelType="label"
 >
   <EuiSelect
     compressed={true}

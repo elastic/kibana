@@ -224,15 +224,15 @@ export function MachineLearningCommonUIProvider({
         } else {
           if (currentDiff > 0) {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_DOWN);
+              await slider.type(browser.keys.PAGE_DOWN);
             } else {
-              slider.type(browser.keys.ARROW_LEFT);
+              await slider.type(browser.keys.ARROW_LEFT);
             }
           } else {
             if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_UP);
+              await slider.type(browser.keys.PAGE_UP);
             } else {
-              slider.type(browser.keys.ARROW_RIGHT);
+              await slider.type(browser.keys.ARROW_RIGHT);
             }
           }
           await retry.tryForTime(1000, async () => {

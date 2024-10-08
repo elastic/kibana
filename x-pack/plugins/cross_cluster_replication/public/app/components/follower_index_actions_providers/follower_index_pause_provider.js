@@ -107,7 +107,6 @@ class FollowerIndexPauseProviderUi extends PureComponent {
             )}
           </p>
         )}
-
         {!isSingle && (
           <Fragment>
             <p>

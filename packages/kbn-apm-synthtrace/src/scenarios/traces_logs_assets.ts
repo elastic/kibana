@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   apm,
   ApmFields,
@@ -18,16 +20,22 @@ import {
 import { random } from 'lodash';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
-  const { logger } = runOptions;
+  const { logger, scenarioOpts } = runOptions;
   const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
+  const { isLogsDb } = parseLogsScenarioOpts(scenarioOpts);
 
   return {
+    bootstrap: async ({ logsEsClient }) => {
+      if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({
       range,
       clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
@@ -142,7 +150,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               };
 
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
                 .service('multi-signal-service')
@@ -182,7 +190,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
               };
 
               return log
-                .create()
+                .create({ isLogsDb })
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
                 .service('logs-only-services')

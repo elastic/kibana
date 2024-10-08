@@ -61,6 +61,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
             })}
             type="visualOptions"
             buttonDataTestSubj="lnsVisualOptionsButton"
+            data-test-subj="lnsVisualOptionsPopover"
           >
             <EuiFormRow
               display="columnCompressed"
@@ -99,7 +100,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
               />
             </EuiFormRow>
             <EuiFormRow
-              display="columnCompressed"
+              display="columnCompressedSwitch"
               label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
                 defaultMessage: 'Show label',
               })}

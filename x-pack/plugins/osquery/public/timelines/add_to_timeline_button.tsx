@@ -28,7 +28,7 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
 
   const queryIds = isArray(value) ? value : [value];
   const TimelineIconComponent = useCallback(
-    (timelineComponentProps) => (
+    (timelineComponentProps: any) => (
       <EuiButtonIcon iconType="timelines" {...timelineComponentProps} size="xs" {...iconProps} />
     ),
     [iconProps]

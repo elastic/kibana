@@ -24,13 +24,13 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   const [error, setError] = useState<Error | null>(null);
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
   const loadGroups = useCallback(async () => {
     try {
-      const response = await mlApiServices.jobs.groups();
+      const response = await mlApi.jobs.groups();
       return response.map((g) => ({
         value: g.id,
         view: (

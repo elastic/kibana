@@ -12,6 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -28,6 +29,8 @@ interface Props {
   cloneTemplate: (name: string) => void;
   history: ScopedHistory;
 }
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
   templates,
@@ -57,6 +60,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
               {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
                 uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}
@@ -188,17 +192,20 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const pagination = {
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<TemplateListItem>({
+    tableId: 'indexTemplates',
     initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
-  };
-
-  const sorting = {
-    sort: {
+    initialSort: {
       field: 'name',
       direction: 'asc',
     },
-  } as const;
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  };
 
   const selectionConfig = {
     onSelectionChange: setSelection,
@@ -284,6 +291,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
+        onTableChange={onTableChange}
         rowProps={() => ({
           'data-test-subj': 'row',
         })}

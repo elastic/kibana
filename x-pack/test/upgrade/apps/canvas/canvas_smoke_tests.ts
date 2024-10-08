@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const { common, header, home } = getPageObjects(['common', 'header', 'home']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
@@ -31,12 +31,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       canvasTests.forEach(({ name, numElements, page }) => {
         describe('space: ' + space, () => {
           before(async () => {
-            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            await common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
               basePath,
             });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.launchSampleCanvas(name);
-            await PageObjects.header.waitUntilLoadingHasFinished();
+            await header.waitUntilLoadingHasFinished();
+            await home.launchSampleCanvas(name);
+            await header.waitUntilLoadingHasFinished();
           });
           it('renders elements on workpad ' + name + ' page ' + page, async () => {
             const browserUrl = await browser.getCurrentUrl();
@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             if (name === 'ecommerce') {
               if (!browserUrl.includes('page/' + page)) {
                 await browser.get(browserUrl.replace(/\/[^\/]*$/, '/' + page), false);
-                await PageObjects.header.waitUntilLoadingHasFinished();
+                await header.waitUntilLoadingHasFinished();
               }
             }
             await retry.try(async () => {

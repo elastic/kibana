@@ -47,14 +47,11 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
         const { page: queryPage = '0', size: querySize = '10', ids: queryIds = null } = req.query;
         const page = parseInt(queryPage, 10) || 0;
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
-        const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
+        const results = await jobsQuery.list(user, page, size, jobIds);
 
         counters.usageCounter();
 
@@ -86,11 +83,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
-
-        const count = await jobsQuery.count(jobTypes, user);
+        const count = await jobsQuery.count(user);
 
         counters.usageCounter();
 

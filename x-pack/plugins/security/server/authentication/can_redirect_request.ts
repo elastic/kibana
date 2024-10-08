@@ -20,8 +20,8 @@ const KIBANA_VERSION_HEADER = 'kbn-version';
 export function canRedirectRequest(request: KibanaRequest) {
   const headers = request.headers;
   const route = request.route;
-  const hasVersionHeader = headers.hasOwnProperty(KIBANA_VERSION_HEADER);
-  const hasXsrfHeader = headers.hasOwnProperty(KIBANA_XSRF_HEADER);
+  const hasVersionHeader = Object.hasOwn(headers, KIBANA_VERSION_HEADER);
+  const hasXsrfHeader = Object.hasOwn(headers, KIBANA_XSRF_HEADER);
 
   const isApiRoute =
     route.options.tags.includes(ROUTE_TAG_API) ||

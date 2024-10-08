@@ -29,7 +29,7 @@ interface Props {
   actionTypeSelectorInline: boolean;
 }
 const itemClassName = css`
-  inline-size: 240px;
+  inline-size: 220px;
 
   .euiKeyPadMenuItem__label {
     white-space: nowrap;
@@ -41,7 +41,7 @@ export const ActionTypeSelectorModal = React.memo(
   ({ actionTypes, actionTypeRegistry, onClose, onSelect, actionTypeSelectorInline }: Props) => {
     const content = useMemo(
       () => (
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="center" responsive={false} wrap={true}>
           {actionTypes?.map((actionType: ActionType) => {
             const fullAction = actionTypeRegistry.get(actionType.id);
             return (

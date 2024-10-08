@@ -17,7 +17,7 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
   const baseConversations = useBaseConversations();
 
   const getAnonymizedConversationTitle = useCallback(
-    async (title) => {
+    async (title: string) => {
       // With persistent storage for conversation replacing id to title, because id is UUID now
       // and doesn't make any value for telemetry tracking
       return baseConversations[title] ? title : 'Custom';
@@ -29,7 +29,8 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     async ({
       fn,
       params: { conversationId, ...rest },
-    }): Promise<{
+    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any): Promise<{
       fn: keyof AssistantTelemetry;
       params: AssistantTelemetry[keyof AssistantTelemetry];
     }> =>

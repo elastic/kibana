@@ -68,7 +68,7 @@ export const RiskScoreField = ({
   const fieldTypeFilter = useMemo(() => ['number'], []);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
 
-  const handleDefaultRiskScoreChange: EuiRangeProps['onChange'] = useCallback(
+  const handleDefaultRiskScoreChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => {
       const range = (e.target as HTMLInputElement).value;
       setValue({

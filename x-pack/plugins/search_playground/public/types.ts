@@ -15,18 +15,24 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React, { ComponentType } from 'react';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChatRequestData, MessageRole } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
+
+export enum PlaygroundPageMode {
+  chat = 'chat',
+  search = 'search',
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -36,6 +42,10 @@ export interface SearchPlaygroundPluginStart {
   PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
 }
 
+export interface AppPluginSetupDependencies {
+  share: SharePluginSetup;
+}
+
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   usageCollection?: UsageCollectionStart;
@@ -43,6 +53,7 @@ export interface AppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface AppServicesContext {
@@ -53,6 +64,7 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export enum ChatFormFields {
@@ -65,6 +77,7 @@ export enum ChatFormFields {
   sourceFields = 'source_fields',
   docSize = 'doc_size',
   queryFields = 'query_fields',
+  searchQuery = 'search_query',
 }
 
 export interface ChatForm {
@@ -77,6 +90,7 @@ export interface ChatForm {
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
+  [ChatFormFields.searchQuery]: string;
 }
 
 export interface Message {

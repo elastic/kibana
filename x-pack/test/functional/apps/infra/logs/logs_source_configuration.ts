@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        retry.try(async () => {
+        await retry.try(async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
         });

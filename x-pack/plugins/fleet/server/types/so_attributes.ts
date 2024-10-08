@@ -119,8 +119,10 @@ export interface PackagePolicySOAttributes {
   created_at: string;
   created_by: string;
   inputs: PackagePolicyInput[];
-  policy_id?: string;
+  policy_id?: string | null;
   policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   updated_at: string;
   updated_by: string;
   description?: string;
@@ -237,6 +239,8 @@ export interface SettingsSOAttributes {
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
+  use_space_awareness_migration_started_at?: string | null;
 }
 
 export interface SpaceSettingsSOAttributes {

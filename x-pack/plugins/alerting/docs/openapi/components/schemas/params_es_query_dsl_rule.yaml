@@ -1,0 +1,54 @@
+title: Elasticsearch DSL query rule params
+description: > 
+  An Elasticsearch query rule can run a query defined in Elasticsearch Query DSL and compare the number of matches to a configured threshold. These parameters are appropriate when `rule_type_id` is `.es-query`.
+type: object
+required:
+  - esQuery
+  - index
+  - threshold
+  - thresholdComparator
+  - timeField
+  - timeWindowSize
+  - timeWindowUnit
+properties:
+  aggField:
+    $ref: 'aggfield.yaml'
+  aggType:
+    $ref: 'aggtype.yaml'
+  esQuery:
+    description: The query definition, which uses Elasticsearch Query DSL.
+    type: string
+  excludeHitsFromPreviousRun:
+    $ref: 'excludehitsfrompreviousrun.yaml'
+  groupBy:
+    $ref: 'groupby.yaml'
+  index:
+    description: The indices to query.
+    oneOf:
+      - type: array
+        items:
+          type: string
+      - type: string
+  searchType:
+    description:  The type of query, in this case a query that uses Elasticsearch Query DSL.
+    type: string
+    enum:
+      - esQuery
+    default: esQuery
+    example: esQuery
+  size:
+    $ref: 'size.yaml'
+  termField:
+    $ref: 'termfield.yaml'
+  termSize:
+    $ref: 'termsize.yaml'
+  threshold:
+    $ref: 'threshold.yaml'
+  thresholdComparator:
+    $ref: 'thresholdcomparator.yaml'
+  timeField:
+    $ref: 'timefield.yaml'
+  timeWindowSize:
+    $ref: 'timewindowsize.yaml'
+  timeWindowUnit:
+    $ref: 'timewindowunit.yaml'

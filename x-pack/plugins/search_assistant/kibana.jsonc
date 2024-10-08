@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-assistant",
+  "owner": "@elastic/search-kibana",
+  "description": "AI Assistant for Search",
+  "plugin": {
+    "id": "searchAssistant",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchAssistant"
+    ],
+    "requiredPlugins": [
+      "observabilityAIAssistant",
+      "observabilityAIAssistantApp"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+    ],
+    "requiredBundles": []
+  }
+}

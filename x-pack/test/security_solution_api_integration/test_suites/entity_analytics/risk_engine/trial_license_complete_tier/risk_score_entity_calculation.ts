@@ -16,7 +16,6 @@ import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/sec
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
-  deleteAllRiskScores,
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
@@ -24,7 +23,6 @@ import {
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
   enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
 } from '../../utils';
@@ -57,9 +55,8 @@ export default ({ getService }: FtrProviderContext): void => {
     return result;
   };
 
-  const calculateEntityRiskScoreAfterRuleCreationAndExecution = async (
+  const createRuleAndWaitExecution = async (
     documentId: string,
-    identifier: string,
     {
       alerts = 1,
       riskScore = 21,
@@ -67,7 +64,9 @@ export default ({ getService }: FtrProviderContext): void => {
     }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
   ) => {
     await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
+  };
 
+  const calculateEntityRiskScore = async (identifier: string) => {
     return await calculateEntityRiskScores({
       body: {
         identifier_type: 'host',
@@ -79,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
     before(async () => {
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {
@@ -90,6 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       before(async () => {
+        await riskEngineRoutes.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -102,27 +102,22 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-
-        await cleanRiskEngine({ kibanaServer, es, log });
-        await riskEngineRoutes.init();
       });
 
       afterEach(async () => {
-        await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-
-        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.cleanUp();
       });
 
       it('calculates and persists risk score for entity', async () => {
         const documentId = uuidv4();
         await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+        await createRuleAndWaitExecution(documentId);
+        await riskEngineRoutes.init();
+        await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
 
-        const results = await calculateEntityRiskScoreAfterRuleCreationAndExecution(
-          documentId,
-          'host-1'
-        );
+        const results = await calculateEntityRiskScore('host-1');
 
         const expectedScore = {
           calculated_level: 'Unknown',
@@ -139,13 +134,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(score).to.eql(expectedScore);
         expect(results.success).to.be(true);
 
-        await waitForRiskScoresToBePresent({ es, log });
+        await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
         const persistedScores = await readRiskScores(es);
 
-        expect(persistedScores.length).to.eql(1);
-        const [persistedScore] = normalizeScores(persistedScores);
+        expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
+        const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
 
-        expect(persistedScore).to.eql(expectedScore);
+        expect(persistedScoreByApi).to.eql(expectedScore);
+        expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
       });
 
       describe('with asset criticality data', () => {
@@ -167,11 +163,12 @@ export default ({ getService }: FtrProviderContext): void => {
           const documentId = uuidv4();
           await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
           await waitForAssetCriticalityToBePresent({ es, log });
+          await createRuleAndWaitExecution(documentId);
+          await riskEngineRoutes.init();
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
 
-          const results = await calculateEntityRiskScoreAfterRuleCreationAndExecution(
-            documentId,
-            'host-1'
-          );
+          const results = await calculateEntityRiskScore('host-1');
+
           const expectedScore = {
             criticality_level: 'high_impact',
             criticality_modifier: 1.5,
@@ -188,20 +185,64 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(results.success).to.be(true);
           expect(score).to.eql(expectedScore);
 
-          await waitForRiskScoresToBePresent({ es, log });
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
           const persistedScores = await readRiskScores(es);
-          expect(persistedScores.length).to.eql(1);
 
-          const [persistedScore] = normalizeScores(persistedScores);
+          expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
+          const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
+          expect(persistedScoreByApi).to.eql(expectedScore);
+          expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
 
-          expect(persistedScore).to.eql(expectedScore);
           const [rawScore] = persistedScores;
 
           expect(
             rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
           ).to.be.within(
-            persistedScore.calculated_score_norm! - 0.000000000000001,
-            persistedScore.calculated_score_norm! + 0.000000000000001
+            persistedScoreByApi.calculated_score_norm! - 0.000000000000001,
+            persistedScoreByApi.calculated_score_norm! + 0.000000000000001
+          );
+        });
+
+        it('ignores deleted asset criticality when calculating and persisting risk scores with additional criticality metadata and modifiers', async () => {
+          const documentId = uuidv4();
+          await assetCriticalityRoutes.delete('host.name', 'host-1');
+          await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+          await waitForAssetCriticalityToBePresent({ es, log });
+          await createRuleAndWaitExecution(documentId);
+          await riskEngineRoutes.init();
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
+
+          const results = await calculateEntityRiskScore('host-1');
+
+          const expectedScore = {
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 8.10060175898781,
+            category_1_score: 8.10060175898781,
+            category_1_count: 1,
+            id_field: 'host.name',
+            id_value: 'host-1',
+          };
+
+          const [score] = sanitizeScores([results.score]);
+          expect(results.success).to.be(true);
+          expect(score).to.eql(expectedScore);
+
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 });
+          const persistedScores = await readRiskScores(es);
+
+          expect(persistedScores.length).to.greaterThan(1); // the risk score is calculated once by the risk engine and a second time by the API
+          const [persistedScoreByApi, persistedScoreByEngine] = normalizeScores(persistedScores);
+          expect(persistedScoreByApi).to.eql(expectedScore);
+          expect(persistedScoreByApi).to.eql(persistedScoreByEngine);
+
+          const [rawScore] = persistedScores;
+
+          expect(
+            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
+          ).to.be.within(
+            persistedScoreByApi.calculated_score_norm! - 0.000000000000001,
+            persistedScoreByApi.calculated_score_norm! + 0.000000000000001
           );
         });
       });

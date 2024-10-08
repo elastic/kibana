@@ -16,7 +16,7 @@ export function handleResponse(
 ): ClusterSettingsReasonResponse {
   let source: keyof ClusterGetSettingsResponse;
   for (source in response) {
-    if (Object.prototype.hasOwnProperty.call(response, source)) {
+    if (Object.hasOwn(response, source)) {
       const monitoringSettings = get(response[source], 'xpack.monitoring');
       if (monitoringSettings !== undefined) {
         const check = findReason(

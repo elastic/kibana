@@ -19,7 +19,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { CATEGORICAL_TYPES } from './form_options_validation';
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 const containsClassificationFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) &&
@@ -73,7 +73,7 @@ export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
   const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
     useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);
-  const { fields } = newJobCapsServiceAnalytics;
+  const { fields } = useNewJobCapsServiceAnalytics();
 
   // Find out if data view contains supported fields for job type. Provides a hint in the form
   // that job may not run correctly if no supported fields are found.

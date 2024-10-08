@@ -19,17 +19,13 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
+import { SemanticTextForm } from './semantic_text';
 import { CombinedFieldLabel } from './combined_field_label';
-import {
-  addCombinedFieldsToMappings,
-  addCombinedFieldsToPipeline,
-  getNameCollisionMsg,
-  removeCombinedFieldsFromMappings,
-  removeCombinedFieldsFromPipeline,
-} from './utils';
+import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
 
 interface Props {
   mappingsString: string;
@@ -45,6 +41,12 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
 }
+
+export type AddCombinedField = (
+  combinedField: CombinedField,
+  addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
+  addToPipeline: (pipeline: IngestPipeline) => IngestPipeline
+) => void;
 
 export class CombinedFieldsForm extends Component<Props, State> {
   state: State = {
@@ -63,20 +65,20 @@ export class CombinedFieldsForm extends Component<Props, State> {
     });
   };
 
-  addCombinedField = (combinedField: CombinedField) => {
-    if (this.hasNameCollision(combinedField.combinedFieldName)) {
-      throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
-    }
-
+  addCombinedField = (
+    combinedField: CombinedField,
+    addToMappings: (mappings: MappingTypeMapping) => {},
+    addToPipeline: (pipeline: IngestPipeline) => {}
+  ) => {
     const mappings = this.parseMappings();
     const pipeline = this.parsePipeline();
 
-    this.props.onMappingsStringChange(
-      JSON.stringify(addCombinedFieldsToMappings(mappings, [combinedField]), null, 2)
-    );
-    this.props.onPipelineStringChange(
-      JSON.stringify(addCombinedFieldsToPipeline(pipeline, [combinedField]), null, 2)
-    );
+    const newMappings = addToMappings(mappings);
+    const newPipeline = addToPipeline(pipeline);
+
+    this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
+    this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
+
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
     this.closePopover();
@@ -145,7 +147,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     }
 
     const mappings = this.parseMappings();
-    return mappings.properties.hasOwnProperty(name);
+    return Object.hasOwn(mappings.properties, name);
   };
 
   render() {
@@ -155,6 +157,13 @@ export class CombinedFieldsForm extends Component<Props, State> {
         defaultMessage: 'Add geo point field',
       }
     );
+
+    const semanticTextLabel = i18n.translate(
+      'xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel',
+      {
+        defaultMessage: 'Add semantic text field',
+      }
+    );
     const panels = [
       {
         id: 0,
@@ -162,6 +171,10 @@ export class CombinedFieldsForm extends Component<Props, State> {
           {
             name: geoPointLabel,
             panel: 1,
+          },
+          {
+            name: semanticTextLabel,
+            panel: 2,
           },
         ],
       },
@@ -176,11 +189,22 @@ export class CombinedFieldsForm extends Component<Props, State> {
           />
         ),
       },
+      {
+        id: 2,
+        title: semanticTextLabel,
+        content: (
+          <SemanticTextForm
+            addCombinedField={this.addCombinedField}
+            hasNameCollision={this.hasNameCollision}
+            results={this.props.results}
+          />
+        ),
+      },
     ];
     return (
       <EuiFormRow
         label={i18n.translate('xpack.dataVisualizer.combinedFieldsLabel', {
-          defaultMessage: 'Combined fields',
+          defaultMessage: 'Automatically created fields',
         })}
       >
         <div>
@@ -217,7 +241,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.dataVisualizer.addCombinedFieldsLabel"
-                  defaultMessage="Add combined field"
+                  defaultMessage="Add additional field"
                 />
               </EuiButtonEmpty>
             }

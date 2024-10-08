@@ -9,18 +9,14 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { AlertHeaderBlock } from './alert_header_block';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import type {
-  EnrichedFieldInfo,
-  EnrichedFieldInfoWithValues,
-} from '../../../../common/components/event_details/types';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
+import { StatusPopoverButton } from './status_popover_button';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
-import { CellActions } from './cell_actions';
+import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
+import { getEnrichedFieldInfo } from '../utils/enriched_field_info';
+import { CellActions } from '../../shared/components/cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 /**
@@ -34,7 +30,6 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { closeFlyout } = useExpandableFlyoutApi();
   const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
     useDocumentDetailsContext();
 
@@ -56,33 +51,28 @@ export const DocumentStatus: FC = () => {
   }, [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" data-test-subj={STATUS_TITLE_TEST_ID}>
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.header.statusTitle"
-              defaultMessage="Status"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {!statusData || !hasData(statusData) || isPreview ? (
-          getEmptyTagValue()
-        ) : (
-          <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
-            <StatusPopoverButton
-              eventId={eventId}
-              contextId={scopeId}
-              enrichedFieldInfo={statusData}
-              scopeId={scopeId}
-              handleOnEventClosed={closeFlyout}
-            />
-          </CellActions>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AlertHeaderBlock
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.header.statusTitle"
+          defaultMessage="Status"
+        />
+      }
+      data-test-subj={STATUS_TITLE_TEST_ID}
+    >
+      {!statusData || !hasData(statusData) || isPreview ? (
+        getEmptyTagValue()
+      ) : (
+        <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
+          <StatusPopoverButton
+            eventId={eventId}
+            contextId={scopeId}
+            enrichedFieldInfo={statusData}
+            scopeId={scopeId}
+          />
+        </CellActions>
+      )}
+    </AlertHeaderBlock>
   );
 };
 

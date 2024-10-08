@@ -7,7 +7,7 @@
 
 import type { Direction, EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
-import type { ListingPageUrlState } from '../../../../../../../common/types/common';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 

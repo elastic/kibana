@@ -60,6 +60,7 @@ export const mockService: ObservabilityAIAssistantService = {
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
+  scope: 'all',
 };
 
 function createSetupContract(): ObservabilityAIAssistantPublicSetup {
@@ -78,12 +79,6 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
-    }),
-    useUserPreferredLanguage: () => ({
-      LANGUAGE_OPTIONS: [{ label: 'English' }],
-      selectedLanguage: 'English',
-      setSelectedLanguage: () => {},
-      getPreferredLanguage: () => 'English',
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),

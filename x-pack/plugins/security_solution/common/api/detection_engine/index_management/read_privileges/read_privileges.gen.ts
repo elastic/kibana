@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type ReadPrivilegesResponse = z.infer<typeof ReadPrivilegesResponse>;
 export const ReadPrivilegesResponse = z.object({

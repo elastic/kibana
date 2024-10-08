@@ -16,15 +16,15 @@ import { AIMessageChunk } from '@langchain/core/messages';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
+import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  bedrockChatEnabled: boolean;
-  inputs: { input: string };
-  llmType: string | undefined;
+  inputs: GraphInputs;
   logger: Logger;
+  isOssModel?: boolean;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceOptions?: TraceOptions;
@@ -37,17 +37,17 @@ interface StreamGraphParams {
  * @param assistantGraph
  * @param inputs
  * @param logger
+ * @param isOssModel
  * @param onLlmResponse
  * @param request
  * @param traceOptions
  */
 export const streamGraph = async ({
   apmTracer,
-  llmType,
-  bedrockChatEnabled,
   assistantGraph,
   inputs,
   logger,
+  isOssModel,
   onLlmResponse,
   request,
   traceOptions,
@@ -82,7 +82,10 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
+  if (
+    inputs.isOssModel ||
+    ((inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') && inputs?.bedrockChatEnabled)
+  ) {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
@@ -92,7 +95,9 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
       },
-      llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs.isOssModel || inputs?.llmType === 'bedrock'
+        ? { includeNames: ['Summarizer'] }
+        : undefined
     );
 
     for await (const { event, data, tags } of stream) {
@@ -225,7 +230,7 @@ export const streamGraph = async ({
 interface InvokeGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: { input: string };
+  inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
 }

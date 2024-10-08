@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
@@ -32,6 +33,7 @@ export const registerProductFeatures = (
 
   // register product features for the main security solution product features service
   pluginsSetup.securitySolution.setProductFeaturesConfigurator({
+    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
     security: getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures

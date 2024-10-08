@@ -11,6 +11,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
+import { Filter } from '@kbn/es-query';
 import { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;
@@ -39,6 +40,7 @@ export type AlertStatus =
 export interface AlertStatusFilter {
   status: AlertStatus;
   query: string;
+  filter: Filter[];
   label: string;
 }
 

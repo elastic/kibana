@@ -14,25 +14,16 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import { Readable, ImportTimelineResult } from '../model/components.gen';
+import { ImportTimelineResult } from '../model/components.gen';
 
 export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBody>;
 export const ImportTimelinesRequestBody = z.object({
-  file: Readable.merge(
-    z.object({
-      hapi: z.object({
-        filename: z.string(),
-        headers: z.object({}),
-        isImmutable: z.enum(['true', 'false']).optional(),
-      }),
-    })
-  ),
+  isImmutable: z.enum(['true', 'false']).optional(),
+  file: z.unknown(),
 });
 export type ImportTimelinesRequestBodyInput = z.input<typeof ImportTimelinesRequestBody>;
 
 export type ImportTimelinesResponse = z.infer<typeof ImportTimelinesResponse>;
-export const ImportTimelinesResponse = z.object({
-  data: ImportTimelineResult,
-});
+export const ImportTimelinesResponse = ImportTimelineResult;

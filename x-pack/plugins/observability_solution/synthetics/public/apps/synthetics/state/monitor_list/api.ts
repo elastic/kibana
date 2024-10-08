@@ -49,12 +49,12 @@ export const fetchMonitorManagementList = async (
   });
 };
 
-export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Promise<void> => {
+export const fetchDeleteMonitor = async ({ configIds }: { configIds: string[] }): Promise<void> => {
   return await apiService.delete(
     SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
     { version: INITIAL_REST_VERSION },
     {
-      ids: [configId],
+      ids: configIds,
     }
   );
 };
@@ -70,7 +70,7 @@ export const fetchUpsertMonitor = async ({
       null,
       {
         version: INITIAL_REST_VERSION,
-        ui: true,
+        internal: true,
       }
     );
   } else {

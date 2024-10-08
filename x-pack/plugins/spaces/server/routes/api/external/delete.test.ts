@@ -16,8 +16,11 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initDeleteSpacesApi } from './delete';
+import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -35,7 +38,7 @@ describe('Spaces Public API', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
-
+    const versionedRouterMock = router.versioned as MockedVersionedRouter;
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
     const log = loggingSystemMock.create().get('spaces');
@@ -54,7 +57,7 @@ describe('Spaces Public API', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -70,10 +73,13 @@ describe('Spaces Public API', () => {
       isServerless: false,
     });
 
-    const [routeDefinition, routeHandler] = router.delete.mock.calls[0];
+    const { handler: routeHandler, config } = versionedRouterMock.getRoute(
+      'delete',
+      '/api/spaces/space/{id}'
+    ).versions[API_VERSIONS.public.v1];
 
     return {
-      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
+      routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
     };

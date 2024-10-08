@@ -1,35 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
+
+import type {
+  DefaultRouteCreateOptions,
+  DefaultRouteHandlerResources,
   ServerRouteCreateOptions,
   ServerRouteHandlerResources,
-  RouteParamsRT,
-  ServerRoute,
-} from './typings';
+} from '@kbn/server-route-repository-utils';
+import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 
 export function createServerRouteFactory<
-  TRouteHandlerResources extends ServerRouteHandlerResources,
-  TRouteCreateOptions extends ServerRouteCreateOptions
->(): <
-  TEndpoint extends string,
-  TReturnType,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined
->(
-  route: ServerRoute<
-    TEndpoint,
-    TRouteParamsRT,
-    TRouteHandlerResources,
-    TReturnType,
-    TRouteCreateOptions
-  >
-) => Record<
-  TEndpoint,
-  ServerRoute<TEndpoint, TRouteParamsRT, TRouteHandlerResources, TReturnType, TRouteCreateOptions>
-> {
+  TRouteHandlerResources extends ServerRouteHandlerResources = DefaultRouteHandlerResources,
+  TRouteCreateOptions extends ServerRouteCreateOptions = DefaultRouteCreateOptions
+>(): CreateServerRouteFactory<TRouteHandlerResources, TRouteCreateOptions> {
   return (route) => ({ [route.endpoint]: route } as any);
 }

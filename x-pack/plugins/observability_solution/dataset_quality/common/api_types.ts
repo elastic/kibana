@@ -31,33 +31,33 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
-    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+    totalDocs: rt.number,
   }),
 ]);
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
-export const dashboardRT = rt.type({
+export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,
 });
 
-export type Dashboard = rt.TypeOf<typeof dashboardRT>;
+export type Dashboard = rt.TypeOf<typeof integrationDashboardRT>;
 
 export const integrationDashboardsRT = rt.type({
-  dashboards: rt.array(dashboardRT),
+  dashboards: rt.array(integrationDashboardRT),
 });
 
 export type IntegrationDashboardsResponse = rt.TypeOf<typeof integrationDashboardsRT>;
 
 export const integrationIconRt = rt.intersection([
   rt.type({
-    path: rt.string,
     src: rt.string,
   }),
   rt.partial({
-    title: rt.string,
+    path: rt.string,
     size: rt.string,
+    title: rt.string,
     type: rt.string,
   }),
 ]);
@@ -103,6 +103,7 @@ export const degradedFieldRt = rt.type({
       y: rt.number,
     })
   ),
+  indexFieldWasLastPresentIn: rt.string,
 });
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
@@ -113,10 +114,41 @@ export const getDataStreamDegradedFieldsResponseRt = rt.type({
 
 export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFieldsResponseRt>;
 
-export const dataStreamSettingsRt = rt.partial({
-  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
-  integration: rt.string,
+export const degradedFieldValuesRt = rt.type({
+  field: rt.string,
+  values: rt.array(rt.string),
 });
+
+export type DegradedFieldValues = rt.TypeOf<typeof degradedFieldValuesRt>;
+
+export const degradedFieldAnalysisRt = rt.intersection([
+  rt.type({
+    isFieldLimitIssue: rt.boolean,
+    fieldCount: rt.number,
+    totalFieldLimit: rt.number,
+  }),
+  rt.partial({
+    ignoreMalformed: rt.boolean,
+    nestedFieldLimit: rt.number,
+    fieldMapping: rt.partial({
+      type: rt.string,
+      ignore_above: rt.number,
+    }),
+  }),
+]);
+
+export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
+
+export const dataStreamSettingsRt = rt.intersection([
+  rt.type({
+    lastBackingIndexName: rt.string,
+  }),
+  rt.partial({
+    createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+    integration: rt.string,
+    datasetUserPrivileges: datasetUserPrivilegesRt,
+  }),
+]);
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 
@@ -124,7 +156,7 @@ export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   docsCount: rt.number,
-  sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+  sizeBytes: rt.number,
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
   userPrivileges: userPrivilegesRt,
@@ -150,7 +182,7 @@ export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
+  estimatedDataInBytes: rt.number,
 });
 
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(

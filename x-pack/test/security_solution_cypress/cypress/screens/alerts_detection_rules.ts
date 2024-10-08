@@ -280,7 +280,7 @@ export const CUSTOM_QUERY_VALUE = '[data-test-subj="customQueryPropertyValue"]';
 
 export const FILTERS_TITLE = '[data-test-subj="filtersPropertyTitle"]';
 export const FILTERS_VALUE_ITEM =
-  '[data-test-subj="filtersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="filtersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const ALERT_SUPPRESSION_GROUP_BY_TITLE =
   '[data-test-subj="alertSuppressionGroupByPropertyTitle"]';
@@ -308,7 +308,7 @@ export const SAVED_QUERY_CONTENT_VALUE = '[data-test-subj="savedQueryContentProp
 
 export const SAVED_QUERY_FILTERS_TITLE = '[data-test-subj="savedQueryFiltersPropertyTitle"]';
 export const SAVED_QUERY_FILTERS_VALUE =
-  '[data-test-subj="savedQueryFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="savedQueryFiltersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const SAVED_QUERY_NAME_TITLE = '[data-test-subj="savedQueryNamePropertyTitle"]';
 export const SAVED_QUERY_NAME_VALUE = '[data-test-subj="savedQueryNamePropertyValue"]';
@@ -333,7 +333,7 @@ export const THREAT_MAPPING_VALUE = '[data-test-subj="threatMappingPropertyValue
 
 export const THREAT_FILTERS_TITLE = '[data-test-subj="threatFiltersPropertyTitle"]';
 export const THREAT_FILTERS_VALUE_ITEM =
-  '[data-test-subj="threatFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="threatFiltersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const THREAT_QUERY_TITLE = '[data-test-subj="threatQueryPropertyTitle"]';
 export const THREAT_QUERY_VALUE = '[data-test-subj="threatQueryPropertyValue"]';

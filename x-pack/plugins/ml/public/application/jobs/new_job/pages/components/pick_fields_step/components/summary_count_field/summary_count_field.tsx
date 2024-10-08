@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { SummaryCountFieldSelect } from './summary_count_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type {
   MultiMetricJobCreator,
   PopulationJobCreator,
@@ -28,7 +28,7 @@ export const SummaryCountField: FC = () => {
   } = useContext(JobCreatorContext);
 
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
-  const { fields } = newJobCapsService;
+  const { fields } = useNewJobCapsService();
   const [summaryCountFieldName, setSummaryCountFieldName] = useState(
     jobCreator.summaryCountFieldName
   );

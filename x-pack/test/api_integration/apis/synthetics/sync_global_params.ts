@@ -83,16 +83,24 @@ export default function ({ getService }: FtrProviderContext) {
           isInvalid: false,
         },
         {
+          id: 'dev2',
+          label: 'Dev Service 2',
+          geo: { lat: 0, lon: 0 },
+          url: 'mockDevUrl',
+          isServiceManaged: true,
+          status: LocationStatus.EXPERIMENTAL,
+          isInvalid: false,
+        },
+        {
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
           label: 'Test private location 0',
           geo: {
-            lat: '',
-            lon: '',
+            lat: 0,
+            lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
-          namespace: 'default',
         },
       ];
 

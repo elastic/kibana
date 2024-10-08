@@ -28,6 +28,7 @@ import type {
   CustomFieldConfiguration,
   TemplateConfiguration,
   CustomFieldTypes,
+  ActionConnector,
 } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -159,8 +160,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = useGetActionTypes();
 
   const onConnectorUpdated = useCallback(
-    async (updatedConnector) => {
-      setEditedConnectorItem(updatedConnector);
+    async (updatedConnector: ActionConnector) => {
+      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
       refetchConnectors();
       refetchActionTypes();
       refetchCaseConfigure();
@@ -169,7 +170,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   const onConnectorCreated = useCallback(
-    async (createdConnector) => {
+    async (createdConnector: ActionConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
       await persistCaseConfigureAsync({

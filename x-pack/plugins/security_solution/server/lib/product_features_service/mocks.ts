@@ -31,6 +31,11 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getAttackDiscoveryFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
 }));
 
 export const createProductFeaturesServiceMock = (
@@ -85,6 +90,25 @@ export const createProductFeaturesServiceMock = (
         )
       ),
       securityAssistant: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      attackDiscovery: jest.fn().mockReturnValue(
         new Map(
           enabledFeatureKeys.map((key) => [
             key,

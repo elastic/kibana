@@ -9,7 +9,7 @@ import React, { createContext, ReactChild, useContext, useState } from 'react';
 import { PolicyFromES } from '../../../../common/types';
 
 interface ListAction {
-  actionType: 'viewIndexTemplates' | 'addIndexTemplate' | 'deletePolicy';
+  actionType: 'viewIndexTemplates' | 'addIndexTemplate' | 'deletePolicy' | 'viewPolicy';
   selectedPolicy: PolicyFromES;
 }
 

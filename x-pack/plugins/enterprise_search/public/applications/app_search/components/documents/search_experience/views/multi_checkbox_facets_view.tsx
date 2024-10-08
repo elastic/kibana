@@ -41,7 +41,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
   const optionToCheckBoxGroupOption = (option: FacetValue, index: number) => ({
     id: getId(String(index)),
     label:
-      option.value ||
+      (option.value as React.ReactNode) ||
       i18n.translate(
         'xpack.enterpriseSearch.appSearch.documents.search.multiCheckboxFacetsView.noValue.selectOption',
         {

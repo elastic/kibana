@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { DEFAULT_ALL_SELECTION } from '@kbn/logs-explorer-plugin/public';
 import { CommonObservabilityLogsExplorerContext } from './types';
 
 export const DEFAULT_CONTEXT: CommonObservabilityLogsExplorerContext = {
   initialLogsExplorerState: {},
+  allSelection: DEFAULT_ALL_SELECTION,
 };

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
@@ -31,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     } = await supertest
       .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
     return savedObjects;
@@ -41,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       .post('/api/ui_counters/_report')
       .set('kbn-xsrf', 'kibana')
       .set('content-type', 'application/json')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ report })
       .expect(200);
   };

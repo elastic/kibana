@@ -25,9 +25,11 @@ export const OtelLogsPage = () => (
         captionCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
           {
-            defaultMessage: 'Collect logs and host metrics using the OTel collector.',
+            defaultMessage:
+              'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
           }
         )}
+        isTechnicalPreview={true}
       />
     }
   >

@@ -21,35 +21,35 @@ export const ORGANISATION_LABEL = i18n.translate(
 export const ORGANISATION_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.thehive.organisationFieldHelpText',
   {
-    defaultMessage: `By default, the user's default organization will be considered.`,
+    defaultMessage: 'By default, it uses the default organisation of the API key owner.',
   }
 );
 
 export const API_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.apiKeyFieldLabel',
   {
-    defaultMessage: 'API Key',
+    defaultMessage: 'API key',
   }
 );
 
 export const EVENT_ACTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.eventActionSelectFieldLabel',
   {
-    defaultMessage: 'Event Action',
+    defaultMessage: 'Event action',
   }
 );
 
 export const TITLE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.titleFieldLabel',
   {
-    defaultMessage: 'Title*',
+    defaultMessage: 'Title',
   }
 );
 
 export const DESCRIPTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.descriptionFieldLabel',
   {
-    defaultMessage: 'Description*',
+    defaultMessage: 'Description',
   }
 );
 
@@ -84,21 +84,21 @@ export const COMMENTS_LABEL = i18n.translate(
 export const TYPE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.typeFieldLabel',
   {
-    defaultMessage: 'Type*',
+    defaultMessage: 'Type',
   }
 );
 
 export const SOURCE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.sourceFieldLabel',
   {
-    defaultMessage: 'Source*',
+    defaultMessage: 'Source',
   }
 );
 
 export const SOURCE_REF_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.sourceRefFieldLabel',
   {
-    defaultMessage: 'Source Reference*',
+    defaultMessage: 'Source reference',
   }
 );
 
@@ -133,6 +133,6 @@ export const SOURCE_REQUIRED = i18n.translate(
 export const SOURCE_REF_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.thehive.requiredSourceRefText',
   {
-    defaultMessage: 'Source Reference is required.',
+    defaultMessage: 'Source reference is required.',
   }
 );

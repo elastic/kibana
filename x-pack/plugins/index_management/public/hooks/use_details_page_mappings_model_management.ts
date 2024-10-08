@@ -34,9 +34,9 @@ const getCustomInferenceIdMap = (
       ? {
           trainedModelId: model.service_settings.model_id,
           isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
-          isDeployed: modelStatsById[model.service_settings.model_id]?.state === 'started',
+          isDeployed: modelStatsById[model.inference_id]?.state === 'started',
           isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
-          modelStats: modelStatsById[model.service_settings.model_id],
+          modelStats: modelStatsById[model.inference_id],
         }
       : {
           trainedModelId: '',
@@ -45,7 +45,7 @@ const getCustomInferenceIdMap = (
           isDownloading: false,
           modelStats: undefined,
         };
-    inferenceMap[model.model_id] = inferenceEntry;
+    inferenceMap[model.inference_id] = inferenceEntry;
     return inferenceMap;
   }, {});
   const defaultInferenceIds = {
@@ -104,7 +104,7 @@ export const useDetailsPageMappingsModelManagement = () => {
         Record<string, TrainedModelStat['deployment_stats'] | undefined>
       >((acc, { model_id: modelId, deployment_stats: stats }) => {
         if (modelId && stats) {
-          acc[modelId] = stats;
+          acc[stats.deployment_id] = stats;
         }
         return acc;
       }, {}) || {};

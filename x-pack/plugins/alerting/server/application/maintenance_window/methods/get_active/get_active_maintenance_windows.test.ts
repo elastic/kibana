@@ -103,6 +103,90 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
     ]);
   });
 
+  it('should use cacheInterval if provided', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    savedObjectsClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-1',
+        },
+        {
+          attributes: getMockMaintenanceWindow({ expirationDate: new Date().toISOString() }),
+          id: 'test-2',
+        },
+      ],
+    } as unknown as SavedObjectsFindResponse);
+
+    const result = await getActiveMaintenanceWindows(mockContext, 60000);
+
+    const findCallParams = savedObjectsClient.find.mock.calls[0][0];
+
+    expect(findCallParams.type).toEqual(MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE);
+
+    expect(toElasticsearchQuery(findCallParams.filter)).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "maintenance-window.attributes.events": "2023-02-26T00:00:00.000Z",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "match": Object {
+                            "maintenance-window.attributes.events": "2023-02-26T00:01:00.000Z",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "maintenance-window.attributes.enabled": "true",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'test-1',
+      }),
+      expect.objectContaining({
+        id: 'test-2',
+      }),
+    ]);
+  });
+
   it('should return empty array if there are no active maintenance windows', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
 

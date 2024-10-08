@@ -96,10 +96,11 @@ export async function validateOutputForPolicy(
   }
 }
 
-export async function validateOutputForNewPackagePolicy(
+export async function validateAgentPolicyOutputForIntegration(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy,
-  packageName: string
+  packageName: string,
+  isNewPackagePolicy: boolean = true
 ) {
   const allowedOutputTypeForPolicy = getAllowedOutputTypesForIntegration(packageName);
 
@@ -109,9 +110,15 @@ export async function validateOutputForNewPackagePolicy(
   if (isOutputTypeRestricted) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      throw new OutputInvalidError(
-        `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
-      );
+      if (isNewPackagePolicy) {
+        throw new OutputInvalidError(
+          `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
+        );
+      } else {
+        throw new OutputInvalidError(
+          `Agent policy "${agentPolicy.name}" uses output type "${dataOutput.type}" which cannot be used for integration "${packageName}".`
+        );
+      }
     }
   }
 }

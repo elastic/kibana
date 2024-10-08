@@ -5,6 +5,10 @@ Some {kib} features are provided via a REST API, which is ideal for creating an
 integration with {kib}, or automating certain aspects of configuring and
 deploying {kib}.
 
+NOTE: Access to internal {kib} API endpoints will be restricted in 9.0. Please move any integrations to publicly documented APIs.
+
+NOTE: For the latest details, refer to {api-kibana}[{kib} API].
+
 [float]
 [[using-apis]]
 == Using the APIs

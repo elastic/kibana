@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AlertConsumers, isValidFeatureId } from '@kbn/rule-data-utils';
@@ -27,7 +28,7 @@ export const useFetchAlertsFieldsQuery = (
   { http, ...params }: UseFetchAlertsFieldsQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsFields>,
-    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+    'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
   const { featureIds } = params;
@@ -37,10 +38,12 @@ export const useFetchAlertsFieldsQuery = (
   );
 
   return useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds)),
+    queryKey: queryKeyPrefix.concat(featureIds),
     queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
-    enabled: validFeatureIds.length > 0,
-    initialData: { browserFields: {}, fields: [] },
+    placeholderData: { browserFields: {}, fields: [] },
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
     ...options,
+    enabled: validFeatureIds.length > 0 && (options?.enabled == null || options.enabled),
   });
 };

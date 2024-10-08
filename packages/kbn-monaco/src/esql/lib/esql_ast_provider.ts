@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { EditorError } from '@kbn/esql-ast';
 import {
   type ESQLCallbacks,
@@ -16,8 +18,9 @@ import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
-import { monacoPositionToOffset } from './shared/utils';
+import { monacoPositionToOffset, offsetRangeToMonacoRange } from './shared/utils';
 import { getSignatureHelp } from './signature';
+import { SuggestionRawDefinitionWithMonacoRange } from './types';
 
 export class ESQLAstAdapter {
   constructor(
@@ -66,17 +69,17 @@ export class ESQLAstAdapter {
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext
-  ) {
+  ): Promise<SuggestionRawDefinitionWithMonacoRange[]> {
     const getAstFn = await this.getAstWorker(model);
     const fullText = model.getValue();
     const offset = monacoPositionToOffset(fullText, position);
-    const suggestionEntries = await suggest(fullText, offset, context, getAstFn, this.callbacks);
-    return {
-      suggestions: suggestionEntries.map((suggestion) => ({
-        ...suggestion,
-        range: undefined as unknown as monaco.IRange,
-      })),
-    };
+    const suggestions = await suggest(fullText, offset, context, getAstFn, this.callbacks);
+    for (const s of suggestions) {
+      (s as SuggestionRawDefinitionWithMonacoRange).range = s.rangeToReplace
+        ? offsetRangeToMonacoRange(fullText, s.rangeToReplace)
+        : undefined;
+    }
+    return suggestions;
   }
 
   async codeAction(

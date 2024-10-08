@@ -1,0 +1,35 @@
+# RIGHT
+
+The RIGHT function extracts a specified number of characters from the end of a string.
+
+## Syntax
+
+`RIGHT(string, length)`
+
+### Parameters
+
+#### string
+
+The string from which a substring is to be returned.
+
+#### length
+
+The number of characters to return from the end of the string.
+
+## Examples
+
+The following example extracts the last three characters from the `last_name` field:
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL right = RIGHT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
+```
+
+```esql
+ROW full_name = "John Doe"
+| EVAL last_part = RIGHT(full_name, 4)
+| KEEP last_part
+```

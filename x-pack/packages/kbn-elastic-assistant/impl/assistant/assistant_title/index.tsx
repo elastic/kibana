@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
@@ -18,10 +19,11 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
  * information about the assistant feature and access to documentation.
  */
 export const AssistantTitle: React.FC<{
+  isDisabled?: boolean;
   title?: string;
   selectedConversation: Conversation | undefined;
-  refetchConversationsState: () => Promise<void>;
-}> = ({ title, selectedConversation, refetchConversationsState }) => {
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+}> = ({ title, selectedConversation, refetchCurrentUserConversations, isDisabled = false }) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -35,10 +37,10 @@ export const AssistantTitle: React.FC<{
           conversationId: selectedConversation.id,
           updatedTitle,
         });
-        await refetchConversationsState();
+        await refetchCurrentUserConversations();
       }
     },
-    [refetchConversationsState, selectedConversation, updateConversationTitle]
+    [refetchCurrentUserConversations, selectedConversation, updateConversationTitle]
   );
 
   useEffect(() => {
@@ -57,12 +59,13 @@ export const AssistantTitle: React.FC<{
         `}
       >
         <EuiInlineEditTitle
+          data-test-subj="conversationTitle"
           heading="h2"
           inputAriaLabel="Edit text inline"
           value={newTitle ?? NEW_CHAT}
           size="xs"
           isInvalid={!!newTitleError}
-          isReadOnly={selectedConversation?.isDefault}
+          isReadOnly={isDisabled || selectedConversation?.isDefault}
           onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
           onCancel={() => setNewTitle(title)}
           onSave={handleUpdateTitle}

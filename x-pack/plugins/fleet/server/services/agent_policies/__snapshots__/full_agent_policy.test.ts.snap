@@ -1,5 +1,174 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFullAgentPolicy should return the right outputs and permissions when package policies use their own outputs 1`] = `
+Object {
+  "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
+    "features": Object {},
+    "monitoring": Object {
+      "enabled": false,
+      "logs": false,
+      "metrics": false,
+      "traces": false,
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
+    },
+  },
+  "fleet": Object {
+    "hosts": Array [
+      "http://fleetserver:8220",
+    ],
+  },
+  "id": "integration-output-policy",
+  "inputs": Array [
+    Object {
+      "data_stream": Object {
+        "namespace": "policyspace",
+      },
+      "id": "test-logs-package-policy-using-output",
+      "meta": Object {
+        "package": Object {
+          "name": "test_package",
+          "version": "0.0.0",
+        },
+      },
+      "name": "test-policy-1",
+      "package_policy_id": "package-policy-using-output",
+      "revision": 1,
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "some-logs",
+            "type": "logs",
+          },
+          "id": "test-logs",
+        },
+      ],
+      "type": "test-logs",
+      "use_output": "test-remote-id",
+    },
+    Object {
+      "data_stream": Object {
+        "namespace": "defaultspace",
+      },
+      "id": "test-logs-package-policy-no-output",
+      "meta": Object {
+        "package": Object {
+          "name": "system",
+          "version": "1.0.0",
+        },
+      },
+      "name": "test-policy-2",
+      "package_policy_id": "package-policy-no-output",
+      "revision": 1,
+      "streams": Array [
+        Object {
+          "data_stream": Object {
+            "dataset": "some-logs",
+            "type": "logs",
+          },
+          "id": "test-logs",
+        },
+      ],
+      "type": "test-logs",
+      "use_output": "data-output-id",
+    },
+  ],
+  "output_permissions": Object {
+    "data-output-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "package-policy-no-output": Object {
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-some-logs-defaultspace",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+    },
+    "default": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [
+          Object {
+            "names": Array [],
+            "privileges": Array [],
+          },
+        ],
+      },
+    },
+    "test-remote-id": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "package-policy-using-output": Object {
+        "indices": Array [
+          Object {
+            "names": Array [
+              "logs-some-logs-policyspace",
+            ],
+            "privileges": Array [
+              "auto_configure",
+              "create_doc",
+            ],
+          },
+        ],
+      },
+    },
+  },
+  "outputs": Object {
+    "data-output-id": Object {
+      "hosts": Array [
+        "http://es-data.co:9201",
+      ],
+      "preset": "balanced",
+      "type": "elasticsearch",
+    },
+    "default": Object {
+      "hosts": Array [
+        "http://127.0.0.1:9201",
+      ],
+      "preset": "balanced",
+      "type": "elasticsearch",
+    },
+    "test-remote-id": Object {
+      "hosts": Array [
+        "http://127.0.0.1:9201",
+      ],
+      "preset": "balanced",
+      "service_token": undefined,
+      "type": "remote_elasticsearch",
+    },
+  },
+  "revision": 1,
+  "secret_references": Array [],
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
+}
+`;
+
 exports[`getFullAgentPolicy should support a different data output 1`] = `
 Object {
   "agent": Object {
@@ -12,6 +181,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "default",
     },
     "protection": Object {
@@ -90,6 +260,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {
@@ -168,6 +339,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {

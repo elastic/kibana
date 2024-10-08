@@ -40,7 +40,7 @@ export function createAddChangePointChartAction(
       },
     ],
     order: 10,
-    getIconType: () => 'machineLearningApp',
+    getIconType: () => 'changePointDetection',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
         defaultMessage: 'Change point detection',

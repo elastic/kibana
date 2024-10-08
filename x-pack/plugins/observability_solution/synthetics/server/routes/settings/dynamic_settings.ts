@@ -22,7 +22,7 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   handler: async ({ savedObjectsClient }) => {
     const dynamicSettingsAttributes: DynamicSettingsAttributes =
       await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
-    return fromAttribute(dynamicSettingsAttributes);
+    return fromSettingsAttribute(dynamicSettingsAttributes);
   },
 });
 
@@ -42,16 +42,20 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
       ...newSettings,
     } as DynamicSettingsAttributes);
 
-    return fromAttribute(attr as DynamicSettingsAttributes);
+    return fromSettingsAttribute(attr as DynamicSettingsAttributes);
   },
 });
 
-const fromAttribute = (attr: DynamicSettingsAttributes) => {
+export const fromSettingsAttribute = (
+  attr: DynamicSettingsAttributes
+): DynamicSettingsAttributes => {
   return {
     certExpirationThreshold: attr.certExpirationThreshold,
     certAgeThreshold: attr.certAgeThreshold,
     defaultConnectors: attr.defaultConnectors,
     defaultEmail: attr.defaultEmail,
+    defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
+    defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
   };
 };
 
@@ -72,6 +76,8 @@ export const DynamicSettingsSchema = schema.object({
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
+  defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string()),

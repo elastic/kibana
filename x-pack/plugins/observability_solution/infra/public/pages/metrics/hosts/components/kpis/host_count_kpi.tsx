@@ -17,7 +17,7 @@ import { TooltipContent } from '../../../../../components/lens';
 
 export const HostCountKpi = () => {
   const inventoryModel = findInventoryModel('host');
-  const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+  const { count, loading } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const euiTheme = useTheme();
 
@@ -32,7 +32,7 @@ export const HostCountKpi = () => {
   };
 
   const subtitle =
-    searchCriteria.limit < (hostCountData?.count.value ?? 0)
+    searchCriteria.limit < count
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {
@@ -45,7 +45,7 @@ export const HostCountKpi = () => {
     <MetricChartWrapper
       {...hostsCountChart}
       style={{ height: KPI_CHART_HEIGHT }}
-      value={hostCountData?.count.value ?? 0}
+      value={count}
       subtitle={subtitle}
       toolTip={
         <TooltipContent
@@ -53,7 +53,7 @@ export const HostCountKpi = () => {
           description={METRICS_TOOLTIP.hostCount}
         />
       }
-      loading={hostCountLoading}
+      loading={loading}
     />
   );
 };

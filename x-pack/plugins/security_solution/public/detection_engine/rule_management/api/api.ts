@@ -150,6 +150,7 @@ export const patchRule = async ({
  */
 export const previewRule = async ({
   rule,
+  enableLoggedRequests,
   signal,
 }: PreviewRulesProps): Promise<RulePreviewResponse> =>
   KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
@@ -157,6 +158,7 @@ export const previewRule = async ({
     version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
+    query: enableLoggedRequests ? { enable_logged_requests: enableLoggedRequests } : undefined,
   });
 
 /**
@@ -362,7 +364,7 @@ export type BulkAction =
   | DuplicateBulkAction
   | ManualRuleRunBulkAction;
 
-export interface PerformBulkActionProps {
+export interface PerformRulesBulkActionProps {
   bulkAction: BulkAction;
   dryRun?: boolean;
 }
@@ -378,7 +380,7 @@ export interface PerformBulkActionProps {
 export async function performBulkAction({
   bulkAction,
   dryRun = false,
-}: PerformBulkActionProps): Promise<BulkActionResponse> {
+}: PerformRulesBulkActionProps): Promise<BulkActionResponse> {
   const params = {
     action: bulkAction.type,
     query: bulkAction.query,

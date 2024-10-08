@@ -9,14 +9,15 @@ import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import type { Duration } from 'moment';
 import moment from 'moment';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
+
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
   type MlEntityField,
@@ -24,9 +25,9 @@ import {
   ML_JOB_AGGREGATION,
   MLCATEGORY,
 } from '@kbn/ml-anomaly-utils';
-import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
-import { parseInterval } from './parse_interval';
-import { maxLengthValidator } from './validators';
+import { maxLengthValidator, ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+import { parseInterval } from '@kbn/ml-parse-interval';
+
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
   CombinedJob,
@@ -301,8 +302,8 @@ export function isModelPlotEnabled(
       // 'partition' field values even though this is supported on the back-end.
       // If supplied, check both the by and partition entities are in the terms.
       const detector = job.analysis_config.detectors[detectorIndex];
-      const detectorHasPartitionField = detector.hasOwnProperty('partition_field_name');
-      const detectorHasByField = detector.hasOwnProperty('by_field_name');
+      const detectorHasPartitionField = Object.hasOwn(detector, 'partition_field_name');
+      const detectorHasByField = Object.hasOwn(detector, 'by_field_name');
       const terms = termsStr.split(',');
 
       if (detectorHasPartitionField) {
@@ -875,7 +876,7 @@ export function resolveMaxTimeInterval(timeIntervals: estypes.Duration[]): numbe
 }
 
 export function getFiltersForDSLQuery(
-  datafeedQuery: QueryDslQueryContainer,
+  datafeedQuery: estypes.QueryDslQueryContainer,
   dataViewId: string | undefined,
   alias?: string,
   store = FilterStateStore.APP_STATE
@@ -903,7 +904,7 @@ export function getFiltersForDSLQuery(
 }
 
 // check to see if the query is a known "empty" shape
-export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
+export function isKnownEmptyQuery(query: estypes.QueryDslQueryContainer) {
   const queries = [
     // the default query used by the job wizards
     { bool: { must: [{ match_all: {} }] } },

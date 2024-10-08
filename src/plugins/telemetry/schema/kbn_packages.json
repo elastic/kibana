@@ -1,4 +1,36 @@
 {
   "properties": {
+    "favorites": {
+      "properties": {
+        "DYNAMIC_KEY": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total favorite object count in this deployment"
+              }
+            },
+            "total_users_spaces": {
+              "type": "long",
+              "_meta": {
+                "description": "Total users per space that have favorited an object of this type in this deployment"
+              }
+            },
+            "avg_per_user_per_space": {
+              "type": "double",
+              "_meta": {
+                "description": "Average favorite objects count of this type per user per space for this deployment, only counts users who have favorited at least one object of this type"
+              }
+            },
+            "max_per_user_per_space": {
+              "type": "long",
+              "_meta": {
+                "description": "Max favorite objects count of this type per user per space for this deployment"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

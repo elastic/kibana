@@ -9,6 +9,7 @@ import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rul
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleResponse,
   TypeSpecificCreateProps,
@@ -25,7 +26,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToCamelCase } from '../../../../../../utils/object_case_converters';
 import type { RuleParams, TypeSpecificRuleParams } from '../../../../rule_schema';
 import { transformToActionFrequency } from '../../../normalization/rule_actions';
-import { addEcsToRequiredFields, separateActionsAndSystemAction } from '../../../utils/utils';
+import { separateActionsAndSystemAction } from '../../../utils/utils';
 
 /**
  * These are the fields that are added to the rule response that are not part of the rule params
@@ -118,6 +119,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         eventCategoryOverride: params.event_category_override,
         tiebreakerField: params.tiebreaker_field,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'esql': {
@@ -126,6 +130,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         language: params.language,
         query: params.query,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     case 'threat_match': {
@@ -172,9 +179,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
@@ -212,6 +216,9 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
+        responseActions: params.response_actions?.map((rule) =>
+          transformRuleToAlertResponseAction(rule)
+        ),
       };
     }
     default: {

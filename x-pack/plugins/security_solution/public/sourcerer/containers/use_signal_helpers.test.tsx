@@ -72,7 +72,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(true);
@@ -101,7 +103,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -132,7 +136,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);
@@ -166,7 +172,9 @@ describe('useSignalHelpers', () => {
     const store = createMockStore(state);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
       expect(result.current.signalIndexNeedsInit).toEqual(false);

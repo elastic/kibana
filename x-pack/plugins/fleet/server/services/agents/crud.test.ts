@@ -38,6 +38,7 @@ jest.mock('./versions', () => {
     getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('8.8.0'),
   };
 });
+jest.mock('../spaces/helpers');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
@@ -56,7 +57,9 @@ describe('Agents CRUD test', () => {
       closePointInTime: jest.fn(),
     } as unknown as ElasticsearchClient;
 
-    mockContract = createAppContextStartContractMock();
+    mockContract = createAppContextStartContractMock({}, false, {
+      withoutSpaceExtensions: soClientMock,
+    });
     appContextService.start(mockContract);
   });
 

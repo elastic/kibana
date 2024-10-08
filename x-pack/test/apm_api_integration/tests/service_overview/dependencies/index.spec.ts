@@ -311,7 +311,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         status: number;
         body: APIReturnType<'GET /internal/apm/services/{serviceName}/dependencies'>;
       };
-
+      // eslint-disable-next-line mocha/no-sibling-hooks
       before(async () => {
         response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/services/{serviceName}/dependencies`,

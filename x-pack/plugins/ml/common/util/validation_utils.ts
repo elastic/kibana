@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { VALIDATION_STATUS } from '../constants/validation';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 // get the most severe status level from a list of messages
 const contains = (arr: string[], str: string) => arr.indexOf(str) >= 0;
@@ -45,7 +45,7 @@ export function findAggField(
       value = returnParent === true ? aggs : aggs[k];
       return true;
     }
-    if (aggs.hasOwnProperty(k) && aggs[k] !== null && typeof aggs[k] === 'object') {
+    if (Object.hasOwn(aggs, k) && aggs[k] !== null && typeof aggs[k] === 'object') {
       value = findAggField(aggs[k], fieldName, returnParent);
       return value !== undefined;
     }

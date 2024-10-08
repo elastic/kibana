@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import { from } from 'rxjs';
-import { ChatCompleteAPI } from '../../common/chat_complete';
+import type { HttpStart } from '@kbn/core/public';
+import type { ChatCompleteAPI } from '../../common/chat_complete';
 import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
 import { httpResponseIntoObservable } from '../util/http_response_into_observable';
 
 export function createChatCompleteApi({ http }: { http: HttpStart }): ChatCompleteAPI {
-  return ({ connectorId, messages, system, toolChoice, tools }) => {
+  return ({ connectorId, messages, system, toolChoice, tools, functionCalling }) => {
     const body: ChatCompleteRequestBody = {
       connectorId,
       system,
       messages,
       toolChoice,
       tools,
+      functionCalling,
     };
 
     return from(

@@ -19,12 +19,14 @@ import React from 'react';
 import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
+  EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
+  AttackDiscoveryUpsellingPageLazy,
   EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
@@ -76,6 +78,11 @@ export const upsellingPages: UpsellingPages = [
       <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
     ),
   },
+  {
+    pageName: SecurityPageName.attackDiscovery,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
 ];
 
 const entityAnalyticsProductType = getProductTypeByPLI(ProductFeatureKey.advancedInsights) ?? '';
@@ -101,6 +108,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpointPolicyProtections',
     pli: ProductFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
+  },
+  {
+    id: 'endpoint_custom_notification',
+    pli: ProductFeatureKey.endpointCustomNotification,
+    component: EndpointCustomNotificationLazy,
   },
   {
     id: 'ruleDetailsEndpointExceptions',

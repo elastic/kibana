@@ -39,8 +39,8 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 import type { useColorRange } from '../../../../../components/color_range_legend';
 import { ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -52,7 +52,6 @@ import {
   openCustomUrlWindow,
 } from '../../../../../util/custom_url_utils';
 import { replaceStringTokens } from '../../../../../util/string_utils';
-import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
 import type { ExpandableSectionProps } from '.';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';
@@ -140,6 +139,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       share,
       data,
       http: { basePath },
+      notifications: { toasts },
     },
   } = useMlKibana();
 
@@ -394,7 +394,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
                   }
                   dataTestSubj="mlExplorationDataGrid"
                   renderCellPopover={renderCellPopover}
-                  toastNotifications={getToastNotifications()}
+                  toastNotifications={toasts}
                 />
               )}
           </>

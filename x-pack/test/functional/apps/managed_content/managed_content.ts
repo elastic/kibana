@@ -26,17 +26,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/177551
-  describe.skip('Managed Content', () => {
+  describe('Managed Content', () => {
     before(async () => {
-      esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
     });
 
     after(async () => {
-      esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
-      kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/managed_content'
+      );
+      await kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });
 
     describe('preventing the user from overwriting managed content', () => {
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('lens', async () => {
         await PageObjects.common.navigateToActualUrl(
           'lens',
-          'edit/managed-36db-4a3b-a4ba-7a64ab8f130b'
+          '/edit/managed-36db-4a3b-a4ba-7a64ab8f130b'
         );
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
@@ -64,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'lens',
-          'edit/unmanaged-36db-4a3b-a4ba-7a64ab8f130b'
+          '/edit/unmanaged-36db-4a3b-a4ba-7a64ab8f130b'
         );
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
@@ -72,11 +73,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await expectManagedContentSignifiers(false, 'lnsApp_saveButton');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/178920
-      it.skip('discover', async () => {
+      it('discover', async () => {
         await PageObjects.common.navigateToActualUrl(
           'discover',
-          'view/managed-3d62-4113-ac7c-de2e20a68fbc'
+          '/view/managed-3d62-4113-ac7c-de2e20a68fbc'
         );
         await PageObjects.discover.waitForDiscoverAppOnScreen();
 
@@ -84,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'discover',
-          'view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
+          '/view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
         );
         await PageObjects.discover.waitForDiscoverAppOnScreen();
 
@@ -94,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('visualize', async () => {
         await PageObjects.common.navigateToActualUrl(
           'visualize',
-          'edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
+          '/edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
         );
         await PageObjects.visChart.waitForVisualization();
 
@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'visualize',
-          'edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
+          '/edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
         );
         await PageObjects.visChart.waitForVisualization();
 
@@ -112,7 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('maps', async () => {
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/managed-d7ab-46eb-a807-8fed28ed8566'
+          'map/managed-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
@@ -120,7 +121,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
@@ -147,20 +149,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('managed panels in dashboards', () => {
+    // unskip with https://github.com/elastic/kibana/issues/190138 fix
+    describe.skip('managed panels in dashboards', () => {
       it('inlines panels when managed dashboard cloned', async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
-          'view/c44c86f9-b105-4a9c-9a24-449a58a827f3',
-          // for some reason the URL didn't always match the expected, so I turned off this check
-          // URL doesn't matter as long as we get the dashboard app
-          { ensureCurrentUrl: false }
+          '/view/c44c86f9-b105-4a9c-9a24-449a58a827f3'
         );
 
         await PageObjects.dashboard.waitForRenderComplete();
 
         await PageObjects.dashboard.duplicateDashboard();
-
         await PageObjects.dashboard.waitForRenderComplete();
 
         await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
@@ -177,7 +176,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { name: 'Managed map', type: 'map' },
           { name: 'Managed saved search', type: 'search' },
         ]);
-
         await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
 
         await dashboardAddPanel.addEmbeddables([

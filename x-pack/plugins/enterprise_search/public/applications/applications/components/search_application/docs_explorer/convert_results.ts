@@ -49,7 +49,7 @@ export const getIndex = (result: SearchResult): string => {
 
 export const isFieldValue = (value: unknown): value is FieldValue => {
   if (value === null || typeof value !== 'object') return false;
-  return value.hasOwnProperty('raw') || value.hasOwnProperty('snippet');
+  return Object.hasOwn(value, 'raw') || Object.hasOwn(value, 'snippet');
 };
 
 export const flattenObjectPreservingValues = (

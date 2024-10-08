@@ -16,12 +16,12 @@ import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 jest.mock('@kbn/elastic-assistant');
 jest.mock('../../../assistant/use_assistant_availability');
 jest.mock('../../get_attack_discovery_markdown/get_attack_discovery_markdown');
-
+const mockUseAssistantOverlay = useAssistantOverlay as jest.Mock;
 describe('useViewInAiAssistant', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useAssistantOverlay as jest.Mock).mockReturnValue({
+    mockUseAssistantOverlay.mockReturnValue({
       promptContextId: 'prompt-context-id',
       showAssistantOverlay: jest.fn(),
     });
@@ -82,5 +82,17 @@ describe('useViewInAiAssistant', () => {
     );
 
     expect(result.current.disabled).toBe(true);
+  });
+
+  it('uses the title + last 5 of the attack discovery id as the conversation title', () => {
+    renderHook(() =>
+      useViewInAiAssistant({
+        attackDiscovery: mockAttackDiscovery,
+      })
+    );
+
+    expect(mockUseAssistantOverlay.mock.calls[0][1]).toEqual(
+      'Malware Attack With Credential Theft Attempt - b72b1'
+    );
   });
 });

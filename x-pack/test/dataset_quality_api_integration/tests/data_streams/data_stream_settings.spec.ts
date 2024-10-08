@@ -15,6 +15,7 @@ import {
   getDataStreamSettingsOfEarliestIndex,
   rolloverDataStream,
 } from '../../utils';
+import { createBackingIndexNameWithoutVersion } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -33,6 +34,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const pkg = {
     name: 'apache',
     version: '1.14.0',
+  };
+
+  const defaultDataStreamPrivileges = {
+    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
   };
 
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
@@ -93,49 +98,56 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns error when dataStream param is not provided', async () => {
         const expectedMessage = 'Data Stream name cannot be empty';
         const err = await expectToReject<DatasetQualityApiError>(() =>
-          callApiAs('datasetQualityLogsUser', encodeURIComponent(' '))
+          callApiAs('datasetQualityMonitorUser', encodeURIComponent(' '))
         );
         expect(err.res.status).to.be(400);
         expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns {} if matching data stream is not available', async () => {
+      it('returns only privileges if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-        const resp = await callApiAs('datasetQualityLogsUser', nonExistentDataStream);
-        expect(resp.body).empty();
+        const resp = await callApiAs('datasetQualityMonitorUser', nonExistentDataStream);
+        expect(resp.body).eql(defaultDataStreamPrivileges);
       });
 
-      it('returns "createdOn" correctly', async () => {
-        const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
-          esClient,
-          `${type}-${dataset}-${namespace}`
-        );
-        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
-        expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
-      });
-
-      it('returns "createdOn" correctly for rolled over dataStream', async () => {
-        await rolloverDataStream(esClient, `${type}-${dataset}-${namespace}`);
-        const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
-          esClient,
-          `${type}-${dataset}-${namespace}`
-        );
-        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
-        expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
-      });
-
-      it('returns "createdOn" and "integration" correctly when available', async () => {
+      it('returns "createdOn", "integration" and "lastBackingIndexName" correctly when available', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
           esClient,
           `${type}-${integrationDataset}-${namespace}`
         );
         const resp = await callApiAs(
-          'datasetQualityLogsUser',
+          'datasetQualityMonitorUser',
           `${type}-${integrationDataset}-${namespace}`
         );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
         expect(resp.body.integration).to.be('apache');
+        expect(resp.body.lastBackingIndexName).to.be(
+          `${createBackingIndexNameWithoutVersion({
+            type,
+            dataset: integrationDataset,
+            namespace,
+          })}-000001`
+        );
+        expect(resp.body.datasetUserPrivileges).to.eql(
+          defaultDataStreamPrivileges.datasetUserPrivileges
+        );
+      });
+
+      it('returns "createdOn" and "lastBackingIndexName" for rolled over dataStream', async () => {
+        await rolloverDataStream(esClient, `${type}-${dataset}-${namespace}`);
+        const dataStreamSettings = await getDataStreamSettingsOfEarliestIndex(
+          esClient,
+          `${type}-${dataset}-${namespace}`
+        );
+        const resp = await callApiAs(
+          'datasetQualityMonitorUser',
+          `${type}-${dataset}-${namespace}`
+        );
+        expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
+        expect(resp.body.lastBackingIndexName).to.be(
+          `${createBackingIndexNameWithoutVersion({ type, dataset, namespace })}-000002`
+        );
       });
 
       after(async () => {

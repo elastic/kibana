@@ -41,20 +41,20 @@ export const getTagcloudVisualization = ({
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsTagcloud',
       icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
-      groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
-        defaultMessage: 'Proportion',
+      sortPriority: 12,
+      description: i18n.translate('xpack.lens.tagcloud.visualizationDescription', {
+        defaultMessage: 'Visualize text data frequency or importance.',
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsTagcloud';
-  },
 
   clearLayer(state) {
     const newState = {

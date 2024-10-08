@@ -65,3 +65,20 @@ export const useAppSearchNav = () => {
   // to cause all our navItems to properly render as nav links.
   return [{ id: '', name: '', items: navItems }];
 };
+
+// Process App Search side nav items for use in the new Solution Nav
+export const cleanAppSearchNavItems = (
+  items: Array<EuiSideNavItemType<unknown>>
+): Array<EuiSideNavItemType<unknown>> => {
+  const enginesItem = items.find((item) => item.id === 'engines');
+  if (enginesItem && enginesItem.items && enginesItem.items.length > 0) {
+    const engineChildren = enginesItem.items;
+    const engineNameItem = engineChildren.find((item) => item.id === 'engineName');
+    if (engineNameItem && engineNameItem.renderItem) {
+      delete engineNameItem.renderItem;
+      engineNameItem.items = engineChildren.filter((item) => item.id !== 'engineName');
+      enginesItem.items = [engineNameItem];
+    }
+  }
+  return items;
+};

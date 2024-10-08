@@ -8,10 +8,11 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getOriginalId } from './transpose_helpers';
 
-export function isNumericFieldForDatatable(currentData: Datatable | undefined, accessor: string) {
-  const column = currentData?.columns.find(
-    (col) => col.id === accessor || getOriginalId(col.id) === accessor
-  );
+export function isNumericFieldForDatatable(table: Datatable | undefined, accessor: string) {
+  return getFieldTypeFromDatatable(table, accessor) === 'number';
+}
 
-  return column?.meta.type === 'number';
+export function getFieldTypeFromDatatable(table: Datatable | undefined, accessor: string) {
+  return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
+    ?.meta.type;
 }

@@ -14,13 +14,13 @@ steps:
         RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
-  # TODO: Uncomment this code when the integration is ready.
-  # - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
-  #   trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
-  #   build:
-  #     env:
-  #       ENVIRONMENT: ${ENVIRONMENT}
-  #     message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+  - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
+    trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
+    soft_fail: true
+    build:
+      env:
+        ENVIRONMENT: ${ENVIRONMENT}
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
 
   - label: ":ship: Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests

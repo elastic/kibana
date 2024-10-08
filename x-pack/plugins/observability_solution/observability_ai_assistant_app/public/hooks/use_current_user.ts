@@ -11,11 +11,7 @@ import { useKibana } from './use_kibana';
 
 export function useCurrentUser() {
   const {
-    services: {
-      plugins: {
-        start: { security },
-      },
-    },
+    services: { security },
   } = useKibana();
 
   const [user, setUser] = useState<AuthenticatedUser>();

@@ -20,7 +20,8 @@
     "@kbn/management-settings-components-field-row",
     "@kbn/observability-shared-plugin",
     "@kbn/config-schema",
-    "@kbn/core-ui-settings-common"
+    "@kbn/core-ui-settings-common",
+    "@kbn/logs-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

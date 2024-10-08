@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
-} from '../../../common/api_schemas/reset_transforms';
+} from '../../../server/routes/api_schemas/reset_transforms';
 import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
@@ -47,7 +47,7 @@ export const useResetTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const status = results[transformId];
 
           if (status.transformReset?.error) {

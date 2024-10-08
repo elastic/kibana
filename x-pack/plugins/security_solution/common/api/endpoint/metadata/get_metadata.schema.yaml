@@ -5,7 +5,7 @@ info:
 paths:
   /api/endpoint/metadata:
     get:
-      summary: Get Metadata List schema
+      summary: Get a metadata list
       operationId: GetEndpointMetadataList
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -25,7 +25,7 @@ paths:
 
   /api/endpoint/metadata/transforms:
     get:
-      summary: Get Metadata Transform schema
+      summary: Get metadata transforms
       operationId: GetEndpointMetadataTransform
       x-codegen-enabled: false
       x-labels: [ess, serverless]
@@ -39,7 +39,7 @@ paths:
 
   /api/endpoint/metadata/{id}:
     get:
-      summary: Get Metadata schema
+      summary: Get metadata
       operationId: GetEndpointMetadata
       x-codegen-enabled: false
       x-labels: [ess, serverless]

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
@@ -69,7 +70,7 @@ describe('createBrowserConfig', () => {
       exposedConfigKeys: {
         exposed1: 'string',
         'nested.exposed2': 'boolean',
-        'nested.exposed3': 'number',
+        'nested.exposed3': 'number?',
         // notExposed4 is not present
       },
     });
@@ -182,7 +183,7 @@ describe('createBrowserConfig', () => {
       exposedConfigKeys: {
         exposed1: 'string',
         'deeply.exposed2': 'boolean',
-        'deeply.nested.exposed3': 'number',
+        'deeply.nested.exposed3': 'number?',
         'deeply.nested.structure.exposed4': 'string',
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },

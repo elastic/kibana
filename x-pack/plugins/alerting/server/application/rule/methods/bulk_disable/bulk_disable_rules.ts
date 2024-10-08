@@ -133,8 +133,6 @@ const bulkDisableRulesWithOCC = async (
     untrack: boolean;
   }
 ) => {
-  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'true');
-
   const rulesFinder = await withSpan(
     {
       name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
@@ -143,7 +141,7 @@ const bulkDisableRulesWithOCC = async (
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
-          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          filter,
           type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
@@ -161,13 +159,15 @@ const bulkDisableRulesWithOCC = async (
     async () => {
       for await (const response of rulesFinder.find()) {
         await pMap(response.saved_objects, async (rule) => {
+          const ruleName = rule.attributes.name;
+
           try {
             if (untrack) {
               await untrackRuleAlerts(context, rule.id, rule.attributes);
             }
 
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            if (ruleName) {
+              ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
             // migrate legacy actions only for SIEM rules
@@ -214,7 +214,7 @@ const bulkDisableRulesWithOCC = async (
               ruleAuditEvent({
                 action: RuleAuditAction.DISABLE,
                 outcome: 'unknown',
-                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+                savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: ruleName },
               })
             );
           } catch (error) {
@@ -222,12 +222,17 @@ const bulkDisableRulesWithOCC = async (
               message: error.message,
               rule: {
                 id: rule.id,
-                name: rule.attributes?.name,
+                name: ruleName,
               },
             });
             context.auditLogger?.log(
               ruleAuditEvent({
                 action: RuleAuditAction.DISABLE,
+                savedObject: {
+                  type: RULE_SAVED_OBJECT_TYPE,
+                  id: rule.id,
+                  name: ruleName,
+                },
                 error,
               })
             );

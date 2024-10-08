@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -16,7 +17,9 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
 
-const TRY_IN_CONSOLE = i18n.translate('tryInConsole.button', { defaultMessage: 'Try in Console' });
+const RUN_IN_CONSOLE = i18n.translate('tryInConsole.button.text', {
+  defaultMessage: 'Run in Console',
+});
 
 export interface TryInConsoleButtonProps {
   request?: string;
@@ -32,7 +35,7 @@ export const TryInConsoleButton = ({
   application,
   consolePlugin,
   sharePlugin,
-  content = TRY_IN_CONSOLE,
+  content = RUN_IN_CONSOLE,
   showIcon = true,
   type = 'emptyButton',
 }: TryInConsoleButtonProps) => {
@@ -70,11 +73,11 @@ export const TryInConsoleButton = ({
       consolePlugin?.isEmbeddedConsoleAvailable?.()
     ) {
       return i18n.translate('tryInConsole.embeddedConsoleButton.ariaLabel', {
-        defaultMessage: 'Try in Console  - opens in embedded console',
+        defaultMessage: 'Run in Console  - opens in embedded console',
       });
     }
     return i18n.translate('tryInConsole.inNewTab.button.ariaLabel', {
-      defaultMessage: 'Try in Console  - opens in a new tab',
+      defaultMessage: 'Run in Console  - opens in a new tab',
     });
   };
 
@@ -83,7 +86,7 @@ export const TryInConsoleButton = ({
     'aria-label': getAriaLabel(),
     onClick,
   };
-  const iconType = showIcon ? 'popout' : undefined;
+  const iconType = showIcon ? 'play' : undefined;
 
   switch (type) {
     case 'link':
