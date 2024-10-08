@@ -67,8 +67,9 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   availableEmbeddables,
   ...restProps
 }) => {
-  const labsService = useMemo(() => presentationUtilService.labsService, []);
-  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
+  const isByValueEnabled = presentationUtilService.labsService.isProjectEnabled(
+    'labs:canvas:byValueEmbeddable'
+  );
 
   const dispatch = useDispatch();
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));

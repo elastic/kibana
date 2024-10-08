@@ -39,7 +39,7 @@ export const App: FC<{ history: ScopedHistory; appUpdater: BehaviorSubject<AppUp
     return history.listen(({ pathname, search }) => {
       const path = pathname + search;
       appUpdater.next(() => ({
-        defaultPath: `${path}`,
+        defaultPath: path,
       }));
 
       getSessionStorage().set(
