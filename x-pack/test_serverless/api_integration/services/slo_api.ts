@@ -50,6 +50,7 @@ type FetchHistoricalSummaryParams = t.OutputOf<
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const retry = getService('retry');
   const requestTimeout = 30 * 1000;
@@ -57,7 +58,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
   return {
     async create(slo: CreateSLOInput, roleAuthc: RoleCredentials) {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -70,7 +71,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
       roleAuthc: RoleCredentials
     ) {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .put(`/api/observability/slos/${sloId}`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -80,7 +81,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     },
 
     async delete({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .delete(`/api/observability/slos/${sloId}`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
@@ -88,7 +89,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     },
 
     async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -102,7 +103,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       params: FetchHistoricalSummaryParams,
       roleAuthc: RoleCredentials
     ): Promise<FetchHistoricalSummaryResponse> {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .post(`/internal/observability/slos/_historical_summary`)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
@@ -122,7 +123,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .delete(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -139,7 +140,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .get(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -156,7 +157,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         throw new Error('sloId is undefined');
       }
       return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertest
+        const response = await supertestWithoutAuth
           .post(`/api/observability/slos/${sloId}/_reset`)
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
