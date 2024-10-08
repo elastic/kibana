@@ -104,11 +104,6 @@ describe('getUnitedEntityDefinition', () => {
               "operation": "collect_values",
             },
             Object {
-              "field": "host.name",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
               "field": "host.type",
               "maxLength": 10,
               "operation": "collect_values",
@@ -155,7 +150,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             "timestampField": "@timestamp",
           },
-          "id": "ea_test_host_entity_store",
+          "id": "security_host_test",
           "identityFields": Array [
             Object {
               "field": "host.name",
@@ -216,14 +211,6 @@ describe('getUnitedEntityDefinition', () => {
               },
               "destination": "host.mac",
               "source": "host.mac",
-            },
-            Object {
-              "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
-              },
-              "destination": "host.name",
-              "source": "host.name",
             },
             Object {
               "aggregation": Object {
@@ -340,6 +327,9 @@ describe('getUnitedEntityDefinition', () => {
             "user.id": Object {
               "type": "keyword",
             },
+            "user.name": Object {
+              "type": "keyword",
+            },
             "user.risk.calculated_level": Object {
               "type": "keyword",
             },
@@ -428,7 +418,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             "timestampField": "@timestamp",
           },
-          "id": "ea_test_user_entity_store",
+          "id": "security_user_test",
           "identityFields": Array [
             Object {
               "field": "user.name",

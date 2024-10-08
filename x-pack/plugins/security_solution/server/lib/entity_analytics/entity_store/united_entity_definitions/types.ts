@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import type { FieldRetentionOperator } from '../field_retention_definition';
+
+export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
 type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
 

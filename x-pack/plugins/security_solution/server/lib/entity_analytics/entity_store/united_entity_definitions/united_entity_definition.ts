@@ -15,7 +15,7 @@ import type {
   FieldRetentionDefinition,
   FieldRetentionOperator,
 } from '../field_retention_definition';
-import type { UnitedDefinitionField } from './types';
+import type { MappingProperties, UnitedDefinitionField } from './types';
 import { BASE_ENTITY_INDEX_MAPPING } from './constants';
 
 export class UnitedEntityDefinition {
@@ -81,16 +81,26 @@ export class UnitedEntityDefinition {
   }
 
   private toIndexMappings(): MappingTypeMapping {
-    const properties = this.fields.reduce(
-      (acc = {}, { field, mapping }) => {
-        if (!mapping) {
-          return acc;
-        }
-        acc[field] = mapping;
-        return acc;
+    const identityField = getIdentityFieldForEntityType(this.entityType);
+
+    const initialMappings: MappingProperties = {
+      ...BASE_ENTITY_INDEX_MAPPING,
+      [identityField]: {
+        type: 'keyword',
       },
-      { ...BASE_ENTITY_INDEX_MAPPING } as MappingTypeMapping['properties']
-    );
+    };
+
+    const properties = this.fields.reduce((acc, { field, mapping }) => {
+      if (!mapping) {
+        return acc;
+      }
+      acc[field] = mapping;
+      return acc;
+    }, initialMappings);
+
+    properties[identityField] = {
+      type: 'keyword',
+    };
 
     return {
       properties,
