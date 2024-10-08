@@ -272,7 +272,10 @@ export function ChatFlyout({
                 conversationList.conversations.refresh();
               }}
               onToggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
-              navigateToConversation={navigateToConversation}
+              navigateToConversation={(newConversationId?: string) => {
+                if (onClose) onClose();
+                navigateToConversation(newConversationId);
+              }}
             />
           </EuiFlexItem>
 
