@@ -89,13 +89,13 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     },
 
     async findDefinitions(): Promise<FindSLODefinitionsResponse> {
-      const response = await supertest
+      const { body } = await supertest
         .get(`/api/observability/slos/_definitions`)
         .set(svlCommonApi.getInternalRequestHeader())
         .send()
         .expect(200);
 
-      return findSloDefinitionsResponseSchema.encode(response as unknown as any);
+      return findSloDefinitionsResponseSchema.encode(body);
     },
 
     async fetchHistoricalSummary(
