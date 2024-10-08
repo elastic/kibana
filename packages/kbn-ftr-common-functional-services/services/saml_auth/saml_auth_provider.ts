@@ -108,7 +108,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         .send({
           name: 'myTestApiKey',
           metadata: {},
-          role_descriptors: { roleDescriptors },
+          role_descriptors: roleDescriptors,
         });
 
       if (response.status !== 200) {
