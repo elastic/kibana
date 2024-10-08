@@ -17,6 +17,7 @@ import { getLatestEntities } from './get_latest_entities';
 import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
 import { getLatestEntitiesAlerts } from './get_latest_entities_alerts';
 import { getIdentityFieldsPerEntityType } from './get_identity_fields_per_entity_type';
+import { getEntityGroupsBy } from './get_entity_groups';
 
 export const getEntityTypesRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/entities/types',
@@ -100,7 +101,42 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   },
 });
 
+export const groupEntitiesByRoute = createInventoryServerRoute({
+  endpoint: 'GET /internal/inventory/entities/group_by/{field}',
+  params: t.type({
+    path: t.type({
+      field: t.string,
+    }),
+    query: t.partial({
+      where: jsonRt.pipe(t.array(t.string)),
+    }),
+  }),
+  options: {
+    tags: ['access:inventory'],
+  },
+  handler: async ({ params, context, logger }) => {
+    const coreContext = await context.core;
+    const inventoryEsClient = createObservabilityEsClient({
+      client: coreContext.elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
+    });
+
+    const { field } = params.path;
+    const { where } = params.query;
+
+    const groups = await getEntityGroupsBy({
+      inventoryEsClient,
+      field,
+      where,
+    });
+
+    return { groups };
+  },
+});
+
 export const entitiesRoutes = {
   ...listLatestEntitiesRoute,
   ...getEntityTypesRoute,
+  ...groupEntitiesByRoute,
 };
