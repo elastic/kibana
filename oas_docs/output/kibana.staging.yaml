@@ -163,7 +163,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -262,7 +262,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -354,7 +354,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -440,7 +440,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -562,7 +562,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -658,7 +658,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -750,7 +750,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -838,7 +838,7 @@ paths:
                     description: >-
                       Indicates whether the connector is preconfigured. If true,
                       the `config` and `is_missing_secrets` properties are
-                      omitted from the response. 
+                      omitted from the response.
                     type: boolean
                   is_system_action:
                     description: >-
@@ -6975,7 +6975,7 @@ paths:
         - cases
     patch:
       description: >
-        You must have `all` privileges for the **Cases** feature in the 
+        You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the
         Kibana  feature privileges, depending on the owner of the case you're
         updating.
@@ -38692,6 +38692,11 @@ paths:
           schema:
             nullable: true
             type: string
+        - in: query
+          name: userFilter
+          schema:
+            nullable: true
+            type: string
       responses:
         '200':
           content:
@@ -39346,7 +39351,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded.  Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -39380,7 +39385,7 @@ paths:
           description: >
             Indicates a successful call. NOTE: This HTTP response code indicates
             that the bulk operation succeeded. Errors pertaining to individual
-            objects will be returned in the response body. 
+            objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -46077,7 +46082,7 @@ components:
           description: >
             The scaling factor to use when encoding values. This property is
             applicable when `type` is `scaled_float`. Values will be multiplied
-            by this factor at index time and rounded to the closest long value. 
+            by this factor at index time and rounded to the closest long value.
           type: integer
         type:
           description: Specifies the data type for the field.
