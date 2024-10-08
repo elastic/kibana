@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { IntegrationCardTopCallout } from './integration_card_top_callout';
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import * as consts from '../constants';
+import { IntegrationTabId } from '../types';
 
 jest.mock('../../../../../hooks/use_onboarding_service', () => ({
   useOnboardingService: jest.fn(),
@@ -18,6 +19,7 @@ jest.mock('../../../../../hooks/use_onboarding_service', () => ({
 
 jest.mock('./agentless_available_callout');
 jest.mock('./installed_integrations_callout');
+jest.mock('./endpoint_callout');
 
 interface MockedConsts {
   AGENTLESS_LEARN_MORE_LINK: string | null;
@@ -30,13 +32,35 @@ describe('IntegrationCardTopCallout', () => {
     jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = 'https://www.elastic.co';
   });
 
+  test('renders EndpointCallout when endpoint tab selected and no integrations installed', async () => {
+    (useOnboardingService as jest.Mock).mockReturnValue({
+      isAgentlessAvailable$: of(true),
+    });
+
+    const { getByTestId } = render(
+      <IntegrationCardTopCallout
+        installedIntegrationsCount={0}
+        isAgentRequired={false}
+        selectedTabId={IntegrationTabId.endpoint}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('endpointCallout')).toBeInTheDocument();
+    });
+  });
+
   test('renders AgentlessAvailableCallout when agentless is available and no integrations installed', async () => {
     (useOnboardingService as jest.Mock).mockReturnValue({
       isAgentlessAvailable$: of(true),
     });
 
     const { getByTestId } = render(
-      <IntegrationCardTopCallout installedIntegrationsCount={0} isAgentRequired={false} />
+      <IntegrationCardTopCallout
+        installedIntegrationsCount={0}
+        isAgentRequired={false}
+        selectedTabId={IntegrationTabId.cloud}
+      />
     );
 
     await waitFor(() => {
@@ -44,14 +68,18 @@ describe('IntegrationCardTopCallout', () => {
     });
   });
 
-  it('returns null if AGENTLESS_LEARN_MORE_LINK is null', async () => {
+  it('does not render AgentlessAvailableCallout if AGENTLESS_LEARN_MORE_LINK is null', async () => {
     (useOnboardingService as jest.Mock).mockReturnValue({
       isAgentlessAvailable$: of(true),
     });
     jest.mocked<MockedConsts>(consts).AGENTLESS_LEARN_MORE_LINK = null;
 
     const { queryByTestId } = render(
-      <IntegrationCardTopCallout installedIntegrationsCount={0} isAgentRequired={false} />
+      <IntegrationCardTopCallout
+        installedIntegrationsCount={0}
+        isAgentRequired={false}
+        selectedTabId={IntegrationTabId.cloud}
+      />
     );
 
     await waitFor(() => {
@@ -65,7 +93,11 @@ describe('IntegrationCardTopCallout', () => {
     });
 
     const { getByTestId } = render(
-      <IntegrationCardTopCallout installedIntegrationsCount={5} isAgentRequired={true} />
+      <IntegrationCardTopCallout
+        installedIntegrationsCount={5}
+        isAgentRequired={true}
+        selectedTabId={IntegrationTabId.cloud}
+      />
     );
 
     await waitFor(() => {

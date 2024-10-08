@@ -174,6 +174,7 @@ export const PackageListGrid = React.memo(
                 <IntegrationCardTopCallout
                   isAgentRequired={isAgentRequired}
                   installedIntegrationsCount={installedIntegrationsCount}
+                  selectedTabId={toggleIdSelected}
                 />
               }
               calloutTopSpacerSize="m"

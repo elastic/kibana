@@ -12,23 +12,33 @@ import { useOnboardingService } from '../../../../../hooks/use_onboarding_servic
 import { AGENTLESS_LEARN_MORE_LINK } from '../constants';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { InstalledIntegrationsCallout } from './installed_integrations_callout';
+import { IntegrationTabId } from '../types';
+import { EndpointCallout } from './endpoint_callout';
 
 export const IntegrationCardTopCallout = React.memo(
   ({
     installedIntegrationsCount,
     isAgentRequired,
+    selectedTabId,
   }: {
     installedIntegrationsCount: number;
     isAgentRequired: boolean;
+    selectedTabId: IntegrationTabId;
   }) => {
     const { isAgentlessAvailable$ } = useOnboardingService();
     const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
     const showAgentlessCallout =
-      isAgentlessAvailable && AGENTLESS_LEARN_MORE_LINK && installedIntegrationsCount === 0;
+      isAgentlessAvailable &&
+      AGENTLESS_LEARN_MORE_LINK &&
+      installedIntegrationsCount === 0 &&
+      selectedTabId !== IntegrationTabId.endpoint;
+    const showEndpointCallout =
+      installedIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
     const showInstalledCallout = installedIntegrationsCount > 0 || isAgentRequired;
 
     return (
       <>
+        {showEndpointCallout && <EndpointCallout />}
         {showAgentlessCallout && <AgentlessAvailableCallout />}
         {showInstalledCallout && (
           <InstalledIntegrationsCallout
@@ -36,6 +46,7 @@ export const IntegrationCardTopCallout = React.memo(
             installedIntegrationsCount={installedIntegrationsCount}
           />
         )}
+        {}
       </>
     );
   }
