@@ -13,7 +13,7 @@ import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { ConnectorCards } from './components/connector_cards/connector_cards';
+import { ConnectorCards } from './components/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 
 export const AssistantCard: OnboardingCardComponent = ({
