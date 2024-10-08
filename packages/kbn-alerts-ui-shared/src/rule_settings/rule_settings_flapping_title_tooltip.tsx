@@ -82,6 +82,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         }}
         button={
           <EuiButtonIcon
+            data-test-subj="ruleSettingsFlappingTitleTooltipButton"
             display="empty"
             color="primary"
             iconType="questionInCircle"
@@ -90,7 +91,9 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
           />
         }
       >
-        <EuiPopoverTitle>{tooltipTitle}</EuiPopoverTitle>
+        <EuiPopoverTitle data-test-subj="ruleSettingsFlappingTooltipTitle">
+          {tooltipTitle}
+        </EuiPopoverTitle>
         <EuiText size="s">
           <FormattedMessage
             id="alertsUIShared.ruleSettingsFlappingTitleTooltip.flappingTitlePopover1"

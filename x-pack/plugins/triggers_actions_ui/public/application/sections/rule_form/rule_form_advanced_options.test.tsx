@@ -157,6 +157,10 @@ describe('ruleFormAdvancedOptions', () => {
     expect(screen.queryByText('Custom')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleFormAdvancedOptionsOverrideSwitch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ruleSettingsFlappingMessage')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('ruleSettingsFlappingFormTooltipButton'));
+
+    expect(screen.getByTestId('ruleSettingsFlappingFormTooltipContent')).toBeInTheDocument();
   });
 
   test('should allow for flapping inputs to be modified', async () => {

@@ -174,6 +174,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             }}
             button={
               <EuiButtonIcon
+                data-test-subj="ruleSettingsFlappingFormTooltipButton"
                 display="empty"
                 color="primary"
                 iconType="questionInCircle"
@@ -182,7 +183,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
               />
             }
           >
-            <EuiText size="s">
+            <EuiText data-test-subj="ruleSettingsFlappingFormTooltipContent" size="s">
               <FormattedMessage
                 id="alertsUIShared.ruleSettingsFlappingForm.flappingOffPopoverContent"
                 defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
