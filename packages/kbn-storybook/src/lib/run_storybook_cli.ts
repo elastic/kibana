@@ -53,7 +53,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         logLevel: getLogLevelFromFlags(flags),
         framework: {
           name: '@storybook/react-webpack5',
-          options: { fastRefresh: true },
+          options: {},
         },
       };
       if (flags.site) {
