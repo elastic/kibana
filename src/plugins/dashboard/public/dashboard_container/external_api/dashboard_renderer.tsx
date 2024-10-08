@@ -24,9 +24,7 @@ import { DashboardContainerInput } from '../../../common';
 import { DashboardApi } from '../../dashboard_api/types';
 import { embeddableService, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
-import {
-  DashboardContainerFactoryDefinition,
-} from '../embeddable/dashboard_container_factory';
+import { DashboardContainerFactoryDefinition } from '../embeddable/dashboard_container_factory';
 import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
