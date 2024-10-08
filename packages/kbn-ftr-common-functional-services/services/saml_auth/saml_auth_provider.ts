@@ -110,7 +110,14 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
           metadata: {},
           role_descriptors: roleDescriptors,
         });
-      expect(status).to.be(200);
+
+      if (status !== 200) {
+        throw new Error(
+          `Failed to create API key for '${role}' role: status code '${status}' and response: ${JSON.stringify(
+            body
+          )}`
+        );
+      }
 
       const apiKey = body;
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
