@@ -391,8 +391,6 @@ export const langChainExecute = async ({
     (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
       v2KnowledgeBaseEnabled,
     })) ?? undefined;
-  const bedrockChatEnabled =
-    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
 
   const dataClients: AssistantDataClients = {
     anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
@@ -406,7 +404,6 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,
