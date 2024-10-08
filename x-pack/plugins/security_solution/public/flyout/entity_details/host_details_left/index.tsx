@@ -12,6 +12,7 @@ import {
   getInsightsInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
+import type { CspInsightLeftPanelSubTab } from '../shared/components/left_panel/left_panel_header';
 import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
@@ -26,7 +27,7 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   hasVulnerabilitiesFindings?: boolean;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
-    subTab?: string;
+    subTab?: CspInsightLeftPanelSubTab;
   };
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {

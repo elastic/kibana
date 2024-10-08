@@ -60,7 +60,6 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
       };
     },
     {
-      staleTime: 5000,
       keepPreviousData: true,
       enabled: options.enabled,
       onError: (err: Error) => showErrorToast(toasts, err),

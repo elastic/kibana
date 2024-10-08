@@ -35,11 +35,7 @@ interface VulnerabilitiesPackage extends Vulnerability {
   };
 }
 
-/**
- * Insights view displayed in the document details expandable flyout left section
- */
 export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryName: string }) => {
-  //
   const { data } = useVulnerabilitiesFindings({
     query: buildEntityFlyoutPreviewQuery('host.name', queryName),
     sort: [],
@@ -47,7 +43,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
     pageSize: 1,
   });
 
-  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, UNKNOWN = 0 } = data?.count || {};
+  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -127,9 +123,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       render: (vulnerability: Vulnerability) => <EuiText size="s">{vulnerability?.id}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
-        {
-          defaultMessage: 'Vulnerability',
-        }
+        { defaultMessage: 'Vulnerability' }
       ),
       width: '20%',
     },
@@ -145,9 +139,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       ),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
-        {
-          defaultMessage: 'CVSS',
-        }
+        { defaultMessage: 'CVSS' }
       ),
       width: '12.5%',
     },
@@ -164,9 +156,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       ),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
-        {
-          defaultMessage: 'Severity',
-        }
+        { defaultMessage: 'Severity' }
       ),
       width: '12.5%',
     },
@@ -177,9 +167,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
       ),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
-        {
-          defaultMessage: 'Package',
-        }
+        { defaultMessage: 'Package' }
       ),
       width: '50%',
     },
@@ -199,7 +187,15 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ queryName }: { queryN
           <EuiIcon type={'popout'} />
         </EuiLink>
         <EuiSpacer size="xl" />
-        <DistributionBar stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)} />
+        <DistributionBar
+          stats={getVulnerabilityStats({
+            critical: CRITICAL,
+            high: HIGH,
+            medium: MEDIUM,
+            low: LOW,
+            none: NONE,
+          })}
+        />
         <EuiSpacer size="l" />
         <EuiBasicTable
           items={pageOfItems || []}

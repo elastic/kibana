@@ -18,6 +18,11 @@ import { ExpandablePanel } from '@kbn/security-solution-common';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -109,7 +114,7 @@ export const MisconfigurationsPreview = ({
     sort: [],
     enabled: true,
     pageSize: 1,
-    ignore_unavailable: false,
+    ignore_unavailable: true,
   });
   const isUsingHostName = fieldName === 'host.name';
   const passedFindings = data?.count.passed || 0;
@@ -130,11 +135,16 @@ export const MisconfigurationsPreview = ({
     HIGH = 0,
     MEDIUM = 0,
     LOW = 0,
-    UNKNOWN = 0,
+    NONE = 0,
   } = vulnerabilitiesData?.count || {};
 
-  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + UNKNOWN;
-  const hasVulnerabilitiesFindings = totalVulnerabilities > 0;
+  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
+    critical: CRITICAL,
+    high: HIGH,
+    medium: MEDIUM,
+    low: LOW,
+    none: NONE,
+  });
 
   const buildFilterQuery = useMemo(
     () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
@@ -147,12 +157,17 @@ export const MisconfigurationsPreview = ({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
+
   const { data: hostRisk } = riskScoreState;
+
   const riskData = hostRisk?.[0];
+
   const isRiskScoreExist = isUsingHostName
     ? !!(riskData as HostRiskScore)?.host.risk
     : !!(riskData as UserRiskScore)?.user.risk;
+
   const { openLeftPanel } = useExpandableFlyoutApi();
+
   const goToEntityInsightTab = useCallback(() => {
     openLeftPanel({
       id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
@@ -162,13 +177,16 @@ export const MisconfigurationsPreview = ({
             isRiskScoreExist,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
-            path: { tab: 'csp_insights', subTab: 'misconfigurationTabId' },
+            path: {
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            },
           }
         : {
             user: { name },
             isRiskScoreExist,
             hasMisconfigurationFindings,
-            path: { tab: 'csp_insights' },
+            path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS },
           },
     });
   }, [

@@ -17,9 +17,10 @@ import {
   buildEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
-import { getVulnerabilityStats } from '@kbn/cloud-security-posture';
+import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
@@ -81,7 +82,13 @@ export const VulnerabilitiesPreview = ({
 
   const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
 
-  const hasVulnerabilitiesFindings = totalVulnerabilities > 0;
+  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
+    critical: CRITICAL,
+    high: HIGH,
+    medium: MEDIUM,
+    low: LOW,
+    none: NONE,
+  });
 
   const { euiTheme } = useEuiTheme();
 
@@ -116,7 +123,7 @@ export const VulnerabilitiesPreview = ({
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasVulnerabilitiesFindings,
-        path: { tab: 'csp_insights', subTab: 'vulnerabilitiesTabId' },
+        path: { tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS, subTab: 'vulnerabilitiesTabId' },
       },
     });
   }, [
@@ -172,7 +179,15 @@ export const VulnerabilitiesPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getVulnerabilityStats(CRITICAL, HIGH, MEDIUM, LOW, NONE)} />
+              <DistributionBar
+                stats={getVulnerabilityStats({
+                  critical: CRITICAL,
+                  high: HIGH,
+                  medium: MEDIUM,
+                  low: LOW,
+                  none: NONE,
+                })}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

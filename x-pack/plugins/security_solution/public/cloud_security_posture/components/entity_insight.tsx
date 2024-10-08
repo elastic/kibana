@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 
@@ -49,9 +50,13 @@ export const EntityInsight = <T,>({
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
-  const totalVulnerabilities = CRITICAL + HIGH + MEDIUM + LOW + NONE;
-
-  const hasVulnerabilitiesFindings = totalVulnerabilities > 0;
+  const hasVulnerabilitiesFindings = hasVulnerabilitiesData({
+    critical: CRITICAL,
+    high: HIGH,
+    medium: MEDIUM,
+    low: LOW,
+    none: NONE,
+  });
 
   const isVulnerabilitiesFindingForHost = hasVulnerabilitiesFindings && fieldName === 'host.name';
 
