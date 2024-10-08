@@ -20,7 +20,13 @@ import {
   getTimeFilters,
   hasDirtyState,
 } from '../../../selectors/map_selectors';
-import { setQuery, setExecutionContext, enableFullScreen, openMapSettings } from '../../../actions';
+import {
+  setQuery,
+  setExecutionContext,
+  enableFullScreen,
+  exitFullScreen,
+  openMapSettings,
+} from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../../reducers/store';
@@ -65,6 +71,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       );
     },
     enableFullScreen: () => dispatch(enableFullScreen()),
+    exitFullScreen: () => dispatch(exitFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
     setExecutionContext: (executionContext: KibanaExecutionContext) =>
       dispatch(setExecutionContext(executionContext)),

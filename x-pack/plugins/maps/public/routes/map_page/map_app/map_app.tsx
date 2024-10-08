@@ -73,6 +73,7 @@ export interface Props {
   isFullScreen: boolean;
   isOpenSettingsDisabled: boolean;
   enableFullScreen: () => void;
+  exitFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   nextIndexPatternIds: string[];
@@ -177,6 +178,16 @@ export class MapApp extends React.Component<Props, State> {
     // }
 
     this._initMap();
+
+    // listen for changes to the chrome showing/hiding itself for fullscreen mode.
+    const { getIsVisible$ } = getCoreChrome();
+    getIsVisible$().subscribe((isVisible) => {
+      if (isVisible) {
+        this.props.exitFullScreen();
+      } else {
+        this.props.enableFullScreen();
+      }
+    });
 
     this.props.onAppLeave((actions) => {
       if (this.props.savedMap.hasUnsavedChanges()) {
@@ -476,7 +487,6 @@ export class MapApp extends React.Component<Props, State> {
       savedMap: this.props.savedMap,
       isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
       isSaveDisabled: this.props.isSaveDisabled,
-      enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
       history: this.props.history,

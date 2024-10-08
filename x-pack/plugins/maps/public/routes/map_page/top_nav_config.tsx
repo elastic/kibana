@@ -35,7 +35,6 @@ export function getTopNavConfig({
   savedMap,
   isOpenSettingsDisabled,
   isSaveDisabled,
-  enableFullScreen,
   openMapSettings,
   inspectorAdapters,
   history,
@@ -43,7 +42,6 @@ export function getTopNavConfig({
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
   isSaveDisabled: boolean;
-  enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   history: ScopedHistory;
@@ -78,19 +76,6 @@ export function getTopNavConfig({
       testId: 'openInspectorButton',
       run() {
         getInspector().open(inspectorAdapters, {});
-      },
-    },
-    {
-      id: 'full-screen',
-      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
-        defaultMessage: `full screen`,
-      }),
-      description: i18n.translate('xpack.maps.topNav.fullScreenDescription', {
-        defaultMessage: `full screen`,
-      }),
-      testId: 'mapsFullScreenMode',
-      run() {
-        enableFullScreen();
       },
     }
   );
