@@ -334,7 +334,7 @@ export default ({ getService }: FtrProviderContext): void => {
             await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // and type field update does not have a conflict
+            // and type field update does have a non-solvable conflict
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             expect(reviewResponse.rules[0].diff.fields.type).toEqual({
               current_version: 'query',
