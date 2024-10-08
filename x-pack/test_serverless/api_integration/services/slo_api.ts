@@ -10,7 +10,6 @@ import {
   fetchHistoricalSummaryParamsSchema,
   FetchHistoricalSummaryResponse,
   FindSLODefinitionsResponse,
-  findSloDefinitionsResponseSchema,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
@@ -95,7 +94,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      return findSloDefinitionsResponseSchema.encode(body);
+      return body;
     },
 
     async fetchHistoricalSummary(

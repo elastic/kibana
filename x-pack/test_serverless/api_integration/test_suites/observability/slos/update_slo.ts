@@ -101,11 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updates the SO definition', async () => {
-        let definitions = await sloApi.findDefinitions();
-        expect(definitions.total).to.eql(1);
-        expect(definitions.results[0].name).to.eql('my custom name');
-        expect(definitions.results[0].description).to.eql('my custom description');
-        expect(definitions.results[0].revision).to.eql(1);
+        let sloResponse = await sloApi.waitForSloCreated({ sloId, roleAuthc });
+        expect(sloResponse.name).to.eql('my custom name');
+        expect(sloResponse.description).to.eql('my custom description');
+        expect(sloResponse.revision).to.eql(1);
 
         await sloApi.update(
           {
@@ -119,11 +118,10 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // assert definition is updated
-        definitions = await sloApi.findDefinitions();
-        expect(definitions.total).to.eql(1);
-        expect(definitions.results[0].name).to.eql('updated name');
-        expect(definitions.results[0].description).to.eql('updated description');
-        expect(definitions.results[0].revision).to.eql(1);
+        sloResponse = await sloApi.waitForSloCreated({ sloId, roleAuthc });
+        expect(sloResponse.name).to.eql('updated name');
+        expect(sloResponse.description).to.eql('updated description');
+        expect(sloResponse.revision).to.eql(1);
 
         // assert resources are not reinstalled
         const expectedRevision = 1;
@@ -179,10 +177,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updates the SO definition and reinstall the resources', async () => {
-        let definitions = await sloApi.findDefinitions();
-        expect(definitions.total).to.eql(1);
-        expect(definitions.results[0].objective).to.eql({ target: 0.95 });
-        expect(definitions.results[0].revision).to.eql(1);
+        let sloResponse = await sloApi.waitForSloCreated({ sloId, roleAuthc });
+        expect(sloResponse.objective).to.eql({ target: 0.95 });
+        expect(sloResponse.revision).to.eql(1);
 
         await sloApi.update(
           {
@@ -197,10 +194,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         // assert definition is updated
-        definitions = await sloApi.findDefinitions();
-        expect(definitions.total).to.eql(1);
-        expect(definitions.results[0].objective).to.eql({ target: 0.8 });
-        expect(definitions.results[0].revision).to.eql(2);
+        sloResponse = await sloApi.waitForSloCreated({ sloId, roleAuthc });
+        expect(sloResponse.objective).to.eql({ target: 0.8 });
+        expect(sloResponse.revision).to.eql(2);
 
         // assert resources are reinstalled
         const expectedRevision = 2;
