@@ -161,9 +161,8 @@ export function getMlClient(
   // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
-      const [jobId] = getADJobIdsFromRequest(p);
       await jobIdsCheck('anomaly-detector', p);
-      return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'close_ad_job', jobId);
+      return auditLogger.wrapTask(() => mlClient.closeJob(...p), 'close_ad_job', p);
     },
     async deleteCalendar(...p: Parameters<MlClient['deleteCalendar']>) {
       return mlClient.deleteCalendar(...p);
@@ -176,11 +175,10 @@ export function getMlClient(
     },
     async deleteDataFrameAnalytics(...p: Parameters<MlClient['deleteDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      const [analyticsId] = getDFAJobIdsFromRequest(p);
       const resp = auditLogger.wrapTask(
         () => mlClient.deleteDataFrameAnalytics(...p),
         'delete_dfa_job',
-        analyticsId
+        p
       );
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
@@ -192,7 +190,7 @@ export function getMlClient(
       const resp = auditLogger.wrapTask(
         () => mlClient.deleteDatafeed(...p),
         'delete_ad_datafeed',
-        datafeedId
+        p
       );
       if (datafeedId !== undefined) {
         await mlSavedObjectService.deleteDatafeed(datafeedId);
@@ -212,20 +210,17 @@ export function getMlClient(
     },
     async deleteJob(...p: Parameters<MlClient['deleteJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const [jobId] = getADJobIdsFromRequest(p);
-      const resp = await auditLogger.wrapTask(
-        () => mlClient.deleteJob(...p),
-        'delete_ad_job',
-        jobId
-      );
+      return auditLogger.wrapTask(() => mlClient.deleteJob(...p), 'delete_ad_job', p);
       // don't delete the job saved object as the real job will not be
       // deleted initially and could still fail.
-      return resp;
     },
     async deleteModelSnapshot(...p: Parameters<MlClient['deleteModelSnapshot']>) {
-      // !!!!!!!!!!!!!!!!!!!! how do we pass the snapshot id to audit log?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       await jobIdsCheck('anomaly-detector', p);
-      return mlClient.deleteModelSnapshot(...p);
+      return auditLogger.wrapTask(
+        () => mlClient.deleteModelSnapshot(...p),
+        'delete_model_snapshot',
+        p
+      );
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
       await modelIdsCheck(p);
@@ -580,8 +575,7 @@ export function getMlClient(
     },
     async openJob(...p: Parameters<MlClient['openJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const [jobId] = getADJobIdsFromRequest(p);
-      return auditLogger.wrapTask(() => mlClient.openJob(...p), 'open_ad_job', jobId);
+      return auditLogger.wrapTask(() => mlClient.openJob(...p), 'open_ad_job', p);
     },
     async postCalendarEvents(...p: Parameters<MlClient['postCalendarEvents']>) {
       return mlClient.postCalendarEvents(...p);
@@ -605,7 +599,7 @@ export function getMlClient(
       const resp = await auditLogger.wrapTask(
         () => mlClient.putDataFrameAnalytics(...p),
         'put_dfa_job',
-        analyticsId
+        p
       );
       if (analyticsId !== undefined) {
         await mlSavedObjectService.createDataFrameAnalyticsJob(analyticsId);
@@ -614,11 +608,7 @@ export function getMlClient(
     },
     async putDatafeed(...p: Parameters<MlClient['putDatafeed']>) {
       const [datafeedId] = getDatafeedIdsFromRequest(p);
-      const resp = auditLogger.wrapTask(
-        () => mlClient.putDatafeed(...p),
-        'put_ad_datafeed',
-        datafeedId
-      );
+      const resp = auditLogger.wrapTask(() => mlClient.putDatafeed(...p), 'put_ad_datafeed', p);
       const jobId = getJobIdFromBody(p);
       if (datafeedId !== undefined && jobId !== undefined) {
         await mlSavedObjectService.addDatafeed(datafeedId, jobId);
@@ -631,7 +621,7 @@ export function getMlClient(
     },
     async putJob(...p: Parameters<MlClient['putJob']>) {
       const [jobId] = getADJobIdsFromRequest(p);
-      const resp = auditLogger.wrapTask(() => mlClient.putJob(...p), 'put_ad_job', jobId);
+      const resp = auditLogger.wrapTask(() => mlClient.putJob(...p), 'put_ad_job', p);
       if (jobId !== undefined) {
         await mlSavedObjectService.createAnomalyDetectionJob(jobId);
       }
@@ -649,47 +639,30 @@ export function getMlClient(
     },
     async revertModelSnapshot(...p: Parameters<MlClient['revertModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const [jobId] = getADJobIdsFromRequest(p);
-      return auditLogger.wrapTask(() => mlClient.revertModelSnapshot(...p), 'revert_ad_job', jobId);
+      return auditLogger.wrapTask(
+        () => mlClient.revertModelSnapshot(...p),
+        'revert_ad_snapshot',
+        p
+      );
     },
     async setUpgradeMode(...p: Parameters<MlClient['setUpgradeMode']>) {
       return mlClient.setUpgradeMode(...p);
     },
     async startDataFrameAnalytics(...p: Parameters<MlClient['startDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      const [analyticsId] = getDFAJobIdsFromRequest(p);
-      return auditLogger.wrapTask(
-        () => mlClient.startDataFrameAnalytics(...p),
-        'start_dfa_job',
-        analyticsId
-      );
+      return auditLogger.wrapTask(() => mlClient.startDataFrameAnalytics(...p), 'start_dfa_job', p);
     },
     async startDatafeed(...p: Parameters<MlClient['startDatafeed']>) {
       await datafeedIdsCheck(p);
-      const [datafeedId] = getDatafeedIdsFromRequest(p);
-      return auditLogger.wrapTask(
-        () => mlClient.startDatafeed(...p),
-        'start_ad_datafeed',
-        datafeedId
-      );
+      return auditLogger.wrapTask(() => mlClient.startDatafeed(...p), 'start_ad_datafeed', p);
     },
     async stopDataFrameAnalytics(...p: Parameters<MlClient['stopDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
-      const [datafeedId] = getDatafeedIdsFromRequest(p);
-      return auditLogger.wrapTask(
-        () => mlClient.stopDataFrameAnalytics(...p),
-        'stop_dfa_job',
-        datafeedId
-      );
+      return auditLogger.wrapTask(() => mlClient.stopDataFrameAnalytics(...p), 'stop_dfa_job', p);
     },
     async stopDatafeed(...p: Parameters<MlClient['stopDatafeed']>) {
       await datafeedIdsCheck(p);
-      const [datafeedId] = getDatafeedIdsFromRequest(p);
-      return auditLogger.wrapTask(
-        () => mlClient.stopDatafeed(...p),
-        'stop_ad_datafeed',
-        datafeedId
-      );
+      return auditLogger.wrapTask(() => mlClient.stopDatafeed(...p), 'stop_ad_datafeed', p);
     },
     async updateDataFrameAnalytics(...p: Parameters<MlClient['updateDataFrameAnalytics']>) {
       await jobIdsCheck('data-frame-analytics', p);
@@ -697,26 +670,18 @@ export function getMlClient(
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
-      const [datafeedId] = getDatafeedIdsFromRequest(p);
-
-      return auditLogger.wrapTask(
-        () => mlClient.updateDatafeed(...p),
-        'update_ad_datafeed',
-        datafeedId
-      );
+      return auditLogger.wrapTask(() => mlClient.updateDatafeed(...p), 'update_ad_datafeed', p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
       return mlClient.updateFilter(...p);
     },
     async updateJob(...p: Parameters<MlClient['updateJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const [jobId] = getADJobIdsFromRequest(p);
-      return auditLogger.wrapTask(() => mlClient.updateJob(...p), 'update_ad_job', jobId);
+      return auditLogger.wrapTask(() => mlClient.updateJob(...p), 'update_ad_job', p);
     },
     async resetJob(...p: Parameters<MlClient['resetJob']>) {
       await jobIdsCheck('anomaly-detector', p);
-      const [jobId] = getADJobIdsFromRequest(p);
-      return auditLogger.wrapTask(() => mlClient.resetJob(...p), 'reset_ad_job', jobId);
+      return auditLogger.wrapTask(() => mlClient.resetJob(...p), 'reset_ad_job', p);
     },
     async updateModelSnapshot(...p: Parameters<MlClient['updateModelSnapshot']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -736,29 +701,29 @@ export function getMlClient(
   } as MlClient;
 }
 
-function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
+export function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
   const ids = params?.id?.split(',');
   return ids || [];
 }
 
-function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
+export function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
   const id = params?.model_id;
   const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }
 
-function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
+export function getADJobIdsFromRequest([params]: MlGetADParams): string[] {
   const ids = typeof params?.job_id === 'string' ? params?.job_id.split(',') : params?.job_id;
   return ids || [];
 }
 
-function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
+export function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
   const ids =
     typeof params?.datafeed_id === 'string' ? params?.datafeed_id.split(',') : params?.datafeed_id;
   return ids || [];
 }
 
-function getJobIdFromBody(p: any): string | undefined {
+export function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
   return params?.body?.job_id;
 }

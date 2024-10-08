@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuditLogger, CoreAuditService } from '@kbn/core/server';
+import type { MlClient, MlClientParams } from './lib/ml_client/types';
+import {
+  getADJobIdsFromRequest,
+  getDFAJobIdsFromRequest,
+  getDatafeedIdsFromRequest,
+} from './lib/ml_client/ml_client';
 
 type TaskType =
   | 'put_ad_job'
   | 'delete_ad_job'
+  | 'delete_model_snapshot'
   | 'open_ad_job'
   | 'close_ad_job'
   | 'update_ad_job'
   | 'reset_ad_job'
-  | 'revert_ad_job'
+  | 'revert_ad_snapshot'
   | 'put_ad_datafeed'
   | 'delete_ad_datafeed'
   | 'start_ad_datafeed'
@@ -29,30 +35,6 @@ type TaskType =
   | 'get_ad_jobs'
   | 'get_dfa_jobs';
 
-const TASKS = new Map<TaskType, string>([
-  ['put_ad_job', 'Creating anomaly detection job'],
-  ['delete_ad_job', 'Deleting anomaly detection job'],
-  ['open_ad_job', 'Opening anomaly detection job'],
-  ['close_ad_job', 'Closing anomaly detection job'],
-  ['update_ad_job', 'Updating anomaly detection job'],
-  ['reset_ad_job', 'Resetting anomaly detection job'],
-  ['revert_ad_job', 'Reverting anomaly detection job'],
-  ['put_ad_datafeed', 'Creating anomaly detection datafeed'],
-  ['delete_ad_datafeed', 'Deleting anomaly detection datafeed'],
-  ['start_ad_datafeed', 'Starting anomaly detection datafeed'],
-  ['stop_ad_datafeed', 'Stopping anomaly detection datafeed'],
-  ['update_ad_datafeed', 'Updating anomaly detection datafeed'],
-  ['put_dfa_job', 'Creating data frame analytics job'],
-  ['delete_dfa_job', 'Deleting data frame analytics job'],
-  ['start_dfa_job', 'Starting data frame analytics job'],
-  ['stop_dfa_job', 'Stopping data frame analytics job'],
-  ['get_ad_jobs', 'Getting anomaly detection jobs'],
-  ['get_dfa_jobs', 'Getting data frame analytics jobs'],
-]);
-
-type ClientTasks = Ml['putJob'];
-type ClientTasksParam = Parameters<Ml['putJob']>;
-
 export class MlAuditLogger {
   private auditLogger: AuditLogger;
   constructor(audit: CoreAuditService, request?: KibanaRequest) {
@@ -63,32 +45,118 @@ export class MlAuditLogger {
     this.auditLogger.log({ message, labels: { application: 'elastic/ml' } });
   }
 
-  public async wrapTask<T>(task: () => T, taskType: TaskType, id: string) {
-    const taskName = TASKS.get(taskType) ?? 'Unknown ML task';
+  private logSuccess(logEntry: any) {
+    this.auditLogger.log({ ...logEntry, labels: { application: 'elastic/ml' } });
+  }
+
+  private logFailure(logEntry: any) {
+    this.auditLogger.log({ ...logEntry, labels: { application: 'elastic/ml' } });
+  }
+
+  public async wrapTask<T, P extends MlClientParams>(task: () => T, taskType: TaskType, p: P) {
+    const logEntry = this.createLogEntry(taskType, p);
     try {
       const resp = await task();
-      this.log(`${taskName} ${id}`);
+      this.logSuccess(logEntry);
       return resp;
     } catch (error) {
-      this.log(`Failed ${taskName} ${id}`);
+      this.logFailure(logEntry);
       throw error;
     }
   }
 
-  // public async wrapTaskTest<T>(
-  //   task: ClientTasks,
-  //   args: ClientTasksParam,
-  //   taskType: TaskType,
-  //   id: string
-  // ) {
-  //   const taskName = TASKS.get(taskType) ?? 'Unknown ML task';
-  //   try {
-  //     const resp = await task(args);
-  //     this.log(`${taskName} ${id}`);
-  //     return resp;
-  //   } catch (error) {
-  //     this.log(`Failed ${taskName} ${id}`);
-  //     throw error;
-  //   }
-  // }
+  private createLogEntry(taskName: string, p: MlClientParams) {
+    switch (taskName) {
+      case 'put_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Creating anomaly detection job ${jobId}` };
+      }
+      case 'delete_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Deleting anomaly detection job ${jobId}` };
+      }
+      case 'delete_model_snapshot': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        const snapshotId = getSnapshotIdFromBody(p as DeleteModelSnapshotParams);
+        return { message: `Deleting model snapshot ${snapshotId} from job ${jobId}` };
+      }
+      case 'open_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Opening anomaly detection job ${jobId}` };
+      }
+      case 'close_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Closing anomaly detection job ${jobId}` };
+      }
+      case 'update_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Updating anomaly detection job ${jobId}` };
+      }
+      case 'reset_ad_job': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Resetting anomaly detection job ${jobId}` };
+      }
+      case 'revert_ad_snapshot': {
+        const [jobId] = getADJobIdsFromRequest(p);
+        const snapshotId = getSnapshotIdFromBody(p as RevertModelSnapshotParams);
+        return { message: `Reverting anomaly detection snapshot ${snapshotId} in job ${jobId}` };
+      }
+      case 'put_ad_datafeed': {
+        const [datafeedId] = getDatafeedIdsFromRequest(p);
+        const [jobId] = getADJobIdsFromRequest(p);
+        return { message: `Creating anomaly detection datafeed ${datafeedId} for job ${jobId}` };
+      }
+      case 'delete_ad_datafeed': {
+        const [datafeedId] = getDatafeedIdsFromRequest(p);
+        return { message: `Deleting anomaly detection datafeed ${datafeedId}` };
+      }
+      case 'start_ad_datafeed': {
+        const [datafeedId] = getDatafeedIdsFromRequest(p);
+        return { message: `Starting anomaly detection datafeed ${datafeedId}` };
+      }
+      case 'stop_ad_datafeed': {
+        const [datafeedId] = getDatafeedIdsFromRequest(p);
+        return { message: `Stopping anomaly detection datafeed ${datafeedId}` };
+      }
+      case 'update_ad_datafeed': {
+        const [datafeedId] = getDatafeedIdsFromRequest(p);
+        return { message: `Updating anomaly detection datafeed ${datafeedId}` };
+      }
+      case 'put_dfa_job': {
+        const [analyticsId] = getDFAJobIdsFromRequest(p);
+        return { message: `Creating data frame analytics job ${analyticsId}` };
+      }
+      case 'delete_dfa_job': {
+        const [analyticsId] = getDFAJobIdsFromRequest(p);
+        return { message: `Deleting data frame analytics job ${analyticsId}` };
+      }
+      case 'start_dfa_job': {
+        const [analyticsId] = getDFAJobIdsFromRequest(p);
+        return { message: `Starting data frame analytics job ${analyticsId}` };
+      }
+      case 'stop_dfa_job': {
+        const [analyticsId] = getDFAJobIdsFromRequest(p);
+        return { message: `Stopping data frame analytics job ${analyticsId}` };
+      }
+      case 'get_ad_jobs': {
+        return { message: 'Getting anomaly detection jobs' };
+      }
+      case 'get_dfa_jobs': {
+        return { message: 'Getting data frame analytics jobs' };
+      }
+      default: {
+        return { message: `Unknown task ${taskName}` };
+      }
+    }
+  }
+}
+
+type DeleteModelSnapshotParams = Parameters<MlClient['deleteModelSnapshot']>;
+type RevertModelSnapshotParams = Parameters<MlClient['revertModelSnapshot']>;
+
+function getSnapshotIdFromBody(
+  p: DeleteModelSnapshotParams | RevertModelSnapshotParams
+): string | undefined {
+  const [params] = p;
+  return params?.snapshot_id;
 }
