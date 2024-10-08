@@ -21,7 +21,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     .put({
       path: '/api/spaces/space/{id}',
       access: 'public',
-      description: `Update a space`,
+      summary: `Update a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },

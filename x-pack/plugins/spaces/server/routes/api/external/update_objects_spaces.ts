@@ -38,7 +38,8 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_update_objects_spaces',
       options: {
         access: isServerless ? 'internal' : 'public',
-        description: `Update saved objects in spaces`,
+        summary: `Update saved objects in spaces`,
+        tags: ['oas-tag:spaces'],
       },
       validate: {
         body: schema.object({

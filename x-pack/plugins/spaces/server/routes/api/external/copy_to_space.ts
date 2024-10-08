@@ -39,8 +39,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_copy_saved_objects',
       options: {
         access: isServerless ? 'internal' : 'public',
-        tags: ['access:copySavedObjectsToSpaces'],
-        description: `Copy saved objects to spaces`,
+        tags: ['access:copySavedObjectsToSpaces', 'oas-tag:spaces'],
+        summary: `Copy saved objects to spaces`,
       },
       validate: {
         body: schema.object(

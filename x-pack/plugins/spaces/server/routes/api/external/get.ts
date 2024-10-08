@@ -20,7 +20,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     .get({
       path: '/api/spaces/space/{id}',
       access: 'public',
-      description: `Get a space`,
+      summary: `Get a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },

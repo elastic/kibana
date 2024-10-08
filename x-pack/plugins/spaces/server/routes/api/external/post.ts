@@ -22,7 +22,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     .post({
       path: '/api/spaces/space',
       access: 'public',
-      description: `Create a space`,
+      summary: `Create a space`,
       options: {
         tags: ['oas-tag:spaces'],
       },
