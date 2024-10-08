@@ -14,7 +14,7 @@ export interface EmptyListContent {
   }) => ReturnType<FunctionComponent>;
 }
 ```
-- `setIndexDetailsPageRoute`: registers a new route for index details page in indices list table. for example for serverless search users, the indices list page index is navigated to search_indices index detail page 
+- `setIndexDetailsPageRoute`: registers a new route for index details page in indices list table. For example, for serverless search users, navigating to an index on the indices list page will lead to the Search Indices detail page.
 
 
 #### Extensions to the indices list and the index details page
