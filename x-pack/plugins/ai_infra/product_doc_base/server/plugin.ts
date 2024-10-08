@@ -11,39 +11,37 @@ import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
-import type { KnowledgeBaseRegistryConfig } from './config';
+import type { ProductDocBaseConfig } from './config';
 import type {
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies,
+  ProductDocBaseSetupContract,
+  ProductDocBaseStartContract,
+  ProductDocBaseSetupDependencies,
+  ProductDocBaseStartDependencies,
 } from './types';
 import { knowledgeBaseProductDocInstallSavedObjectType } from './saved_objects';
 import { PackageInstaller } from './services/package_installer';
 import { InferenceEndpointManager } from './services/inference_endpoint';
 import { ProductDocInstallClient } from './services/doc_install_status';
+import { SearchService } from './services/search';
 
 export class KnowledgeBaseRegistryPlugin
   implements
     Plugin<
-      KnowledgeBaseRegistrySetupContract,
-      KnowledgeBaseRegistryStartContract,
-      KnowledgeBaseRegistrySetupDependencies,
-      KnowledgeBaseRegistryStartDependencies
+      ProductDocBaseSetupContract,
+      ProductDocBaseStartContract,
+      ProductDocBaseSetupDependencies,
+      ProductDocBaseStartDependencies
     >
 {
   logger: Logger;
 
-  constructor(private readonly context: PluginInitializerContext<KnowledgeBaseRegistryConfig>) {
+  constructor(private readonly context: PluginInitializerContext<ProductDocBaseConfig>) {
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<
-      KnowledgeBaseRegistryStartDependencies,
-      KnowledgeBaseRegistryStartContract
-    >,
-    pluginsSetup: KnowledgeBaseRegistrySetupDependencies
-  ): KnowledgeBaseRegistrySetupContract {
+    coreSetup: CoreSetup<ProductDocBaseStartDependencies, ProductDocBaseStartContract>,
+    pluginsSetup: ProductDocBaseSetupDependencies
+  ): ProductDocBaseSetupContract {
     coreSetup.savedObjects.registerType(knowledgeBaseProductDocInstallSavedObjectType);
 
     return {};
@@ -51,8 +49,8 @@ export class KnowledgeBaseRegistryPlugin
 
   start(
     core: CoreStart,
-    pluginsStart: KnowledgeBaseRegistryStartDependencies
-  ): KnowledgeBaseRegistryStartContract {
+    pluginsStart: ProductDocBaseStartDependencies
+  ): ProductDocBaseStartContract {
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
@@ -73,17 +71,29 @@ export class KnowledgeBaseRegistryPlugin
       logger: this.logger.get('package-installer'),
     });
 
+    const searchService = new SearchService({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger.get('search-service'),
+    });
+
     // TODO: remove
     delay(10)
       .then(async () => {
-        this.logger.info('*** test installating packages');
-        return packageInstaller.installAll({});
+        this.logger.info('*** test installing packages');
+        // await packageInstaller.installAll({});
+
+        const results = await searchService.search({
+          query: 'How to create a space in Kibana?',
+          products: ['kibana'],
+        });
+        console.log(JSON.stringify(results.results.map((result) => result.title)));
       })
       .catch((e) => {
         this.logger.error('*** ERROR', e);
       });
-
-    return {};
+    return {
+      search: searchService.search.bind(searchService),
+    };
   }
 }
 

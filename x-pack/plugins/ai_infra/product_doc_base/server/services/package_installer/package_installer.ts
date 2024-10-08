@@ -7,7 +7,12 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getArtifactName, DocumentationProduct, type ProductName } from '@kbn/product-doc-common';
+import {
+  getArtifactName,
+  getProductDocIndexName,
+  DocumentationProduct,
+  type ProductName,
+} from '@kbn/product-doc-common';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { InferenceEndpointManager } from '../inference_endpoint';
 import {
@@ -95,10 +100,7 @@ export class PackageInstaller {
       `Starting installing documentation for product [${productName}] and version [${productVersion}]`
     );
 
-    await this.uninstallPackage({
-      productName,
-      productVersion,
-    });
+    await this.uninstallPackage({ productName });
 
     let zipArchive: ZipArchive | undefined;
     try {
@@ -123,7 +125,7 @@ export class PackageInstaller {
       const manifest = await loadManifestFile(zipArchive);
       const mappings = await loadMappingFile(zipArchive);
 
-      const indexName = getIndexName({ productName, productVersion });
+      const indexName = getProductDocIndexName(productName);
 
       await createIndex({
         indexName,
@@ -157,16 +159,8 @@ export class PackageInstaller {
     }
   }
 
-  async uninstallPackage({
-    productName,
-    productVersion,
-  }: {
-    productName: ProductName;
-    productVersion: string;
-  }) {
-    // TODO: retrieve entry to check installed version instead
-
-    const indexName = getIndexName({ productName, productVersion });
+  async uninstallPackage({ productName }: { productName: ProductName }) {
+    const indexName = getProductDocIndexName(productName);
     await this.esClient.indices.delete(
       {
         index: indexName,
@@ -177,14 +171,3 @@ export class PackageInstaller {
     await this.productDocClient.setUninstalled(productName);
   }
 }
-
-const getIndexName = ({
-  productName,
-  productVersion,
-}: {
-  productName: string;
-  productVersion: string;
-}): string => {
-  // TODO: '.kibana-product-doc-*'
-  return `.kibana-ai-kb-${productName}-${productVersion}`.toLowerCase();
-};

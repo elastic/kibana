@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { SearchApi } from './services/search';
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface KnowledgeBaseRegistrySetupDependencies {}
+export interface ProductDocBaseSetupDependencies {}
 
-export interface KnowledgeBaseRegistryStartDependencies {}
+export interface ProductDocBaseStartDependencies {}
 
-export interface KnowledgeBaseRegistrySetupContract {}
+export interface ProductDocBaseSetupContract {}
 
-export interface KnowledgeBaseRegistryStartContract {}
+export interface ProductDocBaseStartContract {
+  search: SearchApi;
+}

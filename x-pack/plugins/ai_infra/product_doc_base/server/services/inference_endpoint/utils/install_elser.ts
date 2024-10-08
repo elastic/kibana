@@ -20,7 +20,7 @@ export const installElser = async ({
     task_type: 'sparse_embedding',
     inference_id: inferenceId,
     inference_config: {
-      service: 'elser',
+      service: 'elasticsearch',
       service_settings: {
         num_allocations: 1,
         num_threads: 1,

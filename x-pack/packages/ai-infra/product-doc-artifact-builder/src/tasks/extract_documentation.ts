@@ -43,7 +43,7 @@ const convertHit = (hit: SearchHit<any>): ExtractedDocument => {
   return {
     content_title: source.content_title,
     content_body: source.content_body,
-    product_name: source.product_name,
+    product_name: source.product_name, // TODO: lowercase / convert
     root_type: 'documentation',
     slug: source.slug,
     url: source.url,

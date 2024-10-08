@@ -9,3 +9,9 @@ export { getArtifactName, parseArtifactName } from './src/artifact';
 export { type ArtifactManifest } from './src/manifest';
 export { DocumentationProduct, type ProductName } from './src/product';
 export { isArtifactContentFilePath } from './src/artifact_content';
+export {
+  productDocIndexPrefix,
+  productDocIndexPattern,
+  getProductDocIndexName,
+} from './src/indices';
+export type { ProductDocumentationAttributes } from './src/documents';

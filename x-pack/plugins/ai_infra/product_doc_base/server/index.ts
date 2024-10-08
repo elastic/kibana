@@ -6,23 +6,24 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import type { KnowledgeBaseRegistryConfig } from './config';
+import type { ProductDocBaseConfig } from './config';
 import type {
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies,
+  ProductDocBaseSetupContract,
+  ProductDocBaseStartContract,
+  ProductDocBaseSetupDependencies,
+  ProductDocBaseStartDependencies,
 } from './types';
 import { KnowledgeBaseRegistryPlugin } from './plugin';
 
 export { config } from './config';
 
-export type { KnowledgeBaseRegistrySetupContract, KnowledgeBaseRegistryStartContract };
+export type { ProductDocBaseSetupContract, ProductDocBaseStartContract };
+export type { SearchApi as ProductDocSearchApi } from './services/search/types';
 
 export const plugin: PluginInitializer<
-  KnowledgeBaseRegistrySetupContract,
-  KnowledgeBaseRegistryStartContract,
-  KnowledgeBaseRegistrySetupDependencies,
-  KnowledgeBaseRegistryStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<KnowledgeBaseRegistryConfig>) =>
+  ProductDocBaseSetupContract,
+  ProductDocBaseStartContract,
+  ProductDocBaseSetupDependencies,
+  ProductDocBaseStartDependencies
+> = async (pluginInitializerContext: PluginInitializerContext<ProductDocBaseConfig>) =>
   new KnowledgeBaseRegistryPlugin(pluginInitializerContext);

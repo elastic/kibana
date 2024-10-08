@@ -14,9 +14,9 @@ const configSchema = schema.object({
   }),
 });
 
-export const config: PluginConfigDescriptor<KnowledgeBaseRegistryConfig> = {
+export const config: PluginConfigDescriptor<ProductDocBaseConfig> = {
   schema: configSchema,
   exposeToBrowser: {},
 };
 
-export type KnowledgeBaseRegistryConfig = TypeOf<typeof configSchema>;
+export type ProductDocBaseConfig = TypeOf<typeof configSchema>;
