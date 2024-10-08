@@ -546,8 +546,9 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        type: 'icon',
-        isPrimary: false,
+        // @ts-ignore
+        type: isMobileLayout ? 'icon' : 'button',
+        isPrimary: true,
         available: (item) => isTestable(item, true),
         onClick: (item) => {
           if (isDfaTrainedModel(item) && !isBuiltInModel(item)) {
