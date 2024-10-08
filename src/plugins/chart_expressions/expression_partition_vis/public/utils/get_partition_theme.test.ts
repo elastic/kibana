@@ -34,12 +34,16 @@ const linkLabelWithEnoughSpace = (visParams: PartitionVisParams) => ({
   maxTextLength: visParams.labels.truncate ?? undefined,
 });
 
-const linkLabelsWithoutSpaceForOuterLabels = { maxCount: 0 };
+const linkLabelsWithoutSpaceForOuterLabels = (visParams: PartitionVisParams) => ({
+  maxCount: 0,
+  maxTextLength: visParams.labels.truncate ?? undefined,
+});
 
-const linkLabelsWithoutSpaceForLabels = {
+const linkLabelsWithoutSpaceForLabels = (visParams: PartitionVisParams) => ({
   maxCount: 0,
   maximumSection: Number.POSITIVE_INFINITY,
-};
+  maxTextLength: visParams.labels.truncate ?? undefined,
+});
 
 const getStaticThemePartition = (visParams: PartitionVisParams) => ({
   outerSizeRatio: 1,
@@ -57,7 +61,6 @@ const getStaticThemeOptions = (visParams: PartitionVisParams) => ({
 
 const getDefaultLinkLabel = (visParams: PartitionVisParams) => ({
   maxCount: 5,
-  fontSize: 11,
   maxTextLength: visParams.labels.truncate ?? undefined,
 });
 
@@ -81,7 +84,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitColumns),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitColumns),
       },
     });
 
@@ -92,7 +95,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitRows),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitRows),
       },
     });
   });
@@ -132,7 +135,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitRows),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitRows),
       },
     });
 
@@ -147,7 +150,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitColumns),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitColumns),
       },
     });
   });
@@ -188,7 +191,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
         partition: {
           ...getStaticThemePartition(vParams),
           outerSizeRatio: 0.5,
-          linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+          linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParams),
         },
       });
     }
@@ -226,7 +229,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParams),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParams),
       },
     });
 
@@ -237,7 +240,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitColumns),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitColumns),
       },
     });
 
@@ -248,7 +251,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParamsSplitRows),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForOuterLabels,
+        linkLabel: linkLabelsWithoutSpaceForOuterLabels(vParamsSplitRows),
       },
     });
   });
@@ -262,7 +265,7 @@ const runPieDonutWaffleTestSuites = (chartType: ChartTypes, visParams: Partition
       partition: {
         ...getStaticThemePartition(vParams),
         outerSizeRatio: undefined,
-        linkLabel: linkLabelsWithoutSpaceForLabels,
+        linkLabel: linkLabelsWithoutSpaceForLabels(vParams),
       },
     });
   });
