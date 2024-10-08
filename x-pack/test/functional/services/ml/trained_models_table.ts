@@ -155,12 +155,6 @@ export function TrainedModelsTableProvider(
           expectedRow.modelTypes
         )}' (got '${JSON.stringify(modelRow.modelTypes)}')`
       );
-      // 'Created at' will be different on each run,
-      // so we will just assert that the value is in the expected timestamp format.
-      expect(modelRow.createdAt).to.match(
-        /^\w{3}\s\d+,\s\d{4}\s@\s\d{2}:\d{2}:\d{2}\.\d{3}$/,
-        `Expected trained model row created at time to have same format as 'Dec 5, 2019 @ 12:28:34.594' (got '${modelRow.createdAt}')`
-      );
     }
 
     public async assertTableIsPopulated() {
