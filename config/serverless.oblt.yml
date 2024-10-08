@@ -191,6 +191,18 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'observability'
+xpack.ml.modelDeployment:
+  allowStaticAllocations: false
+  vCPURange:
+    low:
+      min: 0
+      max: 2
+    medium:
+      min: 1
+      max: 32
+    high:
+      min: 1
+      max: 128
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false

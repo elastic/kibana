@@ -35,6 +35,23 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     dfa: true,
     nlp: true,
     experimental: true,
+    modelDeployment: {
+      allowStaticAllocations: true,
+      vCPURange: {
+        low: {
+          min: 0,
+          max: 2,
+        },
+        medium: {
+          min: 1,
+          max: 16,
+        },
+        high: {
+          min: 1,
+          max: 32,
+        },
+      },
+    },
   },
 };
 

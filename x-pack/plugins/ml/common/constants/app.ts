@@ -20,6 +20,17 @@ export const ML_EXTERNAL_BASE_PATH = '/api/ml';
 export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
 export type CompatibleModule = 'security' | 'observability' | 'search';
 export type ExperimentalFeatures = Record<'ruleFormV2', boolean>;
+export interface ModelDeploymentSettings {
+  allowStaticAllocations: boolean;
+  vCPURange: Record<
+    'low' | 'medium' | 'high',
+    {
+      min: number;
+      max: number;
+      static?: number;
+    }
+  >;
+}
 
 export interface ConfigSchema {
   ad?: { enabled: boolean };
@@ -29,6 +40,7 @@ export interface ConfigSchema {
   experimental?: {
     ruleFormV2?: { enabled: boolean };
   };
+  modelDeployment?: ModelDeploymentSettings;
 }
 
 export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
@@ -49,5 +61,17 @@ export function initExperimentalFeatures(
 ) {
   if (config.experimental?.ruleFormV2?.enabled !== undefined) {
     experimentalFeatures.ruleFormV2 = config.experimental.ruleFormV2.enabled;
+  }
+}
+
+export function initModelDeploymentSettings(
+  modelDeploymentSettings: ModelDeploymentSettings,
+  config: ConfigSchema
+) {
+  if (config.modelDeployment?.allowStaticAllocations !== undefined) {
+    modelDeploymentSettings.allowStaticAllocations = config.modelDeployment.allowStaticAllocations;
+  }
+  if (config.modelDeployment?.vCPURange !== undefined) {
+    modelDeploymentSettings.vCPURange = config.modelDeployment.vCPURange;
   }
 }

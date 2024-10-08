@@ -20,6 +20,12 @@ const compatibleModuleTypeSchema = schema.maybe(
   ])
 );
 
+const vCPURangeSchema = schema.object({
+  min: schema.number(),
+  max: schema.number(),
+  static: schema.maybe(schema.number()),
+});
+
 export const configSchema = schema.object({
   ad: enabledSchema,
   dfa: enabledSchema,
@@ -28,6 +34,16 @@ export const configSchema = schema.object({
   experimental: schema.maybe(
     schema.object({
       ruleFormV2: enabledSchema,
+    })
+  ),
+  modelDeployment: schema.maybe(
+    schema.object({
+      allowStaticAllocations: schema.boolean(),
+      vCPURange: schema.object({
+        low: vCPURangeSchema,
+        medium: vCPURangeSchema,
+        high: vCPURangeSchema,
+      }),
     })
   ),
 });
