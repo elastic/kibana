@@ -392,7 +392,7 @@ describe('SearchBar', () => {
   it('renders filters', async () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPattern],
         showDatePicker: false,
         showQueryInput: true,
         showFilterBar: true,
@@ -414,7 +414,7 @@ describe('SearchBar', () => {
     const onFiltersUpdatedMock = jest.fn();
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPattern],
         showDatePicker: false,
         showQueryInput: true,
         showFilterBar: true,
@@ -460,7 +460,7 @@ describe('SearchBar', () => {
         meta: {
           alias: null,
           disabled: false,
-          index: '1234',
+          index: 'logstash-*',
           negate: false,
           type: 'custom',
         },
@@ -474,7 +474,7 @@ describe('SearchBar', () => {
     const onFiltersUpdatedMock = jest.fn();
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockIndexPattern],
+        indexPatterns: [stubIndexPattern],
         showDatePicker: false,
         showQueryInput: true,
         showFilterBar: true,
@@ -521,7 +521,7 @@ describe('SearchBar', () => {
         meta: {
           alias: null,
           disabled: false,
-          index: '1234',
+          index: 'logstash-*',
           negate: false,
           type: 'custom',
         },
@@ -538,7 +538,7 @@ describe('SearchBar', () => {
         meta: {
           alias: null,
           disabled: false,
-          index: '1234',
+          index: 'logstash-*',
           negate: false,
           type: 'custom',
         },

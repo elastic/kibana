@@ -426,7 +426,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
     // clean up all filters
-    this.onFiltersChange?.([]);
+    this.onFiltersChange([]);
     this.setState(
       {
         query: query as QT,
