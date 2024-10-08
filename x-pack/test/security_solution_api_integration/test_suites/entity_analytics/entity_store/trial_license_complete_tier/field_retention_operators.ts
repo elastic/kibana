@@ -13,6 +13,7 @@ import {
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
+  const log = getService('log');
 
   const expectArraysMatchAnyOrder = (a: any[], b: any[]) => {
     const aSorted = a.sort();
@@ -39,7 +40,17 @@ export default ({ getService }: FtrProviderContext) => {
       docs: [doc],
     });
 
-    return res.docs?.[0]?.doc?._source;
+    const firstDoc = res.docs?.[0];
+
+    if (firstDoc?.error) {
+      log.error('Full painless error below: ');
+      log.error(JSON.stringify(firstDoc.error, null, 2));
+      throw new Error(
+        'Painless error running pipelie see logs for full detail : ' + firstDoc.error?.type
+      );
+    }
+
+    return firstDoc?.doc?._source;
   };
 
   describe('@ess @serverless @skipInServerlessMKI Entity store - Field Retention Pipeline Steps', () => {
@@ -117,17 +128,22 @@ export default ({ getService }: FtrProviderContext) => {
         expectArraysMatchAnyOrder(resultDoc.test_field, ['foo', 'bar']);
       });
 
-      it('should handle value is string', async () => {
+      it('should handle value not being an array', async () => {
         const op: FieldRetentionOperator = {
           operation: 'collect_values',
           field: 'test_field',
           maxLength: 2,
         };
-        const doc = {};
+        const doc = {
+          test_field: 'foo',
+          historical: {
+            test_field: ['bar'],
+          },
+        };
 
         const resultDoc = await applyOperatorToDoc(op, doc);
 
-        expectArraysMatchAnyOrder(resultDoc.test_field, []);
+        expectArraysMatchAnyOrder(resultDoc.test_field, ['foo', 'bar']);
       });
 
       it('should handle missing values', async () => {
