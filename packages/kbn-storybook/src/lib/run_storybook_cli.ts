@@ -8,7 +8,7 @@
  */
 
 import { join } from 'path';
-import { build } from '@storybook/react-webpack5';
+import { build } from '@storybook/core-server';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
