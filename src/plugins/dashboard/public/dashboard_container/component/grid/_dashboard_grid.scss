@@ -110,16 +110,15 @@
     border-radius: $euiBorderRadius; // keeps shadow within bounds
 
     .embPanel__hoverActionsWrapper {
+      z-index: $euiZLevel9;
       top: -$euiSizeXL;
 
-      .embPanel__hoverActionsLeft {
-        // ensure the drag icon stays visible as you drag
-        opacity: 1 !important;
+      .embPanel__hoverActions:has(.embPanel--dragHandle) {
+        opacity: 1;
       }
 
-      .embPanel__hoverActionsRight {
-        // hide all other actions while you drag
-        opacity: 0 !important;
+      .embPanel__hoverActions:not(:has(.embPanel--dragHandle)) {
+        opacity: 0;
       }
     }
   }
