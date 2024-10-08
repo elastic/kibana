@@ -124,6 +124,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         integrations: {
           pathname: '/app/integrations',
         },
+        ...(options.apps ?? {}),
       },
       // choose where screenshots should be saved
       screenshots: {
