@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isBoolean } from 'lodash/fp';
 import { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
 import type { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/list_types';
 
@@ -20,7 +21,7 @@ export const transformRuleTypesResponse = (
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
       default_schedule_interval: ruleType.defaultScheduleInterval,
-      ...(ruleType.doesSetRecoveryContext !== undefined
+      ...(isBoolean(ruleType.doesSetRecoveryContext)
         ? { does_set_recovery_context: ruleType.doesSetRecoveryContext }
         : {}),
       enabled_in_license: ruleType.enabledInLicense,
