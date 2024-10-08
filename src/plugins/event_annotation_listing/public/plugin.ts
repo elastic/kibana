@@ -74,7 +74,6 @@ export class EventAnnotationListingPlugin
           LensEmbeddableComponent: pluginsStart.lens.EmbeddableComponent,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
-          PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
