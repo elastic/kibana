@@ -70,6 +70,7 @@ export const Overview = () => {
     const isContainer = asset.type === 'container';
     const baseCondition =
       dataStreamsStatus === 'success' &&
+      dataStreams &&
       !hasMetrics(dataStreams) &&
       !dismissedAddMetricsCallout &&
       renderMode.mode === 'page';
