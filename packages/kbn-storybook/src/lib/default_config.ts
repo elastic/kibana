@@ -32,7 +32,8 @@ const IGNORE_GLOBS = [
 ];
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
+  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y'],
+  // addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   core: {
     builder: 'webpack5',
   },
