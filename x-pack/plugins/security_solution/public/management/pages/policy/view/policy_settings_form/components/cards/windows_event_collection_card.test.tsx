@@ -10,7 +10,7 @@ import type { AppContextTestRender } from '../../../../../../../common/mock/endp
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { WindowsEventCollectionCardProps } from './windows_event_collection_card';
 import { WindowsEventCollectionCard } from './windows_event_collection_card';
 
