@@ -258,7 +258,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedForecastId, selectedForecastId]);
+  }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

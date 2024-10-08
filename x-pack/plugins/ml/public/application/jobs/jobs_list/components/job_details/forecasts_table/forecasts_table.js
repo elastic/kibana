@@ -78,7 +78,6 @@ export class ForecastsTable extends Component {
     this.state = {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
-      isConfirmModalVisible: false,
     };
     this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
@@ -212,13 +211,14 @@ export class ForecastsTable extends Component {
 
     this.setState({
       isLoading: true,
-      isConfirmModalVisible: false,
+      forecastIdToDelete: undefined,
     });
 
     try {
       await mlApi.deleteForecast({ jobId: this.props.job.job_id, forecastId });
     } catch (error) {
       this.setState({
+        forecastIdToDelete: undefined,
         isLoading: false,
         errorMessage: i18n.translate(
           'xpack.ml.jobsList.jobDetails.forecastsTable.deleteForecastErrorMessage',
@@ -406,7 +406,6 @@ export class ForecastsTable extends Component {
                   onClick: (item) => {
                     this.setState({
                       forecastIdToDelete: item.forecast_id,
-                      isConfirmModalVisible: true,
                     });
                   },
                   'data-test-subj': 'mlJobListForecastTabDeleteForecastButton',
@@ -429,10 +428,12 @@ export class ForecastsTable extends Component {
           }}
           sorting={true}
         />
-        {this.state.isConfirmModalVisible === true ? (
+        {this.state.forecastIdToDelete !== undefined ? (
           <DeleteForecastConfirm
             onCancel={() =>
-              this.setState({ isConfirmModalVisible: false, forecastIdToDelete: undefined })
+              this.setState({
+                forecastIdToDelete: undefined,
+              })
             }
             onConfirm={() => this.deleteForecast(this.state.forecastIdToDelete)}
           />
