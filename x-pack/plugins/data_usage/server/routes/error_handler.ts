@@ -12,7 +12,7 @@ import { BaseError } from '../common/errors';
 export class NotFoundError extends BaseError {}
 
 /**
- * Default Endpoint Routes error handler
+ * Default Data Usage Routes error handler
  * @param logger
  * @param res
  * @param error

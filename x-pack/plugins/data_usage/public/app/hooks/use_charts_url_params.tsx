@@ -43,15 +43,14 @@ export const getDataUsageMetricsFiltersFromUrlParams = (
   };
 
   const urlMetricTypes = urlParams.metricTypes
-    ? (String(urlParams.metricTypes).split(',') as MetricTypes[]).reduce<MetricTypes[]>(
-        (acc, curr) => {
+    ? String(urlParams.metricTypes)
+        .split(',')
+        .reduce<MetricTypes[]>((acc, curr) => {
           if (isMetricType(curr)) {
             acc.push(curr);
           }
           return acc.sort();
-        },
-        []
-      )
+        }, [])
     : [];
 
   const urlDataStreams = urlParams.dataStreams
@@ -85,7 +84,7 @@ export const useDataUsageMetricsUrlParams = (): DataUsageMetricsFiltersFromUrlPa
         ...location,
         search: toUrlParams({
           ...urlParams,
-          hosts: metricTypes.length ? metricTypes : undefined,
+          metricTypes: metricTypes.length ? metricTypes : undefined,
         }),
       });
     },
