@@ -11,7 +11,6 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AIAssistantAppServiceContext } from '@kbn/ai-assistant';
 import type { SearchAssistantPluginStartDependencies } from './types';
 import { SearchAssistantRouter } from './components/routes/router';
 
@@ -24,9 +23,7 @@ export const renderApp = (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <AIAssistantAppServiceContext.Provider value={services.observabilityAIAssistant.service}>
-            <SearchAssistantRouter history={appMountParameters.history} />
-          </AIAssistantAppServiceContext.Provider>
+          <SearchAssistantRouter history={appMountParameters.history} />
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,

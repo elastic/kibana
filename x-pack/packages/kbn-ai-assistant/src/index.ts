@@ -6,7 +6,6 @@
  */
 
 export * from './conversation/conversation_view';
-export * from './context/ai_assistant_app_service_provider';
 export * from './service/create_app_service';
 export * from './hooks';
 export * from './chat';

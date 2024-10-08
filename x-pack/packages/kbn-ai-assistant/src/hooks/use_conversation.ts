@@ -70,7 +70,7 @@ export function useConversation({
     },
   } = useKibana();
 
-  const initialConversationId = initialConversationIdFromProps;
+  const initialConversationId = useOnce(initialConversationIdFromProps);
   const initialMessages = useOnce(initialMessagesFromProps);
   const initialTitle = useOnce(initialTitleFromProps);
 

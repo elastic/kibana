@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext } from 'react';
-import { AIAssistantAppServiceContext } from '../context/ai_assistant_app_service_provider';
+
+import { useKibana } from './use_kibana';
 
 export function useAIAssistantAppService() {
-  const services = useContext(AIAssistantAppServiceContext);
+  const { services } = useKibana();
 
-  if (!services) {
+  if (!services.observabilityAIAssistant?.service) {
     throw new Error(
-      'AIAssistantAppServiceContext not set. Did you wrap your component in `AIAssistantAppServiceProvider`?'
+      'AI Assistant Service is not available. Did you provide this component in your plugin contract?'
     );
   }
 
-  return services;
+  return services.observabilityAIAssistant.service;
 }

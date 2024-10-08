@@ -11,7 +11,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { AIAssistantAppServiceProvider, AIAssistantAppService } from '@kbn/ai-assistant';
+import { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export function SharedProviders({
@@ -44,11 +44,7 @@ export function SharedProviders({
           }}
         >
           <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <AIAssistantAppServiceProvider value={service}>
-                {children}
-              </AIAssistantAppServiceProvider>
-            </coreStart.i18n.Context>
+            <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
           </RedirectAppLinks>
         </KibanaContextProvider>
       </KibanaThemeProvider>
