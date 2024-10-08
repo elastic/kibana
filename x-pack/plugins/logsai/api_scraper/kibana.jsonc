@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/api-scraper-plugin",
+  "owner": "@elastic/obs-entities",
+  "description": "A way to scrape an Elasticserach API and turn it into an index that we can query.",
+  "plugin": {
+    "id": "apiScraper",
+    "configPath": ["xpack", "apiScraper"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "security",
+      "encryptedSavedObjects",
+      "usageCollection",
+      "licensing",
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+    ]
+  }
+}
