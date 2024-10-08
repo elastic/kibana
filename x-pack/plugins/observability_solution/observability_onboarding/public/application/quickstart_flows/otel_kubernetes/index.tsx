@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface CanvasNavLinkService {
-  updatePath: (path: string) => void;
-}
+export { OtelKubernetesPanel } from './otel_kubernetes_panel';
