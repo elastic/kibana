@@ -1,13 +1,20 @@
 {
   "type": "plugin",
   "id": "@kbn/logs-explorer-plugin",
-  "owner": "@elastic/obs-ux-logs-team",
+  "owner": [
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "description": "This plugin provides a LogsExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.",
   "plugin": {
     "id": "logsExplorer",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "logsExplorer"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "logsExplorer"
+    ],
     "requiredPlugins": [
       "data",
       "dataViews",
@@ -20,7 +27,14 @@
       "discoverShared"
     ],
     "optionalPlugins": [],
-    "requiredBundles": ["controls", "fleet", "kibanaReact", "kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "controls",
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }
