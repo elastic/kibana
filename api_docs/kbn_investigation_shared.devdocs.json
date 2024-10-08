@@ -204,6 +204,21 @@
       },
       {
         "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.EventSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "EventSchema",
+        "description": [],
+        "signature": [
+          "{ id: string; timestamp: number; title: string; description: string; eventType: \"alert\" | \"annotation\" | \"latency\" | \"error_rate\" | \"anomaly\"; source?: Record<string, any> | undefined; } & ({ eventType: \"annotation\"; annotationType?: string | undefined; } | { alertStatus: \"flapping\" | \"recovered\" | \"active\" | \"untracked\"; eventType: \"alert\"; })"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
         "id": "def-common.FindInvestigationsParams",
         "type": "Type",
         "tags": [],
