@@ -32,7 +32,7 @@ export const importRules = async ({
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
-}) => {
+}): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
   // If we had 100% errors and no successful rule could be imported we still have to output an error.

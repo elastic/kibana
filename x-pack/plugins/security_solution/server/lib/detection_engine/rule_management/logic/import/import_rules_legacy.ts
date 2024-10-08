@@ -39,7 +39,7 @@ export const importRulesLegacy = async ({
   detectionRulesClient: IDetectionRulesClient;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
-}) => {
+}): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
   // If we had 100% errors and no successful rule could be imported we still have to output an error.
