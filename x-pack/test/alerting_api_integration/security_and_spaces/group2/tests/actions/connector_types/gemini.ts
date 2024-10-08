@@ -287,6 +287,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           });
 
           // TODO to fix, we need to figure out how to mock the gcp oauth token
+          // https://github.com/elastic/kibana/issues/195437
           it.skip('should invoke AI with assistant AI body argument formatted to gemini expectations', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${geminiActionId}/_execute`)
