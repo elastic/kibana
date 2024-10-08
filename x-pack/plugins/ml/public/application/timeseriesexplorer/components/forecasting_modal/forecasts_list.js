@@ -12,7 +12,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiButtonIcon, EuiIcon, EuiIconTip, EuiInMemoryTable, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { i18n } from '@kbn/i18n';
@@ -74,7 +74,7 @@ function getColumns(viewForecast) {
       },
     },
   ];
-};
+}
 
 export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
   const { euiTheme } = useCurrentThemeVars();
@@ -82,17 +82,19 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
   const getRowProps = (item) => {
     return {
       'data-test-subj': `mlForecastsListRow row-${item.rowId}`,
-      ...(item.forecast_id === selectedForecastId ? { style: {
-            backgroundColor: `${euiTheme.euiPanelBackgroundColorModifiers.primary}`,
-          }} : {}),
+      ...(item.forecast_id === selectedForecastId
+        ? {
+            style: {
+              backgroundColor: `${euiTheme.euiPanelBackgroundColorModifiers.primary}`,
+            },
+          }
+        : {}),
     };
   };
 
   return (
     <EuiText>
-      <h3
-        aria-describedby="ml_aria_description_forecasting_modal_view_list"
-      >
+      <h3 aria-describedby="ml_aria_description_forecasting_modal_view_list">
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
           defaultMessage="Previous forecasts"
@@ -101,10 +103,12 @@ export function ForecastsList({ forecasts, viewForecast, selectedForecastId }) {
         <EuiIconTip
           size="s"
           type="questionInCircle"
-          content={<FormattedMessage
-            id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
-            defaultMessage="Lists a maximum of five of the most recently run forecasts."
-          />}
+          content={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
+              defaultMessage="Lists a maximum of five of the most recently run forecasts."
+            />
+          }
         />
       </h3>
       <EuiInMemoryTable
