@@ -102,6 +102,7 @@ export const GridOverlay = ({
   interactionEvent?: PanelInteractionEvent;
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
+  console.log('interactionEvent', interactionEvent);
   return (
     <EuiPortal>
       <div
@@ -127,6 +128,7 @@ export const GridOverlay = ({
             background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
             transition: opacity 100ms linear;
             position: absolute;
+            cursor: dragging;
           `}
         />
       </div>

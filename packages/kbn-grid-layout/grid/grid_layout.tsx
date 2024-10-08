@@ -8,71 +8,102 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
-import { GridLayoutData, GridSettings } from './types';
+import { resolveGridRow } from './resolve_grid_row';
+import { GridLayoutApi, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from './constants';
+import { runPanelPlacementStrategy } from './run_panel_placement';
 
-export const GridLayout = ({
-  getCreationOptions,
-  renderPanelContents,
-}: {
+interface GridLayoutProps {
   getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
   renderPanelContents: (panelId: string) => React.ReactNode;
-}) => {
-  const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
-    getCreationOptions,
-  });
-  useGridLayoutEvents({ gridLayoutStateManager });
+}
 
-  const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
-    gridLayoutStateManager.gridLayout$,
-    gridLayoutStateManager.runtimeSettings$,
-    gridLayoutStateManager.interactionEvent$
-  );
+export const GridLayout = forwardRef<GridLayoutApi, GridLayoutProps>(
+  ({ getCreationOptions, renderPanelContents }, ref) => {
+    const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
+      getCreationOptions,
+    });
+    useGridLayoutEvents({ gridLayoutStateManager });
 
-  return (
-    <>
-      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-        <div
-          ref={(divElement) => {
-            setDimensionsRef(divElement);
-          }}
-        >
-          {gridLayout.map((rowData, rowIndex) => {
-            return (
-              <GridRow
-                rowData={rowData}
-                key={rowData.title}
-                rowIndex={rowIndex}
-                runtimeSettings={runtimeSettings}
-                activePanelId={interactionEvent?.id}
-                renderPanelContents={renderPanelContents}
-                targetRowIndex={interactionEvent?.targetRowIndex}
-                toggleIsCollapsed={() => {
-                  const currentLayout = gridLayoutStateManager.gridLayout$.value;
-                  currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
-                  gridLayoutStateManager.gridLayout$.next(currentLayout);
-                }}
-                setInteractionEvent={(nextInteractionEvent) => {
-                  if (!nextInteractionEvent) {
-                    gridLayoutStateManager.hideDragPreview();
-                  }
-                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-                }}
-                ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
-              />
-            );
-          })}
-        </div>
-      </GridHeightSmoother>
-      <GridOverlay
-        interactionEvent={interactionEvent}
-        gridLayoutStateManager={gridLayoutStateManager}
-      />
-    </>
-  );
-};
+    const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.runtimeSettings$,
+      gridLayoutStateManager.interactionEvent$
+    );
+
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          addNewPanel: (panelId) => {
+            console.log('panel', panelId);
+            // TODO: Better "find first match";
+            // accept positioning
+            const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const [firstRow, ...rest] = currentLayout;
+            const nextRow = runPanelPlacementStrategy(firstRow, {
+              id: panelId,
+              width: DEFAULT_PANEL_WIDTH,
+              height: DEFAULT_PANEL_HEIGHT,
+            });
+            gridLayoutStateManager.gridLayout$.next([nextRow, ...rest]);
+          },
+          getPanelCount: () => {
+            return gridLayoutStateManager.gridLayout$.getValue().reduce((prev, row) => {
+              return prev + Object.keys(row.panels).length;
+            }, 0);
+          },
+        };
+      },
+      [gridLayoutStateManager.gridLayout$]
+    );
+
+    return (
+      <>
+        <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+          <div
+            ref={(divElement) => {
+              setDimensionsRef(divElement);
+            }}
+          >
+            {gridLayout.map((rowData, rowIndex) => {
+              return (
+                <GridRow
+                  rowData={rowData}
+                  key={rowData.title}
+                  rowIndex={rowIndex}
+                  runtimeSettings={runtimeSettings}
+                  activePanelId={interactionEvent?.id}
+                  renderPanelContents={renderPanelContents}
+                  targetRowIndex={interactionEvent?.targetRowIndex}
+                  toggleIsCollapsed={() => {
+                    const currentLayout = gridLayoutStateManager.gridLayout$.value;
+                    currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
+                    gridLayoutStateManager.gridLayout$.next(currentLayout);
+                  }}
+                  setInteractionEvent={(nextInteractionEvent) => {
+                    if (!nextInteractionEvent) {
+                      gridLayoutStateManager.hideDragPreview();
+                    }
+                    gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+                  }}
+                  ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
+                />
+              );
+            })}
+          </div>
+        </GridHeightSmoother>
+        <GridOverlay
+          interactionEvent={interactionEvent}
+          gridLayoutStateManager={gridLayoutStateManager}
+        />
+      </>
+    );
+  }
+);
