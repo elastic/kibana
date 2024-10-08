@@ -35,6 +35,11 @@ export const QuerySchema = schema.object({
   status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
   monitorQueryIds: StringOrArraySchema,
+  internal: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+    })
+  ),
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
