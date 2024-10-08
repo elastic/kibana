@@ -19,7 +19,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { Role } from '@kbn/security-plugin-types-common';
+import type { Role, SecurityLicense } from '@kbn/security-plugin-types-common';
 import {
   createRawKibanaPrivileges,
   kibanaFeatures,
@@ -74,6 +74,9 @@ const spacesClientsInvocatorMock = jest.fn((fn) =>
 const dispatchMock = jest.fn();
 const onSaveCompleted = jest.fn();
 const closeFlyout = jest.fn();
+const licenseMock = {
+  getFeatures: jest.fn(() => ({})),
+} as unknown as SecurityLicense;
 
 const renderPrivilegeRolesForm = ({
   preSelectedRoles,
@@ -96,12 +99,19 @@ const renderPrivilegeRolesForm = ({
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           navigateToUrl: jest.fn(),
+          license: licenseMock,
           capabilities: {
             navLinks: {},
             management: {},
             catalogue: {},
             spaces: { manage: true },
           },
+          dispatch: dispatchMock,
+          state: {
+            roles: new Map(),
+            fetchRolesError: false,
+          },
+          invokeClient: spacesClientsInvocatorMock,
         }}
       >
         <PrivilegesRolesForm
@@ -111,9 +121,6 @@ const renderPrivilegeRolesForm = ({
             closeFlyout,
             defaultSelected: preSelectedRoles,
             onSaveCompleted,
-            storeDispatch: dispatchMock,
-            spacesClientsInvocator: spacesClientsInvocatorMock,
-            getUrlForApp: jest.fn((_) => _),
           }}
         />
       </EditSpaceProvider>
