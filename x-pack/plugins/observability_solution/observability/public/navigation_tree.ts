@@ -34,7 +34,11 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'observability-overview',
           },
           {
-            link: 'discover',
+            title: i18n.translate('xpack.observability.obltNav.discover', {
+              defaultMessage: 'Discover',
+            }),
+            // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
+            link: 'last-used-logs-viewer',
             renderAs: 'item',
             children: [
               {
