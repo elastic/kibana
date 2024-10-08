@@ -11,13 +11,20 @@ import { join as joinPath } from 'path';
 import { createSync, ensureDirSync } from '../util';
 
 export function createReadme(packageDir: string, integrationName: string, fields: object[]) {
-  createPackageReadme(packageDir, integrationName, fields);
-  createBuildReadme(packageDir, integrationName, fields);
+  try {
+    createPackageReadme(packageDir, integrationName, fields);
+    createBuildReadme(packageDir, integrationName, fields);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('********************************');
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
 }
 
 function createPackageReadme(packageDir: string, integrationName: string, fields: object[]) {
   const dirPath = joinPath(packageDir, 'docs/');
-  createReadmeFile(dirPath, 'package_readme.md.njk', integrationName, fields);
+  createReadmeFile(dirPath, 'package_rdm.md.njk', integrationName, fields);
 }
 
 function createBuildReadme(packageDir: string, integrationName: string, fields: object[]) {
