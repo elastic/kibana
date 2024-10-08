@@ -165,15 +165,6 @@ export const getDashboardBreadcrumb = () =>
   });
 
 export const topNavStrings = {
-  fullScreen: {
-    label: i18n.translate('dashboard.topNave.fullScreenButtonAriaLabel', {
-      defaultMessage: 'full screen',
-    }),
-
-    description: i18n.translate('dashboard.topNave.fullScreenConfigDescription', {
-      defaultMessage: 'Full Screen Mode',
-    }),
-  },
   labs: {
     label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
       defaultMessage: 'labs',
