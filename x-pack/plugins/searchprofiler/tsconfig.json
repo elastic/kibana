@@ -22,6 +22,8 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
+    "@kbn/code-editor",
+    "@kbn/monaco",
   ],
   "exclude": [
     "target/**/*",
