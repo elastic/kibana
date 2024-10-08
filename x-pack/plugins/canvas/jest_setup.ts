@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export interface CanvasNavLinkService {
-  updatePath: (path: string) => void;
-}
+import { setStubKibanaServices } from './public/services/mocks';
+
+// Start the kibana services with stubs
+setStubKibanaServices();
