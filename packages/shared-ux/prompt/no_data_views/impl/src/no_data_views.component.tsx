@@ -115,7 +115,7 @@ const PromptTryEsql = ({
   const description = (
     <FormattedMessage
       id="sharedUXPackages.noDataViewsPrompt.esqlExplanation"
-      defaultMessage="ES|QL is a next-generation transformative piped query language and engine developed by Elastic. ES|QL simplifies workflows and advanced searches while accelerating query response for efficient data processing."
+      defaultMessage="ES|QL is a next-generation piped query language and compute engine developed by Elastic for filtering, transforming, and analyzing data. ES|QL helps streamline your workflows for fast, efficient data processing."
     />
   );
 
