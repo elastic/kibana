@@ -50,7 +50,6 @@ async function fetchSpanLinksDetails({
 
   const requiredFields = asMutableArray([
     TRACE_ID,
-    SPAN_ID,
     SERVICE_NAME,
     AGENT_NAME,
     PROCESSOR_EVENT,
@@ -138,6 +137,7 @@ async function fetchSpanLinksDetails({
         serviceName: commonEvent.service.name,
         agentName: commonEvent.agent.name,
         environment: commonEvent.service.environment as Environment,
+        transactionId: commonEvent.transaction?.id,
       };
 
       if (commonEvent.processor.event === ProcessorEvent.transaction) {
@@ -148,8 +148,8 @@ async function fetchSpanLinksDetails({
         return {
           traceId: event.trace.id,
           spanId: event.transaction.id,
-          transactionId: event.transaction.id,
           processorEvent: commonEvent.processor.event,
+          transactionId: event.transaction.id,
           details: {
             ...commonDetails,
             spanName: event.transaction.name,
@@ -165,7 +165,6 @@ async function fetchSpanLinksDetails({
         return {
           traceId: event.trace.id,
           spanId: event.span.id,
-          transactionId: event.transaction?.id,
           processorEvent: commonEvent.processor.event,
           details: {
             ...commonDetails,

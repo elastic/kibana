@@ -39,12 +39,8 @@ async function fetchLinkedChildrenOfSpan({
     end,
   });
 
-  const requiredFields = asMutableArray([
-    TRACE_ID,
-    SPAN_ID,
-    PROCESSOR_EVENT,
-    TRANSACTION_ID,
-  ] as const);
+  const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
+  const optionalFields = asMutableArray([SPAN_ID, TRANSACTION_ID] as const);
 
   const response = await apmEventClient.search('fetch_linked_children_of_span', {
     apm: {
@@ -52,7 +48,7 @@ async function fetchLinkedChildrenOfSpan({
     },
     _source: [SPAN_LINKS],
     body: {
-      fields: requiredFields,
+      fields: [...requiredFields, ...optionalFields],
       track_total_hits: false,
       size: 1000,
       query: {
@@ -88,10 +84,10 @@ async function fetchLinkedChildrenOfSpan({
   });
 }
 
-function getSpanId(linkedChild: Awaited<ReturnType<typeof fetchLinkedChildrenOfSpan>>[number]) {
-  return linkedChild.processor.event === ProcessorEvent.span
-    ? linkedChild.span?.id
-    : linkedChild.transaction?.id;
+function getSpanId(
+  linkedChild: Awaited<ReturnType<typeof fetchLinkedChildrenOfSpan>>[number]
+): string {
+  return (linkedChild.span.id ?? linkedChild.transaction?.id) as string;
 }
 
 export async function getSpanLinksCountById({

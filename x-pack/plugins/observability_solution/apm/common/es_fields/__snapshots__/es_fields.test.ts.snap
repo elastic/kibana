@@ -15,7 +15,7 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Error AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 08:59:49 GMT+0200 (Central European Summer Time)"`;
+exports[`Error AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
 
@@ -387,7 +387,7 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Span AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 08:59:49 GMT+0200 (Central European Summer Time)"`;
+exports[`Span AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -742,7 +742,7 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Transaction AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 08:59:49 GMT+0200 (Central European Summer Time)"`;
+exports[`Transaction AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 

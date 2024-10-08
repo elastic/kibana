@@ -24,6 +24,7 @@ import {
   PROCESSOR_NAME,
   SPAN_LINKS,
   TRANSACTION_AGENT_MARKS,
+  SERVICE_LANGUAGE_NAME,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -57,6 +58,8 @@ export async function getTransaction({
     TRANSACTION_TYPE,
   ] as const);
 
+  const optionalFields = asMutableArray([PROCESSOR_NAME, SERVICE_LANGUAGE_NAME] as const);
+
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       sources: [
@@ -79,7 +82,7 @@ export async function getTransaction({
           ]),
         },
       },
-      fields: [...requiredFields, PROCESSOR_NAME],
+      fields: [...requiredFields, ...optionalFields],
       _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
     },
   });

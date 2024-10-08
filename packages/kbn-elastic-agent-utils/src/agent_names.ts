@@ -36,7 +36,7 @@ export const ELASTIC_AGENT_NAMES: ElasticAgentName[] = [
   'rum-js',
   'android/java',
 ];
-export type OpenTelemetryGenericAgentName = `opentelemetry/${string}` | `otlp/${string}`;
+
 export type OpenTelemetryAgentName =
   | 'otlp'
   | 'opentelemetry'

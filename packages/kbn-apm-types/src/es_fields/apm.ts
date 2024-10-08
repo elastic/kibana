@@ -102,6 +102,7 @@ export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
 export const SPAN_COMPOSITE_COMPRESSION_STRATEGY = 'span.composite.compression_strategy';
 
 export const SPAN_SYNC = 'span.sync';
+export const SPAN_STACKTRACE = 'span.stacktrace';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
