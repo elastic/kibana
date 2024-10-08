@@ -18,6 +18,10 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
 
   const spacesSchema = schema.arrayOf(
     schema.string({
+      meta: {
+        description:
+          'The identifiers of the spaces the saved objects should be added to or removed from.',
+      },
       validate: (value) => {
         if (value !== ALL_SPACES_ID && !SPACE_ID_REGEX.test(value)) {
           return `lower case, a-z, 0-9, "_", and "-" are allowed, OR "*"`;
@@ -40,13 +44,30 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
         access: isServerless ? 'internal' : 'public',
         summary: `Update saved objects in spaces`,
         tags: ['oas-tag:spaces'],
+        description: 'Update one or more saved objects to add or remove them from some spaces.',
       },
       validate: {
-        body: schema.object({
-          objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),
-          spacesToAdd: spacesSchema,
-          spacesToRemove: spacesSchema,
-        }),
+        request: {
+          body: schema.object({
+            objects: schema.arrayOf(
+              schema.object({
+                type: schema.string({
+                  meta: { description: 'The type of the saved object to update.' },
+                }),
+                id: schema.string({
+                  meta: { description: 'The identifier of the saved object to update.' },
+                }),
+              })
+            ),
+            spacesToAdd: spacesSchema,
+            spacesToRemove: spacesSchema,
+          }),
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {

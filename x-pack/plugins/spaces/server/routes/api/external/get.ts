@@ -31,8 +31,13 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
         validate: {
           request: {
             params: schema.object({
-              id: schema.string(),
+              id: schema.string({ meta: { description: 'The space identifier.' } }),
             }),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },

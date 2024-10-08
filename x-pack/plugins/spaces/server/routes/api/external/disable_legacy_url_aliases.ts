@@ -24,15 +24,22 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
         tags: ['oas-tag:spaces'],
       },
       validate: {
-        body: schema.object({
-          aliases: schema.arrayOf(
-            schema.object({
-              targetSpace: schema.string(),
-              targetType: schema.string(),
-              sourceId: schema.string(),
-            })
-          ),
-        }),
+        request: {
+          body: schema.object({
+            aliases: schema.arrayOf(
+              schema.object({
+                targetSpace: schema.string(),
+                targetType: schema.string(),
+                sourceId: schema.string(),
+              })
+            ),
+          }),
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
