@@ -5,6 +5,7 @@ info:
 paths:
   /api/endpoint/suggestions/{suggestion_type}:
     post:
+      deprecated: true
       summary: Get suggestions
       operationId: GetEndpointSuggestions
       x-codegen-enabled: true

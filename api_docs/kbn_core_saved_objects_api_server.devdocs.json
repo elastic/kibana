@@ -2628,19 +2628,27 @@
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
           },
           {
             "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
           },
           {
             "plugin": "actions",
