@@ -1107,7 +1107,7 @@
             "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"content\" | \"all\" | \"access_control\", syncStatus?: ",
+          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"all\" | \"content\" | \"access_control\", syncStatus?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -1211,7 +1211,7 @@
             "label": "syncJobType",
             "description": [],
             "signature": [
-              "\"content\" | \"all\" | \"access_control\""
+              "\"all\" | \"content\" | \"access_control\""
             ],
             "path": "packages/kbn-search-connectors/lib/fetch_sync_jobs.ts",
             "deprecated": false,

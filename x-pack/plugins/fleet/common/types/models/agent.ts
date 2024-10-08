@@ -101,9 +101,9 @@ interface AgentBase {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting';
   last_checkin_message?: string;
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -272,7 +272,7 @@ export interface FleetServerAgent {
   /**
    * User provided metadata information for the Elastic Agent
    */
-  user_provided_metadata: AgentMetadata;
+  user_provided_metadata?: AgentMetadata;
   /**
    * Local metadata information for the Elastic Agent
    */
