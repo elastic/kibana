@@ -55,7 +55,7 @@ export type CustomFieldFactory<T extends CaseUICustomField> = () => {
   build: () => CustomFieldType<T>;
   filterOptions?: CustomFieldFactoryFilterOption[];
   getDefaultValue?: () => string | boolean | null;
-  convertNullToEmpty?: (value: string | boolean | null) => string;
+  convertNullToEmpty?: (value: string | number | boolean | null) => string;
 };
 
 export type CustomFieldBuilderMap = {

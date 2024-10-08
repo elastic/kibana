@@ -47,7 +47,6 @@ const transformTemplateCaseFieldsToCaseFormFields = (
     const customFieldFactory = customFieldsBuilderMap[customField.type];
     const { convertNullToEmpty } = customFieldFactory();
     const value = convertNullToEmpty ? convertNullToEmpty(customField.value) : customField.value;
-
     return {
       ...customField,
       value,
