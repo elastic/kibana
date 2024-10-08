@@ -50,7 +50,12 @@ function groupFilesByOwners(files, codeowners) {
 
   files.forEach((file) => {
     for (const [pattern, owner] of Object.entries(codeowners)) {
-      const regex = new RegExp(pattern.replace('*', '.*'));
+      const regexPattern = pattern
+        .replace(/\*\*/g, '.*')
+        .replace(/\*/g, '[^/]*')
+        .replace(/\//g, '\\/');
+      const regex = new RegExp(`^${regexPattern}$`);
+
       if (regex.test(file)) {
         if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
         ownerFilesMap[owner].push(file);
