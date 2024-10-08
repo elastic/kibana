@@ -594,6 +594,14 @@ export class TaskRunner<
           runDate: this.runDate,
         });
 
+        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+        if (gap) {
+          this.alertingEventLogger.reportGap({
+            gap,
+          });
+          this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+        }
+
         if (!this.cancelled) {
           this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
           if (outcome === 'failure') {

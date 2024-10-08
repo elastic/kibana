@@ -1473,6 +1473,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -2614,6 +2628,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -3726,6 +3754,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -4936,6 +4978,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: >-
                                       Total number of alerts created during last
@@ -44387,6 +44443,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution

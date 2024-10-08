@@ -325,6 +325,21 @@
                                     "type": "keyword",
                                     "ignore_above": 1024
                                 },
+                                "gap": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "range": {
+                                            "type": "date_range",
+                                            "format": "strict_date_optional_time||epoch_millis"
+                                        },
+                                        "filled_intervals": {
+                                            "type": "date_range"
+                                        }
+                                    }
+                                },
                                 "execution": {
                                     "properties": {
                                         "uuid": {
@@ -391,6 +406,10 @@
                                                 },
                                                 "execution_gap_duration_s": {
                                                     "type": "long"
+                                                },
+                                                "gap_range": {
+                                                    "type": "date_range",
+                                                    "format": "strict_date_optional_time||epoch_millis"
                                                 },
                                                 "rule_type_run_duration_ms": {
                                                     "type": "long"

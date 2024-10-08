@@ -166,6 +166,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     return;
   }
 
+  if (mappings.type === 'date_range') {
+    lineWriter.addLine(`${propKey}: ecsDateRange(),`);
+    return;
+  }
+
   // only handling objects for the rest of this function
   if (mappings.properties == null) {
     logError(`unknown properties to map: ${prop}: ${JSON.stringify(mappings)}`);
@@ -331,6 +336,15 @@ function ecsDate() {
 
 function ecsBoolean() {
   return schema.maybe(schema.boolean());
+}
+
+function ecsDateRange() {
+  return schema.maybe(
+    schema.object({
+      gte: ecsDate(),
+      lte: ecsDate(),
+    })
+  );
 }
 
 const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;

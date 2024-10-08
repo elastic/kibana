@@ -146,6 +146,13 @@ export const EventSchema = schema.maybe(
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
+                gap: schema.maybe(
+                  schema.object({
+                    status: ecsString(),
+                    range: ecsDateRange(),
+                    filled_intervals: ecsDateRange(),
+                  })
+                ),
                 execution: schema.maybe(
                   schema.object({
                     uuid: ecsString(),
@@ -175,6 +182,7 @@ export const EventSchema = schema.maybe(
                         es_search_duration_ms: ecsStringOrNumber(),
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
+                        gap_range: ecsDateRange(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),
@@ -264,6 +272,15 @@ function ecsDate() {
 
 function ecsBoolean() {
   return schema.maybe(schema.boolean());
+}
+
+function ecsDateRange() {
+  return schema.maybe(
+    schema.object({
+      gte: ecsDate(),
+      lte: ecsDate(),
+    })
+  );
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
