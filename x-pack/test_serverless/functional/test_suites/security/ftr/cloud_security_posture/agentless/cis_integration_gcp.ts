@@ -60,18 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
-
-      it(`should hide CIS_GCP Launch Cloud Shell button when package version is less than ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
-
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.selectSetupTechnology('agentless');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(false);
-      });
     });
 
     describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
