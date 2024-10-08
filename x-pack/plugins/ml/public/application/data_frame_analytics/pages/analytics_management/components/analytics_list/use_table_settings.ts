@@ -30,9 +30,11 @@ export interface CriteriaWithPagination<T extends object> extends Criteria<T> {
   };
 }
 
-interface UseTableSettingsReturnValue<T extends object> {
+interface UseTableSettingsReturnValue<T extends object, HidePagination extends boolean = false> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
-  pagination: Required<Omit<Pagination, 'showPerPageOptions'>> | boolean;
+  pagination: HidePagination extends true
+    ? Required<Omit<Pagination, 'showPerPageOptions'>> | boolean
+    : Required<Omit<Pagination, 'showPerPageOptions'>>;
   sorting: {
     sort: {
       field: keyof T;
@@ -44,8 +46,31 @@ interface UseTableSettingsReturnValue<T extends object> {
 export function useTableSettings<TypeOfItem extends object>(
   totalItemCount: number,
   pageState: ListingPageUrlState,
-  updatePageState: (update: Partial<ListingPageUrlState>) => void
-): UseTableSettingsReturnValue<TypeOfItem> {
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide: true
+): UseTableSettingsReturnValue<TypeOfItem, true>;
+
+export function useTableSettings<TypeOfItem extends object>(
+  totalItemCount: number,
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide?: false
+): UseTableSettingsReturnValue<TypeOfItem, false>;
+
+/**
+ *
+ * @param totalItemCount
+ * @param pageState
+ * @param updatePageState
+ * @param hide If true, hides pagination when total number of items is lower that the smallest per page option
+ * @returns
+ */
+export function useTableSettings<TypeOfItem extends object>(
+  totalItemCount: number,
+  pageState: ListingPageUrlState,
+  updatePageState: (update: Partial<ListingPageUrlState>) => void,
+  hide: boolean = false
+): UseTableSettingsReturnValue<TypeOfItem, boolean> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
@@ -67,7 +92,7 @@ export function useTableSettings<TypeOfItem extends object>(
   );
 
   const pagination = useMemo(() => {
-    if (totalItemCount <= Math.min(...PAGE_SIZE_OPTIONS)) {
+    if (hide && totalItemCount <= Math.min(...PAGE_SIZE_OPTIONS)) {
       // Hide pagination if total number of items is lower that the smallest per page option
       return false;
     }
@@ -78,7 +103,7 @@ export function useTableSettings<TypeOfItem extends object>(
       totalItemCount,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-  }, [totalItemCount, pageIndex, pageSize]);
+  }, [totalItemCount, pageIndex, pageSize, hide]);
 
   const sorting = useMemo(
     () => ({

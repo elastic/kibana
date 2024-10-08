@@ -630,16 +630,12 @@ export const ModelsList: FC<Props> = ({
                 size={'xs'}
                 data-test-subj="mlModelsTableColumnIdValueDescription"
               >
+                {descriptionText}&nbsp;
                 {tooltipContent ? (
                   <EuiToolTip content={tooltipContent}>
-                    <>
-                      {descriptionText}&nbsp;
-                      <EuiIcon type={'warning'} color="warning" />
-                    </>
+                    <EuiIcon type={'warning'} color="warning" />
                   </EuiToolTip>
-                ) : (
-                  descriptionText
-                )}
+                ) : null}
               </EuiText>
             ) : null}
 
@@ -802,7 +798,8 @@ export const ModelsList: FC<Props> = ({
   const { onTableChange, pagination, sorting } = useTableSettings<ModelItem>(
     items.length,
     pageState,
-    updatePageState
+    updatePageState,
+    true
   );
 
   const search: EuiSearchBarProps = {
