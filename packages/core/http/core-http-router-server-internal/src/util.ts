@@ -15,7 +15,7 @@ import {
   type RouteValidator,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse, ResponseHeaders } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { InternalRouteConfig } from './route';
 
@@ -72,7 +72,7 @@ export function prepareRouteConfigValidation<P, Q, B>(
  * @internal
  */
 export function injectResponseHeaders(
-  headers: IKibanaResponse['options']['headers'],
+  headers: ResponseHeaders,
   response: IKibanaResponse
 ): IKibanaResponse {
   const mutableResponse = response as Mutable<IKibanaResponse>;
@@ -83,7 +83,7 @@ export function injectResponseHeaders(
   return mutableResponse;
 }
 
-export function getVersionHeader(version: string): IKibanaResponse['options']['headers'] {
+export function getVersionHeader(version: string): ResponseHeaders {
   return {
     [ELASTIC_HTTP_VERSION_HEADER]: version,
   };

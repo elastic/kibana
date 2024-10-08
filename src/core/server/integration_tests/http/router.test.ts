@@ -844,13 +844,16 @@ describe('Handler', () => {
     router.post(
       {
         path: '/public',
-        validate: false,
+        validate: { body: schema.object({ ok: schema.boolean() }) },
         options: {
           access: 'public',
         },
       },
       (context, req, res) => {
-        return res.ok({ body: 'ok', headers: { test: 'this' } });
+        if (req.body.ok) {
+          return res.ok({ body: 'ok', headers: { test: 'this' } });
+        }
+        return res.customError({ statusCode: 499, body: 'custom error' });
       }
     );
     router.post(
@@ -864,11 +867,34 @@ describe('Handler', () => {
     );
     await server.start();
 
+    // Includes header if validation fails
     {
-      const { headers } = await supertest(innerServer.listener).post('/public').expect(200);
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: null })
+        .expect(400);
       expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
     }
 
+    // Includes header if custom error
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: false })
+        .expect(499);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal routes do not include the header
     {
       const { headers } = await supertest(innerServer.listener).post('/internal').expect(200);
       expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });

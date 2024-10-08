@@ -39,7 +39,7 @@ import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
-import { injectVersionHeader, prepareRouteConfigValidation } from './util';
+import { getVersionHeader, injectVersionHeader, prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
 import { InternalRouteConfig } from './route';
@@ -294,7 +294,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
-      return hapiResponseAdapter.toBadRequest(error.message);
+      const response = hapiResponseAdapter.toBadRequest(error.message);
+      response.output.headers = {
+        ...response.output.headers,
+        ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+      };
+      return response;
     }
 
     try {
