@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-
-export interface DataUsageSetupDependencies {}
-
-export interface DataUsageStartDependencies {}
-
-export interface DataUsageServerSetup {}
-
-export interface DataUsageServerStart {}
+export { OtelKubernetesPanel } from './otel_kubernetes_panel';

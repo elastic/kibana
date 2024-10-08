@@ -13,13 +13,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlSearchLandingPage', 'svlCommonPage', 'embeddedConsole']);
   const svlSearchNavigation = getService('svlSearchNavigation');
 
-  describe('landing page', function () {
+  describe('getting started', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     it('has serverless side nav', async () => {
-      await svlSearchNavigation.navigateToLandingPage();
+      await svlSearchNavigation.navigateToGettingStartedPage();
       await pageObjects.svlSearchLandingPage.assertSvlSearchSideNavExists();
     });
 
@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('API Key creation', () => {
       beforeEach(async () => {
         // We need to reload the page between api key creations
-        await svlSearchNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToGettingStartedPage();
       });
 
       it('can create an API key that expires', async () => {
@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Pipelines', () => {
       beforeEach(async () => {
-        await svlSearchNavigation.navigateToLandingPage();
+        await svlSearchNavigation.navigateToGettingStartedPage();
       });
       it('can redirect to the pipeline creation index page', async () => {
         await pageObjects.svlSearchLandingPage.pipeline.createPipeline();
