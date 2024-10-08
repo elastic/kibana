@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import { type EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 import { EVENT_RATE_FIELD_ID, type Field } from '@kbn/ml-anomaly-utils';
 import { css } from '@emotion/react';
 import type { DropDownLabel } from '.';
@@ -64,7 +64,7 @@ export function useFieldStatsTrigger<T = DropDownLabel>() {
         const field = (option as Option).field;
         const isEmpty = populatedFields && field ? !populatedFields.has(field?.id) : false;
         return option.isGroupLabel || !field ? (
-          <EuiText color={isEmpty ? 'subdued' : undefined}>{option.label}</EuiText>
+          option.label
         ) : (
           <FieldStatsInfoButton
             isEmpty={field.id === EVENT_RATE_FIELD_ID ? false : isEmpty}
