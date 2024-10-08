@@ -31,5 +31,5 @@ export const getEntitiesIndexName = (entityType: EntityType, namespace: string) 
   });
 
 export const buildEntityDefinitionId = (entityType: EntityType, space: string) => {
-  return `ea_${space}_${entityType}_entity_store`;
+  return `security_${entityType}_${space}`;
 };
