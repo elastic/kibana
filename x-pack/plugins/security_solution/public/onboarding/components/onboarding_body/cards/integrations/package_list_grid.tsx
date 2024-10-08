@@ -58,10 +58,8 @@ export const PackageListGrid = React.memo(
     );
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
     const onTabChange = useCallback(
-      (id: string) => {
-        if (!isIntegrationTabId(id)) {
-          return;
-        }
+      (stringId: string) => {
+        const id = stringId as IntegrationTabId;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
       },
