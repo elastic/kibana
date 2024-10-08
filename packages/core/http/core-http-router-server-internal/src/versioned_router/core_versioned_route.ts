@@ -38,7 +38,7 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectVersionHeader } from '../util';
+import { getVersionHeader, injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
@@ -221,9 +221,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         req.params = params;
         req.query = query;
       } catch (e) {
-        return res.badRequest({
-          body: e.message,
-        });
+        return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
       }
     } else {
       // Preserve behavior of not passing through unvalidated data

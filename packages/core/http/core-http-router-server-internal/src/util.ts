@@ -83,11 +83,12 @@ export function injectResponseHeaders(
   return mutableResponse;
 }
 
+export function getVersionHeader(version: string): IKibanaResponse['options']['headers'] {
+  return {
+    [ELASTIC_HTTP_VERSION_HEADER]: version,
+  };
+}
+
 export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
-  return injectResponseHeaders(
-    {
-      [ELASTIC_HTTP_VERSION_HEADER]: version,
-    },
-    response
-  );
+  return injectResponseHeaders(getVersionHeader(version), response);
 }
