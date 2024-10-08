@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
@@ -37,9 +38,8 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
 
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
     supportFile: './cypress/support/e2e.ts',
-    excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
