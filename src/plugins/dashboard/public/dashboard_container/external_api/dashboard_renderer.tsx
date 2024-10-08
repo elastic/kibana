@@ -57,10 +57,6 @@ export function DashboardRenderer({
 
   const id = useMemo(() => uuidv4(), []);
 
-  const dashboardFactory = useMemo(() => {
-    return new DashboardContainerFactoryDefinition(embeddableService);
-  }, []);
-
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardContainer) dashboardContainer.locator = locator;
@@ -93,6 +89,7 @@ export function DashboardRenderer({
     (async () => {
       const creationOptions = await getCreationOptions?.();
 
+      const dashboardFactory = new DashboardContainerFactoryDefinition(embeddableService);
       const container = await dashboardFactory.create(
         { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
