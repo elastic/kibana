@@ -16,6 +16,7 @@ import {
   useEuiTheme,
   EuiThemeComputed,
   EuiImage,
+  EuiPortal,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -38,6 +39,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
+import {
+  ExitFullScreenButton,
+  ExitFullScreenButtonKibanaProvider,
+} from '@kbn/shared-ux-button-exit-full-screen';
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -122,6 +127,8 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
+  isFullScreenMode: boolean;
+  setIsFullScreenMode: (isFullScreenMode: boolean) => void;
   homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
@@ -225,6 +232,8 @@ export const ProjectHeader = ({
   children,
   prependBasePath,
   docLinks,
+  isFullScreenMode,
+  setIsFullScreenMode,
   toggleSideNav,
   customBranding$,
   isServerless,
@@ -244,78 +253,100 @@ export const ProjectHeader = ({
       />
       <SkipToMainContent />
 
-      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header data-test-subj="kibanaProjectHeader">
-        <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position="fixed" className="header__firstBar">
-            <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              <Router history={application.history}>
-                <ProjectNavigation
-                  isSideNavCollapsed$={observables.isSideNavCollapsed$}
-                  toggleSideNav={toggleSideNav}
-                >
-                  {children}
-                </ProjectNavigation>
-              </Router>
+      {isFullScreenMode ? (
+        <>
+          {headerActionMenuMounter.mount && (
+            <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
+          )}
+          <EuiPortal>
+            <ExitFullScreenButtonKibanaProvider
+              coreStart={{
+                chrome: {
+                  setIsVisible: (chromeVisible) => setIsFullScreenMode(!chromeVisible),
+                },
+                customBranding: { customBranding$ },
+              }}
+            >
+              <ExitFullScreenButton />
+            </ExitFullScreenButtonKibanaProvider>
+          </EuiPortal>
+        </>
+      ) : (
+        <>
+          <HeaderTopBanner headerBanner$={observables.headerBanner$} />
+          <header data-test-subj="kibanaProjectHeader">
+            <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
+              <EuiHeader position="fixed" className="header__firstBar">
+                <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
+                  <Router history={application.history}>
+                    <ProjectNavigation
+                      isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                      toggleSideNav={toggleSideNav}
+                    >
+                      {children}
+                    </ProjectNavigation>
+                  </Router>
 
-              <EuiHeaderSectionItem>
-                <Logo
-                  prependBasePath={prependBasePath}
-                  application={application}
-                  homeHref$={observables.homeHref$}
-                  loadingCount$={observables.loadingCount$}
-                  customBranding$={customBranding$}
-                  logoCss={logoCss}
-                />
-              </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem>
+                    <Logo
+                      prependBasePath={prependBasePath}
+                      application={application}
+                      homeHref$={observables.homeHref$}
+                      loadingCount$={observables.loadingCount$}
+                      customBranding$={customBranding$}
+                      logoCss={logoCss}
+                    />
+                  </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
-                <HeaderNavControls
-                  side="left"
-                  navControls$={observables.navControlsLeft$}
-                  append={<div className="navcontrols__separator" />}
-                />
-              </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
+                    <HeaderNavControls
+                      side="left"
+                      navControls$={observables.navControlsLeft$}
+                      append={<div className="navcontrols__separator" />}
+                    />
+                  </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <RedirectAppLinks
-                  coreStart={{ application }}
-                  css={headerCss.redirectAppLinksContainer}
-                >
-                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-                </RedirectAppLinks>
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
+                  <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
+                    <RedirectAppLinks
+                      coreStart={{ application }}
+                      css={headerCss.redirectAppLinksContainer}
+                    >
+                      <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                    </RedirectAppLinks>
+                  </EuiHeaderSectionItem>
+                </EuiHeaderSection>
 
-            <EuiHeaderSection side="right">
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
-              </EuiHeaderSectionItem>
+                <EuiHeaderSection side="right">
+                  <EuiHeaderSectionItem>
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
-                <HeaderHelpMenu
-                  isServerless={isServerless}
-                  globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
-                  helpExtension$={observables.helpExtension$}
-                  helpSupportUrl$={observables.helpSupportUrl$}
-                  defaultContentLinks$={observables.helpMenuLinks$}
-                  kibanaDocLink={docLinks.links.elasticStackGetStarted}
-                  docLinks={docLinks}
-                  kibanaVersion={kibanaVersion}
-                  navigateToUrl={application.navigateToUrl}
-                />
-              </EuiHeaderSectionItem>
+                  <EuiHeaderSectionItem>
+                    <HeaderHelpMenu
+                      isServerless={isServerless}
+                      globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
+                      helpExtension$={observables.helpExtension$}
+                      helpSupportUrl$={observables.helpSupportUrl$}
+                      defaultContentLinks$={observables.helpMenuLinks$}
+                      kibanaDocLink={docLinks.links.elasticStackGetStarted}
+                      docLinks={docLinks}
+                      kibanaVersion={kibanaVersion}
+                      navigateToUrl={application.navigateToUrl}
+                    />
+                  </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
-          </EuiHeader>
-        </div>
-      </header>
+                  <EuiHeaderSectionItem>
+                    <HeaderNavControls navControls$={observables.navControlsRight$} />
+                  </EuiHeaderSectionItem>
+                </EuiHeaderSection>
+              </EuiHeader>
+            </div>
+          </header>
 
-      {headerActionMenuMounter.mount && (
-        <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
+          {headerActionMenuMounter.mount && (
+            <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
+          )}
+        </>
       )}
     </>
   );
