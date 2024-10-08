@@ -17,6 +17,8 @@ export const noCasesPermissions = () =>
     push: false,
     connectors: false,
     settings: false,
+    createComment: false,
+    reopenCases: false,
   });
 
 export const readCasesPermissions = () =>
@@ -28,6 +30,8 @@ export const readCasesPermissions = () =>
     push: false,
     connectors: true,
     settings: false,
+    createComment: false,
+    reopenCases: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
@@ -85,6 +89,8 @@ export const noCasesCapabilities = () =>
     push_cases: false,
     cases_connectors: false,
     cases_settings: false,
+    create_comment: false,
+    reopen_cases: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -93,6 +99,8 @@ export const readCasesCapabilities = () =>
     delete_cases: false,
     push_cases: false,
     cases_settings: false,
+    create_comment: false,
+    reopen_cases: false,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
