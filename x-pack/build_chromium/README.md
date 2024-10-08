@@ -83,22 +83,6 @@ settings, including the defaults. Some build flags are documented
 
 **NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
 
-## Directions for Elasticians
-
-If you wish to use a remote VM to build, you'll need access to our GCP account.
-
-**NOTE:** The builds should be done in Ubuntu on x64 architecture. ARM builds
-are created in x64 using cross-compiling. CentOS is not supported for building Chromium.
-
-1. Login to Google Cloud Console
-2. Click the "Compute Engine" tab.
-3. Create a Linux VM:
-   - 8 CPU
-   - 30GB memory
-   - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - "Cloud API access scopes": must have **read / write** scope for the Storage API. Access scopes in the GCP VM instance needs to be set to allow full access to all Cloud APIs vs default access (this will return a 403 otherwise in the build.py script)
-4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
-
 ## Artifacts
 
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
