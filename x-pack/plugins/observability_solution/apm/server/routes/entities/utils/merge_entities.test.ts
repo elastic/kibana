@@ -41,7 +41,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics', 'logs'],
         environments: ['test'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -151,7 +150,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['foo', 'bar'],
         environments: ['env-service-1', 'env-service-2'],
         lastSeenTimestamp: '2024-03-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -175,7 +173,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['baz'],
         environments: ['env-service-3', 'env-service-4'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 15,
@@ -269,7 +266,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics', 'logs', 'foo'],
         environments: ['test', 'prod'],
         lastSeenTimestamp: '2024-23-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 5,
@@ -328,7 +324,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -391,7 +386,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -443,7 +437,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -506,7 +499,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: [],
         environments: [],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: true,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
@@ -557,7 +549,6 @@ describe('mergeEntities', () => {
         dataStreamTypes: ['metrics'],
         environments: ['test'],
         lastSeenTimestamp: '2024-06-05T10:34:40.810Z',
-        hasLogMetrics: false,
         metrics: [
           {
             failedTransactionRate: 0.3333333333333333,
