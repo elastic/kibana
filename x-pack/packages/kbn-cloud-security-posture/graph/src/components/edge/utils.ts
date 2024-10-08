@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeShape } from '../node';
+import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/latest';
 
 export function getShapeHandlePosition(shape?: NodeShape) {
   switch (shape) {

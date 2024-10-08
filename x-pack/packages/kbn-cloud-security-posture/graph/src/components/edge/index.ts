@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CustomPathEdge } from './custom_path_edge';
 export { DefaultEdge } from './default_edge';
