@@ -29,14 +29,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs').filter(
-          // Exclude Fleet adn Security solution experimental features
+          // Exclude Fleet and Security solution experimental features
           // properties since we are overriding them here
           (arg: string) =>
             !arg.includes('xpack.fleet.enableExperimental') &&
             !arg.includes('xpack.securitySolution.enableExperimental')
         ),
+        // FLEET: set any experimental feature flags for testing
         `--xpack.fleet.enableExperimental=${JSON.stringify(fleetEnableExperimental)}`,
-        // set any experimental feature flags for testing
+
+        // SECURITY SOLUTION: set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(
           securitySolutionEnableExperimental
         )}`,
