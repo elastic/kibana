@@ -22322,6 +22322,20 @@ paths:
                           type: array
                         description:
                           type: string
+                        discovery:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            fields:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                         download:
                           type: string
                         format_version:
@@ -22602,6 +22616,7 @@ paths:
                           enum:
                             - integration
                             - input
+                            - content
                           type: string
                         vars:
                           items:
@@ -22654,6 +22669,20 @@ paths:
                           type: array
                         description:
                           type: string
+                        discovery:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            fields:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                         download:
                           type: string
                         format_version:
@@ -22934,6 +22963,7 @@ paths:
                           enum:
                             - integration
                             - input
+                            - content
                           type: string
                         vars:
                           items:
@@ -23906,6 +23936,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -24213,6 +24257,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -24302,6 +24347,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -24609,6 +24668,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -24961,6 +25021,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -25268,6 +25342,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
@@ -25349,6 +25424,20 @@ paths:
                         type: array
                       description:
                         type: string
+                      discovery:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          fields:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                       download:
                         type: string
                       elasticsearch:
@@ -25656,6 +25745,7 @@ paths:
                         enum:
                           - integration
                           - input
+                          - content
                         type: string
                       vars:
                         items:
