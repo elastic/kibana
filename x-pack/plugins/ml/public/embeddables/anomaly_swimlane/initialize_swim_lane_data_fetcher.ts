@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { TimeRange } from '@kbn/es-query';
+import { isOfQueryType, type TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
@@ -95,6 +95,14 @@ export const initializeSwimLaneDataFetcher = (
 
         const { viewBy, swimlaneType, perPage, fromPage } = input;
 
+        let isEmptyQuery = true;
+
+        if (isOfQueryType(query)) {
+          isEmptyQuery = !query.query;
+        } else {
+          isEmptyQuery = !query?.esql;
+        }
+
         let appliedFilters: estypes.QueryDslQueryContainer;
         try {
           if (filters || query) {
@@ -123,7 +131,7 @@ export const initializeSwimLaneDataFetcher = (
                   viewBy!,
                   swimLaneLimit,
                   perPage!,
-                  fromPage,
+                  isEmptyQuery ? fromPage : 1,
                   undefined,
                   appliedFilters,
                   bucketInterval
