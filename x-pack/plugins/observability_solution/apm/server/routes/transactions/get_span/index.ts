@@ -42,6 +42,7 @@ export async function getSpan({
         track_total_hits: false,
         size: 1,
         terminate_after: 1,
+        fields: ['*'],
         query: {
           bool: {
             filter: asMutableArray([

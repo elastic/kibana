@@ -88,6 +88,7 @@ export async function getDerivedServiceAnnotations({
           sort: {
             '@timestamp': 'asc',
           },
+          fields: requiredFields,
         },
       });
 

@@ -37,7 +37,7 @@ export async function getServiceAgent({
   start: number;
   end: number;
 }): Promise<ServiceAgentResponse> {
-  const requiredFields = asMutableArray([
+  const fields = asMutableArray([
     AGENT_NAME,
     SERVICE_RUNTIME_NAME,
     CLOUD_PROVIDER,
@@ -83,7 +83,7 @@ export async function getServiceAgent({
           ],
         },
       },
-      fields: requiredFields,
+      fields,
       sort: {
         _score: { order: 'desc' as const },
       },

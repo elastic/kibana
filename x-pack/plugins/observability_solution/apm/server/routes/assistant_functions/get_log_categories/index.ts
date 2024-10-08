@@ -89,7 +89,7 @@ export async function getLogCategories({
   const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
   const samplingProbability = rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
 
-  const requiredFields = asMutableArray(['message', TRACE_ID] as const);
+  const fields = asMutableArray(['message', TRACE_ID] as const);
   const categorizedLogsRes = await search({
     index,
     size: 1,
@@ -112,7 +112,7 @@ export async function getLogCategories({
                 top_hits: {
                   sort: { '@timestamp': 'desc' as const },
                   size: 1,
-                  fields: requiredFields,
+                  fields,
                 },
               },
             },

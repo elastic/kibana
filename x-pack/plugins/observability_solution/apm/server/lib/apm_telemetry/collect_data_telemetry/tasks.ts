@@ -537,7 +537,7 @@ export const tasks: TelemetryTask[] = [
               ? {
                   retainment: {
                     [processorEvent]: {
-                      ms: new Date().getTime() - new Date(event['@timestamp'][0]).getTime(),
+                      ms: new Date().getTime() - new Date(event[AT_TIMESTAMP][0]).getTime(),
                     },
                   },
                 }

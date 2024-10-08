@@ -22,7 +22,6 @@ import {
   TRANSACTION_TYPE,
   AT_TIMESTAMP,
   PROCESSOR_NAME,
-  AGENT_VERSION,
   SPAN_LINKS,
   TRANSACTION_AGENT_MARKS,
 } from '../../../../common/es_fields/apm';
@@ -47,7 +46,6 @@ export async function getTransaction({
   const requiredFields = asMutableArray([
     TRACE_ID,
     AGENT_NAME,
-    AGENT_VERSION,
     PROCESSOR_EVENT,
     AT_TIMESTAMP,
     TIMESTAMP_US,

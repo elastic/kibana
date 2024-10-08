@@ -21,6 +21,18 @@ describe('flattenObject', () => {
     });
   });
 
+  it('flattens arrays', () => {
+    expect(
+      flattenObject({
+        child: {
+          id: [1, 2],
+        },
+      })
+    ).toEqual({
+      'child.id': [1, 2],
+    });
+  });
+
   it('does not flatten arrays', () => {
     expect(
       flattenObject({
