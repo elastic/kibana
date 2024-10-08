@@ -923,9 +923,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
@@ -1156,7 +1156,6 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
-/ @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_page.ts @elastic/obs-ux-logs-team
 /x-pack/plugins/observability_solution/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
