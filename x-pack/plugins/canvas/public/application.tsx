@@ -58,7 +58,6 @@ export const renderApp = ({
   canvasStore: Store;
   appUpdater: BehaviorSubject<AppUpdater>;
 }) => {
-  const { presentationUtil } = startPlugins;
   const { element } = params;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
@@ -66,13 +65,13 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
-        <LegacyServicesProvider providers={services}>
-          <presentationUtil.ContextProvider>
+        <ServicesContextProvider>
+          <LegacyServicesProvider providers={services}>
             <Provider store={canvasStore}>
-              <App history={params.history} appUpdater={appUpdater} />
+              <App history={params.history} />
             </Provider>
-          </presentationUtil.ContextProvider>
-        </LegacyServicesProvider>
+          </LegacyServicesProvider>
+        </ServicesContextProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element
