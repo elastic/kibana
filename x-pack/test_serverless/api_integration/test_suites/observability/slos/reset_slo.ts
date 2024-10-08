@@ -100,7 +100,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await transform.api.stopTransform(`slo-${sloId}-1`);
+        await transform.api.deleteTransform(`slo-${sloId}-1`);
         await transform.api.stopTransform(`slo-summary-${sloId}-1`);
+        await transform.api.deleteTransform(`slo-summary-${sloId}-1`);
       });
 
       it('resets the SLO resources', async () => {
