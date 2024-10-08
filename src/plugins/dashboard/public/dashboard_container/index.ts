@@ -17,7 +17,6 @@ export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersio
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {
   type DashboardContainerFactory,
-  type DashboardCreationOptions,
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
 
