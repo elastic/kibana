@@ -83,6 +83,10 @@ describe('GeminiConnectorFields renders', () => {
     );
     expect(getAllByTestId('gemini-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('gemini-api-model-doc')[0]).toBeInTheDocument();
+
+    expect(getAllByTestId('secrets.credentialsJson-input')[0]).toHaveValue(
+      geminiConnector.secrets.credentialsJson
+    );
   });
 
   describe('Dashboard link', () => {
