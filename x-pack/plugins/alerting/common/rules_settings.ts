@@ -17,7 +17,7 @@ export {
   MAX_STATUS_CHANGE_THRESHOLD,
 } from '@kbn/alerting-types';
 
-export type {  
+export type {
   RulesSettingsModificationMetadata,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
