@@ -26,6 +26,7 @@ jobs:
 
     env:
       ROUTE_TYPE: ${{ github.event.inputs.route_type }}
+      GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
 
     steps:
     - name: Checkout repository
@@ -45,7 +46,7 @@ jobs:
       run: sudo apt-get install gh -y
 
     - name: Authenticate with GitHub CLI
-      run: echo "${{ secrets.KIBANAMACHINE_TOKEN }}" | gh auth login --with-token
+      run: gh auth login --with-token
 
     - name: Run ESLint Autofix Script
       run: node scripts/eslint-security-route.js
