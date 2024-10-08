@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { omit } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import type { DiscoverAppLocatorParams } from '../../../../../common';
+import {
+  AppMenuAction,
+  AppMenuActionId,
+  AppMenuActionType,
+  AppMenuItem,
+} from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
-import { showOpenSearchPanel } from './show_open_search_panel';
-import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
+import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
+import { runShareAction } from './run_share_action';
+import { OpenSearchPanel } from './open_search_panel';
 
 /**
  * Helper function to build the top nav links
@@ -114,17 +119,24 @@ export const getTopNavLinks = ({
     testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
-  const newSearch = {
-    id: 'new',
-    label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
-      defaultMessage: 'New',
-    }),
-    description: i18n.translate('discover.localMenu.newSearchDescription', {
-      defaultMessage: 'New Search',
-    }),
-    run: () => services.locator.navigate({}),
-    testId: 'discoverNewButton',
+  const stateParams = { services, stateContainer: state, adHocDataViews, isEsqlMode };
+  const newSearchItem: AppMenuAction = {
+    id: AppMenuActionId.new,
+    type: AppMenuActionType.secondary, // TODO: convert to primary
+    controlProps: {
+      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
+        defaultMessage: 'New',
+      }),
+      description: i18n.translate('discover.localMenu.newSearchDescription', {
+        defaultMessage: 'New Search',
+      }),
+      testId: 'discoverNewButton',
+      onClick: () => {
+        services.locator.navigate({});
+      },
+    },
   };
+  const newSearch = convertMenuItem({ appMenuItem: newSearchItem, stateParams });
 
   const saveSearch = {
     id: 'save',
@@ -149,21 +161,28 @@ export const getTopNavLinks = ({
     },
   };
 
-  const openSearch = {
-    id: 'open',
-    label: i18n.translate('discover.localMenu.openTitle', {
-      defaultMessage: 'Open',
-    }),
-    description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
-      defaultMessage: 'Open Saved Search',
-    }),
-    testId: 'discoverOpenButton',
-    run: () =>
-      showOpenSearchPanel({
-        onOpenSavedSearch: state.actions.onOpenSavedSearch,
-        services,
+  const openSearchItem: AppMenuAction = {
+    id: AppMenuActionId.open,
+    type: AppMenuActionType.secondary, // TODO: convert to primary
+    controlProps: {
+      label: i18n.translate('discover.localMenu.openTitle', {
+        defaultMessage: 'Open',
       }),
+      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
+        defaultMessage: 'Open Saved Search',
+      }),
+      testId: 'discoverOpenButton',
+      onClick: ({ onFinishAction }) => {
+        return (
+          <OpenSearchPanel
+            onClose={onFinishAction}
+            onOpenSavedSearch={state.actions.onOpenSavedSearch}
+          />
+        );
+      },
+    },
   };
+  const openSearch = convertMenuItem({ appMenuItem: openSearchItem, stateParams });
 
   const shareSearch = {
     id: 'share',
@@ -175,107 +194,33 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share) return;
-      const savedSearch = state.savedSearchState.getState();
-      const searchSourceSharingData = await getSharingData(
-        savedSearch.searchSource,
-        state.appState.getState(),
-        services,
-        isEsqlMode
-      );
-
-      const { locator, notifications } = services;
-      const appState = state.appState.getState();
-      const { timefilter } = services.data.query.timefilter;
-      const timeRange = timefilter.getTime();
-      const refreshInterval = timefilter.getRefreshInterval();
-      const filters = services.filterManager.getFilters();
-
-      // Share -> Get links -> Snapshot
-      const params: DiscoverAppLocatorParams = {
-        ...omit(appState, 'dataSource'),
-        ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
-        ...(dataView?.isPersisted()
-          ? { dataViewId: dataView?.id }
-          : { dataViewSpec: dataView?.toMinimalSpec() }),
-        filters,
-        timeRange,
-        refreshInterval,
-      };
-      const relativeUrl = locator.getRedirectUrl(params);
-
-      // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
-      // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
-      const link = document.createElement('a');
-      link.setAttribute('href', relativeUrl);
-      const shareableUrl = link.href;
-
-      // Share -> Get links -> Saved object
-      let shareableUrlForSavedObject = await locator.getUrl(
-        { savedSearchId: savedSearch.id },
-        { absolute: true }
-      );
-
-      // UrlPanelContent forces a '_g' parameter in the saved object URL:
-      // https://github.com/elastic/kibana/blob/a30508153c1467b1968fb94faf1debc5407f61ea/src/plugins/share/public/components/url_panel_content.tsx#L230
-      // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
-      // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
-      // so instead we add an empty object for the '_g' parameter to the URL.
-      shareableUrlForSavedObject = setStateToKbnUrl(
-        '_g',
-        {},
-        undefined,
-        shareableUrlForSavedObject
-      );
-
-      services.share.toggleShareContextMenu({
+      await runShareAction({
         anchorElement,
-        allowEmbed: false,
-        allowShortUrl: !!services.capabilities.discover.createShortUrl,
-        shareableUrl,
-        shareableUrlForSavedObject,
-        shareableUrlLocatorParams: { locator, params },
-        objectId: savedSearch.id,
-        objectType: 'search',
-        objectTypeMeta: {
-          title: i18n.translate('discover.share.shareModal.title', {
-            defaultMessage: 'Share this search',
-          }),
-        },
-        sharingData: {
-          isTextBased: isEsqlMode,
-          locatorParams: [{ id: locator.id, params }],
-          ...searchSourceSharingData,
-          // CSV reports can be generated without a saved search so we provide a fallback title
-          title:
-            savedSearch.title ||
-            i18n.translate('discover.localMenu.fallbackReportTitle', {
-              defaultMessage: 'Untitled discover search',
-            }),
-        },
-        isDirty: !savedSearch.id || state.appState.hasChanged(),
-        showPublicUrlSwitch,
-        onClose: () => {
-          anchorElement?.focus();
-        },
-        toasts: notifications.toasts,
+        dataView,
+        stateContainer: state,
+        services,
+        isEsqlMode,
       });
     },
   };
 
-  const inspectSearch = {
-    id: 'inspect',
-    label: i18n.translate('discover.localMenu.inspectTitle', {
-      defaultMessage: 'Inspect',
-    }),
-    description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
-      defaultMessage: 'Open Inspector for search',
-    }),
-    testId: 'openInspectorButton',
-    run: () => {
-      onOpenInspector();
+  const inspectSearchItem: AppMenuAction = {
+    id: AppMenuActionId.inspect,
+    type: AppMenuActionType.secondary,
+    controlProps: {
+      label: i18n.translate('discover.localMenu.inspectTitle', {
+        defaultMessage: 'Inspect',
+      }),
+      description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
+        defaultMessage: 'Open Inspector for search',
+      }),
+      testId: 'openInspectorButton',
+      onClick: () => {
+        onOpenInspector();
+      },
     },
   };
+  const inspectSearch = convertMenuItem({ appMenuItem: inspectSearchItem, stateParams });
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
@@ -314,3 +259,49 @@ export const getTopNavLinks = ({
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };
+
+function convertMenuItem({
+  appMenuItem,
+  stateParams: { services, stateContainer, adHocDataViews, isEsqlMode },
+}: {
+  appMenuItem: AppMenuItem;
+  stateParams: {
+    stateContainer: DiscoverStateContainer;
+    services: DiscoverServices;
+    adHocDataViews: DataView[];
+    isEsqlMode?: boolean;
+  };
+}): TopNavMenuData {
+  if ('actions' in appMenuItem) {
+    return {
+      id: appMenuItem.id,
+      label: appMenuItem.label,
+      description: appMenuItem.label,
+      run: (anchorElement: HTMLElement) => {
+        runAppMenuPopoverAction({
+          appMenuItem,
+          anchorElement,
+          stateContainer,
+          adHocDataViews,
+          services,
+          isEsqlMode,
+        });
+      },
+      testId: appMenuItem.id,
+    };
+  }
+
+  return {
+    id: appMenuItem.id,
+    label: appMenuItem.controlProps.label,
+    description: appMenuItem.controlProps.label,
+    run: async (anchorElement: HTMLElement) => {
+      await runAppMenuAction({
+        appMenuItem,
+        anchorElement,
+        services,
+      });
+    },
+    testId: appMenuItem.id,
+  };
+}
