@@ -20,7 +20,6 @@
     "@kbn/expect",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
-    "@kbn/ace",
     "@kbn/config-schema",
     "@kbn/react-kibana-context-render",
   ],
