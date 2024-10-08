@@ -131,6 +131,7 @@
     "@kbn/ml-field-stats-flyout",
     "@kbn/ml-parse-interval",
     "@kbn/ml-validators",
-    "@kbn/aiops-common"
+    "@kbn/aiops-common",
+    "@kbn/core-http-server"
   ]
 }
