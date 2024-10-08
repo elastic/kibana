@@ -630,11 +630,14 @@ export const ModelsList: FC<Props> = ({
                 size={'xs'}
                 data-test-subj="mlModelsTableColumnIdValueDescription"
               >
-                {descriptionText}&nbsp;
+                {descriptionText}
                 {tooltipContent ? (
-                  <EuiToolTip content={tooltipContent}>
-                    <EuiIcon type={'warning'} color="warning" />
-                  </EuiToolTip>
+                  <>
+                    &nbsp;
+                    <EuiToolTip content={tooltipContent}>
+                      <EuiIcon type={'warning'} color="warning" />
+                    </EuiToolTip>
+                  </>
                 ) : null}
               </EuiText>
             ) : null}
