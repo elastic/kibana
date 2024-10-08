@@ -94,7 +94,7 @@ export enum LINE_MODE {
 /**
  * The CoreEditor is a component separate from the Editor implementation that provides Console
  * app specific business logic. The CoreEditor is an interface to the lower-level editor implementation
- * being used which is usually vendor code such as Ace or Monaco.
+ * being used which is usually vendor code such as Monaco.
  */
 export interface CoreEditor {
   /**

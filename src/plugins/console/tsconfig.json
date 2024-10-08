@@ -18,7 +18,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-utility",
     "@kbn/core-http-browser",
-    "@kbn/ace",
     "@kbn/config-schema",
     "@kbn/core-http-router-server-internal",
     "@kbn/web-worker-stub",

@@ -1116,7 +1116,7 @@ export default function ({
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
     }
 
-    currentToken.position.lineNumber = pos.lineNumber; // extend token with row. Ace doesn't supply it by default
+    currentToken.position.lineNumber = pos.lineNumber; // extend token with row
     if (parser.isEmptyToken(currentToken)) {
       // empty token. check what's coming next
       const nextToken = editor.getTokenAt({ ...pos, column: pos.column + 1 })!;
