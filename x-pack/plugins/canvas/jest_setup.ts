@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { CanvasFiltersService } from './kibana/filters';
+import { setStubKibanaServices } from './public/services/mocks';
+
+// Start the kibana services with stubs
+setStubKibanaServices();
