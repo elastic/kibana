@@ -16,43 +16,54 @@ describe('getKuery', () => {
   const healthyStatuses = ['healthy', 'updating'];
   const inactiveStatuses = ['unhealthy', 'offline', 'inactive', 'unenrolled'];
 
+  const appendAgentlessOffline = (kuery: string) =>
+    kuery && kuery.length > 0
+      ? `not (local_metadata.host.hostname : "agentless*" and status:offline) and ( ${kuery})`
+      : `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
+
   it('should return a kuery with base search', () => {
     expect(getKuery({ search })).toEqual('base search');
   });
 
   it('should return a kuery with selected tags', () => {
     expect(getKuery({ selectedTags })).toEqual(
-      'fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")'
+      appendAgentlessOffline('fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")')
     );
   });
 
   it('should return a kuery with selected agent policies', () => {
     expect(getKuery({ selectedAgentPolicies })).toEqual(
-      'fleet-agents.policy_id : ("policy1" or "policy2" or "policy3")'
+      appendAgentlessOffline('fleet-agents.policy_id : ("policy1" or "policy2" or "policy3")')
     );
   });
 
   it('should return a kuery with selected agent ids', () => {
     expect(getKuery({ selectedAgentIds })).toEqual(
-      'fleet-agents.agent.id : ("agent_id1" or "agent_id2")'
+      appendAgentlessOffline('fleet-agents.agent.id : ("agent_id1" or "agent_id2")')
     );
   });
 
   it('should return a kuery with healthy selected status', () => {
     expect(getKuery({ selectedStatus: healthyStatuses })).toEqual(
-      'status:online or (status:updating or status:unenrolling or status:enrolling)'
+      appendAgentlessOffline(
+        'status:online or (status:updating or status:unenrolling or status:enrolling)'
+      )
     );
   });
 
   it('should return a kuery with unhealthy selected status', () => {
     expect(getKuery({ selectedStatus: inactiveStatuses })).toEqual(
-      '(status:error or status:degraded) or status:offline or status:inactive or status:unenrolled'
+      appendAgentlessOffline(
+        '(status:error or status:degraded) or status:offline or status:inactive or status:unenrolled'
+      )
     );
   });
 
   it('should return a kuery with a combination of previous kueries', () => {
     expect(getKuery({ search, selectedTags, selectedStatus })).toEqual(
-      '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
+      appendAgentlessOffline(
+        '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
+      )
     );
   });
 

@@ -81,8 +81,14 @@ export const getKuery = ({
     } else {
       kueryBuilder = kueryStatus;
     }
-
-    kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kueryBuilder})`;
   }
+
+  if (kueryBuilder.length > 0) {
+    kueryBuilder.trim();
+    kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline) and (${kueryBuilder})`;
+  } else {
+    kueryBuilder = `not (local_metadata.host.hostname : "agentless*" and status:offline)`;
+  }
+
   return kueryBuilder.trim();
 };
