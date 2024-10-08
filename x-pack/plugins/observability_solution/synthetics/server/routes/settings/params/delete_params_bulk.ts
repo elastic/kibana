@@ -11,24 +11,19 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { DeleteParamsResponse } from '../../../../common/runtime_types';
 
-export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
   unknown,
   unknown,
   { ids: string[] }
 > = () => ({
-  method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PARAMS + '/{id?}',
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete',
   validate: {},
   validation: {
     request: {
-      body: schema.nullable(
-        schema.object({
-          ids: schema.arrayOf(schema.string()),
-        })
-      ),
-      params: schema.object({
-        id: schema.maybe(schema.string()),
+      body: schema.object({
+        ids: schema.arrayOf(schema.string()),
       }),
     },
   },

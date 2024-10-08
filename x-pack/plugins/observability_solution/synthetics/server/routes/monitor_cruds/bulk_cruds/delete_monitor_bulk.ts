@@ -4,75 +4,65 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SyntheticsServerSetup } from '../../../types';
-import {
-  formatTelemetryDeleteEvent,
-  sendTelemetryEvents,
-} from '../../telemetry/monitor_upgrade_sender';
-import {
-  ConfigKey,
-  MonitorFields,
-  SyntheticsMonitor,
-  EncryptedSyntheticsMonitorAttributes,
-  SyntheticsMonitorWithId,
-} from '../../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import pMap from 'p-map';
+import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { deleteMonitor } from '../delete_monitor';
 
-export const deleteMonitorBulk = async ({
-  savedObjectsClient,
-  server,
-  monitors,
-  syntheticsMonitorClient,
-  request,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  server: SyntheticsServerSetup;
-  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  request: KibanaRequest;
-}) => {
-  const { logger, telemetry, stackVersion } = server;
+export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
+  DeleteParamsResponse[],
+  Record<string, string>,
+  Record<string, string>,
+  { ids: string[] }
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/_bulk_delete',
+  validate: {},
+  validation: {
+    request: {
+      body: schema.object({
+        ids: schema.arrayOf(schema.string(), {
+          minSize: 1,
+        }),
+      }),
+    },
+  },
+  handler: async (routeContext): Promise<any> => {
+    const { request, response } = routeContext;
 
-  try {
-    const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
-      id: DEFAULT_SPACE_ID,
-    };
+    const { ids: idsToDelete } = request.body || {};
 
-    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
-      monitors.map((normalizedMonitor) => ({
-        ...normalizedMonitor.attributes,
-        id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
-      })) as SyntheticsMonitorWithId[],
-      savedObjectsClient,
-      spaceId
-    );
+    const result: DeleteParamsResponse[] = [];
 
-    const deletePromises = savedObjectsClient.bulkDelete(
-      monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
-    );
+    await pMap(idsToDelete, async (id) => {
+      try {
+        const { errors, res } = await deleteMonitor({
+          routeContext,
+          monitorId: id,
+        });
+        if (res) {
+          return res;
+        }
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
+        if (errors && errors.length > 0) {
+          return response.ok({
+            body: { message: 'error pushing monitor to the service', attributes: { errors } },
+          });
+        }
 
-    monitors.forEach((monitor) => {
-      sendTelemetryEvents(
-        logger,
-        telemetry,
-        formatTelemetryDeleteEvent(
-          monitor,
-          stackVersion,
-          new Date().toISOString(),
-          Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-          errors
-        )
-      );
+        result.push({ id, deleted: true });
+      } catch (getErr) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+          result.push({ id, deleted: false, error: `Monitor id ${id} not found!` });
+        } else {
+          throw getErr;
+        }
+      }
     });
 
-    return errors;
-  } catch (e) {
-    throw e;
-  }
-};
+    return result;
+  },
+});
