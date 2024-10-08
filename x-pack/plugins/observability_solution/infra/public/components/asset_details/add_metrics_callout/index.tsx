@@ -7,6 +7,10 @@
 
 import React from 'react';
 import { AddDataPanel } from '@kbn/observability-shared-plugin/public';
+import {
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  ObservabilityOnboardingLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { AddMetricsCalloutEventParams } from '../../../services/telemetry';
 import { addMetricsCalloutDefinitions, AddMetricsCalloutKey } from './constants';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -20,10 +24,12 @@ const defaultEventParams: AddMetricsCalloutEventParams = { view: 'add_metrics_ct
 
 export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
   const {
-    services: { telemetry, http },
+    services: { telemetry, share },
   } = useKibanaContextForPlugin();
 
-  const basePath = http.basePath.get() || '';
+  const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
 
   function handleAddMetricsClick() {
     telemetry.reportAddMetricsCalloutAddMetricsClicked(defaultEventParams);
@@ -44,8 +50,8 @@ export function AddMetricsCallout({ id, onDismiss }: AddMetricsCalloutProps) {
 
   return (
     <AddDataPanel
-      content={addMetricsCalloutDefinitions(basePath)[id].content}
-      actions={addMetricsCalloutDefinitions(basePath)[id].actions}
+      content={addMetricsCalloutDefinitions(onboardingLocator)[id].content}
+      actions={addMetricsCalloutDefinitions(onboardingLocator)[id].actions}
       onAddData={handleAddMetricsClick}
       onTryIt={handleTryItClick}
       onLearnMore={handleLearnMoreClick}

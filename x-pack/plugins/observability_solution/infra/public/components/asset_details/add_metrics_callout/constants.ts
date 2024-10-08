@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { AddDataPanelProps } from '@kbn/observability-shared-plugin/public/components/add_data_panel';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 
 export type AddMetricsCalloutKey =
   | 'hostOverview'
@@ -34,11 +36,13 @@ const defaultContent = {
   },
 };
 
-const hostDefaultActions = (basePath: string) => {
+const hostDefaultActions = (
+  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
+) => {
   return {
     actions: {
       primary: {
-        href: `${basePath}/app/observabilityOnboarding/?category=logs`,
+        href: locator?.getRedirectUrl({ category: 'logs' }),
         label: defaultPrimaryActionLabel,
       },
       secondary: {
@@ -51,11 +55,13 @@ const hostDefaultActions = (basePath: string) => {
   };
 };
 
-const containerDefaultActions = (basePath: string) => {
+const containerDefaultActions = (
+  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
+) => {
   return {
     actions: {
       primary: {
-        href: `${basePath}/app/observabilityOnboarding/?category=infra`,
+        href: locator?.getRedirectUrl({ category: 'infra' }),
         label: defaultPrimaryActionLabel,
       },
       link: {
@@ -66,7 +72,7 @@ const containerDefaultActions = (basePath: string) => {
 };
 
 export const addMetricsCalloutDefinitions = (
-  basePath: string
+  locator: LocatorPublic<ObservabilityOnboardingLocatorParams> | undefined
 ): Record<
   AddMetricsCalloutKey,
   Omit<AddDataPanelProps, 'onDismiss' | 'onAddData' | 'onLearnMore' | 'onTryIt'>
@@ -74,11 +80,11 @@ export const addMetricsCalloutDefinitions = (
   return {
     hostOverview: {
       ...defaultContent,
-      ...hostDefaultActions(basePath),
+      ...hostDefaultActions(locator),
     },
     hostMetrics: {
       ...defaultContent,
-      ...hostDefaultActions(basePath),
+      ...hostDefaultActions(locator),
     },
     hostProcesses: {
       content: {
@@ -90,15 +96,15 @@ export const addMetricsCalloutDefinitions = (
             'Collect process data to understand what is consuming resource on your hosts.',
         }),
       },
-      ...hostDefaultActions(basePath),
+      ...hostDefaultActions(locator),
     },
     containerOverview: {
       ...defaultContent,
-      ...containerDefaultActions(basePath),
+      ...containerDefaultActions(locator),
     },
     containerMetrics: {
       ...defaultContent,
-      ...containerDefaultActions(basePath),
+      ...containerDefaultActions(locator),
     },
   };
 };
