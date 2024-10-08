@@ -175,7 +175,8 @@ describe('Per-Alert Action Scheduler', () => {
     test('should generate executable for each alert and each action', async () => {
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -200,7 +201,8 @@ describe('Per-Alert Action Scheduler', () => {
       });
       const alertsWithMaintenanceWindow = { ...newAlertWithMaintenanceWindow, ...newAlert2 };
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithMaintenanceWindow,
+        activeCurrentAlerts: alertsWithMaintenanceWindow,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -232,7 +234,8 @@ describe('Per-Alert Action Scheduler', () => {
       });
       const alertsWithInvalidActionGroup = { ...newAlertInvalidActionGroup, ...newAlert2 };
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithInvalidActionGroup,
+        activeCurrentAlerts: alertsWithInvalidActionGroup,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -266,7 +269,8 @@ describe('Per-Alert Action Scheduler', () => {
         ...newAlert2,
       };
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithPendingRecoveredCount,
+        activeCurrentAlerts: alertsWithPendingRecoveredCount,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -307,7 +311,8 @@ describe('Per-Alert Action Scheduler', () => {
         ...newAlert2,
       };
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithPendingRecoveredCount,
+        activeCurrentAlerts: alertsWithPendingRecoveredCount,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -326,7 +331,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, mutedInstanceIds: ['2'] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -381,7 +387,8 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
+        activeCurrentAlerts: alertsWithOngoingAlert,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -432,7 +439,8 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
+        activeCurrentAlerts: alertsWithOngoingAlert,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -483,7 +491,8 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
+        activeCurrentAlerts: alertsWithOngoingAlert,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -536,7 +545,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -592,7 +602,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -649,7 +660,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -706,7 +718,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -764,7 +777,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -820,7 +834,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -843,31 +858,6 @@ describe('Per-Alert Action Scheduler', () => {
         { action: rule.actions[0], alert: alerts['2'] },
         { action: actionWithAlertsFilter, alert: alerts['1'] },
         { action: actionWithAlertsFilter, alert: alerts['2'] },
-      ]);
-    });
-
-    test('should skip generating an executable when an alert has neither scheduled actions nor end time', async () => {
-      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
-      const alertWithNoScheduledActions = generateAlert({
-        id: 5,
-        group: 'default',
-        state: {},
-        scheduleActions: false,
-      });
-      const executables = await scheduler.generateExecutables({
-        alerts: { ...alertWithNoScheduledActions, ...newAlert1 },
-        throttledSummaryActions: {},
-      });
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        'An alert (id:5) has been skipped due to max alerts limit'
-      );
-
-      expect(executables).toHaveLength(2);
-
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[1], alert: alerts['1'] },
       ]);
     });
   });

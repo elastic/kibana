@@ -74,11 +74,13 @@ export class SummaryActionScheduler<
   }
 
   public async generateExecutables({
-    alerts,
+    activeCurrentAlerts,
+    recoveredCurrentAlerts,
     throttledSummaryActions,
   }: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>
   > {
+    const alerts = { ...recoveredCurrentAlerts, ...activeCurrentAlerts };
     const executables = [];
     for (const action of this.actions) {
       if (

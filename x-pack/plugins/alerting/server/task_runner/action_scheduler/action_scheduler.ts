@@ -140,9 +140,13 @@ export class ActionScheduler<
     this.schedulers.sort((a, b) => a.priority - b.priority);
   }
 
-  public async run(
-    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
-  ): Promise<RunResult> {
+  public async run({
+    activeCurrentAlerts,
+    recoveredCurrentAlerts,
+  }: {
+    activeCurrentAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+    recoveredCurrentAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  }): Promise<RunResult> {
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.context.rule.actions,
       summaryActions: this.context.taskInstance.state?.summaryActions,
@@ -151,7 +155,11 @@ export class ActionScheduler<
     const executables = [];
     for (const scheduler of this.schedulers) {
       executables.push(
-        ...(await scheduler.generateExecutables({ alerts, throttledSummaryActions }))
+        ...(await scheduler.generateExecutables({
+          activeCurrentAlerts,
+          recoveredCurrentAlerts,
+          throttledSummaryActions,
+        }))
       );
     }
 

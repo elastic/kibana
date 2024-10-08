@@ -86,7 +86,8 @@ export interface GenerateExecutablesOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
+  activeCurrentAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredCurrentAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   throttledSummaryActions: ThrottledActions;
 }
 

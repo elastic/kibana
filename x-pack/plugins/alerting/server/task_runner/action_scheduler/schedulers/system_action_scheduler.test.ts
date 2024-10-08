@@ -104,7 +104,8 @@ describe('System Action Scheduler', () => {
 
       const scheduler = new SystemActionScheduler(getSchedulerContext());
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -144,7 +145,8 @@ describe('System Action Scheduler', () => {
       const scheduler = new SystemActionScheduler(getSchedulerContext());
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -181,7 +183,8 @@ describe('System Action Scheduler', () => {
       const scheduler = new SystemActionScheduler(getSchedulerContext());
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -206,7 +209,8 @@ describe('System Action Scheduler', () => {
 
       try {
         await scheduler.generateExecutables({
-          alerts,
+          activeCurrentAlerts: alerts,
+          recoveredCurrentAlerts: {},
           throttledSummaryActions: {},
         });
       } catch (err) {

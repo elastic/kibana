@@ -190,7 +190,8 @@ describe('Summary Action Scheduler', () => {
 
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -233,7 +234,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -270,7 +272,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -299,7 +302,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {
           '222-222': { date: '1969-12-31T13:00:00.000Z' },
         },
@@ -333,7 +337,8 @@ describe('Summary Action Scheduler', () => {
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -389,7 +394,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -429,7 +435,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       const executables = await scheduler.generateExecutables({
-        alerts,
+        activeCurrentAlerts: alerts,
+        recoveredCurrentAlerts: {},
         throttledSummaryActions: {},
       });
 
@@ -456,7 +463,8 @@ describe('Summary Action Scheduler', () => {
 
       try {
         await scheduler.generateExecutables({
-          alerts,
+          activeCurrentAlerts: alerts,
+          recoveredCurrentAlerts: {},
           throttledSummaryActions: {},
         });
       } catch (err) {

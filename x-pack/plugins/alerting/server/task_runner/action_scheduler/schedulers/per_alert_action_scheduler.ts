@@ -10,7 +10,7 @@ import { RuleAction, RuleNotifyWhen, RuleTypeParams } from '@kbn/alerting-types'
 import { compact } from 'lodash';
 import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
 import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
-import { AlertHit } from '../../../types';
+import { AlertHit, CombinedSummarizedAlerts } from '../../../types';
 import { Alert } from '../../../alert';
 import { getSummarizedAlerts } from '../get_summarized_alerts';
 import {
@@ -91,13 +91,14 @@ export class PerAlertActionScheduler<
   }
 
   public async generateExecutables({
-    alerts,
+    activeCurrentAlerts,
+    recoveredCurrentAlerts,
+    throttledSummaryActions,
   }: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>
   > {
     const executables = [];
 
-    const alertsArray = Object.entries(alerts);
     for (const action of this.actions) {
       let summarizedAlerts = null;
 
@@ -124,71 +125,25 @@ export class PerAlertActionScheduler<
 
         logNumberOfFilteredAlerts({
           logger: this.context.logger,
-          numberOfAlerts: Object.entries(alerts).length,
+          numberOfAlerts:
+            Object.keys(activeCurrentAlerts).length + Object.keys(recoveredCurrentAlerts).length,
           numberOfSummarizedAlerts: summarizedAlerts.all.count,
           action,
         });
       }
 
-      for (const [alertId, alert] of alertsArray) {
-        const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
-        if (alertMaintenanceWindowIds.length !== 0) {
-          this.context.logger.debug(
-            `no scheduling of summary actions "${action.id}" for rule "${
-              this.context.taskInstance.params.alertId
-            }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
-          );
-          continue;
-        }
-
-        if (alert.isFilteredOut(summarizedAlerts)) {
-          continue;
-        }
-
-        // As the alert has neither scheduled actions and nor end time, the alert is not active or recovered.
-        // This happens when the alert is still in the task state but hasn't been reported by the rule type
-        // as it has been pushed above the max alerts limit by a new alert.
-        if (!alert.hasScheduledActions() && alert.getState().end === undefined) {
-          this.context.logger.warn(
-            `An alert (id:${alert.getId()}) has been skipped due to max alerts limit`
-          );
-          continue;
-        }
-
-        const actionGroup =
-          alert.getScheduledActionOptions()?.actionGroup ||
-          this.context.ruleType.recoveryActionGroup.id;
-
-        if (!this.ruleTypeActionGroups!.has(actionGroup)) {
-          this.context.logger.error(
-            `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
-          );
-          continue;
-        }
-
-        // only actions with notifyWhen set to "on status change" should return
-        // notifications for flapping pending recovered alerts
+      for (const alert of Object.values(activeCurrentAlerts)) {
         if (
-          alert.getPendingRecoveredCount() > 0 &&
-          action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+          this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
+          this.isExecutableActiveAlert({ alert, action })
         ) {
-          continue;
+          executables.push({ action, alert });
         }
+      }
 
-        if (summarizedAlerts) {
-          const alertAsData = summarizedAlerts.all.data.find(
-            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
-          );
-          if (alertAsData) {
-            alert.setAlertAsData(alertAsData);
-          }
-        }
-
-        if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
-          if (
-            this.isRecoveredAlert(action.group) ||
-            this.isExecutableActiveAlert({ alert, action })
-          ) {
+      if (this.isRecoveredAction(action.group)) {
+        for (const alert of Object.values(recoveredCurrentAlerts)) {
+          if (this.isExecutableAlert({ alert, action, summarizedAlerts })) {
             executables.push({ action, alert });
           }
         }
@@ -196,6 +151,66 @@ export class PerAlertActionScheduler<
     }
 
     return executables;
+  }
+
+  private isExecutableAlert({
+    alert,
+    action,
+    summarizedAlerts,
+  }: {
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
+    action: RuleAction;
+    summarizedAlerts: CombinedSummarizedAlerts | null;
+  }) {
+    const alertId = alert.getId();
+    const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
+    if (alertMaintenanceWindowIds.length !== 0) {
+      this.context.logger.debug(
+        `no scheduling of summary actions "${action.id}" for rule "${
+          this.context.taskInstance.params.alertId
+        }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
+      );
+      return false;
+    }
+
+    const actionGroup =
+      alert.getScheduledActionOptions()?.actionGroup ||
+      this.context.ruleType.recoveryActionGroup.id;
+
+    if (!this.ruleTypeActionGroups!.has(actionGroup)) {
+      this.context.logger.error(
+        `Invalid action group "${actionGroup}" for rule "${this.context.ruleType.id}".`
+      );
+      return false;
+    }
+
+    if (alert.isFilteredOut(summarizedAlerts)) {
+      return false;
+    }
+
+    if (this.isAlertMuted(alertId)) {
+      return false;
+    }
+
+    // only actions with notifyWhen set to "on status change" should return
+    // notifications for flapping pending recovered alerts
+    if (
+      alert.getPendingRecoveredCount() > 0 &&
+      action?.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+    ) {
+      return false;
+    }
+
+    if (summarizedAlerts) {
+      const alertAsData = summarizedAlerts.all.data.find(
+        (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+      );
+      if (alertAsData) {
+        alert.setAlertAsData(alertAsData);
+      }
+    }
+
+    return true;
   }
 
   private isAlertMuted(alertId: string) {
@@ -222,6 +237,10 @@ export class PerAlertActionScheduler<
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
     action: RuleAction;
   }) {
+    if (action.group !== alert.getScheduledActionOptions()?.actionGroup) {
+      return false;
+    }
+
     const alertId = alert.getId();
     const {
       context: { rule, logger, ruleLabel },
@@ -268,7 +287,7 @@ export class PerAlertActionScheduler<
     return alert.hasScheduledActions();
   }
 
-  private isRecoveredAlert(actionGroup: string) {
+  private isRecoveredAction(actionGroup: string) {
     return actionGroup === this.context.ruleType.recoveryActionGroup.id;
   }
 }
