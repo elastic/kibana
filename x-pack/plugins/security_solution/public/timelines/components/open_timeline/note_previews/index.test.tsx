@@ -264,7 +264,7 @@ describe('NotePreviews', () => {
       }
     );
 
-    expect(wrapper.find('[data-test-subj="notes-toggle-event-details"]').exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="notes-toggle-event-details"]`).exists()).toBeTruthy();
   });
 
   test('should not render toggle event details action when showToggleEventDetailsAction is false ', () => {
@@ -293,7 +293,7 @@ describe('NotePreviews', () => {
       }
     );
 
-    expect(wrapper.find('[data-test-subj="notes-toggle-event-details"]').exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="notes-toggle-event-details"]`).exists()).toBeFalsy();
   });
 
   describe('Delete Notes', () => {

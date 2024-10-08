@@ -193,7 +193,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   const { isValid, setFieldValue } = configForm;
 
   const agentsLinkHref = useCallback(
-    (policyId) => {
+    (policyId: string) => {
       if (!policy?.policy_ids?.length) return '#';
 
       return getUrlForApp(PLUGIN_ID, {
