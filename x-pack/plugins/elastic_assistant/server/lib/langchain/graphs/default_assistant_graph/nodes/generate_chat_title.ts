@@ -80,8 +80,8 @@ export async function generateChatTitle({
   } catch (e) {
     return {
       // generate a chat title if there is an error in order to complete the graph
-      // limit title to 80 characters
-      chatTitle: (e.name ?? e.message ?? e.toString()).slice(0, 80),
+      // limit title to 60 characters
+      chatTitle: (e.name ?? e.message ?? e.toString()).slice(0, 60),
       lastNode: NodeType.GENERATE_CHAT_TITLE,
     };
   }
