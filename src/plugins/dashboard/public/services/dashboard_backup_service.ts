@@ -83,7 +83,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   };
 
-  public getFilters = (): Filter => {
+  public getFilters = (): Filter[] => {
     return this.localStorage.get(DASHBOARD_FILTERS_LOCAL_KEY);
   };
 
