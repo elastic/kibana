@@ -142,7 +142,7 @@ export type InfraTelemetryEvent =
       schema: RootSchema<AddMetricsCalloutEventParams>;
     }
   | {
-      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED;
+      eventType: InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED;
       schema: RootSchema<AddMetricsCalloutEventParams>;
     }
   | {
