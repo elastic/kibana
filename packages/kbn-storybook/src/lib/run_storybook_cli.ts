@@ -51,10 +51,6 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         port: 9001,
         staticDir,
         logLevel: getLogLevelFromFlags(flags),
-        framework: {
-          name: '@storybook/react-webpack5',
-          options: {},
-        },
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
