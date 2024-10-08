@@ -16,9 +16,13 @@ export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 // mock mountPointPortal
-jest.mock('@kbn/react-kibana-mount', () => ({
-  MountPointPortal: jest.fn(({ children }) => children),
-}));
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
+  return {
+    ...original,
+    MountPointPortal: jest.fn(({ children }) => children),
+  };
+});
 
 const createSetupContract = (): jest.Mocked<Setup> => {
   const setupContract = {
