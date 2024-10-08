@@ -14,12 +14,15 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { ESQL_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { APP_UI_ID } from '../../../../common';
+import { getPromptSuffixForOssModel } from './common';
+
+const TOOL_NAME = 'ESQLKnowledgeBaseTool';
 
 const toolDetails = {
+  id: 'esql-knowledge-base-tool',
+  name: TOOL_NAME,
   description:
     'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the user query on a single line, with no other text. Your answer will be parsed as JSON, so never use quotes within the output and instead use backticks. Do not add any additional text to describe your output.',
-  id: 'esql-knowledge-base-tool',
-  name: 'ESQLKnowledgeBaseTool',
 };
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
@@ -31,12 +34,13 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient } = params as AssistantToolParams;
+    const { kbDataClient, isOssModel } = params as AssistantToolParams;
     if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description:
+        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),

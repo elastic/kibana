@@ -126,6 +126,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.alerts-*'],
+                privileges: ['read'],
+              },
+            ],
+          },
         },
         only_actions_role: {
           kibana: [
