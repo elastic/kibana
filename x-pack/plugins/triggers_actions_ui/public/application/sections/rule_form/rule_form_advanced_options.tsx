@@ -33,9 +33,9 @@ import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_setti
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import { Rule } from '@kbn/alerts-ui-shared';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Flapping } from '@kbn/alerting-plugin/common';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { Flapping } from '@kbn/alerting-plugin/common';
 
 const alertDelayFormRowLabel = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleForm.alertDelayLabel',
