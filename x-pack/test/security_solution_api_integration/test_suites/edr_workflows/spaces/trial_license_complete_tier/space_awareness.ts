@@ -15,6 +15,7 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { createSupertestErrorLogger } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -80,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
               `/api/endpoint/policy_response?agentId=${dataSpaceA.hosts[0].agent.id}`
             )
           )
+          .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
 
@@ -95,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
               `/api/endpoint/policy_response?agentId=${dataSpaceB.hosts[0].agent.id}`
             )
           )
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
           .send()
           .expect(404);
       });
@@ -104,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should retrieve list with only metadata for hosts in current space', async () => {
         const { body } = await adminSupertest
           .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
+          .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
 
@@ -114,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not return host data from other spaces when using kuery value', async () => {
         const { body } = await adminSupertest
           .get(addSpaceIdToPath('/', dataSpaceA.spaceId, HOST_METADATA_LIST_ROUTE))
+          .on('error', createSupertestErrorLogger(log))
           .query({
             kuery: `united.endpoint.agent.id: "${dataSpaceB.hosts[0].agent.id}"`,
           })
@@ -134,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
               HOST_METADATA_GET_ROUTE.replace('{id}', dataSpaceA.hosts[0].agent.id)
             )
           )
+          .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
       });
@@ -147,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
               HOST_METADATA_GET_ROUTE.replace('{id}', dataSpaceB.hosts[0].agent.id)
             )
           )
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
           .send()
           .expect(404);
       });
@@ -158,6 +165,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
           .query({ agentIds: [dataSpaceA.hosts[0].agent.id] })
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
 
@@ -169,6 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(addSpaceIdToPath('/', dataSpaceA.spaceId, AGENT_STATUS_ROUTE))
           .query({ agentIds: [dataSpaceB.hosts[0].agent.id] })
           .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
 
