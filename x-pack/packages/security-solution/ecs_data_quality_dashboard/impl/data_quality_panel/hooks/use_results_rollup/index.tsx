@@ -253,17 +253,34 @@ export const useResultsRollup = ({
     setPatternIndexNames({});
   }, [ilmPhases, patterns]);
 
-  return {
-    onCheckCompleted,
-    patternIndexNames,
-    patternRollups,
-    totalDocsCount,
-    totalIncompatible,
-    totalIndices,
-    totalIndicesChecked,
-    totalSameFamily,
-    totalSizeInBytes,
-    updatePatternIndexNames,
-    updatePatternRollup,
-  };
+  const useResultsRollupReturnValue = useMemo(
+    () => ({
+      onCheckCompleted,
+      patternIndexNames,
+      patternRollups,
+      totalDocsCount,
+      totalIncompatible,
+      totalIndices,
+      totalIndicesChecked,
+      totalSameFamily,
+      totalSizeInBytes,
+      updatePatternIndexNames,
+      updatePatternRollup,
+    }),
+    [
+      onCheckCompleted,
+      patternIndexNames,
+      patternRollups,
+      totalDocsCount,
+      totalIncompatible,
+      totalIndices,
+      totalIndicesChecked,
+      totalSameFamily,
+      totalSizeInBytes,
+      updatePatternIndexNames,
+      updatePatternRollup,
+    ]
+  );
+
+  return useResultsRollupReturnValue;
 };
