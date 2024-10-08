@@ -63,7 +63,6 @@ export const GridPanel = forwardRef<
           css={css`
             opacity: 0;
             display: flex;
-            cursor: move;
             position: absolute;
             align-items: center;
             justify-content: center;
