@@ -104,9 +104,10 @@ function useChatWithoutContext({
     (error: Error) => {
       if (error instanceof AbortError) {
         setChatState(ChatState.Aborted);
-      } else {
-        setChatState(ChatState.Error);
+        return;
       }
+
+      setChatState(ChatState.Error);
 
       if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [

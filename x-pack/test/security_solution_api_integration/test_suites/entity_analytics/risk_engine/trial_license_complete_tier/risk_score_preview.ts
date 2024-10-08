@@ -263,6 +263,60 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ]);
         });
+
+        it('calculates risk from 5 alerts, all in closed state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(10).fill(doc));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 5,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
+        it('calculates risk from 10 alerts, some in closed state, some in open state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const docStatusClosed = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          const docStatusOpen = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'open' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(5).fill(docStatusClosed));
+          await indexListOfDocuments(Array(5).fill(docStatusOpen));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 10,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
       });
 
       context('with a rule generating alerts with risk_score of 100', () => {

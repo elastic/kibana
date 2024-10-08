@@ -18,8 +18,8 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardContainerFactory } from '..';
+import { DashboardCreationOptions } from '../..';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
 import { DashboardRenderer } from './dashboard_renderer';
 
 jest.mock('../embeddable/dashboard_container_factory', () => ({}));
@@ -55,7 +55,6 @@ describe('dashboard renderer', () => {
 
   test('saved object id & creation options are passed to dashboard factory', async () => {
     const options: DashboardCreationOptions = {
-      useControlGroupIntegration: true,
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
     };

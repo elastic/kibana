@@ -26,8 +26,8 @@ import { embeddableService, screenshotModeService } from '../../services/kibana_
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactoryDefinition,
-  DashboardCreationOptions,
 } from '../embeddable/dashboard_container_factory';
+import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 
