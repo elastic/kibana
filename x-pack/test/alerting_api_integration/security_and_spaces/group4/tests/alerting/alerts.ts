@@ -1184,7 +1184,7 @@ instanceStateValue: true
             reference,
             overwrites: {
               enabled: false,
-              schedule: { interval: '1s' },
+              schedule: { interval: '1m' },
             },
           });
 
@@ -1304,7 +1304,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '1h' },
             },
             notifyWhen: 'onActiveAlert',
             throttle: null,
@@ -1435,7 +1435,7 @@ instanceStateValue: true
           const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
             reference,
             overwrites: {
-              schedule: { interval: '1s' },
+              schedule: { interval: '3s' },
             },
             notifyWhen: 'onThrottleInterval',
             throttle: '10s',

@@ -131,6 +131,7 @@ function getIndexRecordActionType() {
           secrets,
           reference: params.reference,
           source: 'action:test.index-record',
+          '@timestamp': new Date(),
         },
       });
       return { status: 'ok', actionId };
