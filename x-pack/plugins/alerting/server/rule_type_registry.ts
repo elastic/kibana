@@ -72,6 +72,7 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'fieldsForAAD'
+    | 'alerts'
   > {
   id: string;
   enabledInLicense: boolean;

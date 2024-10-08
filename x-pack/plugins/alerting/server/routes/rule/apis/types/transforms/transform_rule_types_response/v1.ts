@@ -22,7 +22,7 @@ export const transformRuleTypesResponse = (
       default_schedule_interval: ruleType.defaultScheduleInterval,
       does_set_recovery_context: ruleType.doesSetRecoveryContext,
       enabled_in_license: ruleType.enabledInLicense,
-      field_for_a_a_d: ruleType.fieldsForAAD,
+      fields_for_a_a_d: ruleType.fieldsForAAD,
       has_alerts_mappings: ruleType.hasAlertsMappings,
       has_fields_for_a_a_d: ruleType.hasFieldsForAAD,
       id: ruleType.id,
