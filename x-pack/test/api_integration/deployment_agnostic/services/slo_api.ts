@@ -5,41 +5,15 @@
  * 2.0.
  */
 
-import {
-  fetchHistoricalSummaryParamsSchema,
-  FetchHistoricalSummaryResponse,
-} from '@kbn/slo-schema';
-import * as t from 'io-ts';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import {
+  CreateSLOInput,
+  FetchHistoricalSummaryParams,
+  FetchHistoricalSummaryResponse,
+  FindSLODefinitionsResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
-
-interface SloParams {
-  id?: string;
-  name: string;
-  description: string;
-  indicator: {
-    type: 'sli.kql.custom';
-    params: {
-      index: string;
-      good: string;
-      total: string;
-      timestampField: string;
-    };
-  };
-  timeWindow: {
-    duration: string;
-    type: string;
-  };
-  budgetingMethod: string;
-  objective: {
-    target: number;
-  };
-  groupBy: string;
-}
-
-type FetchHistoricalSummaryParams = t.OutputOf<
-  typeof fetchHistoricalSummaryParamsSchema.props.body
->;
 
 interface SloRequestParams {
   id: string;
@@ -56,12 +30,25 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
   const requestTimeout = 30 * 1000;
 
   return {
-    async create(slo: SloParams, roleAuthc: RoleCredentials) {
+    async create(slo: CreateSLOInput, roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send(slo);
+      return body;
+    },
+
+    async update(
+      { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/observability/slos/${sloId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(slo);
+
       return body;
     },
 
@@ -71,6 +58,17 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
       return response;
+    },
+
+    async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_definitions`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
     },
 
     async fetchHistoricalSummary(
@@ -108,6 +106,24 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
           throw new Error(`No SLO with id '${id}' found`);
+        }
+        return response.body;
+      });
+    },
+
+    async waitForSloUpdated(
+      { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
+      roleAuthc: RoleCredentials
+    ) {
+      return await retry.tryForTime(retryTimeout, async () => {
+        const response = await supertestWithoutAuth
+          .put(`/api/observability/slos/${sloId}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(slo)
+          .timeout(requestTimeout);
+        if (response.body.id === undefined) {
+          throw new Error(`No SLO with id '${sloId}' found`);
         }
         return response.body;
       });
