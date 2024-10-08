@@ -21,7 +21,8 @@ components:
         program:
           type: string
         stateSettings:
-          type: string
+          type: object
+          additionalProperties: true
         redactVars:
           type: array
           items:

@@ -28,6 +28,6 @@ export const ApiDefinition = z.string();
 export type CelInput = z.infer<typeof CelInput>;
 export const CelInput = z.object({
   program: z.string(),
-  stateSettings: z.object({}).passthrough(),
+  stateSettings: z.object({}).catchall(z.unknown()),
   redactVars: z.array(z.string()),
 });
