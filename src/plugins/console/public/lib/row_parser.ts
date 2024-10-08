@@ -20,7 +20,9 @@ export const MODE = {
 
 // eslint-disable-next-line import/no-default-export
 export default class RowParser {
-  constructor(private readonly editor: CoreEditor) {}
+  constructor(private readonly editor: CoreEditor) {
+    console.log('built');
+  }
 
   MODE = MODE;
 
