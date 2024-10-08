@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-
-export interface DataUsageSetupDependencies {}
-
-export interface DataUsageStartDependencies {}
-
-export interface DataUsageServerSetup {}
-
-export interface DataUsageServerStart {}
+export * from './usage_metrics';
+export * from './data_streams';
