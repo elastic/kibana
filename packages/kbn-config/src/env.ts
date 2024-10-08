@@ -8,7 +8,7 @@
  */
 
 import { resolve, join } from 'path';
-import loadJsonFile from 'load-json-file';
+import { loadJsonFileSync } from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
 import { PackageInfo, EnvironmentMode } from './types';
@@ -57,7 +57,7 @@ export class Env {
    */
   public static createDefault(repoRoot: string, options: EnvOptions, pkg?: RawPackageInfo): Env {
     if (!pkg) {
-      pkg = loadJsonFile.sync(join(repoRoot, 'package.json')) as RawPackageInfo;
+      pkg = loadJsonFileSync(join(repoRoot, 'package.json')) as RawPackageInfo;
     }
     return new Env(repoRoot, pkg, options);
   }

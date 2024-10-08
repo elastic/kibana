@@ -8,7 +8,7 @@
  */
 
 import { join } from 'path';
-import loadJsonFile from 'load-json-file';
+import { loadJsonFileSync } from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -55,7 +55,7 @@ export function createRootWithSettings(
 ) {
   let pkg: RawPackageInfo | undefined;
   if (customKibanaVersion) {
-    pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+    pkg = loadJsonFileSync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
     pkg.version = customKibanaVersion;
   }
 
