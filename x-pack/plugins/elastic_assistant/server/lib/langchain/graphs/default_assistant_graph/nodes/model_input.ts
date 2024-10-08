@@ -22,7 +22,9 @@ interface ModelInputParams extends NodeParamsBase {
 export function modelInput({ logger, state }: ModelInputParams): Partial<AgentState> {
   logger.debug(() => `${NodeType.MODEL_INPUT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const hasRespondStep = state.isStream && state.bedrockChatEnabled && state.llmType === 'bedrock';
+  const hasRespondStep =
+    state.isStream &&
+    (state.isOssModel || (state.bedrockChatEnabled && state.llmType === 'bedrock'));
 
   return {
     hasRespondStep,
