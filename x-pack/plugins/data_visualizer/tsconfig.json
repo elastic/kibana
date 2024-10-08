@@ -12,7 +12,6 @@
     "types/**/*"
   ],
   "kbn_references": [
-    "@kbn/ace",
     "@kbn/aiops-components",
     "@kbn/charts-plugin",
     "@kbn/cloud-plugin",
