@@ -13,16 +13,18 @@ export const transformRuleTypesResponse = (
 ): TypesRulesResponseBodyV1 => {
   return Array.from(ruleTypes).map((ruleType: RegistryAlertTypeWithAuth) => {
     return {
-      action_groups: ruleType.actionGroups,
-      action_variables: ruleType.actionVariables,
-      alerts: ruleType.alerts,
+      ...(ruleType.actionGroups ? { action_groups: ruleType.actionGroups } : {}),
+      ...(ruleType.actionVariables ? { action_variables: ruleType.actionVariables } : {}),
+      ...(ruleType.alerts ? { alerts: ruleType.alerts } : {}),
       authorized_consumers: ruleType.authorizedConsumers,
       category: ruleType.category,
       default_action_group_id: ruleType.defaultActionGroupId,
       default_schedule_interval: ruleType.defaultScheduleInterval,
-      does_set_recovery_context: ruleType.doesSetRecoveryContext,
+      ...(ruleType.doesSetRecoveryContext !== undefined
+        ? { does_set_recovery_context: ruleType.doesSetRecoveryContext }
+        : {}),
       enabled_in_license: ruleType.enabledInLicense,
-      fields_for_a_a_d: ruleType.fieldsForAAD,
+      ...(ruleType.fieldsForAAD ? { fields_for_a_a_d: ruleType.fieldsForAAD } : {}),
       has_alerts_mappings: ruleType.hasAlertsMappings,
       has_fields_for_a_a_d: ruleType.hasFieldsForAAD,
       id: ruleType.id,
