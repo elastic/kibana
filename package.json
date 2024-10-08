@@ -1508,6 +1508,7 @@
     "@storybook/node-logger": "^8.3.5",
     "@storybook/preview-web": "^7.6.17",
     "@storybook/react": "^8.3.5",
+    "@storybook/react-webpack5": "^8.3.5",
     "@storybook/testing-react": "^2.0.1",
     "@storybook/theming": "^8.3.5",
     "@testing-library/dom": "^8.19.0",

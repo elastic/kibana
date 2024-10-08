@@ -8,11 +8,11 @@
  */
 
 import { join } from 'path';
-import { logger } from '@storybook/node-logger';
-import buildStandalone from '@storybook/react/standalone';
+import { build } from '@storybook/react-webpack5';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import type { StorybookConfig } from '@storybook/react-webpack5';
 
 // @ts-expect-error internal dep of storybook
 import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
@@ -45,24 +45,27 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         UiSharedDepsSrc.distDir,
         'src/plugins/kibana_react/public/assets:plugins/kibanaReact/assets',
       ];
-      const config: Record<string, any> = {
+      const config: StorybookConfig = {
         configDir,
         mode: flags.site ? 'static' : 'dev',
         port: 9001,
         staticDir,
+        logLevel: getLogLevelFromFlags(flags),
+        framework: {
+          name: '@storybook/react-webpack5',
+          options: { fastRefresh: true },
+        },
       };
       if (flags.site) {
         config.outputDir = join(constants.ASSET_DIR, name);
       }
-
-      logger.setLevel(getLogLevelFromFlags(flags));
 
       // force storybook to use our transpilation rather than ts-node or anything else
       interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
       interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
       interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
-      await buildStandalone(config);
+      await build(config);
 
       // Line is only reached when building the static version
       if (flags.site) process.exit();
