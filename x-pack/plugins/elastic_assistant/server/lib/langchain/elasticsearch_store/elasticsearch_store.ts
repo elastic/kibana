@@ -26,7 +26,6 @@ import { getTermsSearchQuery } from './helpers/get_terms_search_query';
 import { getVectorSearchQuery } from './helpers/get_vector_search_query';
 import type { MsearchResponse } from './helpers/types';
 import {
-  ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
@@ -93,7 +92,7 @@ export class ElasticsearchStore extends VectorStore {
     this.logger = logger;
     this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
-    this.kbResource = kbResource ?? ESQL_RESOURCE;
+    this.kbResource = kbResource;
     this.kbDataClient = kbDataClient;
   }
 

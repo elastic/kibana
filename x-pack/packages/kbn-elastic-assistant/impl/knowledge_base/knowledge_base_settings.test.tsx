@@ -69,7 +69,6 @@ jest.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => ({
     return {
       data: {
         elser_exists: true,
-        esql_exists: true,
         index_exists: true,
         pipeline_exists: true,
       },
@@ -98,7 +97,6 @@ describe('Knowledge base settings', () => {
       return {
         data: {
           elser_exists: true,
-          esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
           is_setup_available: true,
@@ -122,7 +120,6 @@ describe('Knowledge base settings', () => {
       return {
         data: {
           elser_exists: false,
-          esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
         },
