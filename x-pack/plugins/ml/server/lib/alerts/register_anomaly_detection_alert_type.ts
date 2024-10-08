@@ -255,7 +255,7 @@ export function registerAnomalyDetectionAlertType({
       spaceId,
       rule,
     }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const alertingService = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
@@ -293,7 +293,6 @@ export function registerAnomalyDetectionAlertType({
           [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
           [ALERT_TOP_RECORDS]: payload.top_records,
           [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
         };
 
         if (alertDoc) {

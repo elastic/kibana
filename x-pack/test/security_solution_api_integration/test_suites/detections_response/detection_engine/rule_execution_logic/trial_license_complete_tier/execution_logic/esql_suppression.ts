@@ -64,8 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
   const getNonAggRuleQueryWithMetadata = (id: string) =>
     `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(id)}`;
 
-  // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-  describe('@ess @serverless @skipInServerlessMKI ES|QL rule type, alert suppression', () => {
+  describe('@ess @serverless ES|QL rule type, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });

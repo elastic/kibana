@@ -11,7 +11,6 @@ import {
 } from '@kbn/elastic-assistant';
 import { useQuery } from '@tanstack/react-query';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
 
 export const AssistantOverlay: React.FC = () => {
@@ -31,16 +30,10 @@ export const AssistantOverlay: React.FC = () => {
   });
 
   const { assistantAvailability } = useAssistantContext();
-  const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
 
   if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
 
-  return (
-    <ElasticAssistantOverlay
-      isFlyoutMode={aiAssistantFlyoutMode}
-      currentUserAvatar={currentUserAvatar}
-    />
-  );
+  return <ElasticAssistantOverlay currentUserAvatar={currentUserAvatar} />;
 };

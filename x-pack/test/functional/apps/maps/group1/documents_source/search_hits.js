@@ -113,7 +113,8 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('2');
       });
 
-      it('should apply layer query to fit to bounds', async () => {
+      // Fails in chrome 128+: https://github.com/elastic/kibana/issues/175378
+      it.skip('should apply layer query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');

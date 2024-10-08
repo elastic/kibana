@@ -22988,6 +22988,9 @@
             "multi-line": {
               "type": "keyword"
             },
+            "served_from_cache": {
+              "type": "keyword"
+            },
             "this-is-a-very-long-tag-name-without-any-spaces": {
               "type": "keyword"
             }

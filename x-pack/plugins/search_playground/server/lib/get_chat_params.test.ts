@@ -6,12 +6,13 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
+  GEMINI_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { Prompt } from '../../common/prompt';
+import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
@@ -20,12 +21,13 @@ jest.mock('@kbn/langchain/server', () => {
   return {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
-    ActionsClientLlm: jest.fn(),
+    ActionsClientSimpleChatModel: jest.fn(),
   };
 });
 
 jest.mock('../../common/prompt', () => ({
   Prompt: jest.fn((instructions) => instructions),
+  QuestionRewritePrompt: jest.fn((instructions) => instructions),
 }));
 
 jest.mock('uuid', () => ({
@@ -64,7 +66,42 @@ describe('getChatParams', () => {
       context: true,
       type: 'openai',
     });
+    expect(QuestionRewritePrompt).toHaveBeenCalledWith({
+      type: 'openai',
+    });
     expect(ActionsClientChatOpenAI).toHaveBeenCalledWith(expect.anything());
+    expect(result.chatPrompt).toContain('Hello, world!');
+  });
+
+  it('returns the correct chat model and prompt for Gemeni', async () => {
+    mockActionsClient.get.mockResolvedValue({ id: '1', actionTypeId: GEMINI_CONNECTOR_ID });
+
+    const result = await getChatParams(
+      {
+        connectorId: '1',
+        model: 'gemini-1.5-pro',
+        prompt: 'Hello, world!',
+        citations: true,
+      },
+      { actions, request, logger }
+    );
+    expect(Prompt).toHaveBeenCalledWith('Hello, world!', {
+      citations: true,
+      context: true,
+      type: 'gemini',
+    });
+    expect(QuestionRewritePrompt).toHaveBeenCalledWith({
+      type: 'gemini',
+    });
+    expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
+      temperature: 0,
+      llmType: 'gemini',
+      logger: expect.anything(),
+      model: 'gemini-1.5-pro',
+      connectorId: '1',
+      actionsClient: expect.anything(),
+      streaming: true,
+    });
     expect(result.chatPrompt).toContain('Hello, world!');
   });
 
@@ -86,14 +123,17 @@ describe('getChatParams', () => {
       context: true,
       type: 'anthropic',
     });
-    expect(ActionsClientLlm).toHaveBeenCalledWith({
+    expect(QuestionRewritePrompt).toHaveBeenCalledWith({
+      type: 'anthropic',
+    });
+    expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
       temperature: 0,
       llmType: 'bedrock',
-      traceId: 'test-uuid',
       logger: expect.anything(),
       model: 'custom-model',
       connectorId: '2',
       actionsClient: expect.anything(),
+      streaming: true,
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });

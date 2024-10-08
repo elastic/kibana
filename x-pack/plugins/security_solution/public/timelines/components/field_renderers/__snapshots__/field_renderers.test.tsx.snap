@@ -84,16 +84,6 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
-<DocumentFragment>
-  <span
-    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-  >
-    Feb 7, 2019 @ 17:19:41.636
-  </span>
-</DocumentFragment>
-`;
-
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   .c0 > span.euiToolTipAnchor {

@@ -1,7 +1,7 @@
 get:
   summary: Get agent binary download source by ID
   tags:
-    - Agent binary download sources
+    - Elastic Agent binary download sources
   responses:
     '200':
       description: OK
@@ -26,7 +26,7 @@ parameters:
 delete:
   summary: Delete agent binary download source by ID
   tags:
-    - Agent binary download sources
+    - Elastic Agent binary download sources
   operationId: delete-download-source
   responses:
     '200':
@@ -47,7 +47,7 @@ delete:
 put:
   summary: Update agent binary download source by ID
   tags:
-    - Agent binary download sources
+    - Elastic Agent binary download sources
   operationId: update-download-source
   requestBody:
     content:

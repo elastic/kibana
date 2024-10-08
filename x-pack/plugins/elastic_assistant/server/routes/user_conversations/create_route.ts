@@ -21,7 +21,7 @@ import { performChecks } from '../helpers';
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
       options: {
@@ -30,7 +30,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -54,12 +54,14 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
+          const currentUser = ctx.elasticAssistant.getCurrentUser();
+          const userFilter = currentUser?.username
+            ? `name: "${currentUser?.username}"`
+            : `id: "${currentUser?.profile_uid}"`;
           const result = await dataClient?.findDocuments({
             perPage: 100,
             page: 1,
-            filter: `users:{ id: "${
-              ctx.elasticAssistant.getCurrentUser()?.profile_uid
-            }" } AND title:${request.body.title}`,
+            filter: `users:{ ${userFilter} } AND title:${request.body.title}`,
             fields: ['title'],
           });
           if (result?.data != null && result.total > 0) {

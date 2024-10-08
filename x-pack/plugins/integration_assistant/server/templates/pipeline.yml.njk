@@ -5,17 +5,25 @@ processors:
       field: ecs.version
       tag: set_ecs_version
       value: '{{ ecs_version }}'
+  - set:
+      field: originalMessage
+      copy_from: message
+      tag: copy_original_message
   - rename:
-      field: message
+      field: originalMessage
       target_field: event.original
       tag: rename_message
       ignore_missing: true
       if: ctx.event?.original == null
   - remove:
+      field: originalMessage
+      ignore_missing: true
+      tag: remove_copied_message
+      if: 'ctx.event?.original != null'
+  - remove:
       field: message
       ignore_missing: true
-      tag: remove_message
-      if: 'ctx.event?.original != null'{% if log_format == 'json' %}
+      tag: remove_message{% if (log_format == 'json') or (log_format == 'ndjson') %}
   - json:
       field: event.original
       tag: json_original
@@ -27,6 +35,15 @@ processors:
       target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
       ignore_missing: true{% endif %}
   {% if key == 'date' %}
+  - script:
+      description: Ensures the date processor does not receive an array value.
+      tag: script_convert_array_to_string
+      lang: painless
+      {% raw %}source: |
+        if (ctx.{% endraw %}{{ value.field.replaceAll('.', '?.') }}{% raw %} != null &&
+            ctx.{% endraw %}{{ value.field }}{% raw %} instanceof ArrayList){
+            ctx.{% endraw %}{{ value.field }}{% raw %} = ctx.{% endraw %}{{ value.field }}{% raw %}[0];
+        }{% endraw %}
   - {{ key }}:
       field: {{ value.field }}
       target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
@@ -34,6 +51,7 @@ processors:
       {% for format in value.formats %}
         - {{ format }}
       {% endfor %}
+      tag: date_processor_{{ value.field}}
       if: "ctx.{{ value.if }} != null"{% endif %}
   {% if key == 'convert' %}
   - {{ key }}:

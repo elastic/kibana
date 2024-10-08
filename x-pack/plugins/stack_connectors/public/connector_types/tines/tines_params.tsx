@@ -137,7 +137,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     }
   }, [toasts, storiesError, webhooksError]);
 
-  const showFallbackFrom = useMemo<'Story' | 'Webhook' | 'any' | null>(() => {
+  const showFallbackFrom = useMemo<'Story' | 'Webhook' | 'any' | 'error' | null>(() => {
+    if (storiesError || webhooksError) {
+      return 'error';
+    }
     if (incompleteStories && !selectedStoryOption) {
       return 'Story';
     }
@@ -150,7 +153,9 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
     return null;
   }, [
     webhookUrl,
+    storiesError,
     incompleteStories,
+    webhooksError,
     incompleteWebhooks,
     selectedStoryOption,
     selectedWebhookOption,
@@ -276,7 +281,19 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 
       {showFallbackFrom != null && (
         <EuiFlexItem>
-          {showFallbackFrom !== 'any' && (
+          {showFallbackFrom === 'error' && (
+            <>
+              <EuiCallOut
+                title={i18n.WEBHOOK_URL_ERROR_FALLBACK_TITLE}
+                color="primary"
+                data-test-subj="tines-fallbackCallout"
+              >
+                {i18n.WEBHOOK_URL_ERROR_FALLBACK}
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {(showFallbackFrom === 'Story' || showFallbackFrom === 'Webhook') && (
             <>
               <EuiCallOut
                 title={i18n.WEBHOOK_URL_FALLBACK_TITLE}

@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -22,6 +23,7 @@ import {
   getAgentTags,
   openPointInTime,
   updateAgent,
+  _joinFilters,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -135,20 +137,6 @@ describe('Agents CRUD test', () => {
       expect(searchMock).toHaveBeenCalledWith(
         expect.objectContaining({
           aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-          body: {
-            query: {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    match: {
-                      policy_id: '123',
-                    },
-                  },
-                ],
-              },
-            },
-          },
           index: '.fleet-agents',
           size: 0,
           fields: ['status'],
@@ -156,6 +144,12 @@ describe('Agents CRUD test', () => {
             status: expect.anything(),
           },
         })
+      );
+
+      expect(searchMock.mock.calls.at(-1)[0].body.query).toEqual(
+        toElasticsearchQuery(
+          _joinFilters(['fleet-agents.policy_id: 123', 'NOT status:unenrolled'])!
+        )
       );
     });
   });
@@ -414,6 +408,66 @@ describe('Agents CRUD test', () => {
         sortField: 'policy_id',
       });
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
+    });
+
+    describe('status filters', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+      it('should add inactive and unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: false,
+          kuery: '',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['NOT (status:inactive)', 'NOT status:unenrolled'])!)
+        );
+      });
+
+      it('should add unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: '',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['NOT status:unenrolled'])!)
+        );
+      });
+
+      it('should not add unenrolled filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'status:unenrolled',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:unenrolled'])!)
+        );
+      });
+
+      it('should add inactive filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: false,
+          kuery: 'status:*',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:*', 'NOT status:inactive'])!)
+        );
+      });
+
+      it('should not add inactive filter', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'status:*',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['status:*'])!)
+        );
+      });
     });
   });
 

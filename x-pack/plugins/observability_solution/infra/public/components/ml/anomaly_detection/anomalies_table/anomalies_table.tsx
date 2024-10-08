@@ -221,9 +221,9 @@ export const AnomaliesTable = ({
 }: Props) => {
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const [timeRange, setTimeRange] = useState<{ start: number; end: number }>({
-    start: datemathToEpochMillis(dateRange.from) || 0,
-    end: datemathToEpochMillis(dateRange.to, 'up') || 0,
+  const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({
+    start: dateRange.from,
+    end: dateRange.to,
   });
   const { sorting, setSorting } = useSorting<MetricsHostsAnomaly>({
     field: 'startTime',
@@ -256,8 +256,8 @@ export const AnomaliesTable = ({
     ({ isInvalid, start: startChange, end: endChange }: OnTimeChangeProps) => {
       if (!isInvalid) {
         setTimeRange({
-          start: datemathToEpochMillis(startChange)!,
-          end: datemathToEpochMillis(endChange, 'up')!,
+          start: startChange,
+          end: endChange,
         });
       }
     },
@@ -265,14 +265,17 @@ export const AnomaliesTable = ({
   );
 
   const getTimeRange = useCallback(() => {
-    if (hideDatePicker) {
-      return {
-        start: datemathToEpochMillis(dateRange.from) || 0,
-        end: datemathToEpochMillis(dateRange.to, 'up') || 0,
-      };
-    } else {
-      return timeRange;
-    }
+    const { start, end } = hideDatePicker
+      ? {
+          start: dateRange.from,
+          end: dateRange.to,
+        }
+      : timeRange;
+
+    return {
+      start: datemathToEpochMillis(start) || 0,
+      end: datemathToEpochMillis(end, 'up') || 0,
+    };
   }, [dateRange.from, dateRange.to, hideDatePicker, timeRange]);
 
   const anomalyParams = useMemo(() => {
@@ -483,8 +486,8 @@ export const AnomaliesTable = ({
       {!hideDatePicker && (
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
-            start={dateRange.from}
-            end={dateRange.to}
+            start={timeRange.start}
+            end={timeRange.end}
             showUpdateButton={false}
             onTimeChange={onTimeChange}
             width="full"

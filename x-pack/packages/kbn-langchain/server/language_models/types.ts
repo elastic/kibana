@@ -16,7 +16,7 @@ export interface InvokeAIActionParamsSchema {
     function_call?: {
       arguments: string;
       name: string;
-    };
+    } | null;
     tool_calls?: Array<{
       id: string;
 

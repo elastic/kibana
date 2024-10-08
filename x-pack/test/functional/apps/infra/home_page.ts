@@ -555,6 +555,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
+
+      it('should not allow adding more than 20 custom metrics', async () => {
+        // open
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraHome.addCustomMetric(field);
+        }
+        const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
+        // there are 6 default metrics in the context menu for hosts
+        expect(metricsCount).to.eql(20);
+
+        await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
+        // close
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+      });
     });
 
     describe('alerts flyouts', () => {

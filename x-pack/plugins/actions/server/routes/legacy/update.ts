@@ -14,7 +14,9 @@ import { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const bodySchema = schema.object({
@@ -34,10 +36,19 @@ export const updateActionRoute = (
       options: {
         access: 'public',
         summary: `Update a connector`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

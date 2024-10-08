@@ -21,6 +21,7 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -167,3 +168,6 @@ export const useAiSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 
 export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
+
+export const useSemanticSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([{ text: SEMANTIC_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

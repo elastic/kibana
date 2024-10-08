@@ -60,13 +60,16 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
     apiLogs: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         updateView: (_, { results }) => results,
       },
     ],
     meta: [
       DEFAULT_META,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         updateView: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
@@ -80,12 +83,14 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
     polledData: [
       {} as ApiLogsData,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         storePolledData: (_, data) => data,
       },
     ],
     intervalId: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onPollStart: (_, { intervalId }) => intervalId,
       },
     ],

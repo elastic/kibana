@@ -34,6 +34,7 @@ export function ServiceField({
 }) {
   return (
     <PopoverExpression
+      dataTestSubj="apmServiceField"
       value={currentValue || allOptionText}
       title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
@@ -68,6 +69,7 @@ export function EnvironmentField({
 }) {
   return (
     <PopoverExpression
+      dataTestSubj="apmEnvironmentField"
       value={getEnvironmentLabel(currentValue)}
       title={i18n.translate('xpack.apm.alerting.fields.environment', {
         defaultMessage: 'Environment',
@@ -106,7 +108,11 @@ export function TransactionNameField({
   });
 
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmTransactionNameField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.alerting.transaction.name.custom.text', {
@@ -139,7 +145,11 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmTransactionTypeField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
@@ -172,7 +182,11 @@ export function ErrorGroupingKeyField({
     defaultMessage: 'Error grouping key',
   });
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmErrorGroupingKeyField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.errorKeySelectCustomOptionText', {

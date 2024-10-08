@@ -10,7 +10,11 @@ import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type {
+  ElasticCuratedModelName,
+  ElserVersion,
+  InferenceAPIConfigResponse,
+} from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
@@ -30,6 +34,8 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
   modelDownloadsQuery,
+  curatedModelsParamsSchema,
+  curatedModelsQuerySchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -63,16 +69,16 @@ export const populateInferenceServicesProvider = (client: IScopedClusterClient) 
 
     try {
       // Check if model is used by an inference service
-      const { models } = await esClient.transport.request<{
-        models: InferenceAPIConfigResponse[];
+      const { endpoints } = await esClient.transport.request<{
+        endpoints: InferenceAPIConfigResponse[];
       }>({
         method: 'GET',
         path: `/_inference/_all`,
       });
 
       const inferenceAPIMap = groupBy(
-        models,
-        (model) => model.service === 'elser' && model.service_settings.model_id
+        endpoints,
+        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -665,7 +671,8 @@ export function trainedModelsRoutes(
         try {
           const { deploymentId, modelId } = request.params;
 
-          const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+          const results: Record<string, { success: boolean; error?: ErrorType }> =
+            Object.create(null);
 
           for (const id of deploymentId.split(',')) {
             try {
@@ -919,6 +926,49 @@ export function trainedModelsRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/curated_model_config Gets curated model config
+   * @apiName ModelsCuratedConfigs
+   * @apiDescription Gets curated model config for the specified model based on cluster architecture
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/{modelName}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: curatedModelsParamsSchema,
+            query: curatedModelsQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const body = await modelsProvider(client, mlClient, cloud).getCuratedModelConfig(
+              request.params.modelName as ElasticCuratedModelName,
+              { version: request.query.version as ElserVersion }
+            );
 
             return response.ok({
               body,

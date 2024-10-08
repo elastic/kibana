@@ -149,7 +149,7 @@ $ DEV=true SNAPSHOT=true make release-darwin/amd64
 
 # Run dev build, provide your fingerprint and service token from before
 # Replace 8.13.0-SNAPSHOT with the latest version on main
-$ ./build/binaries/fleet-server-8.13.0-SNAPSHOT-darwin-x86_64/fleet-server -c fleet-server.dev.yml
+$ ./build/binaries/fleet-server-8.13.0-SNAPSHOT-darwin-aarch64/fleet-server -c fleet-server.dev.yml
 ```
 
 Now you should have a local ES snapshot running on http://localhost:9200, a local Kibana running on http://localhost:5601, and a local Fleet Server running on http://localhost:8220. You can now navigate to http://localhost:5601/app/fleet and [enroll agents](#enroll-agents).

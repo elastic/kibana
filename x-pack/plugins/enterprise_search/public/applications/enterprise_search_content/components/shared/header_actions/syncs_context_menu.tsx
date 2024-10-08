@@ -73,6 +73,8 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
 
+  const isWaitingForConnector = !connector?.status || connector?.status === ConnectorStatus.CREATED;
+
   const shouldShowDocumentLevelSecurity =
     productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
   const shouldShowIncrementalSync =
@@ -175,7 +177,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
     <EuiPopover
       button={
         <EuiButton
-          disabled={disabled}
+          disabled={disabled || isWaitingForConnector}
           data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
           iconType="arrowDown"

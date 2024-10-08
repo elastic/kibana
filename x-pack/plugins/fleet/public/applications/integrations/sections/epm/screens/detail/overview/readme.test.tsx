@@ -35,6 +35,6 @@ describe('Readme', () => {
     const img = result.getByAltText('Image');
 
     expect(img).toHaveStyle('max-width: 100%');
-    expect(img).toHaveAttribute('src', '/mock/api/fleet/epm/packages/test/1.0.0//img/image.png');
+    expect(img).toHaveAttribute('src', '/mock/api/fleet/epm/packages/test/1.0.0/img/image.png');
   });
 });

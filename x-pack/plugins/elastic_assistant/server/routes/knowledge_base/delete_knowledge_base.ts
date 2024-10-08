@@ -20,8 +20,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import { ESQL_RESOURCE } from './constants';
 import { getKbResource } from './get_kb_resource';
 
 /**
@@ -53,42 +52,25 @@ export const deleteKnowledgeBaseRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
-        const pluginName = getPluginNameFromRequest({
-          request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
-        });
-        const enableKnowledgeBaseByDefault =
-          assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
         try {
           const kbResource = getKbResource(request);
-
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          let esStore = new ElasticsearchStore(
-            esClient,
-            KNOWLEDGE_BASE_INDEX_PATTERN,
-            logger,
-            telemetry
-          );
 
-          // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled, only need an esStore w/ kbDataClient
-          if (enableKnowledgeBaseByDefault) {
-            const knowledgeBaseDataClient =
-              await assistantContext.getAIAssistantKnowledgeBaseDataClient(false);
-            if (!knowledgeBaseDataClient) {
-              return response.custom({ body: { success: false }, statusCode: 500 });
-            }
-            esStore = new ElasticsearchStore(
-              esClient,
-              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
-              logger,
-              telemetry,
-              'elserId', // Not needed for delete ops
-              kbResource,
-              knowledgeBaseDataClient
-            );
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+          if (!knowledgeBaseDataClient) {
+            return response.custom({ body: { success: false }, statusCode: 500 });
           }
+          const esStore = new ElasticsearchStore(
+            esClient,
+            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
+            logger,
+            telemetry,
+            'elserId', // Not needed for delete ops
+            kbResource,
+            knowledgeBaseDataClient
+          );
 
           if (kbResource === ESQL_RESOURCE) {
             // For now, tearing down the Knowledge Base is fine, but will want to support removing specific assets based

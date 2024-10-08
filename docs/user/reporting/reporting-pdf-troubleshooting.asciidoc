@@ -4,7 +4,10 @@
 <titleabbrev>PDF/PNG</titleabbrev>
 ++++
 
-For the most reliable configuration of PDF/PNG {report-features}, consider installing {kib} using <<docker,Docker>> or using <<set-up-on-cloud,Elastic Cloud>>.
+[NOTE]
+============
+include::reporting-pdf-limitations.asciidoc[]
+============
 
 For more advice about common problems, refer to <<reporting-troubleshooting>>.
 
@@ -99,10 +102,10 @@ Handle the generated output with care.
 [[reporting-troubleshooting-system-requirements]]
 === System requirements
 
-In Elastic Cloud, the {kib} instances that most configurations provide by default is for 1GB of RAM for the instance.
-That is enough for {kib} {report-features} when the visualization or dashboard is relatively simple, such as a single pie chart or a dashboard with a few visualizations.
-However, certain visualization types incur more load than others.
-For example, a TSVB panel has a lot of network requests to render.
+In Elastic Cloud, the {kib} instances that most configurations provide by default is for 1GB of RAM for the
+instance. That is enough for {kib} {report-features} when the visualization or dashboard is relatively simple,
+such as a single pie chart or a dashboard with a few visualizations. However, certain visualization types
+incur more load than others. For example, a TSVB panel has a lot of network requests to render.
 
 If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`.
 In this case, try increasing the memory for the {kib} instance to 2GB.

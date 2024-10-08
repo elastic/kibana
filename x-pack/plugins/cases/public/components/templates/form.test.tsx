@@ -562,6 +562,11 @@ describe('TemplateForm', () => {
               value: true,
             },
             {
+              key: 'test_key_3',
+              type: 'text',
+              value: null,
+            },
+            {
               key: 'test_key_4',
               type: 'toggle',
               value: true,
@@ -644,6 +649,11 @@ describe('TemplateForm', () => {
               key: 'test_key_2',
               type: 'toggle',
               value: true,
+            },
+            {
+              key: 'test_key_3',
+              type: 'text',
+              value: null,
             },
             {
               key: 'test_key_4',

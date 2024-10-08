@@ -5619,12 +5619,6 @@ Object {
                   },
                   "name": "custom",
                 },
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
               ],
               "type": "string",
             },
@@ -5633,6 +5627,12 @@ Object {
                 "error": [Function],
               },
               "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
                 Object {
                   "args": Object {
                     "method": [Function],

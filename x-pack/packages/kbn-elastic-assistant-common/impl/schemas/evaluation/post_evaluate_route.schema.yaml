@@ -1,13 +1,14 @@
 openapi: 3.0.0
 info:
   title: Post Evaluate API endpoint
-  version: '1'
+  version: "1"
 paths:
   /internal/elastic_assistant/evaluate:
     post:
-      operationId: PostEvaluate
       x-codegen-enabled: true
-      description: Perform an evaluation using sample data against a combination of Agents and Connectors
+      x-labels: [ess, serverless]
+      operationId: PostEvaluate
+      description: Perform an evaluation using sample data against a combination of Graphs and Connectors
       summary: Performs an evaluation of the Elastic Assistant
       tags:
         - Evaluation API
@@ -16,53 +17,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostEvaluateBody'
-      parameters:
-        - name: agents
-          in: query
-          description: Agents parameter description
-          required: true
-          schema:
-            type: string
-        - name: datasetName
-          in: query
-          description: Dataset Name parameter description
-          schema:
-            type: string
-        - name: evaluationType
-          in: query
-          description: Evaluation Type parameter description
-          schema:
-            type: string
-        - name: evalModel
-          in: query
-          description: Eval Model parameter description
-          schema:
-            type: string
-        - name: models
-          in: query
-          description: Models parameter description
-          required: true
-          schema:
-            type: string
-        - name: outputIndex
-          in: query
-          description: Output Index parameter description
-          required: true
-          schema:
-            $ref: '#/components/schemas/OutputIndex'
-        - name: projectName
-          in: query
-          description: Project Name parameter description
-          schema:
-            type: string
-        - name: runName
-          in: query
-          description: Run Name parameter description
-          schema:
-            type: string
+              $ref: "#/components/schemas/PostEvaluateBody"
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -76,7 +33,7 @@ paths:
                 required:
                   - evaluationId
                   - success
-        '400':
+        "400":
           description: Generic Error
           content:
             application/json:
@@ -91,36 +48,33 @@ paths:
                     type: string
 components:
   schemas:
-    OutputIndex:
-      type: string
-      pattern: '^.kibana-elastic-ai-assistant-'
-    DatasetItem:
+    PostEvaluateBody:
       type: object
+      required:
+        - graphs
+        - datasetName
+        - connectorIds
       properties:
-        id:
-          type: string
-        input:
-          type: string
-        prediction:
-          type: string
-        reference:
-          type: string
-        tags:
+        graphs:
           type: array
           items:
             type: string
-      required:
-        - input
-        - reference
-    Dataset:
-      type: array
-      items:
-        $ref: '#/components/schemas/DatasetItem'
-      default: []
-    PostEvaluateBody:
-      type: object
-      properties:
-        dataset:
-          $ref: '#/components/schemas/Dataset'
-        evalPrompt:
+        datasetName:
           type: string
+        connectorIds:
+          type: array
+          items:
+            type: string
+        runName:
+          type: string
+        alertsIndexPattern:
+          type: string
+          default: ".alerts-security.alerts-default"
+        langSmithApiKey:
+          type: string
+        replacements:
+          $ref: "../conversations/common_attributes.schema.yaml#/components/schemas/Replacements"
+          default: {}
+        size:
+          type: number
+          default: 20

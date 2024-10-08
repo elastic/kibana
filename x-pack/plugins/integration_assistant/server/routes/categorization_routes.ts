@@ -7,10 +7,8 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import {
   CATEGORIZATION_GRAPH_PATH,
   CategorizationRequestBody,
@@ -19,6 +17,7 @@ import {
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
@@ -46,7 +45,14 @@ export function registerCategorizationRoutes(
       },
       withAvailability(
         async (context, req, res): Promise<IKibanaResponse<CategorizationResponse>> => {
-          const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
+          const {
+            packageName,
+            dataStreamName,
+            rawSamples,
+            samplesFormat,
+            currentPipeline,
+            langSmithOptions,
+          } = req.body;
           const services = await context.resolve(['core']);
           const { client } = services.core.elasticsearch;
           const { getStartServices, logger } = await context.integrationAssistant;
@@ -54,21 +60,19 @@ export function registerCategorizationRoutes(
 
           try {
             const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-            const connector = req.body.connectorId
-              ? await actionsClient.get({ id: req.body.connectorId })
-              : (await actionsClient.getAll()).filter(
-                  (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-                )[0];
+            const connector = await actionsClient.get({ id: req.body.connectorId });
 
             const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-            const isOpenAI = connector.actionTypeId === '.gen-ai';
-            const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+
+            const actionTypeId = connector.actionTypeId;
+            const llmType = getLLMType(actionTypeId);
+            const llmClass = getLLMClass(llmType);
 
             const model = new llmClass({
               actionsClient,
               connectorId: connector.id,
               logger,
-              llmType: isOpenAI ? 'openai' : 'bedrock',
+              llmType,
               model: connector.config?.defaultModel,
               temperature: 0.05,
               maxTokens: 4096,
@@ -76,13 +80,23 @@ export function registerCategorizationRoutes(
               streaming: false,
             });
 
-            const graph = await getCategorizationGraph(client, model);
-            const results = await graph.invoke({
+            const parameters = {
               packageName,
               dataStreamName,
               rawSamples,
               currentPipeline,
-            });
+              samplesFormat,
+            };
+            const options = {
+              callbacks: [
+                new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
+                ...getLangSmithTracer({ ...langSmithOptions, logger }),
+              ],
+            };
+
+            const graph = await getCategorizationGraph({ client, model });
+            const results = await graph.invoke(parameters, options);
+
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (e) {
             return res.badRequest({ body: e });

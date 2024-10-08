@@ -11,7 +11,7 @@ import { act, render, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import { useActionStatus } from '../../hooks';
-import { useGetAgentPolicies, useStartServices } from '../../../../../hooks';
+import { useGetAgentPolicies, useStartServices, useAuthz } from '../../../../../hooks';
 
 import { AgentActivityFlyout } from '.';
 
@@ -25,6 +25,15 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
 const mockUseActionStatus = useActionStatus as jest.Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
 const mockUseStartServices = useStartServices as jest.Mock;
+const mockedUseAuthz = useAuthz as jest.Mock;
+
+jest.mock('@kbn/logs-shared-plugin/common', () => {
+  return {
+    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+      logsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
+    }),
+  };
+});
 
 describe('AgentActivityFlyout', () => {
   const mockOnClose = jest.fn();
@@ -65,7 +74,22 @@ describe('AgentActivityFlyout', () => {
       docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
       application: { navigateToUrl: jest.fn() },
       http: { basePath: { prepend: jest.fn() } },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              useUrl: () => 'https://locator.url',
+            }),
+          },
+        },
+      },
     });
+    mockedUseAuthz.mockReturnValue({
+      fleet: {
+        readAgents: true,
+        allAgents: true,
+      },
+    } as any);
   });
 
   beforeEach(() => {

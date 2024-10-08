@@ -21,13 +21,6 @@ export const ALLOW = i18n.translate(
   }
 );
 
-export const ALLOW_BY_DEFAULT = i18n.translate(
-  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.allowByDefaultAction',
-  {
-    defaultMessage: 'Allow by default',
-  }
-);
-
 export const ALLOWED = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.allowedColumnTitle',
   {
@@ -48,14 +41,6 @@ export const ANONYMIZE = i18n.translate(
     defaultMessage: 'Anonymize',
   }
 );
-
-export const ANONYMIZE_BY_DEFAULT = i18n.translate(
-  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.anonymizeByDefaultAction',
-  {
-    defaultMessage: 'Anonymize by default',
-  }
-);
-
 export const ANONYMIZED = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.anonymizedColumnTitle',
   {
@@ -83,14 +68,6 @@ export const DENY = i18n.translate(
     defaultMessage: 'Deny',
   }
 );
-
-export const DENY_BY_DEFAULT = i18n.translate(
-  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.denyByDefaultAction',
-  {
-    defaultMessage: 'Deny by default',
-  }
-);
-
 export const FIELD = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.fieldColumnTitle',
   {
@@ -127,13 +104,6 @@ export const UNANONYMIZE = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.unanonymizeAction',
   {
     defaultMessage: 'Unanonymize',
-  }
-);
-
-export const UNANONYMIZE_BY_DEFAULT = i18n.translate(
-  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.unanonymizeByDefaultAction',
-  {
-    defaultMessage: 'Unanonymize by default',
   }
 );
 

@@ -68,6 +68,7 @@ export const AnalyticsCollectionsLogic = kea<
     searchQuery: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         searchAnalyticsCollections: (_, { query }) => query,
       },
     ],

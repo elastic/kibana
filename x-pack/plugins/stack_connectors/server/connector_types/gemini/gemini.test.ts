@@ -131,6 +131,35 @@ describe('GeminiConnector', () => {
 
         expect(response).toEqual(connectorResponse);
       });
+
+      describe('RunApiResponseSchema', () => {
+        it('successfully validates a response that only has known properties', () => {
+          const onlyKnownProperties = {
+            ...defaultResponse.data,
+          };
+
+          expect(RunApiResponseSchema.validate(onlyKnownProperties)).toEqual(onlyKnownProperties);
+        });
+
+        it('fails validation when the response does NOT conform to the schema', () => {
+          const missingRequiredFields = {
+            // missing candidates and usageMetadata
+          };
+
+          expect(() => RunApiResponseSchema.validate(missingRequiredFields)).toThrowError();
+        });
+
+        it('removes unknown properties, but does NOT fail validation when they are present', () => {
+          const hasUnknownProperties = {
+            ...defaultResponse.data,
+            modelVersion: '1.0.0', // <-- an unknown property
+          };
+
+          expect(RunApiResponseSchema.validate(hasUnknownProperties)).toEqual({
+            ...defaultResponse.data,
+          });
+        });
+      });
     });
 
     describe('invokeAI', () => {
@@ -161,6 +190,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+            ],
           }),
           headers: {
             Authorization: 'Bearer mock_access_token',
@@ -190,6 +222,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+            ],
           }),
           headers: {
             Authorization: 'Bearer mock_access_token',
@@ -237,6 +272,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+            ],
           }),
           responseType: 'stream',
           headers: {
@@ -267,6 +305,9 @@ describe('GeminiConnector', () => {
               temperature: 0,
               maxOutputTokens: 8192,
             },
+            safety_settings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+            ],
           }),
           responseType: 'stream',
           headers: {

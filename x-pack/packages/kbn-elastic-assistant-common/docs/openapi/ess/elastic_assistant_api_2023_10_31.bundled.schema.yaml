@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  description: Manage and interact with Security Assistant resources.
+  title: Security AI Assistant API (Elastic Cloud & self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/security_ai_assistant/chat/complete:
+    post:
+      description: Creates a model response for the given chat conversation.
+      operationId: ChatComplete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompleteProps'
+        required: true
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Generic Error
+      summary: Creates a model response for the given chat conversation.
+      tags:
+        - Chat Complete API
+components:
+  schemas:
+    ChatCompleteProps:
+      type: object
+      properties:
+        connectorId:
+          type: string
+        conversationId:
+          type: string
+        isStream:
+          type: boolean
+        langSmithApiKey:
+          type: string
+        langSmithProject:
+          type: string
+        messages:
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+          type: array
+        model:
+          type: string
+        persist:
+          type: boolean
+        promptId:
+          type: string
+        responseLanguage:
+          type: string
+      required:
+        - messages
+        - persist
+        - connectorId
+    ChatMessage:
+      description: AI assistant message.
+      type: object
+      properties:
+        content:
+          description: Message content.
+          type: string
+        data:
+          $ref: '#/components/schemas/MessageData'
+          description: ECS object to attach to the context of the message.
+        fields_to_anonymize:
+          items:
+            type: string
+          type: array
+        role:
+          $ref: '#/components/schemas/ChatMessageRole'
+          description: Message role.
+      required:
+        - role
+    ChatMessageRole:
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+      type: string
+    MessageData:
+      additionalProperties: true
+      type: object
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags: !<tag:yaml.org,2002:js/undefined> ''

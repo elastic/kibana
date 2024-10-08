@@ -22,36 +22,24 @@ properties:
       - $ref: 'connector_properties_servicenow_sir.yaml'
       - $ref: 'connector_properties_swimlane.yaml'
   description:
-    description: The description for the case.
-    type: string
-    maxLength: 30000
+    $ref: 'case_description.yaml'
   owner:
     $ref: 'owners.yaml'
   settings:
     $ref: 'settings.yaml'
   severity:
-    $ref: 'severity_property.yaml'
+    $ref: 'case_severity.yaml'
   tags:
-    description: The words and phrases that help categorize cases. It can be an empty array.
-    type: array
-    maxItems: 200
-    items:
-      type: string
-      maxLength: 256
+    $ref: 'case_tags.yaml'
   category:
-    description: A word or phrase that categorizes the case.
-    type: string
-    maxLength: 50
+    $ref: 'case_category.yaml'
   title:
-    description: A title for the case.
-    type: string
-    maxLength: 160
+    $ref: 'case_title.yaml'
   customFields:
     type: array
     description: >
       Custom field values for a case.
       Any optional custom fields that are not specified in the request are set to null.
-    x-technical-preview: true
     minItems: 0
     maxItems: 10
     items:

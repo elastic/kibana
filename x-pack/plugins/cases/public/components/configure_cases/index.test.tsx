@@ -724,6 +724,166 @@ describe('ConfigureCases', () => {
       });
     });
 
+    it('deletes a custom field from template while deleting custom field from configuration', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                title: 'Case with sample template 4',
+                description: 'case desc',
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = await screen.findByTestId('custom-fields-list');
+
+      userEvent.click(
+        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
+          ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                title: 'Case with sample template 4',
+                description: 'case desc',
+                customFields: [],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
+    it('adds a custom field to template while adding a new custom field', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: null,
+            },
+          ],
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(await screen.findByTestId(`add-custom-field`));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'New custom field');
+      userEvent.click(screen.getByTestId('text-custom-field-required'));
+      userEvent.paste(
+        screen.getByTestId('text-custom-field-default-value'),
+        'This is a default value'
+      );
+
+      userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: expect.anything(),
+              label: 'New custom field',
+              type: CustomFieldTypes.TEXT as const,
+              required: true,
+              defaultValue: 'This is a default value',
+            },
+          ],
+          templates: [
+            {
+              key: 'test_template_4',
+              name: 'Fourth test template',
+              caseFields: {
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: customFieldsConfigurationMock[0].type,
+                    value: customFieldsConfigurationMock[0].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[1].key,
+                    type: customFieldsConfigurationMock[1].type,
+                    value: customFieldsConfigurationMock[1].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[2].key,
+                    type: customFieldsConfigurationMock[2].type,
+                    value: null,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[3].key,
+                    type: customFieldsConfigurationMock[3].type,
+                    value: false,
+                  },
+                  {
+                    key: expect.anything(),
+                    type: CustomFieldTypes.TEXT as const,
+                    value: 'This is a default value',
+                  },
+                ],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+    });
+
     it('updates a custom field correctly', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
@@ -928,6 +1088,11 @@ describe('ConfigureCases', () => {
                     key: customFieldsConfigurationMock[1].key,
                     type: customFieldsConfigurationMock[1].type,
                     value: customFieldsConfigurationMock[1].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[2].key,
+                    type: customFieldsConfigurationMock[2].type,
+                    value: null,
                   },
                   {
                     key: customFieldsConfigurationMock[3].key,

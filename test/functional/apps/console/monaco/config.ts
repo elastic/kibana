@@ -15,5 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return configureHTTP2({
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        // enabling the monaco editor to run tests for it
+        `--console.dev.enableMonaco=true`,
+      ],
+    },
   });
 }

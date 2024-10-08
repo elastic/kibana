@@ -64,7 +64,9 @@ export const CrawlerConfigurationLogic = kea<
     localHtmlExtraction: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (_, { htmlExtraction }) => htmlExtraction,
+        // @ts-expect-error upgrade typescript v5.1.6
         fetchIndexApiSuccess: (_, index) => {
           if (isCrawlerIndex(index)) {
             return index.connector.configuration.extract_full_html?.value ?? null;

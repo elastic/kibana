@@ -123,13 +123,13 @@ export type EventCategories =
   | 'iam'
   | 'intrusion_detection'
   | 'library'
+  | 'malware'
   | 'network'
   | 'package'
   | 'process'
   | 'registry'
   | 'session'
   | 'threat'
-  | 'user'
   | 'vulnerability'
   | 'web';
 
@@ -153,90 +153,69 @@ export const ECS_EVENT_TYPES_PER_CATEGORY: {
   configuration: ['access', 'change', 'creation', 'deletion', 'info'],
   database: ['access', 'change', 'info', 'error'],
   driver: ['change', 'end', 'info', 'start'],
-  email: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  file: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  host: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  iam: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  intrusion_detection: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  library: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  network: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  package: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  process: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  registry: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  session: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  threat: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  user: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  vulnerability: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
-  web: ['access', 'change', 'creation', 'deletion', 'info', 'start'],
+  email: ['info'],
+  file: ['access', 'change', 'creation', 'deletion', 'info'],
+  host: ['access', 'change', 'end', 'info', 'start'],
+  iam: ['admin', 'change', 'creation', 'deletion', 'group', 'info', 'user'],
+  intrusion_detection: ['allowed', 'denied', 'info'],
+  library: ['start'],
+  malware: ['info'],
+  network: ['access', 'allowed', 'connection', 'denied', 'end', 'info', 'protocol', 'start'],
+  package: ['access', 'change', 'deletion', 'info', 'installation', 'start'],
+  process: ['access', 'change', 'end', 'info', 'start'],
+  registry: ['access', 'change', 'creation', 'deletion'],
+  session: ['start', 'end', 'info'],
+  threat: ['indicator'],
+  vulnerability: ['info'],
+  web: ['access', 'error', 'info'],
 };
 
 export const CATEGORIZATION_EXAMPLE_PROCESSORS = `
 If condition that determines if ctx.checkpoint?.operation is not of a specific value:
 {
-  "append": {
-      "field": "event.category",
-      "value": "network",
-      "allow_duplicates": false,
-      "if": "ctx.checkpoint?.operation != 'Log In'"
-  }
+  "field": "event.category",
+  "value": ["network"],
+  "if": "ctx.checkpoint?.operation != 'Log In'"
 }
 
 If condition that determines if ctx.checkpoint?.operation is of a specific value:
 {
-  "append": {
-      "field": "event.category",
-      "value": "authentication",
-      "allow_duplicates": false,
-      "if": "ctx.checkpoint?.operation == 'Log In'"
-  }
+  "field": "event.category",
+  "value": ["authentication"],
+  "if": "ctx.checkpoint?.operation == 'Log In'"
 }
 
 Appending multiple values when either the value Accept or Allow is found in ctx.checkpoint?.rule_action:
 {
-  "append": {
-      "field": "event.type",
-      "value": [
-          "allowed",
-          "connection"
-      ],
-      "allow_duplicates": false,
-      "if": "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)"
-  }
+  "field": "event.type",
+  "value": ["allowed", "connection"],
+  "if": "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)"
 }
 `;
 
 export const CATEGORIZATION_EXAMPLE_ANSWER = [
-  { append: { field: 'event.type', value: ['access'] } },
   {
-    append: {
-      field: 'event.type',
-      value: ['allowed', 'connection'],
-      allow_duplicates: false,
-      if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
-    },
+    field: 'event.type',
+    value: ['access'],
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['network'],
-      allow_duplicates: false,
-      if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
-    },
+    field: 'event.type',
+    value: ['allowed', 'connection'],
+    if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
   },
   {
-    append: {
-      field: 'event.type',
-      value: ['start'],
-      allow_duplicates: false,
-      if: "ctx.checkpoint?.operation == 'Log In'",
-    },
+    field: 'event.category',
+    value: ['network'],
+    if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['authentication'],
-      allow_duplicates: false,
-      if: "ctx.checkpoint?.operation == 'Log In'",
-    },
+    field: 'event.type',
+    value: ['start'],
+    if: "ctx.checkpoint?.operation == 'Log In'",
+  },
+  {
+    field: 'event.category',
+    value: ['authentication'],
+    if: "ctx.checkpoint?.operation == 'Log In'",
   },
 ];

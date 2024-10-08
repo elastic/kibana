@@ -23,7 +23,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { usePutSettingsMutation, useStartServices } from '../../../hooks';
+import { usePutSettingsMutation, useStartServices, useAuthz } from '../../../hooks';
 
 export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
@@ -92,7 +92,7 @@ export const IntegrationPreference = ({
   const [prereleaseIntegrationsChecked, setPrereleaseIntegrationsChecked] = React.useState<
     boolean | undefined
   >(undefined);
-
+  const authz = useAuthz();
   const { docLinks, notifications } = useStartServices();
 
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
@@ -153,18 +153,24 @@ export const IntegrationPreference = ({
     updateSettings(event.target.checked);
   };
 
+  const canUpdateBetaSetting = authz.fleet.allSettings;
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiSwitchNoWrap
-        label="Display beta integrations"
-        checked={
-          typeof prereleaseIntegrationsChecked !== 'undefined'
-            ? prereleaseIntegrationsChecked
-            : prereleaseIntegrationsEnabled
-        }
-        onChange={onPrereleaseSwitchChange}
-      />
-      <EuiSpacer size="l" />
+      {canUpdateBetaSetting && (
+        <>
+          <EuiSwitchNoWrap
+            label="Display beta integrations"
+            checked={
+              typeof prereleaseIntegrationsChecked !== 'undefined'
+                ? prereleaseIntegrationsChecked
+                : prereleaseIntegrationsEnabled
+            }
+            onChange={onPrereleaseSwitchChange}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiText size="s">{title}</EuiText>
       <EuiSpacer size="m" />
       <EuiForm>

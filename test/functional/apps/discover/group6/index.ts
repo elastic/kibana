@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('discover/group6', function () {
     before(async function () {
-      await browser.setWindowSize(1300, 800);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(async function unloadMakelogs() {
@@ -25,5 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_time_field_column'));
     loadTestFile(require.resolve('./_unsaved_changes_badge'));
     loadTestFile(require.resolve('./_view_mode_toggle'));
+    loadTestFile(require.resolve('./_field_stats_table'));
   });
 }

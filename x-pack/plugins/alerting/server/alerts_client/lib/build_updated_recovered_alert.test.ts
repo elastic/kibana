@@ -75,6 +75,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
+      // @ts-expect-error upgrade typescript v5.1.6
       [ALERT_START]: '2023-03-28T12:27:28.159Z',
       [ALERT_UUID]: 'abcdefg',
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -125,6 +126,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
       [ALERT_STATUS]: 'recovered',
+      // @ts-expect-error upgrade typescript v5.1.6
       [ALERT_START]: '2023-03-28T12:27:28.159Z',
       [ALERT_UUID]: 'abcdefg',
       [ALERT_WORKFLOW_STATUS]: 'open',

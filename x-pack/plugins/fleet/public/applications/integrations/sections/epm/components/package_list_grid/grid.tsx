@@ -7,12 +7,18 @@
 
 import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText, EuiAutoSizer } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiAutoSizer,
+  EuiSkeletonRectangle,
+} from '@elastic/eui';
 import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
 
-import { Loading } from '../../../../components';
 import type { IntegrationCardItem } from '../../screens/home';
 
 import { PackageCard } from '../package_card';
@@ -66,7 +72,17 @@ export const GridColumn = ({
     }
   }, []);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) {
+    return (
+      <EuiFlexGrid gutterSize="l" columns={3}>
+        {Array.from({ length: 12 }).map((_, index) => (
+          <EuiFlexItem key={index} grow={3}>
+            <EuiSkeletonRectangle height="160px" width="100%" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    );
+  }
 
   if (!list.length) {
     return (

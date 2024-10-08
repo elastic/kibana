@@ -17,6 +17,7 @@ export const deleteCaseRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Delete cases`,
+    tags: ['oas-tag:cases'],
   },
   params: {
     query: schema.object({

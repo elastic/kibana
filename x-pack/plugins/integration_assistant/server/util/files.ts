@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cpSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
+import { cpSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync, rmSync } from 'fs';
 import { dirname } from 'path';
 
 export function existsSync(path: string): boolean {
@@ -44,4 +44,8 @@ export function listDirSync(path: string): string[] {
 
 export function readSync(path: string): string {
   return readFileSync(path, { encoding: 'utf-8' });
+}
+
+export function removeDirSync(path: string): void {
+  rmSync(path, { recursive: true, force: true });
 }

@@ -217,7 +217,9 @@ export class CompareTimelinesStatus {
     if (
       templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&
-      existingTemplateTimelineVersion != null
+      existingTemplateTimelineVersion != null &&
+      typeof templateTimelineVersion === 'number' &&
+      typeof existingTemplateTimelineVersion === 'number'
     ) {
       return templateTimelineVersion <= existingTemplateTimelineVersion;
     } else if (this.templateTimelineObject.isExists && templateTimelineVersion == null) {

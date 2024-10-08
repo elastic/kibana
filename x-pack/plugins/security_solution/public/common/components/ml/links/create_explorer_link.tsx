@@ -43,7 +43,6 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
         refreshInterval: {
           pause: true,
           value: 0,
-          display: 'Off',
         },
       },
     },

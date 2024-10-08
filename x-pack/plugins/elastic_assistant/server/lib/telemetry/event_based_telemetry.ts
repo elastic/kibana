@@ -71,26 +71,13 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 };
 
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
+  isEnabledKnowledgeBase: boolean;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
-      },
-    },
     assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
@@ -110,14 +97,19 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         optional: true,
       },
     },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+      },
+    },
   },
 };
 
 export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
+  isEnabledKnowledgeBase: boolean;
   actionTypeId: string;
   model?: string;
 }> = {
@@ -129,18 +121,6 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
         description: 'Error message from Elasticsearch',
       },
     },
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
-      },
-    },
     assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
@@ -158,6 +138,12 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       _meta: {
         description: 'LLM model',
         optional: true,
+      },
+    },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
       },
     },
   },

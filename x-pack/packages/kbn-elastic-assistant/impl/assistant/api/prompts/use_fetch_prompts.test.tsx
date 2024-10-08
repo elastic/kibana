@@ -44,14 +44,14 @@ describe('useFetchPrompts', () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useFetchPrompts());
       await waitForNextUpdate();
-      expect(http.fetch).toHaveBeenCalledWith('/internal/elastic_assistant/prompts/_find', {
+      expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
         method: 'GET',
         query: {
           page: 1,
           per_page: 1000,
           filter: 'consumer:*',
         },
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         signal: undefined,
       });
 

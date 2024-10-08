@@ -17,6 +17,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -30,7 +31,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
@@ -58,13 +59,14 @@ export interface SyntheticsServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
+  alerting: AlertingPluginSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
-  features: PluginSetupContract;
-  alerting: any;
+  features: FeaturesPluginSetup;
+  alerting: AlertingPluginSetup;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;

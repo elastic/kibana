@@ -38,11 +38,13 @@ describe('Popularize field', () => {
   });
 
   test('do not updates saved object if data view is not persisted', async () => {
+    const field = { count: 0 };
     const dataView = {
       id: 'id',
       fields: {
-        getByName: () => ({ count: 0 }),
+        getByName: () => field,
       },
+      setFieldCount: jest.fn(),
       isPersisted: () => false,
     } as unknown as DataView;
     const updateSavedObjectMock = jest.fn();
@@ -62,6 +64,9 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
@@ -84,6 +89,9 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      setFieldCount: jest.fn().mockImplementation((fieldName, count) => {
+        field.count = count;
+      }),
       isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';

@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       ];
 
-      const templates = [
+      const mockTemplates = [
         {
           key: 'test_template_1',
           name: 'First test template',
@@ -196,23 +196,61 @@ export default ({ getService }: FtrProviderContext): void => {
             tags: ['sample-3'],
           },
         },
-      ] as ConfigurationPatchRequest['templates'];
+      ];
 
       const configuration = await createConfiguration(supertest, {
         ...getConfigurationRequest(),
         customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
       });
+
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
         customFields: customFieldsConfiguration,
-        templates,
+        templates: mockTemplates as ConfigurationPatchRequest['templates'],
       });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({
         ...getConfigurationOutput(true),
         customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
-        templates,
+        templates: [
+          {
+            ...mockTemplates[0],
+            caseFields: {
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+          { ...mockTemplates[1] },
+          {
+            ...mockTemplates[2],
+            caseFields: {
+              ...mockTemplates[2].caseFields,
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+        ] as ConfigurationPatchRequest['templates'],
       });
     });
 
@@ -425,35 +463,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 label: '#2',
                 type: CustomFieldTypes.TOGGLE,
                 required: false,
-              },
-            ],
-          },
-          400
-        );
-      });
-
-      it("should not update a configuration with templates with custom fields that don't exist in the configuration", async () => {
-        const configuration = await createConfiguration(supertest);
-
-        await updateConfiguration(
-          supertest,
-          configuration.id,
-          {
-            version: configuration.version,
-            templates: [
-              {
-                key: 'test_template_1',
-                name: 'First test template',
-                description: 'This is a first test template',
-                caseFields: {
-                  customFields: [
-                    {
-                      key: 'random_key',
-                      type: CustomFieldTypes.TEXT,
-                      value: 'Test',
-                    },
-                  ],
-                },
               },
             ],
           },

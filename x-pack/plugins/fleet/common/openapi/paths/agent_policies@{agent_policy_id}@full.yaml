@@ -1,7 +1,7 @@
 get:
   summary: Get full agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   operationId: agent-policy-full
   responses:
     '200':

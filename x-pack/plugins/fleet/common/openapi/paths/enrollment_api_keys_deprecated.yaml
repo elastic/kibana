@@ -1,7 +1,7 @@
 get:
   summary: List enrollment API keys
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK
@@ -38,7 +38,7 @@ get:
 post:
   summary: Create enrollment API key
   tags:
-    - Enrollment API keys
+    - Fleet enrollment API keys
   responses:
     '200':
       description: OK

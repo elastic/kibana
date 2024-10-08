@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 describe('Storage explorer page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:05:00.000Z';
@@ -56,6 +57,40 @@ describe('Storage explorer page', () => {
         'href',
         '/app/profiling/flamegraphs/flamegraph?kuery=host.id%3A%20%228457605156473051743%22&rangeFrom=2023-04-18T00%3A00%3A00.000Z&rangeTo=2023-04-18T00%3A05%3A00.000Z'
       );
+    });
+  });
+
+  describe('summary stats', () => {
+    it('will still load with kuery', () => {
+      cy.intercept('GET', '/internal/profiling/storage_explorer/summary?*', {
+        fixture: 'storage_explorer_summary.json',
+      }).as('summaryStats');
+      cy.visitKibana('/app/profiling/storage-explorer', {
+        rangeFrom,
+        rangeTo,
+        kuery: 'host.id : "1234"',
+      });
+      cy.wait('@summaryStats').then(({ request, response }) => {
+        const {
+          dailyDataGenerationBytes,
+          diskSpaceUsedPct,
+          totalNumberOfDistinctProbabilisticValues,
+          totalNumberOfHosts,
+          totalProfilingSizeBytes,
+          totalSymbolsSizeBytes,
+        } = response?.body;
+
+        const { kuery } = request.query;
+
+        expect(parseFloat(dailyDataGenerationBytes)).to.be.gt(0);
+        expect(parseFloat(diskSpaceUsedPct)).to.be.gt(0);
+        expect(parseFloat(totalNumberOfDistinctProbabilisticValues)).to.be.gt(0);
+        expect(parseFloat(totalNumberOfHosts)).to.be.gt(0);
+        expect(parseFloat(totalProfilingSizeBytes)).to.be.gt(0);
+        expect(parseFloat(totalSymbolsSizeBytes)).to.be.gt(0);
+        /*  eslint-disable @typescript-eslint/no-unused-expressions */
+        expect(kuery).to.be.empty;
+      });
     });
   });
 

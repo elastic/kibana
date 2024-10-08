@@ -13,7 +13,7 @@ import {
   DataTableDocumentToolbarBtn,
   SelectButton,
 } from './data_table_document_selection';
-import { dataTableContextMock } from '../../__mocks__/table_context';
+import { dataTableContextMock, dataTableContextRowsMock } from '../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { getDocId } from '@kbn/discover-utils';
 import { render, screen } from '@testing-library/react';
@@ -142,7 +142,7 @@ describe('document selection', () => {
       const props = {
         isPlainRecord: false,
         isFilterActive: false,
-        rows: dataTableContextMock.rows,
+        rows: dataTableContextRowsMock,
         selectedDocs: ['i::1::'],
         setIsFilterActive: jest.fn(),
         setSelectedDocs: jest.fn(),

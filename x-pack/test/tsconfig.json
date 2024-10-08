@@ -171,6 +171,7 @@
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
-    "@kbn/data-quality-plugin"
+    "@kbn/data-quality-plugin",
+    "@kbn/ml-trained-models-utils"
   ]
 }

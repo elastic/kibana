@@ -8,7 +8,7 @@
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { InputType } from '../../../../common';
+import type { InputType, SamplesFormat } from '../../../../common';
 
 interface GenAiConfig {
   apiUrl?: string;
@@ -32,6 +32,7 @@ export interface IntegrationSettings {
   dataStreamTitle?: string;
   dataStreamDescription?: string;
   dataStreamName?: string;
-  inputType?: InputType;
-  logsSampleParsed?: string[];
+  inputTypes?: InputType[];
+  logSamples?: string[];
+  samplesFormat?: SamplesFormat;
 }

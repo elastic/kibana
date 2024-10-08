@@ -35,14 +35,12 @@ oneOf:
         type: string
         enum:
           - esqlQuery
-        examples:
-          - esqlQuery
+        example: esqlQuery
       size:
         type: integer
         description: >
           When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
-        examples:
-          - 0
+        example: 0
       termSize:
         $ref: 'termsize.yaml'
       threshold:
@@ -62,8 +60,7 @@ oneOf:
           Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
         enum:
           - ">"
-        examples:
-          - ">"
+        example: ">"
       timeField:
         $ref: 'timefield.yaml'
       timeWindowSize:
@@ -108,8 +105,7 @@ oneOf:
             properties:
               language:
                 type: string
-                examples:
-                  - kuery
+                example: kuery
               query:
                 type: string
       searchType:
@@ -117,8 +113,7 @@ oneOf:
         type: string
         enum:
           - searchSource
-        examples:
-          - searchSource
+        example: searchSource
       size:
         $ref: 'size.yaml'
       termField:
@@ -170,8 +165,7 @@ oneOf:
         enum:
           - esQuery
         default: esQuery
-        examples:
-          - esQuery
+        example: esQuery
       size:
         $ref: 'size.yaml'
       termField:

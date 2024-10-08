@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
-import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreEntity, HostItem } from '../../../../common/search_strategy';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -49,7 +49,7 @@ export const HostPanelContent = ({
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
-          <RiskSummary
+          <FlyoutRiskSummary
             riskScoreData={riskScoreState}
             recalculatingScore={recalculatingScore}
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}

@@ -214,13 +214,13 @@ If using PNG/PDF {report-features}, make sure the {kib} server operating system 
 
 If you are using RHEL operating systems, install the following packages:
 
-* `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
 * `xorg-x11-fonts-75dpi`
 * `xorg-x11-utils`
 * `xorg-x11-fonts-cyrillic`
 * `xorg-x11-fonts-Type1`
 * `xorg-x11-fonts-misc`
+* `vlgothic-fonts`
 * `fontconfig`
 * `freetype`
 

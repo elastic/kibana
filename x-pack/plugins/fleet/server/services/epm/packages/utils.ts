@@ -9,7 +9,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { ExtractedDatasetFields } from '@kbn/fields-metadata-plugin/server';
 
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 
 import type { RegistryDataStream } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
@@ -90,7 +90,7 @@ export const resolveDataStreamFields = ({
     const fieldsAssetBuffer = assetsMap.get(fieldsAssetPath);
 
     if (fieldsAssetBuffer) {
-      const fieldsAssetJSON = load(fieldsAssetBuffer.toString('utf8'));
+      const fieldsAssetJSON = safeLoad(fieldsAssetBuffer.toString('utf8'));
       const normalizedFields = normalizeFields(fieldsAssetJSON);
       Object.assign(dataStreamFields, normalizedFields);
     }

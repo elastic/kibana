@@ -15,14 +15,15 @@ Here is some context for you to reference for your task, read it carefully as yo
 <ecs>
 {ecs}
 </ecs>
-<combined_sample>
-{formatted_samples}
-</combined_sample>
 </context>`,
   ],
   [
     'human',
     `Looking at the combined sample from {package_name} {data_stream_name} provided above. The combined sample is a JSON object that includes all unique fields from the log samples sent by {package_name} {data_stream_name}.
+
+<combined_samples>
+{combined_samples}
+</combined_samples>
 
 Go through each value step by step and modify it with the following process:
 1. Check if the name of each key and its current value matches the description and usecase of any of the above ECS fields.
@@ -40,10 +41,10 @@ Go through each value step by step and modify it with the following process:
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Never use \`event.category\` or \`event.type\` as target ECS fields.
-- The target key should never have a null value, if no matching target ECS field is found, the whole key value should be set to null.
+- The key named "target" should never have a null value or a "null" string, if no matching target ECS field is found the original source key's value should be set to null..
 - Never use the same ECS target multiple times. If no other field is found that you are confident in, it should always be null.
 - All keys should be under the {package_name} {data_stream_name} parent fields, same as the original combined sample above.
-- All target key values should be ECS field names only from the above ECS fields provided as context.
+- All values for the key named "target" should be ECS field names only from the above ECS fields provided as context.
 - All original keys from the combined sample object needs to be in your response.
 - Only when a target value is set should type, date_format and confidence be filled out. If no target value then the value should simply be null.
 - Do not respond with anything except the ecs maping JSON object enclosed with 3 backticks (\`), see example response below.
@@ -70,9 +71,9 @@ Here is some context for you to reference your task, read it carefully as you wi
 <ecs>
 {ecs}
 </ecs>
-<formatted_samples>
-{formatted_samples}
-</formatted_samples>
+<combined_samples>
+{combined_samples}
+</combined_samples>
 <current_mapping>
 {current_mapping}
 </current_mapping>
@@ -84,6 +85,7 @@ Here is some context for you to reference your task, read it carefully as you wi
 <invalid_ecs_fields>
 {invalid_ecs_fields}
 </invalid_ecs_fields>
+
 To resolve the invalid ecs fields, go through each key and value defined in the invalid fields, and modify the current mapping step by step, and ensure they follow these guidelines:
 <guidelines>
 - Update the provided current mapping object, the value should be the corresponding Elastic Common Schema field name. If no good or valid match is found the value should always be null.
@@ -111,9 +113,9 @@ Here is some context for you to reference for your task, read it carefully as yo
 <ecs>
 {ecs}
 </ecs>
-<samples>
-{formatted_samples}
-</samples>
+<combined_samples>
+{combined_samples}
+</combined_samples>
 <current_mapping>
 {current_mapping}
 </current_mapping>
@@ -126,7 +128,7 @@ Here is some context for you to reference for your task, read it carefully as yo
 {missing_keys}
 </missing_keys>
   
-Help resolve the issue by adding the missing keys, look up example values from the formatted samples, and go through each missing key step by step, resolve it by following these guidelines:
+Help resolve the issue by adding the missing keys, look up example values from the combined samples, and go through each missing key step by step, resolve it by following these guidelines:
 <guidelines>
 - Update the provided current mapping object with all the missing keys, the value should be the corresponding Elastic Common Schema field name. If no good match is found the value should always be null.
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
@@ -164,10 +166,17 @@ Here is some context for you to reference for your task, read it carefully as yo
 <duplicate_fields>
 {duplicate_fields}
 </duplicate_fields>
-  
+
+Go through each ECS field in the above list of duplicate fields step by step and and modify the current mapping following this process:
+1. For each duplicate ECS field there is 2 or more source fields that has target set to the same ECS field, identify which of these it is.
+2. For each of the source fields that has the same target set, choose only one of them to have the target set to the ECS field, for the rest you should either find another matching ECS field or set the source to be null.
+3. Make sure that all of the ECS fields mentioned in the duplicate fields above have been resolved and return the updated current mapping object.
+
 To resolve the duplicate mappings, go through each key and value defined in the duplicate fields, and modify the current mapping step by step, and ensure they follow these guidelines:
 <guidelines>
-- Multiple keys should not have the same value (ECS field it will be mapped to). If multiple keys do have the same value then always choose the best match for the ECS field, while the other duplicates should have their value changed to null.
+- Only focus on ECS fields reported as duplicate fields, do not modify any other fields.
+- For all fields that are marked duplicate, when the best target is choosen, remember to set the value of the source field to null.
+- The value "target" should not have a null value, but rather the source object itself should be set to null, use the existing current mapping for reference.
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
 </guidelines>
 

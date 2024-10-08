@@ -19,6 +19,7 @@ import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_vi
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
+import type { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -53,7 +54,7 @@ export interface FieldStatisticTableEmbeddableProps {
   /**
    * Optional id to identify the embeddable
    */
-  id?: string;
+  id?: FieldStatsComponentType | string;
   /**
    * Callback to add a filter to filter bar
    */

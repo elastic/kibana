@@ -41,6 +41,7 @@ import {
   userSelectedRow,
   userSelectedRowForDeletion,
   userSortedNotes,
+  selectSortedNotesByDocumentId,
 } from './notes.slice';
 import type { NotesState } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
@@ -513,6 +514,63 @@ describe('notesSlice', () => {
 
     it('should return no notes if document id does not exist', () => {
       expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
+    });
+
+    it('should return all notes sorted dor an existing document id', () => {
+      const oldestNote = {
+        eventId: '1', // should be a valid id based on mockTimelineData
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      };
+      const newestNote = {
+        ...oldestNote,
+        noteId: '2',
+        created: 1663882689000,
+      };
+
+      const state = {
+        ...mockGlobalState,
+        notes: {
+          ...mockGlobalState.notes,
+          entities: {
+            '1': oldestNote,
+            '2': newestNote,
+          },
+          ids: ['1', '2'],
+        },
+      };
+
+      const ascResult = selectSortedNotesByDocumentId(state, {
+        documentId: '1',
+        sort: { field: 'created', direction: 'asc' },
+      });
+      expect(ascResult[0]).toEqual(oldestNote);
+      expect(ascResult[1]).toEqual(newestNote);
+
+      const descResult = selectSortedNotesByDocumentId(state, {
+        documentId: '1',
+        sort: { field: 'created', direction: 'desc' },
+      });
+      expect(descResult[0]).toEqual(newestNote);
+      expect(descResult[1]).toEqual(oldestNote);
+    });
+
+    it('should also return no notes if document id does not exist', () => {
+      expect(
+        selectSortedNotesByDocumentId(mockGlobalState, {
+          documentId: 'wrong-document-id',
+          sort: {
+            field: 'created',
+            direction: 'desc',
+          },
+        })
+      ).toHaveLength(0);
     });
 
     it('should select notes pagination', () => {

@@ -12,7 +12,7 @@ import { AdditionalFieldGroups, convertFieldsToFallbackFields } from '@kbn/unifi
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
 
-export const MAX_COMPARISON_FIELDS = 100;
+export const MAX_COMPARISON_FIELDS = 250;
 
 export interface UseComparisonFieldsProps {
   dataView: DataView;

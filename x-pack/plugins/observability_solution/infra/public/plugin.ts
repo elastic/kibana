@@ -123,19 +123,24 @@ export class Plugin implements InfraClientPluginClass {
             ],
             isInfrastructureHostsViewEnabled,
           ]) => {
+            const { infrastructure, logs, discover, fleet } = capabilities;
             return [
-              ...(capabilities.logs.show
+              ...(logs.show
                 ? [
                     {
                       label: 'Logs',
                       sortKey: 200,
                       entries: [
-                        {
-                          label: 'Explorer',
-                          app: 'observability-logs-explorer',
-                          path: '/',
-                          isBetaFeature: true,
-                        },
+                        ...(discover?.show && fleet?.read
+                          ? [
+                              {
+                                label: 'Explorer',
+                                app: 'observability-logs-explorer',
+                                path: '/',
+                                isBetaFeature: true,
+                              },
+                            ]
+                          : []),
                         ...(this.config.featureFlags.logsUIEnabled
                           ? [
                               { label: 'Stream', app: 'logs', path: '/stream' },
@@ -147,7 +152,7 @@ export class Plugin implements InfraClientPluginClass {
                     },
                   ]
                 : []),
-              ...(capabilities.infrastructure.show
+              ...(infrastructure.show
                 ? [
                     {
                       label: 'Infrastructure',
@@ -405,11 +410,12 @@ export class Plugin implements InfraClientPluginClass {
       order: 30,
       getDisplayName: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-          defaultMessage: 'Log stream',
+          defaultMessage: 'Log stream (deprecated)',
         }),
       getDisplayNameTooltip: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-          defaultMessage: 'Add a table of live streaming logs.',
+          defaultMessage:
+            'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
         }),
       getIconType: () => 'logsApp',
       isCompatible: async ({ embeddable }) => {

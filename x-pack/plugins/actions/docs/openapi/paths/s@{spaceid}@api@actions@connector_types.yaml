@@ -6,6 +6,7 @@ get:
   tags:
     - connectors
   parameters:
+    # - $ref: '../components/headers/elastic_api_version.yaml'
     - $ref: '../components/parameters/space_id.yaml'
     - in: query
       name: feature_id

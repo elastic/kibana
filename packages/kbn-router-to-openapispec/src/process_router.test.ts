@@ -33,10 +33,12 @@ describe('extractResponses', () => {
         response: {
           200: {
             bodyContentType: 'application/test+json',
+            description: 'OK response',
             body: () => schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
           },
           404: {
             bodyContentType: 'application/test2+json',
+            description: 'Not Found response',
             body: () => schema.object({ ok: schema.literal(false) }),
           },
           unsafe: { body: false },
@@ -45,6 +47,7 @@ describe('extractResponses', () => {
     };
     expect(extractResponses(route, oasConverter)).toEqual({
       200: {
+        description: 'OK response',
         content: {
           'application/test+json; Elastic-Api-Version=2023-10-31': {
             schema: {
@@ -59,6 +62,7 @@ describe('extractResponses', () => {
         },
       },
       404: {
+        description: 'Not Found response',
         content: {
           'application/test2+json; Elastic-Api-Version=2023-10-31': {
             schema: {

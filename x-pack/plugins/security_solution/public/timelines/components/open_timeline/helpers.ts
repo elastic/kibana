@@ -22,8 +22,13 @@ import type {
   PinnedEvent,
   Note,
 } from '../../../../common/api/timeline';
+import {
+  RowRendererId,
+  DataProviderType,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';
@@ -233,10 +238,10 @@ export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
   timelineType?: TimelineType,
-  unifiedComponentsInTimelineEnabled?: boolean
+  unifiedComponentsInTimelineDisabled?: boolean
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
-  const defaultHeadersValue = unifiedComponentsInTimelineEnabled
+  const defaultHeadersValue = !unifiedComponentsInTimelineDisabled
     ? defaultUdtHeaders
     : defaultHeaders;
 
@@ -256,6 +261,7 @@ export const defaultTimelineToTimelineModel = (
           }
         : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
+    excludedRowRendererIds: isTemplate ? [] : Object.keys(RowRendererId),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
@@ -288,7 +294,7 @@ export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
   timelineType?: TimelineType,
-  unifiedComponentsInTimelineEnabled?: boolean
+  unifiedComponentsInTimelineDisabled?: boolean
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
@@ -297,7 +303,7 @@ export const formatTimelineResultToModel = (
       timelineModel,
       duplicate,
       timelineType,
-      unifiedComponentsInTimelineEnabled
+      unifiedComponentsInTimelineDisabled
     ),
   };
 };
@@ -316,7 +322,7 @@ export interface QueryTimelineById {
    * Below feature flag will be removed once
    * unified components have been fully migrated
    * */
-  unifiedComponentsInTimelineEnabled?: boolean;
+  unifiedComponentsInTimelineDisabled?: boolean;
 }
 
 export const useQueryTimelineById = () => {
@@ -340,7 +346,7 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
-    unifiedComponentsInTimelineEnabled = false,
+    unifiedComponentsInTimelineDisabled = false,
   }: QueryTimelineById) => {
     updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
@@ -352,15 +358,16 @@ export const useQueryTimelineById = () => {
         to: DEFAULT_TO_MOMENT.toISOString(),
         timeline: {
           ...timelineDefaults,
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           id: TimelineId.active,
           activeTab: activeTimelineTab,
           show: openTimeline,
           initialized: true,
           savedSearchId: savedSearchId ?? null,
-          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineType.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         },
       });
       resetDiscoverAppState();
@@ -377,7 +384,7 @@ export const useQueryTimelineById = () => {
             timelineToOpen,
             duplicate,
             timelineType,
-            unifiedComponentsInTimelineEnabled
+            unifiedComponentsInTimelineDisabled
           );
 
           if (onOpenTimeline != null) {

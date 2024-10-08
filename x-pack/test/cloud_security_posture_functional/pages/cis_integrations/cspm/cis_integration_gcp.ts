@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(true)) === true).to.be(
           true
         );
@@ -79,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField('organization_id_test_id', organizationName);
 
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(
             true,
@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
 
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
           true
         );
@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://cloud.google.com/shell/docs'
@@ -121,7 +121,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
@@ -143,7 +143,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
         await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
@@ -167,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
@@ -183,7 +183,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false)) === true).to.be(
           true
         );
@@ -195,7 +195,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_CLOUD_SHELL_TEST_ID);
         await cisIntegration.fillInTextField('project_id_test_id', projectName);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegrationGcp.isPostInstallGoogleCloudShellModal(false, '', projectName)) ===
             true
@@ -230,7 +230,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
         await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
@@ -248,7 +248,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveIntegrationButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.navigateToIntegrationCspList();
         expect(
           (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
@@ -268,7 +268,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
@@ -286,7 +286,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await cisIntegration.fillInTextField(CREDENTIALS_FILE_TEST_ID, credentialFileName);
         await cisIntegration.clickSaveIntegrationButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.navigateToIntegrationCspList();
         expect(
           (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_FILE_TEST_ID)) ===

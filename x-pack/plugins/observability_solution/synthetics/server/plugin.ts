@@ -73,6 +73,7 @@ export class Plugin implements PluginType {
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
+      alerting: plugins.alerting,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);

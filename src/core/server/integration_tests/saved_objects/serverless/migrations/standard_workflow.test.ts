@@ -10,7 +10,8 @@ import Path from 'path';
 import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import { createStandardWorkflowTest } from '../../migrations/shared_suites/zdt/standard_workflow';
 
-describe('serverless - ZDT upgrades - standard workflow', () => {
+// Disabled, only runs off main branch
+describe.skip('serverless - ZDT upgrades - standard workflow', () => {
   const startElasticsearch = async () => {
     const { startES } = createTestServerlessInstances({
       adjustTimeout: jest.setTimeout,

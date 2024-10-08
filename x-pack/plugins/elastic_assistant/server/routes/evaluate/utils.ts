@@ -5,59 +5,35 @@
  * 2.0.
  */
 
-import { Client } from 'langsmith';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import { Client, Example } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
-import type { Run } from 'langsmith/schemas';
-import { ToolingLog } from '@kbn/tooling-log';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { Dataset } from '@kbn/elastic-assistant-common';
+import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 
 /**
- * Return connector name for the given connectorId/connectors
- *
- * @param connectorId
- * @param connectors
- */
-export const getConnectorName = (
-  connectorId: string,
-  connectors: ActionResult[]
-): string | undefined => {
-  return connectors.find((c) => c.id === connectorId)?.name;
-};
-
-/**
- * Fetches a dataset from LangSmith. Note that `client` will use env vars
+ * Fetches a dataset from LangSmith. Note that `client` will use env vars unless langSmithApiKey is specified
  *
  * @param datasetName
  * @param logger
+ * @param langSmithApiKey
  */
 export const fetchLangSmithDataset = async (
   datasetName: string | undefined,
-  logger: Logger
-): Promise<Dataset> => {
+  logger: Logger,
+  langSmithApiKey?: string
+): Promise<Example[]> => {
   if (datasetName === undefined || !isLangSmithEnabled()) {
     throw new Error('LangSmith dataset name not provided or LangSmith not enabled');
   }
 
   try {
-    const client = new Client();
+    const client = new Client({ apiKey: langSmithApiKey });
 
     const examples = [];
     for await (const example of client.listExamples({ datasetName })) {
       examples.push(example);
     }
 
-    // Convert to internal Dataset type -- TODO: add generic support for the different LangSmith test dataset formats
-    const dataset: Dataset = examples.map((example) => ({
-      id: example.id,
-      input: example.inputs.input as string,
-      reference: (example.outputs?.output as string) ?? '',
-      tags: [], // TODO: Consider adding tags from example data, e.g.: `datasetId:${example.dataset_id}`, `exampleName:${example.name}`
-      prediction: undefined,
-    }));
-
-    return dataset;
+    return examples;
   } catch (e) {
     logger.error(`Error fetching dataset from LangSmith: ${e.message}`);
     return [];
@@ -65,88 +41,28 @@ export const fetchLangSmithDataset = async (
 };
 
 /**
- * Write Feedback to LangSmith for a given Run
+ * Fetches all LangSmith datasets.  Note that `client` will use env vars unless langSmithApiKey is specified
  *
- * @param run
- * @param evaluationId
  * @param logger
+ * @param langSmithApiKey
  */
-export const writeLangSmithFeedback = async (
-  run: Run,
-  evaluationId: string,
-  logger: Logger | ToolingLog
-): Promise<string> => {
-  try {
-    const client = new Client();
-    const feedback = {
-      score: run.feedback_stats?.score,
-      value: run.feedback_stats?.value,
-      correction: run.feedback_stats?.correction,
-      comment: run.feedback_stats?.comment,
-      sourceInfo: run.feedback_stats?.sourceInfo,
-      feedbackSourceType: run.feedback_stats?.feedbackSourceType,
-      sourceRunId: run.feedback_stats?.sourceRunId,
-      feedbackId: run.feedback_stats?.feedbackId,
-      eager: run.feedback_stats?.eager,
-    };
-    await client.createFeedback(run.id, evaluationId, feedback);
-    const runUrl = await client.getRunUrl({ run });
-    return runUrl;
-  } catch (e) {
-    logger.error(`Error writing feedback to LangSmith: ${e.message}`);
-    return '';
-  }
-};
-
-/**
- * Returns a custom LangChainTracer which adds the `exampleId` so Dataset 'Test' runs are written to LangSmith
- * If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
- * section, otherwise it is written to the `Project` provided
- *
- * @param apiKey API Key for LangSmith (will fetch from env vars if not provided)
- * @param projectName Name of project to trace results to
- * @param exampleId Dataset exampleId to associate trace with
- * @param logger
- */
-export const getLangSmithTracer = ({
-  apiKey,
-  projectName,
-  exampleId,
+export const fetchLangSmithDatasets = async ({
   logger,
+  langSmithApiKey,
 }: {
-  apiKey?: string;
-  projectName?: string;
-  exampleId?: string;
-  logger: Logger | ToolingLog;
-}): LangChainTracer[] => {
+  logger: Logger;
+  langSmithApiKey?: string;
+}): Promise<string[]> => {
   try {
-    if (!isLangSmithEnabled() && apiKey == null) {
-      return [];
+    const client = new Client({ apiKey: langSmithApiKey });
+    const datasets = [];
+    for await (const dataset of client.listDatasets()) {
+      datasets.push(dataset);
     }
-    const lcTracer = new LangChainTracer({
-      projectName, // Shows as the 'test' run's 'name' in langsmith ui
-      exampleId,
-      client: new Client({ apiKey }),
-    });
 
-    return [lcTracer];
+    return datasets.map((d) => d.name).sort();
   } catch (e) {
-    // Note: creating a tracer can fail if the LangSmith env vars are not set correctly
-    logger.error(`Error creating LangSmith tracer: ${e.message}`);
-  }
-
-  return [];
-};
-
-/**
- * Returns true if LangSmith/tracing is enabled
- */
-export const isLangSmithEnabled = (): boolean => {
-  try {
-    // Just checking if apiKey is available, if better way to check for enabled that is not env var please update
-    const config = Client.getDefaultClientConfig();
-    return config.apiKey != null;
-  } catch (e) {
-    return false;
+    logger.error(`Error fetching datasets from LangSmith: ${e.message}`);
+    return [];
   }
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { OnboardingComponent } from './onboarding';
 import {
   AddIntegrationsSteps,
@@ -15,44 +14,19 @@ import {
   ViewDashboardSteps,
 } from './types';
 import { ProductLine, ProductTier } from './configs';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
+
 jest.mock('./toggle_panel');
-jest.mock('./hooks/use_project_features_url');
-jest.mock('./hooks/use_projects_url');
-jest.mock('../../../lib/kibana', () => {
-  const original = jest.requireActual('../../../lib/kibana');
-  return {
-    ...original,
-    useCurrentUser: jest.fn().mockReturnValue({ fullName: 'UserFullName' }),
-    useAppUrl: jest.fn().mockReturnValue({ getAppUrl: jest.fn().mockReturnValue('mock url') }),
-  };
-});
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    useEuiTheme: jest.fn().mockReturnValue({
-      euiTheme: {
-        base: 16,
-        size: { xs: '4px', m: '12px', l: '24px', xl: '32px', xxl: '40px' },
-        colors: { lightestShade: '' },
-        font: {
-          weight: { bold: 700 },
-        },
-      },
-    }),
-  };
-});
-jest.mock('react-router-dom', () => ({
-  useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
-}));
-jest.mock('@kbn/security-solution-navigation', () => ({
-  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
-  SecurityPageName: {
-    landing: 'landing',
-  },
-}));
+jest.mock('../../../lib/kibana');
+
+(useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
 
 describe('OnboardingComponent', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderResult: ReturnType<typeof render>;
+  let mockedContext: AppContextTestRender;
   const props = {
     indicesExist: true,
     productTypes: [{ product_line: ProductLine.security, product_tier: ProductTier.complete }],
@@ -65,16 +39,22 @@ describe('OnboardingComponent', () => {
     ],
     spaceId: 'spaceId',
   };
+
   beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
+    render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render page title, subtitle, and description', () => {
-    const { getByText } = render(<OnboardingComponent {...props} />);
+    render();
 
-    const pageTitle = getByText('Hi UserFullName!');
-    const subtitle = getByText(`Get started with Security`);
-    const description = getByText(
+    const pageTitle = renderResult.getByText('Hi UserFullName!');
+    const subtitle = renderResult.getByText(`Get started with Security`);
+    const description = renderResult.getByText(
       `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
     );
 
@@ -84,12 +64,41 @@ describe('OnboardingComponent', () => {
   });
 
   it('should render welcomeHeader and TogglePanel', () => {
-    const { getByTestId } = render(<OnboardingComponent {...props} />);
+    render();
 
-    const welcomeHeader = getByTestId('welcome-header');
-    const togglePanel = getByTestId('toggle-panel');
+    const welcomeHeader = renderResult.getByTestId('welcome-header');
+    const togglePanel = renderResult.getByTestId('toggle-panel');
 
     expect(welcomeHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
+  });
+  describe('AVC 2024 Results banner', () => {
+    it('should render on the page', () => {
+      render();
+      expect(renderResult.getByTestId('avcResultsBanner')).toBeTruthy();
+    });
+
+    it('should link to the blog post', () => {
+      render();
+      expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/blog/elastic-security-malware-protection-test-av-comparatives'
+      );
+    });
+
+    it('on closing the callout should store dismissal state in local storage', () => {
+      render();
+      renderResult.getByTestId('euiDismissCalloutButton').click();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      expect(useKibana().services.storage.set).toHaveBeenCalledWith(
+        'securitySolution.showAvcBanner',
+        false
+      );
+    });
+    it('should stay dismissed if it has been closed once', () => {
+      (useKibana().services.storage.get as jest.Mock).mockReturnValue(false);
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+    });
   });
 });

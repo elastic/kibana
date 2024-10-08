@@ -38,6 +38,7 @@ export const ResponseButton: React.FC = () => {
         onClick={goToResponseTab}
         iconType="documentation"
         data-test-subj={RESPONSE_BUTTON_TEST_ID}
+        size="s"
       >
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.response.responseButtonLabel"

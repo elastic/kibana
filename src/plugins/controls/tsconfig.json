@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "extraPublicDirs": ["common"],
   "include": [
@@ -40,9 +40,7 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-containers",
-    "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -186,14 +186,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
+      await index.removeFindings();
+      await index.removeScores();
       await waitForPluginInitialized();
       await index.addScores(scoresVulnerabilitiesMock);
       await index.addFindings(vulnerabilitiesLatestMock);
-    });
-
-    afterEach(async () => {
-      await index.removeFindings();
-      await index.removeScores();
     });
 
     it('responds with a 200 status code and matching data mock', async () => {

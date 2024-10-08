@@ -26,5 +26,5 @@ export function createScreenContextAction<
   return {
     ...definition,
     respond,
-  };
+  } as ScreenContextActionDefinition<unknown>;
 }

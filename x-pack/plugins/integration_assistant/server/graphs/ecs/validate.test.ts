@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { processMapping } from './validate';
+import { ECS_RESERVED } from './constants';
+
+import {
+  findDuplicateFields,
+  findInvalidEcsFields,
+  processMapping,
+  removeReservedFields,
+} from './validate';
 
 describe('Testing ecs handler', () => {
   it('processMapping()', async () => {
@@ -48,5 +55,130 @@ describe('Testing ecs handler', () => {
       'source.address': [['checkpoint', 'firewall', 'origin']],
       'user.name': [['checkpoint', 'firewall', 'administrator']],
     });
+  });
+});
+
+describe('findInvalidEcsFields', () => {
+  it('invalid: invalid ecs mapping', async () => {
+    const ecsMappingInvalid = {
+      mysql_enterprise: {
+        audit: {
+          test_array: null,
+          bytes: {
+            target: 'myField.bytes',
+            confidence: 0.99,
+            type: 'number',
+            date_formats: [],
+          },
+        },
+      },
+    };
+
+    const invalid = findInvalidEcsFields(ecsMappingInvalid);
+    expect(invalid.length).toBe(1);
+  });
+
+  it('invalid: reserved ecs field', async () => {
+    const ecsMappingReserved = {
+      mysql_enterprise: {
+        audit: {
+          test_array: null,
+          type: {
+            target: 'event.type',
+            confidence: 'error',
+            type: 'string',
+            date_formats: [],
+          },
+        },
+      },
+    };
+
+    const invalid = findInvalidEcsFields(ecsMappingReserved);
+    expect(invalid.length).toBe(1);
+  });
+});
+
+describe('findDuplicateFields', () => {
+  it('duplicates: samples with duplicates', async () => {
+    const finalMapping = {
+      teleport_log: {
+        audit: {
+          ei: null,
+          event: {
+            target: 'event.action',
+            confidence: 0.9,
+            type: 'string',
+            date_formats: [],
+          },
+          uid: {
+            target: 'event.action',
+            confidence: 0.8,
+            type: 'string',
+            date_formats: [],
+          },
+        },
+      },
+    };
+    const samples = [
+      '{"teleport_log":{"audit":{"ei":0,"event":"user.login","uid":"8c815e54-c83b-43d7-b578-2bcf5b6775fa","code":"T1000W","time":"2024-05-09T20:58:57.77Z","cluster_name":"teleport.ericbeahan.com","user":"root","success":false,"error":"invalid username, password or second factor","method":"local","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36","addr.remote":"136.32.177.60:52457"}}}',
+      '{"teleport_log":{"audit":{"ei":0,"event":"user.login","uid":"6bf237a0-2753-418d-b01b-2d82ebf42636","code":"T1000W","time":"2024-05-09T21:00:22.747Z","cluster_name":"teleport.ericbeahan.com","user":"teleport-admin","success":false,"error":"invalid username, password or second factor","method":"local","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36","addr.remote":"136.32.177.60:52818"}}}',
+    ];
+    const duplicates = findDuplicateFields(samples, finalMapping);
+    expect(duplicates).toStrictEqual([
+      "One or more samples have matching fields for ECS field 'event.action': teleport_log.audit.event, teleport_log.audit.uid",
+    ]);
+  });
+});
+
+describe('removeReservedFields', () => {
+  it('should remove reserved fields from the mapping', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'event.category': 'Category',
+      'source.ip': 'IP',
+    };
+
+    const expectedMapping = {
+      'source.ip': 'IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(expectedMapping);
+  });
+
+  it('should remove all fields if all are reserved', () => {
+    const ecsMapping = Object.fromEntries(ECS_RESERVED.map((key) => [key, key]));
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
+  });
+
+  it('should return the same mapping if there are no reserved fields', () => {
+    const ecsMapping = {
+      'source.ip': 'Some IP',
+      'destination.ip': 'Another IP',
+    };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual(ecsMapping);
+  });
+
+  it('should handle an empty mapping', () => {
+    const ecsMapping = {};
+
+    const result = removeReservedFields(ecsMapping);
+    expect(result).toEqual({});
+  });
+
+  it('should not modify the original mapping object', () => {
+    const ecsMapping = {
+      'ecs.version': 'Version',
+      'source.ip': 'IP',
+    };
+
+    const ecsMappingCopy = { ...ecsMapping };
+
+    const result = removeReservedFields(ecsMapping);
+    expect(ecsMapping).toEqual(ecsMappingCopy);
+    expect(ecsMapping).not.toEqual(result);
   });
 });

@@ -38,7 +38,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.getByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.getByTestId('addNewConnectorButton');
 
     expect(connectorSelector).toBeInTheDocument();
   });
@@ -61,7 +61,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.queryByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.queryByTestId('addNewConnectorButton');
 
     expect(connectorSelector).not.toBeInTheDocument();
   });

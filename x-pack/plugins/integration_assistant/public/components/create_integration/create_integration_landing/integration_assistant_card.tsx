@@ -8,64 +8,52 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiCard,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiTitle,
-  useEuiTheme,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react';
 import { useAuthorization } from '../../../common/hooks/use_authorization';
 import { MissingPrivilegesTooltip } from '../../../common/components/authorization';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
 import * as i18n from './translations';
 
-const useAssistantCardCss = () => {
-  const { euiTheme } = useEuiTheme();
-  return css`
-    /* compensate for EuiCard children margin-block-start */
-    margin-block-start: calc(${euiTheme.size.s} * -2);
-  `;
-};
-
 export const IntegrationAssistantCard = React.memo(() => {
   const { canExecuteConnectors } = useAuthorization();
   const navigate = useNavigate();
-  const assistantCardCss = useAssistantCardCss();
   return (
-    <EuiCard
-      display="plain"
-      hasBorder={true}
-      paddingSize="l"
-      title={''} // title shown inside the child component
-      betaBadgeProps={{
-        label: i18n.TECH_PREVIEW,
-        tooltipContent: i18n.TECH_PREVIEW_TOOLTIP,
-      }}
-    >
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="l"
-        alignItems="center"
-        justifyContent="center"
-        css={assistantCardCss}
-      >
+    <EuiPanel hasBorder={true} paddingSize="l">
+      <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <AssistantAvatar />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
             direction="column"
-            gutterSize="s"
+            gutterSize="xs"
             alignItems="flexStart"
             justifyContent="flexStart"
           >
             <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>{i18n.ASSISTANT_TITLE}</h3>
-              </EuiTitle>
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>{i18n.ASSISTANT_TITLE}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    iconType="beaker"
+                    label={i18n.TECH_PREVIEW}
+                    tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                    size="s"
+                    color="hollow"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued" textAlign="left">
@@ -84,7 +72,7 @@ export const IntegrationAssistantCard = React.memo(() => {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiCard>
+    </EuiPanel>
   );
 });
 IntegrationAssistantCard.displayName = 'IntegrationAssistantCard';

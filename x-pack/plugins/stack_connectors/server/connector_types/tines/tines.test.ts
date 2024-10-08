@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -137,6 +137,28 @@ describe('TinesConnector', () => {
       });
       const response = await connector.getStories();
       expect(response.incompleteResponse).toEqual(true);
+    });
+  });
+
+  describe('Error handling', () => {
+    let error: AxiosError;
+
+    beforeEach(() => {
+      error = new AxiosError();
+    });
+
+    it('should return status text api error', () => {
+      error.response = { status: 401, statusText: 'Unauthorized' } as AxiosResponse;
+      // @ts-expect-error protected method
+      const errorMessage = connector.getResponseErrorMessage(error);
+      expect(errorMessage).toEqual('API Error: Unauthorized');
+    });
+
+    it('should return original error', () => {
+      error.toString = () => 'Network Error';
+      // @ts-expect-error protected method
+      const errorMessage = connector.getResponseErrorMessage(error);
+      expect(errorMessage).toEqual('Network Error');
     });
   });
 

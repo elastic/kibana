@@ -18,5 +18,6 @@ import { z } from 'zod';
 
 export type GetEvaluateResponse = z.infer<typeof GetEvaluateResponse>;
 export const GetEvaluateResponse = z.object({
-  agentExecutors: z.array(z.string()),
+  datasets: z.array(z.string()),
+  graphs: z.array(z.string()),
 });

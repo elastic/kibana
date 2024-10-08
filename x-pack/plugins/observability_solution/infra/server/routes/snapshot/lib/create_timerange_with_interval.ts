@@ -11,7 +11,7 @@ import { MetricsAPITimerange } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
-import { getDatasetForField } from '../../metrics_explorer/lib/get_dataset_for_field';
+import { getDatasetForField } from './get_dataset_for_field';
 
 const DEFAULT_LOOKBACK_SIZE = 5;
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {

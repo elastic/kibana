@@ -20,17 +20,18 @@ export const SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS = i18n.translate(
   }
 );
 
-export const SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptsTable.systemPromptsTableColumnCreatedOn',
+export const SYSTEM_PROMPTS_TABLE_COLUMN_DATE_UPDATED = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptsTable.systemPromptsTableColumnDateUpdated',
   {
-    defaultMessage: 'Created on',
+    defaultMessage: 'Date updated',
   }
 );
 
-export const SYSTEM_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.promptsTable.systemPromptsTableColumnActions',
+export const SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptsTable.settingsDescription',
   {
-    defaultMessage: 'Actions',
+    defaultMessage:
+      'Create and manage System Prompts. System Prompts are configurable chunks of context that are always sent as part of the conversation.',
   }
 );
 
@@ -54,5 +55,12 @@ export const DELETE_SYSTEM_PROMPT_MODAL_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.modal.deleteSystemPromptConfirmationMessage',
   {
     defaultMessage: 'You cannot recover the prompt once deleted',
+  }
+);
+
+export const CREATE_SYSTEM_PROMPT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.promptEditor.createSystemPromptLabel',
+  {
+    defaultMessage: 'System Prompt',
   }
 );

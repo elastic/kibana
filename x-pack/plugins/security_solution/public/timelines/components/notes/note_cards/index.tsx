@@ -51,6 +51,7 @@ export interface NoteCardsProps {
   eventId?: string;
   timelineId: string;
   onCancel?: () => void;
+  showToggleEventDetailsAction?: boolean;
 }
 
 /** A view for entering and reviewing notes */
@@ -65,6 +66,7 @@ export const NoteCards = React.memo<NoteCardsProps>(
     eventId,
     timelineId,
     onCancel,
+    showToggleEventDetailsAction = true,
   }) => {
     const [newNote, setNewNote] = useState('');
 
@@ -109,7 +111,11 @@ export const NoteCards = React.memo<NoteCardsProps>(
               <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
                 <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <NotePreviews timelineId={timelineId} notes={notes} />
+              <NotePreviews
+                timelineId={timelineId}
+                notes={notes}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
+              />
             </NotesContainer>
           </NotePreviewsContainer>
         ) : null}

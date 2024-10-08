@@ -59,13 +59,13 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     fieldNames.forEach((fieldName) => {
       if (
         typeof datafeedConfig?.script_fields === 'object' &&
-        datafeedConfig.script_fields.hasOwnProperty(fieldName)
+        Object.hasOwn(datafeedConfig.script_fields, fieldName)
       ) {
         aggregatableFields.push(fieldName);
       }
       if (
         typeof datafeedConfig?.runtime_mappings === 'object' &&
-        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
+        Object.hasOwn(datafeedConfig.runtime_mappings, fieldName)
       ) {
         aggregatableFields.push(fieldName);
       }
@@ -122,7 +122,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !Object.hasOwn(cachedValues, field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -146,17 +146,17 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
-    const runtimeMappings: any = {};
+    const runtimeMappings: any = Object.create(null);
     const aggs = fieldsToAgg.reduce(
       (obj, field) => {
         if (
           typeof datafeedConfig?.script_fields === 'object' &&
-          datafeedConfig.script_fields.hasOwnProperty(field)
+          Object.hasOwn(datafeedConfig.script_fields, field)
         ) {
           obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
         } else if (
           typeof datafeedConfig?.runtime_mappings === 'object' &&
-          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+          Object.hasOwn(datafeedConfig.runtime_mappings, field)
         ) {
           obj[field] = { cardinality: { field } };
           runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
@@ -350,7 +350,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !Object.hasOwn(cachedValues, field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;

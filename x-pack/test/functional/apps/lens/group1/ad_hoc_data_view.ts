@@ -73,6 +73,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await dataViews.isAdHoc()).to.be(true);
   };
 
+  const waitForPageReady = async () => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor('page ready after refresh', async () => {
+      const queryBarVisible = await testSubjects.exists('globalQueryBar');
+      return queryBarVisible;
+    });
+  };
+
   describe('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
@@ -222,8 +230,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
     });
-
     it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
@@ -244,6 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'new'
       );
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();
@@ -253,6 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // adhoc data view should be persisted after refresh
       await browser.refresh();
+      await waitForPageReady();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();

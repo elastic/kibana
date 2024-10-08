@@ -1,7 +1,6 @@
 title: Case response properties for closed_by
-type:
-  - "object"
-  - "null"
+type: object
+nullable: true
 properties:
   $ref: 'user_properties.yaml'
 required:

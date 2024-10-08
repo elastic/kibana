@@ -86,7 +86,7 @@ const appDependencies = {
     editableIndexSettings: 'all',
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
-    enableSemanticText: false,
+    enableSemanticText: true,
   },
   overlays: {
     openConfirm: jest.fn(),

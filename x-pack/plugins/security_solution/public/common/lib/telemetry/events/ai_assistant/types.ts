@@ -16,11 +16,10 @@ export interface ReportAssistantInvokedParams {
 export interface ReportAssistantMessageSentParams {
   conversationId: string;
   role: string;
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   actionTypeId: string;
   provider?: string;
   model?: string;
+  isEnabledKnowledgeBase: boolean;
 }
 
 export interface ReportAssistantQuickPromptParams {
@@ -29,8 +28,7 @@ export interface ReportAssistantQuickPromptParams {
 }
 
 export interface ReportAssistantSettingToggledParams {
-  isEnabledKnowledgeBase?: boolean;
-  isEnabledRAGAlerts?: boolean;
+  alertsCountUpdated?: boolean;
   assistantStreamingEnabled?: boolean;
 }
 

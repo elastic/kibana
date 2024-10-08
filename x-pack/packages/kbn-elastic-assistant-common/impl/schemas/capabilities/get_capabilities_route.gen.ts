@@ -18,6 +18,7 @@ import { z } from 'zod';
 
 export type GetCapabilitiesResponse = z.infer<typeof GetCapabilitiesResponse>;
 export const GetCapabilitiesResponse = z.object({
+  assistantBedrockChat: z.boolean(),
   assistantKnowledgeBaseByDefault: z.boolean(),
   assistantModelEvaluation: z.boolean(),
 });

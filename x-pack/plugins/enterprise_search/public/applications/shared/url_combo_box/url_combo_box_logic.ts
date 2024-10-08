@@ -25,6 +25,7 @@ export const UrlComboBoxLogic = kea<MakeLogicType<UrlComboBoxValues, UrlComboBox
     isInvalid: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsInvalid: (_, { isInvalid }) => isInvalid,
       },
     ],

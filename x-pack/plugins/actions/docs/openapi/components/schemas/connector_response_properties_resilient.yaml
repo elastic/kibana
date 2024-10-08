@@ -11,7 +11,7 @@ properties:
     $ref: 'config_properties_resilient.yaml'
   connector_type_id:
    type: string
-   description: The type of connector. 
+   description: The type of connector.
    enum:
     - .resilient
   id:

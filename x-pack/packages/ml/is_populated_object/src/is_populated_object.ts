@@ -30,7 +30,6 @@ export const isPopulatedObject = <U extends string = string, T extends unknown =
     typeof arg === 'object' &&
     arg !== null &&
     Object.keys(arg).length > 0 &&
-    (requiredAttributes.length === 0 ||
-      requiredAttributes.every((d) => ({}.hasOwnProperty.call(arg, d))))
+    (requiredAttributes.length === 0 || requiredAttributes.every((d) => Object.hasOwn(arg, d)))
   );
 };

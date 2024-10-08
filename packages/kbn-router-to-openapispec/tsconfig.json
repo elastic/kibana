@@ -15,7 +15,8 @@
   ],
   "kbn_references": [
     "@kbn/core-http-router-server-internal",
-    "@kbn/config-schema",
     "@kbn/core-http-server",
+    "@kbn/config-schema",
+    "@kbn/zod"
   ]
 }
