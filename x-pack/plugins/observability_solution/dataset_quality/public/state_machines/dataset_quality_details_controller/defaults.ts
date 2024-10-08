@@ -29,4 +29,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
     ...DEFAULT_TIME_RANGE,
     refresh: DEFAULT_DATEPICKER_REFRESH,
   },
+  showCurrentQualityIssues: false,
 };

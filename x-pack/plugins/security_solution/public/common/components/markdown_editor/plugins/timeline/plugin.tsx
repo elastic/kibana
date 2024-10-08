@@ -45,7 +45,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    (timelineTitle, timelineId, graphEventId) => {
+    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
         absolute: true,
         skipSearch: true,

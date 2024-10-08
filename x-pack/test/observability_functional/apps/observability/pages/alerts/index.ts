@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('alertsFlyout');
         });
 
-        describe('When open', async () => {
+        describe('When open', () => {
           before(async () => {
             await observability.alerts.common.openAlertsFlyout(20);
           });

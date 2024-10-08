@@ -11,7 +11,6 @@ import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SkipValidationButton } from './skip_validatoin';
@@ -67,7 +66,6 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           <ValidateJob
             getJobConfig={getJobConfig}
             getDuration={getDuration}
-            ml={ml}
             embedded={true}
             setIsValid={setIsValid}
             idFilterList={idFilterList}

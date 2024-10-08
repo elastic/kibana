@@ -13,9 +13,12 @@ export const indexPatternSchema = schema.object({
   indexPattern: schema.string(),
 });
 
+const querySchemaBasic = {
+  query: schema.any({ meta: { description: 'Query to match documents in the index' } }),
+};
+
 export const dataVisualizerFieldHistogramsSchema = schema.object({
-  /** Query to match documents in the index. */
-  query: schema.any(),
+  ...querySchemaBasic,
   /** The fields to return histogram data. */
   fields: schema.arrayOf(schema.any()),
   /** Number of documents to be collected in the sample processed on each shard, or -1 for no sampling. */
@@ -62,3 +65,7 @@ export const dataVisualizerOverallStatsSchema = schema.object({
   /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
 });
+
+export const dataVisualizerFieldHistogramsResponse = () => {
+  return schema.any();
+};

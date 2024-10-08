@@ -62,13 +62,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         title="jest test tutorial"
       />
       <EuiSpacer />
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
-      >
+      <EuiFormRow>
         <EuiButtonGroup
           buttonSize="m"
           color="text"

@@ -25,7 +25,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Cases persistable attachments', () => {
-    describe('lens visualization', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176874
+    describe.skip('lens visualization', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('security', { path: 'dashboards' });

@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { createAsyncAction } from '../utils/actions';
 
-export const getDefaultAlertingAction = createAsyncAction<
-  void,
-  { statusRule: Rule; tlsRule: Rule }
->('getDefaultAlertingAction');
+export const getDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
+  'getDefaultAlertingAction'
+);
 
-export const enableDefaultAlertingAction = createAsyncAction<
-  void,
-  { statusRule: Rule; tlsRule: Rule }
->('enableDefaultAlertingAction');
+export const enableDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
+  'enableDefaultAlertingAction'
+);
 
-export const enableDefaultAlertingSilentlyAction = createAsyncAction<
-  void,
-  { statusRule: Rule; tlsRule: Rule }
->('enableDefaultAlertingSilentlyAction');
+export const enableDefaultAlertingSilentlyAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
+  'enableDefaultAlertingSilentlyAction'
+);
 
-export const updateDefaultAlertingAction = createAsyncAction<void, Rule>(
+export const updateDefaultAlertingAction = createAsyncAction<void, DEFAULT_ALERT_RESPONSE>(
   'updateDefaultAlertingAction'
 );

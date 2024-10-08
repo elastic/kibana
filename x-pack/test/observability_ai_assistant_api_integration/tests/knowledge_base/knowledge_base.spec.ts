@@ -7,19 +7,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
-
-interface KnowledgeBaseEntry {
-  id: string;
-  text: string;
-}
+import { clearKnowledgeBase, createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
   describe('Knowledge base', () => {
     before(async () => {
@@ -106,10 +100,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(
-          res.body.entries.filter((entry: KnowledgeBaseEntry) => entry.id.startsWith('my-doc-id'))
-            .length
-        ).to.eql(0);
+        expect(res.body.entries.filter((entry) => entry.id.startsWith('my-doc-id')).length).to.eql(
+          0
+        );
       });
 
       it('returns 500 on delete not found', async () => {
@@ -126,20 +119,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
     describe('when managing multiple entries', () => {
       before(async () => {
-        es.deleteByQuery({
-          index: KB_INDEX,
-          conflicts: 'proceed',
-          query: { match_all: {} },
-        });
+        await clearKnowledgeBase(es);
       });
       afterEach(async () => {
-        es.deleteByQuery({
-          index: KB_INDEX,
-          conflicts: 'proceed',
-          query: { match_all: {} },
-        });
+        await clearKnowledgeBase(es);
       });
-      const knowledgeBaseEntries: KnowledgeBaseEntry[] = [
+      const knowledgeBaseEntries = [
         {
           id: 'my_doc_a',
           text: 'My content a',
@@ -173,10 +158,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(
-          res.body.entries.filter((entry: KnowledgeBaseEntry) => entry.id.startsWith('my_doc'))
-            .length
-        ).to.eql(3);
+        expect(res.body.entries.filter((entry) => entry.id.startsWith('my_doc')).length).to.eql(3);
       });
 
       it('allows sorting', async () => {
@@ -200,9 +182,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const entries = res.body.entries.filter((entry: KnowledgeBaseEntry) =>
-          entry.id.startsWith('my_doc')
-        );
+        const entries = res.body.entries.filter((entry) => entry.id.startsWith('my_doc'));
         expect(entries[0].id).to.eql('my_doc_c');
         expect(entries[1].id).to.eql('my_doc_b');
         expect(entries[2].id).to.eql('my_doc_a');
@@ -221,9 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const entriesAsc = resAsc.body.entries.filter((entry: KnowledgeBaseEntry) =>
-          entry.id.startsWith('my_doc')
-        );
+        const entriesAsc = resAsc.body.entries.filter((entry) => entry.id.startsWith('my_doc'));
         expect(entriesAsc[0].id).to.eql('my_doc_a');
         expect(entriesAsc[1].id).to.eql('my_doc_b');
         expect(entriesAsc[2].id).to.eql('my_doc_c');

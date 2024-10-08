@@ -30,8 +30,7 @@
       "lens",
       "maps",
       "uiActions",
-      "logsDataAccess",
-      "entityManager"
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "actions",
@@ -45,6 +44,7 @@
       "ml",
       "security",
       "spaces",
+      "serverless",
       "taskManager",
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App

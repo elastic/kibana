@@ -25,7 +25,7 @@ interface Props {
     describedByIds?: string[];
     error: string | null;
     fullWidth: boolean;
-    helpText: string;
+    helpText: React.ReactNode;
     isInvalid: boolean;
     label?: string;
   };
@@ -45,7 +45,7 @@ const Wrapper = ({
     describedByIds?: string[];
     error: string | null;
     fullWidth: boolean;
-    helpText: string;
+    helpText: React.ReactNode;
     isInvalid: boolean;
     label?: string;
   };

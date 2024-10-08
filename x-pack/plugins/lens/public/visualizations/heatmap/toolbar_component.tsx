@@ -24,6 +24,10 @@ import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import './toolbar_component.scss';
 
+const PANEL_STYLE = {
+  width: '460px',
+};
+
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
     id: `heatmap_legend_show`,
@@ -58,79 +62,25 @@ export const HeatmapToolbar = memo(
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-            <ToolbarPopover
-              title={i18n.translate('xpack.lens.shared.visualOptionsLabel', {
-                defaultMessage: 'Visual options',
-              })}
-              type="visualOptions"
-              groupPosition="left"
-              buttonDataTestSubj="lnsVisualOptionsButton"
-            >
-              <ValueLabelsSettings
-                valueLabels={state?.gridConfig.isCellLabelVisible ? 'show' : 'hide'}
-                onValueLabelChange={(newMode) => {
-                  setState({
-                    ...state,
-                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'show' },
-                  });
-                }}
-              />
-            </ToolbarPopover>
-
-            <LegendSettingsPopover
-              groupPosition={'right'}
-              legendOptions={legendOptions}
-              mode={legendMode}
-              onDisplayChange={(optionId) => {
-                const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-                if (newMode === 'show') {
-                  setState({
-                    ...state,
-                    legend: { ...state.legend, isVisible: true },
-                  });
-                } else if (newMode === 'hide') {
-                  setState({
-                    ...state,
-                    legend: { ...state.legend, isVisible: false },
-                  });
-                }
-              }}
-              position={state?.legend.position}
-              onPositionChange={(id) => {
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.shared.titlesAndTextLabel', {
+              defaultMessage: 'Titles and text',
+            })}
+            type="titlesAndText"
+            buttonDataTestSubj="lnsTextOptionsButton"
+            data-test-subj="lnsTextOptionsPopover"
+            panelStyle={PANEL_STYLE}
+          >
+            <ValueLabelsSettings
+              valueLabels={state?.gridConfig.isCellLabelVisible ? 'show' : 'hide'}
+              onValueLabelChange={(newMode) => {
                 setState({
                   ...state,
-                  legend: { ...state.legend, position: id as Position },
+                  gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'show' },
                 });
               }}
-              maxLines={state?.legend.maxLines}
-              onMaxLinesChange={(val) => {
-                setState({
-                  ...state,
-                  legend: { ...state.legend, maxLines: val },
-                });
-              }}
-              shouldTruncate={state?.legend.shouldTruncate ?? defaultTruncationValue}
-              onTruncateLegendChange={() => {
-                const current = state.legend.shouldTruncate ?? defaultTruncationValue;
-                setState({
-                  ...state,
-                  legend: { ...state.legend, shouldTruncate: !current },
-                });
-              }}
-              legendSize={legendSize}
-              onLegendSizeChange={(newLegendSize) => {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    legendSize: newLegendSize,
-                  },
-                });
-              }}
-              showAutoLegendSizeOption={hadAutoLegendSize}
             />
-          </EuiFlexGroup>
+          </ToolbarPopover>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -228,6 +178,59 @@ export const HeatmapToolbar = memo(
               </ToolbarPopover>
             </TooltipWrapper>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LegendSettingsPopover
+            legendOptions={legendOptions}
+            mode={legendMode}
+            onDisplayChange={(optionId) => {
+              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+              if (newMode === 'show') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: true },
+                });
+              } else if (newMode === 'hide') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: false },
+                });
+              }
+            }}
+            position={state?.legend.position}
+            onPositionChange={(id) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            maxLines={state?.legend.maxLines}
+            onMaxLinesChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, maxLines: val },
+              });
+            }}
+            shouldTruncate={state?.legend.shouldTruncate ?? defaultTruncationValue}
+            onTruncateLegendChange={() => {
+              const current = state.legend.shouldTruncate ?? defaultTruncationValue;
+              setState({
+                ...state,
+                legend: { ...state.legend, shouldTruncate: !current },
+              });
+            }}
+            legendSize={legendSize}
+            onLegendSizeChange={(newLegendSize) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  legendSize: newLegendSize,
+                },
+              });
+            }}
+            showAutoLegendSizeOption={hadAutoLegendSize}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

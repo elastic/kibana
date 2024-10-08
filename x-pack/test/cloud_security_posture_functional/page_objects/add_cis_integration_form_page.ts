@@ -285,6 +285,11 @@ export function AddCisIntegrationFormPageProvider({
     );
     await agentOption.click();
   };
+
+  const showSetupTechnologyComponent = async () => {
+    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+  };
+
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
@@ -476,6 +481,10 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const showSuccessfulToast = async (testSubjectId: string) => {
+    return await testSubjects.exists(testSubjectId);
+  };
+
   const getFirstCspmIntegrationPageIntegration = async () => {
     const integration = await testSubjects.find('integrationNameLink');
     return await integration.getVisibleText();
@@ -539,5 +548,8 @@ export function AddCisIntegrationFormPageProvider({
     getFirstCspmIntegrationPageIntegration,
     getFirstCspmIntegrationPageAgent,
     getAgentBasedPolicyValue,
+    showSuccessfulToast,
+    showSetupTechnologyComponent,
+    navigateToEditIntegrationPage,
   };
 }

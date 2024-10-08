@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import { ProxySettings } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
@@ -39,6 +39,7 @@ const sendMailMock = jest.fn();
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const connectorTokenClient = connectorTokenClientMock.create();
+let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('send_email module', () => {
   beforeEach(() => {
@@ -53,11 +54,21 @@ describe('send_email module', () => {
         interceptors: mockAxiosInstanceInterceptor,
       };
     });
+
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger: mockLogger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   test('handles authenticated email using service', async () => {
     const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -101,7 +112,12 @@ describe('send_email module', () => {
       content: { hasHTMLMessage: true },
       transport: { service: 'other' },
     });
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -159,7 +175,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -174,6 +190,7 @@ describe('send_email module', () => {
     });
 
     delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     sendEmailGraphApiMock.mock.calls[0].pop();
     sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -254,7 +271,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -292,7 +309,7 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
       configurationUtilities: sendEmailOptions.configurationUtilities,
       connectorId: '1',
@@ -322,7 +339,7 @@ describe('send_email module', () => {
     getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(null);
 
     await expect(() =>
-      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to retrieve access token for connectorId: 1"`
     );
@@ -362,7 +379,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -412,7 +434,12 @@ describe('send_email module', () => {
     delete sendEmailOptions.transport.user;
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -462,7 +489,12 @@ describe('send_email module', () => {
     // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -503,9 +535,9 @@ describe('send_email module', () => {
     sendMailMock.mockReset();
     sendMailMock.mockRejectedValue(new Error('wops'));
 
-    await expect(sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)).rejects.toThrow(
-      'wops'
-    );
+    await expect(
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector)
+    ).rejects.toThrow('wops');
   });
 
   test('it bypasses with proxyBypassHosts when expected', async () => {
@@ -526,7 +558,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -560,7 +597,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -596,7 +638,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -630,7 +677,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -667,7 +719,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
 
     // note in the object below, the rejectUnauthenticated got set to false,
@@ -710,7 +767,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
 
     // in this case, rejectUnauthorized is true, as the custom host settings
@@ -757,7 +819,12 @@ describe('send_email module', () => {
       }
     );
 
-    const result = await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    const result = await sendEmail(
+      mockLogger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -791,7 +858,7 @@ describe('send_email module', () => {
       'Bearer clienttokentokentoken'
     );
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);
@@ -834,7 +901,7 @@ describe('send_email module', () => {
       'Bearer clienttokentokentoken'
     );
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
     expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
     expect(createAxiosInstanceMock).toHaveBeenCalledWith();
     expect(mockAxiosInstanceInterceptor.response.use).toHaveBeenCalledTimes(1);

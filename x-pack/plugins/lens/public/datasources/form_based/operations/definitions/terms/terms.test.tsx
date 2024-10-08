@@ -2284,7 +2284,8 @@ describe('terms', () => {
 
       expect(select.prop('value')).toEqual('alphabetical');
 
-      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
+      expect(select.prop('options')!.map((option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
         'rare',
@@ -2311,7 +2312,8 @@ describe('terms', () => {
 
       expect(select.prop('value')).toEqual('alphabetical');
 
-      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
+      expect(select.prop('options')!.map((option) => option.value)).toEqual([
         'column$$$col2',
         'alphabetical',
         'custom',
@@ -2372,7 +2374,8 @@ describe('terms', () => {
 
       const selection = instance.find(EuiButtonGroup);
       expect(selection.prop('idSelected')).toContain('asc');
-      expect(selection.prop('options').map(({ value }) => value)).toEqual(['asc', 'desc']);
+      // @ts-expect-error @types/react@18 - Parameter 'option' implicitly has an 'any' type.
+      expect(selection.prop('options').map((option) => option.value)).toEqual(['asc', 'desc']);
     });
 
     it('should update state with the order direction value', () => {

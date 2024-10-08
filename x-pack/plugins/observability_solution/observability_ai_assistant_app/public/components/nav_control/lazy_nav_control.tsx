@@ -5,9 +5,39 @@
  * 2.0.
  */
 
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { lazy } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
+import { ObservabilityAIAssistantAppService } from '../../service/create_app_service';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 
-export const LazyNavControl = withSuspense(
-  lazy(() => import('.').then((m) => ({ default: m.NavControl })))
+const LazyNavControlWithProvider = dynamic(() =>
+  import('.').then((m) => ({ default: m.NavControlWithProvider }))
 );
+
+interface NavControlInitiatorProps {
+  appService: ObservabilityAIAssistantAppService;
+  coreStart: CoreStart;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+}
+
+export const NavControlInitiator = ({
+  appService,
+  coreStart,
+  pluginsStart,
+}: NavControlInitiatorProps) => {
+  const { isVisible } = useIsNavControlVisible({ coreStart, pluginsStart });
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return (
+    <LazyNavControlWithProvider
+      appService={appService}
+      coreStart={coreStart}
+      pluginsStart={pluginsStart}
+    />
+  );
+};

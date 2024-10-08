@@ -1,34 +1,4 @@
 [[cases-api]]
 == Cases APIs
 
-NOTE: For the latest details, refer to {api-kibana}/group/endpoint-cases[case APIs].
-
-//ADD
-include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]
-//CREATE
-include::cases/cases-api-create.asciidoc[leveloffset=+1]
-//DELETE
-include::cases/cases-api-delete-cases.asciidoc[leveloffset=+1]
-include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
-//FIND
-include::cases/cases-api-find-case-activity.asciidoc[leveloffset=+1]
-include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
-include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
-//GET
-include::cases/cases-api-get-alerts.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-cases-by-alert.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-configuration.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-reporters.asciidoc[leveloffset=+1]
-include::cases/cases-api-get-tags.asciidoc[leveloffset=+1]
-//PUSH
-include::cases/cases-api-push.asciidoc[leveloffset=+1]
-//SET
-include::cases/cases-api-set-configuration.asciidoc[leveloffset=+1]
-//UPDATE
-include::cases/cases-api-update.asciidoc[leveloffset=+1]
-include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]
-include::cases/cases-api-update-configuration.asciidoc[leveloffset=+1]
+For the latest details, refer to {api-kibana}/group/endpoint-cases[case APIs].

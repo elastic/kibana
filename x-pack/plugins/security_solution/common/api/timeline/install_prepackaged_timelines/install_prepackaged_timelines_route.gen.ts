@@ -14,9 +14,13 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import { ImportTimelines, SavedTimeline, ImportTimelineResult } from '../model/components.gen';
+import {
+  ImportTimelines,
+  TimelineSavedToReturnObject,
+  ImportTimelineResult,
+} from '../model/components.gen';
 
 export type InstallPrepackedTimelinesRequestBody = z.infer<
   typeof InstallPrepackedTimelinesRequestBody
@@ -24,13 +28,11 @@ export type InstallPrepackedTimelinesRequestBody = z.infer<
 export const InstallPrepackedTimelinesRequestBody = z.object({
   timelinesToInstall: z.array(ImportTimelines.nullable()),
   timelinesToUpdate: z.array(ImportTimelines.nullable()),
-  prepackagedTimelines: z.array(SavedTimeline),
+  prepackagedTimelines: z.array(TimelineSavedToReturnObject.nullable()),
 });
 export type InstallPrepackedTimelinesRequestBodyInput = z.input<
   typeof InstallPrepackedTimelinesRequestBody
 >;
 
 export type InstallPrepackedTimelinesResponse = z.infer<typeof InstallPrepackedTimelinesResponse>;
-export const InstallPrepackedTimelinesResponse = z.object({
-  data: ImportTimelineResult,
-});
+export const InstallPrepackedTimelinesResponse = ImportTimelineResult;

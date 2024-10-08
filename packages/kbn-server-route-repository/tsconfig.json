@@ -21,6 +21,8 @@
     "@kbn/logging-mocks",
     "@kbn/server-route-repository-utils",
     "@kbn/zod",
+    "@kbn/sse-utils-server",
+    "@kbn/sse-utils",
   ],
   "exclude": [
     "target/**/*",

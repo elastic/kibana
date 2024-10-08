@@ -21,12 +21,18 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ChatRequestData, MessageRole } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
+
+export enum PlaygroundPageMode {
+  chat = 'chat',
+  search = 'search',
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -47,6 +53,7 @@ export interface AppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export interface AppServicesContext {
@@ -57,6 +64,7 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
+  data: DataPublicPluginStart;
 }
 
 export enum ChatFormFields {
@@ -69,6 +77,7 @@ export enum ChatFormFields {
   sourceFields = 'source_fields',
   docSize = 'doc_size',
   queryFields = 'query_fields',
+  searchQuery = 'search_query',
 }
 
 export interface ChatForm {
@@ -81,6 +90,7 @@ export interface ChatForm {
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
+  [ChatFormFields.searchQuery]: string;
 }
 
 export interface Message {

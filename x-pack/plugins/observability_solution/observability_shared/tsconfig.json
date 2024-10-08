@@ -43,6 +43,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/rule-data-utils",
     "@kbn/es-query",
+    "@kbn/serverless",
   ],
   "exclude": ["target/**/*"]
 }

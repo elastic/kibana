@@ -12,7 +12,7 @@ import {
   IndicesDataStreamIndex,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
 import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
@@ -21,11 +21,33 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
+import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 jest.mock('../alerts_client');
 
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
+const alertingEventLogger = alertingEventLoggerMock.create();
+
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
 const SimulateTemplateResponse = {
   template: {
@@ -219,6 +241,7 @@ const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
 
 describe('Alerts Service', () => {
   let pluginStop$: Subject<void>;
+  const elasticsearchAndSOAvailability$ = of(true);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -251,6 +274,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -258,6 +282,46 @@ describe('Alerts Service', () => {
             async () => alertsService.isInitialized() === true
           );
 
+          expect(alertsService.isInitialized()).toEqual(true);
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          }
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+
+          const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+          expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+          const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+          expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+        });
+
+        test('should not initialize common resources if ES is not ready', async () => {
+          const test$ = new Subject<boolean>();
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$: test$,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
+          expect(alertsService.isInitialized()).toEqual(false);
+
+          // ES is ready, should initialize the resources
+          test$.next(true);
+          await retryUntil(
+            'alert service initialized',
+            async () => alertsService.isInitialized() === true
+          );
           expect(alertsService.isInitialized()).toEqual(true);
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
@@ -285,6 +349,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -306,6 +371,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -386,6 +452,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -427,6 +494,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1447,6 +1515,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1460,9 +1529,13 @@ describe('Alerts Service', () => {
           );
 
           await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1479,11 +1552,15 @@ describe('Alerts Service', () => {
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1508,6 +1585,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -1515,9 +1593,13 @@ describe('Alerts Service', () => {
             async () => alertsService.isInitialized() === true
           );
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1546,6 +1628,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1564,9 +1647,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1597,11 +1684,15 @@ describe('Alerts Service', () => {
           }
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1644,6 +1735,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1664,9 +1756,13 @@ describe('Alerts Service', () => {
           // call createAlertsClient at the same time which will trigger the retries
           const result = await Promise.all([
             alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1682,9 +1778,13 @@ describe('Alerts Service', () => {
               },
             }),
             alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1715,11 +1815,15 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1765,6 +1869,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1774,9 +1879,13 @@ describe('Alerts Service', () => {
           );
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1793,11 +1902,15 @@ describe('Alerts Service', () => {
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1846,6 +1959,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1860,9 +1974,13 @@ describe('Alerts Service', () => {
             }
 
             return await alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1886,11 +2004,15 @@ describe('Alerts Service', () => {
 
           expect(AlertsClient).toHaveBeenCalledTimes(2);
           expect(AlertsClient).toHaveBeenCalledWith({
+            alertingEventLogger,
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1944,6 +2066,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -1958,9 +2081,13 @@ describe('Alerts Service', () => {
             }
 
             return await alertsService.createAlertsClient({
+              alertingEventLogger,
               logger,
+              request: fakeRequest,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
+              spaceId: 'default',
               rule: {
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2006,6 +2133,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2024,9 +2152,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2072,6 +2204,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2090,9 +2223,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).not.toHaveBeenCalled();
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2145,6 +2282,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           alertsService.register(TestRegistrationContext);
 
@@ -2154,9 +2292,13 @@ describe('Alerts Service', () => {
           );
 
           const result = await alertsService.createAlertsClient({
+            alertingEventLogger,
             logger,
+            request: fakeRequest,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
+            spaceId: 'default',
             rule: {
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2198,6 +2340,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2218,6 +2361,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2238,6 +2382,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2266,6 +2411,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2297,6 +2443,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2333,6 +2480,7 @@ describe('Alerts Service', () => {
             pluginStop$,
             kibanaVersion: '8.8.0',
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil(
@@ -2367,6 +2515,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             timeoutMs: 10,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
@@ -2383,6 +2532,7 @@ describe('Alerts Service', () => {
             kibanaVersion: '8.8.0',
             timeoutMs: 10,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);

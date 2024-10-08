@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
-import { find, isEmpty, uniqBy } from 'lodash/fp';
+import { find, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
+import { i18n } from '@kbn/i18n';
 import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
-import { isResponseActionsAlertAgentIdField } from '../../lib/endpoint';
-import { useAlertResponseActionsSupport } from '../../hooks/endpoint/use_alert_response_actions_support';
-import * as i18n from './translations';
-import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
@@ -31,16 +27,26 @@ import {
   AGENT_STATUS_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-import type { AlertSummaryRow } from './helpers';
-import { getEnrichedFieldInfo } from './helpers';
-import type { EventSummaryField, EnrichedFieldInfo } from './types';
+import type { EventSummaryField } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
 const THRESHOLD_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT}.cardinality.field`;
-const THRESHOLD_CARDINALITY_VALUE = `${ALERT_THRESHOLD_RESULT}.cardinality.value`;
 const THRESHOLD_COUNT = `${ALERT_THRESHOLD_RESULT}.count`;
+
+const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});
+const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
+const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
+  defaultMessage: 'Rule type',
+});
 
 /** Always show these fields */
 const alwaysDisplayedFields: EventSummaryField[] = [
@@ -52,7 +58,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
     return {
       id: fieldPath,
       overrideField: AGENT_STATUS_FIELD_NAME,
-      label: i18n.AGENT_STATUS,
+      label: AGENT_STATUS,
     };
   }),
 
@@ -72,7 +78,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'orchestrator.resource.type' },
   { id: 'process.executable' },
   { id: 'file.path' },
-  { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
+  { id: ALERT_RULE_TYPE, label: RULE_TYPE },
 ];
 
 /**
@@ -163,7 +169,7 @@ function getFieldsByEventCode(
         {
           id: 'file.Ext.quarantine_path',
           overrideField: QUARANTINED_PATH_FIELD_NAME,
-          label: i18n.QUARANTINED_FILE_PATH,
+          label: QUARANTINED_FILE_PATH,
         },
       ];
     default:
@@ -296,193 +302,4 @@ export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): E
   }
 
   return { primaryEventCategory, allEventCategories };
-}
-
-export interface UseSummaryRowsProps {
-  data: TimelineEventsDetailsItem[];
-  browserFields: BrowserFields;
-  scopeId: string;
-  eventId: string;
-  investigationFields?: string[];
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}
-
-export const useSummaryRows = ({
-  data,
-  browserFields,
-  scopeId,
-  eventId,
-  isDraggable = false,
-  isReadOnly = false,
-  investigationFields,
-}: UseSummaryRowsProps): AlertSummaryRow[] => {
-  const responseActionsSupport = useAlertResponseActionsSupport(data);
-
-  return useMemo(() => {
-    const eventCategories = getEventCategoriesFromData(data);
-
-    const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
-
-    const eventCode = Array.isArray(eventCodeField?.originalValue)
-      ? eventCodeField?.originalValue?.[0]
-      : eventCodeField?.originalValue;
-
-    const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
-    const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
-      ? eventRuleTypeField?.originalValue?.[0]
-      : eventRuleTypeField?.originalValue;
-
-    const tableFields = getEventFieldsToDisplay({
-      eventCategories,
-      eventCode,
-      eventRuleType,
-      highlightedFieldsOverride: investigationFields ?? [],
-    });
-
-    return data != null
-      ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
-          const item = data.find(
-            (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
-          );
-          if (!item || isEmpty(item.values)) {
-            return acc;
-          }
-
-          // If we found the data by its legacy id we swap the ids to display the correct one
-          if (item.field === field.legacyId) {
-            field.id = field.legacyId;
-          }
-
-          const linkValueField =
-            field.linkField != null && data.find((d) => d.field === field.linkField);
-          const description = {
-            ...getEnrichedFieldInfo({
-              item,
-              linkValueField: linkValueField || undefined,
-              contextId: scopeId,
-              scopeId,
-              browserFields,
-              eventId,
-              field,
-            }),
-            isDraggable,
-            isReadOnly,
-          };
-
-          // If the field is one used by a supported Response Actions agentType,
-          // and the alert's host supports response actions
-          // but the alert field is not the one that the agentType on the alert host uses,
-          // then exit and return accumulator
-          if (
-            isResponseActionsAlertAgentIdField(field.id) &&
-            responseActionsSupport.isSupported &&
-            responseActionsSupport.details.agentIdField !== field.id
-          ) {
-            return acc;
-          }
-
-          if (field.id === THRESHOLD_TERMS_FIELD) {
-            const enrichedInfo = enrichThresholdTerms(item, data, description);
-            if (enrichedInfo) {
-              return [...acc, ...enrichedInfo];
-            } else {
-              return acc;
-            }
-          }
-
-          if (field.id === THRESHOLD_CARDINALITY_FIELD) {
-            const enrichedInfo = enrichThresholdCardinality(item, data, description);
-            if (enrichedInfo) {
-              return [...acc, enrichedInfo];
-            } else {
-              return acc;
-            }
-          }
-
-          return [
-            ...acc,
-            {
-              title: field.label ?? field.id,
-              description,
-            },
-          ];
-        }, [])
-      : [];
-  }, [
-    data,
-    investigationFields,
-    scopeId,
-    browserFields,
-    eventId,
-    isDraggable,
-    isReadOnly,
-    responseActionsSupport.details.agentIdField,
-    responseActionsSupport.isSupported,
-  ]);
-};
-
-/**
- * Enriches the summary data for threshold terms.
- * For any given threshold term, it generates a row with the term's name and the associated value.
- */
-function enrichThresholdTerms(
-  { values: termsFieldArr }: TimelineEventsDetailsItem,
-  data: TimelineEventsDetailsItem[],
-  description: EnrichedFieldInfo
-) {
-  const termsValueItem = data.find((d) => d.field === THRESHOLD_TERMS_VALUE);
-  const termsValueArray = termsValueItem && termsValueItem.values;
-
-  // Make sure both `fields` and `values` are an array and that they have the same length
-  if (
-    Array.isArray(termsFieldArr) &&
-    termsFieldArr.length > 0 &&
-    Array.isArray(termsValueArray) &&
-    termsFieldArr.length === termsValueArray.length
-  ) {
-    return termsFieldArr
-      .map((field, index) => ({
-        title: field,
-        description: {
-          ...description,
-          values: [termsValueArray[index]],
-        },
-      }))
-      .filter(
-        (entry) =>
-          !alwaysDisplayedFields
-            .map((alwaysThereEntry) => alwaysThereEntry.id)
-            .includes(entry.title)
-      );
-  }
-}
-
-/**
- * Enriches the summary data for threshold cardinality.
- * Reads out the cardinality field and the value and interpolates them into a combined string value.
- */
-function enrichThresholdCardinality(
-  { values: cardinalityFieldArr }: TimelineEventsDetailsItem,
-  data: TimelineEventsDetailsItem[],
-  description: EnrichedFieldInfo
-) {
-  const cardinalityValueItem = data.find((d) => d.field === THRESHOLD_CARDINALITY_VALUE);
-  const cardinalityValueArray = cardinalityValueItem && cardinalityValueItem.values;
-
-  // Only return a summary row if we actually have the correct field and value
-  if (
-    Array.isArray(cardinalityFieldArr) &&
-    cardinalityFieldArr.length === 1 &&
-    Array.isArray(cardinalityValueArray) &&
-    cardinalityFieldArr.length === cardinalityValueArray.length
-  ) {
-    return {
-      title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-      description: {
-        ...description,
-        values: [`count(${cardinalityFieldArr[0]}) >= ${cardinalityValueArray[0]}`],
-      },
-    };
-  }
 }

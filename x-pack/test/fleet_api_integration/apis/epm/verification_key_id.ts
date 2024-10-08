@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('EPM - verification key id', async () => {
+  describe('EPM - verification key id', () => {
     it('returns the verification key ID ', async () => {
       const res = await supertest
         .get('/api/fleet/epm/verification_key_id')

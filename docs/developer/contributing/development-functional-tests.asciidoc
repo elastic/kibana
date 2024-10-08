@@ -203,7 +203,7 @@ Tests should run at the positive security boundary condition, meaning that they 
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
-In order to achieve this a new service was introduced called `createTestUserService` (see `test/common/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+In order to achieve this a new service was introduced called `createTestUserService` (see `packages/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
 An example of how to set the role like how its defined below:
 
@@ -366,14 +366,14 @@ await testSubjects.click(‘containerButton’);
 ** `find.allByCssSelector()`
 
 **retry:**:::
-// * Source: {kibana-blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
+// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/retry/retry.ts[packages/kbn-ftr-common-functional-services/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
 ** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
 ** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
-// * Source: {kibana-blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
+// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts[packages/kbn-ftr-common-functional-services/services/kibana_server/kibana_server.ts]
 * Helpers for interacting with {kib}'s server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -381,7 +381,7 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-// * Source: {kibana-blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
+// * Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es_archiver.ts[packages/kbn-ftr-common-functional-services/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(path)`
@@ -393,7 +393,7 @@ Full list of services that are used in functional tests can be found here: {kiba
 
 **Low-level utilities:**:::
 * es
-// ** Source: {kibana-blob}test/common/services/es.ts[test/common/services/es.ts]
+// ** Source: {kibana-blob}packages/kbn-ftr-common-functional-services/services/es.ts[packages/kbn-ftr-common-functional-services/services/es.ts]
 ** {es} client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote

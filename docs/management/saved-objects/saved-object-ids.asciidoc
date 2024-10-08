@@ -77,13 +77,12 @@ be broken. For more information, refer to {kibana-ref-all}/8.0/release-notes-8.0
 
 If you are using the saved objects APIs directly, you should be aware of these changes:
 
-WARNING: Some of the saved objects APIs are deprecated in 8.7.0. For more information, refer to the <<saved-objects-api, API docs>>
+WARNING: Some of the saved objects APIs are deprecated in 8.7.0. For more information, refer to the <<saved-objects-api,API docs>>
 
-* When using the <<saved-objects-api-create,create>> or <<saved-objects-api-bulk-create,bulk create>> API, you may encounter
-  <<saved-objects-api-bulk-create-conflict-errors,conflict errors>> that **cannot** be overridden using the `overwrite: true`
+* When using the create or bulk create API, you may encounter conflict errors that **cannot** be overridden using the `overwrite: true`
   option. This can occur if there is already a saved object with this ID in a _different_ space, or if there is a legacy URL alias for this
   ID in the same space.
-* When using the <<saved-objects-api-import,import>> or <<spaces-api-copy-saved-objects,copy to space>> API, objects can potentially be
+* When using the import or copy to space API, objects can potentially be
   created with a different ID as described above.
-* When using the <<saved-objects-api-delete,delete>> API, if the saved object exists in multiple spaces, it can only be deleted by using the
-  <<saved-objects-api-delete-query-params,`force` option>>.
+* When using the delete API, if the saved object exists in multiple spaces, it can only be deleted by using the
+  `force` option.

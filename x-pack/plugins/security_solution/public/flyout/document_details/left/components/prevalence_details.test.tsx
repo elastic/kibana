@@ -18,8 +18,7 @@ import {
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -32,11 +31,20 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -154,19 +162,19 @@ describe('PrevalenceDetails', () => {
     ).toBeGreaterThan(1);
     expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID)).not.toBeInTheDocument();
+    expect(
+      queryByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
-  it('should render host and user name as clickable link if feature flag is true', () => {
+  it('should render host and user name as clickable link if preview is enabled', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     (usePrevalence as jest.Mock).mockReturnValue(mockPrevelanceReturnValue);
 
-    const { getByTestId } = renderPrevalenceDetails();
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID)).toBeInTheDocument();
+    const { getAllByTestId } = renderPrevalenceDetails();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)).toHaveLength(2);
 
-    getByTestId(PREVALENCE_DETAILS_TABLE_HOST_LINK_CELL_TEST_ID).click();
+    getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)[0].click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
@@ -176,7 +184,7 @@ describe('PrevalenceDetails', () => {
       },
     });
 
-    getByTestId(PREVALENCE_DETAILS_TABLE_USER_LINK_CELL_TEST_ID).click();
+    getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)[1].click();
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {

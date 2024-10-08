@@ -6,11 +6,12 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useMutation } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import {
-  CreateInvestigationNoteInput,
+  CreateInvestigationNoteParams,
   CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
+import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -26,7 +27,7 @@ export function useAddInvestigationNote() {
   return useMutation<
     CreateInvestigationNoteResponse,
     ServerError,
-    { investigationId: string; note: CreateInvestigationNoteInput },
+    { investigationId: string; note: CreateInvestigationNoteParams },
     { investigationId: string }
   >(
     ['addInvestigationNote'],
@@ -39,12 +40,26 @@ export function useAddInvestigationNote() {
     },
     {
       onSuccess: (response, {}) => {
-        // TODO: clear investigationNotes key from queryClient, and push new note to the internal store.
-        // console.log(response);
-        toasts.addSuccess('Note saved');
+        toasts.addSuccess(
+          i18n.translate('xpack.investigateApp.addInvestigationNote.successMessage', {
+            defaultMessage: 'Note saved',
+          })
+        );
       },
       onError: (error, {}, context) => {
-        // console.log(error);
+        toasts.addError(
+          new Error(
+            error.body?.message ??
+              i18n.translate('xpack.investigateApp.addInvestigationNote.errorMessage', {
+                defaultMessage: 'an error occurred',
+              })
+          ),
+          {
+            title: i18n.translate('xpack.investigateApp.addInvestigationNote.errorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
+        );
       },
     }
   );

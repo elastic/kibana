@@ -32,9 +32,9 @@ describe('When using Console component', () => {
     expect(renderResult.getByTestId('test-cmdInput-prompt').textContent).toEqual('MY PROMPT>>');
   });
 
-  it('should focus on input area when it gains focus', () => {
+  it('should focus on input area when it gains focus', async () => {
     render();
-    userEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
+    await userEvent.click(renderResult.getByTestId('test-mainPanel-inputArea'));
 
     expect(document.activeElement!.classList.contains('invisible-input')).toBe(true);
   });

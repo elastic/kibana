@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { FindInvestigationsResponse } from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
@@ -15,6 +16,8 @@ const DEFAULT_PAGE_SIZE = 25;
 export interface InvestigationListParams {
   page?: number;
   perPage?: number;
+  search?: string;
+  filter?: string;
 }
 
 export interface UseFetchInvestigationListResponse {
@@ -29,6 +32,8 @@ export interface UseFetchInvestigationListResponse {
 export function useFetchInvestigationList({
   page = 1,
   perPage = DEFAULT_PAGE_SIZE,
+  search,
+  filter,
 }: InvestigationListParams = {}): UseFetchInvestigationListResponse {
   const {
     core: {
@@ -41,6 +46,8 @@ export function useFetchInvestigationList({
     queryKey: investigationKeys.list({
       page,
       perPage,
+      search,
+      filter,
     }),
     queryFn: async ({ signal }) => {
       return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
@@ -48,22 +55,22 @@ export function useFetchInvestigationList({
         query: {
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
+          ...(!!search && { search }),
+          ...(!!filter && { filter }),
         },
         signal,
       });
     },
-    cacheTime: 0,
+    retry: false,
+    refetchInterval: 60 * 1000,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (String(error) === 'Error: Forbidden') {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
+    cacheTime: 600 * 1000, // 10 minutes
+    staleTime: 0,
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: 'Something went wrong while fetching Investigations',
+        title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {
+          defaultMessage: 'Something went wrong while fetching investigations',
+        }),
       });
     },
   });

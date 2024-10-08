@@ -70,16 +70,21 @@ export class PluginServices {
       { prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion }
     );
 
+    const minRefreshInterval =
+      pluginsSetup.data.query.timefilter.timefilter.getMinRefreshInterval();
+
     this.queryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
+      minRefreshInterval,
     });
 
     this.timelineQueryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
+      minRefreshInterval,
     });
   }
 

@@ -24,6 +24,7 @@ describe('TableActionsPopover', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
+        isLoading={false}
         status={MaintenanceWindowStatus.Running}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -39,6 +40,7 @@ describe('TableActionsPopover', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
+        isLoading={false}
         status={MaintenanceWindowStatus.Running}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -56,6 +58,7 @@ describe('TableActionsPopover', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
+        isLoading={false}
         status={MaintenanceWindowStatus.Upcoming}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -72,6 +75,7 @@ describe('TableActionsPopover', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
+        isLoading={false}
         status={MaintenanceWindowStatus.Finished}
         onEdit={() => {}}
         onCancel={() => {}}
@@ -88,6 +92,7 @@ describe('TableActionsPopover', () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
+        isLoading={false}
         status={MaintenanceWindowStatus.Archived}
         onEdit={() => {}}
         onCancel={() => {}}

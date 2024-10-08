@@ -35,6 +35,7 @@ import { MlPageHeader } from '../../../../components/page_header';
 export const Page: FC = () => {
   const {
     services: {
+      chrome: { recentlyAccessed },
       share,
       notifications: { toasts },
     },
@@ -133,7 +134,12 @@ export const Page: FC = () => {
       { absolute: true }
     );
 
-    addItemToRecentlyAccessed(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER, title, dataVisualizerLink);
+    addItemToRecentlyAccessed(
+      ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+      title,
+      dataVisualizerLink,
+      recentlyAccessed
+    );
     navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 

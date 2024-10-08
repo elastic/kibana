@@ -3,12 +3,8 @@
 exports[`render 1`] = `
 <EuiForm>
   <EuiFormRow
-    describedByIds={Array []}
     display="rowCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Geometry label"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}
@@ -17,12 +13,8 @@ exports[`render 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="rowCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Spatial relation"
-    labelType="label"
   >
     <EuiSelect
       compressed={true}
@@ -71,12 +63,8 @@ exports[`render 1`] = `
 exports[`should render error message 1`] = `
 <EuiForm>
   <EuiFormRow
-    describedByIds={Array []}
     display="rowCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Geometry label"
-    labelType="label"
   >
     <EuiFieldText
       compressed={true}
@@ -85,12 +73,8 @@ exports[`should render error message 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
     display="rowCompressed"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Spatial relation"
-    labelType="label"
   >
     <EuiSelect
       compressed={true}

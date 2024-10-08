@@ -14,7 +14,6 @@ import {
   createAndSyncRuleAndAlertsFactory,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
   getRiskEngineStats,
   areRiskScoreIndicesEmpty,
 } from '../../utils';
@@ -29,29 +28,31 @@ export default ({ getService }: FtrProviderContext) => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless telemetry', async () => {
+  describe('@ess @serverless telemetry', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
       log,
     });
-    const kibanaServer = getService('kibanaServer');
 
     before(async () => {
+      await riskEngineRoutes.cleanUp();
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
-      await cleanRiskEngine({ kibanaServer, es, log });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
     beforeEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+    });
+
+    afterEach(async () => {
+      await riskEngineRoutes.cleanUp();
     });
 
     it('should return empty metrics when the risk engine is disabled', async () => {
@@ -61,7 +62,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // https://github.com/elastic/kibana/issues/183246
     it('@skipInServerlessMKI should return metrics with expected values when risk engine is enabled', async () => {
       expect(await areRiskScoreIndicesEmpty({ log, es })).to.be(true);
 

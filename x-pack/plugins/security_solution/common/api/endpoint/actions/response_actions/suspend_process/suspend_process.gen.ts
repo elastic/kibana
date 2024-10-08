@@ -14,14 +14,21 @@
  *   version: 2023-10-31
  */
 
-import type { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import { KillOrSuspendActionSchema, SuccessResponse } from '../../../model/schema/common.gen';
+import { SuccessResponse, BaseActionSchema, Pid, EntityId } from '../../../model/schema/common.gen';
+
+export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
+export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
+  z.object({
+    parameters: z.union([Pid, EntityId]),
+  })
+);
 
 export type EndpointSuspendProcessActionRequestBody = z.infer<
   typeof EndpointSuspendProcessActionRequestBody
 >;
-export const EndpointSuspendProcessActionRequestBody = KillOrSuspendActionSchema;
+export const EndpointSuspendProcessActionRequestBody = SuspendProcessRouteRequestBody;
 export type EndpointSuspendProcessActionRequestBodyInput = z.input<
   typeof EndpointSuspendProcessActionRequestBody
 >;

@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { usePerformEvaluation, UsePerformEvaluationParams } from './use_perform_evaluation';
 import { postEvaluation as _postEvaluation } from './evaluate';
 import { useMutation as _useMutation } from '@tanstack/react-query';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, PostEvaluateRequestBodyInput } from '@kbn/elastic-assistant-common';
 
 const useMutationMock = _useMutation as jest.Mock;
 const postEvaluationMock = _postEvaluation as jest.Mock;
@@ -55,19 +55,9 @@ describe('usePerformEvaluation', () => {
       await waitForNextUpdate();
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
-        body: '{"dataset":[],"evalPrompt":""}',
+        body: undefined,
         headers: {
           'Content-Type': 'application/json',
-        },
-        query: {
-          agents: undefined,
-          datasetName: undefined,
-          evalModel: undefined,
-          evaluationType: undefined,
-          models: undefined,
-          outputIndex: undefined,
-          projectName: undefined,
-          runName: undefined,
         },
         signal: undefined,
         version: API_VERSIONS.internal.v1,
@@ -78,17 +68,13 @@ describe('usePerformEvaluation', () => {
   it('Correctly passes and formats evalParams', async () => {
     useMutationMock.mockImplementation(async (queryKey, fn, opts) => {
       try {
-        const res = await fn({
-          agents: ['d', 'c'],
-          dataset: '["kewl"]',
-          evalModel: ['b', 'a'],
-          evalPrompt: 'evalPrompt',
-          evaluationType: ['f', 'e'],
-          models: ['h', 'g'],
-          outputIndex: 'outputIndex',
-          projectName: 'test project',
+        const evalParams: PostEvaluateRequestBodyInput = {
+          graphs: ['d', 'c'],
+          datasetName: 'kewl',
+          connectorIds: ['h', 'g'],
           runName: 'test run',
-        });
+        };
+        const res = await fn(evalParams);
         return Promise.resolve(res);
       } catch (e) {
         opts.onError(e);
@@ -99,19 +85,9 @@ describe('usePerformEvaluation', () => {
       await waitForNextUpdate();
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
-        body: '{"dataset":["kewl"],"evalPrompt":"evalPrompt"}',
+        body: '{"graphs":["d","c"],"datasetName":"kewl","connectorIds":["h","g"],"runName":"test run"}',
         headers: {
           'Content-Type': 'application/json',
-        },
-        query: {
-          agents: 'c,d',
-          datasetName: undefined,
-          evalModel: 'a,b',
-          evaluationType: 'e,f',
-          models: 'g,h',
-          outputIndex: 'outputIndex',
-          projectName: 'test project',
-          runName: 'test run',
         },
         signal: undefined,
         version: API_VERSIONS.internal.v1,

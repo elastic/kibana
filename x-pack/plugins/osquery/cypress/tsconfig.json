@@ -4,6 +4,7 @@
     "**/*",
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
+    "./serverless_cypress_qa.config.ts",
     "../../../test_serverless/shared/lib",
   ],
   "exclude": [

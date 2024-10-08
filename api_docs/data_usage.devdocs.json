@@ -1,0 +1,111 @@
+{
+  "id": "dataUsage",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataUsage",
+      "id": "def-public.DataUsagePublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataUsagePublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/data_usage/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataUsage",
+      "id": "def-public.DataUsagePublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataUsagePublicStart",
+      "description": [],
+      "path": "x-pack/plugins/data_usage/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataUsage",
+      "id": "def-server.DataUsageServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataUsageServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/data_usage/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataUsage",
+      "id": "def-server.DataUsageServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataUsageServerStart",
+      "description": [],
+      "path": "x-pack/plugins/data_usage/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"data_usage\""
+        ],
+        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

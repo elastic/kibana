@@ -157,7 +157,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            error={errors.dedupKey}
+            error={errors.dedupKey as string}
             isInvalid={isDedupKeyInvalid}
             label={i18n.translate(
               'xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel',
@@ -189,7 +189,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             id="pagerDutySummary"
             fullWidth
-            error={errors.summary}
+            error={errors.summary as string}
             isInvalid={isSummaryInvalid}
             label={i18n.translate('xpack.stackConnectors.components.pagerDuty.summaryFieldLabel', {
               defaultMessage: 'Summary',
@@ -236,7 +236,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             <EuiFlexItem>
               <EuiFormRow
                 fullWidth
-                error={errors.timestamp}
+                error={errors.timestamp as string}
                 isInvalid={isTimestampInvalid}
                 label={i18n.translate(
                   'xpack.stackConnectors.components.pagerDuty.timestampTextFieldLabel',

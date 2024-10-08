@@ -20,6 +20,7 @@ jest.mock('./api', () => {
   };
 });
 jest.mock('./use_knowledge_base_status');
+jest.mock('./entries/use_knowledge_base_entries');
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {

@@ -56,7 +56,7 @@ export const MyComponent = () => {
           return (
             <EuiFormRow
               label={field.label}
-              helpText={typeof field.helpText === 'function' ? field.helpText() : helpText}
+              helpText={helpText}
               error={errorMessage}
               isInvalid={isInvalid}
             >

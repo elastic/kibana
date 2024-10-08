@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Router, type RouterOptions } from './router';
@@ -48,6 +49,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
           options: {
             deprecated: true,
+            discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
           },
@@ -65,6 +67,7 @@ describe('Router', () => {
         isVersioned: false,
         options: {
           deprecated: true,
+          discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
         },
@@ -226,6 +229,47 @@ describe('Router', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"[options.body.output: 'file'] in route POST / is not valid. Only 'data' or 'stream' are valid."`
+      );
+    });
+
+    it('throws if enabled security config is not valid', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              authz: {
+                requiredPrivileges: [],
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    it('throws if disabled security config does not provide opt-out reason', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          {
+            path: '/',
+            validate: false,
+            security: {
+              // @ts-expect-error
+              authz: {
+                enabled: false,
+              },
+            },
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authz.reason]: expected value of type [string] but got [undefined]"`
       );
     });
 

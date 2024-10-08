@@ -12,17 +12,17 @@ import { resolve } from 'path';
 import { Document } from 'langchain/document';
 
 import { Metadata } from '@kbn/elastic-assistant-common';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 
 /**
  * Loads the ESQL docs and language files into the Knowledge Base.
- *
- * *Item of Interest*
- * Knob #1: Types of documents loaded, metadata included, and document chunking strategies + text-splitting
  */
-export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Promise<boolean> => {
+export const loadESQL = async (
+  kbDataClient: AIAssistantKnowledgeBaseDataClient,
+  logger: Logger
+): Promise<boolean> => {
   try {
     const docsLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/esql/documentation'),
@@ -59,15 +59,27 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       kbResource: ESQL_RESOURCE,
     }) as Array<Document<Metadata>>;
 
+    // And make sure remaining docs have `kbResource:esql`
+    const docsWithMetadata = addRequiredKbResourceMetadata({
+      docs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    }) as Array<Document<Metadata>>;
+
+    const languageDocsWithMetadata = addRequiredKbResourceMetadata({
+      docs: languageDocs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    }) as Array<Document<Metadata>>;
+
     logger.info(
-      `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
+      `Loading ${docsWithMetadata.length} ES|QL docs, ${languageDocsWithMetadata.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
     );
 
-    const response = await esStore.addDocuments([
-      ...docs,
-      ...languageDocs,
-      ...requiredExampleQueries,
-    ]);
+    const response = await kbDataClient.addKnowledgeBaseDocuments({
+      documents: [...docsWithMetadata, ...languageDocsWithMetadata, ...requiredExampleQueries],
+      global: true,
+    });
 
     logger.info(
       `Loaded ${

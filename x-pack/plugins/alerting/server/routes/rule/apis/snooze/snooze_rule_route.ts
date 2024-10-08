@@ -25,6 +25,7 @@ export const snoozeRuleRoute = (
   router.post(
     {
       path: INTERNAL_ALERTING_SNOOZE_RULE,
+      options: { access: 'internal' },
       validate: {
         params: snoozeParamsSchema,
         body: snoozeBodySchema,

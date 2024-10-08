@@ -6,6 +6,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
+import type { ComponentProps } from 'react';
 import React, { useCallback, useMemo, useContext } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -114,8 +115,8 @@ const NonDecoratedIpComponent: React.FC<{
     [value]
   );
 
-  const render = useCallback(
-    (dataProvider, _, snapshot) =>
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
+    (dataProvider: DataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -182,7 +183,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (onClick) {
         onClick();
@@ -239,7 +240,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
     (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>

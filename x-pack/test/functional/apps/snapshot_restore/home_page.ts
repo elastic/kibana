@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await repositoriesButton.isDisplayed()).to.be(true);
     });
 
-    describe('Repositories Tab', async () => {
+    describe('Repositories Tab', () => {
       before(async () => {
         await es.snapshot.createRepository({
           name: 'my-repository',

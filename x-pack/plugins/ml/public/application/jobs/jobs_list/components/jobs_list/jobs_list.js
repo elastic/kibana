@@ -11,6 +11,7 @@ import { sortBy } from 'lodash';
 import moment from 'moment';
 
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { JobIcon } from '../../../../components/job_message_icon';
@@ -34,7 +35,7 @@ import { isManagedJob } from '../../../jobs_utils';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-export class JobsList extends Component {
+export class JobsListUI extends Component {
   constructor(props) {
     super(props);
 
@@ -42,6 +43,8 @@ export class JobsList extends Component {
       jobsSummaryList: props.jobsSummaryList,
       itemIdToExpandedRowMap: {},
     };
+
+    this.mlApi = props.kibana.services.mlServices.mlApi;
   }
 
   static getDerivedStateFromProps(props) {
@@ -170,7 +173,6 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         width: '15%',
-        scope: 'row',
         render: (id, item) => {
           if (!isManagedJob(item)) return id;
 
@@ -330,6 +332,9 @@ export class JobsList extends Component {
           defaultMessage: 'Actions',
         }),
         actions: actionsMenuContent(
+          this.props.kibana.services.notifications.toasts,
+          this.props.kibana.services.application,
+          this.mlApi,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,
@@ -395,11 +400,12 @@ export class JobsList extends Component {
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
         css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
+        rowHeader="id"
       />
     );
   }
 }
-JobsList.propTypes = {
+JobsListUI.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
   isMlEnabledInSpace: PropTypes.bool,
@@ -419,7 +425,9 @@ JobsList.propTypes = {
   jobsViewState: PropTypes.object,
   onJobsViewStateUpdate: PropTypes.func,
 };
-JobsList.defaultProps = {
+JobsListUI.defaultProps = {
   isMlEnabledInSpace: true,
   loading: false,
 };
+
+export const JobsList = withKibana(JobsListUI);

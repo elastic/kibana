@@ -68,7 +68,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [debouncedOnChange]
   );
   const changeHighlightTerm = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setHighlightTerm(value);
     },

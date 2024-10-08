@@ -17,10 +17,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
@@ -29,7 +25,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
     }
     id="multiselect-0"
     key="multiselect"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -44,10 +39,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Only available for \\"string\\" fields"
@@ -56,7 +47,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -72,10 +62,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
@@ -90,7 +76,6 @@ exports[`renders dynamic options should display disabled dynamic options with to
         id="inputControl.editor.listControl.sizeLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="listControlSizeInput"
@@ -119,10 +104,6 @@ exports[`renders dynamic options should display dynamic options for string field
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
@@ -131,7 +112,6 @@ exports[`renders dynamic options should display dynamic options for string field
     }
     id="multiselect-0"
     key="multiselect"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -146,10 +126,6 @@ exports[`renders dynamic options should display dynamic options for string field
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
@@ -158,7 +134,6 @@ exports[`renders dynamic options should display dynamic options for string field
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -193,10 +168,6 @@ exports[`renders dynamic options should display size field when dynamic options 
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
@@ -205,7 +176,6 @@ exports[`renders dynamic options should display size field when dynamic options 
     }
     id="multiselect-0"
     key="multiselect"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -220,10 +190,6 @@ exports[`renders dynamic options should display size field when dynamic options 
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
@@ -232,7 +198,6 @@ exports[`renders dynamic options should display size field when dynamic options 
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -248,10 +213,6 @@ exports[`renders dynamic options should display size field when dynamic options 
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
@@ -266,7 +227,6 @@ exports[`renders dynamic options should display size field when dynamic options 
         id="inputControl.editor.listControl.sizeLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="listControlSizeInput"
@@ -295,10 +255,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     onChange={[Function]}
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
@@ -313,7 +269,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
         id="inputControl.editor.listControl.parentLabel"
       />
     }
-    labelType="label"
   >
     <EuiSelect
       onChange={[Function]}
@@ -337,10 +292,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
@@ -349,7 +300,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     id="multiselect-0"
     key="multiselect"
-    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -364,10 +314,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
@@ -376,7 +322,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
-    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -392,10 +337,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
@@ -410,7 +351,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
         id="inputControl.editor.listControl.sizeLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldNumber
       data-test-subj="listControlSizeInput"

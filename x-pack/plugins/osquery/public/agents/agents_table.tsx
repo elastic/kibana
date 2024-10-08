@@ -173,7 +173,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
-  const renderOption = useCallback((option, searchVal, contentClassName) => {
+  const renderOption = useCallback((option: any, searchVal: any, contentClassName: any) => {
     const { label, value } = option;
 
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (

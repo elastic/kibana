@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('saved objects spaces only enabled', function () {
+    this.tags('skipFIPS');
     loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./bulk_resolve'));

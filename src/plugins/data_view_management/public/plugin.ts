@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +37,7 @@ export interface IndexPatternManagementStartDependencies {
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

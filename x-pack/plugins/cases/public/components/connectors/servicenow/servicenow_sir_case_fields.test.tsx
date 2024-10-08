@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { useGetChoices } from './use_get_choices';
 import { connector, choices } from '../mock';
@@ -20,9 +20,10 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices');
 const useGetChoicesMock = useGetChoices as jest.Mock;
 
-let appMockRenderer: AppMockRenderer;
-
 describe('ServiceNowSIR Fields', () => {
+  let user: UserEvent;
+  let appMockRenderer: AppMockRenderer;
+
   const fields = {
     destIp: true,
     sourceIp: true,
@@ -33,7 +34,17 @@ describe('ServiceNowSIR Fields', () => {
     subcategory: '26',
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
@@ -162,7 +173,7 @@ describe('ServiceNowSIR Fields', () => {
     const checkboxes = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
 
     checkboxes.forEach((subj) =>
-      it(`${subj.toUpperCase()}`, () => {
+      it(`${subj.toUpperCase()}`, async () => {
         appMockRenderer.render(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
@@ -170,7 +181,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const checkbox = screen.getByTestId(`${subj}Checkbox`);
-        userEvent.click(checkbox);
+        await user.click(checkbox);
 
         expect(checkbox).not.toBeChecked();
       })
@@ -187,7 +198,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const select = screen.getByTestId(`${subj}Select`);
-        userEvent.selectOptions(select, '4 - Low');
+        await user.selectOptions(select, '4 - Low');
 
         expect(select).toHaveValue('4');
       })
@@ -201,15 +212,15 @@ describe('ServiceNowSIR Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.click(screen.getByTestId('destIpCheckbox'));
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
-    userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+    await user.click(screen.getByTestId('destIpCheckbox'));
+    await user.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+    await user.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+    await user.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
 
     expect(screen.getByTestId('destIpCheckbox')).not.toBeChecked();
     expect(screen.getByTestId('sourceIpCheckbox')).toBeChecked();
@@ -230,14 +241,14 @@ describe('ServiceNowSIR Fields', () => {
     const categorySelect = screen.getByTestId('categorySelect');
     const subcategorySelect = screen.getByTestId('subcategorySelect');
 
-    userEvent.selectOptions(categorySelect, ['Denial of Service']);
+    await user.selectOptions(categorySelect, ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(subcategorySelect, ['26']);
-    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+    await user.selectOptions(subcategorySelect, ['26']);
+    await user.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
       expect(subcategorySelect).not.toHaveValue();

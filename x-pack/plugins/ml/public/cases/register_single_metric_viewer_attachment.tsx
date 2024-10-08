@@ -14,21 +14,14 @@ import { PLUGIN_ICON } from '../../common/constants/app';
 import { CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER } from '../../common/constants/cases';
 import type { MlStartDependencies } from '../plugin';
 import { getSingleMetricViewerComponent } from '../shared_components/single_metric_viewer';
-import type { SingleMetricViewerServices } from '../embeddables/types';
 import type { MlDependencies } from '../application/app';
+import { getMlServices } from '../embeddables/single_metric_viewer/get_services';
 
 export function registerSingleMetricViewerCasesAttachment(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies,
-  mlServices: SingleMetricViewerServices
+  pluginStart: MlStartDependencies
 ) {
-  const SingleMetricViewerComponent = getSingleMetricViewerComponent(
-    coreStart,
-    pluginStart as MlDependencies,
-    mlServices
-  );
-
   cases.attachmentFramework.registerPersistableState({
     id: CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
     icon: PLUGIN_ICON,
@@ -44,7 +37,15 @@ export function registerSingleMetricViewerCasesAttachment(
       ),
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
-        const { initComponent } = await import('./single_metric_viewer_attachment');
+        const [{ initComponent }, mlServices] = await Promise.all([
+          import('./single_metric_viewer_attachment'),
+          getMlServices(coreStart, pluginStart),
+        ]);
+        const SingleMetricViewerComponent = getSingleMetricViewerComponent(
+          coreStart,
+          pluginStart as MlDependencies,
+          mlServices
+        );
         return {
           default: initComponent(pluginStart.fieldFormats, SingleMetricViewerComponent),
         };

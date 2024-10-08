@@ -16,6 +16,14 @@ describe('ValidationError component', () => {
   let command: CommandDefinition;
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
     let commands: CommandDefinition[];
@@ -27,9 +35,13 @@ describe('ValidationError component', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  it('should display message and help output if command is not hidden from help', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should display message and help output if command is not hidden from help', async () => {
     render();
-    enterCommand('cmd1');
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'this command is not active'
@@ -37,10 +49,10 @@ describe('ValidationError component', () => {
     expect(renderResult.getByTestId('test-validationError-commandUsage'));
   });
 
-  it('should only display message (no help) if command is hidden from help', () => {
+  it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
-    enterCommand('cmd1');
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       'this command is not active'

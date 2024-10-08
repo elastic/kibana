@@ -284,20 +284,6 @@ It accepts
 2. a list of expected errors (can be empty)
 3. a list of expected warnings (can be empty or omitted)
 
-The bulk of the validation tests are auto-generated from function definitions. All the generated function tests are found within the following describe block
-
-```ts
-describe(FUNCTION_DESCRIBE_BLOCK_NAME, () => {
-  ...
-});
-```
-
-They are currently generated in CI when a new function definition is added. The generator script is at `packages/kbn-esql-validation-autocomplete/scripts/generate_function_validation_tests.ts`.
-
-The generator can be run locally using the `cd packages/kbn-esql-validation-autocomplete && yarn make:tests`.
-
-It is not perfect and occasionally creates a test case that is invalid for a particular function. So, humans are allowed to edit the expected assertions for any test case—those edits will not be overwritten by the generator script. However, if a human deletes a test case, it will be added back next time the generator runs. So, we should edit the test cases to make them valid, not delete them.
-
 Running the tests in `validation.test.ts` populates `packages/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
 
 #### Autocomplete

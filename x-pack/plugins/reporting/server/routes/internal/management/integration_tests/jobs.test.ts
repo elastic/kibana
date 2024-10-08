@@ -205,22 +205,6 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         .expect(404);
     });
 
-    it('returns a 403 if not a valid job type', async () => {
-      mockEsClient.search.mockResponseOnce(
-        getHits({
-          jobtype: 'invalidJobType',
-          payload: { title: 'invalid!' },
-        })
-      );
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-        .expect(403);
-    });
-
     it(`returns job's info`, async () => {
       mockEsClient.search.mockResponseOnce(
         getHits({
@@ -236,23 +220,6 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
         .expect(200);
-    });
-
-    it(`returns 403 if a user cannot view a job's info`, async () => {
-      mockEsClient.search.mockResponseOnce(
-        getHits({
-          jobtype: 'customForbiddenJobType',
-          payload: {}, // payload is irrelevant
-        })
-      );
-
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
-        .expect(403);
     });
 
     it('when a job is incomplete, "internal" API endpoint should return appropriate response', async () => {

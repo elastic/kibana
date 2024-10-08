@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import {
   EuiColorPickerSwatch,
@@ -12,8 +14,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiText,
+  EuiTitle,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
@@ -50,13 +53,14 @@ export function PaletteColors({
     <>
       <EuiFlexGroup direction="column" style={{ padding: 8 }}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>
+          <EuiTitle size="xxxs">
+            <h6>
               {i18n.translate('coloring.colorMapping.colorPicker.paletteColorsLabel', {
                 defaultMessage: 'Palette colors',
               })}
-            </strong>
-          </EuiText>
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
@@ -84,22 +88,26 @@ export function PaletteColors({
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup style={{ padding: 8, paddingTop: 0 }}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>
+          <EuiTitle size="xxxs">
+            <h6>
               {i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsLabel', {
                 defaultMessage: 'Neutral colors',
               })}
-            </strong>
-            <EuiToolTip
-              position="bottom"
-              content={i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsTooltip', {
-                defaultMessage:
-                  'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
-              })}
-            >
-              <EuiIcon tabIndex={0} type="questionInCircle" />
-            </EuiToolTip>
-          </EuiText>
+              <EuiToolTip
+                position="bottom"
+                content={i18n.translate(
+                  'coloring.colorMapping.colorPicker.themeAwareColorsTooltip',
+                  {
+                    defaultMessage:
+                      'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
+                  }
+                )}
+              >
+                <EuiIcon tabIndex={0} type="questionInCircle" />
+              </EuiToolTip>
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup
             direction="row"
             gutterSize="s"

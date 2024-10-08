@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
+import { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
   type InfraWaffleMapBounds,
@@ -148,17 +149,17 @@ export const LegendControls = ({
     setPopoverState(false);
   }, [autoBounds, boundsOverride, options]);
 
-  const handleStepsChange = useCallback(
+  const handleStepsChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => {
-      const steps = parseInt(e.target.value, 10);
+      const steps = parseInt((e.target as HTMLInputElement).value, 10);
       setLegendOptions((previous) => ({ ...previous, steps }));
     },
     [setLegendOptions]
   );
 
-  const handlePaletteChange = useCallback(
+  const handlePaletteChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
-      const palette = e.target.value;
+      const palette = e.target.value as WaffleLegendOptions['palette'];
       setLegendOptions((previous) => ({ ...previous, palette }));
     },
     [setLegendOptions]

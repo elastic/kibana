@@ -14,9 +14,6 @@ import type {
   DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useMlKibana } from '../../../../../contexts/kibana';
-
 import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionResults } from '../expandable_section';
@@ -33,19 +30,7 @@ interface Props {
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
   ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
-    const {
-      services: {
-        mlServices: { mlApiServices },
-      },
-    } = useMlKibana();
-
-    const classificationData = useExplorationResults(
-      dataView,
-      jobConfig,
-      searchQuery,
-      getToastNotifications(),
-      mlApiServices
-    );
+    const classificationData = useExplorationResults(dataView, jobConfig, searchQuery);
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;

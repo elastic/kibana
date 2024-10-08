@@ -17,7 +17,7 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 import { initialUserPrivilegesState } from '../../../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => {
   const originalModule = jest.requireActual('../../../../../../common/lib/kibana/kibana_react');
@@ -38,11 +38,13 @@ jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../../../../../../common/components/user_privileges');
 
 describe('When using the Endpoint Details Actions Menu', () => {
+  let user: UserEvent;
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let coreStart: AppContextTestRender['coreStart'];
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let httpMocks: ReturnType<typeof endpointPageHttpMock>;
-  let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
+  // let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let endpointHost: HostInfo;
 
   const setEndpointMetadataResponse = (isolation: boolean = false) => {
@@ -54,15 +56,27 @@ describe('When using the Endpoint Details Actions Menu', () => {
     endpointHost.metadata.host.os.name = 'Windows';
     // @ts-expect-error TS2540
     endpointHost.metadata.agent.version = '7.14.0';
+    // @ts-expect-error TS2540
+    endpointHost.policy_info = { agent: { applied: { id: '123' } } };
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
     coreStart = mockedContext.coreStart;
-    middlewareSpy = mockedContext.middlewareSpy;
+    // TODO middlewareSpy.waitForAction() times out after the upgrade to userEvent v14 https://github.com/elastic/kibana/pull/189949
+    // middlewareSpy = mockedContext.middlewareSpy;
 
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
 
@@ -75,10 +89,10 @@ describe('When using the Endpoint Details Actions Menu', () => {
     });
 
     render = async () => {
-      renderResult = mockedContext.render(<ActionsMenu hostMetadata={endpointHost?.metadata} />);
+      renderResult = mockedContext.render(<ActionsMenu hostInfo={endpointHost} />);
       const endpointDetailsActionsButton = renderResult.getByTestId('endpointDetailsActionsButton');
       endpointDetailsActionsButton.style.pointerEvents = 'all';
-      userEvent.click(endpointDetailsActionsButton);
+      await user.click(endpointDetailsActionsButton);
 
       return renderResult;
     };
@@ -117,13 +131,10 @@ describe('When using the Endpoint Details Actions Menu', () => {
       'should navigate via kibana `navigateToApp()` when %s is clicked',
       async (_, dataTestSubj) => {
         await render();
-        await act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
-        });
 
         const takeActionMenuItem = renderResult.getByTestId(dataTestSubj);
         takeActionMenuItem.style.pointerEvents = 'all';
-        userEvent.click(takeActionMenuItem);
+        await user.click(takeActionMenuItem);
 
         expect(coreStart.application.navigateToApp).toHaveBeenCalled();
       }
@@ -143,7 +154,7 @@ describe('When using the Endpoint Details Actions Menu', () => {
         await render();
         const isolateButton = renderResult.getByTestId('unIsolateLink');
         isolateButton.style.pointerEvents = 'all';
-        userEvent.click(isolateButton);
+        await user.click(isolateButton);
 
         expect(coreStart.application.navigateToApp).toHaveBeenCalled();
       });

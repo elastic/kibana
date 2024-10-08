@@ -11,7 +11,7 @@
     "format": "../../node_modules/.bin/prettier **/*.js --write"
   },
   "author": "",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "bugs": {
     "url": "https://github.com/jbudz/spec-to-console/issues"
   },

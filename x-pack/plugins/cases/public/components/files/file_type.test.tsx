@@ -17,8 +17,7 @@ import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
-// FLAKY: https://github.com/elastic/kibana/issues/175841
-describe.skip('getFileType', () => {
+describe('getFileType', () => {
   const fileType = getFileType();
 
   it('invalid props return blank FileAttachmentViewObject', () => {
@@ -45,6 +44,10 @@ describe.skip('getFileType', () => {
       jest.clearAllMocks();
     });
 
+    afterEach(async () => {
+      await appMockRender.clearQueryCache();
+    });
+
     it('event renders a clickable name if the file is an image', async () => {
       appMockRender = createAppMockRenderer();
 
@@ -61,7 +64,7 @@ describe.skip('getFileType', () => {
       // @ts-expect-error: event is a React element
       appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
 
-      userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
+      await userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
       expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
     });
 
@@ -135,14 +138,17 @@ describe.skip('getFileType', () => {
 
       expect(deleteButton).toBeInTheDocument();
 
-      userEvent.click(deleteButton);
+      await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
     });
 
     it('empty externalReferenceMetadata returns blank FileAttachmentViewObject', () => {
       expect(
-        fileType.getAttachmentViewObject({ ...attachmentViewProps, externalReferenceMetadata: {} })
+        fileType.getAttachmentViewObject({
+          ...attachmentViewProps,
+          externalReferenceMetadata: {},
+        })
       ).toEqual({
         event: 'added an unknown file',
         hideDefaultActions: true,
