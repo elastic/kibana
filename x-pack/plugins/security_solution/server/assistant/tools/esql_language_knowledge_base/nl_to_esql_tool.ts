@@ -11,6 +11,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { APP_UI_ID } from '../../../../common';
+import { getPromptSuffixForOssModel } from './common';
 
 export type ESQLToolParams = AssistantToolParams;
 
@@ -37,7 +38,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request } = params as ESQLToolParams;
+    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
     const callNaturalLanguageToEsql = async (question: string) => {
@@ -46,6 +47,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           client: inference.getClient({ request }),
           connectorId,
           input: question,
+          ...(isOssModel ? { functionCalling: 'simulated' } : {}),
           logger: {
             debug: (source) => {
               logger.debug(typeof source === 'function' ? source() : source);
@@ -57,7 +59,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
-      description: toolDetails.description,
+      description:
+        toolDetails.description + (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
       schema: z.object({
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
