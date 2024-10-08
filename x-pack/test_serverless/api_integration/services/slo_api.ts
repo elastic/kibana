@@ -87,10 +87,11 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
-    async findDefinitions(): Promise<FindSLODefinitionsResponse> {
+    async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {
       const { body } = await supertest
         .get(`/api/observability/slos/_definitions`)
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send()
         .expect(200);
 
@@ -135,7 +136,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
     async waitForSloCreated({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       if (!sloId) {
-        throw new Error(`'sloId is undefined`);
+        throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
@@ -145,6 +146,23 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
           throw new Error(`No slo with id ${sloId} found`);
+        }
+        return response.body;
+      });
+    },
+
+    async waitForSloReseted(sloId: string, roleAuthc: RoleCredentials) {
+      if (!sloId) {
+        throw new Error('sloId is undefined');
+      }
+      return await retry.tryForTime(retryTimeout, async () => {
+        const response = await supertest
+          .post(`/api/observability/slos/${sloId}/_reset`)
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
+          .timeout(requestTimeout);
+        if (response.body.id === undefined) {
+          throw new Error(`Error reseting ${sloId}`);
         }
         return response.body;
       });
