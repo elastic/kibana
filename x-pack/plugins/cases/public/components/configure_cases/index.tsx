@@ -485,7 +485,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
         renderHeader={() => (
-          <span>{!customFieldToEdit ? i18n.ADD_CUSTOM_FIELD : i18n.EDIT_CUSTOM_FIELD} </span>
+          <span>{customFieldToEdit ? i18n.EDIT_CUSTOM_FIELD : i18n.ADD_CUSTOM_FIELD} </span>
         )}
       >
         {({ onChange }) => (
@@ -507,7 +507,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
         renderHeader={() => (
-          <span>{!templateToEdit ? i18n.CREATE_TEMPLATE : i18n.EDIT_TEMPLATE}</span>
+          <span>{templateToEdit ? i18n.EDIT_TEMPLATE : i18n.CREATE_TEMPLATE}</span>
         )}
       >
         {({ onChange }) => (
