@@ -1,11 +1,17 @@
 {
   "type": "plugin",
   "id": "@kbn/saved-objects-finder-plugin",
-  "owner": "@elastic/kibana-data-discovery",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "savedObjectsFinder",
-    "server": true,
     "browser": true,
-    "requiredBundles": ["savedObjectsManagement"]
+    "server": true,
+    "requiredBundles": [
+      "savedObjectsManagement"
+    ]
   }
 }
