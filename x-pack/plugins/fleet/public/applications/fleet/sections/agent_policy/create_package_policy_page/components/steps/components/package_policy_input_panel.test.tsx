@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
 import type { TestRenderer } from '../../../../../../../../mock';
-import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { useAgentless } from '../../../../../../../../hooks';
 
 import type {
   PackageInfo,
@@ -21,7 +21,7 @@ import type {
 
 import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_policy_input_panel';
 
-jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
+jest.mock('../../../../../../../../hooks', () => {
   return {
     useAgentless: jest.fn(),
   };
@@ -365,6 +365,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessIntegration: jest.fn(),
         isAgentlessApiEnabled: true,
         isDefaultAgentlessPolicyEnabled: false,
+        isOnlyAgentlessIntegration: jest.fn(),
+        isOnlyAgentlessPolicyTemplate: jest.fn(),
       });
     });
 
@@ -400,6 +402,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessIntegration: jest.fn(),
         isAgentlessApiEnabled: true,
         isDefaultAgentlessPolicyEnabled: false,
+        isOnlyAgentlessIntegration: jest.fn(),
+        isOnlyAgentlessPolicyTemplate: jest.fn(),
       });
     });
 
