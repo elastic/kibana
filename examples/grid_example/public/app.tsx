@@ -7,19 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, type GridLayoutData, type GridLayoutApi } from '@kbn/grid-layout';
 import { AppMountParameters } from '@kbn/core-application-browser';
-import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiProvider, EuiSpacer } from '@elastic/eui';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE,
+} from '@kbn/grid-layout/grid/constants';
 
 export const GridExample = () => {
+  const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
+
   return (
     <EuiProvider>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header iconType={'dashboardApp'} pageTitle="Grid Layout Example" />
         <EuiPageTemplate.Section color="subdued">
+          <EuiButton
+            onClick={() => {
+              gridLayoutApi?.addNewPanel(`panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`);
+            }}
+          >
+            Add a panel
+          </EuiButton>
+          <EuiSpacer size="m" />
           <GridLayout
+            ref={setGridLayoutApi}
             renderPanelContents={(id) => {
               return <div style={{ padding: 8 }}>{id}</div>;
             }}
@@ -52,7 +68,11 @@ export const GridExample = () => {
               ];
 
               return {
-                gridSettings: { gutterSize: 8, rowHeight: 26, columnCount: 48 },
+                gridSettings: {
+                  gutterSize: DASHBOARD_MARGIN_SIZE,
+                  rowHeight: DASHBOARD_GRID_HEIGHT,
+                  columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+                },
                 initialLayout,
               };
             }}
