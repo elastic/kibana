@@ -54,7 +54,8 @@ function groupFilesByOwners(files, codeowners) {
         .replace(/\*\*/g, '.*')
         .replace(/\*/g, '[^/]*')
         .replace(/\//g, '\\/');
-      const regex = new RegExp(`^${regexPattern}$`);
+
+      const regex = new RegExp(`${regexPattern}`);
 
       if (regex.test(file)) {
         if (!ownerFilesMap[owner]) ownerFilesMap[owner] = [];
@@ -69,8 +70,10 @@ function groupFilesByOwners(files, codeowners) {
 
 // Create a branch, stage, and commit files for each owner
 function processChangesByOwners(ownerFilesMap) {
+  const mainBranch = execSync('git rev-parse --abbrev-ref HEAD');
+
   for (const [owner, files] of Object.entries(ownerFilesMap)) {
-    const branchName = `changes-by-${owner}`;
+    const branchName = `eslint/changes-by-${owner.replace('@elastic/', '')}`;
 
     console.log(`Owner: ${owner}`);
     console.log(`Files: ${files.join(', ')} \n ----`);
@@ -89,6 +92,8 @@ function processChangesByOwners(ownerFilesMap) {
     runCommand(
       `gh pr create --base main --head ${branchName} --title "ESLint fixes for ${owner}" --body "This PR contains ESLint fixes for files owned by ${owner}"`
     );
+
+    runCommand(`git checkout ${mainBranch}`);
   }
 }
 
@@ -103,6 +108,10 @@ function runESLint() {
     runCommand(
       `${eslintRuleFlag} grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/security | xargs npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
     );
+
+    // runCommand(
+    //   `${eslintRuleFlag} grep -rEl --include="*.ts" "router\.(get|post|delete|put)|router\.versioned\.(get|post|put|delete)" ./x-pack/plugins/banners | xargs npx eslint --fix --rule "@kbn/eslint/no_deprecated_authz_config:error"`
+    // );
     console.log('ESLint autofix complete');
   } catch (error) {
     console.error('Error running ESLint:', error);
@@ -129,8 +138,6 @@ function main() {
   const ownerFilesMap = groupFilesByOwners(changedFiles, codeowners);
 
   processChangesByOwners(ownerFilesMap);
-
-  runCommand('git checkout main');
 }
 
 main();
