@@ -67,7 +67,7 @@ export const renderApp = ({
       <KibanaContextProvider services={{ ...startPlugins, ...coreStart }}>
         <LegacyServicesProvider providers={services}>
           <Provider store={canvasStore}>
-            <App history={params.history} appUpdater={appUpdater} />{' '}
+            <App history={params.history} appUpdater={appUpdater} />
           </Provider>
         </LegacyServicesProvider>
       </KibanaContextProvider>
