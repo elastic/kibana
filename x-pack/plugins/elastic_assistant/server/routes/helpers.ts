@@ -322,6 +322,7 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   inference: InferenceServerStart;
+  isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
@@ -348,6 +349,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  isOssModel,
   context,
   actionsClient,
   inference,
@@ -412,6 +414,7 @@ export const langChainExecute = async ({
     inference,
     isStream,
     llmType: getLlmType(actionTypeId),
+    isOssModel,
     langChainMessages,
     logger,
     onNewReplacements,
