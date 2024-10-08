@@ -89,6 +89,13 @@ describe('ruleSourceImporter', () => {
       expect(subject.isPrebuiltRule(ruleToImport)).toBe(true);
     });
 
+    it('returns true if the rule has no version, but its rule_id matches an available rule asset', async () => {
+      const ruleWithoutVersion = { ...ruleToImport, version: undefined };
+      await subject.setup({ rules: [ruleWithoutVersion] });
+
+      expect(subject.isPrebuiltRule(ruleWithoutVersion)).toBe(true);
+    });
+
     it('throws an error if the rule is not known to the calculator', async () => {
       await subject.setup({ rules: [ruleToImport] });
 
