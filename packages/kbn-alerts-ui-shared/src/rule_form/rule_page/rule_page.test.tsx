@@ -50,6 +50,7 @@ const formDataMock: RuleFormData = {
     index: ['.kibana'],
     timeField: 'alert.executionStatus.lastExecutionDate',
   },
+  actions: [],
   consumer: 'stackAlerts',
   schedule: { interval: '1m' },
   tags: [],
@@ -64,12 +65,22 @@ useRuleFormState.mockReturnValue({
   plugins: {
     application: {
       navigateToUrl,
+      capabilities: {
+        actions: {
+          show: true,
+          save: true,
+          execute: true,
+        },
+      },
     },
   },
   baseErrors: {},
   paramsErrors: {},
   multiConsumerSelection: 'logs',
   formData: formDataMock,
+  connectors: [],
+  connectorTypes: [],
+  aadTemplateFields: [],
 });
 
 const onSave = jest.fn();

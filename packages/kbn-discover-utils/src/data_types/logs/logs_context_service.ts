@@ -15,7 +15,7 @@ export interface LogsContextService {
 }
 
 export interface LogsContextServiceDeps {
-  logsDataAccessPlugin?: LogsDataAccessPluginStart;
+  logsDataAccess?: LogsDataAccessPluginStart;
 }
 
 export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS = [
@@ -31,13 +31,11 @@ export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom
   DEFAULT_ALLOWED_LOGS_BASE_PATTERNS
 );
 
-export const createLogsContextService = async ({
-  logsDataAccessPlugin,
-}: LogsContextServiceDeps) => {
+export const createLogsContextService = async ({ logsDataAccess }: LogsContextServiceDeps) => {
   let logSources: string[] | undefined;
 
-  if (logsDataAccessPlugin) {
-    const logSourcesService = logsDataAccessPlugin.services.logSourcesService;
+  if (logsDataAccess) {
+    const logSourcesService = logsDataAccess.services.logSourcesService;
     logSources = (await logSourcesService.getLogSources())
       .map((logSource) => logSource.indexPattern)
       .join(',') // TODO: Will be replaced by helper in: https://github.com/elastic/kibana/pull/192003

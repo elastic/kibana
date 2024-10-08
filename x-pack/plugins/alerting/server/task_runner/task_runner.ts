@@ -42,7 +42,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -64,11 +64,14 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
 import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
+import {
+  createTaskRunnerLogger,
+  withAlertingSpan,
+  processRunResults,
+  clearExpiredSnoozes,
+} from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -136,8 +139,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
-  private maintenanceWindows: MaintenanceWindow[] = [];
-  private maintenanceWindowsWithoutScopedQueryIds: string[] = [];
   private ruleTypeRunner: RuleTypeRunner<
     Params,
     ExtractedParams,
@@ -208,7 +209,6 @@ export class TaskRunner<
 
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
-    namespace: string | undefined,
     attributes: {
       executionStatus?: RawRuleExecutionStatus;
       monitoring?: RawRuleMonitoring;
@@ -216,7 +216,7 @@ export class TaskRunner<
       lastRun?: RawRuleLastRun | null;
     }
   ) {
-    const client = this.internalSavedObjectsRepository;
+    const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
       // the update of the attribute `running` in the rule's saved object
@@ -227,13 +227,12 @@ export class TaskRunner<
       // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateRule(
+      await partiallyUpdateRuleWithEs(
         client,
         ruleId,
         { ...attributes, running: false },
         {
           ignore404: true,
-          namespace,
           refresh: false,
         }
       );
@@ -299,8 +298,10 @@ export class TaskRunner<
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
+      maintenanceWindowsService: this.context.maintenanceWindowsService,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelaySettings.delay,
+      request: fakeRequest,
       ruleId,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -359,8 +360,6 @@ export class TaskRunner<
       alertsClient,
       executionId: this.executionId,
       executorServices,
-      maintenanceWindows: this.maintenanceWindows,
-      maintenanceWindowsWithoutScopedQueryIds: this.maintenanceWindowsWithoutScopedQueryIds,
       rule,
       ruleType: this.ruleType,
       startedAt: this.taskInstance.startedAt!,
@@ -509,6 +508,7 @@ export class TaskRunner<
         paramValidator: this.ruleType.validate.params,
         ruleId,
         spaceId,
+        logger: this.logger,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
       });
@@ -526,33 +526,11 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
-      // Load the maintenance windows
-      this.maintenanceWindows = await withAlertingSpan('alerting:load-maintenance-windows', () =>
-        getMaintenanceWindows({
-          context: this.context,
-          fakeRequest: runRuleParams.fakeRequest,
-          logger: this.logger,
-          ruleTypeId: this.ruleType.id,
-          ruleId,
-          ruleTypeCategory: this.ruleType.category,
-        })
-      );
-
-      // Set the event log MW Id field the first time with MWs without scoped queries
-      this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-        maintenanceWindows: this.maintenanceWindows,
-        withScopedQuery: false,
-      });
-
-      if (this.maintenanceWindowsWithoutScopedQueryIds.length) {
-        this.alertingEventLogger.setMaintenanceWindowIds(
-          this.maintenanceWindowsWithoutScopedQueryIds
-        );
-      }
-
       (async () => {
         try {
-          await runRuleParams.rulesClient.clearExpiredSnoozes({
+          await clearExpiredSnoozes({
+            esClient: this.context.elasticsearch.client.asInternalUser,
+            logger: this.logger,
             rule: runRuleParams.rule,
             version: runRuleParams.version,
           });
@@ -576,7 +554,7 @@ export class TaskRunner<
     const { executionStatus: execStatus, executionMetrics: execMetrics } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
         const {
-          params: { alertId: ruleId, spaceId },
+          params: { alertId: ruleId },
           startedAt,
           schedule: taskSchedule,
         } = this.taskInstance;
@@ -587,8 +565,6 @@ export class TaskRunner<
         } else if (taskSchedule) {
           nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
         }
-
-        const namespace = this.context.spaceIdToNamespace(spaceId);
 
         const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
           logger: this.logger,
@@ -630,7 +606,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
-          await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
+          await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,
             lastRun: lastRunToRaw(lastRun),
@@ -786,11 +762,10 @@ export class TaskRunner<
 
     // Write event log entry
     const {
-      params: { alertId: ruleId, spaceId, consumer },
+      params: { alertId: ruleId, consumer },
       schedule: taskSchedule,
       startedAt,
     } = this.taskInstance;
-    const namespace = this.context.spaceIdToNamespace(spaceId);
 
     if (consumer && !this.ruleConsumer) {
       this.ruleConsumer = consumer;
@@ -831,7 +806,7 @@ export class TaskRunner<
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
     const outcome = 'failed';
-    await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
+    await this.updateRuleSavedObjectPostRun(ruleId, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
         outcome,

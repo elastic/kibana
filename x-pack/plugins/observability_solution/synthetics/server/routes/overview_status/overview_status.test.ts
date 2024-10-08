@@ -262,6 +262,7 @@ describe('current status route', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
+          "disabledConfigs": Object {},
           "down": 1,
           "downConfigs": Object {
             "id2-Europe - Germany": Object {
@@ -527,6 +528,7 @@ describe('current status route', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
+          "disabledConfigs": Object {},
           "down": 1,
           "downConfigs": Object {
             "id2-Europe - Germany": Object {
@@ -820,6 +822,7 @@ describe('current status route', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
+          "disabledConfigs": Object {},
           "down": 1,
           "downConfigs": Object {
             "id2-Europe - Germany": Object {

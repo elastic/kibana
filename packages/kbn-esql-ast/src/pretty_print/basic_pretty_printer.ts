@@ -8,16 +8,9 @@
  */
 
 import { binaryExpressionGroup } from '../ast/helpers';
-import { ESQLAstCommand } from '../types';
-import { ESQLAstExpressionNode, ESQLAstQueryNode, Visitor } from '../visitor';
+import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
+import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { LeafPrinter } from './leaf_printer';
-
-/**
- * @todo
- *
- * 1. Add support for binary expression wrapping into brackets, due to operator
- *    precedence.
- */
 
 export interface BasicPrettyPrinterOptions {
   /**
@@ -66,7 +59,7 @@ export class BasicPrettyPrinter {
    * @returns A single-line string representation of the query.
    */
   public static readonly print = (
-    query: ESQLAstQueryNode,
+    query: ESQLAstQueryExpression,
     opts?: BasicPrettyPrinterOptions
   ): string => {
     const printer = new BasicPrettyPrinter(opts);
@@ -82,7 +75,7 @@ export class BasicPrettyPrinter {
    * @returns A multi-line string representation of the query.
    */
   public static readonly multiline = (
-    query: ESQLAstQueryNode,
+    query: ESQLAstQueryExpression,
     opts?: BasicPrettyPrinterMultilineOptions
   ): string => {
     const printer = new BasicPrettyPrinter({ ...opts, multiline: true });
@@ -133,15 +126,56 @@ export class BasicPrettyPrinter {
       : word.toUpperCase();
   }
 
+  protected decorateWithComments(node: ESQLAstBaseItem, formatted: string): string {
+    const formatting = node.formatting;
+
+    if (!formatting) {
+      return formatted;
+    }
+
+    if (formatting.left) {
+      const comments = LeafPrinter.commentList(formatting.left);
+
+      if (comments) {
+        formatted = `${comments} ${formatted}`;
+      }
+    }
+
+    if (formatting.right) {
+      const comments = LeafPrinter.commentList(formatting.right);
+
+      if (comments) {
+        formatted = `${formatted} ${comments}`;
+      }
+    }
+
+    return formatted;
+  }
+
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
     })
 
-    .on('visitSourceExpression', (ctx) => LeafPrinter.source(ctx.node))
-    .on('visitColumnExpression', (ctx) => LeafPrinter.column(ctx.node))
-    .on('visitLiteralExpression', (ctx) => LeafPrinter.literal(ctx.node))
-    .on('visitTimeIntervalLiteralExpression', (ctx) => LeafPrinter.timeInterval(ctx.node))
+    .on('visitSourceExpression', (ctx) => {
+      const formatted = LeafPrinter.source(ctx.node);
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitColumnExpression', (ctx) => {
+      const formatted = LeafPrinter.column(ctx.node);
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitLiteralExpression', (ctx) => {
+      const formatted = LeafPrinter.literal(ctx.node);
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitTimeIntervalLiteralExpression', (ctx) => {
+      const formatted = LeafPrinter.timeInterval(ctx.node);
+      return this.decorateWithComments(ctx.node, formatted);
+    })
 
     .on('visitInlineCastExpression', (ctx) => {
       const value = ctx.value();
@@ -156,7 +190,10 @@ export class BasicPrettyPrinter {
         valueFormatted = `(${valueFormatted})`;
       }
 
-      return `${valueFormatted}::${ctx.node.castType}`;
+      const typeName = this.keyword(ctx.node.castType);
+      const formatted = `${valueFormatted}::${typeName}`;
+
+      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitListLiteralExpression', (ctx) => {
@@ -166,7 +203,9 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      return `[${elements}]`;
+      const formatted = `[${elements}]`;
+
+      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitFunctionCallExpression', (ctx) => {
@@ -179,12 +218,16 @@ export class BasicPrettyPrinter {
         case 'unary-expression': {
           operator = this.keyword(operator);
 
-          return `${operator} ${ctx.visitArgument(0, undefined)}`;
+          const formatted = `${operator} ${ctx.visitArgument(0, undefined)}`;
+
+          return this.decorateWithComments(ctx.node, formatted);
         }
         case 'postfix-unary-expression': {
           operator = this.keyword(operator);
 
-          return `${ctx.visitArgument(0)} ${operator}`;
+          const formatted = `${ctx.visitArgument(0)} ${operator}`;
+
+          return this.decorateWithComments(ctx.node, formatted);
         }
         case 'binary-expression': {
           operator = this.keyword(operator);
@@ -207,7 +250,7 @@ export class BasicPrettyPrinter {
 
           const formatted = `${leftFormatted} ${operator} ${rightFormatted}`;
 
-          return formatted;
+          return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
           if (opts.lowercaseFunctions) {
@@ -220,13 +263,17 @@ export class BasicPrettyPrinter {
             args += (args ? ', ' : '') + arg;
           }
 
-          return `${operator}(${args})`;
+          const formatted = `${operator}(${args})`;
+
+          return this.decorateWithComments(ctx.node, formatted);
         }
       }
     })
 
     .on('visitRenameExpression', (ctx) => {
-      return `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
+      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
+
+      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitOrderExpression', (ctx) => {
@@ -295,7 +342,7 @@ export class BasicPrettyPrinter {
       return text;
     });
 
-  public print(query: ESQLAstQueryNode) {
+  public print(query: ESQLAstQueryExpression) {
     return this.visitor.visitQuery(query, undefined);
   }
 

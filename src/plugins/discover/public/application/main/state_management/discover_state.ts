@@ -382,6 +382,7 @@ export function getDiscoverStateContainer({
 
   const transitionFromDataViewToESQL = (dataView: DataView) => {
     const queryString = getInitialESQLQuery(dataView);
+
     appStateContainer.update({
       query: { esql: queryString },
       filters: [],
@@ -390,6 +391,9 @@ export function getDiscoverStateContainer({
       },
       columns: [],
     });
+    // clears pinned filters
+    const globalState = globalStateContainer.get();
+    globalStateContainer.set({ ...globalState, filters: [] });
   };
 
   const onDataViewCreated = async (nextDataView: DataView) => {

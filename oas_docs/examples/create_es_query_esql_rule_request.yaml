@@ -1,4 +1,6 @@
-summary: Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
+summary: Elasticsearch query rule (ES|QL)
+description: >
+  Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL) to define its query and a server log connector to send notifications.
 value:
   name: my Elasticsearch query ESQL rule
   params:

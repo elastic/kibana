@@ -448,22 +448,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -497,6 +481,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
@@ -4166,13 +4158,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -4220,13 +4206,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -7664,13 +7644,7 @@
             "text": "RuntimeFieldSpec"
           },
           "> | undefined; fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -8344,22 +8318,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -8393,6 +8351,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
@@ -10140,13 +10106,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -10194,13 +10154,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -14979,7 +14933,7 @@
               "\nMap of field attributes by field name. Currently count and customLabel."
             ],
             "signature": [
-              "{ [key: string]: ",
+              "Map<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -14987,7 +14941,7 @@
                 "section": "def-common.FieldAttrSet",
                 "text": "FieldAttrSet"
               },
-              "; }"
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts",
             "deprecated": false,
@@ -16484,14 +16438,15 @@
             "label": "getFieldAttrs",
             "description": [],
             "signature": [
-              "() => ",
+              "() => Map<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              }
+                "section": "def-common.FieldAttrSet",
+                "text": "FieldAttrSet"
+              },
+              ">"
             ],
             "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts",
             "deprecated": false,
@@ -16948,22 +16903,6 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
               },
               {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
-                "plugin": "dataViewManagement",
-                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/public/application/lib/fetch_fields.ts"
               }
@@ -16997,6 +16936,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
@@ -20319,13 +20266,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -20373,13 +20314,7 @@
                   ": FieldAttrs"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22449,7 +22384,7 @@
                 "signature": [
                   "Pick<",
                   "Toast",
-                  ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
+                  ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"hidden\" | \"slot\" | \"style\" | \"children\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
                     "scope": "public",
@@ -23010,13 +22945,7 @@
                 "text": "FieldSpec"
               },
               "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined) => ",
               {
                 "pluginId": "dataViews",
@@ -23062,13 +22991,7 @@
                 "label": "fieldAttrs",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldAttrs",
-                    "text": "FieldAttrs"
-                  },
+                  "FieldAttrsAsObject",
                   " | undefined"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -25425,13 +25348,7 @@
                 "text": "RuntimeFieldSpec"
               },
               "> | undefined; fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
+              "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
@@ -27035,13 +26952,7 @@
             "text": "FieldSpec"
           },
           "[], fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined) => ",
           {
             "pluginId": "dataViews",
@@ -27268,13 +27179,7 @@
             "text": "RuntimeFieldSpec"
           },
           "> | undefined; fieldAttrs?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldAttrs",
-            "text": "FieldAttrs"
-          },
+          "FieldAttrsAsObject",
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -27292,7 +27197,7 @@
           "\nSet of field attributes"
         ],
         "signature": [
-          "{ [key: string]: ",
+          "Map<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -27300,7 +27205,7 @@
             "section": "def-common.FieldAttrSet",
             "text": "FieldAttrSet"
           },
-          "; }"
+          ">"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -27625,7 +27530,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
+              ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"hidden\" | \"slot\" | \"style\" | \"children\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"nonce\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
                 "scope": "public",
