@@ -315,7 +315,7 @@ export class ActionsClient {
           wasSuccessful,
         });
       } catch (err) {
-        this.context.logger.error(`postSaveHook crearte error for ${label}: ${err.message}`, {
+        this.context.logger.error(`postSaveHook create error for ${label}: ${err.message}`, {
           tags,
         });
       }

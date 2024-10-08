@@ -56,6 +56,7 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
+
 const ConnectorSavedObject = {
   id: 'connector-id-uuid',
   type: 'action',
@@ -67,6 +68,24 @@ const ConnectorSavedObject = {
     secrets: { bar: 2001 },
   },
   references: [],
+};
+
+const CreateParms = {
+  action: {
+    name: ConnectorSavedObject.attributes.name,
+    actionTypeId: ConnectorSavedObject.attributes.actionTypeId,
+    config: { foo: 42 },
+    secrets: { bar: 2001 },
+  },
+};
+
+const UpdateParms = {
+  id: ConnectorSavedObject.id,
+  action: {
+    name: ConnectorSavedObject.attributes.name,
+    config: { foo: 42 },
+    secrets: { bar: 2001 },
+  },
 };
 
 const CoreHookParams = {
@@ -132,15 +151,9 @@ beforeEach(() => {
       params: { schema: schema.object({}) },
     },
     executor,
-    preSaveHook: async (params) => {
-      preSaveHook(params);
-    },
-    postSaveHook: async (params) => {
-      postSaveHook(params);
-    },
-    postDeleteHook: async (params) => {
-      postDeleteHook(params);
-    },
+    preSaveHook,
+    postSaveHook,
+    postDeleteHook,
   });
 });
 
@@ -148,26 +161,11 @@ describe('connector type hooks', () => {
   describe('successful operation and successful hook', () => {
     test('for create', async () => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(ConnectorSavedObject);
-      const result = await actionsClient.create({
-        action: {
-          name: ConnectorSavedObject.attributes.name,
-          actionTypeId: ConnectorSavedObject.attributes.actionTypeId,
-          config: { foo: 42 },
-          secrets: { bar: 2001 },
-        },
-      });
+      const result = await actionsClient.create(CreateParms);
       expect(result.id).toBe(ConnectorSavedObject.id);
 
-      const preParams = {
-        ...CoreHookParams,
-        logger,
-        isUpdate: false,
-      };
-
-      const postParams = {
-        ...preParams,
-        wasSuccessful: true,
-      };
+      const preParams = { ...CoreHookParams, logger, isUpdate: false };
+      const postParams = { ...preParams, wasSuccessful: true };
 
       expect(preSaveHook).toHaveBeenCalledTimes(1);
       expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
@@ -179,26 +177,11 @@ describe('connector type hooks', () => {
     test('for update', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(ConnectorSavedObject);
-      const result = await actionsClient.update({
-        id: ConnectorSavedObject.id,
-        action: {
-          name: ConnectorSavedObject.attributes.name,
-          config: { foo: 42 },
-          secrets: { bar: 2001 },
-        },
-      });
+      const result = await actionsClient.update(UpdateParms);
       expect(result.id).toBe(ConnectorSavedObject.id);
 
-      const preParams = {
-        ...CoreHookParams,
-        logger,
-        isUpdate: true,
-      };
-
-      const postParams = {
-        ...preParams,
-        wasSuccessful: true,
-      };
+      const preParams = { ...CoreHookParams, logger, isUpdate: true };
+      const postParams = { ...preParams, wasSuccessful: true };
 
       expect(preSaveHook).toHaveBeenCalledTimes(1);
       expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
@@ -215,10 +198,7 @@ describe('connector type hooks', () => {
       const result = await actionsClient.delete({ id: ConnectorSavedObject.id });
       expect(result).toBe(expectedResult);
 
-      const postParams = {
-        ...CoreHookParams,
-        logger,
-      };
+      const postParams = { ...CoreHookParams, logger };
 
       expect(postDeleteHook).toHaveBeenCalledTimes(1);
       expect(postDeleteHook.mock.calls[0]).toEqual([postParams]);
@@ -228,27 +208,12 @@ describe('connector type hooks', () => {
   describe('unsuccessful operation and successful hook', () => {
     test('for create', async () => {
       unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('OMG create'));
-      await expect(
-        actionsClient.create({
-          action: {
-            name: ConnectorSavedObject.attributes.name,
-            actionTypeId: ConnectorSavedObject.attributes.actionTypeId,
-            config: { foo: 42 },
-            secrets: { bar: 2001 },
-          },
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: OMG create]`);
+      await expect(actionsClient.create(CreateParms)).rejects.toMatchInlineSnapshot(
+        `[Error: OMG create]`
+      );
 
-      const preParams = {
-        ...CoreHookParams,
-        logger,
-        isUpdate: false,
-      };
-
-      const postParams = {
-        ...preParams,
-        wasSuccessful: false,
-      };
+      const preParams = { ...CoreHookParams, logger, isUpdate: false };
+      const postParams = { ...preParams, wasSuccessful: false };
 
       expect(preSaveHook).toHaveBeenCalledTimes(1);
       expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
@@ -260,27 +225,12 @@ describe('connector type hooks', () => {
     test('for update', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
       unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('OMG update'));
-      await expect(
-        actionsClient.update({
-          id: ConnectorSavedObject.id,
-          action: {
-            name: ConnectorSavedObject.attributes.name,
-            config: { foo: 42 },
-            secrets: { bar: 2001 },
-          },
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: OMG update]`);
+      await expect(actionsClient.update(UpdateParms)).rejects.toMatchInlineSnapshot(
+        `[Error: OMG update]`
+      );
 
-      const preParams = {
-        ...CoreHookParams,
-        logger,
-        isUpdate: true,
-      };
-
-      const postParams = {
-        ...preParams,
-        wasSuccessful: false,
-      };
+      const preParams = { ...CoreHookParams, logger, isUpdate: true };
+      const postParams = { ...preParams, wasSuccessful: false };
 
       expect(preSaveHook).toHaveBeenCalledTimes(1);
       expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
@@ -298,6 +248,135 @@ describe('connector type hooks', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: OMG delete]`);
 
       expect(postDeleteHook).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('successful operation and unsuccessful hook', () => {
+    test('for create pre hook', async () => {
+      preSaveHook.mockRejectedValueOnce(new Error('OMG create pre save'));
+
+      await expect(actionsClient.create(CreateParms)).rejects.toMatchInlineSnapshot(
+        `[Error: OMG create pre save]`
+      );
+
+      const preParams = { ...CoreHookParams, logger, isUpdate: false };
+
+      expect(preSaveHook).toHaveBeenCalledTimes(1);
+      expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(0);
+      expect(postSaveHook).toHaveBeenCalledTimes(0);
+    });
+
+    test('for create post hook', async () => {
+      postSaveHook.mockRejectedValueOnce(new Error('OMG create post save'));
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(ConnectorSavedObject);
+      const result = await actionsClient.create(CreateParms);
+      expect(result.id).toBe(ConnectorSavedObject.id);
+
+      const preParams = { ...CoreHookParams, logger, isUpdate: false };
+      const postParams = { ...preParams, wasSuccessful: true };
+
+      expect(preSaveHook).toHaveBeenCalledTimes(1);
+      expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
+
+      expect(postSaveHook).toHaveBeenCalledTimes(1);
+      expect(postSaveHook.mock.calls[0]).toStrictEqual([postParams]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "postSaveHook create error for connectorId: \\"connector-id-uuid\\"; type: hooked-action-type: OMG create post save",
+            Object {
+              "tags": Array [
+                "post-save-hook",
+                "connector-id-uuid",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('for update pre hook', async () => {
+      preSaveHook.mockRejectedValueOnce(new Error('OMG update pre save'));
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(ConnectorSavedObject);
+      await expect(actionsClient.update(UpdateParms)).rejects.toMatchInlineSnapshot(
+        `[Error: OMG update pre save]`
+      );
+
+      const preParams = { ...CoreHookParams, logger, isUpdate: true };
+
+      expect(preSaveHook).toHaveBeenCalledTimes(1);
+      expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(0);
+      expect(postSaveHook).toHaveBeenCalledTimes(0);
+    });
+
+    test('for update post hook', async () => {
+      postSaveHook.mockRejectedValueOnce(new Error('OMG update post save'));
+
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(ConnectorSavedObject);
+      const result = await actionsClient.update(UpdateParms);
+      expect(result.id).toBe(ConnectorSavedObject.id);
+
+      const preParams = { ...CoreHookParams, logger, isUpdate: true };
+      const postParams = { ...preParams, wasSuccessful: true };
+
+      expect(preSaveHook).toHaveBeenCalledTimes(1);
+      expect(preSaveHook.mock.calls[0]).toStrictEqual([preParams]);
+
+      expect(postSaveHook).toHaveBeenCalledTimes(1);
+      expect(postSaveHook.mock.calls[0]).toStrictEqual([postParams]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "postSaveHook update error for connectorId: \\"connector-id-uuid\\"; type: hooked-action-type: OMG update post save",
+            Object {
+              "tags": Array [
+                "post-save-hook",
+                "connector-id-uuid",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
+    test('for delete post hook', async () => {
+      postDeleteHook.mockRejectedValueOnce(new Error('OMG delete post delete'));
+
+      const expectedResult = Symbol();
+      unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ConnectorSavedObject);
+
+      const result = await actionsClient.delete({ id: ConnectorSavedObject.id });
+      expect(result).toBe(expectedResult);
+
+      const postParams = { ...CoreHookParams, logger };
+
+      expect(postDeleteHook).toHaveBeenCalledTimes(1);
+      expect(postDeleteHook.mock.calls[0]).toEqual([postParams]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "The post delete hook failed for for connector \\"connector-id-uuid\\": OMG delete post delete",
+            Object {
+              "tags": Array [
+                "post-delete-hook",
+                "connector-id-uuid",
+              ],
+            },
+          ],
+        ]
+      `);
     });
   });
 });
