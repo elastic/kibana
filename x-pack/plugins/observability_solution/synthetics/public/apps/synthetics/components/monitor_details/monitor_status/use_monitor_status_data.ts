@@ -28,7 +28,7 @@ import {
   quietGetMonitorStatusHeatmapAction,
   selectHeatmap,
 } from '../../../state/status_heatmap';
-import { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
+import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 
 type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
