@@ -15,8 +15,6 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
-exports[`Error AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
-
 exports[`Error CHILD_ID 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -318,6 +316,8 @@ exports[`Error SPAN_NAME 1`] = `undefined`;
 
 exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Error SPAN_STACKTRACE 1`] = `undefined`;
+
 exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_SYNC 1`] = `undefined`;
@@ -386,8 +386,6 @@ exports[`Span AGENT_NAME 1`] = `"java"`;
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
-
-exports[`Span AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -673,6 +671,8 @@ exports[`Span SPAN_NAME 1`] = `"span name"`;
 
 exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
 
+exports[`Span SPAN_STACKTRACE 1`] = `undefined`;
+
 exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_SYNC 1`] = `false`;
@@ -741,8 +741,6 @@ exports[`Transaction AGENT_NAME 1`] = `"java"`;
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
-
-exports[`Transaction AT_TIMESTAMP 1`] = `"Tue Oct 08 2024 12:06:19 GMT+0200 (Central European Summer Time)"`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
@@ -1045,6 +1043,8 @@ exports[`Transaction SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
 exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Transaction SPAN_STACKTRACE 1`] = `undefined`;
 
 exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
