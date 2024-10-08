@@ -180,7 +180,12 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                 </p>
                 <EuiSpacer />
                 <EuiButtonGroup
-                  legend="Select a programming languages"
+                  legend={i18n.translate(
+                    'xpack.observability_onboarding.otelKubernetesPanel.selectProgrammingLanguageLegend',
+                    {
+                      defaultMessage: 'Select a programming language',
+                    }
+                  )}
                   idSelected={idSelected}
                   onChange={(optionId) => setIdSelected(optionId)}
                   options={[
