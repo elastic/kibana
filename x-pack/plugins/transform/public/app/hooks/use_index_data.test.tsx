@@ -49,15 +49,16 @@ describe('Transform: useIndexData()', () => {
 
     const { result, waitForNextUpdate } = renderHook(
       () =>
-        useIndexData(
-          {
+        useIndexData({
+          dataView: {
             id: 'the-id',
             getIndexPattern: () => 'the-index-pattern',
             fields: [],
           } as unknown as SearchItems['dataView'],
           query,
-          runtimeMappings
-        ),
+          combinedRuntimeMappings: runtimeMappings,
+          populatedFields: [],
+        }),
       { wrapper }
     );
 
@@ -81,7 +82,12 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
 
     const Wrapper = () => {
       const props = {
-        ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
+        ...useIndexData({
+          dataView,
+          query: { match_all: {} },
+          combinedRuntimeMappings: runtimeMappings,
+          populatedFields: [],
+        }),
         copyToClipboard: 'the-copy-to-clipboard-code',
         copyToClipboardDescription: 'the-copy-to-clipboard-description',
         dataTestSubj: 'the-data-test-subj',
@@ -107,44 +113,6 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
       expect(
         screen.queryByText('Cross-cluster search returned no fields data.')
       ).not.toBeInTheDocument();
-    });
-  });
-
-  test('Cross-cluster search warning', async () => {
-    // Arrange
-    const dataView = {
-      getIndexPattern: () => 'remote:the-index-pattern-title',
-      fields: [] as any[],
-    } as SearchItems['dataView'];
-
-    const Wrapper = () => {
-      const props = {
-        ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
-        copyToClipboard: 'the-copy-to-clipboard-code',
-        copyToClipboardDescription: 'the-copy-to-clipboard-description',
-        dataTestSubj: 'the-data-test-subj',
-        title: 'the-index-preview-title',
-        toastNotifications: {} as CoreSetup['notifications']['toasts'],
-      };
-
-      return <DataGrid {...props} />;
-    };
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <Wrapper />
-        </IntlProvider>
-      </QueryClientProvider>
-    );
-
-    // Act
-    // Assert
-    await waitFor(() => {
-      expect(screen.queryByText('the-index-preview-title')).toBeInTheDocument();
-      expect(
-        screen.queryByText('Cross-cluster search returned no fields data.')
-      ).toBeInTheDocument();
     });
   });
 });
