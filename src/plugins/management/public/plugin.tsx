@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n as kbnI18n } from '@kbn/i18n';
+import { i18n, i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -55,7 +55,12 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
+    const deepLinks: AppDeepLink[] = this.getDeepLinks();
+    return { deepLinks };
+  });
+
+  getDeepLinks(core?: CoreStart) {
+    const appDeepLinks = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
@@ -67,9 +72,24 @@ export class ManagementPlugin
         })),
       })
     );
+    if (!core) {
+      return appDeepLinks;
+    }
+    const allSettings = core.uiSettings.getAll();
+    const settingDeepLinks = Object.keys(allSettings).map((key) => {
+      const setting = allSettings[key];
+      return {
+        id: key,
+        title: i18n.translate('management.stackManagement.settingsTitle.deepLink', {
+          defaultMessage: 'Advanced Setting: {settingName}',
+          values: { settingName: setting.name },
+        }),
+        path: `/kibana/settings?query=${encodeURIComponent(setting.name ?? '')}`,
+      };
+    });
 
-    return { deepLinks };
-  });
+    return [...appDeepLinks, ...settingDeepLinks];
+  }
 
   private hasAnyEnabledApps = true;
 
@@ -116,6 +136,7 @@ export class ManagementPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
+      keywords: [],
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
@@ -153,7 +174,12 @@ export class ManagementPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ManagementStartDependencies): ManagementStart {
+  public start(core: CoreStart): ManagementStart {
+    const deepLinks = this.getDeepLinks(core);
+    this.appUpdater.next(() => ({
+      deepLinks,
+    }));
+
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
