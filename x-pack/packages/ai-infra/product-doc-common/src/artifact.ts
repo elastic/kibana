@@ -7,8 +7,8 @@
 
 import { type ProductName, DocumentationProduct } from './product';
 
-// kibana-kb-elasticsearch-8.15.zip
-const artifactNameRegexp = /^kibana-kb-([a-zA-Z]+)-([0-9]+\.[0-9]+)(\.zip)?$/;
+// kb-product-doc-elasticsearch-8.15.zip
+const artifactNameRegexp = /^kb-product-doc-([a-zA-Z]+)-([0-9]+\.[0-9]+)(\.zip)?$/;
 const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
 
 export const getArtifactName = ({
@@ -21,7 +21,7 @@ export const getArtifactName = ({
   excludeExtension?: boolean;
 }): string => {
   const ext = excludeExtension ? '' : '.zip';
-  return `kibana-kb-${productName}-${productVersion}${ext}`.toLowerCase();
+  return `kb-product-doc-${productName}-${productVersion}${ext}`.toLowerCase();
 };
 
 export const parseArtifactName = (artifactName: string) => {

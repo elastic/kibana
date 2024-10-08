@@ -5,7 +5,34 @@
  * 2.0.
  */
 
-/**
- * The allowed product names, as found in the source's cluster
- */
-export const sourceProductNames = ['Kibana', 'Elasticsearch', 'Security', 'Observability'];
+import type { ProductName } from '@kbn/product-doc-common';
+
+export const getSourceProductName = (productName: ProductName) => {
+  switch (productName) {
+    case 'elasticsearch':
+      return 'Elasticsearch';
+    case 'observability':
+      return 'Observability';
+    case 'security':
+      return 'Security';
+    case 'kibana':
+      return 'Kibana';
+    default:
+      throw new Error(`Unknown product name: ${productName}`);
+  }
+};
+
+export const getProductNameFromSource = (source: string): ProductName => {
+  switch (source) {
+    case 'Elasticsearch':
+      return 'elasticsearch';
+    case 'Observability':
+      return 'observability';
+    case 'Security':
+      return 'security';
+    case 'Kibana':
+      return 'kibana';
+    default:
+      throw new Error(`Unknown source product name: ${source}`);
+  }
+};

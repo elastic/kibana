@@ -8,6 +8,7 @@
 import Path from 'path';
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { ProductName } from '@kbn/product-doc-common';
 import {
   // checkConnectivity,
   createTargetIndex,
@@ -93,7 +94,7 @@ const buildArtifact = async ({
   sourceClient,
   log,
 }: {
-  productName: string;
+  productName: ProductName;
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
