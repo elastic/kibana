@@ -49,7 +49,7 @@ import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { ESQL_RESOURCE, SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
-  isEsqlSystemEntry,
+  isSystemEntry,
   isKnowledgeBaseEntryCreateProps,
   isKnowledgeBaseEntryResponse,
 } from './helpers';
@@ -172,13 +172,13 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
           openFlyout();
         },
         isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isEsqlSystemEntry(entry);
+          return !isSystemEntry(entry);
         },
         onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           deleteEntry({ ids: [id] });
         },
         isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return !isEsqlSystemEntry(entry);
+          return !isSystemEntry(entry);
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);

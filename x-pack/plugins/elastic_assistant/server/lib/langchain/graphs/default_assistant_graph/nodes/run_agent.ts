@@ -7,6 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import { formatLatestUserMessage } from '../prompts';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
@@ -51,6 +52,8 @@ export async function runAgent({
           ? JSON.stringify(knowledgeHistory.map((e) => e.text))
           : NO_KNOWLEDGE_HISTORY
       }`,
+      // prepend any user prompt (gemini)
+      input: formatLatestUserMessage(state.input, state.llmType),
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
     },
     config

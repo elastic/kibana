@@ -18,7 +18,7 @@ import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
-import { isEsqlSystemEntry } from './helpers';
+import { isSystemEntry } from './helpers';
 
 export const useKnowledgeBaseTable = () => {
   const { currentUserAvatar } = useAssistantContext();
@@ -26,7 +26,10 @@ export const useKnowledgeBaseTable = () => {
 
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
-      if (entry.kbResource === 'esql') {
+      if (entry.kbResource === 'user') {
+        return 'userAvatar';
+      }
+      if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';
       }
       return 'document';
@@ -78,8 +81,8 @@ export const useKnowledgeBaseTable = () => {
           render: (entry: KnowledgeBaseEntryResponse) => {
             // TODO: Look up user from `createdBy` id if privileges allow
             const userName = entry.users?.[0]?.name ?? 'Unknown';
-            const badgeItem = isEsqlSystemEntry(entry) ? 'Elastic' : userName;
-            const userImage = isEsqlSystemEntry(entry) ? (
+            const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
+            const userImage = isSystemEntry(entry) ? (
               <EuiIcon
                 type={'logoElastic'}
                 css={css`
@@ -119,7 +122,7 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isEsqlSystemEntry(entry)
+            return isSystemEntry(entry)
               ? entry.text
               : entry.type === DocumentEntryType.value
               ? '1'
