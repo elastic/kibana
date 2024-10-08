@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Replacement for ./_variables.scss as we aim to remove the scss files
+
 export const mlColors = {
   critical: '#FE5050',
   major: '#FBA740',
