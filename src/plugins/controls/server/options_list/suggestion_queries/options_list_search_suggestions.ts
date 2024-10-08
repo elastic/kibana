@@ -117,13 +117,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
       basePath += isNested ? '.nestedSuggestions.filteredSuggestions' : '.filteredSuggestions';
 
-      const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
-        (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
-          return acc;
-        },
-        []
-      );
+      const buckets =
+        (get(rawEsResult, `${basePath}.suggestions.buckets`) as unknown as EsBucket[]) || [];
+      const suggestions = buckets?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
+        acc.push({ value: suggestion.key, docCount: suggestion.doc_count });
+        return acc;
+      }, []);
       return {
         suggestions,
         totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
