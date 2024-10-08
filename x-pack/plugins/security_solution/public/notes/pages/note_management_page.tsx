@@ -36,6 +36,7 @@ import {
   selectNotesTablePendingDeleteIds,
   selectFetchNotesError,
   ReqStatus,
+  selectNotesTableUserFilters,
 } from '..';
 import type { NotesState } from '..';
 import { SearchRow } from '../components/search_row';
@@ -117,6 +118,7 @@ export const NoteManagementPage = () => {
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const notesSearch = useSelector(selectNotesTableSearch);
+  const notesUserFilters = useSelector(selectNotesTableUserFilters);
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const isDeleteModalVisible = pendingDeleteIds.length > 0;
   const fetchNotesStatus = useSelector(selectFetchNotesStatus);
@@ -132,10 +134,19 @@ export const NoteManagementPage = () => {
         sortField: sort.field,
         sortOrder: sort.direction,
         filter: '',
+        userFilter: notesUserFilters,
         search: notesSearch,
       })
     );
-  }, [dispatch, pagination.page, pagination.perPage, sort.field, sort.direction, notesSearch]);
+  }, [
+    dispatch,
+    pagination.page,
+    pagination.perPage,
+    sort.field,
+    sort.direction,
+    notesUserFilters,
+    notesSearch,
+  ]);
 
   useEffect(() => {
     fetchData();

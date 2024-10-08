@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { userSearchedNotes } from '..';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import { SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
+import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
+import { userFilterUsers, userSearchedNotes } from '..';
 
-const SearchRowContainer = styled.div`
-  &:not(:last-child) {
-    margin-bottom: ${(props) => props.theme.eui.euiSizeL};
-  }
-`;
-
-SearchRowContainer.displayName = 'SearchRowContainer';
-
-const SearchRowFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
-`;
-
-SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
+export const USERS_DROPDOWN = i18n.translate('xpack.securitySolution.notes.usersDropdownLabel', {
+  defaultMessage: 'Users',
+});
 
 export const SearchRow = React.memo(() => {
   const dispatch = useDispatch();
@@ -31,7 +25,7 @@ export const SearchRow = React.memo(() => {
     () => ({
       placeholder: 'Search note contents',
       incremental: false,
-      'data-test-subj': 'notes-search-bar',
+      'data-test-subj': SEARCH_BAR_TEST_ID,
     }),
     []
   );
@@ -43,14 +37,43 @@ export const SearchRow = React.memo(() => {
     [dispatch]
   );
 
+  const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
+    searchTerm: '',
+  });
+  const users = useMemo(
+    () =>
+      (userProfiles || []).map((userProfile: UserProfileWithAvatar) => ({
+        label: userProfile.user.full_name || userProfile.user.username,
+      })),
+    [userProfiles]
+  );
+
+  const [selectedUser, setSelectedUser] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const onChange = useCallback(
+    (user: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedUser(user);
+      dispatch(userFilterUsers(user.length > 0 ? user[0].label : ''));
+    },
+    [dispatch]
+  );
+
   return (
-    <SearchRowContainer>
-      <SearchRowFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
-        </EuiFlexItem>
-      </SearchRowFlexGroup>
-    </SearchRowContainer>
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem>
+        <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiComboBox
+          prepend={USERS_DROPDOWN}
+          singleSelection={{ asPlainText: true }}
+          options={users}
+          selectedOptions={selectedUser}
+          onChange={onChange}
+          isLoading={isLoadingSuggestedUsers}
+          data-test-subj={USER_SELECT_TEST_ID}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 

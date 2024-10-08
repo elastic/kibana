@@ -51,6 +51,11 @@ paths:
           schema:
             type: string
             nullable: true
+        - in: query
+          name: userFilter
+          schema:
+            nullable: true
+            type: string
       responses:
         '200':
           description: Indicates the requested notes were returned.

@@ -549,6 +549,7 @@ export const mockGlobalState: State = {
       direction: 'desc' as const,
     },
     filter: '',
+    userFilter: '',
     search: '',
     selectedIds: [],
     pendingDeleteIds: [],
