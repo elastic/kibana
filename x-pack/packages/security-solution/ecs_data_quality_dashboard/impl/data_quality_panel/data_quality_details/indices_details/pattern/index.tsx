@@ -54,6 +54,13 @@ const PatternComponent: React.FC<Props> = ({
   setChartSelectedIndex,
 }) => {
   const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
+  const historicalResultsContextValue = useMemo(
+    () => ({
+      fetchHistoricalResults,
+      historicalResultsState,
+    }),
+    [fetchHistoricalResults, historicalResultsState]
+  );
   const { httpFetch, isILMAvailable, ilmPhases, startDate, endDate, formatBytes, formatNumber } =
     useDataQualityContext();
   const { checkIndex, checkState } = useIndicesCheckContext();
@@ -260,12 +267,7 @@ const PatternComponent: React.FC<Props> = ({
 
   return (
     <div data-test-subj={`${pattern}PatternPanel`}>
-      <HistoricalResultsContext.Provider
-        value={{
-          fetchHistoricalResults,
-          historicalResultsState,
-        }}
-      >
+      <HistoricalResultsContext.Provider value={historicalResultsContextValue}>
         <PatternAccordion
           id={patternComponentAccordionId}
           initialIsOpen={true}
