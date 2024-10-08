@@ -6,13 +6,19 @@
  */
 
 import React from 'react';
+
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { DisplayType, FieldType } from '../lib/dynamic_config/types';
+import { useProviders } from './providers/get_providers';
+import { getTaskTypes } from './get_task_types';
+import { HttpSetup } from '@kbn/core-http-browser';
+
+jest.mock('./providers/get_providers');
+jest.mock('./get_task_types');
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -22,42 +28,151 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   })),
 }));
 
-const providerSchema = [
-  {
-    key: 'access_key',
-    display: DisplayType.TEXTBOX,
-    label: 'Access Key',
-    order: 1,
-    required: true,
-    sensitive: true,
-    tooltip: `A valid AWS access key that has permissions to use Amazon Bedrock.`,
-    type: FieldType.STRING,
-    validations: [],
-    value: null,
-    ui_restrictions: [],
-    default_value: null,
-    depends_on: [],
+jest.mock('@faker-js/faker', () => ({
+  faker: {
+    string: {
+      alpha: jest.fn().mockReturnValue('123'),
+    },
   },
-];
-const taskTypeSchema = [
-  {
-    key: 'max_tokens',
-    display: DisplayType.NUMERIC,
-    label: 'Max tokens',
-    order: 1,
-    required: true,
-    sensitive: false,
-    tooltip: 'The maximum number of tokens to generate before stopping.',
-    type: FieldType.INTEGER,
-    validations: [],
-    value: null,
-    ui_restrictions: [],
-    default_value: null,
-    depends_on: [],
-  },
-];
+}));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockProviders = useProviders as jest.Mock;
+const mockTaskTypes = getTaskTypes as jest.Mock;
+
+const providersSchemas = [
+  {
+    provider: 'openai',
+    logo: '', // should be openai logo here, the hardcoded uses assets/images
+    taskTypes: ['completion', 'text_embedding'],
+    configuration: {
+      api_key: {
+        display: DisplayType.TEXTBOX,
+        label: 'API Key',
+        order: 3,
+        required: true,
+        sensitive: true,
+        tooltip: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+      model_id: {
+        display: DisplayType.TEXTBOX,
+        label: 'Model ID',
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: 'The name of the model.',
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+      organization_id: {
+        display: DisplayType.TEXTBOX,
+        label: 'Organization ID',
+        order: 4,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+      url: {
+        display: DisplayType.TEXTBOX,
+        label: 'URL',
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: 'https://api.openai.com/v1/chat/completions',
+        depends_on: [],
+      },
+    },
+  },
+  {
+    provider: 'googleaistudio',
+    logo: '', // should be googleaistudio logo here, the hardcoded uses assets/images
+    taskTypes: ['completion', 'text_embedding'],
+    configuration: {
+      api_key: {
+        display: DisplayType.TEXTBOX,
+        label: 'API Key',
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: `API Key for the provider you're connecting to`,
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+      model_id: {
+        display: DisplayType.TEXTBOX,
+        label: 'Model ID',
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: `ID of the LLM you're using`,
+        type: FieldType.STRING,
+        validations: [],
+        value: null,
+        ui_restrictions: [],
+        default_value: null,
+        depends_on: [],
+      },
+    },
+  },
+];
+const taskTypesSchemas: Record<string, any> = {
+  googleaistudio: [
+    {
+      task_type: 'completion',
+      configuration: {},
+    },
+    {
+      task_type: 'text_embedding',
+      configuration: {},
+    },
+  ],
+  openai: [
+    {
+      task_type: 'completion',
+      configuration: {
+        user: {
+          display: DisplayType.TEXTBOX,
+          label: 'User',
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: 'Specifies the user issuing the request.',
+          type: FieldType.STRING,
+          validations: [],
+          value: '',
+          ui_restrictions: [],
+          default_value: null,
+          depends_on: [],
+        },
+      },
+    },
+  ],
+};
+
 const openAiConnector = {
   actionTypeId: '.inference',
   name: 'AI Connector',
@@ -68,14 +183,15 @@ const openAiConnector = {
     providerConfig: {
       url: 'https://openaiurl.com',
       model_id: 'gpt-4o',
+      organization_id: 'test-org',
     },
     taskTypeConfig: {
-      max_tokens: 100,
+      user: 'elastic',
     },
   },
   secrets: {
     secretsConfig: {
-      access_key: 'thats-a-nice-looking-key',
+      api_key: 'thats-a-nice-looking-key',
     },
   },
   isDeprecated: false,
@@ -87,51 +203,58 @@ const googleaistudioConnector = {
     ...openAiConnector.config,
     provider: 'googleaistudio',
     providerConfig: {
-      modelId: 'somemodel',
+      ...openAiConnector.config.providerConfig,
+      model_id: 'somemodel',
+    },
+    taskTypeConfig: {},
+  },
+  secrets: {
+    secretsConfig: {
+      api_key: 'thats-google-key',
     },
   },
 };
 
-const navigateToUrl = jest.fn();
-
 describe('ConnectorFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock().services.application.navigateToUrl = navigateToUrl;
+    mockProviders.mockReturnValue({
+      isLoading: false,
+      data: providersSchemas,
+    });
+    mockTaskTypes.mockImplementation(
+      (http: HttpSetup, provider: string) => taskTypesSchemas[provider]
+    );
   });
-  test('open ai provider fields are rendered', async () => {
+  test('openai provider fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
-        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('access_key-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('access_key-input')[0]).toHaveValue(
-      openAiConnector.config?.providerConfig?.url
-    );
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      openAiConnector.config.provider
-    );
-    expect(getAllByTestId('max_tokens-number')[0]).toBeInTheDocument();
+    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
+    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
+
+    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
+    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
+    expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
   });
 
-  test('azure ai provider fields are rendered', async () => {
+  test('googleaistudio provider fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={googleaistudioConnector}>
-        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
-      googleaistudioConnector.config?.providerConfig?.modelId
+    expect(getAllByTestId('api_key-password')[0]).toBeInTheDocument();
+    expect(getAllByTestId('api_key-password')[0]).toHaveValue('');
+    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
+    expect(getAllByTestId('provider-select')[0]).toHaveValue('Google AI Studio');
+    expect(getAllByTestId('model_id-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('model_id-input')[0]).toHaveValue(
+      googleaistudioConnector.config?.providerConfig.model_id
     );
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
-      googleaistudioConnector.config.provider
-    );
-    expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -157,7 +280,16 @@ describe('ConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: openAiConnector,
+        data: {
+          config: {
+            inferenceId: 'openai-completion-123',
+            ...openAiConnector.config,
+          },
+          actionTypeId: openAiConnector.actionTypeId,
+          name: openAiConnector.name,
+          id: openAiConnector.id,
+          isDeprecated: openAiConnector.isDeprecated,
+        },
         isValid: true,
       });
     });
@@ -176,13 +308,11 @@ describe('ConnectorFields renders', () => {
 
       const res = render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });
@@ -191,8 +321,8 @@ describe('ConnectorFields renders', () => {
     });
 
     const tests: Array<[string, string]> = [
-      ['config.apiUrl-input', 'not-valid'],
-      ['secrets.apiKey-input', ''],
+      ['url-input', 'not-valid'],
+      ['api_key-password', ''],
     ];
     it.each(tests)('validates correctly %p', async (field, value) => {
       const connector = {
@@ -205,7 +335,7 @@ describe('ConnectorFields renders', () => {
 
       const res = render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
@@ -215,9 +345,7 @@ describe('ConnectorFields renders', () => {
         });
       });
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });

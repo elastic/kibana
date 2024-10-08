@@ -226,12 +226,14 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     const getTaskTypeSchema = async () => {
       const currentTaskTypes = await getTaskTypes(http, config?.provider ?? '');
       const newTaskType = currentTaskTypes?.find((p) => p.task_type === config?.taskType);
+
       // transform the schema
       const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
         key: k,
         isValid: true,
         ...newTaskType?.configuration[k],
       })) as ConfigEntryView[];
+
       setTaskTypeSchema(newTaskTypeSchema);
     };
 
@@ -282,7 +284,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           return itemValue;
         })
       : [];
-
     existingTaskTypeConfiguration.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     setTaskTypeFormFields(existingTaskTypeConfiguration);
   }, [config, taskTypeSchema]);
@@ -361,6 +362,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       >
         <EuiFieldText
           onClick={handleProviderPopover}
+          data-test-subj="provider-select"
           isInvalid={isInvalid}
           disabled={isEdit || readOnly}
           onKeyDown={handleProviderKeyboardOpen}
@@ -444,6 +446,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                         background: euiTheme.colors.disabled,
                         color: euiTheme.colors.lightestShade,
                       }}
+                      data-test-subj="taskTypeSelectDisabled"
                       isDisabled
                     >
                       {config?.taskType}
@@ -454,6 +457,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                         background: euiTheme.colors.darkShade,
                         color: euiTheme.colors.lightestShade,
                       }}
+                      data-test-subj="taskTypeSelectSingle"
                       onClick={() => onTaskTypeOptionsSelect(config?.taskType)}
                     >
                       {config?.taskType}
@@ -506,6 +510,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       config?.provider ? (
         <EuiAccordion
           id="inferenceAdditionalOptions"
+          data-test-subj="inferenceAdditionalOptions"
           buttonProps={{ css: buttonCss }}
           css={css`
             .euiAccordion__triggerWrapper {
@@ -770,21 +775,25 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
           );
         }}
       </UseField>
-      <EuiSpacer size="m" />
-      <ConnectorConfigurationFormItems
-        itemsGrow={false}
-        isLoading={false}
-        direction="column"
-        items={requiredProviderFormFields}
-        setConfigEntry={onSetProviderConfigEntry}
-      />
-      <EuiSpacer size="m" />
-      {additionalOptions}
-      <EuiSpacer size="l" />
-      <EuiHorizontalRule />
-      {providerSecretsHiddenField}
-      {providerConfigHiddenField}
-      {taskTypeConfigHiddenField}
+      {config?.provider ? (
+        <>
+          <EuiSpacer size="m" />
+          <ConnectorConfigurationFormItems
+            itemsGrow={false}
+            isLoading={false}
+            direction="column"
+            items={requiredProviderFormFields}
+            setConfigEntry={onSetProviderConfigEntry}
+          />
+          <EuiSpacer size="m" />
+          {additionalOptions}
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule />
+          {providerSecretsHiddenField}
+          {providerConfigHiddenField}
+          {taskTypeConfigHiddenField}
+        </>
+      ) : null}
     </>
   );
 };

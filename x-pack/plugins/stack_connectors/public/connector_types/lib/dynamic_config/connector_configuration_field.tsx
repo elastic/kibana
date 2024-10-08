@@ -105,7 +105,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
       fullWidth
       data-test-subj={`${key}-textarea`}
       // ensures placeholder shows up when value is empty string
-      value={ensureStringType(innerValue) || undefined}
+      value={ensureStringType(innerValue)}
       isInvalid={!isValid}
       onChange={(event) => {
         setInnerValue(event.target.value);
@@ -192,13 +192,14 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value);
+  const { value, key } = configEntry;
+  const [innerValue, setInnerValue] = useState(value ?? null);
   return (
     <>
       <EuiFieldPassword
         fullWidth
         disabled={isLoading}
+        data-test-subj={`${key}-password`}
         type="dual"
         value={ensureStringType(innerValue)}
         onChange={(event) => {

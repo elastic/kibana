@@ -36,9 +36,10 @@ export const generateInferenceEndpointId = (
   setFieldValue: (fieldName: string, value: unknown) => void
 ) => {
   const taskTypeSuffix = config.taskType ? `${config.taskType}-` : '';
-  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${faker.string
-    .nanoid(10)
-    .toLowerCase()}`;
+  const inferenceEndpointId = `${config.provider}-${taskTypeSuffix}${faker.string.alpha({
+    length: 8,
+    casing: 'lower',
+  })}`;
   config.inferenceId = inferenceEndpointId;
   setFieldValue('config.inferenceId', inferenceEndpointId);
 };

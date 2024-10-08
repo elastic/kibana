@@ -37,7 +37,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
   itemsGrow,
 }) => {
   return (
-    <EuiFlexGroup direction={direction}>
+    <EuiFlexGroup direction={direction} data-test-subj="connector-configuration-fields">
       {items.map((configEntry) => {
         const {
           depends_on: dependencies,
@@ -85,7 +85,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                   error={validationErrors}
                   isInvalid={!isValid}
                   labelAppend={optionalLabel}
-                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                  data-test-subj={`connector-configuration-formrow-${key}`}
                 >
                   <ConnectorConfigurationField
                     configEntry={configEntry}
