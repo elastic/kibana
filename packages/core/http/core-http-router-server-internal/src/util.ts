@@ -16,6 +16,7 @@ import {
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {
@@ -80,4 +81,13 @@ export function injectResponseHeaders(
     ...headers,
   };
   return mutableResponse;
+}
+
+export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
+  return injectResponseHeaders(
+    {
+      [ELASTIC_HTTP_VERSION_HEADER]: version,
+    },
+    response
+  );
 }

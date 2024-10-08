@@ -38,7 +38,7 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectResponseHeaders } from '../util';
+import { injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
@@ -252,12 +252,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    return injectResponseHeaders(
-      {
-        [ELASTIC_HTTP_VERSION_HEADER]: version,
-      },
-      response
-    );
+    return injectVersionHeader(version, response);
   };
 
   private validateVersion(version: string) {
