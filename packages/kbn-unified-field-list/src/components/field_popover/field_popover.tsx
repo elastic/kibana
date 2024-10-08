@@ -16,6 +16,7 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 import './field_popover.scss';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
@@ -76,7 +77,19 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
               {content ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
             </EuiFlexItem>
           )}
-          {content ? <EuiFlexItem css={{ overflowY: 'auto' }}>{content}</EuiFlexItem> : content}
+          {content ? (
+            <EuiFlexItem
+              className="eui-yScrollWithShadows"
+              css={{
+                padding: euiThemeVars.euiSize,
+                margin: `-${euiThemeVars.euiSize}`,
+              }}
+            >
+              {content}
+            </EuiFlexItem>
+          ) : (
+            content
+          )}
           {Boolean(footer) && <EuiFlexItem grow={false}>{footer}</EuiFlexItem>}
         </EuiFlexGroup>
       )}
