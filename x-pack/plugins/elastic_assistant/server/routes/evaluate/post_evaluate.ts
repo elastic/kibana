@@ -180,7 +180,7 @@ export const postEvaluateRoute = (
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
-              const llmClass = getLlmClass(llmType, true);
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = () =>
                 new llmClass({
                   actionsClient,

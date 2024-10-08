@@ -142,7 +142,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             : formatPrompt(systemPrompts.gemini, systemPrompt),
         streamRunnable: isStream,
       })
-    : await createStructuredChatAgent({
+    : // used with OSS models
+      await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
         prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
@@ -175,7 +176,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       assistantGraph,
       inputs,
       logger,
-      isOssModel,
       onLlmResponse,
       request,
       traceOptions,
