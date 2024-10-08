@@ -85,7 +85,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                 latestFunctionService.config.sort ? [latestFunctionService.config.sort] : []
               }
               onChange={(selected: DropDownLabel[]) => {
-                if (typeof selected[0]?.value === 'string') {
+                if (typeof selected[0].value === 'string') {
                   latestFunctionService.updateLatestFunctionConfig({
                     sort: {
                       value: selected[0].value,

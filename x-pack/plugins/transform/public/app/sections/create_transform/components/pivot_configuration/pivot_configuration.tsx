@@ -43,7 +43,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     const aggOptionsWithFieldStats: EuiComboBoxOptionOption[] = useMemo(() => {
       const opts: EuiComboBoxOptionOption[] = [];
       aggOptions.forEach(({ label, field, options }: DropDownOptionWithField) => {
-        const isEmpty = populatedFields ? !populatedFields.has(field.id) : false;
+        const isEmpty = populatedFields && field.id ? !populatedFields.has(field.id) : false;
 
         const aggOption: DropDownOption = {
           isGroupLabel: true,
