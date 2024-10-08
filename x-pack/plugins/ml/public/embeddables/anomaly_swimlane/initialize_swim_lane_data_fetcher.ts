@@ -168,7 +168,6 @@ export const initializeSwimLaneDataFetcher = (
     swimLaneData$,
     onDestroy: () => {
       subscription.unsubscribe();
-      query$.unsubscribe();
     },
   };
 };
