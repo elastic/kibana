@@ -27,6 +27,8 @@ import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { useAssetEntitySummary } from '../../hooks/use_asset_entity_summary';
 import { hasMetrics } from '../../utils/get_data_stream_types';
+import { INTEGRATIONS } from '../../constants';
+import { useIntegrationCheck } from '../../hooks/use_integration_check';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -42,6 +44,16 @@ export const Overview = () => {
     entityType: asset.type,
     entityId: asset.type === 'host' ? asset.name : asset.id,
   });
+  const addMetricsCalloutId: AddMetricsCalloutKey =
+    asset.type === 'host' ? 'hostOverview' : 'containerOverview';
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
+  );
+  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
+  const isKubernetesContainer = useIntegrationCheck({
+    dependsOn: INTEGRATIONS.kubernetesContainer,
+  });
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
@@ -53,16 +65,24 @@ export const Overview = () => {
     />
   );
 
-  const addMetricsCalloutId: AddMetricsCalloutKey =
-    asset.type === 'host' ? 'hostOverview' : 'containerOverview';
+  const shouldShowCallout = () => {
+    const isHost = asset.type === 'host';
+    const isContainer = asset.type === 'container';
+    const baseCondition =
+      !hasMetrics(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
 
-  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
-    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
-    false
-  );
+    if (isHost) {
+      return baseCondition;
+    }
 
-  const showAddMetricsCallout =
-    !hasMetrics(dataStreams) && !dismissedAddMetricsCallout && renderMode.mode === 'page';
+    if (isContainer) {
+      return baseCondition && (isDockerContainer || isKubernetesContainer);
+    }
+
+    return false;
+  };
+
+  const showAddMetricsCallout = shouldShowCallout();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
