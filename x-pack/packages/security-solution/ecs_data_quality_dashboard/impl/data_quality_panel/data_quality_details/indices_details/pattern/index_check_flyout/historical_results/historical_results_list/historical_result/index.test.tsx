@@ -9,7 +9,10 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 
 import { HistoricalResult } from '.';
-import { getHistoricalResultStub } from '../../../../../../../stub/get_historical_result_stub';
+import {
+  getHistoricalResultStub,
+  getLegacyHistoricalResultStub,
+} from '../../../../../../../stub/get_historical_result_stub';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
@@ -48,5 +51,25 @@ describe('HisoricalResult', () => {
 
     const wrapper = screen.getByTestId('historicalCheckFields');
     expect(wrapper).toBeInTheDocument();
+  });
+
+  describe('when historical result is legacy', () => {
+    it('should render legacy historical check fields', () => {
+      render(
+        <TestExternalProviders>
+          <TestDataQualityProviders>
+            <TestHistoricalResultsProvider>
+              <HistoricalResult
+                indexName="test"
+                historicalResult={getLegacyHistoricalResultStub('test')}
+              />
+            </TestHistoricalResultsProvider>
+          </TestDataQualityProviders>
+        </TestExternalProviders>
+      );
+
+      const wrapper = screen.getByTestId('legacyHistoricalCheckFields');
+      expect(wrapper).toBeInTheDocument();
+    });
   });
 });

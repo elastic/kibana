@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButtonGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import {
@@ -19,27 +19,23 @@ import {
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
 import { IlmPhase, PatternRollup } from '../../../../../../types';
 import { EMPTY_METADATA } from '../../../../../../constants';
-import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../constants';
+import {
+  ALL_TAB_ID,
+  CUSTOM_TAB_ID,
+  ECS_COMPLIANT_TAB_ID,
+  INCOMPATIBLE_TAB_ID,
+  SAME_FAMILY_TAB_ID,
+} from '../../constants';
 import { getIncompatibleStatBadgeColor } from '../../../../../../utils/get_incompatible_stat_badge_color';
 import { getIncompatibleMappings, getIncompatibleValues } from '../../../../../../utils/markdown';
 import { IncompatibleTab } from '../../incompatible_tab';
 import { getSizeInBytes } from '../../../../../../utils/stats';
 import { SameFamilyTab } from '../../same_family_tab';
-import { ALL_TAB_ID, CUSTOM_TAB_ID, ECS_COMPLIANT_TAB_ID } from './constants';
 import { CustomTab } from './custom_tab';
 import { EcsCompliantTab } from './ecs_compliant_tab';
 import { AllTab } from './all_tab';
 import { getEcsCompliantBadgeColor } from './utils/get_ecs_compliant_badge_color';
-
-const StyledTabFlexGroup = styled(EuiFlexGroup)`
-  width: 100%;
-`;
-
-const StyledTabFlexItem = styled.div`
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-`;
+import { CheckFieldsTabs } from '../../check_fields_tabs';
 
 const StyledButtonGroup = styled(EuiButtonGroup)`
   button[data-test-subj='${INCOMPATIBLE_TAB_ID}'] {
@@ -48,11 +44,6 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
   button[data-test-subj='${ECS_COMPLIANT_TAB_ID}'] {
     flex-grow: 1.4;
   }
-`;
-
-const StyledBadge = styled(EuiBadge)`
-  text-align: right;
-  cursor: pointer;
 `;
 
 export interface Props {
@@ -99,11 +90,8 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
       {
         id: INCOMPATIBLE_TAB_ID,
         name: INCOMPATIBLE_FIELDS,
-        append: (
-          <StyledBadge color={getIncompatibleStatBadgeColor(incompatibleFields.length)}>
-            {incompatibleFields.length}
-          </StyledBadge>
-        ),
+        badgeColor: getIncompatibleStatBadgeColor(incompatibleFieldsCount),
+        badgeCount: incompatibleFieldsCount,
         content: (
           <IncompatibleTab
             docsCount={docsCount}
@@ -123,7 +111,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
       {
         id: SAME_FAMILY_TAB_ID,
         name: SAME_FAMILY,
-        append: <StyledBadge color="hollow">{sameFamilyFieldsCount}</StyledBadge>,
+        badgeCount: sameFamilyFieldsCount,
         content: (
           <SameFamilyTab
             docsCount={docsCount}
@@ -142,7 +130,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
       {
         id: CUSTOM_TAB_ID,
         name: CUSTOM_FIELDS,
-        append: <StyledBadge color="hollow">{customFieldsCount}</StyledBadge>,
+        badgeCount: customFieldsCount,
         content: (
           <CustomTab
             docsCount={docsCount}
@@ -162,17 +150,14 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
       {
         id: ECS_COMPLIANT_TAB_ID,
         name: ECS_COMPLIANT_FIELDS,
-        append: (
-          <StyledBadge color={getEcsCompliantBadgeColor(ecsCompliantFields)}>
-            {ecsCompliantFieldsCount}
-          </StyledBadge>
-        ),
+        badgeColor: getEcsCompliantBadgeColor(ecsCompliantFields),
+        badgeCount: ecsCompliantFieldsCount,
         content: <EcsCompliantTab indexName={indexName} ecsCompliantFields={ecsCompliantFields} />,
       },
       {
         id: ALL_TAB_ID,
         name: ALL_FIELDS,
-        append: <StyledBadge color="hollow">{allFieldsCount}</StyledBadge>,
+        badgeCount: allFieldsCount,
         content: <AllTab indexName={indexName} allFields={allFields} />,
       },
     ],
@@ -185,7 +170,6 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
       ecsCompliantFields,
       ecsCompliantFieldsCount,
       ilmPhase,
-      incompatibleFields.length,
       incompatibleFieldsCount,
       incompatibleMappingsFields,
       incompatibleValuesFields,
@@ -197,46 +181,12 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
     ]
   );
 
-  const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
-
-  const tabSelections = useMemo(
-    () =>
-      tabs.map((tab) => ({
-        id: tab.id,
-        label: (
-          <StyledTabFlexGroup
-            responsive={false}
-            justifyContent="center"
-            gutterSize="s"
-            alignItems="center"
-            title={tab.name}
-          >
-            <StyledTabFlexItem>{tab.name}</StyledTabFlexItem>
-            {tab.append}
-          </StyledTabFlexGroup>
-        ),
-        textProps: false as false,
-      })),
-    [tabs]
-  );
-
-  const handleSelectedTabId = useCallback((optionId: string) => {
-    setSelectedTabId(optionId);
-  }, []);
-
   return (
-    <div data-test-subj="indexCheckFields">
-      <StyledButtonGroup
-        legend="Index check field tab toggle"
-        options={tabSelections}
-        idSelected={selectedTabId}
-        onChange={handleSelectedTabId}
-        buttonSize="compressed"
-        color="primary"
-        isFullWidth
+    <div data-test-subj="latestCheckFields">
+      <CheckFieldsTabs
+        tabs={tabs}
+        renderButtonGroup={(props) => <StyledButtonGroup {...props} isFullWidth />}
       />
-      <EuiSpacer />
-      {tabs.find((tab) => tab.id === selectedTabId)?.content}
     </div>
   );
 };

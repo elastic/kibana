@@ -32,7 +32,7 @@ describe('IndexCheckFields', () => {
     );
   });
   it('should render the index check fields', () => {
-    expect(screen.getByTestId('indexCheckFields')).toBeInTheDocument();
+    expect(screen.getByTestId('latestCheckFields')).toBeInTheDocument();
   });
 
   it('should render incompatible tab content by default', () => {

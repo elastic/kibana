@@ -37,7 +37,7 @@ import { useHistoricalResultsContext } from '../contexts/historical_results_cont
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 import { CHECK_NOW } from '../translations';
 import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
-import { HistoricalResultsTabId } from './types';
+import { IndexCheckFlyoutTabId } from './types';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -46,7 +46,7 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
-  initialSelectedTabId: HistoricalResultsTabId;
+  initialSelectedTabId: IndexCheckFlyoutTabId;
 }
 
 const tabs = [
@@ -89,7 +89,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   const fetchHistoricalResultsAbortControllerRef = useAbortControllerRef();
 
   const handleTabClick = useCallback(
-    (tabId: HistoricalResultsTabId) => {
+    (tabId: IndexCheckFlyoutTabId) => {
       if (tabId === HISTORY_TAB_ID) {
         fetchHistoricalResults({
           abortController: fetchHistoricalResultsAbortControllerRef.current,

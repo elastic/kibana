@@ -101,14 +101,14 @@ export const getSummaryTableColumns = ({
   isILMAvailable,
   pattern,
   onCheckNowAction,
-  onViewCheckHistoryAction,
+  onViewHistoryAction,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   isILMAvailable: boolean;
   pattern: string;
   onCheckNowAction: (indexName: string) => void;
-  onViewCheckHistoryAction: (indexName: string) => void;
+  onViewHistoryAction: (indexName: string) => void;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
     name: i18n.ACTIONS,
@@ -137,7 +137,7 @@ export const getSummaryTableColumns = ({
               <EuiButtonIcon
                 iconType="clockCounter"
                 aria-label={i18n.VIEW_HISTORY}
-                onClick={() => onViewCheckHistoryAction(item.indexName)}
+                onClick={() => onViewHistoryAction(item.indexName)}
               />
             </EuiToolTip>
           );

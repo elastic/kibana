@@ -16,11 +16,6 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../../../../../mock/test_providers/test_providers';
-import {
-  CHECK_IS_BASED_ON_LEGACY_FORMAT,
-  DEPRECATED_DATA_FORMAT,
-  TO_SEE_RUN_A_NEW_CHECK,
-} from './translations';
 
 jest.mock('@elastic/eui', () => {
   const originalModule = jest.requireActual('@elastic/eui');
@@ -54,127 +49,134 @@ function stripAttributes(html: string) {
 
 describe('LegacyHistoricalCheckFields', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  describe('when no incompatible fields', () => {
-    it('should just render success check prompt', () => {
-      const historicalResult = {
-        ...getLegacyHistoricalResultStub('test'),
-        incompatibleFieldCount: 0,
-      };
-      render(
-        <TestExternalProviders>
-          <TestDataQualityProviders>
-            <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
-          </TestDataQualityProviders>
-        </TestExternalProviders>
-      );
+  it('should render incompatible (preselected) and disabled same family field tabs', () => {
+    render(
+      <TestExternalProviders>
+        <TestDataQualityProviders>
+          <LegacyHistoricalCheckFields
+            indexName="test"
+            historicalResult={getLegacyHistoricalResultStub('test')}
+          />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
+    );
 
-      expect(screen.getByTestId('checkSuccessEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('incompatibleTab')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('sameFamilyTab')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByTestId('sameFamilyTab')).toBeDisabled();
+
+    expect(screen.getByTestId('legacyIncompatibleTabContent')).toBeInTheDocument();
+    expect(screen.queryByTestId('sameFamilyTabContent')).not.toBeInTheDocument();
+  });
+
+  describe('incompatible fields tab', () => {
+    describe('when there are incompatible fields', () => {
+      it('should render incompatible fields messages including ecs version and field count', () => {
+        const historicalResult = getLegacyHistoricalResultStub('test');
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        expect(screen.getByTestId('incompatibleCallout')).toHaveTextContent(
+          `${historicalResult.incompatibleFieldCount} incompatible field`
+        );
+        expect(screen.getByTestId('fieldsAreIncompatible')).toHaveTextContent(
+          `Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${historicalResult.ecsVersion}.`
+        );
+      });
+
+      it('should render eui formatted markdown from markdownComments table slice', () => {
+        const historicalResult = getLegacyHistoricalResultStub('test');
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders>
+              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        const tablesMarkdown = historicalResult.markdownComments.slice(4).join('\n');
+
+        const wrapper = screen.getByTestId('incompatibleTablesMarkdown');
+
+        const actualHTML = stripAttributes(wrapper.outerHTML);
+        const expectedHTML = stripAttributes(
+          render(
+            <TestExternalProviders>
+              <EuiMarkdownFormat>{tablesMarkdown}</EuiMarkdownFormat>
+            </TestExternalProviders>
+          ).container.innerHTML
+        );
+
+        expect(screen.getByTestId('incompatibleTablesMarkdown')).toBeInTheDocument();
+        expect(actualHTML).toBe(expectedHTML);
+      });
+
+      it('should render full actions consuming full markdown comment', async () => {
+        const historicalResult = getLegacyHistoricalResultStub('test');
+
+        const openCreateCaseFlyout = jest.fn();
+        const { markdownComments } = historicalResult;
+
+        render(
+          <TestExternalProviders>
+            <TestDataQualityProviders
+              dataQualityContextProps={{
+                openCreateCaseFlyout,
+              }}
+            >
+              <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+            </TestDataQualityProviders>
+          </TestExternalProviders>
+        );
+
+        const wrapper = screen.getByTestId('actions');
+
+        expect(wrapper).toBeInTheDocument();
+
+        const addToNewCase = screen.getByLabelText('Add to new case');
+        expect(addToNewCase).toBeInTheDocument();
+        await act(async () => userEvent.click(addToNewCase));
+        expect(openCreateCaseFlyout).toHaveBeenCalledWith({
+          comments: [markdownComments.join('\n')],
+          headerContent: expect.anything(),
+        });
+
+        const copyToClipboardElement = screen.getByLabelText('Copy to clipboard');
+        expect(copyToClipboardElement).toBeInTheDocument();
+        await act(async () => userEvent.click(copyToClipboardElement));
+        expect(copyToClipboard).toHaveBeenCalledWith(markdownComments.join('\n'));
+
+        const chat = screen.getByTestId('newChatLink');
+        expect(chat).toBeInTheDocument();
+        // clicking in test is broken atm
+        // so can't test the chat action + markdown comment
+      });
     });
   });
 
-  describe('when there are incompatible fields', () => {
-    it('should render warning messages', () => {
-      const historicalResult = getLegacyHistoricalResultStub('test');
+  describe('same family tab', () => {
+    it('should have warning tooltip', async () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
-            <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
+            <LegacyHistoricalCheckFields
+              indexName="test"
+              historicalResult={getLegacyHistoricalResultStub('test')}
+            />
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
 
-      expect(screen.getByText(DEPRECATED_DATA_FORMAT)).toBeInTheDocument();
-      expect(screen.getByText(CHECK_IS_BASED_ON_LEGACY_FORMAT)).toBeInTheDocument();
-      expect(screen.getByText(TO_SEE_RUN_A_NEW_CHECK)).toBeInTheDocument();
-    });
-
-    it('should render incompatible fields messages including ecs version and field count', () => {
-      const historicalResult = getLegacyHistoricalResultStub('test');
-      render(
-        <TestExternalProviders>
-          <TestDataQualityProviders>
-            <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
-          </TestDataQualityProviders>
-        </TestExternalProviders>
-      );
-
-      expect(screen.getByTestId('incompatibleCallout')).toHaveTextContent(
-        `${historicalResult.incompatibleFieldCount} incompatible field`
-      );
-      expect(screen.getByTestId('fieldsAreIncompatible')).toHaveTextContent(
-        `Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${historicalResult.ecsVersion}.`
-      );
-    });
-
-    it('should render eui formatted markdown from markdownComments table slice', () => {
-      const historicalResult = getLegacyHistoricalResultStub('test');
-      render(
-        <TestExternalProviders>
-          <TestDataQualityProviders>
-            <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
-          </TestDataQualityProviders>
-        </TestExternalProviders>
-      );
-
-      const tablesMarkdown = historicalResult.markdownComments.slice(4).join('\n');
-
-      const wrapper = screen.getByTestId('incompatibleTablesMarkdown');
-
-      const actualHTML = stripAttributes(wrapper.outerHTML);
-      const expectedHTML = stripAttributes(
-        render(
-          <TestExternalProviders>
-            <EuiMarkdownFormat>{tablesMarkdown}</EuiMarkdownFormat>
-          </TestExternalProviders>
-        ).container.innerHTML
-      );
-
-      expect(screen.getByTestId('incompatibleTablesMarkdown')).toBeInTheDocument();
-      expect(actualHTML).toBe(expectedHTML);
-    });
-
-    it('should render full actions consuming full markdown comment', async () => {
-      const historicalResult = getLegacyHistoricalResultStub('test');
-
-      const openCreateCaseFlyout = jest.fn();
-      const { markdownComments } = historicalResult;
-
-      render(
-        <TestExternalProviders>
-          <TestDataQualityProviders
-            dataQualityContextProps={{
-              openCreateCaseFlyout,
-            }}
-          >
-            <LegacyHistoricalCheckFields indexName="test" historicalResult={historicalResult} />
-          </TestDataQualityProviders>
-        </TestExternalProviders>
-      );
-
-      const wrapper = screen.getByTestId('actions');
-
-      expect(wrapper).toBeInTheDocument();
-
-      const addToNewCase = screen.getByLabelText('Add to new case');
-      expect(addToNewCase).toBeInTheDocument();
-      await act(async () => userEvent.click(addToNewCase));
-      expect(openCreateCaseFlyout).toHaveBeenCalledWith({
-        comments: [markdownComments.join('\n')],
-        headerContent: expect.anything(),
-      });
-
-      const copyToClipboardElement = screen.getByLabelText('Copy to clipboard');
-      expect(copyToClipboardElement).toBeInTheDocument();
-      await act(async () => userEvent.click(copyToClipboardElement));
-      expect(copyToClipboard).toHaveBeenCalledWith(markdownComments.join('\n'));
-
-      const chat = screen.getByTestId('newChatLink');
-      expect(chat).toBeInTheDocument();
-      // clicking in test is broken atm
-      // so can't test the chat action + markdown comment
+      expect(screen.getByTestId('disabledReasonTooltip')).toBeInTheDocument();
     });
   });
 });

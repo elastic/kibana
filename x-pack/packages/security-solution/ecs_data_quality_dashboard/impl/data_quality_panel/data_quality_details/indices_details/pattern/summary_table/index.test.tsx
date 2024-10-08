@@ -71,7 +71,7 @@ const defaultProps: Props = {
   setSorting: jest.fn(),
   sorting: defaultSort,
   onCheckNowAction: jest.fn(),
-  onExpandAction: jest.fn(),
+  onViewHistoryAction: jest.fn(),
   checkState: Object.fromEntries(
     indexNames.map((indexName) => [
       indexName,
