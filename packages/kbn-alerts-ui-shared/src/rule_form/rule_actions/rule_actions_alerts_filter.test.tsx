@@ -65,7 +65,7 @@ describe('ruleActionsAlertsFilter', () => {
           onClick={() =>
             onFiltersUpdated?.([
               {
-                $state: { store: 'appState' as FilterStateStore },
+                $state: { store: FilterStateStore.APP_STATE },
                 meta: {},
               },
             ])
@@ -196,7 +196,7 @@ describe('ruleActionsAlertsFilter', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: 'appState' as FilterStateStore },
+        $state: { store: FilterStateStore.APP_STATE },
       },
     ];
 

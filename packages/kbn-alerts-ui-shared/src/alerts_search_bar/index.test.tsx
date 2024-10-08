@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { useLoadRuleTypesQuery, useRuleAADFields, useAlertsDataView } from '../common/hooks';
 import { AlertsSearchBar } from '.';
@@ -70,8 +70,6 @@ const httpMock = {
 } as unknown as HttpStart;
 
 describe('AlertsSearchBar', () => {
-  beforeEach(() => {});
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -123,7 +121,7 @@ describe('AlertsSearchBar', () => {
 
   it('calls onFiltersUpdated correctly', async () => {
     const onFiltersUpdatedMock = jest.fn();
-    const filters = [
+    const filters: Filter[] = [
       {
         meta: {
           negate: false,
@@ -133,9 +131,9 @@ describe('AlertsSearchBar', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: 'appState' },
+        $state: { store: FilterStateStore.APP_STATE },
       },
-    ] as Filter[];
+    ];
 
     const newUnifiedSearchBarMock = jest.fn().mockImplementation((props) => (
       <button

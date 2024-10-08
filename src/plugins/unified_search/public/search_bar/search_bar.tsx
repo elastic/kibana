@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, compact } from 'lodash';
+import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
@@ -415,7 +415,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   };
 
   public onFiltersChange = (filters: Filter[]) => {
-    const mappedFilters = filters.map((filter) => cloneDeep(filter));
+    const mappedFilters = structuredClone(filters);
 
     if (this.props.shouldExecuteFilterManagerUpdate) {
       this.services.data.query.filterManager.setFilters(mappedFilters);

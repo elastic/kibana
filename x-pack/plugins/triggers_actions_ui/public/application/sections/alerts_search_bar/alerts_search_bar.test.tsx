@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
@@ -129,7 +129,7 @@ describe('AlertsSearchBar', () => {
 
   it('calls onFiltersUpdated correctly', async () => {
     const onFiltersUpdatedMock = jest.fn();
-    const filters = [
+    const filters: Filter[] = [
       {
         meta: {
           negate: false,
@@ -139,9 +139,9 @@ describe('AlertsSearchBar', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: 'appState' },
+        $state: { store: FilterStateStore.APP_STATE },
       },
-    ] as Filter[];
+    ];
 
     mockUseKibana.mockReturnValue({
       services: {
