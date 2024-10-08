@@ -176,7 +176,6 @@ export interface PostDeleteConnectorHookParams<
 > {
   connectorId: string;
   config: Config;
-  secrets: Secrets;
   logger: Logger;
   request: KibanaRequest;
   services: HookServices;

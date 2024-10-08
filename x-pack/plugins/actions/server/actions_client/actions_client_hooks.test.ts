@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
@@ -198,7 +199,8 @@ describe('connector type hooks', () => {
       const result = await actionsClient.delete({ id: ConnectorSavedObject.id });
       expect(result).toBe(expectedResult);
 
-      const postParams = { ...CoreHookParams, logger };
+      const postParamsWithSecrets = { ...CoreHookParams, logger };
+      const postParams = omit(postParamsWithSecrets, 'secrets');
 
       expect(postDeleteHook).toHaveBeenCalledTimes(1);
       expect(postDeleteHook.mock.calls[0]).toEqual([postParams]);
@@ -359,7 +361,8 @@ describe('connector type hooks', () => {
       const result = await actionsClient.delete({ id: ConnectorSavedObject.id });
       expect(result).toBe(expectedResult);
 
-      const postParams = { ...CoreHookParams, logger };
+      const postParamsWithSecrets = { ...CoreHookParams, logger };
+      const postParams = omit(postParamsWithSecrets, 'secrets');
 
       expect(postDeleteHook).toHaveBeenCalledTimes(1);
       expect(postDeleteHook.mock.calls[0]).toEqual([postParams]);

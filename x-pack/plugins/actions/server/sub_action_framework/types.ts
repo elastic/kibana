@@ -101,7 +101,6 @@ export interface PostSaveConnectorHookParams<Config, Secrets> {
 export interface PostDeleteConnectorHookParams<Config, Secrets> {
   connectorId: string;
   config: Config;
-  secrets: Secrets;
   logger: Logger;
   services: HookServices;
   request: KibanaRequest;

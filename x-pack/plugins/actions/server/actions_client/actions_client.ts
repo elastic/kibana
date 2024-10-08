@@ -617,11 +617,11 @@ export class ActionsClient {
       );
     }
 
-    const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
-      'action',
-      id
-    );
-    const { actionTypeId, config, secrets } = attributes;
+    const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+    const {
+      attributes: { actionTypeId, config },
+    } = rawAction;
+
     const actionType = this.context.actionTypeRegistry.get(actionTypeId);
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
@@ -634,7 +634,6 @@ export class ActionsClient {
         await actionType.postDeleteHook({
           connectorId: id,
           config,
-          secrets,
           logger: this.context.logger,
           request: this.context.request,
           services: hookServices,

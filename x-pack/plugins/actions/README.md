@@ -151,7 +151,7 @@ interface PostSaveConnectorHookParams<Config, Secrets> {
 interface PostDeleteConnectorHookParams<Config, Secrets> {
   connectorId: string;
   config: Config;
-  secrets: Secrets;
+  // secrets not provided, yet
   logger: Logger;
   request: KibanaRequest;
   services: HookServices;
