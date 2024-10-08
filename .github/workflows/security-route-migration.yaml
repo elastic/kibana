@@ -45,6 +45,5 @@ jobs:
       run: echo "${{ secrets.KIBANAMACHINE_TOKEN }}" | gh auth login --with-token
 
     - name: Run ESLint Autofix Script
-        run: |
-          node scripts/eslint-security-route.js
+        run: node scripts/eslint-security-route.js
 
