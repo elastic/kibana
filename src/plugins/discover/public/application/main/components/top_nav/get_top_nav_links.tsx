@@ -7,28 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import {
-  AppMenuAction,
-  AppMenuActionId,
-  AppMenuActionType,
-  AppMenuDiscoverParams,
-  AppMenuItem,
-} from '@kbn/discover-utils';
+import { AppMenuDiscoverParams, AppMenuItem } from '@kbn/discover-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { getAlertsActionItem } from './get_action_alerts';
+import {
+  getAlertsAppMenuItem,
+  getNewSearchAppMenuItem,
+  getOpenSearchAppMenuItem,
+  getShareAppMenuItem,
+  getInspectAppMenuItem,
+} from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
-import { runShareAction } from './run_share_action';
-import { OpenSearchPanel } from './open_search_panel';
 
 /**
  * Helper function to build the top nav links
@@ -52,23 +49,6 @@ export const getTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
-  const getDiscoverParams = (): AppMenuDiscoverParams => ({
-    dataView,
-    adHocDataViews,
-    isEsqlMode,
-    services,
-    savedSearch: state.savedSearchState.getState(),
-    savedQueryId: state.appState.getState().savedQuery,
-    query: state.appState.getState().query,
-    onUpdateAdHocDataViews: async (adHocDataViewList) => {
-      await state.actions.loadDataViewList();
-      state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
-    },
-  });
-
-  const alertsItem = getAlertsActionItem({ getDiscoverParams });
-  const alerts = convertMenuItem({ appMenuItem: alertsItem, getDiscoverParams });
-
   /**
    * Switches from ES|QL to classic mode and vice versa
    */
@@ -117,24 +97,6 @@ export const getTopNavLinks = ({
     testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
-  const newSearchItem: AppMenuAction = {
-    id: AppMenuActionId.new,
-    type: AppMenuActionType.secondary, // TODO: convert to primary
-    controlProps: {
-      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
-        defaultMessage: 'New',
-      }),
-      description: i18n.translate('discover.localMenu.newSearchDescription', {
-        defaultMessage: 'New Search',
-      }),
-      testId: 'discoverNewButton',
-      onClick: () => {
-        services.locator.navigate({});
-      },
-    },
-  };
-  const newSearch = convertMenuItem({ appMenuItem: newSearchItem, getDiscoverParams });
-
   const saveSearch = {
     id: 'save',
     label: i18n.translate('discover.localMenu.saveTitle', {
@@ -158,66 +120,56 @@ export const getTopNavLinks = ({
     },
   };
 
-  const openSearchItem: AppMenuAction = {
-    id: AppMenuActionId.open,
-    type: AppMenuActionType.secondary, // TODO: convert to primary
-    controlProps: {
-      label: i18n.translate('discover.localMenu.openTitle', {
-        defaultMessage: 'Open',
-      }),
-      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
-        defaultMessage: 'Open Saved Search',
-      }),
-      testId: 'discoverOpenButton',
-      onClick: ({ onFinishAction }) => {
-        return (
-          <OpenSearchPanel
-            onClose={onFinishAction}
-            onOpenSavedSearch={state.actions.onOpenSavedSearch}
-          />
-        );
-      },
+  const getDiscoverParams = (): AppMenuDiscoverParams => ({
+    dataView,
+    adHocDataViews,
+    isEsqlMode,
+    services,
+    savedSearch: state.savedSearchState.getState(),
+    savedQueryId: state.appState.getState().savedQuery,
+    query: state.appState.getState().query,
+    onUpdateAdHocDataViews: async (adHocDataViewList) => {
+      await state.actions.loadDataViewList();
+      state.internalState.transitions.setAdHocDataViews(adHocDataViewList);
     },
-  };
-  const openSearch = convertMenuItem({ appMenuItem: openSearchItem, getDiscoverParams });
+    onNewSearch: () => {
+      services.locator.navigate({});
+    },
+    onOpenSavedSearch: state.actions.onOpenSavedSearch,
+  });
 
-  const shareSearch = {
-    id: 'share',
-    label: i18n.translate('discover.localMenu.shareTitle', {
-      defaultMessage: 'Share',
-    }),
-    description: i18n.translate('discover.localMenu.shareSearchDescription', {
-      defaultMessage: 'Share Search',
-    }),
-    testId: 'shareTopNavButton',
-    run: async (anchorElement: HTMLElement) => {
-      await runShareAction({
-        anchorElement,
-        dataView,
-        stateContainer: state,
-        services,
-        isEsqlMode,
-      });
-    },
-  };
+  /* Primary items */
 
-  const inspectSearchItem: AppMenuAction = {
-    id: AppMenuActionId.inspect,
-    type: AppMenuActionType.secondary,
-    controlProps: {
-      label: i18n.translate('discover.localMenu.inspectTitle', {
-        defaultMessage: 'Inspect',
-      }),
-      description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
-        defaultMessage: 'Open Inspector for search',
-      }),
-      testId: 'openInspectorButton',
-      onClick: () => {
-        onOpenInspector();
-      },
-    },
-  };
-  const inspectSearch = convertMenuItem({ appMenuItem: inspectSearchItem, getDiscoverParams });
+  const newSearch = convertMenuItem({
+    appMenuItem: getNewSearchAppMenuItem(),
+    getDiscoverParams,
+  });
+
+  const openSearch = convertMenuItem({
+    appMenuItem: getOpenSearchAppMenuItem(),
+    getDiscoverParams,
+  });
+
+  const shareSearch = convertMenuItem({
+    appMenuItem: getShareAppMenuItem({ stateContainer: state, services }),
+    getDiscoverParams,
+  });
+
+  /* Secondary items */
+
+  const alerts = convertMenuItem({
+    appMenuItem: getAlertsAppMenuItem({ getDiscoverParams }),
+    getDiscoverParams,
+  });
+  // TODO: allow to extend the alerts menu
+
+  const inspectSearch = convertMenuItem({
+    appMenuItem: getInspectAppMenuItem({ onOpenInspector }),
+    getDiscoverParams,
+  });
+
+  /* Custom items */
+  // TODO: allow to extend with custom items
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
@@ -226,16 +178,8 @@ export const getTopNavLinks = ({
     entries.push({ data: esqLDataViewTransitionToggle, order: 0 });
   }
 
-  if (!defaultMenu?.newItem?.disabled) {
-    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });
-  }
-
-  if (!defaultMenu?.openItem?.disabled) {
-    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 200 });
-  }
-
-  if (!defaultMenu?.shareItem?.disabled) {
-    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 300 });
+  if (!defaultMenu?.inspectItem?.disabled) {
+    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 100 });
   }
 
   if (
@@ -243,11 +187,19 @@ export const getTopNavLinks = ({
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !defaultMenu?.alertsItem?.disabled
   ) {
-    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 400 });
+    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 200 });
   }
 
-  if (!defaultMenu?.inspectItem?.disabled) {
-    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 500 });
+  if (!defaultMenu?.newItem?.disabled) {
+    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 300 });
+  }
+
+  if (!defaultMenu?.openItem?.disabled) {
+    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 400 });
+  }
+
+  if (!defaultMenu?.shareItem?.disabled) {
+    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 500 });
   }
 
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {

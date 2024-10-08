@@ -99,7 +99,7 @@ const CreateAlertFlyout: React.FC<{
   });
 });
 
-export const getAlertsActionItem = ({
+export const getAlertsAppMenuItem = ({
   getDiscoverParams,
 }: {
   getDiscoverParams: () => AppMenuDiscoverParams;
