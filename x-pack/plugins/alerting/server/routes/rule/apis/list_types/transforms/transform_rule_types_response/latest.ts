@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { TypesRulesResponseBody } from './types/latest';
-export type { TypesRulesResponseBody as TypesRulesResponseBodyV1 } from './types/v1';
+export * from './v1';

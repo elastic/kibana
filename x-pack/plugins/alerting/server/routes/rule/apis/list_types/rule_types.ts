@@ -6,7 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/rule_types';
+import { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/list_types';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
