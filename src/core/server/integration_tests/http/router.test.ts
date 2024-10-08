@@ -894,7 +894,7 @@ describe('Handler', () => {
       expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
     }
 
-    // Internal routes do not include the header
+    // Internal unversioned routes do not include the header
     {
       const { headers } = await supertest(innerServer.listener).post('/internal').expect(200);
       expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
