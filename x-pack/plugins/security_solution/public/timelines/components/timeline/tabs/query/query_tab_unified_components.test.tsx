@@ -1141,4 +1141,11 @@ describe('query tab with unified timeline', () => {
       );
     });
   });
+
+
+  describe('Hover Actions',()=>{
+    describe('Add to Timeline', ()=>{
+
+    })
+  })
 });

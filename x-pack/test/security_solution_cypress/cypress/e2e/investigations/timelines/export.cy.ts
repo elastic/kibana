@@ -42,7 +42,7 @@ describe.skip('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
     visit(TIMELINES_URL);
   });
 
-  it('should export custom timeline(s)', function () {
+  it.only('should export custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
     exportTimeline(this.timelineId1);
