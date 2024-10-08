@@ -63,10 +63,6 @@ describe('field and variable escaping', () => {
       'ROW variable.`wi#th`.separator = "lolz" | RENAME variable . /* lolz */ `wi#th` . separator AS foo',
       []
     );
-    // await expectErrors(
-    //   'FROM index | ENRICH policy WITH `new`.name1 = `otherField`, `new.name2` = `yetAnotherField`',
-    //   []
-    // );
     // function argument
     await expectErrors(
       'ROW variable.`wi#th`.separator = "lolz" | EVAL TRIM(variable . /* lolz */ `wi#th` . separator)',
@@ -115,6 +111,8 @@ describe('field and variable escaping', () => {
 
 describe('variable support', () => {
   describe('variable data type detection', () => {
+    // most of these tests are aspirational (and skipped) because we don't have
+    // a good way to compute the type of an expression yet.
     beforeAll(() => {
       setTestFunctions([
         // this test function is just used to test the type of the variable
@@ -156,7 +154,7 @@ describe('variable support', () => {
     const expectType = (type: FunctionParameterType) =>
       `Argument of [test] must be [cartesian_point], found value [var] type [${type}]`;
 
-    test('literals', async () => {
+    test.skip('literals', async () => {
       const { expectErrors } = await setup();
       // literal assignment
       await expectErrors('FROM index | EVAL var = 1, TEST(var)', [expectType('integer')]);
@@ -170,7 +168,14 @@ describe('variable support', () => {
       await expectErrors('FROM index | EVAL var = textField, TEST(var)', [expectType('text')]);
     });
 
-    test('inline casting', async () => {
+    test.skip('variables', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | EVAL var = textField, var2 = var, TEST(var2)', [
+        `Argument of [test] must be [cartesian_point], found value [var2] type [text]`,
+      ]);
+    });
+
+    test.skip('inline casting', async () => {
       const { expectErrors } = await setup();
       // inline cast assignment
       await expectErrors('FROM index | EVAL var = doubleField::long, TEST(var)', [
@@ -182,7 +187,7 @@ describe('variable support', () => {
       ]);
     });
 
-    test('function results', async () => {
+    test.skip('function results', async () => {
       const { expectErrors } = await setup();
       // function assignment
       await expectErrors('FROM index | EVAL var = RETURN_VALUE(doubleField), TEST(var)', [

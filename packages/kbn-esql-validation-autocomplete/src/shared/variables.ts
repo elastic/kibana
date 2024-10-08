@@ -43,26 +43,61 @@ function addToVariables(
   }
 }
 
-function getAssignRightHandSideType(item: ESQLAstItem, fields: Map<string, ESQLRealField>) {
+/**
+ * Determines the type of the expression
+ *
+ * TODO - this function needs a lot of work. For example, it needs to find the best-matching function signature
+ * which it isn't currently doing.
+ * @param root
+ * @returns
+ */
+function getExpressionType(
+  root: ESQLAstItem,
+  fields: Map<string, ESQLRealField>,
+  variables: Map<string, ESQLVariable[]>
+): string {
+  const fallback = 'double';
+
+  if (Array.isArray(root) || !root) {
+    return fallback;
+  }
+  if (root.type === 'literal') {
+    return root.literalType;
+  }
+  if (root.type === 'inlineCast') {
+    if (root.castType === 'int') {
+      return 'integer';
+    }
+    if (root.castType === 'bool') {
+      return 'boolean';
+    }
+    return root.castType;
+  }
+  if (isColumnItem(root)) {
+    const field = fields.get(root.parts.join('.'));
+    if (field) {
+      return field.type;
+    }
+    const variable = variables.get(root.parts.join('.'));
+    if (variable) {
+      return variable[0].type;
+    }
+  }
+  if (isFunctionItem(root)) {
+    const fnDefinition = getFunctionDefinition(root.name);
+    return fnDefinition?.signatures[0].returnType ?? fallback;
+  }
+  return fallback;
+}
+
+function getAssignRightHandSideType(
+  item: ESQLAstItem,
+  fields: Map<string, ESQLRealField>,
+  variables: Map<string, ESQLVariable[]>
+) {
   if (Array.isArray(item)) {
     const firstArg = item[0];
-    if (Array.isArray(firstArg) || !firstArg) {
-      return;
-    }
-    if (firstArg.type === 'literal') {
-      return firstArg.literalType;
-    }
-    if (isColumnItem(firstArg)) {
-      const field = fields.get(firstArg.name);
-      if (field) {
-        return field.type;
-      }
-    }
-    if (isFunctionItem(firstArg)) {
-      const fnDefinition = getFunctionDefinition(firstArg.name);
-      return fnDefinition?.signatures[0].returnType;
-    }
-    return firstArg.type;
+    return getExpressionType(firstArg, fields, variables);
   }
 }
 
@@ -89,10 +124,14 @@ function addVariableFromAssignment(
   fields: Map<string, ESQLRealField>
 ) {
   if (isColumnItem(assignOperation.args[0])) {
-    const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
+    const rightHandSideArgType = getAssignRightHandSideType(
+      assignOperation.args[1],
+      fields,
+      variables
+    );
     addToVariableOccurrences(variables, {
       name: assignOperation.args[0].parts.join('.'),
-      type: (rightHandSideArgType as string) || 'double' /* fallback to number */,
+      type: rightHandSideArgType as string /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -108,7 +147,7 @@ function addVariableFromExpression(
       expressionOperation.location.min,
       expressionOperation.location.max + 1
     );
-    const expressionType = 'double';
+    const expressionType = 'double'; // TODO - use getExpressionType once it actually works
     addToVariableOccurrences(variables, {
       name: expressionText,
       type: expressionType,
@@ -125,6 +164,9 @@ export function collectVariables(
   const variables = new Map<string, ESQLVariable[]>();
 
   const visitor = new Visitor()
+    .on('visitLiteralExpression', (ctx) => {
+      // TODO - add these as variables
+    })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
     .on('visitRenameExpression', (ctx) => {
       const [oldArg, newArg] = ctx.node.args;
