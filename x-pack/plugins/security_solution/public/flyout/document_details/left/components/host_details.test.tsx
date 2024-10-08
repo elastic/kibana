@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
@@ -24,6 +26,8 @@ import {
   HOST_DETAILS_LINK_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
   HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -37,6 +41,8 @@ import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -158,6 +164,8 @@ describe('<HostDetails />', () => {
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
   });
 
   it('should render host details correctly', () => {
@@ -294,6 +302,32 @@ describe('<HostDetails />', () => {
           banner: NETWORK_PREVIEW_BANNER,
         },
       });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderHostDetails(mockContextValue);
+      expect(queryByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render vulnerabilities when data is available', () => {
+      (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+        data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).toBeInTheDocument();
     });
   });
 });

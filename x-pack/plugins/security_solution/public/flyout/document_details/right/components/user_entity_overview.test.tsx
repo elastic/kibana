@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
@@ -15,6 +16,7 @@ import {
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -45,6 +47,7 @@ const panelContextValue = {
 };
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -85,6 +88,7 @@ describe('<UserEntityOverview />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
   });
 
   describe('license is valid', () => {
@@ -209,6 +213,29 @@ describe('<UserEntityOverview />', () => {
           banner: USER_PREVIEW_BANNER,
         },
       });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    beforeEach(() => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+    });
+
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderUserEntityOverview();
+      expect(
+        queryByTestId(ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderUserEntityOverview();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
     });
   });
 });

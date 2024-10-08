@@ -53,10 +53,12 @@ import {
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { MisconfigurationsInsight } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_insight';
 
 const USER_ICON = 'user';
 
@@ -196,12 +198,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       responsive={false}
       data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
@@ -270,6 +272,11 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
+      <MisconfigurationsInsight
+        fieldName={'user.name'}
+        name={userName}
+        data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
+      />
     </EuiFlexGroup>
   );
 };
