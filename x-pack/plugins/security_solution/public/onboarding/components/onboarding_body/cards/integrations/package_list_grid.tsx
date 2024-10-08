@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef } from 'react';
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
@@ -52,12 +52,10 @@ export const PackageListGrid = React.memo(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }: WrapperProps) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const [selectedTabIdFromStorage, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
+    const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id
     );
-    const [toggleIdSelected, setToggleIdSelected] =
-      useState<IntegrationTabId>(selectedTabIdFromStorage);
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
     const onTabChange = useCallback(
       (id: string) => {
@@ -65,10 +63,9 @@ export const PackageListGrid = React.memo(
           return;
         }
         scrollElement.current?.scrollTo?.(0, 0);
-        setToggleIdSelected(id);
         setSelectedTabIdToStorage(id);
       },
-      [setToggleIdSelected, setSelectedTabIdToStorage]
+      [setSelectedTabIdToStorage]
     );
 
     const {
