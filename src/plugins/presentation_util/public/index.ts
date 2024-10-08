@@ -13,14 +13,6 @@ import { pluginServices } from './services';
 
 export type { PresentationCapabilitiesService, PresentationLabsService } from './services';
 
-export type {
-  KibanaPluginServiceFactory,
-  PluginServiceFactory,
-  PluginServiceProviders,
-  KibanaPluginServiceParams,
-} from './services/create';
-export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
-
 export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export type { SaveModalDashboardProps } from './components/types';
 
