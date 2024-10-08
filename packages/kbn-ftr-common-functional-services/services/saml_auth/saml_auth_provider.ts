@@ -101,25 +101,23 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         };
       }
 
-      const { body, status } = await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .post('/internal/security/api_key')
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send({
           name: 'myTestApiKey',
           metadata: {},
-          role_descriptors: roleDescriptors,
+          role_descriptors: { roleDescriptors },
         });
 
-      if (status !== 200) {
+      if (response.status !== 200) {
         throw new Error(
-          `Failed to create API key for '${role}' role: status code '${status}' and response: ${JSON.stringify(
-            body
-          )}`
+          `Failed to create API key for '${role}' role with response text: ${response.text}`
         );
       }
 
-      const apiKey = body;
+      const apiKey = response.body;
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
       log.debug(`Created api key for role: [${role}]`);
