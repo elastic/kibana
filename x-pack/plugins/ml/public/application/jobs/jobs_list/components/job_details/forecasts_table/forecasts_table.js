@@ -78,6 +78,7 @@ export class ForecastsTable extends Component {
     this.state = {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
+      forecastIdToDelete: undefined,
     };
     this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
