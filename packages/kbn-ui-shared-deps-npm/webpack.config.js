@@ -185,6 +185,7 @@ module.exports = (_, argv) => {
       }),
       new webpack.DllPlugin({
         context: REPO_ROOT,
+        entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),
