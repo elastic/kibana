@@ -52,5 +52,7 @@ export const builtInServicesFromEcsEntityDefinition: EntityDefinition =
       'cloud.machine.type',
       'kubernetes.namespace',
       'orchestrator.cluster.name',
+      'k8s.namespace.name',
+      'k8s.cluster.name',
     ],
   });
