@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import React, { useMemo } from 'react';
 import type {
-  CaseCustomFieldText,
-  TextCustomFieldConfiguration,
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration,
 } from '../../../../common/types/domain';
-import type { CustomFieldType } from '../types';
-import { getTextFieldConfig } from './config';
 import { OptionalFieldLabel } from '../../optional_field_label';
+import type { CustomFieldType } from '../types';
+import { getListFieldConfig } from './config';
+import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
 
 const CreateComponent: CustomFieldType<
-  CaseCustomFieldText,
-  TextCustomFieldConfiguration
+  CaseCustomFieldList,
+  ListCustomFieldConfiguration
 >['Create'] = ({ customFieldConfiguration, isLoading, setAsOptional, setDefaultValue = true }) => {
-  const { key, label, required, defaultValue } = customFieldConfiguration;
-  const config = getTextFieldConfig({
+  const { key, label, required, defaultValue, options } = customFieldConfiguration;
+
+  const euiSelectOptions = useMemo(
+    () => listCustomFieldOptionsToEuiSelectOptions(options),
+    [options]
+  );
+
+  const config = getListFieldConfig({
     required: setAsOptional ? false : required,
     label,
     ...(defaultValue && setDefaultValue && { defaultValue: String(defaultValue) }),
@@ -31,15 +38,16 @@ const CreateComponent: CustomFieldType<
     <UseField
       path={`customFields.${key}`}
       config={config}
-      component={TextField}
+      component={SelectField}
       label={label}
       componentProps={{
         labelAppend: setAsOptional ? OptionalFieldLabel : null,
         euiFieldProps: {
-          'data-test-subj': `${key}-text-create-custom-field`,
+          'data-test-subj': `${key}-list-create-custom-field`,
           fullWidth: true,
           disabled: isLoading,
           isLoading,
+          options: euiSelectOptions,
         },
       }}
     />

@@ -9,15 +9,16 @@ import Boom from '@hapi/boom';
 import { isString } from 'lodash';
 import type { FilteringValues } from './types';
 
-export const getCasesTextCustomField = () => ({
-  isFilterable: false,
+export const getCasesListCustomField = () => ({
+  isFilterable: true,
   isSortable: false,
   savedObjectMappingType: 'string',
   validateFilteringValues: (values: FilteringValues) => {
     values.forEach((value) => {
       if (value !== null && !isString(value)) {
-        throw Boom.badRequest(`Unsupported filtering value for custom field of type text.`);
+        throw Boom.badRequest(`Unsupported filtering value for custom field of type list.`);
       }
     });
   },
+  getDefaultValue: () => null,
 });
