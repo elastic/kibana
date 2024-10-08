@@ -10,19 +10,10 @@ import React from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
-import { pluginServices, CanvasPluginServices } from '../../public/services';
-import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
 import { LegacyServicesProvider } from '../../public/services/legacy';
-import { startServices } from '../../public/services/legacy/stubs';
+import { setStubKibanaServices } from '../../public/services/mocks';
 
 export const servicesContextDecorator = (): DecoratorFn => {
-  const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(
-    pluginServiceProviders
-  );
-
-  pluginServices.setRegistry(pluginServiceRegistry.start({}));
-
   return (story: Function, storybook) => {
     if (process.env.JEST_WORKER_ID !== undefined) {
       storybook.args.useStaticData = true;
@@ -33,6 +24,7 @@ export const servicesContextDecorator = (): DecoratorFn => {
 };
 
 export const legacyContextDecorator = () => {
-  startServices();
+  setStubKibanaServices();
+
   return (story: Function) => <LegacyServicesProvider>{story()}</LegacyServicesProvider>;
 };
