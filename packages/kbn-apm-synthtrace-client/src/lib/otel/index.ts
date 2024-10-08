@@ -13,7 +13,7 @@ import { OtelError } from './error';
 import { OtelMetric } from './metric';
 import { OtelTransaction } from './transaction';
 
-export interface SharedAttributes {
+interface OtelSharedResourceAttributes {
   'service.name'?: string;
   'agent.name'?: string;
   'agent.version'?: string;
@@ -37,7 +37,7 @@ export interface OtelDocument extends Fields {
     [key: string]: any;
   };
   resource?: {
-    attributes?: SharedAttributes;
+    attributes?: OtelSharedResourceAttributes;
     dropped_attributes_count?: number;
     schema_url?: string;
   };
