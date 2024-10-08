@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useContext, useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { WorkpadRoutingContext } from '..';
 import { coreServices } from '../../../services/kibana_services';
