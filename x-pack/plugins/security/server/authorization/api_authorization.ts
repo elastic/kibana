@@ -87,13 +87,13 @@ export function initAPIAuthorization(
           const missingPrivileges = Object.keys(kibanaPrivileges).filter(
             (key) => !kibanaPrivileges[key]
           );
-          const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${
+          const forbiddenMessage = `API [${request.route.method.toLocaleUpperCase('en')} ${
             request.url.pathname
           }${
             request.url.search
           }] is unauthorized for user, this action is granted by the Kibana privileges [${missingPrivileges}]`;
 
-          logger.warn(forbiddenMessage);
+          logger.warn(`Responding with 403: ${forbiddenMessage}}`);
 
           return response.forbidden({
             body: {
