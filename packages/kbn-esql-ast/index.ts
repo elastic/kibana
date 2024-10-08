@@ -56,3 +56,5 @@ export {
 } from './src/pretty_print';
 
 export { EsqlQuery } from './src/query';
+
+export * as mutate from './src/mutate';
