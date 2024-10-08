@@ -24,7 +24,6 @@
       "path": "../../../src/setup_node_env/tsconfig.json"
     },
     // add references to other TypeScript projects the plugin depends on
-    "@kbn/ace",
     "@kbn/actions-plugin",
     "@kbn/aiops-plugin",
     "@kbn/alerting-plugin",
@@ -131,6 +130,7 @@
     "@kbn/json-schemas",
     "@kbn/ml-field-stats-flyout",
     "@kbn/ml-parse-interval",
-    "@kbn/ml-validators"
+    "@kbn/ml-validators",
+    "@kbn/aiops-common"
   ]
 }
