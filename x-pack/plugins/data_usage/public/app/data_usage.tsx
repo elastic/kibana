@@ -33,8 +33,14 @@ export const DataUsage = () => {
     services: { chrome, appParams },
   } = useKibanaContextForPlugin();
 
-  const { metricTypes: metricTypesFromUrl, dataStreams: dataStreamsFromUrl } =
-    useDataUsageMetricsUrlParams();
+  const {
+    metricTypes: metricTypesFromUrl,
+    dataStreams: dataStreamsFromUrl,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+    setUrlMetricTypesFilter,
+    setUrlDateRangeFilter,
+  } = useDataUsageMetricsUrlParams();
 
   const [queryParams, setQueryParams] = useState<UsageMetricsRequestSchemaQueryParams>({
     metricTypes: ['storage_retained', 'ingest_rate'],
@@ -42,6 +48,28 @@ export const DataUsage = () => {
     from: DEFAULT_DATE_RANGE_OPTIONS.startDate,
     to: DEFAULT_DATE_RANGE_OPTIONS.endDate,
   });
+
+  useEffect(() => {
+    if (!metricTypesFromUrl) {
+      setUrlMetricTypesFilter(
+        typeof queryParams.metricTypes !== 'string'
+          ? queryParams.metricTypes.join(',')
+          : queryParams.metricTypes
+      );
+    }
+    if (!startDateFromUrl || !endDateFromUrl) {
+      setUrlDateRangeFilter({ startDate: queryParams.from, endDate: queryParams.to });
+    }
+  }, [
+    endDateFromUrl,
+    metricTypesFromUrl,
+    queryParams.from,
+    queryParams.metricTypes,
+    queryParams.to,
+    setUrlDateRangeFilter,
+    setUrlMetricTypesFilter,
+    startDateFromUrl,
+  ]);
 
   useEffect(() => {
     setQueryParams((prevState) => ({
