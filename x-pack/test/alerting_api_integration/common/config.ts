@@ -40,6 +40,7 @@ const enabledActionTypes = [
   '.bedrock',
   '.cases-webhook',
   '.email',
+  '.gemini',
   '.index',
   '.opsgenie',
   '.pagerduty',

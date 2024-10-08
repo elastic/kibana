@@ -110,6 +110,7 @@ export function ChatBody({
   showLinkToConversationsApp,
   onConversationUpdate,
   onToggleFlyoutPositionMode,
+  onClose,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -121,6 +122,7 @@ export function ChatBody({
   showLinkToConversationsApp: boolean;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
+  onClose?: () => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -498,6 +500,7 @@ export function ChatBody({
             saveTitle(newTitle);
           }}
           onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
+          onClose={onClose}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -54,6 +54,11 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="spaces")]'
+    description: Change displayName
+    update:
+      x-displayName: "Spaces"
+      description: Manage your Kibana spaces.
   - target: '$.tags[?(@.name=="system")]'
     description: Change displayName and description
     update:

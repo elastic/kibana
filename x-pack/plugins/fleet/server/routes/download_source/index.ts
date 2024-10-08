@@ -36,8 +36,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      fleetAuthz: (authz) => {
+        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
       description: `List agent binary download sources`,
       options: {
@@ -65,8 +65,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      fleetAuthz: (authz) => {
+        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
       description: `Get agent binary download source by ID`,
       options: {

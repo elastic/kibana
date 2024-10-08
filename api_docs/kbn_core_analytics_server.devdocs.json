@@ -995,14 +995,6 @@
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
-              },
-              {
                 "plugin": "inventory",
                 "path": "x-pack/plugins/observability_solution/inventory/public/services/telemetry/telemetry_client.ts"
               },
@@ -1835,10 +1827,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/analytics/register_service_inventory_view_type_context.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",

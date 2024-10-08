@@ -42,7 +42,9 @@ export const ApiKeyPanel: React.FC = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const elasticsearchEndpoint = esConfig.elasticsearch_host;
 
-  useEffect(() => makeRequest({}), []);
+  useEffect(() => {
+    makeRequest({});
+  }, []);
 
   const apiKeys = data?.api_keys || [];
   const cloudId = cloud?.cloudId;

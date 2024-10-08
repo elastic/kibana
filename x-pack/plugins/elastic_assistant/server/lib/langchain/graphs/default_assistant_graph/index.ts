@@ -36,6 +36,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   inference,
   langChainMessages,
   llmType,
+  isOssModel,
   logger: parentLogger,
   isStream = false,
   onLlmResponse,
@@ -48,7 +49,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai';
+  const isOpenAI = llmType === 'openai' && !isOssModel;
   const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   /**
@@ -111,7 +112,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
   );
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -166,6 +167,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     conversationId,
     llmType,
     isStream,
+    isOssModel,
     input: latestMessage[0]?.content as string,
   };
 
@@ -175,6 +177,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       assistantGraph,
       inputs,
       logger,
+      isOssModel,
       onLlmResponse,
       request,
       traceOptions,

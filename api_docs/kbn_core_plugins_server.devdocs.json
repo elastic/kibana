@@ -451,7 +451,7 @@
             "tags": [],
             "label": "dynamicConfig",
             "description": [
-              "\nList of configuration properties that can be dynamically changed via the PUT /_settings API."
+              "\nList of configuration properties that can be dynamically changed via the PUT /internal/core/_settings API."
             ],
             "signature": [
               {
