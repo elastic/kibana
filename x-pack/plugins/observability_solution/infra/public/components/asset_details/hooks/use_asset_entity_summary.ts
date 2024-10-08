@@ -45,5 +45,5 @@ export function useAssetEntitySummary({
     [entityType, entityId]
   );
 
-  return { dataStreams: data ? data.sourceDataStreams : [], status };
+  return { dataStreams: data ? data.sourceDataStreams : undefined, status };
 }

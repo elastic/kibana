@@ -7,6 +7,6 @@
 
 import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 
-export function hasMetrics(dataStreamTypes: EntityDataStreamType[]) {
+export function hasMetrics(dataStreamTypes: EntityDataStreamType[] | undefined) {
   return dataStreamTypes?.includes(EntityDataStreamType.METRICS);
 }
