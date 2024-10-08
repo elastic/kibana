@@ -33,9 +33,14 @@ export function defineInvalidateSessionsRoutes({ router, getSession }: RouteDefi
           ),
         }),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['sessionManagement'],
+        },
+      },
       options: {
         access: 'public',
-        tags: ['access:sessionManagement'],
+
         summary: `Invalidate user sessions`,
       },
     },

@@ -18,7 +18,16 @@ export function defineAnonymousAccessGetStateRoutes({
   getAnonymousAccessService,
 }: RouteDefinitionParams) {
   router.get(
-    { path: '/internal/security/anonymous_access/state', validate: false },
+    {
+      path: '/internal/security/anonymous_access/state',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (_context, _request, response) => {
       const anonymousAccessService = getAnonymousAccessService();
       const accessURLParameters = anonymousAccessService.accessURLParameters

@@ -22,6 +22,12 @@ export function defineHasApiKeysRoutes({
   router.get(
     {
       path: '/internal/security/api_key/_has_active',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',

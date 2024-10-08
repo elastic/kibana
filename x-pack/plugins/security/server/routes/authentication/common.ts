@@ -43,6 +43,12 @@ export function defineCommonRoutes({
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
@@ -90,7 +96,16 @@ export function defineCommonRoutes({
     ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
   ]) {
     router.get(
-      { path, validate: false },
+      {
+        path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       createLicensedRouteHandler(async (context, request, response) => {
         if (path === '/api/security/v1/me') {
           logger.warn(
@@ -137,6 +152,12 @@ export function defineCommonRoutes({
   router.post(
     {
       path: '/internal/security/login',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           providerType: schema.string(),
@@ -181,7 +202,16 @@ export function defineCommonRoutes({
   if (buildFlavor !== 'serverless') {
     // In the serverless offering, the access agreement functionality isn't available.
     router.post(
-      { path: '/internal/security/access_agreement/acknowledge', validate: false },
+      {
+        path: '/internal/security/access_agreement/acknowledge',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       createLicensedRouteHandler(async (context, request, response) => {
         // If license doesn't allow access agreement we shouldn't handle request.
         if (!license.getFeatures().allowAccessAgreement) {

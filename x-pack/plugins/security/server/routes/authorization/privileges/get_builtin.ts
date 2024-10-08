@@ -9,7 +9,16 @@ import type { RouteDefinitionParams } from '../..';
 
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(
-    { path: '/internal/security/esPrivileges/builtin', validate: false },
+    {
+      path: '/internal/security/esPrivileges/builtin',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const esClient = (await context.core).elasticsearch.client;
       const privileges = await esClient.asCurrentUser.security.getBuiltinPrivileges();

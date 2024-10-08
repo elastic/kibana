@@ -16,6 +16,12 @@ export function defineEnabledApiKeysRoutes({
   router.get(
     {
       path: '/internal/security/api_key/_enabled',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
