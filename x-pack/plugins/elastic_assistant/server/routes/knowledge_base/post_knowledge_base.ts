@@ -74,7 +74,11 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
           }
 
           const installEsqlDocs = kbResource === ESQL_RESOURCE;
-          await knowledgeBaseDataClient.setupKnowledgeBase({ soClient, installEsqlDocs });
+          await knowledgeBaseDataClient.setupKnowledgeBase({
+            soClient,
+            installEsqlDocs,
+            installSecurityLabsDocs: v2KnowledgeBaseEnabled,
+          });
 
           return response.ok({ body: { success: true } });
         } catch (error) {
