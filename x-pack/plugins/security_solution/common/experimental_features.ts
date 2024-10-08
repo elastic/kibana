@@ -114,11 +114,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
-   */
-  assistantBedrockChat: true,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
