@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../../lib/kibana';
 
 export const useAvailableSteps = () => {

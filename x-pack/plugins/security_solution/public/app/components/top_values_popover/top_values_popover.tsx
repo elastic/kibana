@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';

@@ -14,7 +14,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../lib/kibana';
 import { useBreadcrumbsNav } from '../breadcrumbs';
 import { SecuritySideNav } from '../security_side_nav';

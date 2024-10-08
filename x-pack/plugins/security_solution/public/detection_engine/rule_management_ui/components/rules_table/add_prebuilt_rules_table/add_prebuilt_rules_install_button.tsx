@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useBoolean } from 'react-use';
+import useBoolean from 'react-use/lib/useBoolean';
 import type { Rule } from '../../../../rule_management/logic';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';

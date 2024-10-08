@@ -15,7 +15,7 @@ import React, {
   FC,
 } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useEvent } from 'react-use';
+import useEvent from 'react-use/lib/useEvent';
 import moment from 'moment';
 import { Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
