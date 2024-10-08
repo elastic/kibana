@@ -10,7 +10,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
@@ -115,7 +115,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       };
 
       const getSecurityLicense = async () => {
-        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginSetup }>(
           'security'
         );
 

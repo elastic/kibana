@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityPluginStart } from '../plugin';
+import type { SecurityPluginSetup } from '../plugin';
 
-export type SecurityLicense = SecurityPluginStart['license'];
+export type SecurityLicense = SecurityPluginSetup['license'];
