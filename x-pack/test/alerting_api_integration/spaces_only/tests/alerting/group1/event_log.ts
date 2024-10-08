@@ -82,8 +82,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
+                schedule: { interval: '2s' },
+                throttle: '1s',
                 params: {
                   pattern,
                 },
@@ -1218,6 +1218,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '2s' },
                 notify_when: RuleNotifyWhen.THROTTLE,
+                throttle: '1s',
                 params: {
                   pattern,
                 },
@@ -1330,8 +1331,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                   {
@@ -1340,8 +1340,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                 ],
@@ -1428,7 +1427,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
                 throttle: '1s',
                 params: {
                   pattern,
@@ -1524,7 +1523,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '2s' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1537,8 +1536,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                   {
@@ -1547,8 +1545,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                     frequency: {
                       summary: false,
-                      throttle: '1s',
-                      notify_when: RuleNotifyWhen.THROTTLE,
+                      notify_when: RuleNotifyWhen.ACTIVE,
                     },
                   },
                 ],
@@ -1748,8 +1745,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
-                throttle: null,
+                schedule: { interval: '2s' },
+                throttle: '1s',
                 params: {
                   pattern,
                 },
