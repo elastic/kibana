@@ -45,6 +45,7 @@ export interface AgentExecutorParams<T extends boolean> {
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
   inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;
