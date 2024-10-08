@@ -56,8 +56,6 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
     setInputConnectorName('');
   }, [isDeleteModalVisible, isCrawler]);
 
-  console.log('test', isCrawler);
-
   return isDeleteModalVisible ? (
     <EuiConfirmModal
       title={
