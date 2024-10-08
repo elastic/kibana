@@ -8,11 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import ReactDOM from 'react-dom';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
-import { setEuiDevProviderWarning } from '@elastic/eui';
+import { EuiButtonIcon, EuiPortal, EuiProvider, setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -23,6 +23,11 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+
 import type {
   ChromeNavLink,
   ChromeBadge,
@@ -56,6 +61,7 @@ import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
+const IS_FULLSCREEN_MODE_KEY = 'core.chrome.isFullScreenMode';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 interface ConstructorParams {
@@ -92,6 +98,9 @@ export class ChromeService {
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
   private readonly isFeedbackBtnVisible$ = new BehaviorSubject(false);
+  private readonly isFullScreenMode$ = new BehaviorSubject(
+    localStorage.getItem(IS_FULLSCREEN_MODE_KEY) === 'true'
+  );
   private logger: Logger;
   private isServerless = false;
 
@@ -134,6 +143,16 @@ export class ChromeService {
   }
 
   private setIsVisible = (isVisible: boolean) => this.isForceHidden$.next(!isVisible);
+
+  /**
+   * Fullscreen mode requires user interaction. Applications can detect if fullscreen mode is enabled using
+   * chrome.getIsVisible$()
+   */
+  private setIsFullScreenMode = (isFullScreenMode: boolean) => {
+    localStorage.setItem(IS_FULLSCREEN_MODE_KEY, JSON.stringify(isFullScreenMode));
+    this.isFullScreenMode$.next(isFullScreenMode);
+    this.setIsVisible(!isFullScreenMode);
+  };
 
   /**
    * Some EUI component can be toggled in Full screen (e.g. the EuiDataGrid). When they are toggled in full
@@ -257,6 +276,7 @@ export class ChromeService {
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
     const chromeStyleSubject$ = new BehaviorSubject<ChromeStyle | undefined>(undefined);
+    let fullScreenButtonRegistered = false;
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -304,6 +324,7 @@ export class ChromeService {
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
     });
+
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
@@ -397,13 +418,59 @@ export class ChromeService {
 
       const HeaderComponent = () => {
         const isVisible = useObservable(this.isVisible$);
+        const isFullScreenMode = useObservable(this.isFullScreenMode$);
         const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
-        if (!isVisible) {
+        if (!fullScreenButtonRegistered) {
+          // rendering the full screen button depends on knowing the chrome style
+          navControls.registerRight({
+            order: 3000, // appear to the left of the user avatar icon
+            mount: (targetDomElement) => {
+              ReactDOM.render(
+                <EuiProvider
+                  globalStyles={false}
+                  colorMode={chromeStyle === 'classic' ? 'dark' : 'light'}
+                >
+                  <EuiButtonIcon
+                    iconType="fullScreen"
+                    color="text"
+                    onClick={() => this.setIsFullScreenMode(true)}
+                    aria-label={i18n.translate(
+                      'core.ui.primaryNav.project.headerSection.enterFullScreen',
+                      { defaultMessage: 'Enter full screeen' }
+                    )}
+                  />
+                </EuiProvider>,
+                targetDomElement
+              );
+
+              return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+            },
+          });
+
+          // prevent registering the button on each render
+          fullScreenButtonRegistered = true;
+        }
+
+        if (!isVisible || isFullScreenMode) {
           return (
             <div data-test-subj="kibanaHeaderChromeless">
               <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
               <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+              {isFullScreenMode && (
+                <EuiPortal>
+                  <ExitFullScreenButtonKibanaProvider
+                    coreStart={{
+                      chrome: {
+                        setIsVisible: (visible) => this.setIsFullScreenMode(!visible),
+                      },
+                      customBranding: { customBranding$ },
+                    }}
+                  >
+                    <ExitFullScreenButton />
+                  </ExitFullScreenButtonKibanaProvider>
+                </EuiPortal>
+              )}
             </div>
           );
         }

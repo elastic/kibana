@@ -64,9 +64,7 @@ export interface ChromeStart {
   getIsVisible$(): Observable<boolean>;
 
   /**
-   * Set the temporary visibility for the chrome. This does nothing if the chrome is hidden
-   * by default and should be used to hide the chrome for things like full-screen modes
-   * with an exit button.
+   * Set the temporary visibility for the chrome.
    */
   setIsVisible(isVisible: boolean): void;
 
