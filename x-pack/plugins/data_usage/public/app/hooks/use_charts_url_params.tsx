@@ -8,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { MetricTypes, isMetricType } from '../../../common/rest_types';
 import { useUrlParams } from '../../hooks/use_url_params';
+import { DEFAULT_DATE_RANGE_OPTIONS } from './use_date_picker';
 
 interface UrlParamsDataUsageMetricsFilters {
   metricTypes: string;
@@ -30,16 +31,6 @@ type FiltersFromUrl = Pick<
   DataUsageMetricsFiltersFromUrlParams,
   'metricTypes' | 'dataStreams' | 'startDate' | 'endDate'
 >;
-
-export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
-  autoRefreshOptions: {
-    enabled: false,
-    duration: 10000,
-  },
-  startDate: 'now-24h/h',
-  endDate: 'now',
-  recentlyUsedDateRanges: [],
-});
 
 export const getDataUsageMetricsFiltersFromUrlParams = (
   urlParams: Partial<UrlParamsDataUsageMetricsFilters>
