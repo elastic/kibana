@@ -19,7 +19,6 @@ import {
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { AIAssistantAppServiceProvider } from '../context/ai_assistant_app_service_provider';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { AIAssistantAppService } from '../service/create_app_service';
 import {
@@ -74,6 +73,7 @@ const useKibanaMockServices = {
         },
       } as unknown as NotificationsStart,
     }),
+    service: mockService,
   },
 };
 
@@ -83,11 +83,7 @@ describe('useConversation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     wrapper = ({ children }: PropsWithChildren<unknown>) => (
-      <KibanaContextProvider services={useKibanaMockServices}>
-        <AIAssistantAppServiceProvider value={mockService}>
-          {children}
-        </AIAssistantAppServiceProvider>
-      </KibanaContextProvider>
+      <KibanaContextProvider services={useKibanaMockServices}>{children}</KibanaContextProvider>
     );
   });
 

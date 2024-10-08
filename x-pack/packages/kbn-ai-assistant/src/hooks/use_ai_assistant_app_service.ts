@@ -12,7 +12,7 @@ export function useAIAssistantAppService() {
 
   if (!services.observabilityAIAssistant?.service) {
     throw new Error(
-      'AI Assistant Service is not available. Did you provide this component in your plugin contract?'
+      'AI Assistant Service is not available. Did you provide this service in your plugin contract?'
     );
   }
 

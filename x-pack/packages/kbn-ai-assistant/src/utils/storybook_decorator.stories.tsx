@@ -13,7 +13,6 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { AIAssistantAppServiceProvider } from '../context/ai_assistant_app_service_provider';
 import { AIAssistantAppService } from '../service/create_app_service';
 
 const mockService: AIAssistantAppService = {
@@ -41,15 +40,14 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         observabilityAIAssistant: {
           ObservabilityAIAssistantChatServiceContext,
           ObservabilityAIAssistantMultipaneFlyoutContext,
+          service: mockService,
         },
         triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
       }}
     >
-      <AIAssistantAppServiceProvider value={mockService}>
-        <ObservabilityAIAssistantChatServiceContext.Provider value={mockChatService}>
-          <Story />
-        </ObservabilityAIAssistantChatServiceContext.Provider>
-      </AIAssistantAppServiceProvider>
+      <ObservabilityAIAssistantChatServiceContext.Provider value={mockChatService}>
+        <Story />
+      </ObservabilityAIAssistantChatServiceContext.Provider>
     </KibanaContextProvider>
   );
 }
