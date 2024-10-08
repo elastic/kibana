@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
+import { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/rule_types';
+
+export const transformRuleTypesResponse = (
+  ruleTypes: Set<RegistryAlertTypeWithAuth>
+): TypesRulesResponseBodyV1 => {
+  return Array.from(ruleTypes).map((ruleType: RegistryAlertTypeWithAuth) => {
+    return {
+      action_groups: ruleType.actionGroups,
+      action_variables: ruleType.actionVariables,
+      alerts: ruleType.alerts,
+      authorized_consumers: ruleType.authorizedConsumers,
+      category: ruleType.category,
+      default_action_group_id: ruleType.defaultActionGroupId,
+      default_schedule_interval: ruleType.defaultScheduleInterval,
+      does_set_recovery_context: ruleType.doesSetRecoveryContext,
+      enabled_in_license: ruleType.enabledInLicense,
+      field_for_a_a_d: ruleType.fieldsForAAD,
+      has_alerts_mappings: ruleType.hasAlertsMappings,
+      has_fields_for_a_a_d: ruleType.hasFieldsForAAD,
+      id: ruleType.id,
+      is_exportable: ruleType.isExportable,
+      minimum_license_required: ruleType.minimumLicenseRequired,
+      name: ruleType.name,
+      producer: ruleType.producer,
+      recovery_action_group: ruleType.recoveryActionGroup,
+      rule_task_timeout: ruleType.ruleTaskTimeout,
+    };
+  });
+};
