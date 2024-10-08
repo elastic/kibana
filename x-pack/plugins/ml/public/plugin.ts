@@ -68,8 +68,8 @@ import {
   type ConfigSchema,
   type ExperimentalFeatures,
   initExperimentalFeatures,
-  type ModelDeploymentSettings,
   initModelDeploymentSettings,
+  type NLPSettings,
 } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
@@ -137,20 +137,22 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
-  private modelDeployment: ModelDeploymentSettings = {
-    allowStaticAllocations: true,
-    vCPURange: {
-      low: {
-        min: 0,
-        max: 2,
-      },
-      medium: {
-        min: 1,
-        max: 16,
-      },
-      high: {
-        min: 1,
-        max: 32,
+  private nlpSettings: NLPSettings = {
+    modelDeployment: {
+      allowStaticAllocations: true,
+      vCPURange: {
+        low: {
+          min: 0,
+          max: 2,
+        },
+        medium: {
+          min: 1,
+          max: 16,
+        },
+        high: {
+          min: 1,
+          max: 32,
+        },
       },
     },
   };
@@ -159,7 +161,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
     initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
-    initModelDeploymentSettings(this.modelDeployment, initializerContext.config.get());
+    initModelDeploymentSettings(this.nlpSettings, initializerContext.config.get());
   }
 
   setup(
@@ -214,7 +216,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           params,
           this.isServerless,
           this.enabledFeatures,
-          this.experimentalFeatures
+          this.experimentalFeatures,
+          this.nlpSettings
         );
       },
     });

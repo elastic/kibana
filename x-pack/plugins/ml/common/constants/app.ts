@@ -32,15 +32,21 @@ export interface ModelDeploymentSettings {
   >;
 }
 
+export interface NLPSettings {
+  modelDeployment: ModelDeploymentSettings;
+}
+
 export interface ConfigSchema {
   ad?: { enabled: boolean };
   dfa?: { enabled: boolean };
-  nlp?: { enabled: boolean };
+  nlp?: {
+    enabled: boolean;
+    modelDeployment?: ModelDeploymentSettings;
+  };
   compatibleModuleType?: CompatibleModule;
   experimental?: {
     ruleFormV2?: { enabled: boolean };
   };
-  modelDeployment?: ModelDeploymentSettings;
 }
 
 export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {
@@ -64,14 +70,8 @@ export function initExperimentalFeatures(
   }
 }
 
-export function initModelDeploymentSettings(
-  modelDeploymentSettings: ModelDeploymentSettings,
-  config: ConfigSchema
-) {
-  if (config.modelDeployment?.allowStaticAllocations !== undefined) {
-    modelDeploymentSettings.allowStaticAllocations = config.modelDeployment.allowStaticAllocations;
-  }
-  if (config.modelDeployment?.vCPURange !== undefined) {
-    modelDeploymentSettings.vCPURange = config.modelDeployment.vCPURange;
+export function initModelDeploymentSettings(nlpSettings: NLPSettings, config: ConfigSchema) {
+  if (config.nlp?.modelDeployment !== undefined) {
+    nlpSettings.modelDeployment = config.nlp.modelDeployment;
   }
 }

@@ -29,21 +29,25 @@ const vCPURangeSchema = schema.object({
 export const configSchema = schema.object({
   ad: enabledSchema,
   dfa: enabledSchema,
-  nlp: enabledSchema,
+  nlp: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      modelDeployment: schema.maybe(
+        schema.object({
+          allowStaticAllocations: schema.boolean(),
+          vCPURange: schema.object({
+            low: vCPURangeSchema,
+            medium: vCPURangeSchema,
+            high: vCPURangeSchema,
+          }),
+        })
+      ),
+    })
+  ),
   compatibleModuleType: compatibleModuleTypeSchema,
   experimental: schema.maybe(
     schema.object({
       ruleFormV2: enabledSchema,
-    })
-  ),
-  modelDeployment: schema.maybe(
-    schema.object({
-      allowStaticAllocations: schema.boolean(),
-      vCPURange: schema.object({
-        low: vCPURangeSchema,
-        medium: vCPURangeSchema,
-        high: vCPURangeSchema,
-      }),
     })
   ),
 });

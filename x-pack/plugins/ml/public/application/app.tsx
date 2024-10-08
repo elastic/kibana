@@ -19,7 +19,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
-import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
+import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
@@ -42,6 +42,7 @@ interface AppProps {
   isServerless: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
+  nlpSettings: NLPSettings;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -59,6 +60,7 @@ const App: FC<AppProps> = ({
   isServerless,
   mlFeatures,
   experimentalFeatures,
+  nlpSettings,
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
@@ -141,6 +143,7 @@ const App: FC<AppProps> = ({
                 mlFeatures={mlFeatures}
                 showMLNavMenu={chromeStyle === 'classic'}
                 experimentalFeatures={experimentalFeatures}
+                nlpSettings={nlpSettings}
               >
                 <MlRouter pageDeps={pageDeps} />
               </EnabledFeaturesContextProvider>
@@ -158,7 +161,8 @@ export const renderApp = (
   appMountParams: AppMountParameters,
   isServerless: boolean,
   mlFeatures: MlFeatures,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  nlpSettings: NLPSettings
 ) => {
   appMountParams.onAppLeave((actions) => actions.default());
 
@@ -170,6 +174,7 @@ export const renderApp = (
       isServerless={isServerless}
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
+      nlpSettings={nlpSettings}
     />,
     appMountParams.element
   );
