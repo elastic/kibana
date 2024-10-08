@@ -11,7 +11,18 @@ export function unflattenObject(source: Record<string, any>, target: Record<stri
   // eslint-disable-next-line guard-for-in
   for (const key in source) {
     const val = source[key as keyof typeof source];
-    set(target, key, val);
+
+    if (Array.isArray(val)) {
+      const unflattenedArray = val.map((item) => {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          return unflattenObject(item);
+        }
+        return item;
+      });
+      set(target, key, unflattenedArray);
+    } else {
+      set(target, key, val);
+    }
   }
   return target;
 }

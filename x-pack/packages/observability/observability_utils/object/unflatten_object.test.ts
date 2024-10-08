@@ -24,12 +24,16 @@ describe('unflattenObject', () => {
         simpleArray: ['0', '1', '2'],
         complexArray: [{ one: 'one', two: 'two', three: 'three' }],
         'nested.array': [0, 1, 2],
+        'complex.nested': [{ one: 'one', two: 'two', 'first.second': 'foo', 'first.third': 'bar' }],
       })
     ).toEqual({
       simpleArray: ['0', '1', '2'],
       complexArray: [{ one: 'one', two: 'two', three: 'three' }],
       nested: {
         array: [0, 1, 2],
+      },
+      complex: {
+        nested: [{ one: 'one', two: 'two', first: { second: 'foo', third: 'bar' } }],
       },
     });
   });
