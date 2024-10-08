@@ -9,13 +9,7 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-
-const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
-const actionTypeKey = {
-  bedrock: '.bedrock',
-  openai: '.gen-ai',
-  gemini: '.gemini',
-};
+import { AllowedActionTypeIds } from './constants';
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete = async ({ http }) => {
   const aiConnectorsResult = await loadConnectors({ http });
@@ -23,10 +17,7 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete = async ({ 
   const reducedAiConnectorsResult = aiConnectorsResult.reduce(
     (acc: AIConnector[], connector) => [
       ...acc,
-      ...(!connector.isMissingSecrets &&
-      [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-        connector.actionTypeId
-      )
+      ...(!connector.isMissingSecrets && AllowedActionTypeIds.includes(connector.actionTypeId)
         ? [
             {
               ...connector,

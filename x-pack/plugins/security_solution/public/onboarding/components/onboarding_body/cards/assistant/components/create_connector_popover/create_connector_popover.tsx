@@ -18,12 +18,11 @@ import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/us
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { ActionType } from '@kbn/actions-plugin/server';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import { AllowedActionTypeIds } from '../../constants';
 
 interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
 }
-
-const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
 export const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(
   ({ onConnectorSaved }) => {

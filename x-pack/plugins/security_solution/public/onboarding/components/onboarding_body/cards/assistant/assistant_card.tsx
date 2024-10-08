@@ -16,10 +16,7 @@ import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { ConnectorCards } from './components/connector_cards/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 
-const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
-
 export const AssistantCard: OnboardingCardComponent = ({
-  setComplete,
   isCardComplete,
   setExpandedCardId,
   checkCompleteMetadata,
@@ -46,11 +43,7 @@ export const AssistantCard: OnboardingCardComponent = ({
         </EuiFlexItem>
         <EuiFlexItem>
           {isIntegrationsCardComplete ? (
-            <ConnectorCards
-              connectors={aiConnectors}
-              actionTypeIds={AllowedActionTypeIds}
-              onConnectorSaved={checkComplete}
-            />
+            <ConnectorCards connectors={aiConnectors} onConnectorSaved={checkComplete} />
           ) : (
             <EuiFlexItem
               className={css`

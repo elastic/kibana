@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import type { IconType } from '@elastic/eui';
 import {
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiLink,
   EuiTextColor,
-  useEuiBackgroundColor,
   EuiBadge,
   EuiSpacer,
 } from '@elastic/eui';
@@ -27,40 +26,18 @@ import type { ActionType } from '@kbn/actions-plugin/common';
 import { css } from '@emotion/css';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { CreateConnectorPopover } from '../create_connector_popover/create_connector_popover';
-
-const useConnectorCardsStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const backgroundColor = useEuiBackgroundColor('success');
-  return {
-    panel: css`
-      position: relative;
-      overflow: hidden;
-      height: 160px;
-      &.euiPanel:hover {
-        background-color: ${euiTheme.colors.lightestShade};
-      }
-    `,
-    selected: css`
-      width: 100%;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      padding: 8px 0;
-      background-color: ${backgroundColor};
-    `,
-  };
-};
+import { AllowedActionTypeIds } from '../../constants';
+import { useConnectorCardsStyles } from './connector_cards.styles';
 
 interface ConnectorCardsProps {
   connectors?: AIConnector[];
   onConnectorSaved: () => void;
   onClose?: () => void;
-  actionTypeIds?: string[];
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
-  ({ connectors, onConnectorSaved, onClose, actionTypeIds }) => {
-    const { panel, selected } = useConnectorCardsStyles();
+  ({ connectors, onConnectorSaved, onClose }) => {
+    const connectorCardsStyles = useConnectorCardsStyles();
     const {
       http,
       triggersActionsUi: { actionTypeRegistry },
@@ -76,8 +53,8 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     const { data } = useLoadActionTypes({ http, toasts });
 
     const actionTypes = useMemo(() => {
-      return actionTypeIds ? data?.filter(({ id }) => actionTypeIds.includes(id)) : data;
-    }, [data, actionTypeIds]);
+      return data?.filter(({ id }) => AllowedActionTypeIds.includes(id));
+    }, [data]);
 
     if (!actionTypes || !connectors) return <EuiLoadingSpinner />;
 
@@ -93,9 +70,15 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
                 `}
               >
                 <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-                  <EuiFlexGroup alignItems="center">
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="center"
+                    className={css`
+                      height: 100%;
+                    `}
+                  >
                     <EuiFlexItem>
-                      <EuiText>{connector.name}</EuiText>
+                      <EuiText size="s">{connector.name}</EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="hollow">
@@ -117,57 +100,12 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
       <>
         <EuiFlexGroup gutterSize="s" data-test-subj="connectorSetupPage">
           {actionTypes.map((actionType) => (
-            <EuiFlexItem key={actionType.id}>
-              <EuiLink
-                color="text"
-                onClick={() => setSelectedActionType(actionType)}
-                data-test-subj={`actionType-${actionType.id}`}
-              >
-                <EuiPanel hasShadow={false} hasBorder paddingSize="m" className={panel}>
-                  <EuiFlexGroup
-                    direction="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    gutterSize="s"
-                    className={css`
-                      height: 100%;
-                    `}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        size="xxl"
-                        color="text"
-                        type={actionTypeRegistry.get(actionType.id).iconClass}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiTextColor color="default">
-                        <EuiText size="s">{actionType.name}</EuiText>
-                      </EuiTextColor>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  {connectors?.some((connector) => connector.actionTypeId === actionType.id) && (
-                    <EuiFlexGroup
-                      direction="row"
-                      justifyContent="center"
-                      alignItems="center"
-                      gutterSize="s"
-                      className={selected}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon color="success" type="check" name="check" size="s" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiTextColor color="success">
-                          <EuiText size="xs">
-                            <strong>{'Connected'}</strong>
-                          </EuiText>
-                        </EuiTextColor>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                </EuiPanel>
-              </EuiLink>
+            <EuiFlexItem key={actionType.id} className={connectorCardsStyles}>
+              <ConnectorCardSelector
+                setSelectedActionType={setSelectedActionType}
+                actionType={actionType}
+                iconType={actionTypeRegistry.get(actionType.id).iconClass}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -185,3 +123,40 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
   }
 );
 ConnectorCards.displayName = 'ConnectorCards';
+
+const ConnectorCardSelector = React.memo<{
+  setSelectedActionType: (actionType: ActionType) => void;
+  actionType: ActionType;
+  iconType: IconType;
+}>(({ setSelectedActionType, actionType, iconType }) => {
+  return (
+    <EuiLink
+      color="text"
+      onClick={() => setSelectedActionType(actionType)}
+      data-test-subj={`actionType-${actionType.id}`}
+    >
+      <EuiPanel hasShadow={false} hasBorder paddingSize="m" className="connectorSelectorPanel">
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          gutterSize="s"
+          className={css`
+            height: 100%;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="xxl" color="text" type={iconType} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTextColor color="default">
+              <EuiText size="s">{actionType.name}</EuiText>
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiLink>
+  );
+});
+
+ConnectorCardSelector.displayName = 'ConnectorCardSelector';
