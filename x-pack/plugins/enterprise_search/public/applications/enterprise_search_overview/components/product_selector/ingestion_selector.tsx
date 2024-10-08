@@ -77,52 +77,42 @@ export const IngestionSelector: React.FC = () => {
         </EuiFlexItem>
         {productFeatures.hasWebCrawler && (
           <EuiFlexItem>
-            {crawlerDisabled ? (
-              <IngestionCard
-                buttonLabel={i18n.translate(
-                  'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
-                  {
-                    defaultMessage: 'Source code',
-                  }
-                )}
-                buttonIcon={GithubIcon}
-                description={i18n.translate(
-                  'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                  {
-                    defaultMessage:
-                      'Discover, extract, and index searchable content from websites and knowledge bases.',
-                  }
-                )}
-                href={CRAWLER.github_repo}
-                isBeta
-                logo={crawlerLogo}
-                title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
-                  defaultMessage: 'Web Crawler',
-                })}
-              />
-            ) : (
-              <IngestionCard
-                buttonLabel={i18n.translate(
-                  'xpack.enterpriseSearch.ingestSelector.method.crawlerButtonLabel',
-                  {
-                    defaultMessage: 'Crawl URL',
-                  }
-                )}
-                buttonIcon={CrawlerIcon}
-                description={i18n.translate(
-                  'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
-                  {
-                    defaultMessage:
-                      'Discover, extract, and index searchable content from websites and knowledge bases.',
-                  }
-                )}
-                href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)}
-                logo={crawlerLogo}
-                title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
-                  defaultMessage: 'Web Crawler',
-                })}
-              />
-            )}
+            <IngestionCard
+              buttonLabel={
+                crawlerDisabled
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.ingestSelector.method.sourceCodeButtonLabel',
+                      {
+                        defaultMessage: 'Source code',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
+                      {
+                        defaultMessage:
+                          'Discover, extract, and index searchable content from websites and knowledge bases.',
+                      }
+                    )
+              }
+              buttonIcon={crawlerDisabled ? GithubIcon : CrawlerIcon}
+              description={i18n.translate(
+                'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
+                {
+                  defaultMessage:
+                    'Discover, extract, and index searchable content from websites and knowledge bases.',
+                }
+              )}
+              href={
+                crawlerDisabled
+                  ? CRAWLER.github_repo
+                  : generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)
+              }
+              isBeta={crawlerDisabled}
+              logo={crawlerLogo}
+              title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {
+                defaultMessage: 'Web Crawler',
+              })}
+            />
           </EuiFlexItem>
         )}
         {productFeatures.hasConnectors && (
