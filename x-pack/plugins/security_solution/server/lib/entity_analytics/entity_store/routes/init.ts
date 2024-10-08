@@ -22,7 +22,7 @@ import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/c
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
     .post({
@@ -46,13 +46,16 @@ export const initEntityEngineRoute = (
       async (context, request, response): Promise<IKibanaResponse<InitEntityEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
+        const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
 
         await checkAndInitAssetCriticalityResources(context, logger);
 
         try {
           const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, request.body);
+            .init(request.params.entityType, request.body, {
+              pipelineDebugMode,
+            });
 
           return response.ok({ body });
         } catch (e) {

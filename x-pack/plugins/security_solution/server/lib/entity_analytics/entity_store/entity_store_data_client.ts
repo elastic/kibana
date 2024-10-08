@@ -101,7 +101,8 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody
+    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
@@ -180,6 +181,7 @@ export class EntityStoreDataClient {
     });
     debugLog(`Executed field retention enrich policy`);
     await createPlatformPipeline({
+      debugMode: pipelineDebugMode,
       unitedDefinition,
       logger,
       esClient,

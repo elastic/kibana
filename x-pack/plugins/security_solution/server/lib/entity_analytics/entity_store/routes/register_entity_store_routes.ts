@@ -18,8 +18,9 @@ export const registerEntityStoreRoutes = ({
   router,
   logger,
   getStartServices,
+  config,
 }: EntityAnalyticsRoutesDeps) => {
-  initEntityEngineRoute(router, logger, getStartServices);
+  initEntityEngineRoute(router, logger, config);
   startEntityEngineRoute(router, logger);
   stopEntityEngineRoute(router, logger);
   deleteEntityEngineRoute(router, logger, getStartServices);

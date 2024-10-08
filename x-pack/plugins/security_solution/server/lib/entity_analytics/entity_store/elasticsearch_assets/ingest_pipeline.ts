@@ -95,6 +95,9 @@ const buildIngestPipeline = ({
   ];
 };
 
+// developing the pipeline is a bit tricky, so we have a debug mode
+// set  xpack.securitySolution.entityAnalytics.entityStore.developer.pipelineDebugMode
+// to true to keep the enrich field and the context field in the document to help with debugging.
 export const createPlatformPipeline = async ({
   unitedDefinition,
   logger,
