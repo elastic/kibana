@@ -187,15 +187,8 @@ export const NoDataViewsPrompt = ({
             <h2>
               <FormattedMessage
                 id="sharedUXPackages.noDataViewsPrompt.youHaveData"
-                defaultMessage="You have data in Elasticsearch."
+                defaultMessage="How do you want to explore your Elasticsearch data?"
               />
-              <EuiSpacer size="s" />
-              <EuiText size="m">
-                <FormattedMessage
-                  id="sharedUXPackages.noDataViewsPrompt.chooseHowToExplore"
-                  defaultMessage="Now choose how to explore your data"
-                />
-              </EuiText>
             </h2>
           </EuiTextAlign>
         </EuiText>
