@@ -7,7 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import type {
+  EuiComboBoxOptionOption,
+  EuiComboBoxSingleSelectionShape,
+  EuiFormControlLayoutProps,
+} from '@elastic/eui';
 import { EuiInputPopover, htmlIdGenerator, EuiFormControlLayout, EuiFieldText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +33,8 @@ export const optionCss = css`
   }
 `;
 
-interface OptionListWithFieldStatsProps {
+interface OptionListWithFieldStatsProps
+  extends Pick<EuiFormControlLayoutProps, 'prepend' | 'compressed'> {
   options: DropDownLabel[];
   placeholder?: string;
   'aria-label'?: string;
@@ -56,6 +61,8 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   isDisabled,
   isLoading,
   isClearable = true,
+  prepend,
+  compressed,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -87,6 +94,8 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       id={popoverId}
       input={
         <EuiFormControlLayout
+          prepend={prepend}
+          compressed={compressed}
           fullWidth={fullWidth}
           // Adding classname to make functional tests similar to EuiComboBox
           className={singleSelection ? 'euiComboBox__inputWrap--plainText' : ''}
