@@ -52,13 +52,13 @@ describe('Endpoint Policy Settings Form', () => {
 
   it('should show the event merging banner for 8.16', () => {
     render();
-    expect(renderResult.getByTestId('eventMergingCallout'));
+    expect(renderResult.getByTestId('eventMergingCallout')).toBeTruthy();
   });
 
   it('should not show the event merging banner after it has been dismissed', () => {
     render();
     renderResult.getByTestId('euiDismissCalloutButton').click();
-    expect(renderResult.getByTestId('eventMergingCallout')).toBeTruthy();
+    expect(renderResult.queryByTestId('eventMergingCallout')).toBeNull();
   });
 
   it.each([

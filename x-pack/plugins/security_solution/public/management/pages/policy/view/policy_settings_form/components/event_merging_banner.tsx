@@ -21,7 +21,7 @@ export const EventMergingBanner: React.FC<{ onDismiss: () => void }> = ({ onDism
   );
 
   return (
-    <EuiCallOut title={bannerTitle} onDismiss={onDismiss} data-test-subj="eventMergingBehavior">
+    <EuiCallOut title={bannerTitle} onDismiss={onDismiss} data-test-subj="eventMergingCallout">
       <EuiText size="s">
         <FormattedMessage
           id="eventMergingBanner.body"
