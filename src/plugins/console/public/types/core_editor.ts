@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Editor } from 'brace';
 import { ResultTerm } from '../lib/autocomplete/types';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
@@ -260,7 +259,7 @@ export interface CoreEditor {
    */
   registerKeyboardShortcut(opts: {
     keys: string | { win?: string; mac?: string };
-    fn: (editor: Editor) => void;
+    fn: (editor: any) => void;
     name: string;
   }): void;
 
