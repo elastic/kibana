@@ -82,16 +82,6 @@ describe('Knowledge base settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Shows correct description when esql is installed', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('esql-installed')).toBeInTheDocument();
-    expect(queryByTestId('install-esql')).not.toBeInTheDocument();
-  });
   it('On enable knowledge base, call setup knowledge base setup', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
       return {
@@ -113,7 +103,7 @@ describe('Knowledge base settings', () => {
     expect(queryByTestId('kb-installed')).not.toBeInTheDocument();
     expect(getByTestId('install-kb')).toBeInTheDocument();
     fireEvent.click(getByTestId('setupKnowledgeBaseButton'));
-    expect(mockSetup).toHaveBeenCalledWith('esql');
+    expect(mockSetup).toHaveBeenCalled();
   });
   it('If elser does not exist, do not offer knowledge base', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {

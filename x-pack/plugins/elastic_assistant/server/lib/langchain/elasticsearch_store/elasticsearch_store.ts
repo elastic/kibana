@@ -71,7 +71,7 @@ export class ElasticsearchStore extends VectorStore {
   private readonly logger: Logger;
   private readonly telemetry: AnalyticsServiceSetup;
   private readonly model: string;
-  private kbResource: string;
+  private kbResource?: string;
 
   _vectorstoreType(): string {
     return 'elasticsearch';
@@ -268,7 +268,7 @@ export class ElasticsearchStore extends VectorStore {
 
       this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
         model: this.model,
-        resourceAccessed: this.kbResource,
+        ...(this.kbResource != null ? { resourceAccessed: this.kbResource } : {}),
         resultCount: results.length,
         responseTime: result.took ?? 0,
       });
@@ -287,7 +287,7 @@ export class ElasticsearchStore extends VectorStore {
       const error = transformError(e);
       this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
         model: this.model,
-        resourceAccessed: this.kbResource,
+        ...(this.kbResource != null ? { resourceAccessed: this.kbResource } : {}),
         errorMessage: error.message,
       });
       this.logger.error(e);
