@@ -26,7 +26,7 @@ interface EsClients {
   infraEsClient: InfraSynthtraceEsClient;
   assetsEsClient: AssetsSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
-  otelSynthtraceEsClient: OtelSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
 }
 
 type Generate<TFields> = (options: {

@@ -14,7 +14,7 @@ import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<OtelDocument> = async (runOptions) => {
   return {
-    generate: ({ range, clients: { otelSynthtraceEsClient } }) => {
+    generate: ({ range, clients: { otelEsClient } }) => {
       const { numOtelTraces = 5 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
       const traceId = generateShortId();
@@ -37,7 +37,7 @@ const scenario: Scenario<OtelDocument> = async (runOptions) => {
 
       return [
         withClient(
-          otelSynthtraceEsClient,
+          otelEsClient,
           logger.perf('generating_otel_otelTrace', () => otelWithMetricsAndErrors)
         ),
       ];

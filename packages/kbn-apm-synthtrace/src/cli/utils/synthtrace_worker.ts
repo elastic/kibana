@@ -66,7 +66,7 @@ async function start() {
     logger,
   });
 
-  const otelSynthtraceEsClient = getOtelSynthtraceEsClient({
+  const otelEsClient = getOtelSynthtraceEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
     logger,
@@ -87,7 +87,7 @@ async function start() {
       infraEsClient,
       assetsEsClient,
       syntheticsEsClient,
-      otelSynthtraceEsClient,
+      otelEsClient,
     });
   }
 
@@ -102,7 +102,7 @@ async function start() {
         infraEsClient,
         assetsEsClient,
         syntheticsEsClient,
-        otelSynthtraceEsClient,
+        otelEsClient,
       },
     })
   );

@@ -91,6 +91,7 @@ export async function bootstrap(runOptions: RunOptions) {
     infraEsClient,
     assetsEsClient,
     syntheticsEsClient,
+    otelEsClient,
     version,
     kibanaUrl,
     esUrl,
