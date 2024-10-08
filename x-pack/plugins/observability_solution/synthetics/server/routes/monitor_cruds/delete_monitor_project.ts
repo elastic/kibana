@@ -11,7 +11,7 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, getSavedObjectKqlFilter } from '../common';
-import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
+import { deleteMonitorBulk } from './services/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
