@@ -41,9 +41,7 @@ export const importRules = async ({
     return response;
   }
 
-  while (ruleChunks.length) {
-    const rules = ruleChunks.shift() ?? [];
-
+  for (const rules of ruleChunks) {
     const importedRulesResponse = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
       overwriteRules,
