@@ -836,6 +836,44 @@ describe('Handler', () => {
 
     expect(body).toEqual(12);
   });
+
+  it('adds versioned header v2023-10-31 to public, unversioned routes', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.post(
+      {
+        path: '/public',
+        validate: false,
+        options: {
+          access: 'public',
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'ok', headers: { test: 'this' } });
+      }
+    );
+    router.post(
+      {
+        path: '/internal',
+        validate: false,
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'ok', headers: { test: 'this' } });
+      }
+    );
+    await server.start();
+
+    {
+      const { headers } = await supertest(innerServer.listener).post('/public').expect(200);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    {
+      const { headers } = await supertest(innerServer.listener).post('/internal').expect(200);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+  });
 });
 
 describe('handleLegacyErrors', () => {
