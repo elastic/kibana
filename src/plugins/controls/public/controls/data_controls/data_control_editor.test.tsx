@@ -117,15 +117,17 @@ describe('Data control editor', () => {
     return controlEditor.getByTestId(testId).getAttribute('aria-pressed');
   };
 
-  const mockRegistry: { [key: string]: ControlFactory<DefaultDataControlState, DataControlApi> } = {
-    search: getMockedSearchControlFactory({ parentApi: controlGroupApi }),
-    optionsList: getMockedOptionsListControlFactory({ parentApi: controlGroupApi }),
-    rangeSlider: getMockedRangeSliderControlFactory({ parentApi: controlGroupApi }),
+  const mockRegistry: {
+    [key: string]: () => Promise<ControlFactory<DefaultDataControlState, DataControlApi>>;
+  } = {
+    search: async () => getMockedSearchControlFactory({ parentApi: controlGroupApi }),
+    optionsList: async () => getMockedOptionsListControlFactory({ parentApi: controlGroupApi }),
+    rangeSlider: async () => getMockedRangeSliderControlFactory({ parentApi: controlGroupApi }),
   };
 
   beforeAll(() => {
     (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
-    (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]);
+    (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]());
   });
 
   describe('creating a new control', () => {
@@ -146,33 +148,35 @@ describe('Data control editor', () => {
 
     test('CompatibleControlTypesComponent respects ordering', async () => {
       const tempRegistry: {
-        [key: string]: ControlFactory<DefaultDataControlState, DataControlApi>;
+        [key: string]: () => Promise<ControlFactory<DefaultDataControlState, DataControlApi>>;
       } = {
         ...mockRegistry,
-        alphabeticalFirstControl: {
-          type: 'alphabeticalFirst',
-          getIconType: () => 'lettering',
-          getDisplayName: () => 'Alphabetically first',
-          isFieldCompatible: () => true,
-          buildControl: jest.fn().mockReturnValue({
-            api: controlGroupApi,
-            Component: <>Should be first alphabetically</>,
-          }),
-        } as DataControlFactory,
-        supremeControl: {
-          type: 'supremeControl',
-          order: 100, // force it first despite alphabetical ordering
-          getIconType: () => 'starFilled',
-          getDisplayName: () => 'Supreme leader',
-          isFieldCompatible: () => true,
-          buildControl: jest.fn().mockReturnValue({
-            api: controlGroupApi,
-            Component: <>This control is forced first via the factory order</>,
-          }),
-        } as DataControlFactory,
+        alphabeticalFirstControl: async () =>
+          ({
+            type: 'alphabeticalFirst',
+            getIconType: () => 'lettering',
+            getDisplayName: () => 'Alphabetically first',
+            isFieldCompatible: () => true,
+            buildControl: jest.fn().mockReturnValue({
+              api: controlGroupApi,
+              Component: <>Should be first alphabetically</>,
+            }),
+          } as DataControlFactory),
+        supremeControl: async () =>
+          ({
+            type: 'supremeControl',
+            order: 100, // force it first despite alphabetical ordering
+            getIconType: () => 'starFilled',
+            getDisplayName: () => 'Supreme leader',
+            isFieldCompatible: () => true,
+            buildControl: jest.fn().mockReturnValue({
+              api: controlGroupApi,
+              Component: <>This control is forced first via the factory order</>,
+            }),
+          } as DataControlFactory),
       };
       (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(tempRegistry));
-      (getControlFactory as jest.Mock).mockImplementation((key) => tempRegistry[key]);
+      (getControlFactory as jest.Mock).mockImplementation((key) => tempRegistry[key]());
 
       const controlEditor = await mountComponent({});
       const menu = controlEditor.getByTestId('controlTypeMenu');
@@ -185,7 +189,7 @@ describe('Data control editor', () => {
       expect(menu.children[4].textContent).toEqual('Search');
 
       (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
-      (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]);
+      (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]());
     });
 
     test('selecting a keyword field - can only create an options list control', async () => {

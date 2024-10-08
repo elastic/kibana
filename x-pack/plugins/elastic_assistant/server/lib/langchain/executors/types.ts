@@ -17,7 +17,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -44,9 +43,9 @@ export interface AgentExecutorParams<T extends boolean> {
   conversationId?: string;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
-  esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
   inference: InferenceServerStart;
   onNewReplacements?: (newReplacements: Replacements) => void;

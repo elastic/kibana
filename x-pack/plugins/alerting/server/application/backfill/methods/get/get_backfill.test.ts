@@ -70,6 +70,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
+const fakeRuleName = 'fakeRuleName';
+
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
   id: '1',
   type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -80,7 +82,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     duration: '12h',
     enabled: true,
     rule: {
-      name: 'my rule name',
+      name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
       // @ts-expect-error
@@ -148,10 +150,11 @@ describe('getBackfill()', () => {
         saved_object: {
           id: '1',
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          name: `backfill for rule "my rule name"`,
+          name: `backfill for rule "fakeRuleName"`,
         },
       },
-      message: 'User has got ad hoc run for ad_hoc_run_params [id=1]',
+      message:
+        'User has got ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
     });
     expect(logger.error).not.toHaveBeenCalled();
 
@@ -194,10 +197,11 @@ describe('getBackfill()', () => {
           saved_object: {
             id: '1',
             type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            name: `backfill for rule "my rule name"`,
+            name: 'backfill for rule "fakeRuleName"',
           },
         },
-        message: 'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1]',
+        message:
+          'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
       });
     });
 
@@ -211,6 +215,7 @@ describe('getBackfill()', () => {
           message: 'Unable to get',
           statusCode: 404,
         },
+        attributes: { rule: { name: fakeRuleName } },
       });
 
       await expect(rulesClient.getBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -228,8 +233,15 @@ describe('getBackfill()', () => {
           outcome: 'failure',
           type: ['access'],
         },
-        kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
-        message: 'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1]',
+        kibana: {
+          saved_object: {
+            id: '1',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            name: 'backfill for rule "fakeRuleName"',
+          },
+        },
+        message:
+          'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
       });
     });
   });

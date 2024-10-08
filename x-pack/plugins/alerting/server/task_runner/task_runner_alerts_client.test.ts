@@ -15,6 +15,7 @@ import {
   AlertInstanceContext,
   Rule,
   RuleAlertData,
+  MaintenanceWindowStatus,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
@@ -33,7 +34,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -45,19 +46,19 @@ import {
   RULE_NAME,
   generateRunnerResult,
   RULE_ACTIONS,
-  generateSavedObjectParams,
+  generateRuleUpdateParams,
   mockTaskInstance,
   DATE_1970,
   DATE_1970_5_MIN,
   mockedRawRuleSO,
 } from './fixtures';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
@@ -104,6 +105,8 @@ import {
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
+import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 
 jest.mock('uuid', () => ({
@@ -116,6 +119,9 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
+
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
@@ -124,6 +130,7 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
@@ -164,7 +171,6 @@ describe('Task Runner', () => {
     const services = alertsMock.createRuleExecutorServices();
     const actionsClient = actionsClientMock.create();
     const rulesSettingsService = rulesSettingsServiceMock.create();
-    const rulesClient = rulesClientMock.create();
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
     const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
     const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -181,7 +187,6 @@ describe('Task Runner', () => {
     const mockAlertsClient = alertsClientMock.create();
     const mockLegacyAlertsClient = legacyAlertsClientMock.create();
     const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
-    const maintenanceWindowClient = maintenanceWindowClientMock.create();
     const connectorAdapterRegistry = new ConnectorAdapterRegistry();
     const elasticsearchAndSOAvailability$ = new Subject<boolean>();
 
@@ -205,10 +210,9 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient,
       eventLogger: eventLoggerMock.create(),
       executionContext: executionContextServiceMock.createInternalStartContract(),
-      getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
-      getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
       kibanaBaseUrl: 'https://localhost:5601',
       logger,
+      maintenanceWindowsService,
       maxAlerts: 1000,
       maxEphemeralActionsPerRule: 10,
       ruleTypeRegistry,
@@ -236,8 +240,6 @@ describe('Task Runner', () => {
           });
         savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
         elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-        maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue([]);
-        taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
         taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
           actionsClient
         );
@@ -252,14 +254,31 @@ describe('Task Runner', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
         });
-        taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
-          maintenanceWindowClient
-        );
         mockedRuleTypeSavedObject.monitoring!.run.history = [];
         mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
 
         alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
         (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+
+        maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+          maintenanceWindows: [
+            {
+              ...getMockMaintenanceWindow(),
+              eventStartTime: new Date().toISOString(),
+              eventEndTime: new Date().toISOString(),
+              status: MaintenanceWindowStatus.Running,
+              id: 'test-id1',
+            },
+            {
+              ...getMockMaintenanceWindow(),
+              eventStartTime: new Date().toISOString(),
+              eventEndTime: new Date().toISOString(),
+              status: MaintenanceWindowStatus.Running,
+              id: 'test-id2',
+            },
+          ],
+          maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
+        });
         logger.get.mockImplementation(() => logger);
         ruleType.executor.mockResolvedValue({ state: {} });
       });
@@ -303,14 +322,18 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
 
         expect(mockAlertsService.createAlertsClient).toHaveBeenCalledWith({
+          alertingEventLogger,
           logger: taskRunnerLogger,
+          maintenanceWindowsService,
+          request: expect.any(Object),
           ruleType: ruleTypeWithAlerts,
+          spaceId: 'default',
           namespace: 'default',
           rule: {
             alertDelay: 0,
@@ -354,8 +377,8 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -411,7 +434,7 @@ describe('Task Runner', () => {
           inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
         const runnerResult = await taskRunner.run();
         expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
@@ -488,8 +511,8 @@ describe('Task Runner', () => {
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
           { tags: ['1', 'test'] }
         );
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
         expect(
@@ -557,7 +580,7 @@ describe('Task Runner', () => {
           inMemoryMetrics,
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
         await taskRunner.run();
 
@@ -588,7 +611,7 @@ describe('Task Runner', () => {
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_SEVERITY_IMPROVING]: false,
-              [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+              [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -655,7 +678,7 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
@@ -666,8 +689,12 @@ describe('Task Runner', () => {
           { tags: ['1', 'test'] }
         );
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+          alertingEventLogger,
+          request: expect.any(Object),
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
+          maintenanceWindowsService,
+          spaceId: 'default',
         });
 
         testCorrectAlertsClientUsed({
@@ -682,8 +709,8 @@ describe('Task Runner', () => {
           tags: ['1', 'test'],
         });
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -745,7 +772,7 @@ describe('Task Runner', () => {
         });
         expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-        rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
         await taskRunner.run();
@@ -753,8 +780,12 @@ describe('Task Runner', () => {
         expect(mockAlertsService.createAlertsClient).not.toHaveBeenCalled();
         expect(logger.error).not.toHaveBeenCalled();
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
+          alertingEventLogger,
+          request: expect.any(Object),
+          spaceId: 'default',
           logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
+          maintenanceWindowsService,
         });
 
         testCorrectAlertsClientUsed({
@@ -769,8 +800,8 @@ describe('Task Runner', () => {
           tags: ['1', 'test'],
         });
 
-        expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-          ...generateSavedObjectParams({})
+        expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+          ...generateRuleUpdateParams({})
         );
 
         expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -844,12 +875,10 @@ describe('Task Runner', () => {
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        maintenanceWindowIds: [],
         ruleRunMetricsStore,
       });
 
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });

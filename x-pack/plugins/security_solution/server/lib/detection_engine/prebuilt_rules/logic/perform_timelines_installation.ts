@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { importTimelineResultSchema } from '../../../../../common/api/timeline';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { ImportTimelineResult } from '../../../../../common/api/timeline';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 
@@ -18,10 +18,10 @@ export const performTimelinesInstallation = async (
     securitySolutionContext.getFrameworkRequest(),
     true
   );
-  const [result, error] = validate(timeline, importTimelineResultSchema);
+  const parsed = ImportTimelineResult.safeParse(timeline);
 
   return {
-    result,
-    error,
+    result: parsed.data,
+    error: parsed.error && stringifyZodError(parsed.error),
   };
 };
